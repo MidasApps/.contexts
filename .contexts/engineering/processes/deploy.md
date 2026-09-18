@@ -1,4 +1,4 @@
-﻿# Deploy
+# Deploy
 
 Convenções operacionais para entregar mudanças aos ambientes `dev`, `staging` e `prod` de forma frequente, pequena, automatizada, observável e reversível. Este documento governa o fluxo de deploy ponta-a-ponta — desde merge em `main` até health check pós-rollout — e define as regras para componentes Next.js, Firebase Functions, Firestore, Postgres e prompts de IA.
 
@@ -22,9 +22,9 @@ Deploy é decoupled de release. O artefato chega em produção atrás de feature
 
 | Ambiente | Trigger | Projeto GCP | Domínio | Aprovação |
 |---|---|---|---|---|
-| `dev` | local + opcional shared dev env | `liquid-dev` | `dev.<app>.internal` | nenhuma |
-| `staging` | auto-deploy de `main` | `liquid-staging` | `staging.<app>.com` | nenhuma |
-| `prod` | tag `vX.Y.Z` + aprovação manual | `liquid-prod` | `<app>.com` | required reviewers |
+| `dev` | local + opcional shared dev env | `app-dev` | `dev.<app>.internal` | nenhuma |
+| `staging` | auto-deploy de `main` | `app-staging` | `staging.<app>.com` | nenhuma |
+| `prod` | tag `vX.Y.Z` + aprovação manual | `app-prod` | `<app>.com` | required reviewers |
 
 Cada ambiente vive em **projeto GCP separado** (isolamento de dados, IAM, billing, secrets). Secrets nunca cruzam ambientes — consulte `@contracts/secrets` para naming e separação por projeto.
 

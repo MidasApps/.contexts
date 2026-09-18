@@ -74,7 +74,7 @@ Storage **nunca-permitido**, sob nenhuma hipótese:
 
 - **SCREAMING_SNAKE_CASE**, sem exceção: `OPENAI_API_KEY`, `STRIPE_WEBHOOK_SECRET`, `DATABASE_URL`, `JWT_SIGNING_KEY`.
 - Sem hífen, sem ponto, sem case misturado.
-- Sem prefixo de empresa redundante (`ASKLIQUID_OPENAI_API_KEY`); o projeto/ambiente já dá escopo.
+- Sem prefixo de empresa redundante (`ACME_OPENAI_API_KEY`); o projeto/ambiente já dá escopo.
 
 ### 3.2 Estrutura semântica
 

@@ -40,4 +40,4 @@ const json = await res.json();
 
 ---
 **Detalhes/convenções específicas do projeto:** `@.contexts/engineering/stacks/runtime/node@24.md`
-**Documentação upstream:** MCP `liquid-docs` — busque por `nodejs` para detalhes da versão atual.
+**Documentação upstream:** documentação oficial da biblioteca na versão pinada em MEMORY.

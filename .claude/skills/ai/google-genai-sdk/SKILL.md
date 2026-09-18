@@ -49,4 +49,4 @@ const data = JSON.parse(res.text);
 
 ---
 **Detalhes/convenções específicas do projeto:** `@.contexts/engineering/stacks/ai/google-genai-sdk.md`
-**Documentação upstream:** MCP `liquid-docs` — busque por `google-genai` para detalhes da versão atual.
+**Documentação upstream:** documentação oficial da biblioteca na versão pinada em MEMORY.

@@ -50,4 +50,4 @@ Utility-first CSS com engine Rust (Oxide), config CSS-first via `@theme`, suport
 
 ---
 **Detalhes/convenções específicas do projeto:** `@.contexts/engineering/stacks/frontend/tailwind@4.md`
-**Documentação upstream:** MCP `liquid-docs` — busque por `tailwindcss` para detalhes da versão atual.
+**Documentação upstream:** documentação oficial da biblioteca na versão pinada em MEMORY.

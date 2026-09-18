@@ -56,4 +56,4 @@ const unsub = onSnapshot(q, (snap) => setOrders(snap.docs.map(d => ({ id: d.id, 
 
 ---
 **Detalhes/convenções específicas do projeto:** `@.contexts/engineering/stacks/database/firebase-firestore.md`
-**Documentação upstream:** MCP `liquid-docs` — busque por `firebase-firestore` para detalhes da versão atual.
+**Documentação upstream:** documentação oficial da biblioteca na versão pinada em MEMORY.

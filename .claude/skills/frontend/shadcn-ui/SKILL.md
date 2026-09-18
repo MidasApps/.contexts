@@ -41,4 +41,4 @@ import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 
 ---
 **Detalhes/convenções específicas do projeto:** `@.contexts/engineering/stacks/frontend/shadcn-ui.md`
-**Documentação upstream:** MCP `liquid-docs` — busque por `shadcn/ui` para detalhes da versão atual.
+**Documentação upstream:** documentação oficial da biblioteca na versão pinada em MEMORY.

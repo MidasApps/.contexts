@@ -1,4 +1,4 @@
-﻿---
+---
 title: Tailwind CSS
 version: 4.x
 last_updated: 2026-05-21
@@ -71,7 +71,7 @@ Cada token de `@theme` vira um CSS var consumível diretamente (`var(--color-bra
 Sem `content: [...]`. O engine descobre os arquivos. Para escopos não-óbvios:
 
 ```css
-@source "../node_modules/@askliquid/ui/dist";
+@source "../node_modules/@org/ui/dist";
 ```
 
 ### 5. Novas APIs declarativas

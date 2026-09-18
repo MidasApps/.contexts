@@ -48,4 +48,4 @@ const config = { region: "us-east-1", retries: 3 } satisfies { region: string; r
 
 ---
 **Detalhes/convenções específicas do projeto:** `@.contexts/engineering/stacks/language/typescript@7.md`
-**Documentação upstream:** MCP `liquid-docs` — busque por `typescript` para detalhes da versão atual.
+**Documentação upstream:** documentação oficial da biblioteca na versão pinada em MEMORY.

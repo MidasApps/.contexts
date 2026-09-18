@@ -1,7 +1,6 @@
-# Liquid — Design System
+# Midas — Design System
 
-Extraído de `https://liquid-demo-v2.vercel.app/` (Liquid Real Estate Credit Intelligence).
-Plataforma de inteligência de crédito imobiliário — app interno com sidebar, chat, terminais e rotinas. Visual **shadcn/ui-derived**, dual theme (dark default + light), neutral-first com paleta de status colorida.
+Catálogo visual do produto — app interno com sidebar, chat, terminais e rotinas. Visual **shadcn/ui-derived**, dual theme (dark default + light), neutral-first com paleta de status colorida.
 
 ## Postura visual
 

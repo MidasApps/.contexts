@@ -59,4 +59,4 @@ LIMIT 10;
 
 ---
 **Detalhes/convenções específicas do projeto:** `@.contexts/engineering/stacks/database/pgvector.md`
-**Documentação upstream:** MCP `liquid-docs` — busque por `pgvector` para detalhes da versão atual.
+**Documentação upstream:** documentação oficial da biblioteca na versão pinada em MEMORY.

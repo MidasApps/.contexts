@@ -68,4 +68,4 @@ match /tenants/{tid}/orders/{oid} {
 
 ---
 **Detalhes/convenções específicas do projeto:** `@.contexts/engineering/contracts/firebase-firestore.md`
-**Documentação upstream:** MCP `liquid-docs` — busque por `firebase-firestore` para detalhes da versão atual.
+**Documentação upstream:** documentação oficial da biblioteca na versão pinada em MEMORY.

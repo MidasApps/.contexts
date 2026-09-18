@@ -52,4 +52,4 @@ export async function publishPost(formData: FormData) {
 
 ---
 **Detalhes/convenções específicas do projeto:** `@.contexts/engineering/stacks/frontend/next@16.md`
-**Documentação upstream:** MCP `liquid-docs` — busque por `nextjs` para detalhes da versão atual.
+**Documentação upstream:** documentação oficial da biblioteca na versão pinada em MEMORY.

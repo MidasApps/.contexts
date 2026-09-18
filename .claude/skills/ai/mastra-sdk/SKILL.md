@@ -48,4 +48,4 @@ const res = await travelAgent.generate("Plan a trip to Lisbon");
 
 ---
 **Detalhes/convenções específicas do projeto:** `@.contexts/engineering/stacks/ai/mastra-sdk.md`
-**Documentação upstream:** MCP `liquid-docs` — busque por `mastra` para detalhes da versão atual.
+**Documentação upstream:** documentação oficial da biblioteca na versão pinada em MEMORY.

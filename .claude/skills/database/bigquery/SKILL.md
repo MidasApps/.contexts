@@ -58,4 +58,4 @@ GROUP BY event_name;
 
 ---
 **Detalhes/convenções específicas do projeto:** `@.contexts/engineering/stacks/database/bigquery.md`
-**Documentação upstream:** MCP `liquid-docs` — busque por `bigquery` para detalhes da versão atual.
+**Documentação upstream:** documentação oficial da biblioteca na versão pinada em MEMORY.

@@ -47,4 +47,4 @@ function SubmitBtn() { const { pending } = useFormStatus(); return <button disab
 
 ---
 **Detalhes/convenções específicas do projeto:** `@.contexts/engineering/stacks/frontend/react@19.md`
-**Documentação upstream:** MCP `liquid-docs` — busque por `reactjs` para detalhes da versão atual.
+**Documentação upstream:** documentação oficial da biblioteca na versão pinada em MEMORY.

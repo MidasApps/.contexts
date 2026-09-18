@@ -64,4 +64,4 @@ CREATE INDEX ON doc_chunks(tenant_id, source_type);
 
 ---
 **Detalhes/convenções específicas do projeto:** `@.contexts/engineering/contracts/pgvector.md`
-**Documentação upstream:** MCP `liquid-docs` — busque por `pgvector` para detalhes da versão atual.
+**Documentação upstream:** documentação oficial da biblioteca na versão pinada em MEMORY.

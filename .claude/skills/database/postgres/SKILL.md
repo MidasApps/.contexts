@@ -54,4 +54,4 @@ ON CONFLICT (tenant_id, external_id) DO UPDATE SET total_cents = EXCLUDED.total_
 
 ---
 **Detalhes/convenções específicas do projeto:** `@.contexts/engineering/stacks/database/postgres.md`
-**Documentação upstream:** MCP `liquid-docs` — busque por `postgres` para detalhes da versão atual.
+**Documentação upstream:** documentação oficial da biblioteca na versão pinada em MEMORY.

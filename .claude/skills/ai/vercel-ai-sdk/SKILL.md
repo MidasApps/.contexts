@@ -60,4 +60,4 @@ const { messages, input, handleInputChange, handleSubmit } = useChat();
 
 ---
 **Detalhes/convenções específicas do projeto:** `@.contexts/engineering/stacks/ai/vercel-ai-sdk.md`
-**Documentação upstream:** MCP `liquid-docs` — busque por `vercelai` para detalhes da versão atual.
+**Documentação upstream:** documentação oficial da biblioteca na versão pinada em MEMORY.

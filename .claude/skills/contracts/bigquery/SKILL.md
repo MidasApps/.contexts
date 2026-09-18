@@ -63,4 +63,4 @@ OPTIONS (
 
 ---
 **Detalhes/convenções específicas do projeto:** `@.contexts/engineering/contracts/bigquery.md`
-**Documentação upstream:** MCP `liquid-docs` — busque por `bigquery` para detalhes da versão atual.
+**Documentação upstream:** documentação oficial da biblioteca na versão pinada em MEMORY.

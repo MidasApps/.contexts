@@ -54,4 +54,4 @@ if (!parsed.success) return json({ errors: parsed.error.issues }, { status: 400 
 
 ---
 **Detalhes/convenções específicas do projeto:** `@.contexts/engineering/stacks/validation/zod@4.md`
-**Documentação upstream:** MCP `liquid-docs` — busque por `zod` para detalhes da versão atual.
+**Documentação upstream:** documentação oficial da biblioteca na versão pinada em MEMORY.

@@ -56,4 +56,4 @@ describe("createOrder", () => {
 
 ---
 **Detalhes/convenções específicas do projeto:** `@.contexts/engineering/stacks/testing/vitest.md`
-**Documentação upstream:** MCP `liquid-docs` — busque por `vitest` para detalhes da versão atual.
+**Documentação upstream:** documentação oficial da biblioteca na versão pinada em MEMORY.

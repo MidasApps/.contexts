@@ -47,4 +47,4 @@ import * as Dialog from "@radix-ui/react-dialog";
 
 ---
 **Detalhes/convenções específicas do projeto:** `@.contexts/engineering/stacks/frontend/radix-ui.md`
-**Documentação upstream:** MCP `liquid-docs` — busque por `radixui` para detalhes da versão atual.
+**Documentação upstream:** documentação oficial da biblioteca na versão pinada em MEMORY.

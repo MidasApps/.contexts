@@ -58,4 +58,4 @@ export const createCharge = onCall(
 
 ---
 **Detalhes/convenções específicas do projeto:** `@.contexts/engineering/stacks/backend/firebase-functions.md`
-**Documentação upstream:** MCP `liquid-docs` — busque por `firebase-functions` para detalhes da versão atual.
+**Documentação upstream:** documentação oficial da biblioteca na versão pinada em MEMORY.
