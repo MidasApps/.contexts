@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Liquid — Design System</title>
+<link rel="stylesheet" href="styles.css">
+<style>
+  .ds-grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(240px, 1fr)); gap:14px; margin-top:24px}
+  .ds-card{display:flex; flex-direction:column; gap:6px; padding:18px 18px 20px; background:var(--card); border:1px solid var(--border); border-radius:14px; text-decoration:none; color:var(--foreground); transition:transform .15s, border-color .15s}
+  .ds-card:hover{transform:translateY(-2px); border-color:color-mix(in oklab, var(--c-blue) 40%, var(--border))}
+  .ds-num{font-size:11px; color:var(--muted-foreground); letter-spacing:.08em}
+  .ds-title{font-size:15px; font-weight:600; letter-spacing:-0.01em; margin-top:2px}
+  .ds-lede{font-size:12.5px; color:var(--muted-foreground); line-height:1.5}
+  .ds-hero{display:grid; grid-template-columns:1.4fr 1fr; gap:24px; margin-top:24px; padding:28px; border:1px solid var(--border); border-radius:18px; background:var(--card)}
+  .ds-hero h3{margin:0 0 8px; font-size:22px; font-weight:600; letter-spacing:-0.015em}
+  .ds-hero p{margin:0; color:var(--muted-foreground); font-size:13.5px; line-height:1.6}
+  .ds-meta{display:grid; gap:12px}
+  .ds-meta .row{display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--border); font-size:13px}
+  .ds-meta .row:last-child{border-bottom:0}
+  .ds-meta .row .mono{color:var(--muted-foreground); font-size:12px}
+  @media (max-width:760px){ .ds-hero{grid-template-columns:1fr} }
+</style>
+</head>
+<body>
+<div class="shell">
+  <aside class="nav">
+    <div class="brand">
+      <div class="brand-mark">L</div>
+      <div>
+        <div class="brand-name">Liquid</div>
+        <div class="brand-sub mono">design-system / v0.1</div>
+      </div>
+    </div>
+    <div class="nav-section">
+      <a class="nav-link active" href="index.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">★</span><span>Visão geral</span></a>
+      <a class="nav-link" href="paleta.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">01</span><span>Paleta</span></a>
+      <a class="nav-link" href="tipografia.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">02</span><span>Tipografia</span></a>
+      <a class="nav-link" href="raios.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">03</span><span>Raios & espaçamento</span></a>
+      <a class="nav-link" href="componentes.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">04</span><span>Componentes</span></a>
+      <a class="nav-link" href="status.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">05</span><span>Status & pills</span></a>
+      <a class="nav-link" href="demo.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">06</span><span>Demo de produto</span></a>
+      <a class="nav-link" href="icones.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">07</span><span>Iconografia</span></a>
+      <a class="nav-link" href="motion.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">08</span><span>Motion</span></a>
+      <a class="nav-link" href="layout.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">09</span><span>Layout & grid</span></a>
+      <a class="nav-link" href="a11y.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">10</span><span>Acessibilidade</span></a>
+      <a class="nav-link" href="principios.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">11</span><span>Princípios</span></a>
+      <a class="nav-link" href="formularios.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">12</span><span>Formulários</span></a>
+      <a class="nav-link" href="toasts.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">13</span><span>Toasts</span></a>
+      <a class="nav-link" href="empty.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">14</span><span>Empty states</span></a>
+      <a class="nav-link" href="dataviz.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">15</span><span>Data viz</span></a>
+      <a class="nav-link" href="voz.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">16</span><span>Voz & tom</span></a>
+      <a class="nav-link" href="elevacao.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">17</span><span>Elevação & sombras</span></a>
+      <a class="nav-link" href="breakpoints.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">18</span><span>Breakpoints</span></a>
+      <a class="nav-link" href="atalhos.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">19</span><span>Atalhos de teclado</span></a>
+      <a class="nav-link" href="tokens.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">20</span><span>Tokens (código)</span></a>
+      <a class="nav-link" href="navegacao.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">21</span><span>Navegação</span></a>
+      <a class="nav-link" href="avatar.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">22</span><span>Avatar & user chip</span></a>
+      <a class="nav-link" href="chat.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">23</span><span>Chat & composer</span></a>
+    </div>
+    <div class="nav-section">
+      <h6>Recursos</h6>
+      <a class="nav-link" href="DESIGN.md"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">md</span><span>DESIGN.md</span></a>
+      <a class="nav-link" href="https://liquid-demo-v2.vercel.app/" target="_blank" rel="noopener"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">↗</span><span>Site fonte</span></a>
+    </div>
+    <div class="user">
+      <div class="avatar">JM</div>
+      <div style="flex:1; min-width:0">
+        <div style="font-size:13px; font-weight:500">Johnnathan Maia</div>
+        <div style="font-size:11.5px; color:var(--muted-foreground)">Admin</div>
+      </div>
+    </div>
+  </aside>
+  <main>
+    <div class="top">
+      <div>
+        <div class="mono" style="font-size:11.5px; color:var(--muted-foreground); letter-spacing:.1em; text-transform:uppercase">Liquid · Real Estate Credit Intelligence</div>
+        <h1 style="margin-top:6px">Design System</h1>
+        <p class="lede">Extraído diretamente do CSS de produção. Neutros frios, bordas hairline, raio generoso, paleta de status saturada. Dark-first com light theme paralelo.</p>
+      </div>
+      <div class="theme-switch" role="tablist" aria-label="Tema">
+        <button id="t-dark" class="on" type="button">Dark</button>
+        <button id="t-light" type="button">Light</button>
+      </div>
+    </div>
+
+    <div class="ds-hero">
+      <div>
+        <h3>Um sistema, vinte páginas.</h3>
+        <p>Cada grupo do sistema agora vive na sua própria página — paleta, tipografia, componentes, motion, acessibilidade, voz, tokens. A sidebar à esquerda é o índice; o toggle Dark/Light persiste entre páginas.</p>
+        <p style="margin-top:10px">A base é a mesma do produto: shell de 260px, tokens em <span class="mono">styles.css</span>, e cada página é um documento HTML independente — pronto para imprimir, compartilhar ou abrir isolado.</p>
+      </div>
+      <div class="ds-meta">
+        <div class="row"><span>Versão</span><span class="mono">0.1 · 2026-05</span></div>
+        <div class="row"><span>Fonte</span><span class="mono">liquid-demo-v2.vercel.app</span></div>
+        <div class="row"><span>Tema padrão</span><span class="mono">dark</span></div>
+        <div class="row"><span>Páginas</span><span class="mono">20</span></div>
+        <div class="row"><span>Folha de estilo</span><span class="mono">styles.css</span></div>
+      </div>
+    </div>
+
+    <section style="margin-top:40px">
+      <h2>Índice</h2>
+      <div class="ds-grid">
+      <a class="ds-card" href="paleta.html">
+        <div class="ds-num mono">01</div>
+        <div class="ds-title">Paleta</div>
+        <div class="ds-lede">Superfícies e cores semânticas do produto.</div>
+      </a>
+      <a class="ds-card" href="tipografia.html">
+        <div class="ds-num mono">02</div>
+        <div class="ds-title">Tipografia</div>
+        <div class="ds-lede">Escala system sans + mono tabular para números.</div>
+      </a>
+      <a class="ds-card" href="raios.html">
+        <div class="ds-num mono">03</div>
+        <div class="ds-title">Raios & espaçamento</div>
+        <div class="ds-lede">Border-radius e escala de spacing base 4px.</div>
+      </a>
+      <a class="ds-card" href="componentes.html">
+        <div class="ds-num mono">04</div>
+        <div class="ds-title">Componentes</div>
+        <div class="ds-lede">Botões, inputs, command palette e cards de ação.</div>
+      </a>
+      <a class="ds-card" href="status.html">
+        <div class="ds-num mono">05</div>
+        <div class="ds-title">Status & pills</div>
+        <div class="ds-lede">Pills semânticas para estados de operação.</div>
+      </a>
+      <a class="ds-card" href="demo.html">
+        <div class="ds-num mono">06</div>
+        <div class="ds-title">Demo de produto</div>
+        <div class="ds-lede">Composição real — Mesa com tabela e chat.</div>
+      </a>
+      <a class="ds-card" href="icones.html">
+        <div class="ds-num mono">07</div>
+        <div class="ds-title">Iconografia</div>
+        <div class="ds-lede">Lucide stroke 1.5, outline, currentColor.</div>
+      </a>
+      <a class="ds-card" href="motion.html">
+        <div class="ds-num mono">08</div>
+        <div class="ds-title">Motion</div>
+        <div class="ds-lede">Durações e easings; respeita reduced-motion.</div>
+      </a>
+      <a class="ds-card" href="layout.html">
+        <div class="ds-num mono">09</div>
+        <div class="ds-title">Layout & grid</div>
+        <div class="ds-lede">Shell do app e densidades de grid.</div>
+      </a>
+      <a class="ds-card" href="a11y.html">
+        <div class="ds-num mono">10</div>
+        <div class="ds-title">Acessibilidade</div>
+        <div class="ds-lede">Contraste WCAG AA+ e foco visível.</div>
+      </a>
+      <a class="ds-card" href="principios.html">
+        <div class="ds-num mono">11</div>
+        <div class="ds-title">Princípios</div>
+        <div class="ds-lede">Seis regras que mantêm o sistema coeso.</div>
+      </a>
+      <a class="ds-card" href="formularios.html">
+        <div class="ds-num mono">12</div>
+        <div class="ds-title">Formulários</div>
+        <div class="ds-lede">Inputs, switches, checkboxes e segmented controls.</div>
+      </a>
+      <a class="ds-card" href="toasts.html">
+        <div class="ds-num mono">13</div>
+        <div class="ds-title">Toasts</div>
+        <div class="ds-lede">Notificações com ícone tinted e hierarquia clara.</div>
+      </a>
+      <a class="ds-card" href="empty.html">
+        <div class="ds-num mono">14</div>
+        <div class="ds-title">Empty states</div>
+        <div class="ds-lede">Tracejado, glyph neutro, uma ação primária.</div>
+      </a>
+      <a class="ds-card" href="dataviz.html">
+        <div class="ds-num mono">15</div>
+        <div class="ds-title">Data viz</div>
+        <div class="ds-lede">Stats com sparklines e bar charts em tabular.</div>
+      </a>
+      <a class="ds-card" href="voz.html">
+        <div class="ds-num mono">16</div>
+        <div class="ds-title">Voz & tom</div>
+        <div class="ds-lede">Direta, técnica, sem floreio — 8 pares.</div>
+      </a>
+      <a class="ds-card" href="elevacao.html">
+        <div class="ds-num mono">17</div>
+        <div class="ds-title">Elevação & sombras</div>
+        <div class="ds-lede">Quatro níveis — flat é o default.</div>
+      </a>
+      <a class="ds-card" href="breakpoints.html">
+        <div class="ds-num mono">18</div>
+        <div class="ds-title">Breakpoints</div>
+        <div class="ds-lede">Quatro quebras com comportamento por nível.</div>
+      </a>
+      <a class="ds-card" href="atalhos.html">
+        <div class="ds-num mono">19</div>
+        <div class="ds-title">Atalhos de teclado</div>
+        <div class="ds-lede">Convenção macOS-first, ⌘+letra.</div>
+      </a>
+      <a class="ds-card" href="tokens.html">
+        <div class="ds-num mono">20</div>
+        <div class="ds-title">Tokens (código)</div>
+        <div class="ds-lede">CSS pronto para colar no :root.</div>
+      </a>
+      <a class="ds-card" href="navegacao.html">
+        <div class="ds-num mono">21</div>
+        <div class="ds-title">Navegação</div>
+        <div class="ds-lede">Topbar, contador, tag Beta e sidebar colapsada.</div>
+      </a>
+      <a class="ds-card" href="avatar.html">
+        <div class="ds-num mono">22</div>
+        <div class="ds-title">Avatar & user chip</div>
+        <div class="ds-lede">Escala, presença, role tags e chip de usuário.</div>
+      </a>
+      <a class="ds-card" href="chat.html">
+        <div class="ds-num mono">23</div>
+        <div class="ds-title">Chat & composer</div>
+        <div class="ds-lede">Launcher, sugestões, composer e scroll-to-bottom.</div>
+      </a>
+      </div>
+    </section>
+
+    <p class="t-small mono" style="margin-top:48px; opacity:.7">extraído de liquid-demo-v2.vercel.app · tokens em DESIGN.md</p>
+  </main>
+</div>
+<script>
+  const root = document.documentElement;
+  const dark = document.getElementById('t-dark');
+  const light = document.getElementById('t-light');
+  function set(theme){
+    root.dataset.theme = theme;
+    dark.classList.toggle('on', theme==='dark');
+    light.classList.toggle('on', theme==='light');
+    try{ localStorage.setItem('liquid-ds-theme', theme); }catch(e){}
+  }
+  dark.onclick = ()=> set('dark');
+  light.onclick = ()=> set('light');
+  try{
+    const saved = localStorage.getItem('liquid-ds-theme');
+    if(saved) set(saved);
+  }catch(e){}
+</script>
+</body>
+</html>

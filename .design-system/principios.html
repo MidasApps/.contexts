@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Liquid — 11 · Princípios</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="shell">
+  <aside class="nav">
+    <div class="brand">
+      <div class="brand-mark">L</div>
+      <div>
+        <div class="brand-name">Liquid</div>
+        <div class="brand-sub mono">design-system / v0.1</div>
+      </div>
+    </div>
+    <div class="nav-section">
+      <a class="nav-link" href="index.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">★</span><span>Visão geral</span></a>
+      <a class="nav-link" href="paleta.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">01</span><span>Paleta</span></a>
+      <a class="nav-link" href="tipografia.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">02</span><span>Tipografia</span></a>
+      <a class="nav-link" href="raios.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">03</span><span>Raios & espaçamento</span></a>
+      <a class="nav-link" href="componentes.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">04</span><span>Componentes</span></a>
+      <a class="nav-link" href="status.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">05</span><span>Status & pills</span></a>
+      <a class="nav-link" href="demo.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">06</span><span>Demo de produto</span></a>
+      <a class="nav-link" href="icones.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">07</span><span>Iconografia</span></a>
+      <a class="nav-link" href="motion.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">08</span><span>Motion</span></a>
+      <a class="nav-link" href="layout.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">09</span><span>Layout & grid</span></a>
+      <a class="nav-link" href="a11y.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">10</span><span>Acessibilidade</span></a>
+      <a class="nav-link active" href="principios.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">11</span><span>Princípios</span></a>
+      <a class="nav-link" href="formularios.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">12</span><span>Formulários</span></a>
+      <a class="nav-link" href="toasts.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">13</span><span>Toasts</span></a>
+      <a class="nav-link" href="empty.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">14</span><span>Empty states</span></a>
+      <a class="nav-link" href="dataviz.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">15</span><span>Data viz</span></a>
+      <a class="nav-link" href="voz.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">16</span><span>Voz & tom</span></a>
+      <a class="nav-link" href="elevacao.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">17</span><span>Elevação & sombras</span></a>
+      <a class="nav-link" href="breakpoints.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">18</span><span>Breakpoints</span></a>
+      <a class="nav-link" href="atalhos.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">19</span><span>Atalhos de teclado</span></a>
+      <a class="nav-link" href="tokens.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">20</span><span>Tokens (código)</span></a>
+    </div>
+    <div class="nav-section">
+      <h6>Recursos</h6>
+      <a class="nav-link" href="DESIGN.md"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">md</span><span>DESIGN.md</span></a>
+      <a class="nav-link" href="https://liquid-demo-v2.vercel.app/" target="_blank" rel="noopener"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">↗</span><span>Site fonte</span></a>
+    </div>
+    <div class="user">
+      <div class="avatar">JM</div>
+      <div style="flex:1; min-width:0">
+        <div style="font-size:13px; font-weight:500">Johnnathan Maia</div>
+        <div style="font-size:11.5px; color:var(--muted-foreground)">Admin</div>
+      </div>
+    </div>
+  </aside>
+  <main>
+    <div class="top">
+      <div>
+        <div class="mono" style="font-size:11.5px; color:var(--muted-foreground); letter-spacing:.1em; text-transform:uppercase">Liquid · Design System</div>
+        <h1 style="margin-top:6px">11 · Princípios</h1>
+        <p class="lede">Seis regras que mantêm o sistema coeso.</p>
+      </div>
+      <div class="theme-switch" role="tablist" aria-label="Tema">
+        <button id="t-dark" class="on" type="button">Dark</button>
+        <button id="t-light" type="button">Light</button>
+      </div>
+    </div>
+    <section id="principios" style="margin-top:24px">
+
+      <h2>11 — Princípios</h2>
+      <div class="grid-3">
+        <div class="card"><div class="pr-num mono">01</div><h4>Cor é informação</h4><p class="t-small">Status saturado em pills e ícones. Superfícies neutras. Sem wash de página.</p></div>
+        <div class="card"><div class="pr-num mono">02</div><h4>Hairline sobre sombra</h4><p class="t-small">Bordas translúcidas separam superfícies. Sombras só em popover e modal.</p></div>
+        <div class="card"><div class="pr-num mono">03</div><h4>Mono para números</h4><p class="t-small">Valores, IDs, taxas e horários em mono tabular. Texto em system sans.</p></div>
+        <div class="card"><div class="pr-num mono">04</div><h4>Densidade ≠ ruído</h4><p class="t-small">Linhas finas, baixa altura, mas respiração entre blocos. Tabela compacta, página calma.</p></div>
+        <div class="card"><div class="pr-num mono">05</div><h4>Dark-first</h4><p class="t-small">Tema escuro é o canônico. Light é paridade, não default.</p></div>
+        <div class="card"><div class="pr-num mono">06</div><h4>Raio generoso</h4><p class="t-small">14px base. Pills full-rounded. Inputs nunca quadrados.</p></div>
+      </div>
+    
+    </section>
+  </main>
+</div>
+<script>
+  const root = document.documentElement;
+  const dark = document.getElementById('t-dark');
+  const light = document.getElementById('t-light');
+  function set(theme){
+    root.dataset.theme = theme;
+    dark.classList.toggle('on', theme==='dark');
+    light.classList.toggle('on', theme==='light');
+    try{ localStorage.setItem('liquid-ds-theme', theme); }catch(e){}
+  }
+  dark.onclick = ()=> set('dark');
+  light.onclick = ()=> set('light');
+  try{
+    const saved = localStorage.getItem('liquid-ds-theme');
+    if(saved) set(saved);
+  }catch(e){}
+</script>
+</body>
+</html>

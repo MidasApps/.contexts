@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Liquid — 23 · Chat & composer</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="shell">
+  <aside class="nav">
+    <div class="brand">
+      <div class="brand-mark">L</div>
+      <div>
+        <div class="brand-name">Liquid</div>
+        <div class="brand-sub mono">design-system / v0.1</div>
+      </div>
+    </div>
+    <div class="nav-section">
+      <a class="nav-link" href="index.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">★</span><span>Visão geral</span></a>
+      <a class="nav-link" href="paleta.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">01</span><span>Paleta</span></a>
+      <a class="nav-link" href="componentes.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">04</span><span>Componentes</span></a>
+      <a class="nav-link" href="demo.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">06</span><span>Demo de produto</span></a>
+      <a class="nav-link" href="tokens.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">20</span><span>Tokens (código)</span></a>
+      <a class="nav-link" href="navegacao.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">21</span><span>Navegação</span></a>
+      <a class="nav-link" href="avatar.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">22</span><span>Avatar & user chip</span></a>
+      <a class="nav-link active" href="chat.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">23</span><span>Chat & composer</span></a>
+    </div>
+    <div class="nav-section">
+      <h6>Recursos</h6>
+      <a class="nav-link" href="DESIGN.md"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">md</span><span>DESIGN.md</span></a>
+      <a class="nav-link" href="https://liquid-demo-v2.vercel.app/" target="_blank" rel="noopener"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">↗</span><span>Site fonte</span></a>
+    </div>
+    <div class="user">
+      <div class="avatar">JM</div>
+      <div style="flex:1; min-width:0">
+        <div style="font-size:13px; font-weight:500">Johnnathan Maia</div>
+        <div style="font-size:11.5px; color:var(--muted-foreground)">Admin</div>
+      </div>
+    </div>
+  </aside>
+  <main>
+    <div class="top">
+      <div>
+        <div class="mono" style="font-size:11.5px; color:var(--muted-foreground); letter-spacing:.1em; text-transform:uppercase">Liquid · Design System</div>
+        <h1 style="margin-top:6px">23 · Chat & composer</h1>
+        <p class="lede">Launcher state (vazio), cards de sugestão, composer com anexos + atalhos, chip flutuante de scroll-to-bottom.</p>
+      </div>
+      <div class="theme-switch" role="tablist" aria-label="Tema">
+        <button id="t-dark" class="on" type="button">Dark</button>
+        <button id="t-light" type="button">Light</button>
+      </div>
+    </div>
+
+    <section>
+      <h2>23.1 — Launcher state</h2>
+      <div class="h-row"><div><h3>Logo grande · saudação · cards de sugestão · composer fixo</h3><p>Estado inicial quando não há histórico de chat. Logo Liquid em 64px no centro, saudação contextual, 3-4 cards de sugestão como quick-starts, composer pinado no rodapé.</p></div></div>
+
+      <div class="chat-stage">
+        <div class="stg-top"><span class="dot"></span> Mesa principal · <span class="mono" style="font-size:11.5px">claude-opus-4-7</span></div>
+        <div class="chat-launcher">
+          <div class="chat-logo">L</div>
+          <div class="chat-greet">
+            <h3>Boa tarde, Johnnathan.</h3>
+            <p>Como posso ajudar com o pipeline hoje?</p>
+          </div>
+          <div class="suggest-grid">
+            <button class="suggest"><span class="tt">Simular financiamento MCMV</span><span class="ds">Calcular parcela, CET e prazo para um cliente novo.</span><span class="mt">Empreendimento Magnólia</span></button>
+            <button class="suggest"><span class="tt">Iniciar análise SBPE</span><span class="ds">Validar renda, score e LTV para crédito imobiliário tradicional.</span><span class="mt">João da Silva · CPF *4421</span></button>
+            <button class="suggest"><span class="tt">Resumir Inbox</span><span class="ds">Sintetizar mensagens pendentes da última semana.</span><span class="mt">2 não lidas</span></button>
+            <button class="suggest"><span class="tt">Gerar relatório mensal</span><span class="ds">Performance da equipe e funil de aprovação de crédito.</span><span class="mt">Abril 2026</span></button>
+          </div>
+        </div>
+        <div class="composer-wrap">
+          <button class="scroll-bottom">↓ Scroll to bottom</button>
+          <div class="composer">
+            <div class="cm-actions">
+              <button class="cm-btn" title="Anexar">＋</button>
+              <button class="cm-btn" title="Mencionar">@</button>
+            </div>
+            <textarea placeholder="Enviar mensagem" rows="1"></textarea>
+            <button class="send" title="Enviar (⌘↵)">↑</button>
+          </div>
+          <div class="composer-meta">
+            <span>Enter envia · Shift+Enter quebra linha</span>
+            <span><kbd>⌘</kbd> <kbd>↵</kbd></span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>23.2 — Composer (estado isolado)</h2>
+      <div class="h-row"><div><h3>Ações à esquerda · textarea expansível · botão send em fill</h3><p>Border-radius 14px, padding 10/12. Textarea cresce até 140px e depois rola. Foco aplica ring de 3px (color-mix com --ring 22%).</p></div></div>
+
+      <div style="max-width:680px; display:flex; flex-direction:column; gap:14px">
+        <div>
+          <div class="composer">
+            <div class="cm-actions"><button class="cm-btn">＋</button><button class="cm-btn">@</button></div>
+            <textarea placeholder="Enviar mensagem" rows="1"></textarea>
+            <button class="send">↑</button>
+          </div>
+          <p class="t-small mono" style="color:var(--muted-foreground); margin-top:6px">— vazio · placeholder em muted-foreground</p>
+        </div>
+        <div>
+          <div class="composer">
+            <div class="cm-actions"><button class="cm-btn">＋</button><button class="cm-btn">@</button></div>
+            <textarea rows="2">Validar renda do cliente João da Silva para crédito SBPE de R$ 480.000 com prazo de 360 meses</textarea>
+            <button class="send">↑</button>
+          </div>
+          <p class="t-small mono" style="color:var(--muted-foreground); margin-top:6px">— preenchido · textarea expandiu para 2 linhas</p>
+        </div>
+        <div>
+          <div class="composer" style="border-color:var(--ring); box-shadow:0 0 0 3px color-mix(in oklab, var(--ring) 22%, transparent)">
+            <div class="cm-actions"><button class="cm-btn">＋</button><button class="cm-btn">@</button></div>
+            <textarea placeholder="Enviar mensagem" rows="1"></textarea>
+            <button class="send">↑</button>
+          </div>
+          <p class="t-small mono" style="color:var(--muted-foreground); margin-top:6px">— focado · ring 3px</p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>23.3 — Cards de ação (quick-start)</h2>
+      <div class="h-row"><div><h3>Título · descrição · contexto secundário em mono</h3><p>Padrão de card de tarefa rápida. Hover sutil (border azul + lift 1px). O contexto em mono no rodapé do card cita a entidade real ("Empreendimento Magnólia · João da Silva") — não é placeholder.</p></div></div>
+
+      <div class="action-grid">
+        <button class="action">
+          <div class="ah"><div class="ic">⌗</div><div class="tt">Simular financiamento MCMV</div></div>
+          <p class="ds">Calcular parcela, CET e prazo aplicando faixas de subsídio do programa Minha Casa Minha Vida.</p>
+          <div class="ct">Empreendimento Magnólia · João da Silva</div>
+        </button>
+        <button class="action">
+          <div class="ah"><div class="ic">✓</div><div class="tt">Iniciar análise SBPE</div></div>
+          <p class="ds">Validar renda comprovada, score Serasa e LTV para crédito imobiliário tradicional.</p>
+          <div class="ct">CPF *4421 · R$ 480.000 · 360 meses</div>
+        </button>
+        <button class="action">
+          <div class="ah"><div class="ic">∑</div><div class="tt">Resumir reunião</div></div>
+          <p class="ds">Gerar ata e action items a partir da transcrição da última call de comitê de crédito.</p>
+          <div class="ct">Comitê · 14 mai 2026 · 47min</div>
+        </button>
+      </div>
+    </section>
+
+    <section>
+      <h2>23.4 — Scroll to bottom (chip flutuante)</h2>
+      <div class="h-row"><div><h3>Aparece quando o usuário rola para cima · centralizado no topo do composer</h3><p>Card pill com sombra suave (modal-level), aparece com fade-in 150ms. Some quando o scroll está no fundo. Clique = animação suave até o fim.</p></div></div>
+
+      <div style="position:relative; padding:40px 18px 18px; border:1px solid var(--border); border-radius:14px; background:var(--card)">
+        <button class="scroll-bottom">↓ Scroll to bottom</button>
+        <p class="t-small mono" style="color:var(--muted-foreground); margin:0">— chip ancorado no topo do container, com sombra modal-level</p>
+      </div>
+    </section>
+
+    <section>
+      <h2>23.5 — Atalhos no composer</h2>
+      <div style="padding:18px; border:1px solid var(--border); border-radius:14px; background:var(--card)">
+        <div style="display:grid; grid-template-columns:1fr auto; gap:10px 24px; font-size:13px">
+          <span>Enviar mensagem</span><span><kbd>↵</kbd></span>
+          <span>Quebrar linha</span><span><kbd>⇧</kbd> <kbd>↵</kbd></span>
+          <span>Enviar com modificador</span><span><kbd>⌘</kbd> <kbd>↵</kbd></span>
+          <span>Anexar arquivo</span><span><kbd>⌘</kbd> <kbd>U</kbd></span>
+          <span>Mencionar</span><span><kbd>@</kbd></span>
+          <span>Abrir command palette</span><span><kbd>⌘</kbd> <kbd>K</kbd></span>
+          <span>Nova conversa</span><span><kbd>⌘</kbd> <kbd>N</kbd></span>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+<script>
+  const root = document.documentElement;
+  const dark = document.getElementById('t-dark');
+  const light = document.getElementById('t-light');
+  function set(theme){
+    root.dataset.theme = theme;
+    dark.classList.toggle('on', theme==='dark');
+    light.classList.toggle('on', theme==='light');
+    try{ localStorage.setItem('liquid-ds-theme', theme); }catch(e){}
+  }
+  dark.onclick = ()=> set('dark');
+  light.onclick = ()=> set('light');
+  try{ const saved = localStorage.getItem('liquid-ds-theme'); if(saved) set(saved); }catch(e){}
+
+  // composer textarea auto-grow
+  document.querySelectorAll('.composer textarea').forEach(t=>{
+    const grow = ()=>{ t.style.height='auto'; t.style.height = Math.min(t.scrollHeight, 140) + 'px'; };
+    t.addEventListener('input', grow); grow();
+  });
+</script>
+</body>
+</html>

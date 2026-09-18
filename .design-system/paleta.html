@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Liquid — 01 · Paleta</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="shell">
+  <aside class="nav">
+    <div class="brand">
+      <div class="brand-mark">L</div>
+      <div>
+        <div class="brand-name">Liquid</div>
+        <div class="brand-sub mono">design-system / v0.1</div>
+      </div>
+    </div>
+    <div class="nav-section">
+      <a class="nav-link" href="index.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">★</span><span>Visão geral</span></a>
+      <a class="nav-link active" href="paleta.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">01</span><span>Paleta</span></a>
+      <a class="nav-link" href="tipografia.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">02</span><span>Tipografia</span></a>
+      <a class="nav-link" href="raios.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">03</span><span>Raios & espaçamento</span></a>
+      <a class="nav-link" href="componentes.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">04</span><span>Componentes</span></a>
+      <a class="nav-link" href="status.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">05</span><span>Status & pills</span></a>
+      <a class="nav-link" href="demo.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">06</span><span>Demo de produto</span></a>
+      <a class="nav-link" href="icones.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">07</span><span>Iconografia</span></a>
+      <a class="nav-link" href="motion.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">08</span><span>Motion</span></a>
+      <a class="nav-link" href="layout.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">09</span><span>Layout & grid</span></a>
+      <a class="nav-link" href="a11y.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">10</span><span>Acessibilidade</span></a>
+      <a class="nav-link" href="principios.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">11</span><span>Princípios</span></a>
+      <a class="nav-link" href="formularios.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">12</span><span>Formulários</span></a>
+      <a class="nav-link" href="toasts.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">13</span><span>Toasts</span></a>
+      <a class="nav-link" href="empty.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">14</span><span>Empty states</span></a>
+      <a class="nav-link" href="dataviz.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">15</span><span>Data viz</span></a>
+      <a class="nav-link" href="voz.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">16</span><span>Voz & tom</span></a>
+      <a class="nav-link" href="elevacao.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">17</span><span>Elevação & sombras</span></a>
+      <a class="nav-link" href="breakpoints.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">18</span><span>Breakpoints</span></a>
+      <a class="nav-link" href="atalhos.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">19</span><span>Atalhos de teclado</span></a>
+      <a class="nav-link" href="tokens.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">20</span><span>Tokens (código)</span></a>
+    </div>
+    <div class="nav-section">
+      <h6>Recursos</h6>
+      <a class="nav-link" href="DESIGN.md"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">md</span><span>DESIGN.md</span></a>
+      <a class="nav-link" href="https://liquid-demo-v2.vercel.app/" target="_blank" rel="noopener"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">↗</span><span>Site fonte</span></a>
+    </div>
+    <div class="user">
+      <div class="avatar">JM</div>
+      <div style="flex:1; min-width:0">
+        <div style="font-size:13px; font-weight:500">Johnnathan Maia</div>
+        <div style="font-size:11.5px; color:var(--muted-foreground)">Admin</div>
+      </div>
+    </div>
+  </aside>
+  <main>
+    <div class="top">
+      <div>
+        <div class="mono" style="font-size:11.5px; color:var(--muted-foreground); letter-spacing:.1em; text-transform:uppercase">Liquid · Design System</div>
+        <h1 style="margin-top:6px">01 · Paleta</h1>
+        <p class="lede">Superfícies e cores semânticas do produto.</p>
+      </div>
+      <div class="theme-switch" role="tablist" aria-label="Tema">
+        <button id="t-dark" class="on" type="button">Dark</button>
+        <button id="t-light" type="button">Light</button>
+      </div>
+    </div>
+    <section id="paleta" style="margin-top:24px">
+
+      <h2>01 — Paleta</h2>
+      <div class="h-row">
+        <h3>Superfícies & semânticas</h3>
+        <p>Empilhamento: background → sidebar/card → popover. Cor é informação, não decoração.</p>
+      </div>
+      <div class="palette">
+        <div class="swatch"><div class="chip" style="background:var(--background)"></div><div class="meta"><div class="name">background</div><div class="val mono">#0a0a0a · #ffffff</div></div></div>
+        <div class="swatch"><div class="chip" style="background:var(--card)"></div><div class="meta"><div class="name">card / sidebar</div><div class="val mono">#171717 · #ffffff</div></div></div>
+        <div class="swatch"><div class="chip" style="background:var(--muted)"></div><div class="meta"><div class="name">muted</div><div class="val mono">#262626 · #f5f5f5</div></div></div>
+        <div class="swatch"><div class="chip" style="background:var(--border)"></div><div class="meta"><div class="name">border</div><div class="val mono">#ffffff1a · #e5e5e5</div></div></div>
+        <div class="swatch"><div class="chip" style="background:var(--foreground)"></div><div class="meta"><div class="name">foreground</div><div class="val mono">#fafafa · #0a0a0a</div></div></div>
+        <div class="swatch"><div class="chip" style="background:var(--muted-foreground)"></div><div class="meta"><div class="name">muted-foreground</div><div class="val mono">#a1a1a1 · #737373</div></div></div>
+      </div>
+
+      <div class="h-row" style="margin-top:32px">
+        <h3>Status & accents</h3>
+        <p>Cores de domínio — usadas em pills, ícones e estados. Nunca como wash de página.</p>
+      </div>
+      <div class="palette">
+        <div class="swatch"><div class="chip" style="background:var(--c-blue)"></div><div class="meta"><div class="name">blue</div><div class="val mono">#478eff · #0766ee</div></div></div>
+        <div class="swatch"><div class="chip" style="background:var(--c-emerald)"></div><div class="meta"><div class="name">emerald</div><div class="val mono">#2bbb71 · #009956</div></div></div>
+        <div class="swatch"><div class="chip" style="background:var(--c-amber)"></div><div class="meta"><div class="name">amber</div><div class="val mono">#f2823b · #dc6400</div></div></div>
+        <div class="swatch"><div class="chip" style="background:var(--c-cyan)"></div><div class="meta"><div class="name">cyan</div><div class="val mono">#00b2d1 · #008ba6</div></div></div>
+        <div class="swatch"><div class="chip" style="background:var(--c-violet)"></div><div class="meta"><div class="name">violet</div><div class="val mono">#a37aff · #824ae4</div></div></div>
+        <div class="swatch"><div class="chip" style="background:var(--destructive)"></div><div class="meta"><div class="name">destructive</div><div class="val mono">#ff6568 · #e40014</div></div></div>
+        <div class="swatch"><div class="chip" style="background:var(--sidebar-primary)"></div><div class="meta"><div class="name">sidebar-primary</div><div class="val mono">#1447e6</div></div></div>
+        <div class="swatch"><div class="chip" style="background:var(--primary)"></div><div class="meta"><div class="name">primary (pill)</div><div class="val mono">#e5e5e5 · #171717</div></div></div>
+      </div>
+    
+    </section>
+  </main>
+</div>
+<script>
+  const root = document.documentElement;
+  const dark = document.getElementById('t-dark');
+  const light = document.getElementById('t-light');
+  function set(theme){
+    root.dataset.theme = theme;
+    dark.classList.toggle('on', theme==='dark');
+    light.classList.toggle('on', theme==='light');
+    try{ localStorage.setItem('liquid-ds-theme', theme); }catch(e){}
+  }
+  dark.onclick = ()=> set('dark');
+  light.onclick = ()=> set('light');
+  try{
+    const saved = localStorage.getItem('liquid-ds-theme');
+    if(saved) set(saved);
+  }catch(e){}
+</script>
+</body>
+</html>

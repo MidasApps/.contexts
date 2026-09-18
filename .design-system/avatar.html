@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Liquid — 22 · Avatar & user chip</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="shell">
+  <aside class="nav">
+    <div class="brand">
+      <div class="brand-mark">L</div>
+      <div>
+        <div class="brand-name">Liquid</div>
+        <div class="brand-sub mono">design-system / v0.1</div>
+      </div>
+    </div>
+    <div class="nav-section">
+      <a class="nav-link" href="index.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">★</span><span>Visão geral</span></a>
+      <a class="nav-link" href="paleta.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">01</span><span>Paleta</span></a>
+      <a class="nav-link" href="componentes.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">04</span><span>Componentes</span></a>
+      <a class="nav-link" href="demo.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">06</span><span>Demo de produto</span></a>
+      <a class="nav-link" href="tokens.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">20</span><span>Tokens (código)</span></a>
+      <a class="nav-link" href="navegacao.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">21</span><span>Navegação</span></a>
+      <a class="nav-link active" href="avatar.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">22</span><span>Avatar & user chip</span></a>
+      <a class="nav-link" href="chat.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">23</span><span>Chat & composer</span></a>
+    </div>
+    <div class="nav-section">
+      <h6>Recursos</h6>
+      <a class="nav-link" href="DESIGN.md"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">md</span><span>DESIGN.md</span></a>
+      <a class="nav-link" href="https://liquid-demo-v2.vercel.app/" target="_blank" rel="noopener"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">↗</span><span>Site fonte</span></a>
+    </div>
+    <div class="user">
+      <div class="avatar">JM</div>
+      <div style="flex:1; min-width:0">
+        <div style="font-size:13px; font-weight:500">Johnnathan Maia</div>
+        <div style="font-size:11.5px; color:var(--muted-foreground)">Admin</div>
+      </div>
+    </div>
+  </aside>
+  <main>
+    <div class="top">
+      <div>
+        <div class="mono" style="font-size:11.5px; color:var(--muted-foreground); letter-spacing:.1em; text-transform:uppercase">Liquid · Design System</div>
+        <h1 style="margin-top:6px">22 · Avatar & user chip</h1>
+        <p class="lede">Fallback de iniciais, escala de tamanho, indicador de presença, user chip com role e role tags textuais.</p>
+      </div>
+      <div class="theme-switch" role="tablist" aria-label="Tema">
+        <button id="t-dark" class="on" type="button">Dark</button>
+        <button id="t-light" type="button">Light</button>
+      </div>
+    </div>
+
+    <section>
+      <h2>22.1 — Tamanhos</h2>
+      <div class="h-row"><div><h3>Cinco tamanhos · iniciais maiúsculas em branco</h3><p>Sempre 2 caracteres. Gradiente diagonal 135° escolhido por hash do nome — mesmo usuário tem sempre o mesmo gradiente.</p></div></div>
+
+      <div style="display:flex; align-items:center; gap:24px; padding:24px; border:1px solid var(--border); border-radius:14px; background:var(--card)">
+        <div style="display:flex; flex-direction:column; align-items:center; gap:8px"><div class="av xs v1">JM</div><span class="mono" style="font-size:10.5px; color:var(--muted-foreground)">xs · 20</span></div>
+        <div style="display:flex; flex-direction:column; align-items:center; gap:8px"><div class="av sm v1">JM</div><span class="mono" style="font-size:10.5px; color:var(--muted-foreground)">sm · 28</span></div>
+        <div style="display:flex; flex-direction:column; align-items:center; gap:8px"><div class="av md v1">JM</div><span class="mono" style="font-size:10.5px; color:var(--muted-foreground)">md · 36</span></div>
+        <div style="display:flex; flex-direction:column; align-items:center; gap:8px"><div class="av lg v1">JM</div><span class="mono" style="font-size:10.5px; color:var(--muted-foreground)">lg · 48</span></div>
+        <div style="display:flex; flex-direction:column; align-items:center; gap:8px"><div class="av xl v1">JM</div><span class="mono" style="font-size:10.5px; color:var(--muted-foreground)">xl · 64</span></div>
+      </div>
+    </section>
+
+    <section>
+      <h2>22.2 — Variantes de gradiente</h2>
+      <div class="h-row"><div><h3>Quatro pares definidos · derivados das cores de status</h3><p>Quando o usuário não tem foto: gradiente colorido. Mantém vivacidade sem virar wash. Cinza para usuários removidos/sistema.</p></div></div>
+
+      <div style="display:flex; gap:18px; padding:24px; border:1px solid var(--border); border-radius:14px; background:var(--card); flex-wrap:wrap">
+        <div style="display:flex; flex-direction:column; align-items:center; gap:8px"><div class="av lg v1">JM</div><span class="mono" style="font-size:10.5px; color:var(--muted-foreground)">violet · blue</span></div>
+        <div style="display:flex; flex-direction:column; align-items:center; gap:8px"><div class="av lg v2">AB</div><span class="mono" style="font-size:10.5px; color:var(--muted-foreground)">emerald · cyan</span></div>
+        <div style="display:flex; flex-direction:column; align-items:center; gap:8px"><div class="av lg v3">CR</div><span class="mono" style="font-size:10.5px; color:var(--muted-foreground)">amber · red</span></div>
+        <div style="display:flex; flex-direction:column; align-items:center; gap:8px"><div class="av lg v4">SY</div><span class="mono" style="font-size:10.5px; color:var(--muted-foreground)">neutral (sys)</span></div>
+      </div>
+    </section>
+
+    <section>
+      <h2>22.3 — Indicador de presença</h2>
+      <div class="h-row"><div><h3>Online · away · busy · offline</h3><p>Dot de 10px no canto inferior direito, com border de 2px na cor do fundo (recorte limpo). Só aplicar em tamanhos md+.</p></div></div>
+
+      <div style="display:flex; gap:24px; padding:24px; border:1px solid var(--border); border-radius:14px; background:var(--card)">
+        <div style="display:flex; flex-direction:column; align-items:center; gap:8px"><div class="av md v1 av-presence">JM</div><span class="mono" style="font-size:10.5px; color:var(--muted-foreground)">online</span></div>
+        <div style="display:flex; flex-direction:column; align-items:center; gap:8px"><div class="av md v2 av-presence away">AB</div><span class="mono" style="font-size:10.5px; color:var(--muted-foreground)">away</span></div>
+        <div style="display:flex; flex-direction:column; align-items:center; gap:8px"><div class="av md v3 av-presence busy">CR</div><span class="mono" style="font-size:10.5px; color:var(--muted-foreground)">busy</span></div>
+        <div style="display:flex; flex-direction:column; align-items:center; gap:8px"><div class="av md v4 av-presence off">SY</div><span class="mono" style="font-size:10.5px; color:var(--muted-foreground)">offline</span></div>
+      </div>
+    </section>
+
+    <section>
+      <h2>22.4 — User chip</h2>
+      <div class="h-row"><div><h3>Avatar + nome + role em duas linhas</h3><p>Padrão usado no canto da sidebar e em listas de equipe. Container com border-radius 999px (pill) ou 12px (card). Role em muted-foreground 11px.</p></div></div>
+
+      <div style="display:flex; flex-direction:column; gap:14px; padding:24px; border:1px solid var(--border); border-radius:14px; background:var(--card); max-width:420px">
+        <div class="user-chip">
+          <div class="av sm v1">JM</div>
+          <div class="meta"><span class="nm">Johnnathan Maia</span><span class="rl">Admin</span></div>
+        </div>
+        <div class="user-chip">
+          <div class="av sm v2 av-presence">AB</div>
+          <div class="meta"><span class="nm">Ana Bezerra</span><span class="rl">Editor</span></div>
+        </div>
+        <div class="user-chip">
+          <div class="av sm v3 av-presence away">CR</div>
+          <div class="meta"><span class="nm">Carla Ribeiro</span><span class="rl">Viewer · convidado</span></div>
+        </div>
+        <div class="user-chip">
+          <div class="av sm v4">SY</div>
+          <div class="meta"><span class="nm">Liquid System</span><span class="rl">Bot</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>22.5 — Role tags (labels textuais)</h2>
+      <div class="h-row"><div><h3>Sistema de labels que não são status pills</h3><p>Roles e estados de produto: Admin, Editor, Viewer, Owner, Beta. Mono uppercase 9.5px, padding compacto, sem dot. Diferente de status pills (que sinalizam estado de operação).</p></div></div>
+
+      <div style="display:flex; flex-wrap:wrap; gap:8px; padding:18px; border:1px solid var(--border); border-radius:14px; background:var(--card)">
+        <span class="role-tag admin">Admin</span>
+        <span class="role-tag">Editor</span>
+        <span class="role-tag">Viewer</span>
+        <span class="role-tag">Owner</span>
+        <span class="role-tag beta">Beta</span>
+        <span class="role-tag">Convidado</span>
+      </div>
+
+      <div class="grid-2" style="margin-top:14px">
+        <div class="vt"><div class="yes"><div class="tag">✓ Role tag</div><p>Descreve o que a entidade <em>é</em>: Admin, Beta, Owner. Permanente para aquela entidade.</p></div></div>
+        <div class="vt"><div class="no"><div class="tag">✗ Status pill</div><p>Descreve o que está <em>acontecendo</em>: Pendente, Erro, Em revisão. Muda com o tempo. Use <a href="status.html">status.html</a>.</p></div></div>
+      </div>
+    </section>
+
+  </main>
+</div>
+<script>
+  const root = document.documentElement;
+  const dark = document.getElementById('t-dark');
+  const light = document.getElementById('t-light');
+  function set(theme){
+    root.dataset.theme = theme;
+    dark.classList.toggle('on', theme==='dark');
+    light.classList.toggle('on', theme==='light');
+    try{ localStorage.setItem('liquid-ds-theme', theme); }catch(e){}
+  }
+  dark.onclick = ()=> set('dark');
+  light.onclick = ()=> set('light');
+  try{ const saved = localStorage.getItem('liquid-ds-theme'); if(saved) set(saved); }catch(e){}
+</script>
+</body>
+</html>

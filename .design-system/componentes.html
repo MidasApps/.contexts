@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Liquid — 04 · Componentes</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="shell">
+  <aside class="nav">
+    <div class="brand">
+      <div class="brand-mark">L</div>
+      <div>
+        <div class="brand-name">Liquid</div>
+        <div class="brand-sub mono">design-system / v0.1</div>
+      </div>
+    </div>
+    <div class="nav-section">
+      <a class="nav-link" href="index.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">★</span><span>Visão geral</span></a>
+      <a class="nav-link" href="paleta.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">01</span><span>Paleta</span></a>
+      <a class="nav-link" href="tipografia.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">02</span><span>Tipografia</span></a>
+      <a class="nav-link" href="raios.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">03</span><span>Raios & espaçamento</span></a>
+      <a class="nav-link active" href="componentes.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">04</span><span>Componentes</span></a>
+      <a class="nav-link" href="status.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">05</span><span>Status & pills</span></a>
+      <a class="nav-link" href="demo.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">06</span><span>Demo de produto</span></a>
+      <a class="nav-link" href="icones.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">07</span><span>Iconografia</span></a>
+      <a class="nav-link" href="motion.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">08</span><span>Motion</span></a>
+      <a class="nav-link" href="layout.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">09</span><span>Layout & grid</span></a>
+      <a class="nav-link" href="a11y.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">10</span><span>Acessibilidade</span></a>
+      <a class="nav-link" href="principios.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">11</span><span>Princípios</span></a>
+      <a class="nav-link" href="formularios.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">12</span><span>Formulários</span></a>
+      <a class="nav-link" href="toasts.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">13</span><span>Toasts</span></a>
+      <a class="nav-link" href="empty.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">14</span><span>Empty states</span></a>
+      <a class="nav-link" href="dataviz.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">15</span><span>Data viz</span></a>
+      <a class="nav-link" href="voz.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">16</span><span>Voz & tom</span></a>
+      <a class="nav-link" href="elevacao.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">17</span><span>Elevação & sombras</span></a>
+      <a class="nav-link" href="breakpoints.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">18</span><span>Breakpoints</span></a>
+      <a class="nav-link" href="atalhos.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">19</span><span>Atalhos de teclado</span></a>
+      <a class="nav-link" href="tokens.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">20</span><span>Tokens (código)</span></a>
+    </div>
+    <div class="nav-section">
+      <h6>Recursos</h6>
+      <a class="nav-link" href="DESIGN.md"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">md</span><span>DESIGN.md</span></a>
+      <a class="nav-link" href="https://liquid-demo-v2.vercel.app/" target="_blank" rel="noopener"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">↗</span><span>Site fonte</span></a>
+    </div>
+    <div class="user">
+      <div class="avatar">JM</div>
+      <div style="flex:1; min-width:0">
+        <div style="font-size:13px; font-weight:500">Johnnathan Maia</div>
+        <div style="font-size:11.5px; color:var(--muted-foreground)">Admin</div>
+      </div>
+    </div>
+  </aside>
+  <main>
+    <div class="top">
+      <div>
+        <div class="mono" style="font-size:11.5px; color:var(--muted-foreground); letter-spacing:.1em; text-transform:uppercase">Liquid · Design System</div>
+        <h1 style="margin-top:6px">04 · Componentes</h1>
+        <p class="lede">Botões, inputs, command palette e cards de ação.</p>
+      </div>
+      <div class="theme-switch" role="tablist" aria-label="Tema">
+        <button id="t-dark" class="on" type="button">Dark</button>
+        <button id="t-light" type="button">Light</button>
+      </div>
+    </div>
+    <section id="componentes" style="margin-top:24px">
+
+      <h2>04 — Componentes</h2>
+
+      <div class="h-row"><h3>Botões</h3><p>Primário neutro (alto contraste no tema), secundário com border, ghost para ações na sidebar/toolbar.</p></div>
+      <div class="card">
+        <div class="btn-row">
+          <button class="btn btn-primary">Iniciar análise SBPE</button>
+          <button class="btn btn-secondary">Importar planilha</button>
+          <button class="btn btn-ghost">Cancelar</button>
+          <button class="btn btn-destructive">Excluir tarefa</button>
+        </div>
+      </div>
+
+      <div class="h-row" style="margin-top:28px"><h3>Inputs & command</h3><p>Borda <code class="mono">--input</code>, raio 10, focus ring 3px translúcido. Command palette com <kbd>⌘</kbd><kbd>K</kbd>.</p></div>
+      <div class="grid-2">
+        <div class="card">
+          <div class="field" style="margin-bottom:12px">
+            <label>Valor do imóvel</label>
+            <input class="input mono" value="R$ 780.000,00">
+          </div>
+          <div class="field">
+            <label>Prazo (meses)</label>
+            <input class="input mono" value="360">
+          </div>
+        </div>
+        <div class="card">
+          <div class="cmd">
+            <span class="ic">⌕</span>
+            <span class="grow">Buscar tarefa, cliente ou rotina…</span>
+            <kbd>⌘</kbd><kbd>K</kbd>
+          </div>
+          <p class="t-small" style="margin-top:14px">Atalhos globais usam <kbd>⌘</kbd>+letra. Em ações de tarefa, <kbd>↵</kbd> confirma e <kbd>esc</kbd> cancela.</p>
+        </div>
+      </div>
+
+      <div class="h-row" style="margin-top:28px"><h3>Cards de ação</h3><p>Padrão observado em "Nova tarefa" — título semibold, descrição muted, CTA primário no canto inferior.</p></div>
+      <div class="grid-3">
+        <div class="card">
+          <div class="pill pill-blue"><span class="dot" style="background:var(--c-blue)"></span> SBPE</div>
+          <h4 style="margin-top:12px">Iniciar análise SBPE</h4>
+          <p class="desc">Cálculo rápido com taxa Caixa, parcelas e CET — em menos de 1 min.</p>
+          <button class="btn btn-primary">Começar</button>
+        </div>
+        <div class="card">
+          <div class="pill pill-emerald"><span class="dot" style="background:var(--c-emerald)"></span> Pronto</div>
+          <h4 style="margin-top:12px">Pré-aprovação rápida</h4>
+          <p class="desc">Encaminhe o cliente direto à mesa com renda, CPF e valor do imóvel.</p>
+          <button class="btn btn-secondary">Encaminhar</button>
+        </div>
+        <div class="card">
+          <div class="pill pill-amber"><span class="dot" style="background:var(--c-amber)"></span> Em análise</div>
+          <h4 style="margin-top:12px">Comparar bancos</h4>
+          <p class="desc">Caixa, Itaú, Bradesco e Santander lado a lado — CET, prazo, entrada.</p>
+          <button class="btn btn-secondary">Abrir mesa</button>
+        </div>
+      </div>
+    
+    </section>
+  </main>
+</div>
+<script>
+  const root = document.documentElement;
+  const dark = document.getElementById('t-dark');
+  const light = document.getElementById('t-light');
+  function set(theme){
+    root.dataset.theme = theme;
+    dark.classList.toggle('on', theme==='dark');
+    light.classList.toggle('on', theme==='light');
+    try{ localStorage.setItem('liquid-ds-theme', theme); }catch(e){}
+  }
+  dark.onclick = ()=> set('dark');
+  light.onclick = ()=> set('light');
+  try{
+    const saved = localStorage.getItem('liquid-ds-theme');
+    if(saved) set(saved);
+  }catch(e){}
+</script>
+</body>
+</html>

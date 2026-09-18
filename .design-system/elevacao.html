@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Liquid — 17 · Elevação & sombras</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="shell">
+  <aside class="nav">
+    <div class="brand">
+      <div class="brand-mark">L</div>
+      <div>
+        <div class="brand-name">Liquid</div>
+        <div class="brand-sub mono">design-system / v0.1</div>
+      </div>
+    </div>
+    <div class="nav-section">
+      <a class="nav-link" href="index.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">★</span><span>Visão geral</span></a>
+      <a class="nav-link" href="paleta.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">01</span><span>Paleta</span></a>
+      <a class="nav-link" href="tipografia.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">02</span><span>Tipografia</span></a>
+      <a class="nav-link" href="raios.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">03</span><span>Raios & espaçamento</span></a>
+      <a class="nav-link" href="componentes.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">04</span><span>Componentes</span></a>
+      <a class="nav-link" href="status.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">05</span><span>Status & pills</span></a>
+      <a class="nav-link" href="demo.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">06</span><span>Demo de produto</span></a>
+      <a class="nav-link" href="icones.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">07</span><span>Iconografia</span></a>
+      <a class="nav-link" href="motion.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">08</span><span>Motion</span></a>
+      <a class="nav-link" href="layout.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">09</span><span>Layout & grid</span></a>
+      <a class="nav-link" href="a11y.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">10</span><span>Acessibilidade</span></a>
+      <a class="nav-link" href="principios.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">11</span><span>Princípios</span></a>
+      <a class="nav-link" href="formularios.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">12</span><span>Formulários</span></a>
+      <a class="nav-link" href="toasts.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">13</span><span>Toasts</span></a>
+      <a class="nav-link" href="empty.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">14</span><span>Empty states</span></a>
+      <a class="nav-link" href="dataviz.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">15</span><span>Data viz</span></a>
+      <a class="nav-link" href="voz.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">16</span><span>Voz & tom</span></a>
+      <a class="nav-link active" href="elevacao.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">17</span><span>Elevação & sombras</span></a>
+      <a class="nav-link" href="breakpoints.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">18</span><span>Breakpoints</span></a>
+      <a class="nav-link" href="atalhos.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">19</span><span>Atalhos de teclado</span></a>
+      <a class="nav-link" href="tokens.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">20</span><span>Tokens (código)</span></a>
+    </div>
+    <div class="nav-section">
+      <h6>Recursos</h6>
+      <a class="nav-link" href="DESIGN.md"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">md</span><span>DESIGN.md</span></a>
+      <a class="nav-link" href="https://liquid-demo-v2.vercel.app/" target="_blank" rel="noopener"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">↗</span><span>Site fonte</span></a>
+    </div>
+    <div class="user">
+      <div class="avatar">JM</div>
+      <div style="flex:1; min-width:0">
+        <div style="font-size:13px; font-weight:500">Johnnathan Maia</div>
+        <div style="font-size:11.5px; color:var(--muted-foreground)">Admin</div>
+      </div>
+    </div>
+  </aside>
+  <main>
+    <div class="top">
+      <div>
+        <div class="mono" style="font-size:11.5px; color:var(--muted-foreground); letter-spacing:.1em; text-transform:uppercase">Liquid · Design System</div>
+        <h1 style="margin-top:6px">17 · Elevação & sombras</h1>
+        <p class="lede">Quatro níveis — flat é o default.</p>
+      </div>
+      <div class="theme-switch" role="tablist" aria-label="Tema">
+        <button id="t-dark" class="on" type="button">Dark</button>
+        <button id="t-light" type="button">Light</button>
+      </div>
+    </div>
+    <section id="elevacao" style="margin-top:24px">
+
+      <h2>17 — Elevação & sombras</h2>
+      <p class="t-small" style="color:var(--muted-foreground); max-width:600px">Quatro níveis. A maioria das superfícies fica em <span class="mono">flat</span>; sombras só aparecem em popovers, dropdowns e modais. Nunca em cards de conteúdo.</p>
+      <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-top:18px">
+        <div style="padding:24px; border-radius:14px; background:var(--card); border:1px solid var(--border)">
+          <div class="mono t-small" style="opacity:.6">elev-0</div>
+          <div style="margin-top:8px; font-weight:500">flat</div>
+          <div class="mono t-small" style="opacity:.6; margin-top:4px">none</div>
+        </div>
+        <div style="padding:24px; border-radius:14px; background:var(--card); border:1px solid var(--border); box-shadow:0 1px 2px #0000000d">
+          <div class="mono t-small" style="opacity:.6">elev-1</div>
+          <div style="margin-top:8px; font-weight:500">hover</div>
+          <div class="mono t-small" style="opacity:.6; margin-top:4px">0 1px 2px #0000000d</div>
+        </div>
+        <div style="padding:24px; border-radius:14px; background:var(--card); border:1px solid var(--border); box-shadow:0 4px 12px #00000026">
+          <div class="mono t-small" style="opacity:.6">elev-2</div>
+          <div style="margin-top:8px; font-weight:500">popover</div>
+          <div class="mono t-small" style="opacity:.6; margin-top:4px">0 4px 12px #00000026</div>
+        </div>
+        <div style="padding:24px; border-radius:14px; background:var(--card); border:1px solid var(--border); box-shadow:0 20px 40px #00000040">
+          <div class="mono t-small" style="opacity:.6">elev-3</div>
+          <div style="margin-top:8px; font-weight:500">modal</div>
+          <div class="mono t-small" style="opacity:.6; margin-top:4px">0 20px 40px #00000040</div>
+        </div>
+      </div>
+    
+    </section>
+  </main>
+</div>
+<script>
+  const root = document.documentElement;
+  const dark = document.getElementById('t-dark');
+  const light = document.getElementById('t-light');
+  function set(theme){
+    root.dataset.theme = theme;
+    dark.classList.toggle('on', theme==='dark');
+    light.classList.toggle('on', theme==='light');
+    try{ localStorage.setItem('liquid-ds-theme', theme); }catch(e){}
+  }
+  dark.onclick = ()=> set('dark');
+  light.onclick = ()=> set('light');
+  try{
+    const saved = localStorage.getItem('liquid-ds-theme');
+    if(saved) set(saved);
+  }catch(e){}
+</script>
+</body>
+</html>

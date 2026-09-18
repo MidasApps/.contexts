@@ -1,0 +1,1688 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DDC Framework — Briefing de Contextos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=Manrope:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0E0D0C;
+  --bg-2: #161513;
+  --bg-3: #1F1D1A;
+  --ink: #F2EFE9;
+  --ink-2: #C9C4BA;
+  --ink-3: #8A857B;
+  --ink-4: #57534D;
+  --rule: #2A2723;
+
+  --c-business: #E8B96A;
+  --c-product: #E97373;
+  --c-engineering: #7DD3C0;
+  --c-accent: #F2EFE9;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'Manrope', sans-serif;
+  font-weight: 400;
+  line-height: 1.55;
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+}
+
+/* Grain overlay */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1000;
+  opacity: 0.04;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' /%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ============ TYPE ============ */
+.display, h1, h2, h3 {
+  font-family: 'Fraunces', serif;
+  font-weight: 400;
+  font-variation-settings: 'opsz' 144, 'SOFT' 50;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+}
+
+.serif-italic {
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-weight: 300;
+}
+
+.mono {
+  font-family: 'JetBrains Mono', monospace;
+  font-feature-settings: 'liga' 1, 'calt' 1;
+}
+
+/* ============ LAYOUT ============ */
+.container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 48px;
+}
+
+@media (max-width: 768px) {
+  .container { padding: 0 24px; }
+}
+
+section { padding: 120px 0; position: relative; }
+
+/* ============ HERO ============ */
+.hero {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+  padding-top: 80px;
+}
+
+.hero-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(var(--rule) 1px, transparent 1px),
+    linear-gradient(90deg, var(--rule) 1px, transparent 1px);
+  background-size: 80px 80px;
+  opacity: 0.25;
+  mask-image: radial-gradient(ellipse at center, black 0%, transparent 70%);
+}
+
+.hero-meta {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  margin-bottom: 48px;
+  display: flex;
+  gap: 32px;
+  align-items: center;
+  position: relative;
+}
+
+.hero-meta::before {
+  content: '';
+  width: 32px;
+  height: 1px;
+  background: var(--ink-3);
+}
+
+.hero h1 {
+  font-size: clamp(64px, 11vw, 180px);
+  font-weight: 300;
+  font-variation-settings: 'opsz' 144, 'SOFT' 30, 'wght' 300;
+  margin-bottom: 32px;
+  position: relative;
+}
+
+.hero h1 em {
+  font-style: italic;
+  font-weight: 200;
+  color: var(--c-engineering);
+  font-variation-settings: 'opsz' 144, 'SOFT' 100, 'wght' 200;
+}
+
+.hero-sub {
+  font-family: 'Fraunces', serif;
+  font-size: clamp(20px, 2.2vw, 28px);
+  font-weight: 300;
+  line-height: 1.4;
+  max-width: 720px;
+  color: var(--ink-2);
+  margin-bottom: 64px;
+}
+
+.hero-sub em {
+  font-style: italic;
+  color: var(--ink);
+}
+
+.hero-binary {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 32px;
+  align-items: center;
+  max-width: 880px;
+  padding: 32px;
+  border: 1px solid var(--rule);
+  background: rgba(31, 29, 26, 0.4);
+  backdrop-filter: blur(20px);
+}
+
+.hero-binary-cell {
+  text-align: center;
+}
+
+.hero-binary-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  color: var(--ink);
+  letter-spacing: 0.05em;
+  margin-bottom: 8px;
+}
+
+.hero-binary-desc {
+  font-size: 14px;
+  color: var(--ink-3);
+}
+
+.hero-binary-divider {
+  width: 1px;
+  height: 48px;
+  background: var(--rule);
+}
+
+@media (max-width: 768px) {
+  .hero-binary {
+    grid-template-columns: 1fr;
+  }
+  .hero-binary-divider {
+    width: 100%;
+    height: 1px;
+  }
+}
+
+/* ============ SECTION HEADER ============ */
+.section-eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.section-eyebrow .num {
+  color: var(--ink-4);
+  font-size: 14px;
+}
+
+.section-eyebrow::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--rule);
+}
+
+.section-title {
+  font-size: clamp(40px, 6vw, 80px);
+  font-weight: 300;
+  margin-bottom: 32px;
+  max-width: 1000px;
+}
+
+.section-title em {
+  font-style: italic;
+  font-weight: 200;
+}
+
+.section-lede {
+  font-family: 'Fraunces', serif;
+  font-size: clamp(18px, 1.8vw, 22px);
+  font-weight: 300;
+  line-height: 1.5;
+  color: var(--ink-2);
+  max-width: 720px;
+  margin-bottom: 80px;
+}
+
+/* ============ MENTAL MODEL ============ */
+.mental-model {
+  background: var(--bg-2);
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+}
+
+.layer-stack {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-top: 48px;
+}
+
+@media (max-width: 900px) {
+  .layer-stack { grid-template-columns: 1fr; }
+}
+
+.layer-card {
+  padding: 32px 24px;
+  border: 1px solid var(--rule);
+  background: var(--bg);
+  position: relative;
+  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.layer-card:hover {
+  transform: translateY(-4px);
+}
+
+.layer-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: var(--accent);
+}
+
+.layer-card[data-layer="business"] { --accent: var(--c-business); }
+.layer-card[data-layer="product"] { --accent: var(--c-product); }
+.layer-card[data-layer="engineering"] { --accent: var(--c-engineering); }
+
+.layer-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--accent);
+  letter-spacing: 0.1em;
+  margin-bottom: 12px;
+}
+
+.layer-name {
+  font-family: 'Fraunces', serif;
+  font-size: 32px;
+  font-weight: 300;
+  margin-bottom: 8px;
+  letter-spacing: -0.01em;
+}
+
+.layer-q {
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  color: var(--ink-3);
+  margin-bottom: 24px;
+  font-size: 15px;
+  min-height: 44px;
+}
+
+.layer-owner {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--accent);
+  padding-top: 16px;
+  border-top: 1px solid var(--rule);
+}
+
+/* ============ LAYER DEEP-DIVE ============ */
+.deep-dive {
+  border-top: 1px solid var(--rule);
+}
+
+.deep-dive[data-layer="business"] { --accent: var(--c-business); }
+.deep-dive[data-layer="product"] { --accent: var(--c-product); }
+.deep-dive[data-layer="engineering"] { --accent: var(--c-engineering); }
+
+.deep-dive .section-title em { color: var(--accent); }
+
+.layer-header {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 64px;
+  margin-bottom: 80px;
+  align-items: end;
+}
+
+@media (max-width: 768px) {
+  .layer-header { grid-template-columns: 1fr; gap: 24px; }
+}
+
+.layer-marker {
+  font-family: 'Fraunces', serif;
+  font-size: 240px;
+  font-weight: 200;
+  line-height: 0.8;
+  color: var(--accent);
+  letter-spacing: -0.05em;
+  font-variation-settings: 'opsz' 144, 'SOFT' 100;
+}
+
+.layer-intro h2 {
+  font-size: clamp(48px, 7vw, 96px);
+  margin-bottom: 24px;
+}
+
+.layer-intro p {
+  font-family: 'Fraunces', serif;
+  font-size: 22px;
+  font-weight: 300;
+  line-height: 1.5;
+  color: var(--ink-2);
+  max-width: 600px;
+}
+
+/* ============ TIME BADGE ============ */
+.time-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  border: 1px solid var(--accent);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 32px;
+}
+
+.time-badge::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  background: var(--accent);
+  border-radius: 50%;
+}
+
+/* ============ CONTEXTS LIST ============ */
+.contexts-section {
+  margin-top: 64px;
+}
+
+.contexts-section-title {
+  font-family: 'Fraunces', serif;
+  font-size: 28px;
+  font-weight: 300;
+  margin-bottom: 8px;
+  letter-spacing: -0.01em;
+}
+
+.contexts-section-sub {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: var(--ink-3);
+  margin-bottom: 32px;
+  letter-spacing: 0.05em;
+}
+
+.context-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1px;
+  background: var(--rule);
+  border: 1px solid var(--rule);
+  margin-bottom: 64px;
+}
+
+.context-item {
+  background: var(--bg);
+  padding: 24px 28px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: background 0.2s;
+}
+
+.context-item:hover {
+  background: var(--bg-3);
+}
+
+.context-name {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+  color: var(--ink);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+.context-desc {
+  font-size: 14px;
+  color: var(--ink-3);
+  line-height: 1.5;
+}
+
+/* ============ ENGINEERING GROUPS ============ */
+.eng-groups {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 32px;
+  margin: 48px 0 64px;
+}
+
+@media (max-width: 900px) {
+  .eng-groups { grid-template-columns: 1fr; }
+}
+
+.eng-group {
+  border: 1px solid var(--rule);
+  padding: 32px;
+  position: relative;
+  background: var(--bg);
+}
+
+.eng-group-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--rule);
+}
+
+.eng-group-name {
+  font-family: 'Fraunces', serif;
+  font-size: 28px;
+  font-weight: 300;
+  letter-spacing: -0.01em;
+  color: var(--c-engineering);
+}
+
+.eng-group-count {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--ink-3);
+}
+
+.eng-group-q {
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  color: var(--ink-2);
+  font-size: 16px;
+  margin-bottom: 12px;
+}
+
+.eng-group-desc {
+  font-size: 14px;
+  color: var(--ink-3);
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+
+.eng-group-tone {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--ink-4);
+  padding-top: 16px;
+  border-top: 1px dashed var(--rule);
+}
+
+.eng-group-tone span {
+  color: var(--c-engineering);
+}
+
+/* ============ FOLDER TREE ============ */
+.tree {
+  background: var(--bg-2);
+  border: 1px solid var(--rule);
+  padding: 32px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  line-height: 1.85;
+  color: var(--ink-2);
+  overflow-x: auto;
+  margin: 32px 0;
+  white-space: pre;
+  tab-size: 2;
+}
+
+.tree .root { color: var(--ink); font-weight: 600; }
+.tree .folder { color: var(--ink); }
+.tree .file { color: var(--ink-3); }
+.tree .comment { color: var(--ink-4); font-style: italic; }
+.tree .accent-b { color: var(--c-business); }
+.tree .accent-p { color: var(--c-product); }
+.tree .accent-e { color: var(--c-engineering); }
+
+/* ============ PULL QUOTE ============ */
+.pullquote {
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-weight: 300;
+  font-size: clamp(28px, 4vw, 48px);
+  line-height: 1.25;
+  color: var(--ink);
+  padding: 80px 0;
+  text-align: center;
+  max-width: 1000px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.pullquote::before, .pullquote::after {
+  content: '';
+  display: block;
+  width: 48px;
+  height: 1px;
+  background: var(--ink-3);
+  margin: 32px auto;
+}
+
+.pullquote em {
+  font-style: normal;
+  color: var(--c-engineering);
+}
+
+/* ============ PRODUCT EMPHASIS ============ */
+.product-callout {
+  background: var(--bg-2);
+  border-left: 3px solid var(--c-product);
+  padding: 32px 40px;
+  margin: 48px 0;
+  position: relative;
+}
+
+.product-callout-eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--c-product);
+  margin-bottom: 16px;
+}
+
+.product-callout h3 {
+  font-family: 'Fraunces', serif;
+  font-size: 28px;
+  font-weight: 300;
+  margin-bottom: 16px;
+  line-height: 1.2;
+}
+
+.product-callout p {
+  color: var(--ink-2);
+  margin-bottom: 12px;
+  font-size: 15px;
+  line-height: 1.65;
+}
+
+.product-callout strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.org-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 28px 0 20px;
+  font-size: 14px;
+}
+
+.org-table thead th {
+  text-align: left;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--c-product);
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--c-product);
+  font-weight: 600;
+}
+
+.org-table tbody td {
+  padding: 16px;
+  border-bottom: 1px solid var(--rule);
+  vertical-align: top;
+  color: var(--ink-2);
+}
+
+.org-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.org-table tbody td:first-child {
+  width: 38%;
+  padding-right: 24px;
+}
+
+.org-table strong {
+  color: var(--ink);
+  font-family: 'Fraunces', serif;
+  font-size: 17px;
+  font-weight: 400;
+  letter-spacing: -0.005em;
+}
+
+.org-note {
+  display: block;
+  font-size: 12px;
+  color: var(--ink-3);
+  margin-top: 4px;
+  font-style: italic;
+  font-family: 'Fraunces', serif;
+}
+
+.org-table code.mono {
+  font-size: 12.5px;
+  color: var(--ink);
+  background: var(--bg-3);
+  padding: 4px 8px;
+  border: 1px solid var(--rule);
+  display: inline-block;
+}
+
+.org-footer {
+  font-size: 13px;
+  color: var(--ink-3);
+  font-style: italic;
+  font-family: 'Fraunces', serif;
+  padding-top: 16px;
+  border-top: 1px dashed var(--rule);
+  margin: 0 !important;
+}
+
+.org-footer code {
+  font-style: normal;
+  font-size: 12px;
+  color: var(--ink-2);
+}
+
+@media (max-width: 640px) {
+  .org-table tbody td:first-child {
+    width: 100%;
+    display: block;
+    padding-bottom: 8px;
+  }
+  .org-table tbody td:last-child {
+    display: block;
+    padding-top: 0;
+    padding-left: 16px;
+  }
+  .org-table tbody tr {
+    display: block;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--rule);
+  }
+}
+
+/* ============ STACKS GROUPED ============ */
+.stacks-cats {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
+  margin: 32px 0;
+}
+
+.stacks-cat {
+  border: 1px solid var(--rule);
+  padding: 20px;
+  background: var(--bg);
+}
+
+.stacks-cat-name {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--c-engineering);
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--rule);
+}
+
+.stacks-cat ul {
+  list-style: none;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: var(--ink-2);
+}
+
+.stacks-cat li {
+  padding: 4px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.stacks-cat li::before {
+  content: '';
+  width: 3px;
+  height: 3px;
+  background: var(--c-engineering);
+  border-radius: 50%;
+  margin-right: 8px;
+  opacity: 0.4;
+}
+
+.stacks-cat li > span:first-of-type {
+  flex: 1;
+}
+
+/* ============ CLAUDE INTEGRATION ============ */
+.claude-section {
+  background: linear-gradient(180deg, var(--bg) 0%, var(--bg-2) 100%);
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+}
+
+.binary-explain {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  margin: 48px 0;
+}
+
+@media (max-width: 768px) { .binary-explain { grid-template-columns: 1fr; } }
+
+.binary-card {
+  border: 1px solid var(--rule);
+  padding: 40px;
+  background: var(--bg);
+  position: relative;
+}
+
+.binary-card-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+  margin-bottom: 8px;
+  letter-spacing: 0.02em;
+}
+
+.binary-card-label.claude { color: var(--c-product); }
+.binary-card-label.contexts { color: var(--c-business); }
+
+.binary-card h3 {
+  font-family: 'Fraunces', serif;
+  font-size: 36px;
+  font-weight: 300;
+  margin-bottom: 24px;
+  letter-spacing: -0.02em;
+}
+
+.binary-card p {
+  color: var(--ink-2);
+  margin-bottom: 16px;
+  line-height: 1.6;
+}
+
+.binary-card ul {
+  list-style: none;
+}
+
+.binary-card li {
+  padding: 8px 0;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  color: var(--ink-3);
+  border-bottom: 1px dashed var(--rule);
+}
+
+.binary-card li:last-child { border: 0; }
+
+/* ============ CHECKLIST ============ */
+.checklist {
+  border: 1px solid var(--rule);
+  background: var(--bg-2);
+  padding: 48px;
+  margin-top: 48px;
+}
+
+.checklist h3 {
+  font-family: 'Fraunces', serif;
+  font-size: 28px;
+  font-weight: 300;
+  margin-bottom: 24px;
+  letter-spacing: -0.01em;
+}
+
+.checklist-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+}
+
+@media (max-width: 768px) { .checklist-grid { grid-template-columns: 1fr; } }
+
+.checklist-col h4 {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--c-engineering);
+  margin-bottom: 16px;
+}
+
+.checklist-col ol {
+  list-style: none;
+  counter-reset: step;
+}
+
+.checklist-col li {
+  padding: 12px 0 12px 36px;
+  position: relative;
+  border-bottom: 1px solid var(--rule);
+  color: var(--ink-2);
+  font-size: 14px;
+  line-height: 1.55;
+  counter-increment: step;
+}
+
+.checklist-col li:last-child { border: 0; }
+
+.checklist-col li::before {
+  content: counter(step, decimal-leading-zero);
+  position: absolute;
+  left: 0;
+  top: 14px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--ink-4);
+  letter-spacing: 0.05em;
+}
+
+/* ============ STATS ============ */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 32px;
+  margin-top: 64px;
+  padding: 48px 0;
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+}
+
+@media (max-width: 900px) { .stats { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 540px) { .stats { grid-template-columns: 1fr; } }
+
+.stat-num {
+  font-family: 'Fraunces', serif;
+  font-size: 64px;
+  font-weight: 200;
+  line-height: 1;
+  margin-bottom: 8px;
+  letter-spacing: -0.03em;
+}
+
+.stat-num em {
+  font-style: italic;
+  color: var(--c-engineering);
+}
+
+.stat-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  line-height: 1.4;
+}
+
+/* ============ FOOTER ============ */
+footer {
+  padding: 80px 0 48px;
+  border-top: 1px solid var(--rule);
+}
+
+.footer-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 48px;
+  margin-bottom: 48px;
+}
+
+@media (max-width: 768px) {
+  .footer-grid { grid-template-columns: 1fr; }
+}
+
+.footer-mark {
+  font-family: 'Fraunces', serif;
+  font-size: 48px;
+  font-weight: 200;
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+
+.footer-mark em {
+  font-style: italic;
+  color: var(--c-engineering);
+}
+
+.footer-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--ink-3);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-top: 16px;
+}
+
+.footer-col h5 {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-4);
+  margin-bottom: 16px;
+}
+
+.footer-col p, .footer-col li {
+  font-size: 13px;
+  color: var(--ink-3);
+  line-height: 1.6;
+  list-style: none;
+  margin-bottom: 6px;
+}
+
+.footer-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 32px;
+  border-top: 1px solid var(--rule);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--ink-4);
+  letter-spacing: 0.05em;
+}
+
+@media (max-width: 540px) {
+  .footer-bottom { flex-direction: column; gap: 12px; text-align: center; }
+}
+
+/* ============ ANIMATIONS ============ */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.hero-meta, .hero h1, .hero-sub, .hero-binary {
+  animation: fadeUp 1.2s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+}
+
+.hero h1 { animation-delay: 0.1s; }
+.hero-sub { animation-delay: 0.3s; }
+.hero-binary { animation-delay: 0.5s; }
+
+/* ============ PRINT ============ */
+@media print {
+  body { background: white; color: black; }
+  section { padding: 40px 0; page-break-inside: avoid; }
+}
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="hero-grid"></div>
+  <div class="container">
+    <div class="hero-meta">
+      <span>DDC Framework</span>
+      <span>v1.0</span>
+      <span>Briefing executivo</span>
+    </div>
+
+    <h1>Domain-<br>Driven <em>Context</em></h1>
+
+    <p class="hero-sub">
+      Um framework de engenharia de contexto para projetos de <em>vibe coding</em> com Claude Code CLI.
+      Organiza documentação, regras e procedimentos para que a IA tenha contexto profundo do projeto
+      sem alucinar e <em>sem inflar a janela de contexto.</em>
+    </p>
+
+    <div class="hero-binary">
+      <div class="hero-binary-cell">
+        <div class="hero-binary-label">.claude/</div>
+        <div class="hero-binary-desc">Como a IA age — executor</div>
+      </div>
+      <div class="hero-binary-divider"></div>
+      <div class="hero-binary-cell">
+        <div class="hero-binary-label">.contexts/</div>
+        <div class="hero-binary-desc">O que a IA sabe — conhecimento</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- MENTAL MODEL -->
+<section class="mental-model">
+  <div class="container">
+    <div class="section-eyebrow">
+      <span class="num">01</span>
+      <span>Mental model</span>
+    </div>
+    <h2 class="section-title">Três camadas de <em>conhecimento</em>, três times responsáveis</h2>
+    <p class="section-lede">
+      Cada camada responde uma pergunta que a anterior não responde. A propriedade emergente
+      é que decisões fluem do norte estratégico até o código rodando em produção, sem desencontros
+      entre o que o negócio quer, o que o produto promete e o que a engenharia entrega.
+    </p>
+
+    <div class="layer-stack">
+      <div class="layer-card" data-layer="business">
+        <div class="layer-num">01 · Camada</div>
+        <div class="layer-name">Business</div>
+        <div class="layer-q">Por que existimos?</div>
+        <div class="layer-owner">Time de negócio</div>
+      </div>
+      <div class="layer-card" data-layer="product">
+        <div class="layer-num">02 · Camada</div>
+        <div class="layer-name">Product</div>
+        <div class="layer-q">O que construímos e pra quem?</div>
+        <div class="layer-owner">Time de produto</div>
+      </div>
+      <div class="layer-card" data-layer="engineering">
+        <div class="layer-num">03 · Camada</div>
+        <div class="layer-name">Engineering</div>
+        <div class="layer-q">Como construímos e rodamos?</div>
+        <div class="layer-owner">Time de engenharia</div>
+      </div>
+    </div>
+
+    <div class="stats">
+      <div>
+        <div class="stat-num">3</div>
+        <div class="stat-label">Camadas<br>top-level</div>
+      </div>
+      <div>
+        <div class="stat-num">7</div>
+        <div class="stat-label">Grupos<br>de engenharia</div>
+      </div>
+      <div>
+        <div class="stat-num"><em>~74</em></div>
+        <div class="stat-label">Contextos<br>no total</div>
+      </div>
+      <div>
+        <div class="stat-num">3</div>
+        <div class="stat-label">Times<br>envolvidos</div>
+      </div>
+      <div>
+        <div class="stat-num">∞</div>
+        <div class="stat-label">Decisions<br>orgânicas</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PULL QUOTE -->
+<section style="padding: 40px 0;">
+  <div class="container">
+    <div class="pullquote">
+      O menor conjunto possível de <em>tokens de alto sinal</em> que maximizam a probabilidade
+      do resultado desejado.
+    </div>
+  </div>
+</section>
+
+<!-- BUSINESS -->
+<section class="deep-dive" data-layer="business" id="business">
+  <div class="container">
+    <div class="layer-header">
+      <div class="layer-marker">B</div>
+      <div class="layer-intro">
+        <div class="section-eyebrow">
+          <span class="num">02</span>
+          <span>Camada 01 · Business</span>
+        </div>
+        <h2 class="section-title"><em>Por que</em> existimos</h2>
+        <p>
+          O norte estratégico que justifica toda decisão de produto e engenharia.
+          Sem essa camada, a IA — e o time — toma decisões sem ancoragem.
+        </p>
+      </div>
+    </div>
+
+    <div class="time-badge">Owner: Time de negócio</div>
+
+    <div class="contexts-section">
+      <div class="contexts-section-title">Contextos da camada</div>
+      <div class="contexts-section-sub">.contexts/business/</div>
+      <div class="context-grid">
+        <div class="context-item">
+          <span class="context-name">vision.md</span>
+          <span class="context-desc">Visão de uma página. O que somos, pra quem, qual problema resolvemos. O documento que dá norte.</span>
+        </div>
+        <div class="context-item">
+          <span class="context-name">glossary.md</span>
+          <span class="context-desc">Linguagem ubíqua do domínio. Termos com definição precisa. Crítico para reduzir alucinação.</span>
+        </div>
+        <div class="context-item">
+          <span class="context-name">compliance.md</span>
+          <span class="context-desc">LGPD, GDPR, SLAs com terceiros. Regula decisões de arquitetura e retenção de dados.</span>
+        </div>
+        <div class="context-item">
+          <span class="context-name">business-model.md</span>
+          <span class="context-desc">Como o negócio gera receita. Custos, margens, modelo de monetização. Contextualiza decisões de feature.</span>
+        </div>
+        <div class="context-item">
+          <span class="context-name">metrics.md</span>
+          <span class="context-desc">Métricas do negócio: MRR, churn, LTV, CAC, NPS, north-star metric. O que medimos e por quê.</span>
+        </div>
+        <div class="context-item">
+          <span class="context-name">icp.md</span>
+          <span class="context-desc">Ideal Customer Profile. Quem é o cliente real, o que ele valoriza, como compra.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRODUCT -->
+<section class="deep-dive" data-layer="product" id="product">
+  <div class="container">
+    <div class="layer-header">
+      <div class="layer-marker">P</div>
+      <div class="layer-intro">
+        <div class="section-eyebrow">
+          <span class="num">03</span>
+          <span>Camada 02 · Product</span>
+        </div>
+        <h2 class="section-title"><em>O que</em> construímos<br>e pra quem</h2>
+        <p>
+          A experiência prometida ao usuário. Personas, jornadas, design system, políticas
+          e — crucialmente — a documentação organizada conforme a granularidade do produto.
+        </p>
+      </div>
+    </div>
+
+    <div class="time-badge">Owner: Time de produto</div>
+
+    <div class="product-callout">
+      <div class="product-callout-eyebrow">Premissa estrutural</div>
+      <h3>A estrutura é <em>flexível por design</em></h3>
+      <p>
+        Os contextos listados abaixo representam <strong>os tipos de documento</strong> que existem na
+        camada de produto — não a estrutura física obrigatória. A documentação acompanha a granularidade
+        da conversa de produto: se o time discute o produto como entidade própria, ele tem documentação
+        própria; se uma feature tem persona ou jornada distinta, ela também tem.
+      </p>
+
+      <table class="org-table">
+        <thead>
+          <tr>
+            <th>Cenário</th>
+            <th>Caminho do arquivo</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Global</strong><br><span class="org-note">um único produto, sem subdivisão</span></td>
+            <td><code class="mono">product/vision.md</code></td>
+          </tr>
+          <tr>
+            <td><strong>Por produto</strong><br><span class="org-note">vários produtos no mesmo repo</span></td>
+            <td><code class="mono">product/products/&lt;produto&gt;/vision.md</code></td>
+          </tr>
+          <tr>
+            <td><strong>Por feature</strong><br><span class="org-note">único produto, feature com doc própria</span></td>
+            <td><code class="mono">product/&lt;feature&gt;/vision.md</code></td>
+          </tr>
+          <tr>
+            <td><strong>Por feature dentro de produto</strong><br><span class="org-note">vários produtos, com features próprias</span></td>
+            <td><code class="mono">product/products/&lt;produto&gt;/&lt;feature&gt;/vision.md</code></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p class="org-footer">
+        A mesma lógica vale para <code class="mono">tone-of-voice</code>,
+        <code class="mono">buyer-persona</code>, <code class="mono">audience-persona</code>,
+        <code class="mono">onboarding</code> e demais contextos de produto.
+      </p>
+    </div>
+
+    <div class="contexts-section">
+      <div class="contexts-section-title">Tipos de contexto de produto</div>
+      <div class="contexts-section-sub">organização à escolha do time &middot; global, por produto ou por feature dentro de produto</div>
+      <div class="context-grid">
+        <div class="context-item">
+          <span class="context-name">vision.md</span>
+          <span class="context-desc">Visão. Pra que serve, o que faz, o que explicitamente não faz. Pode ser global, por produto ou por feature dentro de produto.</span>
+        </div>
+        <div class="context-item">
+          <span class="context-name">design-system.md</span>
+          <span class="context-desc">Tokens visuais, componentes base, padrões. O que é shadcn/ui e o que customizamos. Tipicamente global.</span>
+        </div>
+        <div class="context-item">
+          <span class="context-name">tone-of-voice.md</span>
+          <span class="context-desc">Como o produto fala. Vocabulário, formalidade, exemplos certos vs errados. Pode variar por produto.</span>
+        </div>
+        <div class="context-item">
+          <span class="context-name">persona.md</span>
+          <span class="context-desc">Quem usa o produto no dia-a-dia. Contexto, expectativas, fluxo de trabalho, dores. Pode ser global ou específico por produto.</span>
+        </div>
+        <div class="context-item">
+          <span class="context-name">policies.md</span>
+          <span class="context-desc">Política de privacidade e termos de uso resumidos. Pontos-chave do contrato com usuário e do que o produto pode/não pode fazer.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ENGINEERING -->
+<section class="deep-dive" data-layer="engineering" id="engineering">
+  <div class="container">
+    <div class="layer-header">
+      <div class="layer-marker">E</div>
+      <div class="layer-intro">
+        <div class="section-eyebrow">
+          <span class="num">04</span>
+          <span>Camada 03 · Engineering</span>
+        </div>
+        <h2 class="section-title"><em>Como</em> construímos<br>e rodamos</h2>
+        <p>
+          A camada mais densa do framework. Subdivide em sete grupos, cobrindo desde
+          decisões e padrões até stacks, fluxo de trabalho e runtime em produção.
+        </p>
+      </div>
+    </div>
+
+    <div class="time-badge">Owner: Time de engenharia</div>
+
+    <div class="eng-groups">
+      <div class="eng-group">
+        <div class="eng-group-header">
+          <div class="eng-group-name">decisions</div>
+          <div class="eng-group-count">vazio inicial · cresce orgânico</div>
+        </div>
+        <div class="eng-group-q">Por que escolhemos?</div>
+        <div class="eng-group-desc">
+          Architecture Decision Records (ADRs). Registram escolhas técnicas com alternativas
+          consideradas e consequências. Imutáveis, numerados em 4 dígitos. Nascem ao decidir.
+        </div>
+        <div class="eng-group-tone">Tom: <span>histórico-narrativo</span></div>
+      </div>
+
+      <div class="eng-group">
+        <div class="eng-group-header">
+          <div class="eng-group-name">rules</div>
+          <div class="eng-group-count">17 arquivos</div>
+        </div>
+        <div class="eng-group-q">Como escrevemos sempre?</div>
+        <div class="eng-group-desc">
+          Regras imperativas e granulares que viram guarda-corpos. "Sempre faça X", "nunca faça Y".
+          Cobrem segurança, validação, performance, error handling, acessibilidade e mais.
+        </div>
+        <div class="eng-group-tone">Tom: <span>imperativo direto</span></div>
+      </div>
+
+      <div class="eng-group">
+        <div class="eng-group-header">
+          <div class="eng-group-name">architecture</div>
+          <div class="eng-group-count">6 arquivos</div>
+        </div>
+        <div class="eng-group-q">Como o código se organiza?</div>
+        <div class="eng-group-desc">
+          Modelos estruturais: FSD, Feature-Based, Atomic Design, DDD, Hexagonal, Clean Architecture.
+          Cada documento explica o conceito e como o time adaptou.
+        </div>
+        <div class="eng-group-tone">Tom: <span>descritivo-contextual</span></div>
+      </div>
+
+      <div class="eng-group">
+        <div class="eng-group-header">
+          <div class="eng-group-name">practices</div>
+          <div class="eng-group-count">5 arquivos</div>
+        </div>
+        <div class="eng-group-q">Como o time trabalha?</div>
+        <div class="eng-group-desc">
+          Métodos e disciplinas de processo: TDD, BDD, SDD, Clean Code, AI-friendly Code.
+          Definem ciclos de desenvolvimento, gatilhos e critérios de aplicação.
+        </div>
+        <div class="eng-group-tone">Tom: <span>descritivo de método</span></div>
+      </div>
+
+      <div class="eng-group">
+        <div class="eng-group-header">
+          <div class="eng-group-name">stacks</div>
+          <div class="eng-group-count">26 arquivos</div>
+        </div>
+        <div class="eng-group-q">Com que tecnologias?</div>
+        <div class="eng-group-desc">
+          Manuais versionados de cada tecnologia do stack — frameworks, libs, runtimes, SDKs.
+          Organizados por categoria: runtime, frontend, IA, backend, banco, testes.
+        </div>
+        <div class="eng-group-tone">Tom: <span>técnico-referencial</span></div>
+      </div>
+
+      <div class="eng-group">
+        <div class="eng-group-header">
+          <div class="eng-group-name">contracts</div>
+          <div class="eng-group-count">8 arquivos</div>
+        </div>
+        <div class="eng-group-q">Como modelamos fronteiras?</div>
+        <div class="eng-group-desc">
+          Doutrina de modelagem — não os contratos em si, mas as convenções para desenhá-los.
+          Naming, idioma, case, versionamento de schemas, APIs, eventos.
+        </div>
+        <div class="eng-group-tone">Tom: <span>prescritivo-doutrinal</span></div>
+      </div>
+
+      <div class="eng-group">
+        <div class="eng-group-header">
+          <div class="eng-group-name">processes</div>
+          <div class="eng-group-count">8 arquivos</div>
+        </div>
+        <div class="eng-group-q">Como o trabalho flui e a aplicação opera?</div>
+        <div class="eng-group-desc">
+          Convenções de fluxo: git, commits, pull requests, deploy, release. E runtime
+          em produção: ambientes, monitoring, rollback.
+        </div>
+        <div class="eng-group-tone">Tom: <span>prescritivo-operacional</span></div>
+      </div>
+    </div>
+
+    <!-- RULES -->
+    <div class="contexts-section">
+      <div class="contexts-section-title">Rules &mdash; 17 contextos imperativos</div>
+      <div class="contexts-section-sub">.contexts/engineering/rules/</div>
+      <div class="context-grid">
+        <div class="context-item"><span class="context-name">development.md</span><span class="context-desc">Regras gerais de código. TypeScript strict, no-default-export, async/await patterns.</span></div>
+        <div class="context-item"><span class="context-name">security.md</span><span class="context-desc">OWASP, secrets, RBAC, input sanitization. Regra sempre-ativa.</span></div>
+        <div class="context-item"><span class="context-name">performance.md</span><span class="context-desc">Budgets de bundle, LCP, INP, regras de otimização imperativas.</span></div>
+        <div class="context-item"><span class="context-name">validation.md</span><span class="context-desc">safeParse em boundary, schema em arquivo separado, branded types.</span></div>
+        <div class="context-item"><span class="context-name">testing.md</span><span class="context-desc">Mock policy, coverage mínimo, naming de teste, padrões de assertion.</span></div>
+        <div class="context-item"><span class="context-name">code-review.md</span><span class="context-desc">Checklist de review, critérios de aprovação, ownership.</span></div>
+        <div class="context-item"><span class="context-name">documentation.md</span><span class="context-desc">JSDoc obrigatório onde, README de feature, comentários inline.</span></div>
+        <div class="context-item"><span class="context-name">api-design.md</span><span class="context-desc">Server Action shape, auth check no início, Result&lt;T,E&gt; pattern.</span></div>
+        <div class="context-item"><span class="context-name">data-modeling.md</span><span class="context-desc">Convenções Firestore: timestamps, naming, IDs, soft delete.</span></div>
+        <div class="context-item"><span class="context-name">migration.md</span><span class="context-desc">Como rodar backfill, dual-write, schemaVersion, rollback de migração.</span></div>
+        <div class="context-item"><span class="context-name">state-management.md</span><span class="context-desc">Zustand vs TanStack Query vs useState. Quando usar cada um.</span></div>
+        <div class="context-item"><span class="context-name">error-handling.md</span><span class="context-desc">Taxonomia de erros, como cruzam fronteiras, error envelope.</span></div>
+        <div class="context-item"><span class="context-name">caching.md</span><span class="context-desc">revalidateTag, staleTime, unstable_cache. Defaults por tipo de query.</span></div>
+        <div class="context-item"><span class="context-name">observability.md</span><span class="context-desc">Logging estruturado, correlation ID, campos obrigatórios, OTel.</span></div>
+        <div class="context-item"><span class="context-name">internationalization.md</span><span class="context-desc">Onde mora copy, fallback strategy, formato de keys de tradução.</span></div>
+        <div class="context-item"><span class="context-name">governance.md</span><span class="context-desc">Processo de mudança de rule, ownership, ciclo de revisão.</span></div>
+        <div class="context-item"><span class="context-name">accessibility.md</span><span class="context-desc">WCAG 2.2 AA, ARIA patterns, contraste, navegação por teclado.</span></div>
+      </div>
+    </div>
+
+    <!-- ARCHITECTURE -->
+    <div class="contexts-section">
+      <div class="contexts-section-title">Architecture &mdash; 6 contextos estruturais</div>
+      <div class="contexts-section-sub">.contexts/engineering/architecture/</div>
+      <div class="context-grid">
+        <div class="context-item"><span class="context-name">fsd.md</span><span class="context-desc">Feature-Sliced Design. Camadas, regras de import, public API por slice.</span></div>
+        <div class="context-item"><span class="context-name">feature-based.md</span><span class="context-desc">Organização por feature como unidade de coesão. Alternativa/complemento ao FSD.</span></div>
+        <div class="context-item"><span class="context-name">atomic-design.md</span><span class="context-desc">Atoms, molecules, organisms, templates, pages. Aplicado à camada de UI.</span></div>
+        <div class="context-item"><span class="context-name">hexagonal.md</span><span class="context-desc">Ports & Adapters. Domínio puro, infraestrutura plugável.</span></div>
+        <div class="context-item"><span class="context-name">ddd.md</span><span class="context-desc">Domain-Driven Design. Bounded contexts, agregados, ubiquitous language.</span></div>
+        <div class="context-item"><span class="context-name">clean-architecture.md</span><span class="context-desc">Camadas concêntricas, dependency rule, isolamento de regras de negócio.</span></div>
+      </div>
+    </div>
+
+    <!-- PRACTICES -->
+    <div class="contexts-section">
+      <div class="contexts-section-title">Practices &mdash; 5 contextos de processo</div>
+      <div class="contexts-section-sub">.contexts/engineering/practices/</div>
+      <div class="context-grid">
+        <div class="context-item"><span class="context-name">tdd.md</span><span class="context-desc">Test-Driven Development. Ciclo red-green-refactor, quando aplicar.</span></div>
+        <div class="context-item"><span class="context-name">bdd.md</span><span class="context-desc">Behavior-Driven Development. Given-when-then, especificação executável.</span></div>
+        <div class="context-item"><span class="context-name">sdd.md</span><span class="context-desc">Spec-Driven Development. Spec antes de código, plan, tasks.</span></div>
+        <div class="context-item"><span class="context-name">clean-code.md</span><span class="context-desc">Princípios contínuos: nomes expressivos, funções curtas, SRP.</span></div>
+        <div class="context-item"><span class="context-name">ai-friendly-code.md</span><span class="context-desc">Código otimizado pra LLMs trabalharem: modularidade alta, arquivos 150-500 linhas, funções 30-50 linhas, baixo acoplamento, token economy. Reduz alucinação e melhora qualidade da geração.</span></div>
+      </div>
+    </div>
+
+    <!-- STACKS -->
+    <div class="contexts-section">
+      <div class="contexts-section-title">Stacks &mdash; 26 contextos por tecnologia</div>
+      <div class="contexts-section-sub">.contexts/engineering/stacks/&lt;categoria&gt;/</div>
+
+      <div class="stacks-cats">
+        <div class="stacks-cat">
+          <div class="stacks-cat-name">runtime/</div>
+          <ul>
+            <li><span>node@24.md</span></li>
+          </ul>
+        </div>
+        <div class="stacks-cat">
+          <div class="stacks-cat-name">language/</div>
+          <ul>
+            <li><span>typescript@6.md</span></li>
+          </ul>
+        </div>
+        <div class="stacks-cat">
+          <div class="stacks-cat-name">frontend/</div>
+          <ul>
+            <li><span>next@16.md</span></li>
+            <li><span>react@19.md</span></li>
+            <li><span>tailwind@4.md</span></li>
+            <li><span>shadcn-ui.md</span></li>
+            <li><span>radix-ui.md</span></li>
+          </ul>
+        </div>
+        <div class="stacks-cat">
+          <div class="stacks-cat-name">validation/</div>
+          <ul>
+            <li><span>zod@4.md</span></li>
+          </ul>
+        </div>
+        <div class="stacks-cat">
+          <div class="stacks-cat-name">state/</div>
+          <ul>
+            <li><span>zustand@5.md</span></li>
+          </ul>
+        </div>
+        <div class="stacks-cat">
+          <div class="stacks-cat-name">ai/</div>
+          <ul>
+            <li><span>openai.md</span></li>
+            <li><span>anthropic.md</span></li>
+            <li><span>gemini.md</span></li>
+            <li><span>openai-sdk.md</span></li>
+            <li><span>anthropic-sdk.md</span></li>
+            <li><span>google-genai-sdk.md</span></li>
+            <li><span>vercel-ai-sdk.md</span></li>
+            <li><span>mastra-sdk.md</span></li>
+            <li><span>harness-engineering.md</span></li>
+          </ul>
+        </div>
+        <div class="stacks-cat">
+          <div class="stacks-cat-name">backend/</div>
+          <ul>
+            <li><span>firebase-functions.md</span></li>
+          </ul>
+        </div>
+        <div class="stacks-cat">
+          <div class="stacks-cat-name">database/</div>
+          <ul>
+            <li><span>firebase-firestore.md</span></li>
+            <li><span>postgres.md</span></li>
+            <li><span>pgvector.md</span></li>
+            <li><span>bigquery.md</span></li>
+          </ul>
+        </div>
+        <div class="stacks-cat">
+          <div class="stacks-cat-name">testing/</div>
+          <ul>
+            <li><span>vitest.md</span></li>
+            <li><span>playwright.md</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONTRACTS -->
+    <div class="contexts-section">
+      <div class="contexts-section-title">Contracts &mdash; 8 contextos de modelagem</div>
+      <div class="contexts-section-sub">.contexts/engineering/contracts/ &middot; doutrina, não os contratos</div>
+      <div class="context-grid">
+        <div class="context-item"><span class="context-name">api.md</span><span class="context-desc">Convenções de API: verbos REST, status codes, error envelope, paginação, versionamento.</span></div>
+        <div class="context-item"><span class="context-name">firebase-firestore.md</span><span class="context-desc">Modelagem Firestore: collections naming, timestamps obrigatórios, denormalização.</span></div>
+        <div class="context-item"><span class="context-name">bigquery.md</span><span class="context-desc">Modelagem BigQuery: datasets, tables, partition, naming, esquemas analíticos.</span></div>
+        <div class="context-item"><span class="context-name">postgres.md</span><span class="context-desc">Modelagem Postgres: schemas, naming, indexes, FKs, soft delete.</span></div>
+        <div class="context-item"><span class="context-name">pgvector.md</span><span class="context-desc">Modelagem vector store: chunking strategy, metadata, dimensões, similarity index.</span></div>
+        <div class="context-item"><span class="context-name">schemas.md</span><span class="context-desc">Convenções gerais de schema agnóstico de lib. Naming, branded types, nullability.</span></div>
+        <div class="context-item"><span class="context-name">events.md</span><span class="context-desc">Eventos de domínio: naming, payload, versionamento, propagação.</span></div>
+        <div class="context-item"><span class="context-name">secrets.md</span><span class="context-desc">Modelagem de secrets: naming, escopo, rotação, ambientes.</span></div>
+      </div>
+    </div>
+
+    <!-- PROCESSES -->
+    <div class="contexts-section">
+      <div class="contexts-section-title">Processes &mdash; 8 contextos de fluxo</div>
+      <div class="contexts-section-sub">.contexts/engineering/processes/</div>
+      <div class="context-grid">
+        <div class="context-item"><span class="context-name">git.md</span><span class="context-desc">Branching strategy (trunk-based), naming de branch, merge strategy.</span></div>
+        <div class="context-item"><span class="context-name">commits.md</span><span class="context-desc">Conventional Commits. Formato, escopo, tipos permitidos.</span></div>
+        <div class="context-item"><span class="context-name">pull-requests.md</span><span class="context-desc">Template, mínimo de reviewers, critérios de merge, squash policy.</span></div>
+        <div class="context-item"><span class="context-name">deploy.md</span><span class="context-desc">Pipeline e fluxo de deploy: staging → prod, gates, aprovações, frequência, runtime do pipeline.</span></div>
+        <div class="context-item"><span class="context-name">release.md</span><span class="context-desc">Versionamento semântico, changelog, frequência de release.</span></div>
+        <div class="context-item"><span class="context-name">environments.md</span><span class="context-desc">Ambientes (dev, staging, prod). URLs, configurações, diferenças, paridade.</span></div>
+        <div class="context-item"><span class="context-name">monitoring.md</span><span class="context-desc">Ferramentas de observabilidade, dashboards principais, SLOs, alertas, thresholds.</span></div>
+        <div class="context-item"><span class="context-name">rollback.md</span><span class="context-desc">Procedimento de rollback. Quando, como, critérios de saúde pós-rollback.</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CLAUDE INTEGRATION -->
+<section class="claude-section">
+  <div class="container">
+    <div class="section-eyebrow">
+      <span class="num">05</span>
+      <span>Claude Code CLI · Integração</span>
+    </div>
+    <h2 class="section-title">A <em>divisão binária</em> que define o framework</h2>
+    <p class="section-lede">
+      O DDC opera sobre dois diretórios paralelos. Um define como a IA age. O outro define
+      o que ela sabe. Toda primitiva em <code class="mono">.claude/</code> referencia conhecimento
+      em <code class="mono">.contexts/</code> via sintaxe <code class="mono">@</code>, sem duplicar.
+    </p>
+
+    <div class="binary-explain">
+      <div class="binary-card">
+        <div class="binary-card-label claude">.claude/ &nbsp;·&nbsp; executor</div>
+        <h3>Como a IA <em class="serif-italic">age</em></h3>
+        <p>
+          Diretório com primitivas operacionais que o Claude Code CLI usa para agir no projeto.
+          Cinco primitivas, cada uma com função operacional distinta.
+        </p>
+        <ul>
+          <li>agents/ &mdash; especialistas isolados</li>
+          <li>skills/ &mdash; procedimentos repetíveis</li>
+          <li>rules/ &mdash; guarda-corpos path-scoped</li>
+          <li>hooks/ &mdash; garantias determinísticas</li>
+          <li>commands/ &mdash; atalhos /comando</li>
+        </ul>
+      </div>
+
+      <div class="binary-card">
+        <div class="binary-card-label contexts">.contexts/ &nbsp;·&nbsp; conhecimento</div>
+        <h3>O que a IA <em class="serif-italic">sabe</em></h3>
+        <p>
+          Diretório com conhecimento estruturado em três camadas. Consultado sob demanda
+          via referências <code class="mono">@</code>, com progressive disclosure.
+        </p>
+        <ul>
+          <li>business/ &mdash; norte estratégico</li>
+          <li>product/ &mdash; experiência ao usuário</li>
+          <li>engineering/ &mdash; manual técnico e runtime</li>
+          <li>upstream/ &mdash; docs de terceiros (opcional)</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="tree">
+<span class="root">projeto-raiz/</span>
+├── <span class="folder">CLAUDE.md</span>                          <span class="comment">// entrada raiz, ≤200 linhas</span>
+│
+├── <span class="folder">.claude/</span>                           <span class="comment">// 🤖 executor</span>
+│   ├── settings.json
+│   ├── agents/
+│   ├── skills/
+│   ├── rules/
+│   ├── commands/
+│   └── hooks/
+│
+└── <span class="folder">.contexts/</span>                         <span class="comment">// 📚 conhecimento</span>
+    │
+    ├── <span class="accent-b">business/</span>                        <span class="comment">// owner: time de negócio</span>
+    │   ├── <span class="file">vision.md</span>
+    │   ├── <span class="file">glossary.md</span>
+    │   ├── <span class="file">compliance.md</span>
+    │   ├── <span class="file">business-model.md</span>
+    │   ├── <span class="file">metrics.md</span>
+    │   └── <span class="file">icp.md</span>
+    │
+    ├── <span class="accent-p">product/</span>                         <span class="comment">// owner: time de produto · 4 formas de organizar</span>
+    │   │
+    │   ├── <span class="file">vision.md</span>                      <span class="comment">// → global</span>
+    │   ├── <span class="file">design-system.md</span>
+    │   ├── <span class="file">tone-of-voice.md</span>
+    │   ├── <span class="file">persona.md</span>
+    │   ├── <span class="file">policies.md</span>
+    │   │
+    │   ├── &lt;feature&gt;/                  <span class="comment">// → por feature (sem múltiplos produtos)</span>
+    │   │   └── <span class="file">vision.md</span>
+    │   │
+    │   └── products/                   <span class="comment">// → por produto (com ou sem features)</span>
+    │       └── &lt;produto&gt;/
+    │           ├── <span class="file">vision.md</span>
+    │           └── &lt;feature&gt;/
+    │               └── <span class="file">vision.md</span>
+    │
+    └── <span class="accent-e">engineering/</span>                     <span class="comment">// owner: time de engenharia</span>
+        ├── decisions/                 <span class="comment">// ADRs · vazio inicial</span>
+        ├── rules/                     <span class="comment">// 17 regras imperativas</span>
+        ├── architecture/              <span class="comment">// 6 modelos estruturais</span>
+        ├── practices/                 <span class="comment">// 5 métodos de processo</span>
+        ├── stacks/                    <span class="comment">// 26 tecnologias por categoria</span>
+        │   ├── runtime/
+        │   ├── language/
+        │   ├── frontend/
+        │   ├── validation/
+        │   ├── state/
+        │   ├── ai/
+        │   ├── backend/
+        │   ├── database/
+        │   └── testing/
+        ├── contracts/                 <span class="comment">// 8 doutrinas de modelagem</span>
+        └── processes/                 <span class="comment">// 8 fluxos de trabalho e runtime</span>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-mark">DDC<em>.</em></div>
+        <div class="footer-tag">Domain-Driven Context · v1.0</div>
+      </div>
+      <div class="footer-col">
+        <h5>Princípios</h5>
+        <ul>
+          <li>Single source of truth</li>
+          <li>Progressive disclosure</li>
+          <li>Just-in-time loading</li>
+          <li>Apontar via @, nunca duplicar</li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h5>Limites duros</h5>
+        <ul>
+          <li>CLAUDE.md ≤ 200 linhas</li>
+          <li>SKILL.md ≤ 500 linhas</li>
+          <li>Descriptions ≤ 1.536 chars</li>
+          <li>Catálogo total ≤ 15.000 chars</li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>Briefing executivo · Business · Product · Engineering</span>
+      <span>Consumido por Claude Code CLI</span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

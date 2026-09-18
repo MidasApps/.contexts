@@ -1,0 +1,17 @@
+# Dependências e builds (futuro-proof)
+node_modules/
+dist/
+.next/
+
+# Ambiente — nunca versionar (.env.example sim)
+.env
+.env.*
+!.env.example
+
+# Sistema operacional / editor
+.DS_Store
+Thumbs.db
+*.swp
+
+# Configuração local por máquina do Claude Code
+.claude/settings.local.json

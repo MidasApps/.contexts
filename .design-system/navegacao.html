@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Liquid — 21 · Navegação</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="shell">
+  <aside class="nav">
+    <div class="brand">
+      <div class="brand-mark">L</div>
+      <div>
+        <div class="brand-name">Liquid</div>
+        <div class="brand-sub mono">design-system / v0.1</div>
+      </div>
+    </div>
+    <div class="nav-section">
+      <a class="nav-link" href="index.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">★</span><span>Visão geral</span></a>
+      <a class="nav-link" href="paleta.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">01</span><span>Paleta</span></a>
+      <a class="nav-link" href="tipografia.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">02</span><span>Tipografia</span></a>
+      <a class="nav-link" href="componentes.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">04</span><span>Componentes</span></a>
+      <a class="nav-link" href="demo.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">06</span><span>Demo de produto</span></a>
+      <a class="nav-link" href="tokens.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">20</span><span>Tokens (código)</span></a>
+      <a class="nav-link active" href="navegacao.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">21</span><span>Navegação</span></a>
+      <a class="nav-link" href="avatar.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">22</span><span>Avatar & user chip</span></a>
+      <a class="nav-link" href="chat.html"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">23</span><span>Chat & composer</span></a>
+    </div>
+    <div class="nav-section">
+      <h6>Recursos</h6>
+      <a class="nav-link" href="DESIGN.md"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">md</span><span>DESIGN.md</span></a>
+      <a class="nav-link" href="https://liquid-demo-v2.vercel.app/" target="_blank" rel="noopener"><span class="mono" style="opacity:.5; font-size:11px; width:22px; display:inline-block">↗</span><span>Site fonte</span></a>
+    </div>
+    <div class="user">
+      <div class="avatar">JM</div>
+      <div style="flex:1; min-width:0">
+        <div style="font-size:13px; font-weight:500">Johnnathan Maia</div>
+        <div style="font-size:11.5px; color:var(--muted-foreground)">Admin</div>
+      </div>
+    </div>
+  </aside>
+  <main>
+    <div class="top">
+      <div>
+        <div class="mono" style="font-size:11.5px; color:var(--muted-foreground); letter-spacing:.1em; text-transform:uppercase">Liquid · Design System</div>
+        <h1 style="margin-top:6px">21 · Navegação</h1>
+        <p class="lede">Topbar do app com itens primários, contadores e tags. Sidebar com section headers, estado colapsado e ícones.</p>
+      </div>
+      <div class="theme-switch" role="tablist" aria-label="Tema">
+        <button id="t-dark" class="on" type="button">Dark</button>
+        <button id="t-light" type="button">Light</button>
+      </div>
+    </div>
+
+    <section>
+      <h2>21.1 — Topbar do app</h2>
+      <div class="h-row"><div><h3>Itens primários, contador e tag de versão</h3><p>Brand isolada à esquerda por divisor vertical. Itens em ghost; um item primário em fill. Contadores são pill saturado com texto branco; tags como "Beta" usam o accent violeta.</p></div></div>
+
+      <div class="topbar">
+        <div class="tb-brand"><div class="brand-mark">L</div><div class="brand-name" style="font-size:13.5px">Liquid</div></div>
+        <button class="tb-item cta">+ Nova Tarefa</button>
+        <button class="tb-item">Inbox <span class="tb-count">2</span></button>
+        <button class="tb-item on">Mesa</button>
+        <button class="tb-item">Rotinas <span class="tb-tag">Beta</span></button>
+        <span class="tb-spacer"></span>
+        <button class="tb-item" aria-label="Buscar">⌘K</button>
+      </div>
+
+      <p class="t-small mono" style="color:var(--muted-foreground); margin-top:14px">— altura: 52px · padding horizontal: 14px · raio: 14px · gap entre itens: 6px</p>
+    </section>
+
+    <section>
+      <h2>21.2 — Estados de item</h2>
+      <div class="h-row"><div><h3>Default · hover · active · com contador · com tag · CTA</h3><p>O contador é numérico em pill saturado (azul brand). A tag "Beta" é textual em violeta. Não combine contador + tag no mesmo item.</p></div></div>
+
+      <div style="display:flex; flex-wrap:wrap; gap:8px; padding:14px; border:1px solid var(--border); border-radius:14px; background:var(--card)">
+        <button class="tb-item">Default</button>
+        <button class="tb-item" style="background:var(--muted); color:var(--foreground)">Hover</button>
+        <button class="tb-item on">Active</button>
+        <button class="tb-item">Inbox <span class="tb-count">2</span></button>
+        <button class="tb-item">Inbox <span class="tb-count">12</span></button>
+        <button class="tb-item">Rotinas <span class="tb-tag">Beta</span></button>
+        <button class="tb-item">Análises <span class="tb-tag" style="background:color-mix(in oklab, var(--c-amber) 18%, transparent); color:var(--c-amber); border-color:color-mix(in oklab, var(--c-amber) 30%, transparent)">Alpha</span></button>
+        <button class="tb-item cta">+ Nova Tarefa</button>
+      </div>
+    </section>
+
+    <section>
+      <h2>21.3 — Sidebar: section headers e estado colapsado</h2>
+      <div class="h-row"><div><h3>Group labels em mono uppercase · 260px expandido · 60px colapsado</h3><p>Section headers (TERMINAIS, EQUIPE, CONFIGURAÇÕES) separam grupos lógicos. No estado colapsado só ícones permanecem, hit area 40×40px.</p></div></div>
+
+      <div class="sb-mock">
+        <div class="sb-card">
+          <div class="sb-group">Terminais</div>
+          <div class="sb-row"><span class="sb-ic">▸</span> Mesa principal</div>
+          <div class="sb-row muted"><span class="sb-ic">▸</span> Pipeline Q4</div>
+          <div class="sb-row muted"><span class="sb-ic">▸</span> Rascunhos</div>
+          <div class="sb-group">Equipe</div>
+          <div class="sb-row muted"><span class="sb-ic">●</span> Membros</div>
+          <div class="sb-row muted"><span class="sb-ic">●</span> Convites</div>
+          <div class="sb-group">Configurações</div>
+          <div class="sb-row muted"><span class="sb-ic">⚙</span> Workspace</div>
+          <div class="sb-row muted"><span class="sb-ic">⚙</span> Faturamento</div>
+        </div>
+        <div class="sb-card collapsed">
+          <div class="sb-row muted">▸</div>
+          <div class="sb-row muted">▸</div>
+          <div class="sb-row muted">▸</div>
+          <div style="height:1px;background:var(--border);margin:6px 0"></div>
+          <div class="sb-row muted">●</div>
+          <div class="sb-row muted">●</div>
+          <div style="height:1px;background:var(--border);margin:6px 0"></div>
+          <div class="sb-row muted">⚙</div>
+          <div class="sb-row muted">⚙</div>
+        </div>
+      </div>
+
+      <p class="t-small mono" style="color:var(--muted-foreground); margin-top:14px">— botão de toggle: <kbd>⌘B</kbd> · animação 200ms ease-out · persistir estado em localStorage</p>
+    </section>
+
+    <section>
+      <h2>21.4 — Quando usar tag vs. contador</h2>
+      <div class="grid-2">
+        <div class="vt"><div class="yes"><div class="tag">✓ Use contador</div><p>Itens com algo "novo" para o usuário: Inbox, Notificações, Comentários, Tarefas pendentes. Sempre numérico.</p></div></div>
+        <div class="vt"><div class="yes"><div class="tag">✓ Use tag</div><p>Estado do recurso, não da atividade: Beta, Alpha, Em breve, Premium. Sempre textual em mono uppercase.</p></div></div>
+      </div>
+    </section>
+
+  </main>
+</div>
+<script>
+  const root = document.documentElement;
+  const dark = document.getElementById('t-dark');
+  const light = document.getElementById('t-light');
+  function set(theme){
+    root.dataset.theme = theme;
+    dark.classList.toggle('on', theme==='dark');
+    light.classList.toggle('on', theme==='light');
+    try{ localStorage.setItem('liquid-ds-theme', theme); }catch(e){}
+  }
+  dark.onclick = ()=> set('dark');
+  light.onclick = ()=> set('light');
+  try{ const saved = localStorage.getItem('liquid-ds-theme'); if(saved) set(saved); }catch(e){}
+</script>
+</body>
+</html>

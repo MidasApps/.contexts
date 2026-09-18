@@ -1,0 +1,7 @@
+# Normaliza line endings: LF no repositório, checkout conforme plataforma
+* text=auto
+*.md text
+*.cjs text
+*.json text
+*.html text
+*.css text
