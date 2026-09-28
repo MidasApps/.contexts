@@ -1,14 +1,30 @@
 ﻿---
 title: Gemini API
 version: 2025
-last_updated: 2026-07-13
-status: active
+last_updated: 2026-09-28
+status: needs-revision
 upstream:
   - https://ai.google.dev/gemini-api/docs
   - https://cloud.google.com/vertex-ai/generative-ai/docs
 ---
 
 # Gemini API
+
+> ## ⚠️ As tabelas de modelo abaixo são da geração 2.5 — que **se aposenta em 16/10/2026**.
+>
+> Migre para a geração 3 (observado em produção, 2026-08-13:
+> `gemini-3.5-flash-lite`, `gemini-3.6-flash`, `gemini-3.1-pro-preview`).
+> Confirme ids na doc upstream antes de fixar.
+>
+> **Endpoint regional deixa de valer.** Nenhum modelo da geração 3 respondeu em
+> `us-central1` (`Publisher model … was not found`): a geração 3 exige o endpoint
+> `global`. Isso é **decisão de residência de dados** (ver `@rules/governance`,
+> "Terceirização de chamadas de IA" — default global é proibido para `pii`) e
+> exige decisão explícita do dono do produto + ADR, não troca silenciosa de modelo.
+>
+> Trocar de região **não** obriga reindexação: `gemini-embedding-001` respondeu
+> nas duas com a mesma dimensão (3072). `thinkingConfig`/`thoughtsTokenCount`
+> seguem valendo.
 
 Manual operacional da **Gemini API** como produto/protocolo do Google. Cobre superfícies, modelos, request shape, autenticação, quotas e governança. Documento focado em **o que a API é e como o projeto a consome**, agnóstico de SDK. Para o SDK oficial TypeScript `@google/genai`, ver `@stacks/ai/google-genai-sdk`. Para acesso via abstração unificada, ver `@stacks/ai/vercel-ai-sdk`.
 

@@ -3,7 +3,7 @@ title: Regras Gerais de Desenvolvimento
 type: rules
 scope: global
 status: active
-last_updated: 2026-07-13
+last_updated: 2026-09-28
 ---
 
 # Regras Gerais de Desenvolvimento
@@ -42,6 +42,16 @@ Aplica-se a todo código-fonte do projeto: backend (Firebase Functions, serviço
 - Nunca use abreviações ambíguas (`usr`, `btn`, `cfg`). Use o nome completo (`user`, `button`, `config`).
 - Nunca prefixe interfaces com `I` (`IUser`). Nunca sufixe tipos com `Type` (`UserType`).
 - Sempre nomeie booleanos com prefixo afirmativo: `isActive`, `hasPermission`, `canEdit`. Nunca use negações no nome (`isNotReady`).
+
+### Idioma dos identificadores
+
+- Sempre escreva identificadores de código em inglês: variáveis, funções, propriedades, tipos, constantes, componentes e nomes de arquivo (`resolveMetric`, `SourceDoc`, `MAX_RETRIES`, `source-repo.ts`).
+- Nunca misture idiomas dentro de um identificador (`calculaTotal`, `buscaUserById`).
+- Nunca traduza nomes canônicos de dado. Entidades, atributos, tabelas e colunas definidos em contrato de dados ou no glossário (`@.contexts/business/glossary.md`) aparecem no código como **valores**, exatamente como no contrato (`'transacoes'`), e nunca viram vocabulário de identificador.
+- Nomes de objetos de dados fora do código seguem o contrato da tecnologia (`@.contexts/engineering/contracts/bigquery.md`, `firebase-firestore.md`, `postgres.md`, `secrets.md`), não esta seção.
+- Strings exibidas ao usuário não são identificadores: seguem `@.contexts/engineering/rules/internationalization.md`.
+- Código legado fora do padrão migra em commits `refactor` dedicados, nunca junto com mudança de comportamento; exceções exigem decisão registrada nesta seção do projeto.
+- Aplique por lint: regra ESLint local de identificadores + allowlist versionada para chaves persistidas que precisem ficar no idioma original, com motivo no PR.
 
 ## Funções e controle de fluxo
 

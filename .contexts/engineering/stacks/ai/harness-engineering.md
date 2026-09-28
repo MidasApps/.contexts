@@ -27,7 +27,7 @@ Um harness completo tem oito camadas. Nem todo produto precisa de todas — a co
 
 ### 1. Prompt layer
 
-- System prompts versionados em git, nunca em string literal solta no código.
+- System prompts versionados — em git por default, ou em store com histórico de versões e rollback quando o produto exige edição em runtime (ver `@rules/governance`, "Governança de IA generativa"). Nunca em string literal solta no código.
 - Prompt templates com composição explícita: `instructions` + `context` + `examples` + `user_input`.
 - Few-shot examples gerenciados como dataset, não inline em prosa.
 - Separação clara de papéis: `system`, `user`, `assistant`, `tool` — sem misturar instruções do desenvolvedor dentro do turno do usuário.
@@ -35,7 +35,7 @@ Um harness completo tem oito camadas. Nem todo produto precisa de todas — a co
 
 ### 2. Context layer
 
-- Retrieval (RAG) via embeddings em vector store. No projeto: `pgvector` — ver `@stacks/database/pgvector` (pendente).
+- Retrieval (RAG) via embeddings em vector store. Default do framework: `pgvector` — ver `@stacks/database/pgvector`. Projeto que usar outro vector store registra em ADR.
 - Summarization de threads longas para caber na janela.
 - Context window management: truncation strategies, prioridade por recência e relevância, pruning de turnos antigos.
 - Memory tiers:
@@ -108,7 +108,7 @@ Tool gating:
 - Exponential backoff com jitter em retries.
 - Fallback model: Pro → Flash → cache → erro tipado.
 - Circuit breakers por provider.
-- Cost budgets por feature/user com kill-switch automático — ver `@rules/governance`.
+- Cost budgets por feature/user com kill-switch automático — ver `@rules/governance`, "Custo de IA e de consultas".
 - Audit log de mudanças de prompt, modelo e configuração.
 
 ## Princípios
@@ -148,7 +148,7 @@ Tools com `dry_run` flag. Mudanças destrutivas com confirmação. Audit log de 
 | Modelo (cross-provider) | Vercel AI SDK | `@stacks/ai/vercel-ai-sdk` |
 | Agents / workflows / memory / RAG / evals | Mastra | `@stacks/ai/mastra-sdk` |
 | Provider direto (features vendor-specific) | OpenAI / Gemini SDK | `@stacks/ai/openai`, `@stacks/ai/gemini`, `@stacks/ai/google-genai-sdk` |
-| Vector store | pgvector | `@stacks/database/pgvector` (pendente) |
+| Vector store | pgvector (default) | `@stacks/database/pgvector` |
 | Schemas (params + outputs) | Zod 4 | `@stacks/validation/zod@4` |
 | Observability | OpenTelemetry → Langfuse / Braintrust / SigNoz / Grafana | `@rules/observability` |
 | Tools cross-agent | MCP | — |
@@ -211,7 +211,7 @@ Overhead injustificado em produto early-stage gera fricção sem retorno. Cresç
 - `@stacks/ai/gemini` — features vendor-specific Gemini
 - `@stacks/ai/google-genai-sdk` — SDK oficial Google GenAI
 - `@stacks/validation/zod@4` — schemas de tools e outputs
-- `@stacks/database/pgvector` — vector store (pendente)
+- `@stacks/database/pgvector` — vector store (default)
 - `@rules/security` — PII, prompt injection, redaction
 - `@rules/observability` — spans `gen_ai.*`, redaction
 - `@rules/error-handling` — timeouts, retries, fallback

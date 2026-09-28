@@ -1,13 +1,42 @@
 ---
 title: Vercel AI SDK
-version: 4.x
-last_updated: 2026-07-13
-status: current
+version: 4.x (upstream: 7.x)
+last_updated: 2026-09-28
+status: needs-revision
 upstream: https://ai-sdk.dev
 repository: https://github.com/vercel/ai
 ---
 
 # Vercel AI SDK
+
+> ## ⚠️ Este documento descreve a linha 4.x. O upstream já está na 7.
+>
+> Observado em projeto DDC em produção (2026-08-13, `package.json` + `pnpm outdated`):
+> `ai@7.0.x`, `@ai-sdk/google-vertex@5.x`, `@ai-sdk/react@4.x` (a v7.0.0 saiu em
+> 25/06/2026). Um agente que seguir as seções abaixo literalmente escreve código
+> de **três majors** atrás.
+>
+> Diferenças que mais quebram:
+>
+> - Streaming de UI é *UI message stream* (`createUIMessageStream` /
+>   `createUIMessageStreamResponse` / `convertToModelMessages`), **não**
+>   `toDataStreamResponse()` da 4.x.
+> - v7: `system:` vira `instructions:`; `experimental_customProvider` removido
+>   (use `customProvider`); `tool()` reformula contexto
+>   (`experimental_context` → `context`); `needsApproval` → `toolApproval`
+>   como opção de **chamada**.
+> - A regra de alinhamento de major entre `ai` e `@ai-sdk/*` continua valendo,
+>   com outros números.
+>
+> **Guia de migração descreve o loop DAQUELE SDK.** Se as tools rodam dentro do
+> Mastra (`@stacks/ai/mastra-sdk`), é ele quem lê `needsApproval` — migrar para
+> `toolApproval` desliga o gate humano em silêncio. Confira quem dirige o loop
+> antes de aplicar qualquer item do guia.
+>
+> As seções de API abaixo **não foram reescritas**: convenção parcialmente
+> atualizada é mais perigosa que uma declaradamente vencida. Até a revisão
+> completa, trate-as como referência histórica e confirme na doc upstream da
+> versão instalada.
 
 Camada de abstração de IA do projeto. Padroniza chamadas a LLMs entre provedores, estrutura saídas via Zod, habilita tool use cross-provider e fornece hooks React para streaming de UI. É a **primitiva de baixo nível** em cima da qual orquestramos agents — para fluxos compostos (workflows, memory, eval, RAG) ver `@stacks/ai/mastra-sdk`, que usa o AI SDK por baixo.
 

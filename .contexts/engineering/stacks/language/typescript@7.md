@@ -1,7 +1,7 @@
 ---
 title: TypeScript
 version: 7.x
-last_updated: 2026-07-13
+last_updated: 2026-09-28
 status: current
 upstream: https://www.typescriptlang.org/docs/
 supersedes: typescript@6
@@ -40,6 +40,39 @@ TS 7 **ainda não expõe API programática estável** (prevista em 7.1+). Ferram
 - `typescript` (peer de eslint) → API 6 via `@typescript/typescript6` (binário `tsc6`).
 
 Projetos **sem** Vue/Svelte/MDX/Astro/Angular language plugins podem instalar só `typescript@^7`.
+
+**Com Next.js 16.3+, o alias acima quebra o build.** O Next 16.3 usa
+`experimental.useTypeScriptCli: true` por padrão e exige que o pacote `typescript`
+tenha `bin/tsc`; com o alias ele só tem `bin/tsc6`, e o `next build` falha com
+"do not have the required package(s) installed" (verificado em projeto DDC em
+2026-09-25). Nesse caso:
+
+- a raiz mantém `typescript@^7` (`tsc` e `next build` no 7);
+- só quem precisa da API 6 a recebe, via hook `readPackage` em `.pnpmfile.cjs`,
+  trocando o peer `typescript` por dependência de
+  `npm:@typescript/typescript6@<pin exato>` nos pacotes `@typescript-eslint/*`,
+  `ts-api-utils` e `typescript-paths` (este último puxado pela CLI do Mastra via
+  `@mastra/deployer`; recebendo TS 7 falha com
+  `Cannot read properties of undefined (reading 'getCurrentDirectory')`);
+- codemods/scripts que precisem do parser ou `LanguageService` usam
+  `@typescript/typescript6` como devDependency direta — nunca em código de produção.
+
+```js
+// .pnpmfile.cjs
+const NEEDS_TS6_API = new Set(["@typescript-eslint/parser", "@typescript-eslint/typescript-estree", "ts-api-utils", "typescript-paths" /* … */]);
+const TS6_API = "npm:@typescript/typescript6@6.0.2";
+function readPackage(pkg) {
+  if (NEEDS_TS6_API.has(pkg.name) && pkg.peerDependencies?.typescript) {
+    delete pkg.peerDependencies.typescript;
+    pkg.dependencies = { ...pkg.dependencies, typescript: TS6_API };
+  }
+  return pkg;
+}
+module.exports = { hooks: { readPackage } };
+```
+
+Reavaliar quando o typescript-eslint aceitar TS 7 ou o TS 7.1 expuser a API.
+Ao migrar: `baseUrl` foi removido (TS5102) — seguro quando as `paths` já são relativas.
 
 ## O que mudou vs TypeScript 6
 

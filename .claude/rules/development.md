@@ -23,6 +23,7 @@ Convenções de desenvolvimento em código TS/TSX: strictness, estilo async, imp
 - [ ] `export default` só em arquivos onde framework exige.
 - [ ] Tipos públicos exportados com nome estável.
 - [ ] Sem `// @ts-ignore` (use `expect-error` justificado).
+- [ ] Identificadores em inglês; nomes de dado do contrato sem tradução (ver "Idioma dos identificadores" no `.contexts`).
 
 ## Anti-patterns
 - `as any` para silenciar erro → corrigir o tipo.

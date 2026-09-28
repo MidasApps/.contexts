@@ -2,7 +2,18 @@
 
 Índice dos contextos de engenharia do DDC Framework. Referenciados via `@<path-sem-extensão>`.
 
-**Última revisão de versões:** 2026-07-14.
+**Última revisão de versões:** 2026-09-28.
+
+> ⚠️ **A matriz abaixo é o baseline PRETENDIDO do framework, não o estado de um
+> projeto.** Cada projeto mede o instalado × upstream em `stacks/VERSIONS.md`
+> (levantado por `pnpm outdated` + `npm view <pkg> time --json`, **nunca de
+> memória** — um modelo com corte de conhecimento acha que a versão dele é a
+> última), com o motivo de cada pacote que ficou para trás. Antes de citar uma
+> linha desta matriz como fato de um projeto, confira lá.
+>
+> Docs de stack em `status: needs-revision` (upstream andou majors):
+> `vercel-ai-sdk` (4.x → 7.x), `mastra-sdk` (0.x → 1.x), `gemini` (2.5 se
+> aposenta em 16/10/2026).
 
 **ADR da onda de baseline + harness:** [`decisions/0001-ddc-engineering-baseline-and-harness-enforcement.md`](decisions/0001-ddc-engineering-baseline-and-harness-enforcement.md) (accepted).
 
@@ -14,7 +25,7 @@ Stack pinado para ser **mutuamente compatível**. Não subir uma major isolada s
 |---|---|---|
 | Runtime | **Node.js 24 LTS** (Krypton, pin ~24.18) | Node 26 = Current — não produção até LTS. |
 | Linguagem | **TypeScript 7.x** | Side-by-side com TS 6 API se eslint/Volar exigir. |
-| Frontend app | **Next.js 16.2.x** (+ React **19.2.x**) | 16.3 Preview = Instant Navigations; adotar após stable. |
+| Frontend app | **Next.js 16.2.x** (+ React **19.2.x**) | 16.3 já em produção em projeto DDC (2026-08). Com TS 7, o alias TS 6 quebra `next build` 16.3 — ver `typescript@7`. |
 | UI | **Tailwind 4** + **shadcn/ui** + **Radix** | Tailwind 4 CSS-first; React 19 peers. |
 | Validação | **Zod 4.4.x** | Schema-first; `z.infer` único source de tipos. |
 | State client | **Zustand 5** | Só client components; server state fora. |
@@ -24,7 +35,7 @@ Stack pinado para ser **mutuamente compatível**. Não subir uma major isolada s
 | OLAP | **BigQuery** | Inalterado em major; ver stack. |
 | Unit/integration | **Vitest 4.x** | Vite ≥6; browser via `@vitest/browser-playwright`. |
 | E2E | **Playwright 1.61.x** | Node 22/24/26; helper Next `instant()` em 16.3. |
-| AI default | **Vercel AI SDK** (cross-provider) | SDKs oficiais quando feature exclusiva. |
+| AI default | **Vercel AI SDK** (cross-provider) | Upstream `ai@7` + `@mastra/core@1`; subir **Mastra antes do `ai`** (spec `LanguageModelV4`). SDKs oficiais quando feature exclusiva. |
 
 **Invariantes de compatibilidade:**
 
@@ -55,7 +66,7 @@ Stack pinado para ser **mutuamente compatível**. Não subir uma major isolada s
 - [caching](rules/caching.md) — Camadas, chaves determinísticas, stampede, HTTP headers
 - [observability](rules/observability.md) — Três pilares, OTel, RED/USE, SLI/SLO, LLM tokens
 - [internationalization](rules/internationalization.md) — Sem hard-code, ICU MessageFormat, Intl, RTL
-- [governance](rules/governance.md) — ADRs, ownership, gates, exceções, evals AI, compliance
+- [governance](rules/governance.md) — ADRs, ownership, gates, exceções, evals AI, custo (teto × aprovação), compliance
 - [accessibility](rules/accessibility.md) — WCAG 2.2 AA, semântica primeiro, ARIA como último recurso
 - [grounding](rules/grounding.md) — Anti-alucinação: verificar paths/símbolos/versões no repo
 
@@ -82,7 +93,7 @@ Stack pinado para ser **mutuamente compatível**. Não subir uma major isolada s
 - [node@24](stacks/runtime/node@24.md) — Node.js 24 LTS (Krypton), strip-types, Permission Model
 
 ### language/
-- [typescript@7](stacks/language/typescript@7.md) — TS 7 nativo (Go), strict + `erasableSyntaxOnly`, side-by-side com TS 6 API
+- [typescript@7](stacks/language/typescript@7.md) — TS 7 nativo (Go), strict + `erasableSyntaxOnly`, side-by-side com TS 6 API (`.pnpmfile.cjs` com Next 16.3)
 
 ### frontend/
 - [next@16](stacks/frontend/next@16.md) — Next.js 16.2 LTS / 16.3 preview (Instant Navigations), App Router, Turbopack
@@ -98,13 +109,13 @@ Stack pinado para ser **mutuamente compatível**. Não subir uma major isolada s
 - [zustand@5](stacks/state/zustand@5.md) — Zustand 5, `useSyncExternalStore`, per-request stores
 
 ### ai/
-- [vercel-ai-sdk](stacks/ai/vercel-ai-sdk.md) — Camada cross-provider (Core + UI hooks)
-- [mastra-sdk](stacks/ai/mastra-sdk.md) — Framework agents/workflows/RAG/evals
+- [vercel-ai-sdk](stacks/ai/vercel-ai-sdk.md) — Camada cross-provider (Core + UI hooks) · ⚠️ needs-revision (doc 4.x, upstream 7.x)
+- [mastra-sdk](stacks/ai/mastra-sdk.md) — Framework agents/workflows/RAG/evals · ⚠️ needs-revision (doc 0.x, upstream 1.x)
 - [openai](stacks/ai/openai.md) — OpenAI API (Responses, reasoning, Realtime, Batch)
 - [openai-sdk](stacks/ai/openai-sdk.md) — SDK `openai` (Node) — streaming, Realtime, Batch
 - [anthropic](stacks/ai/anthropic.md) — Claude API (prompt caching, computer use, extended thinking)
 - [anthropic-sdk](stacks/ai/anthropic-sdk.md) — SDK `@anthropic-ai/sdk` (direct/Bedrock/Vertex)
-- [gemini](stacks/ai/gemini.md) — Gemini API (AI Studio vs Vertex, multimodal, context caching)
+- [gemini](stacks/ai/gemini.md) — Gemini API (AI Studio vs Vertex, multimodal, context caching) · ⚠️ 2.5 aposenta 16/10/2026; geração 3 só em `global`
 - [google-genai-sdk](stacks/ai/google-genai-sdk.md) — SDK `@google/genai` unificado
 - [harness-engineering](stacks/ai/harness-engineering.md) — 8 camadas ao redor do LLM
 
@@ -124,7 +135,7 @@ Stack pinado para ser **mutuamente compatível**. Não subir uma major isolada s
 ## Contracts — 8 doutrinas de modelagem
 
 - [api](contracts/api.md) — Naming kebab/camel, envelopes RFC 9457, status codes, paginação cursor
-- [firebase-firestore](contracts/firebase-firestore.md) — Coleções, audit fields, soft-delete, tenant isolation
+- [firebase-firestore](contracts/firebase-firestore.md) — Coleções, audit fields, soft-delete, tenant isolation (default `tenantId`; modelo por conjunto → `rules/tenancy.md` do projeto)
 - [bigquery](contracts/bigquery.md) — Star schema, STRUCT/ARRAY, partitioning, policy tags
 - [postgres](contracts/postgres.md) — snake_case, **uuidv7() PKs** (default), audit+soft-delete, TIMESTAMPTZ, outbox
 - [pgvector](contracts/pgvector.md) — Schema `ai`, `chunks_v1`, PKs uuidv7, versionamento de embeddings

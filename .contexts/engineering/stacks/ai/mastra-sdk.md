@@ -1,8 +1,8 @@
 ---
 title: Mastra
-version: latest-stable
-last_updated: 2026-07-13
-status: current
+version: 0.x (upstream: 1.x)
+last_updated: 2026-09-28
+status: needs-revision
 upstream:
   docs: https://mastra.ai/docs
   repo: https://github.com/mastra-ai/mastra
@@ -10,6 +10,28 @@ category: ai
 ---
 
 # Mastra
+
+> ## ⚠️ Este documento descreve a linha 0.x. O upstream é `@mastra/core@1`.
+>
+> Os blocos de instalação abaixo pedem `^0.x` — copiar de lá instala a major
+> errada. Observado em projeto DDC em produção (2026-08-13): `@mastra/core@1.58`,
+> CLI `mastra@1.24`.
+>
+> **O Mastra não depende do `ai`.** O único peer é `zod ^3.25 || ^4`: ele recebe
+> o objeto de modelo pronto, e o que importa é a *spec version* do modelo
+> (`LanguageModelV3` = AI SDK v6, `V4` = v7). Um core publicado antes do
+> `ai@7` não conhece `LanguageModelV4`. **Ordem de upgrade: Mastra primeiro,
+> AI SDK depois**, e valide com smoke real contra o provider.
+>
+> **CLI e core andam juntos.** Ranges `^` no CLI podem resolver
+> `@mastra/deployer`/`@mastra/loggers` de um trem mais novo que o core
+> instalado (símbolos inexistentes em runtime). Fixe `mastra` exato e trave
+> `mastra>@mastra/deployer` / `mastra>@mastra/loggers` via `pnpm.overrides` no
+> trem do core; subir o core = subir os três. Sob TS 7, ver
+> `@stacks/language/typescript@7` (o `typescript-paths` do deployer exige API 6).
+>
+> As seções de API abaixo **não foram reescritas** — trate-as como referência
+> histórica e confirme na doc da versão instalada.
 
 Framework TypeScript open-source, opinativo, para construção de **AI agents**, **workflows tipados**, **RAG** e **evals**. Construído pela equipe ex-Gatsby, posiciona-se como camada de orquestração acima do **Vercel AI SDK** (ver `@stacks/ai/vercel-ai-sdk`), adicionando memória persistente, multi-step workflows com snapshot/resume, vetorização nativa e observabilidade OpenTelemetry embutida.
 

@@ -117,10 +117,22 @@ Antes de adicionar dependência nova, **sempre** avalie e registre no PR:
 - **Nunca** faça deploy de mudança em prompt de produção fora de janela em que o owner de IA esteja disponível para reverter.
 - **Sempre** mantenha **human-in-the-loop** em decisões de IA com impacto financeiro, jurídico, médico ou irreversível. Autonomia total é proibida nessas classes.
 - **Sempre** marque conteúdo gerado por IA com identificador visível ao usuário final quando o conteúdo for público ou compartilhável.
-- **Sempre** versione prompts como código. Prompt em string solta no meio de feature é dívida — extraia para módulo dedicado e versione.
+- **Sempre** versione prompts. Default: como código, em git. Prompt em string solta no meio de feature é dívida — extraia para módulo dedicado e versione.
+- **Exceção permitida por ADR:** quando o produto exige prompt editável em runtime (ex.: admin na UI), o store (DB) pode ser a fonte canônica, com código como seed/fallback. A exigência de rastreabilidade continua: **toda escrita cria nova versão** (sem `set(merge)` que sobrescreve a anterior), com autor, timestamp e rollback funcional. Sem histórico, `@processes/rollback` não tem para onde voltar.
 - **Nunca** confie em saída de LLM como autoridade para decisão de segurança, autorização ou validação de input. LLM informa, não autoriza.
 - **Sempre** documente vieses conhecidos do modelo e mitigações aplicadas para casos de uso que envolvam pessoas (avaliação, ranking, moderação).
 - **Sempre** mantenha kill-switch funcional por feature de IA. Feature de IA sem kill-switch não vai para produção.
+
+---
+
+## Custo de IA e de consultas
+
+- **Sempre** separe dois mecanismos que não se substituem: **gate de cobrança** (teto duro na chamada, ex. `maximumBytesBilled` no BigQuery, orçamento de tokens por request no LLM — o provedor recusa antes de faturar) e **gate de aprovação** (estimativa/dry-run + confirmação humana antes de submeter). Um limita o prejuízo máximo; o outro dá visibilidade antes do gasto. Nunca consolide os dois.
+- **Sempre** mantenha o limiar de aprovação **abaixo** do teto (derive-o do teto, ex. metade). Com os dois iguais, todo job que pede aprovação é recusado depois de aprovado. Aprovação nunca eleva o teto; estimativa acima do teto é recusada sem pedir aprovação.
+- **Sempre** passe o teto em **todo** caminho que executa query faturada — especialmente SQL gerado ou persistido a partir de LLM. Filtro de palavra-chave impede escrita, não impede varrer a tabela inteira. Deixe o teto explícito na chamada (não escondido em `...opts`) e trave com teste estático que varre as chamadas.
+- **Sempre** leia tetos de **fonte única** (um helper). Número copiado em vários arquivos diverge.
+- **Nunca** deixe configuração inválida (env ausente, zero, negativa, não numérica) virar "sem teto": caia no default seguro.
+- **Sempre** documente os tetos vigentes numa tabela única do projeto (ex. `rules/cost.md`) com owner e data.
 
 ---
 
