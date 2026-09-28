@@ -37,7 +37,7 @@ Types alinhados com Conventional Commits (ver `@processes/commits`):
 **Válido:**
 - `feat/order-checkout`
 - `fix/auth-redirect-loop`
-- `chore/upgrade-next-15`
+- `chore/upgrade-next-16`
 - `refactor/extract-payment-gateway`
 
 **Inválido:**

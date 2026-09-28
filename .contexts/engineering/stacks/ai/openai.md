@@ -3,7 +3,7 @@ title: OpenAI API
 category: ai
 kind: product-protocol
 status: current
-last_updated: 2026-05-21
+last_updated: 2026-09-28
 upstream: https://platform.openai.com/docs
 ---
 
@@ -73,27 +73,19 @@ Suporta SFT, DPO e reinforcement fine-tuning conforme modelo base. Resulta em mo
 
 ---
 
-## Modelos (snapshot 2025)
+## Modelos (ficha de 2026-09-28)
 
-### Reasoning
+O id de produção fica na config. Esta tabela é o default para código novo, lida em https://developers.openai.com/api/docs/models e na página de preço nessa data. O SDK é `openai@7.23.0`.
 
-`o1`, `o1-mini`, `o3`, `o3-mini`, `o4-mini`. Aceitam `reasoning_effort: "low" | "medium" | "high"` (e `"minimal"` em alguns). Geram **reasoning tokens** invisíveis cobrados em `completion_tokens_details.reasoning_tokens`. Sempre setar `max_completion_tokens` generoso — modelos reasoning podem consumir milhares de tokens "pensando" antes de produzir um único token visível.
+| Papel | Model id |
+|---|---|
+| Trabalho difícil | `gpt-6-astra` |
+| Dia a dia | `gpt-6-sol` |
+| Volume | `gpt-6-luna` |
+| Imagem | `gpt-image-2.5-sunburst` (edição) ou `gpt-image-2.5-flare` (geração rápida) |
+| Voz em tempo real | `gpt-realtime-2.1` |
 
-### Chat / General-purpose
-
-`gpt-4o`, `gpt-4o-mini`, `gpt-4.1`, `gpt-4.1-mini`, `gpt-4.1-nano`. `gpt-5` quando estabilizar — verificar disponibilidade antes de adotar em produção.
-
-### Image
-
-`gpt-image-1` (recomendado), `dall-e-3` (legacy mas estável).
-
-### Audio
-
-`gpt-4o-mini-tts`, `gpt-4o-transcribe`, `gpt-4o-mini-transcribe`, `whisper-1`.
-
-### Embeddings
-
-`text-embedding-3-small`, `text-embedding-3-large`.
+`gpt-4o`, `gpt-5` e `dall-e-3` não são default. Reasoning tokens continuam cobrados à parte. Defina teto de saída. Não use alias `latest` em produção.
 
 ### Moderation
 

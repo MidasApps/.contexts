@@ -1,7 +1,7 @@
 ---
 title: Tailwind CSS
-version: 4.x
-last_updated: 2026-05-21
+version: 4.3.3
+last_updated: 2026-09-28
 status: current
 upstream: https://tailwindcss.com/docs
 release_notes: https://tailwindcss.com/blog/tailwindcss-v4
@@ -19,18 +19,18 @@ Tailwind 4 é uma reescrita completa: novo engine (Oxide, em Rust), configuraç�
 
 ## Versão e ciclo de vida
 
-- **Linha:** Tailwind CSS 4.x.
+- **Linha:** Tailwind CSS **4.3.3**.
 - **Status:** estável, padrão para todo CSS do projeto. Tailwind 3.x está congelado para código novo; remanescentes legados migram em janelas dedicadas.
 - **Engine:** Oxide (Rust). Builds incrementais em milissegundos; full build em frações de segundo mesmo em apps grandes.
 - **Browser baseline:** Safari 16.4+, Chrome 111+, Firefox 128+. Depende de `@property`, `color-mix()`, cascade layers nativas, container queries. Não suporta browsers anteriores — se o público alvo exige IE/Safari antigo, **não usar Tailwind 4**.
-- **Plugin canônico:** `@tailwindcss/postcss` no PostCSS de Next 15. CLI standalone (`@tailwindcss/cli`) e Vite plugin existem, mas o projeto consome via PostCSS.
+- **Plugin canônico:** `@tailwindcss/postcss` no PostCSS de Next 16. CLI standalone (`@tailwindcss/cli`) e Vite plugin existem, mas o projeto consome via PostCSS.
 - **Versão pinada:** `package.json` declara `tailwindcss` e `@tailwindcss/postcss` em versão exata, atualizados em conjunto.
 
 ```json
 {
   "devDependencies": {
-    "tailwindcss": "4.0.6",
-    "@tailwindcss/postcss": "4.0.6",
+    "tailwindcss": "4.3.3",
+    "@tailwindcss/postcss": "4.3.3",
     "prettier-plugin-tailwindcss": "0.6.x"
   }
 }

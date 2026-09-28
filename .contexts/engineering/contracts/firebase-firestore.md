@@ -3,7 +3,7 @@ title: Convenções de Modelagem — Firebase Firestore
 type: contracts
 scope: firestore
 status: active
-last_updated: 2026-05-20
+last_updated: 2026-09-28
 ---
 
 # Convenções de Modelagem — Firebase Firestore
@@ -123,7 +123,7 @@ Queries de leitura DEVEM filtrar `deletedAt == null` (encapsule no converter ou 
 
 ```
 userId: "01HM8K..."        // correto
-organizationId: "org_abc"  // correto
+organizationId: "01HZX8K2M4VN3P5Q7R9S2T4W6Y"  // ULID opaco, sem prefixo
 ```
 
 **Nunca** armazene `DocumentReference`:
@@ -148,9 +148,9 @@ Toda coleção top-level multi-tenant DEVE conter `tenantId` (ou `organizationId
 
 ```
 audit-logs/{logId}
-  tenantId: "org_abc"
+  tenantId: "01HZX8K2M4VN3P5Q7R9S2T4W6Y"
   actorUid: "..."
-  action:   "USER_INVITED"
+  action:   "user_invited"
   ...
 ```
 
@@ -255,11 +255,11 @@ Toda query carrega o array **inteiro**. Se você precisa paginar, filtrar ou ord
 
 ## 14. Enums
 
-Strings em **SCREAMING_SNAKE_CASE**:
+Strings em **lowercase snake_case**, o mesmo literal do JSON e da união TypeScript (`@rules/data-modeling`):
 
 ```
-status: "ACTIVE" | "PENDING" | "SUSPENDED" | "DELETED"
-role:   "OWNER" | "ADMIN" | "MEMBER" | "VIEWER"
+status: "active" | "pending" | "suspended" | "deleted"
+role:   "owner" | "admin" | "member" | "viewer"
 ```
 
 ### Evolução
@@ -272,10 +272,10 @@ role:   "OWNER" | "ADMIN" | "MEMBER" | "VIEWER"
 
 ## 15. Money
 
-Valores monetários DEVEM ser armazenados como **inteiro de centavos** (ou menor subunidade da moeda):
+Valores monetários DEVEM ser armazenados como **inteiro na menor unidade da moeda**:
 
 ```
-amountCents: 12345        // R$ 123,45
+amountMinor: 12345        // R$ 123,45
 currency:    "BRL"        // ISO 4217
 ```
 
@@ -397,9 +397,9 @@ Para eventos de domínio que cruzam bounded contexts, use **Pub/Sub explícito**
 | `createdAt` como string ISO | `Timestamp` UTC via `serverTimestamp()` |
 | Composite index não declarado | `firestore.indexes.json` versionado |
 | Firestore listener como event bus cross-context | Pub/Sub com contract (`@contracts/events`) |
-| Money como float decimal | `amountCents: number` + `currency: "BRL"` |
+| Money como float decimal | `amountMinor: number` + `currency: "BRL"` |
 | Singular ou camelCase em nome de coleção | kebab-case plural |
-| Enum em camelCase ou rename de valor existente | SCREAMING_SNAKE_CASE + evolução aditiva |
+| Enum em SCREAMING_SNAKE ou rename de valor existente | lowercase snake_case + evolução aditiva |
 
 ---
 

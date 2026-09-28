@@ -43,7 +43,7 @@ docs/plans/YYYY-MM-DD-<feature-kebab>.md
 
 ## Global Constraints
 
-- Node 24 / TypeScript 7 / Next 16.2 / React 19.2 / Zod 4.4 (ver `@.contexts/engineering/MEMORY.md`)
+- Node 24.21 / TypeScript 7.0.2 / Next 16.3.6 / React 19.3 / Zod 4.6.5 / Vitest 5.0.2 (ver `@.contexts/engineering/MEMORY.md`)
 - [contratos e rules que amarram o plano — paths @.contexts exatos]
 - [compliance / multi-tenant / region se aplicável]
 

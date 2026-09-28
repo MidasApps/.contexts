@@ -1,11 +1,12 @@
 ---
 title: Radix UI
+version: 1.6.7
 category: frontend
 packages:
   - "@radix-ui/react-* (SemVer individual por pacote)"
   - "radix-ui (meta-package, opcional)"
   - "@radix-ui/colors (opcional)"
-last_updated: 2026-07-13
+last_updated: 2026-09-28
 status: current
 upstream:
   - https://www.radix-ui.com/primitives
@@ -87,7 +88,7 @@ import * as Dialog from "@radix-ui/react-dialog";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 ```
 
-Existe um meta-package `radix-ui` consolidando todos, mas:
+O meta-package `radix-ui` está em **1.6.7** e `@radix-ui/react-slot` em **1.3.3** (2026-09-28). Ele consolida os primitivos, mas:
 
 **Convenção do projeto:** importar **dos pacotes individuais** (`@radix-ui/react-*`), nunca do meta-package.
 

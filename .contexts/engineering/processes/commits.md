@@ -2,7 +2,7 @@
 title: Convenções de Commit
 type: process
 status: active
-last_updated: 2026-05-20
+last_updated: 2026-09-28
 standard: Conventional Commits 1.0.0
 ---
 
@@ -137,14 +137,15 @@ Fixes: #482
 ```
 
 ```
-refactor(billing)!: rename amount to amount_cents
+refactor(billing)!: rename amount to amount_minor
 
-BREAKING CHANGE: todos os campos monetários agora são inteiros em
-centavos. Consumidores devem dividir por 100 ao exibir.
+BREAKING CHANGE: campos monetários agora são inteiros na menor
+unidade da moeda (`amount_minor`). A UI formata com o expoente
+da currency.
 ```
 
 ```
-chore(deps): bump next from 14.2.0 to 15.0.0
+chore(deps): bump next from 16.3.5 to 16.3.6
 ```
 
 ```

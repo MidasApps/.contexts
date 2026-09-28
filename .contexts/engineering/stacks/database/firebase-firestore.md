@@ -3,9 +3,9 @@ title: Firebase Firestore
 category: backend
 edition: Native
 sdks:
-  client: firebase ^11
-  admin: firebase-admin ^12
-last_updated: 2026-07-13
+  client: firebase 12.19.0
+  admin: firebase-admin 14.5.0
+last_updated: 2026-09-28
 status: current
 upstream:
   - https://firebase.google.com/docs/firestore
@@ -22,14 +22,14 @@ Este projeto usa **Firestore Native** (não Datastore mode). Native é a única 
 
 ## SDKs
 
-### Client SDK (`firebase` v11)
+### Client SDK (`firebase` 12.19.0)
 
 - Usado em browsers e mobile/web.
 - Respeita Security Rules — **fronteira de segurança real** quando o cliente toca Firestore diretamente.
 - Suporta listeners em tempo real (`onSnapshot`) e offline persistence.
 - Modular tree-shakeable (`import { getFirestore, collection, query, where } from 'firebase/firestore'`).
 
-### Admin SDK (`firebase-admin` v12+)
+### Admin SDK (`firebase-admin` 14.5)
 
 - Usado em servidores: Firebase Functions, Next.js Route Handlers / Server Components.
 - **Bypassa Security Rules** — toda autorização e validação fica em código de aplicação (veja `@rules/security` e `@rules/validation`).

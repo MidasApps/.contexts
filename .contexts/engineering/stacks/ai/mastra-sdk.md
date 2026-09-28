@@ -1,8 +1,8 @@
 ---
 title: Mastra
-version: 0.x (upstream: 1.x)
+version: "@mastra/core@1.71.0 / mastra@1.31.3"
 last_updated: 2026-09-28
-status: needs-revision
+status: current
 upstream:
   docs: https://mastra.ai/docs
   repo: https://github.com/mastra-ai/mastra
@@ -11,29 +11,9 @@ category: ai
 
 # Mastra
 
-> ## ⚠️ Este documento descreve a linha 0.x. O upstream é `@mastra/core@1`.
->
-> Os blocos de instalação abaixo pedem `^0.x` — copiar de lá instala a major
-> errada. Observado em projeto DDC em produção (2026-08-13): `@mastra/core@1.58`,
-> CLI `mastra@1.24`.
->
-> **O Mastra não depende do `ai`.** O único peer é `zod ^3.25 || ^4`: ele recebe
-> o objeto de modelo pronto, e o que importa é a *spec version* do modelo
-> (`LanguageModelV3` = AI SDK v6, `V4` = v7). Um core publicado antes do
-> `ai@7` não conhece `LanguageModelV4`. **Ordem de upgrade: Mastra primeiro,
-> AI SDK depois**, e valide com smoke real contra o provider.
->
-> **CLI e core andam juntos.** Ranges `^` no CLI podem resolver
-> `@mastra/deployer`/`@mastra/loggers` de um trem mais novo que o core
-> instalado (símbolos inexistentes em runtime). Fixe `mastra` exato e trave
-> `mastra>@mastra/deployer` / `mastra>@mastra/loggers` via `pnpm.overrides` no
-> trem do core; subir o core = subir os três. Sob TS 7, ver
-> `@stacks/language/typescript@7` (o `typescript-paths` do deployer exige API 6).
->
-> As seções de API abaixo **não foram reescritas** — trate-as como referência
-> histórica e confirme na doc da versão instalada.
+Framework TypeScript para **AI agents**, **workflows tipados**, **RAG** e **evals**. Fica acima do AI SDK 7 (ver `@stacks/ai/vercel-ai-sdk`): o core recebe o modelo pronto e detecta a spec (`LanguageModelV4` é AI SDK 7, desde `@mastra/core@1.47.0`).
 
-Framework TypeScript open-source, opinativo, para construção de **AI agents**, **workflows tipados**, **RAG** e **evals**. Construído pela equipe ex-Gatsby, posiciona-se como camada de orquestração acima do **Vercel AI SDK** (ver `@stacks/ai/vercel-ai-sdk`), adicionando memória persistente, multi-step workflows com snapshot/resume, vetorização nativa e observabilidade OpenTelemetry embutida.
+Pins de 2026-09-28: `@mastra/core@1.71.0`, CLI `mastra@1.31.3`. O peer de Zod é `^3.25 || ^4`; o projeto usa só Zod 4.6.5. Fixe core e CLI na mesma leva. Se o CLI puxar `@mastra/deployer` ou `@mastra/loggers` de um trem diferente do core, trave com `pnpm.overrides`. Sob TypeScript 7, o deployer que ainda importa a API programática precisa do pacote TS 6 ao lado (`@stacks/language/typescript@7`).
 
 Mastra **não substitui** o AI SDK — usa AI SDK Core como primitiva de modelo. A escolha entre os dois é arquitetural, não competitiva (ver seção "Mastra vs Vercel AI SDK puro").
 
@@ -44,19 +24,24 @@ Pin sempre a versão exata em `package.json`. Mastra ainda evolui rapidamente; m
 ```json
 {
   "dependencies": {
-    "@mastra/core": "^0.x",
-    "@mastra/memory": "^0.x",
-    "@mastra/rag": "^0.x",
-    "@mastra/evals": "^0.x",
-    "@mastra/mcp": "^0.x"
+    "@mastra/core": "1.71.0",
+    "@mastra/memory": "1.32.1",
+    "@mastra/rag": "2.6.4",
+    "@mastra/mcp": "2.1.0",
+    "@mastra/pg": "1.27.1",
+    "@mastra/ai-sdk": "1.10.5"
   },
   "devDependencies": {
-    "mastra": "^0.x"
+    "mastra": "1.31.3"
   }
 }
 ```
 
 Toda interface pública de Mastra usa **Zod** (ver `@stacks/validation/zod@4`) — schemas Zod são o contrato de fronteira para tools, inputs e outputs.
+
+As majors não andam juntas: `rag` e `mcp` estão na 2.x com peer `@mastra/core >=1 <2`. Não force tudo para a major do core.
+
+`@mastra/evals@1.10.3` declara peer `vitest >=3 <5`. O runner do projeto é Vitest 5.0.2, então esse pacote **não entra** no install até o peer aceitar a 5. Métrica de eval do Mastra, quando voltar a ser instalável, continua sendo sinal estatístico, não substituto de teste.
 
 ## Componentes principais
 
@@ -71,7 +56,7 @@ import { openai } from '@ai-sdk/openai';
 export const supportAgent = new Agent({
   name: 'support-agent',
   instructions: 'Você responde dúvidas de suporte usando a base de conhecimento.',
-  model: openai('gpt-4o'),
+  model: openai(config.openaiModelId),
   tools: { searchKnowledge, createTicket },
   memory,
 });
@@ -92,7 +77,7 @@ import { z } from 'zod';
 
 const extractStep = createStep({
   id: 'extract',
-  inputSchema: z.object({ url: z.string().url() }),
+  inputSchema: z.object({ url: z.url() }),
   outputSchema: z.object({ text: z.string() }),
   execute: async ({ inputData }) => { /* ... */ },
 });
@@ -170,6 +155,8 @@ Vector stores suportados: **pgvector** (preferido aqui), Pinecone, Qdrant, Chrom
 
 ### Evals
 
+`@mastra/evals@1.10.3` não instala ao lado de Vitest 5 (peer `<5`). Até o peer abrir, eval de LLM fica fora do `package.json`. Quando voltar, as métricas abaixo são sinal estatístico, não teste.
+
 Métricas built-in para qualidade de output de LLM. Roda em CI ou no Mastra Dev playground.
 
 Métricas nativas: `faithfulness`, `answer-relevance`, `context-relevance`, `toxicity`, `bias`, `hallucination`, `summarization`, `prompt-alignment`, `tone-consistency`, `completeness`. Use `createEval()` para métricas custom (LLM-as-judge ou determinísticas).
@@ -220,8 +207,8 @@ Decisão arquitetural por caso de uso:
 | Agent com tools e memória entre sessões | **Mastra** |
 | Workflow multi-step com observabilidade e retries | **Mastra** |
 | RAG estruturado com chunking + retrieval + reranking | **Mastra** |
-| Evals em CI | **Mastra** |
-| Ingestão batch sem LLM-driven decisions | AI SDK puro (`embedMany`) |
+| Evals em CI | adiar `@mastra/evals` até o peer aceitar Vitest 5 |
+| Ingestão batch sem decisão dirigida pelo LLM | AI SDK puro (`embedMany`) |
 
 Mastra **usa** AI SDK por baixo (`model: openai(...)`, `model: google(...)`) — providers do AI SDK funcionam transparentemente. Ver `@stacks/ai/openai` e `@stacks/ai/gemini` para configuração de providers.
 
@@ -231,19 +218,7 @@ Mastra **usa** AI SDK por baixo (`model: openai(...)`, `model: google(...)`) —
 
 Em Route Handlers App Router (ver `@stacks/frontend/next@16`):
 
-```ts
-// app/api/chat/route.ts
-import { mastra } from '@/mastra';
-
-export async function POST(req: Request) {
-  const { messages, threadId, resourceId } = await req.json();
-  const agent = mastra.getAgent('supportAgent');
-  const stream = await agent.stream(messages, { threadId, resourceId });
-  return stream.toDataStreamResponse();
-}
-```
-
-Cliente consome via `useChat` do AI SDK UI normalmente — o stream é compatível.
+O handler usa `@mastra/ai-sdk@1.10.5` para adaptar `agent.stream(...)` ao UI message stream do AI SDK 7 (`createUIMessageStreamResponse`). Não chame `toDataStreamResponse`: isso é da linha 4 do `ai`. A assinatura do helper está na doc do pacote instalado. O cliente usa `useChat` de `@ai-sdk/react@4`.
 
 ### Postgres / pgvector
 
@@ -271,7 +246,7 @@ Ver `@rules/error-handling`. Tools devem lançar erros tipados — Mastra captur
 
 ## Anti-patterns
 
-- **Usar Mastra para single completion** — overhead de agent loop, memory, telemetria. Use `generateText`/`generateObject` do AI SDK puro.
+- **Usar Mastra para single completion** — overhead de agent loop, memory, telemetria. Use `generateText` do AI SDK 7 (`Output.object` quando a saída é estruturada).
 - **Agent sem `instructions` claros** — system prompt vago produz tool selection errática. Escreva instructions com persona, escopo e regras de invocação de tools.
 - **Tools sem schema Zod completo** — LLM alucina inputs se `inputSchema` for permissivo. Use `.strict()`, enums, `min`/`max`, `.describe()` em cada campo.
 - **Memory sem TTL/limite** — `lastMessages` sem cap explode o contexto e a fatura. Sempre defina `lastMessages` numérico e revise working memory periodicamente.

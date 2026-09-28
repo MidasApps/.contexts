@@ -49,7 +49,7 @@ O Pull Request é a unidade de proposta de mudança no repositório. Cada PR rep
 **Exemplos válidos:**
 - `feat(auth): add passkey enrollment endpoint`
 - `fix(billing): handle stripe webhook race on subscription cancel`
-- `chore(deps): bump zod to 3.23.8`
+- `chore(deps): bump zod from 4.6.4 to 4.6.5`
 
 **Inválidos:**
 - `WIP` — abrir como Draft em vez disso

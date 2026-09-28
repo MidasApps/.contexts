@@ -1,7 +1,7 @@
 ---
 title: Node.js
-version: 24.x (LTS)
-last_updated: 2026-07-13
+version: 24.21.0
+last_updated: 2026-09-28
 status: current
 upstream: https://nodejs.org/docs/latest-v24.x/api/
 supersedes: node@20
@@ -9,7 +9,7 @@ supersedes: node@20
 
 # Node.js 24 LTS
 
-Runtime JavaScript do projeto. Versão **24.x LTS** (codename **Krypton**), Active LTS desde out/2025. Pin de referência: **24.18.0** (jul/2026). Support schedule: deprecation prevista ~abr/2028, decommission ~out/2028. **Node 26** é Current (não LTS ainda) — não adotar em produção até virar LTS (previsto out/2026) e após um patch release estável. Node 20 está em EOL e não deve ser usado.
+Runtime JavaScript do projeto. Versão **24.21.0 LTS** (codename **Krypton**), medida em 2026-09-28. Active LTS desde out/2025; entra em Maintenance em 2026-10-20 e segue com correção de segurança até 2028-04-30. **Node 26.10** é Current e só vira LTS em 2026-10-28 — não adotar em produção antes disso, e só depois de um patch estável já em LTS. Node 20 está em EOL.
 
 > Single source of truth para qualquer ambiente que execute código JS/TS no projeto: Functions, scripts locais, CI, ferramentas de build, server runtime de Next.js. Versão é fixada em `.nvmrc`, `package.json#engines` e imagem base do Docker/CI.
 
@@ -116,7 +116,7 @@ API estável para loaders customizados, substituindo `--loader` (deprecado).
 
 ### V8 atualizado
 
-V8 12.x → ganhos de performance em parsing/codegen. `structuredClone` agora suporta mais tipos (Error, DOMException compat). Não há ação requerida — apenas vem de graça no upgrade.
+V8 13.6 (no 24.21.0) → ganhos de performance em parsing/codegen. `structuredClone` agora suporta mais tipos (Error, DOMException compat). Não há ação requerida — apenas vem de graça no upgrade.
 
 ### `Intl` atualizado
 

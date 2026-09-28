@@ -1,7 +1,7 @@
 ---
 title: PostgreSQL
-version: 18.x
-last_updated: 2026-07-13
+version: 18.6
+last_updated: 2026-09-28
 status: current
 upstream: https://www.postgresql.org/docs/18/
 ---
@@ -12,8 +12,8 @@ upstream: https://www.postgresql.org/docs/18/
 
 ## Versão alvo
 
-- **Pinned**: PostgreSQL **18.x** (atualizar minor versions de manutenção sem cerimônia).
-- **Postgres 19** está em beta (jun/2026) — **não** adotar em produção.
+- **Pinned**: PostgreSQL **18.6** (2026-08-13). O patch 18.5 não foi publicado. Atualizar o patch de manutenção da linha 18 sem cerimônia.
+- **Postgres 19** estava no beta 4 em 2026-09-24, sem GA. Não adotar. pgvector 0.8.6 publica imagem para `pg18`, não para 19.
 - **Não suportadas no projeto**: < 16. Bases em 16/17 devem planejar upgrade expand-migrate-contract para 18 (ver `@rules/migration`).
 
 ### Postgres 18 — o que importa
@@ -42,7 +42,7 @@ upstream: https://www.postgresql.org/docs/18/
 - `text` (não `varchar(n)` arbitrário).
 - `timestamptz` **sempre** (nunca `timestamp` sem timezone).
 - `uuid` para PKs (ver `@contracts/postgres`).
-- `numeric(p,s)` para money e quantias financeiras (nunca `float`/`double precision`).
+- `bigint` `amount_minor` para dinheiro. `numeric(p,s)` para taxa e quantidade fracionária. Nunca `float` / `double precision` (ver `@contracts/postgres`).
 - `boolean`, `inet`/`cidr`, `interval`, `daterange`/`tstzrange`.
 - `jsonb` (preferir sobre `json` — armazenamento binário, indexável).
 - Arrays nativos (`text[]`, `uuid[]`) quando semântica de conjunto pequeno e bounded.
@@ -349,7 +349,7 @@ Foco em tecnologia. Convenções de modelagem ficam em `@contracts/postgres`.
 - `varchar(n)` com `n` arbitrário em vez de `text`.
 - `timestamp` sem timezone — **sempre** `timestamptz`.
 - `serial`/`bigserial` como PK em entidades de domínio (use `uuid` ou ULID `text`).
-- `float`/`double precision` para money — use `numeric(p,s)`.
+- `float`/`double precision` para money — use `bigint` `amount_minor`. `numeric(p,s)` é para taxa e quantidade fracionária.
 - String concat em SQL (`sql.unsafe('... ' + userInput)`) — sempre parametrizado.
 - Connection per request sem pooler em serverless/edge.
 - `SELECT *` em hotspots — especifique colunas.

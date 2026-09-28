@@ -286,6 +286,7 @@ Artefatos que **implementam** esta decisão (não reabrir sem ADR superseding):
 
 Correções de conformidade que **não alteram** pins nem bootstrap — a decisão original permanece válida.
 
+- **2026-09-28 — matriz de versões:** os pins da tabela "Matriz de baseline aceita" (acima) foram substituídos pela ADR 0002. O texto histórico dessa tabela não foi reescrito. IDs, harness e a decisão de secrets desta ADR continuam valendo.
 - **2026-07-22 — auditoria de conformidade (pente fino):**
   - `guard-conventional-commit`: extração do subject corrigida para mensagens multi-linha (heredoc Bash `-m "$(cat <<'EOF'…)"` bloqueava commits válidos; here-string PowerShell `-m @'…'@` passava sem validação) e cobertura estendida à tool PowerShell em `settings.json` — a tabela de harness acima ("PreToolUse Bash") fica emendada para **Bash/PowerShell**. Regex também passou a aceitar `!` de breaking change (`feat!:` / `feat(scope)!:`), que a rule `commits` declara válido e o guard rejeitava.
   - `.contexts/business/` (6 arquivos) e `.contexts/product/` (5) criados como **boilerplate `status: template`** — os imports do CLAUDE.md e as skills business/product agora resolvem; nenhum conteúdo de negócio/produto foi inventado (preenchimento segue com os times).

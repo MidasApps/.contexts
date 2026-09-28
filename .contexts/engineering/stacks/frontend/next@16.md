@@ -1,7 +1,7 @@
 ---
 title: Next.js
-version: 16.x
-last_updated: 2026-07-13
+version: 16.3.6
+last_updated: 2026-09-28
 status: current
 upstream: https://nextjs.org/docs
 supersedes: next@15
@@ -11,19 +11,18 @@ supersedes: next@15
 
 Framework full-stack React baseado em App Router, com Server Components, Server Actions, streaming, Partial Prerendering estável e Turbopack como compilador padrão para dev e build. Esta é a versão de referência do projeto. A versão 15 está descontinuada — todo código novo segue Next 16.
 
-Requer **React 19.2+** (peer obrigatório — ver `@stacks/frontend/react@19`) e **Node 22+ ou 24** (ver `@stacks/runtime/node@24`). TypeScript **7** (`@stacks/language/typescript@7`). Baseline estável de produção: **Next 16.2.x**; **16.3** em preview (Instant Navigations).
+Requer **React 19.3** (peer `^19` — ver `@stacks/frontend/react@19`) e **Node 24** (ver `@stacks/runtime/node@24`). TypeScript **7.0.2** (`@stacks/language/typescript@7`). Baseline de produção: **Next 16.3.6** (Active LTS desde 2026-08-03). 16.4 é canary. O release de segurança **16.3.7** foi anunciado para 2026-09-30: subir no dia em que publicar.
 
 ---
 
-## Linha 16.2 / 16.3 (2026)
+## Linha 16.3 (2026)
 
-- **16.2.x (stable LTS)**: baseline de produção do projeto (ex.: 16.2.10).
-- **16.3 Preview**: **Instant Navigations** — navegações com feeling de SPA em app server-driven.
+- **16.3.6** é o piso de produção nesta data. Inclui Instant Navigations (GA, não preview) e os patches de segurança de agosto e de 22/09/2026.
+- Instant Navigations: navegações com feeling de SPA em app server-driven.
   - Exige `cacheComponents: true` em `next.config.ts`.
   - Rotas “instant” usam Stream (`<Suspense>`) ou Cache (`'use cache'`); opt-out com `export const instant = false`.
   - **Partial Prefetching** (`partialPrefetching: true`): prefetch de shell reutilizável por rota (não por link).
   - Helper de teste: `import { instant } from '@next/playwright'` com Playwright (`@stacks/testing/playwright`).
-  - Adotar 16.3 em produção só após stable; até lá, 16.2 + PPR/`use cache` conforme maturidade.
 
 ## O que mudou em relação a Next 15
 

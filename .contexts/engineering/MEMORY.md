@@ -4,18 +4,12 @@
 
 **Última revisão de versões:** 2026-09-28.
 
-> ⚠️ **A matriz abaixo é o baseline PRETENDIDO do framework, não o estado de um
-> projeto.** Cada projeto mede o instalado × upstream em `stacks/VERSIONS.md`
-> (levantado por `pnpm outdated` + `npm view <pkg> time --json`, **nunca de
-> memória** — um modelo com corte de conhecimento acha que a versão dele é a
-> última), com o motivo de cada pacote que ficou para trás. Antes de citar uma
-> linha desta matriz como fato de um projeto, confira lá.
->
-> Docs de stack em `status: needs-revision` (upstream andou majors):
-> `vercel-ai-sdk` (4.x → 7.x), `mastra-sdk` (0.x → 1.x), `gemini` (2.5 se
-> aposenta em 16/10/2026).
+> A matriz abaixo é o baseline do **framework**. O que estava no npm e nas
+> release notes nesse dia, e o que ficou de fora, está em
+> [`stacks/VERSIONS.md`](stacks/VERSIONS.md). Um projeto consumidor compara o
+> `package.json` dele com essa tabela antes de tratar a linha como fato local.
 
-**ADR da onda de baseline + harness:** [`decisions/0001-ddc-engineering-baseline-and-harness-enforcement.md`](decisions/0001-ddc-engineering-baseline-and-harness-enforcement.md) (accepted).
+**ADRs:** [0001](decisions/0001-ddc-engineering-baseline-and-harness-enforcement.md) (harness, IDs, secrets) e [0002](decisions/0002-baseline-2026-09-version-and-naming-alignment.md) (pins e nomes entre camadas).
 
 ## Matriz de compatibilidade (baseline de produção)
 
@@ -23,19 +17,19 @@ Stack pinado para ser **mutuamente compatível**. Não subir uma major isolada s
 
 | Camada | Baseline | Notas de compatibilidade |
 |---|---|---|
-| Runtime | **Node.js 24 LTS** (Krypton, pin ~24.18) | Node 26 = Current — não produção até LTS. |
-| Linguagem | **TypeScript 7.x** | Side-by-side com TS 6 API se eslint/Volar exigir. |
-| Frontend app | **Next.js 16.2.x** (+ React **19.2.x**) | 16.3 já em produção em projeto DDC (2026-08). Com TS 7, o alias TS 6 quebra `next build` 16.3 — ver `typescript@7`. |
-| UI | **Tailwind 4** + **shadcn/ui** + **Radix** | Tailwind 4 CSS-first; React 19 peers. |
-| Validação | **Zod 4.4.x** | Schema-first; `z.infer` único source de tipos. |
-| State client | **Zustand 5** | Só client components; server state fora. |
-| Backend serverless | **firebase-functions@7** + **Admin ≥13**, runtime **nodejs24** | Gen 2 only. |
-| OLTP | **PostgreSQL 18** + Drizzle | `uuidv7()` nativo; checksums default. |
-| Vectors | **pgvector 0.8.x** em Postgres 18 | HNSW default. |
+| Runtime | **Node.js 24.21.0** LTS (Krypton) | Node 26.10 é Current até LTS em 2026-10-28. 24 entra em Maintenance em 2026-10-20. |
+| Linguagem | **TypeScript 7.0.2** | `@typescript/typescript6@6.0.2` só para API programática (eslint, Volar, deployer). |
+| Frontend app | **Next.js 16.3.6** + React **19.3.0** | 16.3 é Active LTS. 16.4 é canary. 16.3.7 anunciado para 2026-09-30. |
+| UI | **Tailwind 4.3.3** + **shadcn/ui** + **radix-ui 1.6.7** | React 19.3. |
+| Validação | **Zod 4.6.5** | Schema-first; `z.infer` único source de tipos. Sem Zod 3 no bundle. |
+| State client | **Zustand 5.0.15** | Só client components; server state fora. |
+| Backend serverless | **firebase-functions@7.4.0** + **firebase-admin@14.5.0**, runtime **nodejs24** | Gen 2 only. |
+| OLTP | **PostgreSQL 18.6** + Drizzle 0.45.3 | `uuidv7()` nativo. 18.5 não foi publicado. Postgres 19 segue em beta. |
+| Vectors | **pgvector 0.8.6** em Postgres 18 | Imagem `pgvector/pgvector:0.8.6-pg18`. HNSW default. |
 | OLAP | **BigQuery** | Inalterado em major; ver stack. |
-| Unit/integration | **Vitest 4.x** | Vite ≥6; browser via `@vitest/browser-playwright`. |
-| E2E | **Playwright 1.61.x** | Node 22/24/26; helper Next `instant()` em 16.3. |
-| AI default | **Vercel AI SDK** (cross-provider) | Upstream `ai@7` + `@mastra/core@1`; subir **Mastra antes do `ai`** (spec `LanguageModelV4`). SDKs oficiais quando feature exclusiva. |
+| Unit/integration | **Vitest 5.0.2** | Vite ^6.4, ^7 ou ^8 como peer (medido: 8.3.1). Pacotes `@vitest/*` na mesma versão. |
+| E2E | **Playwright 1.63.0** | `@playwright/experimental-ct-react` ainda em 1.62.1. |
+| AI default | **`ai@7.0.120`** | Providers nas majors medidas em `VERSIONS.md` (não a mesma major do `ai`). `@mastra/core@1.71.0` aceita `LanguageModelV4`. |
 
 **Invariantes de compatibilidade:**
 
@@ -43,9 +37,9 @@ Stack pinado para ser **mutuamente compatível**. Não subir uma major isolada s
 2. Typecheck com **TS 7** (`tsc --noEmit`); emit de app via bundler (Next/Turbopack).
 3. Next 16 ↔ React 19 — peers obrigatórios; sem React 18.
 4. Zod 4 em **todas** as boundaries (não misturar Zod 3 no mesmo bundle).
-5. Postgres 18 + pgvector 0.8 no mesmo cluster; imagens de dev/CI `postgres:18` / `pgvector/pgvector:pg18`.
+5. Postgres 18.6 + pgvector 0.8.6 no mesmo cluster; imagens de dev/CI `postgres:18` / `pgvector/pgvector:0.8.6-pg18`.
 6. Firebase Functions Gen 2 em **nodejs24** com o mesmo `engines.node` do monorepo.
-7. Vitest 4 e Playwright 1.61 compartilham Playwright como browser engine quando browser mode está ativo.
+7. Vitest 5 e Playwright 1.63 compartilham o browser quando o browser mode está ativo. O pacote experimental de component testing do Playwright pode estar um patch atrás; não force a mesma versão se o npm não a publicou.
 
 ---
 
@@ -59,7 +53,7 @@ Stack pinado para ser **mutuamente compatível**. Não subir uma major isolada s
 - [code-review](rules/code-review.md) — Escopo de PR, checklists, severidade de comentários
 - [documentation](rules/documentation.md) — Quando documentar (WHY) e quando não, TSDoc, ADRs
 - [api-design](rules/api-design.md) — Recursos, HTTP, idempotência, versionamento, webhooks
-- [data-modeling](rules/data-modeling.md) — Identidade vs valor, ULIDs/UUIDv7, timestamps UTC, money como inteiro
+- [data-modeling](rules/data-modeling.md) — Nomes por camada, UUIDv7/ULID, timestamps UTC, `amountMinor` inteiro
 - [migration](rules/migration.md) — Expand-and-contract, CONCURRENTLY, dual-write, runbook
 - [state-management](rules/state-management.md) — Server vs client state, derivação, race conditions
 - [error-handling](rules/error-handling.md) — Taxonomia, Result vs throw, retry, boundaries
@@ -96,41 +90,41 @@ Stack pinado para ser **mutuamente compatível**. Não subir uma major isolada s
 - [typescript@7](stacks/language/typescript@7.md) — TS 7 nativo (Go), strict + `erasableSyntaxOnly`, side-by-side com TS 6 API (`.pnpmfile.cjs` com Next 16.3)
 
 ### frontend/
-- [next@16](stacks/frontend/next@16.md) — Next.js 16.2 LTS / 16.3 preview (Instant Navigations), App Router, Turbopack
-- [react@19](stacks/frontend/react@19.md) — React 19.2, Actions, `use`, ref como prop, React Compiler
+- [next@16](stacks/frontend/next@16.md) — Next.js 16.3.6 Active LTS, App Router, Turbopack, Instant Navigations
+- [react@19](stacks/frontend/react@19.md) — React 19.3, Actions, `use`, ref como prop, React Compiler
 - [tailwind@4](stacks/frontend/tailwind@4.md) — Tailwind 4, Oxide engine, CSS-first config
 - [shadcn-ui](stacks/frontend/shadcn-ui.md) — Copy-not-install sobre Radix + Tailwind 4 + cva
 - [radix-ui](stacks/frontend/radix-ui.md) — Primitives headless, `asChild`, data-attributes
 
 ### validation/
-- [zod@4](stacks/validation/zod@4.md) — Zod 4.4 com `z.iso`, `z.toJSONSchema`, performance 7–100x vs 3
+- [zod@4](stacks/validation/zod@4.md) — Zod 4.6 com `z.email`, `z.iso`, `z.toJSONSchema`
 
 ### state/
 - [zustand@5](stacks/state/zustand@5.md) — Zustand 5, `useSyncExternalStore`, per-request stores
 
 ### ai/
-- [vercel-ai-sdk](stacks/ai/vercel-ai-sdk.md) — Camada cross-provider (Core + UI hooks) · ⚠️ needs-revision (doc 4.x, upstream 7.x)
-- [mastra-sdk](stacks/ai/mastra-sdk.md) — Framework agents/workflows/RAG/evals · ⚠️ needs-revision (doc 0.x, upstream 1.x)
+- [vercel-ai-sdk](stacks/ai/vercel-ai-sdk.md) — `ai@7` + providers nas majors medidas em VERSIONS.md
+- [mastra-sdk](stacks/ai/mastra-sdk.md) — `@mastra/core@1` + CLI `mastra@1`, modelos `LanguageModelV4`
 - [openai](stacks/ai/openai.md) — OpenAI API (Responses, reasoning, Realtime, Batch)
 - [openai-sdk](stacks/ai/openai-sdk.md) — SDK `openai` (Node) — streaming, Realtime, Batch
 - [anthropic](stacks/ai/anthropic.md) — Claude API (prompt caching, computer use, extended thinking)
 - [anthropic-sdk](stacks/ai/anthropic-sdk.md) — SDK `@anthropic-ai/sdk` (direct/Bedrock/Vertex)
-- [gemini](stacks/ai/gemini.md) — Gemini API (AI Studio vs Vertex, multimodal, context caching) · ⚠️ 2.5 aposenta 16/10/2026; geração 3 só em `global`
+- [gemini](stacks/ai/gemini.md) — Gemini API; default Vertex `gemini-3.5-flash` (2.5 aposenta no Vertex em 2026-10-20)
 - [google-genai-sdk](stacks/ai/google-genai-sdk.md) — SDK `@google/genai` unificado
 - [harness-engineering](stacks/ai/harness-engineering.md) — 8 camadas ao redor do LLM
 
 ### backend/
-- [firebase-functions](stacks/backend/firebase-functions.md) — Functions Gen 2, firebase-functions@7, runtime nodejs24
+- [firebase-functions](stacks/backend/firebase-functions.md) — Functions Gen 2, firebase-functions@7.4, firebase-admin@14.5, runtime nodejs24
 
 ### database/
 - [firebase-firestore](stacks/database/firebase-firestore.md) — SDKs Client/Admin, queries, vector
 - [postgres](stacks/database/postgres.md) — Postgres 18, Drizzle, `uuidv7()`, AIO, pooling
-- [pgvector](stacks/database/pgvector.md) — Vetores 0.8.x (vector/halfvec/bit/sparse), HNSW vs IVFFlat
+- [pgvector](stacks/database/pgvector.md) — Vetores 0.8.6 (vector/halfvec/bit/sparse), HNSW vs IVFFlat
 - [bigquery](stacks/database/bigquery.md) — Warehouse OLAP, Storage Write API, dryRun
 
 ### testing/
-- [vitest](stacks/testing/vitest.md) — Vitest 4.x, projects, browser-playwright, schemaMatching
-- [playwright](stacks/testing/playwright.md) — E2E 1.61.x + component + a11y, locators role-first
+- [vitest](stacks/testing/vitest.md) — Vitest 5.0, projects, browser-playwright, `clearMocks` ligado
+- [playwright](stacks/testing/playwright.md) — E2E 1.63 + component + a11y, locators role-first
 
 ## Contracts — 8 doutrinas de modelagem
 
@@ -156,7 +150,8 @@ Stack pinado para ser **mutuamente compatível**. Não subir uma major isolada s
 
 ## Decisions
 
-- [0001 — Baseline 2026-07 + harness DDC](decisions/0001-ddc-engineering-baseline-and-harness-enforcement.md) — pins, uuidv7/ULID, using-ddc, plans, verification, hooks, remoção guard-secrets
+- [0001 — Baseline 2026-07 + harness DDC](decisions/0001-ddc-engineering-baseline-and-harness-enforcement.md) — uuidv7/ULID, using-ddc, plans, verification, hooks, remoção guard-secrets
+- [0002 — Baseline 2026-09 + nomes](decisions/0002-baseline-2026-09-version-and-naming-alignment.md) — pins medidos e tradução camelCase/snake_case entre camadas
 
 ---
 

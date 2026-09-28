@@ -27,19 +27,18 @@ não por preferência pessoal.
 A API direta é o caminho padrão. Bedrock e Vertex existem quando contrato/regulação
 exige residência de dados em conta da cloud (ver `@rules/governance`).
 
-## Modelos (2026-05)
+## Modelos (ficha de 2026-09-28)
 
-| Modelo | Family | Context | Notas |
-|---|---|---|---|
-| `claude-opus-4-7` | Opus 4.7 | 200K (1M opt-in) | Reasoning top-tier, extended thinking, computer use beta |
-| `claude-sonnet-4-6` | Sonnet 4.6 | 200K | Trabalho diário, melhor custo/qualidade |
-| `claude-haiku-4-5` | Haiku 4.5 | 200K | Latência baixa, classificação, batch barato |
+| Papel | Model id | Context / saída |
+|---|---|---|
+| Trabalho diário | `claude-sonnet-5-5` | 1M / 128K |
+| Raciocínio | `claude-opus-5-5` | 1M / 128K |
+| Agente longo | `claude-fable-5-1` | 1M / 128K |
+| Latência | `claude-haiku-4-5` | 200K / 64K |
 
-- **Extended thinking** disponível em Opus e Sonnet via `thinking: { type: "enabled", budget_tokens: N }`.
-- **1M context** é opt-in em Opus — habilitado por beta header; cobra tier diferente.
-- **Computer use** é beta em Opus — tool especial `computer_20250124` para screenshots e ações.
+`claude-opus-4-7` e `claude-sonnet-4-6` continuam Active, mas não são o default. No Bedrock, a geração 4.6 em diante não usa sufixo `-v1:0`: `anthropic.claude-sonnet-5-5`. Haiku 4.5 ainda é datado.
 
-Sempre fixar o model ID exato em código. Nunca alias genérico ("latest") em produção.
+Thinking atual é adaptativo. `thinking: { type: "enabled", budget_tokens }` devolve 400 no Sonnet 5 e posteriores. O id de produção vive na config, nunca em alias `latest`.
 
 ## Endpoints principais
 
@@ -309,7 +308,7 @@ Quando **não** usar diretamente: ver "Acesso no projeto" abaixo.
 
 Ordem de preferência:
 
-1. **`@stacks/ai/vercel-ai-sdk` + `@ai-sdk/anthropic`** — caminho padrão. Cobre 90% dos casos: chat, tool use, structured output via `generateObject`, streaming, multimodal. Provider-agnostic, fácil trocar Anthropic ↔ OpenAI ↔ Gemini sem reescrever a feature.
+1. **`@stacks/ai/vercel-ai-sdk` + `@ai-sdk/anthropic@4`** — caminho padrão. Cobre chat, tool use, structured output via `Output.object`, streaming e multimodal. Provider-agnostic, fácil trocar Anthropic, OpenAI e Gemini sem reescrever a feature.
 2. **`@anthropic-ai/sdk` direto** (`@stacks/ai/anthropic-sdk`) — quando precisar de features que o AI SDK não expõe ainda:
    - Computer use (beta)
    - Message Batches

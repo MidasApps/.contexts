@@ -1,9 +1,9 @@
 ---
 title: Firebase Cloud Functions
-version: firebase-functions@7 / firebase-admin@13
+version: firebase-functions@7.4.0 / firebase-admin@14.5.0
 runtime: nodejs24
 generation: gen2
-last_updated: 2026-07-13
+last_updated: 2026-09-28
 status: current
 upstream: https://firebase.google.com/docs/functions
 ---
@@ -16,9 +16,10 @@ Gen 1 é **legacy**: não escrever código novo em Gen 1. Migrações Gen 1 → 
 
 ## Pacotes e versões
 
-- `firebase-functions` **>= 7.2** (Gen 2 APIs em `firebase-functions/v2/*`; v7 é a linha atual no npm)
-- `firebase-admin` **>= 13** (Admin SDK para Firestore, Auth, Storage)
-- Runtime de deploy: `nodejs24` (preferido) ou `nodejs22` se algum provider/região ainda restringir
+- `firebase-functions` **7.4.0** (Gen 2 APIs em `firebase-functions/v2/*`)
+- `firebase-admin` **14.5.0** (o peer de functions aceita 11–14; o projeto fica na 14)
+- SDK cliente `firebase` **12.19.0** quando o app precisar do client
+- Runtime de deploy: `nodejs24`, o mesmo major do monorepo. Não abrir função nova em `nodejs22`
 - `firebase-tools` (CLI) — só dev/CI, nunca dependência de runtime
 
 Imports canônicos:

@@ -2,7 +2,7 @@
 title: Convenções de modelagem para PostgreSQL
 type: contracts
 status: active
-last_updated: 2026-07-13
+last_updated: 2026-09-28
 scope: Doutrina de modelagem de schemas relacionais em PostgreSQL
 related:
   - "@stacks/database/postgres"
@@ -63,7 +63,7 @@ Esta doutrina cobre:
 ### Tipos e enums
 
 - **Tipos** (DOMAIN, custom types): **singular**, snake_case → `email`, `order_status`, `currency_code`.
-- **Enum values**: `SCREAMING_SNAKE_CASE` → `'PENDING'`, `'PAID'`, `'AWAITING_REVIEW'`.
+- **Enum values**: lowercase snake_case → `'pending'`, `'paid'`, `'awaiting_review'`. `SCREAMING_SNAKE_CASE` é só `eventName`.
 
 ### Constraints e índices (sufixos canônicos)
 
@@ -213,7 +213,8 @@ Aplicação consome `orders_active` por default; acessa `orders` diretamente ape
 | Timestamp            | `TIMESTAMPTZ`                        | `TIMESTAMP` (sem timezone)         |
 | Data pura            | `DATE`                               | `TEXT`                             |
 | Hora pura            | `TIME`                               | `TEXT`                             |
-| Money (alta precisão)| `NUMERIC(p,s)` ou `BIGINT` em cents  | `FLOAT`, `DOUBLE PRECISION`, `REAL`|
+| Money                | `BIGINT` `amount_minor` + `CHAR(3)` currency | `FLOAT`, `NUMERIC` para o valor, string formatada |
+| Taxa, razão, quantidade fracionária | `NUMERIC(p,s)`                 | `FLOAT`, `DOUBLE PRECISION`, `REAL`|
 | Booleano             | `BOOLEAN`                            | `INTEGER` 0/1, `TEXT` 'Y'/'N'      |
 | JSON                 | `JSONB`                              | `JSON`, `TEXT`                     |
 | UUID / PK ordenável  | `UUID` com `uuidv7()` (default)      | `BIGSERIAL`; `TEXT` para UUID      |
@@ -247,13 +248,13 @@ Use DOMAIN quando a mesma invariante reaparece em múltiplas tabelas. Não use p
 **Opção A — TEXT + CHECK (padrão do projeto):**
 
 ```sql
-status TEXT NOT NULL CHECK (status IN ('PENDING', 'PAID', 'CANCELLED'))
+status TEXT NOT NULL CHECK (status IN ('pending', 'paid', 'cancelled'))
 ```
 
 **Opção B — ENUM nativo:**
 
 ```sql
-CREATE TYPE order_status AS ENUM ('PENDING', 'PAID', 'CANCELLED');
+CREATE TYPE order_status AS ENUM ('pending', 'paid', 'cancelled');
 status order_status NOT NULL
 ```
 
@@ -360,7 +361,7 @@ CREATE INDEX orders_active_partial_idx
 
 -- Covering
 CREATE INDEX orders_user_id_covering_idx
-  ON orders(user_id) INCLUDE (status, total_cents);
+  ON orders(user_id) INCLUDE (status, total_minor);
 
 -- GIN em JSONB
 CREATE INDEX events_payload_gin_idx ON events USING gin (payload);
@@ -399,25 +400,14 @@ Particularidades de ferramentas (pg_partman, automação de criação de partiç
 
 ## Money pattern
 
-### Duas opções padronizadas
-
-**Cents em BIGINT (default para sistemas transacionais):**
+Valor monetário é `BIGINT` na menor unidade da moeda. O nome da coluna é `amount_minor` (ou `total_minor` quando for o agregado). `currency` é `CHAR(3)` ISO 4217.
 
 ```sql
-amount_cents BIGINT NOT NULL CHECK (amount_cents >= 0),
+amount_minor BIGINT NOT NULL CHECK (amount_minor >= 0),
 currency CHAR(3) NOT NULL
 ```
 
-**NUMERIC quando cálculos exigem fração decimal explícita:**
-
-```sql
-amount NUMERIC(15,2) NOT NULL CHECK (amount >= 0),
-currency CHAR(3) NOT NULL
-```
-
-Cada bounded context **documenta sua escolha** na primeira tabela monetária e mantém consistência interna. Nunca `FLOAT`/`DOUBLE PRECISION` para money — perda de precisão é certa.
-
-`currency` sempre `CHAR(3)` ISO 4217 (`'USD'`, `'BRL'`). Nunca armazenado como número.
+`NUMERIC(p,s)` fica para taxa de câmbio, percentual e quantidade fracionária. Não guarda o valor da cobrança. Nunca `FLOAT` / `DOUBLE PRECISION` / `REAL` para nenhum dos dois.
 
 ## JSONB
 
@@ -478,7 +468,7 @@ Use quando custo de recomputação justifica armazenamento. Documente sempre a e
 
 ```sql
 CREATE MATERIALIZED VIEW mv_daily_revenue AS
-  SELECT date_trunc('day', placed_at) AS day, SUM(total_cents) AS revenue_cents
+  SELECT date_trunc('day', placed_at) AS day, SUM(total_minor) AS revenue_minor
   FROM orders_active
   GROUP BY 1;
 
@@ -524,8 +514,8 @@ CREATE TABLE orders (
   id uuid PRIMARY KEY DEFAULT uuidv7(),
   tenant_id uuid NOT NULL,
   user_id uuid NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
-  status text NOT NULL CHECK (status IN ('PENDING', 'PAID', 'CANCELLED')),
-  total_cents bigint NOT NULL CHECK (total_cents >= 0),
+  status text NOT NULL CHECK (status IN ('pending', 'paid', 'cancelled')),
+  total_minor bigint NOT NULL CHECK (total_minor >= 0),
   currency char(3) NOT NULL,
   placed_at timestamptz NOT NULL,
   created_at timestamptz NOT NULL DEFAULT now(),
@@ -558,7 +548,7 @@ CREATE VIEW orders_active AS
 ```sql
 id uuid PRIMARY KEY DEFAULT uuidv7()                 -- PK ordenável (default PG 18)
 created_at timestamptz NOT NULL DEFAULT now()        -- TZ + default
-amount_cents bigint NOT NULL CHECK (amount_cents >= 0)  -- money em cents
+amount_minor bigint NOT NULL CHECK (amount_minor >= 0)  -- menor unidade da moeda
 status text NOT NULL CHECK (status IN (...))         -- enum flexível
 tenant_id uuid NOT NULL                              -- multi-tenant
 CREATE INDEX orders_user_id_idx ON orders(user_id);  -- FK indexada

@@ -1,7 +1,7 @@
 ---
 title: React
-version: 19.2.x
-last_updated: 2026-07-13
+version: 19.3.0
+last_updated: 2026-09-28
 status: current
 upstream: https://react.dev
 release_notes: https://react.dev/blog/2024/12/05/react-19
@@ -19,7 +19,7 @@ Biblioteca de UI do projeto. Opera como camada de componentes dentro de @stacks/
 
 - **Linha:** React 19.x estável (lançada em dezembro de 2024).
 - **Status:** padrão para todos os apps web do projeto.
-- **Dependência de Next:** Next 16 requer React 19.2+ (peer obrigatório) — versões caminham juntas; ver @stacks/frontend/next@16.
+- **Dependência de Next:** Next 16.3.6 aceita React `^19`. O pin do projeto é **19.3.0**, que também satisfaz `@ai-sdk/react@4` (`^19.2.1`). Ver @stacks/frontend/next@16.
 - **Pinagem:** `react` e `react-dom` em versão exata no `package.json`. `@types/react` e `@types/react-dom` na linha 19.
 - **Strict Mode:** **ligado** em dev. Detecta side effects em render, double-invocation de effects, problemas de cleanup. Não desligar.
 - **React Compiler:** opt-in, ainda em RC/estabilização. Tratado em seção própria; não obrigatório.
@@ -27,12 +27,12 @@ Biblioteca de UI do projeto. Opera como camada de componentes dentro de @stacks/
 ```json
 {
   "dependencies": {
-    "react": "19.2.0",
-    "react-dom": "19.2.0"
+    "react": "19.3.0",
+    "react-dom": "19.3.0"
   },
   "devDependencies": {
-    "@types/react": "19.2.0",
-    "@types/react-dom": "19.2.0"
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0"
   }
 }
 ```
@@ -225,7 +225,7 @@ function Article({ post }: { post: Post }) {
 }
 ```
 
-**Em apps Next 15, prefira a Metadata API** (`generateMetadata` em `page.tsx`/`layout.tsx`) — ver @stacks/frontend/next@16. Document metadata no React é fallback útil para componentes deeply nested onde a Metadata API não chega; em geral evitar duplicar.
+**Em apps Next 16, prefira a Metadata API** (`generateMetadata` em `page.tsx`/`layout.tsx`) — ver @stacks/frontend/next@16. Document metadata no React é fallback útil para componentes deeply nested onde a Metadata API não chega; em geral evitar duplicar.
 
 ### 8. Stylesheets com `precedence`
 
@@ -318,7 +318,7 @@ Em apps Next, o root é gerenciado pela framework — esses handlers são config
 
 React 19 estabiliza Server Components (RSC) e Server Functions (`'use server'`). No projeto, são consumidos via @stacks/frontend/next@16 (App Router).
 
-**Server Component** (default em Next 15):
+**Server Component** (default em Next 16):
 
 ```tsx
 // posts-page.tsx

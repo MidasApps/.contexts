@@ -64,7 +64,7 @@ A aplicação consome componentes de UI de duas origens: **primitives de bibliot
 
 ### Localização no projeto
 
-A biblioteca de UI vive em `src/shared/ui/` (sob a convenção de @architecture/feature-based) ou em `src/shared/ui/` da camada `shared` (sob a convenção de @architecture/fsd — ver @architecture/fsd). Em ambos os casos, é dentro dessa pasta de UI compartilhada que Atomic Design opera. Componentes específicos de feature **não** vivem aqui — eles ficam dentro de suas próprias features e consomem desta biblioteca.
+A biblioteca de UI do frontend vive em `src/shared/ui/` da camada `shared` de `@architecture/fsd`. Atomic Design não se aplica à pasta de backend `services/`. Componentes específicos de feature **não** vivem aqui — eles ficam dentro de suas próprias features e consomem desta biblioteca.
 
 A estrutura interna adotada:
 

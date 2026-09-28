@@ -4,6 +4,8 @@ type: rules
 scope: global
 status: active
 last_updated: 2026-09-28
+related:
+  - "@.contexts/engineering/rules/data-modeling.md"
 ---
 
 # Regras Gerais de Desenvolvimento
@@ -38,7 +40,8 @@ Aplica-se a todo código-fonte do projeto: backend (Firebase Functions, serviço
 - Sempre use `camelCase` para variáveis, funções e propriedades.
 - Sempre use `PascalCase` para tipos, classes, componentes React e enums-como-objeto.
 - Sempre use `SCREAMING_SNAKE_CASE` para constantes verdadeiramente imutáveis exportadas no nível de módulo.
-- Sempre use `kebab-case` para nomes de arquivo. Exceção: componentes React podem usar `PascalCase` se a convenção do diretório for consistente.
+- Sempre use `kebab-case` para nomes de arquivo (`place-order.ts`, `user-schema.ts`, `use-auth-store.ts`). Exceção: o arquivo de um componente React usa `PascalCase` (`Button.tsx`).
+- O nome físico do dado em SQL, JSON e evento segue `@.contexts/engineering/rules/data-modeling.md`. Esta seção governa o identificador TypeScript, não a coluna.
 - Nunca use abreviações ambíguas (`usr`, `btn`, `cfg`). Use o nome completo (`user`, `button`, `config`).
 - Nunca prefixe interfaces com `I` (`IUser`). Nunca sufixe tipos com `Type` (`UserType`).
 - Sempre nomeie booleanos com prefixo afirmativo: `isActive`, `hasPermission`, `canEdit`. Nunca use negações no nome (`isNotReady`).

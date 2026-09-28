@@ -1,15 +1,15 @@
 ---
 title: Zod
-version: 4.4.x
-last_updated: 2026-07-13
+version: 4.6.5
+last_updated: 2026-09-28
 status: current
 upstream: https://zod.dev
 supersedes: zod@3.23
 ---
 
-# Zod 4.4.x
+# Zod 4.6.x
 
-Pin de referência: **zod@^4.4** (ex.: 4.4.3). API estável da major 4; minors 4.3/4.4 trazem correções de soundness (podem ser mais estritas — revisar changelog ao subir).
+Pin de referência: **zod@4.6.5** (medido em 2026-09-28). A major 4 segue a API deste documento. Minors podem apertar soundness — leia o changelog ao subir. O AI SDK 7 aceita `zod ^4.1.8`; Zod 3 não entra no mesmo bundle.
 
 Zod é a biblioteca de schema-first validation adotada pelo projeto. A versão 4, lançada em 2025, é um **major rewrite** com ganhos dramáticos de performance, redução de bundle e mudanças sintáticas em validators de string. Este documento captura o uso correto da versão atual e o que difere de Zod 3.
 
@@ -236,7 +236,7 @@ Validar na **fronteira de leitura** — todo documento Firestore ou row Postgres
 
 ### AI SDKs (`@stacks/ai/vercel-ai-sdk`)
 
-`generateObject({ schema })` recebe o schema Zod diretamente. Tool definitions usam Zod para `parameters`. O modelo é forçado a respeitar a forma; ainda assim, trate output como untrusted e re-valide se vier por canal indireto.
+No AI SDK 7, `generateText({ output: Output.object({ schema }) })` recebe o schema Zod. Tool definitions usam Zod em `inputSchema`. O modelo é forçado a respeitar a forma; ainda assim, trate output como untrusted e re-valide se vier por canal indireto.
 
 ### OpenAPI / JSON Schema
 
@@ -307,5 +307,5 @@ Não deixe Zod 3 e Zod 4 coexistirem no runtime do mesmo bundle. Migre a árvore
 - `@stacks/language/typescript@7` — interação com inference
 - `@stacks/frontend/next@16` — Server Actions
 - `@stacks/frontend/shadcn-ui` — form resolver
-- `@stacks/ai/vercel-ai-sdk` — `generateObject`, tool params
+- `@stacks/ai/vercel-ai-sdk` — `Output.object`, `inputSchema` de tool
 - `@practices/sdd` — geração de OpenAPI a partir dos schemas

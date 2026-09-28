@@ -1,14 +1,14 @@
 ---
 title: Playwright
-version: 1.61.x
-last_updated: 2026-07-13
+version: 1.63.0
+last_updated: 2026-09-28
 status: current
 upstream: https://playwright.dev
 repository: https://github.com/microsoft/playwright
 category: testing
 ---
 
-# Playwright 1.61.x
+# Playwright 1.63.0
 
 Playwright é o framework de testes end-to-end e component testing cross-browser mantido pela Microsoft. Executa Chromium, Firefox e WebKit a partir de uma única API, com auto-waiting embutido, tracing nativo e tooling de debug de primeira classe (UI mode, codegen, trace viewer).
 
@@ -29,10 +29,11 @@ Não use Playwright para:
 - Cobertura quantitativa de funções. Vitest com `c8` cobre mais barato e rápido.
 - Testes de Route Handlers que não envolvem browser. Use Vitest com `fetch` direto ou supertest-like.
 
-## Destaques recentes (1.60–1.61)
+## Destaques recentes (1.60–1.63)
 
-- **WebAuthn / passkeys** via `browserContext.credentials` (1.61).
-- **Ubuntu 26.04** suportado; Node 22/24/26.
+- **WebAuthn / passkeys** via `browserContext.credentials` (desde 1.61).
+- **Ubuntu 26.04** suportado; Node 22/24/26. O CI do projeto usa Node 24.
+- `@playwright/test` e `playwright` em **1.63.0**. `@playwright/experimental-ct-react` ainda está em **1.62.1** — não force 1.63 nesse pacote enquanto o npm não publicar.
 - Integração Next 16.3: helper `instant()` de `@next/playwright` para assert de Instant Navigations (ver `@stacks/frontend/next@16`).
 
 ## Setup
@@ -396,7 +397,7 @@ Esqueleto:
 
 ```yaml
 - uses: actions/setup-node@v4
-  with: { node-version: '20' }
+  with: { node-version: '24' }
 - run: pnpm install --frozen-lockfile
 - run: pnpm exec playwright install --with-deps
 - run: pnpm exec playwright test --shard=${{ matrix.shard }}/4

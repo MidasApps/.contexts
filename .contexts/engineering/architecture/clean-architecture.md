@@ -177,47 +177,47 @@ Para features que não satisfazem nenhum desses critérios, @architecture/hexago
 Quando Clean Architecture se aplica, ela vive **dentro do recorte de uma feature**, mantendo a organização por contexto promovida por @architecture/feature-based e @architecture/fsd. A estrutura interna canônica:
 
 ```
-src/features/<feature>/
+services/<context>/
   domain/                              # Anel 1 — Entities (Enterprise Business Rules)
     entities/
       order.ts                         # entity com métodos de negócio
-      orderItem.ts
-    valueObjects/
+      order-item.ts
+    value-objects/
       money.ts
-      orderStatus.ts
+      order-status.ts
     services/
-      pricingPolicy.ts                 # domain service (lógica que cruza entities)
+      pricing-policy.ts                 # domain service (lógica que cruza entities)
     events/
-      orderPlaced.ts                   # domain events (quando aplicável)
+      order-placed.ts                   # domain events (quando aplicável)
   application/                         # Anel 2 — Use Cases (Application Business Rules)
     ports/
       input/                           # Input Boundaries
-        placeOrder.ts                  # interface do use case
-        cancelOrder.ts
+        place-order.ts                  # interface do use case
+        cancel-order.ts
       output/                          # Output Boundaries / Gateways
-        orderRepository.ts             # interface de persistência
-        emailSender.ts                 # interface de gateway externo
-        paymentGateway.ts
-    useCases/
-      placeOrder.ts                    # Interactor — implementa Input Boundary
-      cancelOrder.ts
+        order-repository.ts             # interface de persistência
+        email-sender.ts                 # interface de gateway externo
+        payment-gateway.ts
+    use-cases/
+      place-order.ts                    # Interactor — implementa Input Boundary
+      cancel-order.ts
     dto/
-      placeOrderRequest.ts             # Request Model
-      placeOrderResponse.ts            # Response Model
+      place-order-request.ts             # Request Model
+      place-order-response.ts            # Response Model
   adapters/                            # Anel 3 — Interface Adapters
     controllers/
-      placeOrderController.ts          # invocado por Next.js route/action
-      placeOrderFunctionHandler.ts     # invocado por Firebase Function
+      place-order-controller.ts          # invocado por Next.js route/action
+      place-order-function-handler.ts     # invocado por Firebase Function
     presenters/
-      placeOrderJsonPresenter.ts       # formata Response → JSON
+      place-order-json-presenter.ts       # formata Response → JSON
     gateways/
-      postgresOrderRepository.ts       # implementa OrderRepository
-      firestoreOrderRepository.ts      # alternativa
-      resendEmailSender.ts             # implementa EmailSender
-      stripePaymentGateway.ts          # implementa PaymentGateway
+      postgres-order-repository.ts       # implementa OrderRepository
+      firestore-order-repository.ts      # alternativa
+      resend-email-sender.ts             # implementa EmailSender
+      stripe-payment-gateway.ts          # implementa PaymentGateway
   infrastructure/                      # Anel 4 — Frameworks & Drivers (cola mínima)
-    postgresClient.ts                  # configuração do driver
-    firebaseAdmin.ts
+    postgres-client.ts                  # configuração do driver
+    firebase-admin.ts
   composition.ts                       # fiação local
   index.ts                             # public API
 ```
@@ -227,7 +227,7 @@ O leitor atento perceberá que os anéis 1 e 2 são essencialmente o **núcleo d
 ### Naming adotado
 
 - **Entities**: nomeadas pelo conceito de negócio: `Order`, `Customer`, `Invoice`. Métodos descrevem operações de negócio: `order.approve()`, `order.cancel(reason)`, `invoice.markAsPaid(payment)`.
-- **Use Cases**: nomeados como verbo + objeto no padrão `<Action><Entity>`: `PlaceOrder`, `CancelOrder`, `RegisterUser`, `GenerateMonthlyReport`. O arquivo do use case (interactor) tem o mesmo nome em camelCase: `placeOrder.ts`.
+- **Use Cases**: nomeados como verbo + objeto no padrão `<Action><Entity>`: `PlaceOrder`, `CancelOrder`, `RegisterUser`, `GenerateMonthlyReport`. O arquivo é kebab-case: `place-order.ts`. O export continua `PlaceOrder`.
 - **Input/Output DTOs**: `<UseCase>Request` e `<UseCase>Response`. Ex.: `PlaceOrderRequest`, `PlaceOrderResponse`.
 - **Controllers**: `<UseCase>Controller` ou `<UseCase><Channel>Handler`: `PlaceOrderController` (genérico) ou `PlaceOrderRouteHandler`, `PlaceOrderFunctionHandler` quando o canal é parte do nome.
 - **Presenters**: `<UseCase><Format>Presenter`: `PlaceOrderJsonPresenter`, `PlaceOrderHtmlPresenter`.
@@ -242,9 +242,9 @@ A forma canônica do livro envolve Input Boundary, Interactor, Output Boundary e
 Input Boundary (port no anel de Use Cases):
 
 ```typescript
-// application/ports/input/placeOrder.ts
-import type { PlaceOrderRequest } from '../../dto/placeOrderRequest';
-import type { PlaceOrderResponse } from '../../dto/placeOrderResponse';
+// application/ports/input/place-order.ts
+import type { PlaceOrderRequest } from '../../dto/place-order-request';
+import type { PlaceOrderResponse } from '../../dto/place-order-response';
 
 export type PlaceOrder = (request: PlaceOrderRequest) => Promise<PlaceOrderResponse>;
 ```
@@ -252,7 +252,7 @@ export type PlaceOrder = (request: PlaceOrderRequest) => Promise<PlaceOrderRespo
 Output ports (gateways no anel de Use Cases):
 
 ```typescript
-// application/ports/output/orderRepository.ts
+// application/ports/output/order-repository.ts
 import type { Order, OrderId } from '../../../domain/entities/order';
 
 export interface OrderRepository {
@@ -264,10 +264,10 @@ export interface OrderRepository {
 Interactor (use case no anel de Use Cases):
 
 ```typescript
-// application/useCases/placeOrder.ts
-import type { PlaceOrder } from '../ports/input/placeOrder';
-import type { OrderRepository } from '../ports/output/orderRepository';
-import type { EmailSender } from '../ports/output/emailSender';
+// application/use-cases/place-order.ts
+import type { PlaceOrder } from '../ports/input/place-order';
+import type { OrderRepository } from '../ports/output/order-repository';
+import type { EmailSender } from '../ports/output/email-sender';
 import { Order } from '../../domain/entities/order';
 
 export const makePlaceOrder = (deps: {
@@ -287,7 +287,7 @@ export const makePlaceOrder = (deps: {
 Controller (anel de Interface Adapters, lado de entrada):
 
 ```typescript
-// adapters/controllers/placeOrderRouteHandler.ts
+// adapters/controllers/place-order-route-handler.ts
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { placeOrder } from '../../composition';
@@ -310,10 +310,10 @@ export async function POST(req: Request) {
 Gateway (anel de Interface Adapters, lado de saída):
 
 ```typescript
-// adapters/gateways/postgresOrderRepository.ts
-import type { OrderRepository } from '../../application/ports/output/orderRepository';
+// adapters/gateways/postgres-order-repository.ts
+import type { OrderRepository } from '../../application/ports/output/order-repository';
 import type { Order, OrderId } from '../../domain/entities/order';
-import { db } from '../../infrastructure/postgresClient';
+import { db } from '../../infrastructure/postgres-client';
 
 export const PostgresOrderRepository: OrderRepository = {
   async findById(id: OrderId) { /* SQL → Order */ },
@@ -324,9 +324,9 @@ export const PostgresOrderRepository: OrderRepository = {
 Composition root local (`composition.ts`):
 
 ```typescript
-import { makePlaceOrder } from './application/useCases/placeOrder';
-import { PostgresOrderRepository } from './adapters/gateways/postgresOrderRepository';
-import { ResendEmailSender } from './adapters/gateways/resendEmailSender';
+import { makePlaceOrder } from './application/use-cases/place-order';
+import { PostgresOrderRepository } from './adapters/gateways/postgres-order-repository';
+import { ResendEmailSender } from './adapters/gateways/resend-email-sender';
 
 export const placeOrder = makePlaceOrder({
   orders: PostgresOrderRepository,
@@ -420,7 +420,7 @@ A combinação típica em uma feature complexa do projeto: **estrutura de anéis
 - **Presenter duplicando DTO sem ganho.** Quando o Response Model do use case já é JSON-serializable e o único formato de saída é JSON, criar um Presenter dedicado apenas para `return res` é puro overhead. Use o controller diretamente; introduza presenter quando houver mais de um formato.
 - **Framework dentro do core.** Decorators de Nest em entities, hooks de React em use cases, middlewares de Express em portas. Cada um apaga a justificativa da arquitetura.
 - **Composition root distribuída.** Gateways sendo instanciados dentro de controllers, ou ainda pior, dentro de use cases. A fiação vive em um único arquivo por feature — caso contrário, trocar gateway exige caçada na base inteira.
-- **Use case importando gateway concreto.** `import { PostgresOrderRepository }` dentro de `useCases/placeOrder.ts`. Use case importa **interface**, nunca implementação. A composition root injeta.
+- **Use case importando gateway concreto.** `import { PostgresOrderRepository }` dentro de `use-cases/place-order.ts`. Use case importa **interface**, nunca implementação. A composition root injeta.
 - **Anel 3 dependendo do anel 4 explicitamente.** Controller importando direto do driver do banco em vez de usar o gateway. A camada de Interface Adapters protege as camadas internas dos drivers — pular essa proteção descaracteriza a arquitetura.
 - **Onion + Clean + Hexagonal misturados sem critério.** Pasta `domain/` no estilo Onion, controllers no estilo MVC, ports no estilo Hexagonal, sem coerência sobre qual modelo está sendo seguido. Escolher um e ser consistente é mais importante que escolher o "correto".
 - **Tactical pattern como objetivo.** Aplicar `Presenter`, `Interactor`, `Input/Output Boundary` porque o livro descreve, sem que o problema justifique. Os blocos são ferramentas; o critério é "isso clareia o modelo?".

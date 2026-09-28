@@ -183,7 +183,7 @@ A heurística: aplique se o código sobreviverá amanhã e será lido por algué
 
 TypeScript amplifica retorno de Clean Code porque o sistema de tipos absorve parte do trabalho que comentários e nomes faziam em linguagens dinâmicas.
 
-- **Branded types** para identificadores e valores semânticos: `UserId`, `Email`, `Cents` em vez de `string` e `number` genéricos. Reduz disinformation no chamador.
+- **Branded types** para identificadores e valores semânticos: `UserId`, `Email`, `Money` (`amountMinor` + `currency`) em vez de `string` e `number` genéricos. Reduz disinformation no chamador.
 - **Discriminated unions** para Result e estados: `type Result<T, E> = { ok: true; value: T } | { ok: false; error: E }` torna fluxo de erro inspeção exhaustiva pelo compilador.
 - **Funções puras preferenciais.** Em lógica de domínio, recebem dados e retornam dados; side effects empurrados para fronteiras.
 - **Módulos pequenos coesos** preferíveis a arquivos com múltiplas classes não-relacionadas.

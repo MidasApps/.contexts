@@ -2,11 +2,13 @@
 title: Feature-Sliced Design
 type: architecture
 status: active
-last_updated: 2026-07-13
+last_updated: 2026-09-28
 upstream: https://feature-sliced.design/
 ---
 
 # Feature-Sliced Design
+
+**Escopo: frontend.** Esta árvore é a do app Next.js. O backend não mora aqui. O recorte vertical do servidor é `@architecture/feature-based`, em `services/<context>/`. As duas pastas não se substituem e não compartilham `src/features`.
 
 Feature-Sliced Design (FSD) é uma metodologia arquitetural para aplicações frontend, oficializada pela comunidade homônima e mantida em `feature-sliced.design`. Propõe uma estrutura hierárquica explícita do código baseada em três dimensões ortogonais — **camadas** (layers), **fatias** (slices) e **segmentos** (segments) — e em uma regra de dependência estrita que torna o grafo de imports unidirecional. O objetivo declarado é tornar o código previsível, escalável e resistente a acoplamento acidental em aplicações de médio a grande porte.
 
@@ -143,7 +145,7 @@ src/
 
 - Slices em `kebab-case`, descritivos e curtos: `auth-by-email`, `add-to-cart`, `user-profile`.
 - Componentes React dentro de `ui/` em `PascalCase`: `LoginForm.tsx`, `ProductCard.tsx`.
-- Stores e schemas em `camelCase`: `useAuthStore.ts`, `userSchema.ts`.
+- Stores e schemas em arquivo `kebab-case`, export em camelCase ou PascalCase: `use-auth-store.ts` exporta `useAuthStore`, `user-schema.ts` exporta `UserSchema`.
 - Public API sempre via `index.ts` na raiz do slice.
 
 ### Segments adotados
@@ -173,9 +175,9 @@ O time usa os cinco segments oficiais (`ui`, `model`, `lib`, `api`, `config`) se
 
 ### Coexistência com outros modelos
 
-FSD opera no eixo de **organização de código frontend** e não impede que outros modelos arquiteturais convivam em camadas adjacentes. A camada `api` de um slice pode falar com um backend organizado segundo @architecture/hexagonal ou @architecture/ddd sem conflito conceitual. Componentes dentro do segment `ui/` de um slice podem ser construídos seguindo princípios de @architecture/atomic-design para sua decomposição visual interna, desde que a fronteira do slice continue sendo a unidade de composição externa.
+FSD organiza só o frontend. A camada `api` de um slice chama o backend em `services/<context>/` (`@architecture/feature-based`, com o interior em `@architecture/hexagonal`, `@architecture/ddd` ou `@architecture/clean-architecture`). Não copie a árvore FSD para o servidor e não coloque use case dentro de `src/features`.
 
-A diferença essencial em relação a @architecture/feature-based é que FSD impõe **camadas formais e regra de dependência** — Feature-Based deixa essa estrutura implícita. Em relação a @architecture/atomic-design, FSD organiza por **contexto de negócio**, não por **granularidade visual** — um átomo Atomic é uma classificação por tamanho/complexidade, um slice FSD é uma classificação por recorte de domínio.
+Componentes no segment `ui/` podem seguir `@architecture/atomic-design` por dentro. A fronteira externa continua o slice. Atomic classifica tamanho visual; FSD classifica recorte de produto.
 
 ## Trade-offs reconhecidos
 

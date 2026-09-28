@@ -1,10 +1,10 @@
 ---
 title: OpenAI SDK (Node)
 package: openai
-version: 4.x
+version: 7.23.0
 language: TypeScript
-runtime: Node 20+
-last_updated: 2026-07-13
+runtime: Node 24
+last_updated: 2026-09-28
 status: current
 upstream: https://github.com/openai/openai-node
 related:
@@ -36,8 +36,8 @@ Manual de uso do **SDK oficial TypeScript da OpenAI** (`openai` no npm). Este do
 
 ## Versão
 
-- **Linha alvo**: `4.x+` (estável; major atual)
-- **Pin obrigatório**: fixe versão em `package.json` (ex: `"openai": "4.x"` com lockfile honesto)
+- **Linha alvo**: `7.23.0` (medido em 2026-09-28). A linha 4 ficou para trás.
+- **Pin obrigatório**: versão exata em `package.json`. O id de modelo não é pin deste SDK: vive na config e na ficha atual da OpenAI.
 - **Breaking changes recentes** (consultar CHANGELOG upstream antes de upgrade):
   - 4.0: reorganização de módulos (`chat.completions` em vez de `createChatCompletion`)
   - Streaming helper `.stream()` separado de `.create({ stream: true })`
@@ -74,7 +74,7 @@ const client = new AzureOpenAI({
   apiKey: process.env.AZURE_OPENAI_API_KEY,
   endpoint: process.env.AZURE_OPENAI_ENDPOINT,
   apiVersion: "2025-03-01-preview",
-  deployment: "gpt-5-prod", // nome do deployment no Azure, não o model id
+  deployment: "gpt-6-sol-prod", // nome do deployment no Azure, não o model id
 });
 ```
 
@@ -163,7 +163,7 @@ Para tools, `ChatCompletionTool` carrega o JSON Schema completo. Combinar com `z
 
 ```ts
 const completion = await openai.chat.completions.create({
-  model: "gpt-5",
+  model: "gpt-6-sol",
   messages,
 });
 
@@ -175,7 +175,7 @@ const finishReason = completion.choices[0]?.finish_reason; // sempre inspecionar
 
 ```ts
 const stream = await openai.chat.completions.create({
-  model: "gpt-5",
+  model: "gpt-6-sol",
   messages,
   stream: true,
 });
@@ -190,7 +190,7 @@ for await (const chunk of stream) {
 
 ```ts
 const stream = openai.chat.completions.stream({
-  model: "gpt-5",
+  model: "gpt-6-sol",
   messages,
 });
 
@@ -219,7 +219,7 @@ const Schema = z.object({
 });
 
 const completion = await openai.chat.completions.create({
-  model: "gpt-5",
+  model: "gpt-6-sol",
   messages,
   response_format: {
     type: "json_schema",
@@ -253,7 +253,7 @@ const tools: ChatCompletionTool[] = [
 ];
 
 const completion = await openai.chat.completions.create({
-  model: "gpt-5",
+  model: "gpt-6-sol",
   messages,
   tools,
   tool_choice: { type: "function", function: { name: "lookup_order" } }, // forçar
@@ -275,7 +275,7 @@ setTimeout(() => ac.abort(), 5_000);
 
 try {
   const stream = await openai.chat.completions.create(
-    { model: "gpt-5", messages, stream: true },
+    { model: "gpt-6-sol", messages, stream: true },
     { signal: ac.signal },
   );
   for await (const chunk of stream) { /* ... */ }
@@ -432,7 +432,7 @@ Restrições:
 | Caso | SDK direto? |
 |---|---|
 | Chat completion + tools cross-provider | Não — Vercel AI SDK |
-| Structured outputs com Zod | Não — Vercel AI SDK (`generateObject`) |
+| Structured outputs com Zod | Não — Vercel AI SDK (`Output.object`) |
 | UI streaming (RSC, `useChat`) | Não — Vercel AI SDK |
 | **Realtime API (voz)** | **Sim** |
 | **Batches API** (jobs offline) | **Sim** |
@@ -458,7 +458,7 @@ export async function POST(req: Request) {
   const { messages } = await req.json();
 
   const stream = await openai.chat.completions.create(
-    { model: "gpt-5", messages, stream: true },
+    { model: "gpt-6-sol", messages, stream: true },
     { signal: req.signal }, // propagar cancelamento do cliente
   );
 

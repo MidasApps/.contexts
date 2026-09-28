@@ -3,7 +3,7 @@ title: Regras de Segurança
 type: rules
 scope: engineering
 status: active
-last_updated: 2026-05-20
+last_updated: 2026-09-28
 related:
   - "@.contexts/engineering/rules/development.md"
 ---
@@ -70,7 +70,7 @@ Regras imperativas e enforce sobre segurança de código. Cobrem secrets, autent
 
 ## 7. CSRF e same-site
 
-- **Sempre** use Server Actions do Next 15 ou route handlers com verificação de origem para mutações. Server Actions já vêm com proteção CSRF embutida — não desabilite.
+- **Sempre** use Server Actions do Next 16 ou route handlers com verificação de origem para mutações. Server Actions já vêm com proteção CSRF embutida — não desabilite.
 - **Nunca** aceite mutações via `GET`. `GET` é idempotente e safe por contrato.
 - **Sempre** valide o header `Origin` (ou `Referer` como fallback) em endpoints que aceitam credenciais via cookie.
 

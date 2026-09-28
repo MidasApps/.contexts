@@ -90,14 +90,15 @@ Consulte sempre a tabela em `@.contexts/engineering/MEMORY.md`. Snapshot:
 
 | Camada | Baseline |
 |---|---|
-| Runtime | Node 24 LTS |
-| Language | TypeScript 7 |
-| App | Next 16.2 + React 19.2 |
-| Validation | Zod 4.4 |
-| OLTP | Postgres 18 (`uuidv7()` PKs) |
-| Serverless | firebase-functions@7 / nodejs24 |
-| Unit | Vitest 4 |
-| E2E | Playwright 1.61 |
+| Runtime | Node 24.21 LTS |
+| Language | TypeScript 7.0.2 |
+| App | Next 16.3.6 + React 19.3 |
+| Validation | Zod 4.6.5 |
+| OLTP | Postgres 18.6 (`uuidv7()` PKs) |
+| Serverless | firebase-functions@7.4 / firebase-admin@14.5 / nodejs24 |
+| Unit | Vitest 5.0.2 |
+| E2E | Playwright 1.63 |
+| AI | ai@7.0 + @mastra/core@1.71 (`@mastra/evals` fora: peer Vitest <5) |
 
 ## Red flags — PARE
 

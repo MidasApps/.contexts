@@ -3,7 +3,7 @@ title: Convenções de modelagem para APIs
 type: contracts
 scope: api
 status: active
-last_updated: 2026-05-20
+last_updated: 2026-09-28
 related:
   - "@rules/api-design"
   - "@rules/data-modeling"
@@ -53,9 +53,9 @@ Toda nova API consulta este documento **antes** de definir schema ou path.
 
 ### 1.3 IDs
 
-- **ULIDs** opacos em paths e payloads: `01HZX7K2P5N9V8M3Q4R6T7Y8U0`. Ver `@rules/data-modeling`.
-- **Nunca expor** IDs sequenciais internos de banco (PK auto-increment, Firestore auto-IDs internos não-ULID).
-- IDs são strings em JSON, sempre — mesmo que numéricos por baixo.
+- String opaca, sem prefixo de tipo. Postgres emite `uuidv7()`; Firestore emite ULID. Os dois são string no JSON. Ver `@rules/data-modeling`.
+- **Nunca expor** IDs sequenciais internos de banco (PK auto-increment, auto-id do Firestore que não seja o ULID de domínio).
+- IDs são strings em JSON, sempre.
 
 ### 1.4 Operações RPC (Server Actions, Callable Functions)
 
@@ -102,7 +102,7 @@ Não criar endpoints estilo `/v1/cancelOrder` no path REST público.
 Reservadas para filtros, paginação, ordenação e seleção de campos:
 
 ```
-GET /v1/orders?status=ACTIVE&createdAfter=2025-01-01&limit=20&cursor=eyJ...&sort=-createdAt
+GET /v1/orders?status=active&createdAfter=2025-01-01&limit=20&cursor=eyJ...&sort=-createdAt
 ```
 
 ---
@@ -305,12 +305,12 @@ Não usar 403 para "não autenticado" nem 401 para "sem permissão". Distinguir 
 ### 8.2 Money
 
 ```json
-{ "amount": "1234.56", "currency": "BRL" }
+{ "amountMinor": 12345, "currency": "BRL" }
 ```
 
-- `amount`: **string decimal** (preserva precisão arbitrária).
-- `currency`: ISO 4217 maiúsculo (`BRL`, `USD`, `EUR`).
-- **Proibido**: `amount` como número (`1234.56` float), centavos como inteiro sem documentação explícita em escopo restrito.
+- `amountMinor`: inteiro na menor unidade da moeda. BRL 123,45 é `12345`. JPY não tem subdivisão: o inteiro é o yen.
+- `currency`: ISO 4217 maiúsculo (`BRL`, `USD`, `JPY`).
+- **Proibido**: float (`123.45`), string decimal (`"123.45"`) e string formatada (`"R$ 123,45"`).
 
 ### 8.3 Booleans
 
@@ -321,12 +321,13 @@ Não usar 403 para "não autenticado" nem 401 para "sem permissão". Distinguir 
 ### 8.4 Enums
 
 ```json
-{ "status": "PENDING_REVIEW" }
+{ "status": "pending_review" }
 ```
 
-- **SCREAMING_SNAKE_CASE** strings.
-- Evoluir aditivamente: adicionar valores novos é seguro **se** clientes tratam desconhecidos como passthrough (fallback `UNKNOWN`).
-- **Proibido**: enums como inteiros (`status: 1`), enums com case misto (`PendingReview`, `pending_review`).
+- **lowercase snake_case**, o mesmo literal em JSON, Firestore, Postgres e na união TypeScript.
+- Evoluir aditivamente: valor novo é seguro **se** o cliente trata desconhecido como passthrough (fallback `unknown`).
+- **Proibido**: enum como inteiro (`status: 1`), `PENDING_REVIEW`, `PendingReview`.
+- `eventName` não segue esta caixa. O nome do evento é `SCREAMING_SNAKE_CASE` (`@contracts/events`).
 
 ### 8.5 Strings
 
@@ -393,8 +394,8 @@ GET /v1/countries?offset=0&limit=50
 Query params nomeados pelo campo:
 
 ```
-?status=ACTIVE
-?status=ACTIVE,PENDING_REVIEW       # múltiplos valores separados por vírgula
+?status=active
+?status=active,pending_review       # múltiplos valores separados por vírgula
 ?createdAfter=2025-01-01T00:00:00Z
 ?createdBefore=2025-12-31T23:59:59Z
 ?customerId=01HZX...
@@ -402,8 +403,8 @@ Query params nomeados pelo campo:
 
 Convenções:
 
-- Igualdade: `status=ACTIVE`.
-- Range em timestamp/número: sufixos `After`/`Before` ou `Min`/`Max` (`amountMin=100&amountMax=500`).
+- Igualdade: `status=active`.
+- Range em timestamp/número: sufixos `After`/`Before` ou `Min`/`Max` (`amountMinorMin=100&amountMinorMax=500`).
 - Busca textual livre: `q=...` (reservar `q` para isso, não usar como filtro estruturado).
 
 ### 10.2 Ordenação
@@ -482,13 +483,13 @@ Headers:
   X-Signature: sha256=<hex>
   X-Signature-Timestamp: 1716210600
   X-Event-Id: 01HZX...
-  X-Event-Type: order.created
+  X-Event-Type: ORDER_PLACED
   X-Delivery-Attempt: 1
 
 Body:
 {
   "eventId": "01HZX...",
-  "eventType": "order.created",
+  "eventName": "ORDER_PLACED",
   "occurredAt": "2025-05-20T14:30:00.000Z",
   "data": { ... }
 }
@@ -504,7 +505,7 @@ Body:
 
 ### 13.3 Naming de event types
 
-`<resource>.<verbo-passado>`: `order.created`, `order.cancelled`, `payment.refunded`, `user.email-verified`.
+`eventName` em `SCREAMING_SNAKE_CASE`, o mesmo literal de `@contracts/events`: `ORDER_PLACED`, `ORDER_CANCELLED`, `PAYMENT_REFUNDED`, `USER_EMAIL_VERIFIED`.
 
 Schema do payload de eventos vive em `@contracts/events`.
 
@@ -601,10 +602,10 @@ Lista de padrões que **violam** este contrato. Code review rejeita.
 |---|---|
 | `200 OK` com `{ "error": ... }` no body | Status code correto (4xx/5xx) com error envelope |
 | `user_id` em uma rota, `userId` em outra | camelCase em todo JSON |
-| IDs sequenciais de banco em path/payload | ULIDs opacos |
-| `status: 1` (enum como inteiro) | `"status": "ACTIVE"` |
+| IDs sequenciais de banco em path/payload | string opaca do id de domínio (`uuidv7` ou ULID) |
+| `status: 1` (enum como inteiro) | `"status": "active"` |
 | `createdAt: "2025-05-20 14:30:00"` (sem timezone) | ISO 8601 UTC com `Z` |
-| `amount: 1234.56` (money como float) | `{ "amount": "1234.56", "currency": "BRL" }` |
+| `amount: 1234.56` (money como float ou string decimal) | `{ "amountMinor": 123456, "currency": "BRL" }` |
 | `?page=2&pageSize=20` em lista dinâmica | Cursor-based |
 | Error response sem `requestId` | `requestId` sempre presente |
 | `message: "FirebaseError: ... at /path/to/file.ts:42"` | Mensagem user-facing, sem stack/SQL/path |
@@ -628,9 +629,9 @@ Antes de mergear uma rota nova, confirmar:
 - [ ] Status codes corretos por cenário (incluindo 401 vs 403).
 - [ ] `X-Request-Id` propagado em response.
 - [ ] Timestamps ISO 8601 UTC.
-- [ ] IDs são ULIDs opacos.
-- [ ] Enums em SCREAMING_SNAKE_CASE.
-- [ ] Money como `{ amount: string, currency: string }`.
+- [ ] IDs são string opaca do domínio, sem prefixo (`uuidv7` ou ULID).
+- [ ] Enums persistidos em lowercase snake_case.
+- [ ] Money como `{ amountMinor: number, currency: string }`.
 - [ ] Paginação cursor-based quando aplicável.
 - [ ] Erros nunca vazam stack/SQL/path.
 - [ ] OpenAPI atualizado e exemplos incluídos.

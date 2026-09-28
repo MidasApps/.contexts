@@ -3,7 +3,7 @@ title: Convenções de Modelagem para BigQuery
 type: contracts
 scope: warehouse analítico (OLAP) no GCP
 status: active
-last_updated: 2026-05-20
+last_updated: 2026-09-28
 related:
   - "@rules/data-modeling"
   - "@rules/migration"
@@ -144,14 +144,14 @@ CREATE TABLE billing_facts.payment_event (
   tenant_id STRING,
   user_id STRING,
   payment STRUCT<
-    amount NUMERIC(18, 2),
+    amount_minor INT64,
     currency STRING,
     method STRING
   >,
   line_items ARRAY<STRUCT<
     sku STRING,
     quantity INT64,
-    unit_price NUMERIC(18, 2)
+    unit_price_minor INT64
   >>
 )
 ```
@@ -169,7 +169,8 @@ Tipos canônicos por categoria:
 | Texto | `STRING` (nunca `VARCHAR` — não existe) |
 | Inteiro | `INT64` |
 | Decimal científico | `FLOAT64` |
-| **Money / precisão fixa** | `NUMERIC(p, s)` ou `BIGNUMERIC(p, s)` (ver `@rules/data-modeling`) |
+| **Money** | `INT64` (`amount_minor`) + `STRING` currency | 
+| Taxa, razão, quantidade fracionária | `NUMERIC(p, s)` ou `BIGNUMERIC(p, s)` |
 | Booleano | `BOOL` |
 | Binário | `BYTES` |
 | Data sem hora | `DATE` |
@@ -182,7 +183,7 @@ Tipos canônicos por categoria:
 
 Regras:
 - **Event time é sempre `TIMESTAMP` em UTC.** Nunca `STRING`. Nunca `DATETIME` sem TZ.
-- **Money é sempre `NUMERIC(p, s)`** — nunca `FLOAT64` (ver `@rules/data-modeling`).
+- **Money é sempre `INT64` em `amount_minor`** — nunca `FLOAT64` e nunca `NUMERIC` para o valor (ver `@rules/data-modeling`).
 - IDs são `STRING` (ver seção 7).
 - Para payloads de forma instável, prefira `JSON` (queryable, indexado parcialmente) sobre `STRING` serializado.
 
@@ -190,7 +191,7 @@ Regras:
 
 ## 7. IDs
 
-IDs são `STRING`. Use ULID ou UUIDv4/v7. **Nunca** invente `AUTO_INCREMENT` — BigQuery não tem sequences.
+IDs são `STRING`. `event_id` é ULID. `aggregate_id` é o id opaco da entidade, sem prefixo (`uuidv7` ou ULID). **Nunca** invente `AUTO_INCREMENT` — BigQuery não tem sequences.
 
 Correto:
 - `event_id STRING` contendo `01HXYZ...` (ULID) ou `f47ac10b-58cc-...` (UUID).
@@ -329,7 +330,7 @@ Tabela canônica `ai_observability.llm_calls`:
 | `prompt_tokens` | `INT64` |
 | `completion_tokens` | `INT64` |
 | `cached_tokens` | `INT64` |
-| `cost_usd` | `NUMERIC(12, 6)` |
+| `cost_micro_usd` | `INT64` (micro-dólar; dinheiro abaixo do centavo continua inteiro, não `NUMERIC`) |
 | `latency_ms` | `INT64` |
 | `finish_reason` | `STRING` |
 | `tool_calls` | `ARRAY<STRUCT<name STRING, arguments JSON, latency_ms INT64>>` |

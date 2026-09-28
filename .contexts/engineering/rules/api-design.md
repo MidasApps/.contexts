@@ -3,6 +3,7 @@ title: Regras de Design de API
 type: rules
 status: active
 scope: HTTP Route Handlers (Next.js), Server Actions, Firebase Functions (HTTPS/Callable), webhooks, RPC interno
+last_updated: 2026-09-28
 ---
 
 # Regras de Design de API
@@ -86,7 +87,7 @@ Regras imperativas que governam **como** desenhamos superfícies de API. Este do
 
 ## 8. Identificadores
 
-- **Use** ULID para IDs gerados pelo servidor: ordenáveis por tempo, opacos ao cliente, URL-safe. Não use UUID v4 (não-ordenável) nem auto-increment (vaza volume).
+- **Use** o id do store, opaco e sem prefixo: `uuidv7()` no Postgres, ULID no Firestore e em `eventId`. Não use auto-increment. UUID v4 fica para segredo que não é id de entidade.
 - **IDs são opacos**. **Nunca** parseie estrutura do ID no cliente. **Nunca** documente formato interno.
 - **Não** exponha IDs de banco (`uid` interno) ao público quando o recurso tem outra identidade natural pública (slug, código). Use o ID público.
 - **Para recursos hierárquicos**, prefira path nesting raso: `/projects/:projectId/tasks/:taskId`. Não aninhe mais de dois níveis — vira inferno de URL.
@@ -126,7 +127,7 @@ Regras imperativas que governam **como** desenhamos superfícies de API. Este do
 - **Inclua** header `X-Webhook-Id` único por entrega. Receptores usam para deduplicação.
 - **Retry** com backoff exponencial: 1m, 5m, 30m, 2h, 12h. Pare após 5 tentativas. Sucesso é qualquer 2xx do receptor.
 - **Não** envie payload sensível bruto (PII, tokens) em webhook. Envie ID do evento e exija que o receptor busque o dado via API autenticada.
-- **Documente** todos os tipos de evento em catálogo único. Cada evento tem versão (`order.created.v1`). Nunca renomeie evento — deprecie e crie novo.
+- **Documente** todos os tipos de evento em catálogo único. O nome é `eventName` em `SCREAMING_SNAKE_CASE` (`ORDER_PLACED`). A versão fica em campo próprio, não no nome. Nunca renomeie evento — deprecie e crie novo.
 
 ## 13. Webhooks (entrada)
 
@@ -170,7 +171,7 @@ Regras imperativas que governam **como** desenhamos superfícies de API. Este do
 
 - **Toda** rota retorna `Content-Type` correto, status code apropriado, envelope consistente.
 - **Toda** API usa mesmo formato de data: ISO 8601 com timezone (`2026-05-20T14:30:00Z`). Nunca epoch em campo de payload (apenas em headers como `X-Webhook-Timestamp`).
-- **Toda** API usa mesmo formato de moeda: inteiro em menor unidade (centavos), com campo `currency` separado (ISO 4217). Nunca float para dinheiro.
+- **Toda** API usa o mesmo dinheiro: `amountMinor` inteiro na menor unidade da moeda e `currency` ISO 4217. Nunca float e nunca string decimal. O nome vem de `@.contexts/engineering/rules/data-modeling.md`.
 - **Toda** API usa mesmo formato de booleano: `true`/`false` JSON. Nunca `"yes"`, `"1"`, `1`.
 - **Toda** API usa mesma convenção de nulidade: campo opcional ausente vs presente com `null` significam coisas diferentes. **Ausente** = não informado. **`null` explícito** = limpar valor. Documente em `@contracts/api`.
 - **Inconsistência transversal entre rotas é bug**, não preferência de quem implementou. Revisor de PR rejeita.

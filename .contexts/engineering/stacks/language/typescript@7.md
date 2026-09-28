@@ -1,6 +1,6 @@
 ---
 title: TypeScript
-version: 7.x
+version: 7.0.2
 last_updated: 2026-09-28
 status: current
 upstream: https://www.typescriptlang.org/docs/
@@ -10,7 +10,7 @@ category: language
 
 # TypeScript 7.x
 
-Linguagem oficial do projeto. TypeScript 7 (GA em julho/2026) é o **port nativo em Go** do toolchain TypeScript: type-checking e language service tipicamente **8-12x mais rápidos** que TypeScript 6, com paralelização (`--checkers`, `--builders`) e menor uso de memória. A semântica de type-checking é compatível com TypeScript 6.0 (com `stableTypeOrdering` e sem `ignoreDeprecations`).
+Linguagem oficial do projeto. TypeScript 7 (GA em 2026-07-08) é o **port nativo em Go** do toolchain TypeScript: type-checking e language service tipicamente **8-12x mais rápidos** que TypeScript 6, com paralelização (`--checkers`, `--builders`) e menor uso de memória. Pin medido em 2026-09-28: **7.0.2**. A 7.1, que deve expor a API programática, ainda não estava no npm. A semântica de type-checking é compatível com TypeScript 6.0 (com `stableTypeOrdering` e sem `ignoreDeprecations`).
 
 TypeScript 6 permanece o baseline de **API programática** (eslint, Volar, etc.) via pacote de compatibilidade. Código de aplicação e `tsc` do projeto usam TypeScript 7. O runtime JS/TS é `@stacks/runtime/node@24`.
 

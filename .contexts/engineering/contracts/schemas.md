@@ -3,7 +3,7 @@ title: Convenções de modelagem para schemas
 type: contracts
 scope: schemas zod compartilhados (boundaries, naming, organização, versionamento, sharing client/server)
 status: active
-last_updated: 2026-05-20
+last_updated: 2026-09-28
 ---
 
 # Convenções de modelagem para schemas
@@ -71,21 +71,21 @@ src/contracts/
 import { z } from 'zod';
 import { UserIdSchema } from '../users';
 
-export const OrderIdSchema = z.string().min(26).brand<'OrderId'>();
+export const OrderIdSchema = z.string().min(1).brand<'OrderId'>();
 export type OrderId = z.infer<typeof OrderIdSchema>;
 
-export const OrderStatusSchema = z.enum(['PENDING', 'PAID', 'CANCELLED']);
+export const OrderStatusSchema = z.enum(['pending', 'paid', 'cancelled']);
 export type OrderStatus = z.infer<typeof OrderStatusSchema>;
 
 export const OrderSchema = z.object({
   id: OrderIdSchema,
   userId: UserIdSchema,
   status: OrderStatusSchema,
-  totalCents: z.number().int().nonnegative(),
+  amountMinor: z.number().int().nonnegative(),
   currency: z.string().length(3),
-  placedAt: z.string().datetime({ offset: false }),
-  createdAt: z.string().datetime({ offset: false }),
-  updatedAt: z.string().datetime({ offset: false }),
+  placedAt: z.iso.datetime({ offset: false }),
+  createdAt: z.iso.datetime({ offset: false }),
+  updatedAt: z.iso.datetime({ offset: false }),
 });
 export type Order = z.infer<typeof OrderSchema>;
 ```
@@ -101,10 +101,10 @@ Regras estruturais:
 Todo identificador de entidade é um branded type. Isso impede troca acidental entre `UserId` e `OrderId` em chamadas, mesmo que ambos sejam strings em runtime. Ver `@rules/data-modeling`.
 
 ```ts
-export const UserIdSchema = z.string().min(26).brand<'UserId'>();
+export const UserIdSchema = z.string().min(1).brand<'UserId'>();
 export type UserId = z.infer<typeof UserIdSchema>;
 
-export const OrderIdSchema = z.string().min(26).brand<'OrderId'>();
+export const OrderIdSchema = z.string().min(1).brand<'OrderId'>();
 export type OrderId = z.infer<typeof OrderIdSchema>;
 ```
 
@@ -116,12 +116,12 @@ export type OrderId = z.infer<typeof OrderIdSchema>;
 Em `src/contracts/primitives/`:
 
 ```ts
-export const EmailSchema = z.string().email().toLowerCase().trim();
-export const UrlSchema = z.string().url();
-export const IsoDateTimeSchema = z.string().datetime({ offset: false });
+export const EmailSchema = z.email().toLowerCase().trim();
+export const UrlSchema = z.url();
+export const IsoDateTimeSchema = z.iso.datetime({ offset: false });
 export const CurrencySchema = z.string().length(3).toUpperCase();
 export const MoneySchema = z.object({
-  amountCents: z.number().int().nonnegative(),
+  amountMinor: z.number().int().nonnegative(),
   currency: CurrencySchema,
 });
 ```
@@ -236,15 +236,15 @@ export const OrderSchema = z.object({
 
 ## 16. JSON Schema export para IA
 
-Para structured outputs e tool params consumidos por LLMs (ver `@stacks/ai/vercel-ai-sdk`), exporte JSON Schema via `zod-to-json-schema`:
+Para structured outputs e tool params consumidos por LLMs (ver `@stacks/ai/vercel-ai-sdk`), exporte JSON Schema com `z.toJSONSchema`. No AI SDK 7 o schema Zod entra direto:
 
 ```ts
-import { generateObject } from 'ai';
+import { generateText, Output } from 'ai';
 import { OrderSummarySchema } from '@/contracts/orders';
 
-const { object } = await generateObject({
+const { output } = await generateText({
   model,
-  schema: OrderSummarySchema,
+  output: Output.object({ schema: OrderSummarySchema }),
   prompt: '...',
 });
 ```

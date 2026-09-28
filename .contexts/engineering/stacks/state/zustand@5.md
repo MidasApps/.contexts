@@ -1,7 +1,7 @@
 ---
 title: Zustand
-version: 5.x
-last_updated: 2026-07-13
+version: 5.0.15
+last_updated: 2026-09-28
 status: current
 upstream: https://zustand.docs.pmnd.rs
 repository: https://github.com/pmndrs/zustand

@@ -182,15 +182,15 @@ Nunca bloquear deploy em backfill síncrono. Regras detalhadas em `@rules/migrat
 
 Pós-deploy, monitore em janela de 15 minutos (regras completas em `@rules/observability`):
 
-| Métrica | Limiar de alerta |
+| Métrica | Limiar |
 |---|---|
-| Error rate | > baseline + 1% absoluto |
+| Error rate (5xx) | o da tabela "Ação ligada ao 5xx" em `@processes/monitoring` |
 | p95 latency | > baseline + 20% |
 | Throughput | drop > 15% |
 
 - Sentry / Datadog: **tag releases** com `version` para correlação automática de erros à release.
-- Logs estruturados com `version`, `commit_sha`, `deploy_id`.
-- Alerta de spike em error rate dentro de 5 min após deploy dispara **rollback automático**.
+- Logs estruturados com `version`, `commitSha`, `deployId`.
+- Nos 30 minutos depois do deploy, 5xx acima do baseline em 1 ponto percentual por 5 min, pico acima de 5% em 1 min, ou falha de smoke disparam rollback automático. Fora dessa janela vale a regra de page do monitoring, não um segundo limiar.
 
 ---
 

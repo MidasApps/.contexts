@@ -1,7 +1,7 @@
 ﻿---
 title: shadcn/ui
 version: distribuição via CLI (sem SemVer)
-last_updated: 2026-05-21
+last_updated: 2026-09-28
 status: current
 upstream: https://ui.shadcn.com
 repo: https://github.com/shadcn-ui/ui

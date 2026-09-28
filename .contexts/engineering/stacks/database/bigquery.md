@@ -2,11 +2,11 @@
 title: BigQuery
 category: database
 status: active
-last_updated: 2026-07-13
+last_updated: 2026-09-28
 upstream: https://cloud.google.com/bigquery/docs
 sdks:
-  - "@google-cloud/bigquery"
-  - "@google-cloud/bigquery-storage"
+  - "@google-cloud/bigquery@9.1.0"
+  - "@google-cloud/bigquery-storage@6.1.0"
   - googleapis (REST)
   - bq CLI
 ---

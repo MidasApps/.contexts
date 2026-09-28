@@ -8,7 +8,8 @@ Cada ADR é **imutável** após accepted. Decisões superadas geram ADR nova com
 
 | # | Título | Status | Data |
 |---|---|---|---|
-| [0001](0001-ddc-engineering-baseline-and-harness-enforcement.md) | Baseline de engenharia 2026-07 e enforcement do harness DDC | accepted | 2026-07-14 |
+| [0001](0001-ddc-engineering-baseline-and-harness-enforcement.md) | Baseline de engenharia 2026-07 e enforcement do harness DDC | accepted; matriz de versões superseded pela 0002 | 2026-07-14 |
+| [0002](0002-baseline-2026-09-version-and-naming-alignment.md) | Baseline de setembro de 2026 e alinhamento de nomes entre camadas | accepted | 2026-09-28 |
 
 ## Como criar
 

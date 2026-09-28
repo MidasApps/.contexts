@@ -1,9 +1,9 @@
 ---
 title: Anthropic TypeScript SDK
 package: "@anthropic-ai/sdk"
-version: 0.30+ / 1.x
-last_updated: 2026-07-13
-status: stable
+version: 0.129.0
+last_updated: 2026-09-28
+status: current
 upstream: https://github.com/anthropics/anthropic-sdk-typescript
 runtime: node | edge (parcial)
 type: stack
@@ -45,17 +45,17 @@ pnpm add @anthropic-ai/bedrock-sdk
 pnpm add @anthropic-ai/vertex-sdk
 ```
 
-Pinning recomendado no `package.json` (versões 0.x/1.x ainda podem ter breaking changes em minor):
+Pin exato. Em 2026-09-28 o latest é `0.129.0` e **não existe** linha 1.x no npm. Minor de 0.x ainda pode quebrar.
 
 ```json
 {
   "dependencies": {
-    "@anthropic-ai/sdk": "1.2.3"
+    "@anthropic-ai/sdk": "0.129.0"
   }
 }
 ```
 
-Não use `^` em produção até a linha estabilizar plenamente em 1.x. Prefira pin exato em `dependencies` (ver `@rules/development` e `@rules/security` para supply chain).
+Prefira pin exato em `dependencies` (ver `@rules/development` e `@rules/security` para supply chain).
 
 ---
 

@@ -13,7 +13,7 @@ related:
 
 > **TEMPLATE — ainda não preenchido.** Estrutura boilerplate do DDC (carregada sob
 > demanda pela skill `policies`). Enquanto vazio, aplique o default conservador de
-> @business/compliance: todo dado de usuário é PII, consentimento explícito.
+> @business/compliance: todo dado de usuário é PII. A base legal fica em branco até ser preenchida.
 
 ## Consentimento
 <!-- PREENCHER: quando pedir, granularidade, como registrar e revogar. -->

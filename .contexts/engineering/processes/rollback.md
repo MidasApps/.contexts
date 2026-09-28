@@ -15,7 +15,7 @@ Rollback é mecanismo de defesa, não fracasso. Um deploy revertido é um sistem
 
 Acione rollback (ou forward fix urgente) quando qualquer um destes critérios for atingido:
 
-- **Error rate acima do threshold** definido em `@processes/monitoring` (tipicamente > 1% sustentado por 5min, ou pico > 5%).
+- **5xx** na tabela "Ação ligada ao 5xx" de `@processes/monitoring`: page quando passa de 1% por 5 min ou de 5% em 1 min. Rollback automático só na janela de 30 min após o deploy, nos gatilhos dessa mesma tabela.
 - **p95 de latência degradou significativamente** versus baseline pre-deploy (tipicamente > 2x).
 - **SLO burn rate alto** — queimando budget mensal em horas.
 - **Bug crítico afetando usuários** (fluxo principal quebrado, dados incorretos exibidos, ação destrutiva acidental).
@@ -30,7 +30,7 @@ Diante de qualquer sinal acima, **mitigar primeiro, investigar depois**. Não de
 Nem todo bug em produção justifica rollback. Avalie forward fix quando:
 
 - **Bug cosmético sem impacto funcional** (typo, alinhamento, copy errado). Hotfix forward na próxima janela.
-- **Issue afetando < 1% dos usuários sem perda de dados.** Custo do rollback (interrupção, regressão de features legítimas) > benefício. Preferir hotfix forward.
+- **Menos de 1% dos usuários, sem perda de dado.** O rollback atingiria gente que o bug não atinge. Preferir hotfix forward. É a mesma linha da tabela de monitoring.
 - **Migration destrutiva já aplicada irreversivelmente** (drop column, drop table). Rollback do código pode quebrar com schema novo — ver `@rules/migration`. Forward-only com fix.
 - **Falha causada por dependência upstream** (provider de IA down, Firebase outage, DNS). Rollback não resolve. Comunicar status, esperar mitigação upstream, considerar fallback/degradação.
 - **Bug existe em todas as versões recentes.** Rollback apenas troca um bug por outro. Hotfix forward.
@@ -134,7 +134,7 @@ Ver `@stacks/database/postgres`.
 
 Eventos são imutáveis — não há rollback retroativo. Ver `@contracts/events`.
 
-- Para "desfazer" um evento: emitir evento compensatório (`OrderCanceled` após `OrderPlaced` errado).
+- Para desfazer um evento: emitir evento compensatório (`ORDER_CANCELED` depois de um `ORDER_PLACED` errado).
 - Consumers devem ser idempotentes e lidar com sequências de compensação.
 
 ### AI prompts

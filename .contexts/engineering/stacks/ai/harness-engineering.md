@@ -115,7 +115,7 @@ Tool gating:
 
 ### Modelo é commodity, harness é produto
 
-Trocas de modelo (gpt-4o → claude-3.7-sonnet → gemini-2.5-pro) devem ser **configuração**, não rewrite. Adote abstrações cross-provider — ver `@stacks/ai/vercel-ai-sdk`. Use APIs vendor-specific apenas quando a feature exige (ex: Gemini context caching, OpenAI Realtime).
+Trocas de modelo devem ser **configuração**, não rewrite. O id vive na config e segue `stacks/VERSIONS.md` mais a ficha do provedor. Adote abstrações cross-provider — ver `@stacks/ai/vercel-ai-sdk`. Use APIs vendor-specific apenas quando a feature exige (ex: Gemini context caching, OpenAI Realtime).
 
 ### Determinismo por construção
 

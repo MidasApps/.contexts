@@ -1,8 +1,8 @@
 ---
 title: Google Gen AI SDK (@google/genai)
 package: "@google/genai"
-version: latest
-last_updated: 2026-07-13
+version: 2.24.0
+last_updated: 2026-09-28
 status: current
 upstream:
   - https://github.com/googleapis/js-genai
@@ -55,7 +55,7 @@ A diferença estrutural mais importante: **não existe mais o conceito de "model
 pnpm add @google/genai
 ```
 
-Requer Node 20+ (referencie `@stacks/runtime/node@24`) e TypeScript 7+ (referencie `@stacks/language/typescript@7`).
+Requer Node 24 (referencie `@stacks/runtime/node@24`) e TypeScript 7.0.2 (referencie `@stacks/language/typescript@7`). Pacote medido: `@google/genai@2.24.0`. Os exemplos usam `gemini-3.5-flash` / `gemini-3.5-flash-lite`, o default do `@stacks/ai/gemini`.
 
 ---
 
@@ -88,7 +88,7 @@ Autenticação via Application Default Credentials:
 - Local: `GOOGLE_APPLICATION_CREDENTIALS` apontando para JSON de service account, ou `gcloud auth application-default login`.
 - Em GCP (Cloud Run, GCE, GKE, Cloud Functions): metadata server, sem configuração extra.
 
-`location` deve ser uma região suportada (`us-central1`, `europe-west4`, `asia-northeast1`, etc.). Pinar a região é obrigatório — não há "global" para Vertex Gemini.
+`location` é uma região suportada (`us-central1`, `europe-west4`) ou `global` quando a ficha do modelo lista esse endpoint. `global` com `pii` exige aprovação de compliance (`@rules/governance`). Confira o location antes de fixar.
 
 ---
 
@@ -102,7 +102,7 @@ Operações stateless contra um modelo.
 
 ```ts
 const res = await ai.models.generateContent({
-  model: 'gemini-2.5-pro',
+  model: 'gemini-3.5-flash',
   contents: 'Resuma em uma frase: ...',
   config: {
     temperature: 0.2,
@@ -117,7 +117,7 @@ Streaming via `AsyncIterable`:
 
 ```ts
 const stream = await ai.models.generateContentStream({
-  model: 'gemini-2.5-flash',
+  model: 'gemini-3.5-flash-lite',
   contents: prompt,
 });
 for await (const chunk of stream) {
@@ -129,7 +129,7 @@ Embeddings:
 
 ```ts
 const emb = await ai.models.embedContent({
-  model: 'text-embedding-004',
+  model: 'gemini-embedding-001',
   contents: ['frase A', 'frase B'],
 });
 ```
@@ -140,7 +140,7 @@ Sessão stateful com histórico mantido pelo SDK.
 
 ```ts
 const chat = ai.chats.create({
-  model: 'gemini-2.5-pro',
+  model: 'gemini-3.5-flash',
   history: [],
   config: { temperature: 0.7 },
 });
@@ -165,7 +165,7 @@ const uploaded = await ai.files.upload({
 });
 
 await ai.models.generateContent({
-  model: 'gemini-2.5-pro',
+  model: 'gemini-3.5-flash',
   contents: [
     { fileData: { fileUri: uploaded.uri!, mimeType: uploaded.mimeType! } },
     'Descreva o vídeo.',
@@ -181,7 +181,7 @@ Context caching explícito (referencie `@stacks/ai/gemini` para semântica e pri
 
 ```ts
 const cache = await ai.caches.create({
-  model: 'gemini-2.5-pro',
+  model: 'gemini-3.5-flash',
   config: {
     contents: largeContext,
     systemInstruction: '...',
@@ -190,7 +190,7 @@ const cache = await ai.caches.create({
 });
 
 await ai.models.generateContent({
-  model: 'gemini-2.5-pro',
+  model: 'gemini-3.5-flash',
   contents: 'Pergunta sobre o contexto cacheado',
   config: { cachedContent: cache.name },
 });
@@ -210,7 +210,7 @@ Live API: sessão WebSocket bidirecional com áudio/vídeo de entrada e áudio/t
 
 ```ts
 const session = await ai.live.connect({
-  model: 'gemini-2.0-flash-live',
+  model: 'gemini-3.8-live',
   config: { responseModalities: ['AUDIO'] },
   callbacks: {
     onmessage: (msg) => { /* LiveServerMessage */ },
@@ -270,7 +270,7 @@ Toda configuração de geração vai dentro de `config`, não espalhada:
 
 ```ts
 await ai.models.generateContent({
-  model: 'gemini-2.5-pro',
+  model: 'gemini-3.5-flash',
   contents,
   config: {
     temperature: 0.4,
@@ -329,7 +329,7 @@ const controller = new AbortController();
 setTimeout(() => controller.abort(), 10_000);
 
 await ai.models.generateContent({
-  model: 'gemini-2.5-flash',
+  model: 'gemini-3.5-flash-lite',
   contents,
   config: { abortSignal: controller.signal },
 });
@@ -342,7 +342,7 @@ await ai.models.generateContent({
 A regra default do stack é **Vercel AI SDK** (`@ai-sdk/google` ou `@ai-sdk/google-vertex`) — referencie `@stacks/ai/vercel-ai-sdk`. Ele oferece:
 
 - Cross-provider (trocar para Anthropic/OpenAI sem reescrever).
-- `generateObject`/`streamObject` com Zod nativo.
+- `generateText` / `streamText` com `Output.object` e Zod 4.
 - Tool use unificado.
 - UI streaming React (`useChat`, `useCompletion`).
 
@@ -370,7 +370,7 @@ Referencie `@stacks/frontend/next@16`.
   export async function POST(req: Request) {
     const { prompt } = await req.json();
     const stream = await ai.models.generateContentStream({
-      model: 'gemini-2.5-flash',
+      model: 'gemini-3.5-flash-lite',
       contents: prompt,
     });
     const encoder = new TextEncoder();
@@ -428,7 +428,7 @@ Referencie `@rules/observability`. Envolva chamadas em spans OpenTelemetry com c
 const span = tracer.startSpan('gen_ai.generate_content', {
   attributes: {
     'gen_ai.system': 'gemini',
-    'gen_ai.request.model': 'gemini-2.5-pro',
+    'gen_ai.request.model': 'gemini-3.5-flash',
     'gen_ai.request.temperature': 0.4,
   },
 });

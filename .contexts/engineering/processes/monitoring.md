@@ -142,7 +142,8 @@ Padrão **RED** (Rate, Errors, Duration) + saturação:
 
 | Sinal | Threshold | Severidade |
 |---|---|---|
-| Error rate (5xx) | > 2% por 5 min | P1 |
+| Error rate (5xx) sustentado | > 1% por 5 min | P1 |
+| Error rate (5xx) em pico | > 5% em 1 min | P1 |
 | p95 latency | > 2× baseline por 10 min | P2 |
 | SLO burn rate fast (1h consome 2% budget mensal) | — | P1 |
 | SLO burn rate slow (6h consome 5% budget mensal) | — | P2 |
@@ -151,6 +152,19 @@ Padrão **RED** (Rate, Errors, Duration) + saturação:
 | Postgres connections | > 80% do pool | P2 |
 | Firestore quota | > 80% do limite | P2 |
 | Synthetic probe | falha em 2 regiões consecutivas | P1 |
+
+### Ação ligada ao 5xx
+
+Uma tabela só. Deploy e rollback não inventam outro número.
+
+| Situação | Número | Ação |
+|---|---|---|
+| Meta mensal | 5xx < 1% | SLO. Acima disso o error budget queima. |
+| Operação normal | 5xx > 1% por 5 min, ou > 5% em 1 min | P1. On-call mitiga. |
+| Janela de 30 min após um deploy | 5xx > baseline + 1 ponto percentual por 5 min, ou > 5% em 1 min, ou smoke falha | Rollback automático do deploy. |
+| Bug estreito | < 1% dos usuários e sem perda de dado | Forward fix. Rollback aqui espalha mais do que corrige. |
+
+O 2% antigo de page ficava acima do SLO de 1% e deixava a meta furar sem acordar ninguém. O page agora é o próprio SLO sustentado. O pico de 5% e o desvio de 1 ponto contra o baseline do deploy continuam gatilhos diferentes: um é incidente, o outro é o deploy que acabou de sair.
 | Audit log gap | nenhum evento por > 5 min em fluxo ativo | P2 |
 
 ---

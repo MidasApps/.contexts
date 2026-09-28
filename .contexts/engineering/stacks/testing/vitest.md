@@ -1,7 +1,7 @@
 ---
 title: Vitest
-version: 4.x
-last_updated: 2026-07-13
+version: 5.0.2
+last_updated: 2026-09-28
 status: current
 upstream: https://vitest.dev
 repo: https://github.com/vitest-dev/vitest
@@ -28,14 +28,24 @@ Pin via `package.json` com versão exata ou caret restrito:
 ```json
 {
   "devDependencies": {
-    "vitest": "4.1.10",
-    "@vitest/coverage-v8": "4.1.10",
-    "@vitest/ui": "4.1.10"
+    "vitest": "5.0.2",
+    "@vitest/coverage-v8": "5.0.2",
+    "@vitest/ui": "5.0.2",
+    "@vitest/browser-playwright": "5.0.2",
+    "vite": "8.3.1"
   }
 }
 ```
 
-Manter `vitest`, `@vitest/coverage-v8`, `@vitest/ui` e provider de browser (`@vitest/browser-playwright`) sempre na mesma linha major. Vitest **4.x** é o baseline (Vite >= 6, Node >= 20; projeto usa Node 24). Coverage V8 usa remapeamento AST (mais preciso que v3). `workspace` foi renomeado para `projects`.
+Manter `vitest`, `@vitest/coverage-v8`, `@vitest/ui` e `@vitest/browser-playwright` na **mesma versão**. Vitest 5.0.2 exige Node `^22.12 || ^24 || >=26` (o projeto está no 24.21) e Vite `^6.4 || ^7 || ^8` como peer — o `vite` medido é 8.3.1 e serve só ao runner, não ao build do Next. `workspace` já se chama `projects` desde a 3.2/4.
+
+Quebras que o código deste framework precisa respeitar (guia: https://vitest.dev/guide/migration):
+
+- `clearMocks` passa a ser `true`: o histórico do mock não vaza entre testes; a implementação permanece.
+- `vi.mock`, `vi.unmock` e `vi.hoisted` fora do topo do arquivo lançam erro.
+- A opção `sequential` saiu. Use `concurrent` quando a inversão for necessária.
+- Anexos vão para `.vitest/attachments/`.
+- `expect.poll` falha se a função não resolver no tempo.
 
 ## Setup
 
@@ -424,7 +434,7 @@ test: {
 - `jest.config.js` é descartado; o equivalente é `vitest.config.ts`.
 - Snapshots gerados pelo Jest geralmente são compatíveis, mas serializers customizados precisam ser portados.
 
-## Matchers e schemas (Vitest 4)
+## Matchers e schemas (Vitest 5)
 
 - `expect.schemaMatching(schema)` — asymmetric matcher para Standard Schema (Zod 4, Valibot, ArkType). Ideal com `toEqual`/`toMatchObject` em payloads validados por `@stacks/validation/zod@4`.
 - `expect.assert(cond)` — narrow de tipo no teste (Chai assert em `expect`).

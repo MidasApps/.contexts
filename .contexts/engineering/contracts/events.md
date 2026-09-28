@@ -3,7 +3,7 @@ title: Domain Events — Convenções de Modelagem
 type: contracts
 scope: events
 status: active
-last_updated: 2026-05-20
+last_updated: 2026-09-28
 related:
   - "@architecture/ddd"
   - "@contracts/api"
@@ -44,7 +44,7 @@ A escolha da classe **define o contrato, o transport e a política de retenção
 - Cruzam **bounded contexts** ou **sistemas externos** (microservices, parceiros).
 - Contrato **estável**, versionado com rigor de API pública (ver `@contracts/api`).
 - Devem ser **anêmicos em vocabulário interno**: não vazar conceitos privados do contexto produtor.
-- Exemplo: `Orders.OrderPlaced` consumido por Billing, Analytics, Notifications.
+- Exemplo: `ORDERS_ORDER_PLACED` consumido por Billing, Analytics, Notifications.
 
 ### 1.3 Notification Events (lightweight)
 
@@ -69,10 +69,10 @@ Todo evento publicado no projeto **DEVE** conformar com o envelope abaixo. Inspi
   "occurredAt": "2026-05-20T14:30:00.000Z",
   "tenantId": "tenant-123",
   "aggregateType": "Order",
-  "aggregateId": "order-01HZX1J4K8VN3P5Q7R9S2T4W6Y",
-  "causationId": "command-01HZW9G2H7VN3P5Q7R9S2T4W6Y",
+  "aggregateId": "01932a7c-5b14-7c3a-8e2d-6f4b9a1c0d11",
+  "causationId": "01HZW9G2H7VN3P5Q7R9S2T4W6Y",
   "correlationId": "trace-abc-123",
-  "actor": { "type": "USER", "id": "user-01HZV8F1G6VN3P5Q7R9S2T4W6Y" },
+  "actor": { "type": "user", "id": "01HZV8F1G6VN3P5Q7R9S2T4W6Y" },
   "source": "orders-service",
   "schemaVersion": 1,
   "data": { "...": "payload específico do evento" }
@@ -112,7 +112,7 @@ Todo evento publicado no projeto **DEVE** conformar com o envelope abaixo. Inspi
 
 - **SCREAMING_SNAKE_CASE**, verbo no **particípio passado**.
 - Expressa um **fato consumado**, nunca uma intenção.
-- Quando ambíguo entre contextos, prefixar com bounded context em PascalCase: `Orders.OrderPlaced` (formato externo) ou manter convenção SCREAMING_SNAKE_CASE com prefixo do contexto: `ORDERS_ORDER_PLACED`.
+- Quando o mesmo fato existe em mais de um bounded context, prefixar o contexto no mesmo formato: `ORDERS_ORDER_PLACED`. Não usar `Orders.OrderPlaced`.
 
 | Correto | Incorreto | Por quê |
 |---|---|---|
@@ -124,7 +124,7 @@ Todo evento publicado no projeto **DEVE** conformar com o envelope abaixo. Inspi
 ### 3.2 Aggregate
 
 - `aggregateType`: PascalCase singular (`Order`, `User`, `Invoice`).
-- `aggregateId`: ULID com prefixo opcional (`order-01HZX...`).
+- `aggregateId`: a string do id da entidade, sem prefixo. `uuidv7` quando a entidade mora no Postgres, ULID quando mora no Firestore.
 
 ### 3.3 Topics
 
@@ -197,7 +197,7 @@ Todo evento **DEVE** ter schema Zod versionado. Schemas implícitos são anti-pa
 import { z } from 'zod';
 
 export const ActorSchema = z.object({
-  type: z.enum(['USER', 'SYSTEM', 'SERVICE']),
+  type: z.enum(['user', 'system', 'service']),
   id: z.string().min(1),
 });
 
@@ -205,7 +205,7 @@ export const EventEnvelopeSchema = z.object({
   eventId: z.string().regex(/^[0-9A-HJKMNP-TV-Z]{26}$/), // ULID
   eventName: z.string(),
   eventVersion: z.number().int().positive(),
-  occurredAt: z.string().datetime({ offset: false }),
+  occurredAt: z.iso.datetime({ offset: false }),
   tenantId: z.string().min(1),
   aggregateType: z.string(),
   aggregateId: z.string().min(1),
@@ -227,7 +227,7 @@ export const OrderPlacedEventV1Schema = EventEnvelopeSchema.extend({
   data: z.object({
     orderId: OrderIdSchema,
     userId: UserIdSchema,
-    totalCents: z.number().int().nonnegative(),
+    amountMinor: z.number().int().nonnegative(),
     currency: z.string().length(3),
     items: z.array(OrderItemSchema).min(1),
   }),
@@ -240,7 +240,7 @@ export type OrderPlacedEventV1 = z.infer<typeof OrderPlacedEventV1Schema>;
 
 - Um schema por **(eventName, eventVersion)**. Co-localizar em `events/<context>/<event-name>.v<n>.ts`.
 - `eventName` e `eventVersion` SEMPRE com `z.literal(...)` — força discriminação estática.
-- Reusar schemas atômicos (`OrderIdSchema`, `MoneyCentsSchema`) — ver `@contracts/schemas`.
+- Reusar schemas atômicos (`OrderIdSchema`, `MoneySchema`) — ver `@contracts/schemas`.
 - Validar no **producer (antes de publicar)** e no **consumer (antes de processar)**.
 
 ---
@@ -457,7 +457,7 @@ Ver `@rules/observability`.
 | Topic por evento (em vez de por contexto) | Explosão de topics, IAM intratável. |
 | Payload >1MB sem claim check | Falha de publish ou perda de mensagem. |
 | Ausência de `correlationId` / `causationId` | Debug e auditoria de cadeias impossíveis. |
-| Eventos CRUD-like (`OrderUpdated`) | Não diz **o que** mudou; consumers viram polling. Preferir eventos específicos (`OrderShipped`, `OrderAddressChanged`). |
+| Eventos CRUD-like (`ORDER_UPDATED`) | Não diz **o que** mudou; consumers viram polling. Preferir eventos específicos (`ORDER_SHIPPED`, `ORDER_ADDRESS_CHANGED`). |
 | Comandos disfarçados de eventos | Quebra de direção de fluxo; eventos descrevem fatos, não pedem ações. |
 | Side effects multi-step no handler sem outbox/saga | Perda de atomicidade write+publish. |
 | Retention infinita em topic com PII | Violação de LGPD/GDPR. |

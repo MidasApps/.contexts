@@ -166,34 +166,34 @@ DDD não é adotado como abordagem **uniforme** no projeto — é aplicado **sel
 A modelagem DDD vive **dentro** do recorte de cada feature, dentro do hexágono definido por @architecture/hexagonal, casada com a organização por contexto promovida por @architecture/feature-based e @architecture/fsd. A estrutura interna canônica para uma feature com domínio rico:
 
 ```
-src/features/<feature>/
+services/<context>/
   domain/                          # tactical design vive aqui
     entities/
       order.ts                     # Entity: Order (aggregate root)
-      orderItem.ts                 # Entity interna do aggregate Order
-    valueObjects/
+      order-item.ts                # Entity interna do aggregate Order
+    value-objects/
       money.ts                     # Value Object
-      orderStatus.ts
-      orderId.ts                   # branded type
+      order-status.ts
+      order-id.ts                  # branded type
     services/
-      pricingPolicy.ts             # Domain Service
-      shippingCalculator.ts
+      pricing-policy.ts            # Domain Service
+      shipping-calculator.ts
     events/
-      orderPlaced.ts               # Domain Event
-      orderShipped.ts
+      order-placed.ts              # Domain Event
+      order-shipped.ts
     specifications/
-      eligibleForDiscount.ts       # Specification (quando aplicável)
+      eligible-for-discount.ts     # Specification (quando aplicável)
   application/                     # application services / use cases
     ports/
       driven/
-        orderRepository.ts         # interface do Repository
+        order-repository.ts        # interface do Repository
       driving/
-        placeOrder.ts              # interface do use case
-    useCases/
-      placeOrder.ts                # Application Service
+        place-order.ts             # interface do use case
+    use-cases/
+      place-order.ts               # Application Service
   adapters/
     driven/
-      firestoreOrderRepository.ts  # implementação concreta do Repository
+      firestore-order-repository.ts  # implementação concreta do Repository
   composition.ts
   index.ts
 ```
@@ -238,7 +238,7 @@ Para contextos onde aggregates não casam bem com a forma natural do banco (ex.:
 
 Eventos de domínio publicados externamente seguem convenções específicas de payload, naming e versionamento — tratadas em `@contracts/events` (a ser definido). Em síntese:
 
-- Nome no passado, em PascalCase: `OrderPlaced`, `PaymentApproved`.
+- O tipo TypeScript é PascalCase (`OrderPlaced`). O `eventName` no fio é `ORDER_PLACED`. O arquivo é `order-placed.ts`.
 - Payload mínimo: identificadores e dados essenciais; não é DTO inteiro do aggregate.
 - Versionamento explícito quando o evento atravessa bounded contexts.
 - Metadados padronizados: `eventId`, `occurredAt`, `aggregateId`, `aggregateType`, `version`.

@@ -1,8 +1,8 @@
 ﻿---
 title: Gemini API
-version: 2025
+version: gemini-3.5-flash
 last_updated: 2026-09-28
-status: needs-revision
+status: current
 upstream:
   - https://ai.google.dev/gemini-api/docs
   - https://cloud.google.com/vertex-ai/generative-ai/docs
@@ -10,23 +10,21 @@ upstream:
 
 # Gemini API
 
-> ## ⚠️ As tabelas de modelo abaixo são da geração 2.5 — que **se aposenta em 16/10/2026**.
->
-> Migre para a geração 3 (observado em produção, 2026-08-13:
-> `gemini-3.5-flash-lite`, `gemini-3.6-flash`, `gemini-3.1-pro-preview`).
-> Confirme ids na doc upstream antes de fixar.
->
-> **Endpoint regional deixa de valer.** Nenhum modelo da geração 3 respondeu em
-> `us-central1` (`Publisher model … was not found`): a geração 3 exige o endpoint
-> `global`. Isso é **decisão de residência de dados** (ver `@rules/governance`,
-> "Terceirização de chamadas de IA" — default global é proibido para `pii`) e
-> exige decisão explícita do dono do produto + ADR, não troca silenciosa de modelo.
->
-> Trocar de região **não** obriga reindexação: `gemini-embedding-001` respondeu
-> nas duas com a mesma dimensão (3072). `thinkingConfig`/`thoughtsTokenCount`
-> seguem valendo.
-
 Manual operacional da **Gemini API** como produto/protocolo do Google. Cobre superfícies, modelos, request shape, autenticação, quotas e governança. Documento focado em **o que a API é e como o projeto a consome**, agnóstico de SDK. Para o SDK oficial TypeScript `@google/genai`, ver `@stacks/ai/google-genai-sdk`. Para acesso via abstração unificada, ver `@stacks/ai/vercel-ai-sdk`.
+
+Default de produção nova, lido no Vertex em 2026-09-28:
+
+| Papel | Model id | Janela no Vertex |
+|---|---|---|
+| Geral | `gemini-3.5-flash` | GA, aposentadoria em 2027-05-19 ou depois |
+| Throughput | `gemini-3.5-flash-lite` | GA, aposentadoria em 2027-07-21 ou depois |
+| Embedding | `gemini-embedding-001` | 3072 dimensões |
+
+`gemini-2.5-pro`, `gemini-2.5-flash` e `gemini-2.5-flash-lite` aposentam no **Vertex em 2026-10-20**. Não comece trabalho novo neles. O console AI Studio, na mesma data, ainda não anunciava shutdown dos 2.5 de texto. O framework segue o Vertex, que é o caminho de produção.
+
+`gemini-3.8-flash` é mais novo e está GA, mas a página de lifecycle o lista como disponibilidade curta (sem data de aposentadoria publicada). Não é o default.
+
+Região: a doc do Vertex descreve endpoint regional e endpoint `global`. Confirme o location na ficha do modelo antes de fixar. `global` para fluxo com `pii` continua exigindo aprovação de compliance (`@rules/governance`), não troca silenciosa.
 
 ## Duas plataformas, mesma família de modelos
 
@@ -52,26 +50,19 @@ A Gemini API é oferecida em **duas plataformas distintas**, com modelos compat�
 
 > Regra operacional: **AI Studio em dev/MVP, Vertex em produção**. Migração não muda o shape do request, apenas auth e endpoint.
 
-## Modelos principais (2025)
+## Modelos de referência
 
-| Modelo | Família | Context | Caso de uso |
-|---|---|---|---|
-| `gemini-2.5-pro` | 2.5 | até 2M tokens | raciocínio complexo, multimodal pesado |
-| `gemini-2.5-flash` | 2.5 | até 1M tokens | default custo/latência, thinking opcional |
-| `gemini-2.5-flash-lite` | 2.5 | até 1M tokens | high-throughput, custo mínimo |
-| `gemini-2.0-flash` | 2.0 | até 1M tokens | legacy estável |
-| `text-embedding-004` | embed | — | embeddings 768 dims |
-| `gemini-embedding-001` | embed | — | embeddings até 3072 dims, multilíngue |
-| `imagen-3.0` / `imagen-4.0` | image gen | — | geração de imagens (Vertex) |
-| `veo-*` | video gen | — | geração de vídeo (Vertex) |
+A tabela do topo deste arquivo é o default. A ficha de migração do Vertex (2026-09-28) dá aos modelos 3.x de texto janela de 1.048.576 tokens e saída de 65.536. Não copie id de blog: a página de modelos muda.
 
-Todos os modelos `gemini-2.x` são **multimodais nativos**: aceitam text, image, audio, video e PDF como input direto (sem pré-processamento OCR/transcrição externa).
+`gemini-2.5-flash-image` aposenta em datas diferentes conforme a superfície (API Gemini em 2026-10-02, Vertex em 2027-03-15). Imagem nova usa a geração 3 publicada na ficha (`gemini-3.1-flash-image` e variantes lite), conferida no dia do pin.
+
+Os modelos de texto atuais são multimodais nativos: text, image, audio, video e PDF entram sem OCR externo. `thinkingConfig` e `thoughtsTokenCount` continuam no uso de raciocínio.
 
 ## Features distintivas vs outros providers
 
-- **Context window**: 1M–2M tokens em Pro/Flash 2.5 — ordem de magnitude acima de competidores.
+- **Context window**: 1.048.576 tokens na geração 3 de texto listada na ficha de migração do Vertex.
 - **Multimodal nativo**: vídeo inteiro como input, áudio longo, PDFs estruturados — não há conversão para texto antes.
-- **Thinking/reasoning**: Gemini 2.5 expõe `thinkingConfig` com budget de tokens de pensamento (campo `thoughtsTokenCount` no `usageMetadata`).
+- **Thinking/reasoning**: `thinkingConfig` com budget de tokens de pensamento (campo `thoughtsTokenCount` no `usageMetadata`).
 - **Grounding with Google Search**: tool built-in (`googleSearch`) que injeta resultados de busca no contexto, com citações estruturadas no response.
 - **Code execution**: tool built-in (`codeExecution`) que roda Python sandbox e retorna stdout/stderr.
 - **URL context**: tool built-in (`urlContext`) para fetch e ingestão de URLs.
@@ -156,7 +147,7 @@ Para JSON estruturado garantido pelo decoder:
 
 1. Defina `generationConfig.responseMimeType: "application/json"`.
 2. Defina `generationConfig.responseSchema` com um **JSON Schema subset** (Gemini não aceita JSON Schema completo — sem `$ref`, sem `oneOf` em alguns níveis).
-3. Pareie com Zod usando `zod-to-json-schema` e valide o parsed result com `Schema.parse()` — ver `@stacks/validation/zod@4`.
+3. Pareie com Zod usando `z.toJSONSchema` e valide o parsed result com `Schema.parse()` — ver `@stacks/validation/zod@4`.
 
 Sem `responseMimeType: "application/json"`, `responseSchema` é ignorado silenciosamente — bug recorrente.
 
@@ -176,7 +167,7 @@ Built-in tools (`googleSearch`, `codeExecution`, `urlContext`) **não podem ser 
 
 ### AI Studio
 ```http
-GET /v1beta/models/gemini-2.5-flash:generateContent
+GET /v1beta/models/gemini-3.5-flash:generateContent
 Host: generativelanguage.googleapis.com
 x-goog-api-key: <API_KEY>
 ```
@@ -210,7 +201,7 @@ Endpoint regional obrigatório — `us-central1`, `europe-west4`, `southamerica-
 
 Emita spans OpenTelemetry com atributos padrão `gen_ai.*`:
 - `gen_ai.system = "gemini"`
-- `gen_ai.request.model = "gemini-2.5-flash"`
+- `gen_ai.request.model = "gemini-3.5-flash"`
 - `gen_ai.usage.input_tokens`, `gen_ai.usage.output_tokens`
 - `gen_ai.response.finish_reasons`
 
@@ -228,7 +219,7 @@ Ver `@rules/observability`.
 ## Quando NÃO usar Gemini (neste projeto)
 
 - Workloads que dependem de features OpenAI-specific (ex: Realtime API com WebRTC) — use OpenAI direto, ver `@stacks/ai/openai`.
-- Texto curto, baixo volume, sem multimodal: `gpt-4o-mini` costuma ser mais barato e simples.
+- Texto curto, baixo volume, sem multimodal: compare o preço na tabela vigente do outro provedor antes de trocar. Não fixe um id de modelo antigo como se fosse o barato de hoje.
 - Compliance que exige provider não-Google.
 
 ## Acesso no projeto

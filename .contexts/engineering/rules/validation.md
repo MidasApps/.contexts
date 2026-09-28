@@ -3,7 +3,7 @@ title: Regras de Validação
 type: rules
 scope: engineering
 status: active
-last_updated: 2026-07-13
+last_updated: 2026-09-28
 related:
   - "@.contexts/engineering/rules/development.md"
   - "@.contexts/engineering/rules/security.md"
@@ -55,7 +55,7 @@ Estas fronteiras **exigem** validação Zod sem exceção:
 - **Sempre** valide payloads de Firebase Functions HTTP e callable functions. Triggers do Firestore validam o snapshot esperado antes de processar.
 - **Sempre** valide mensagens de Pub/Sub, Cloud Tasks ou qualquer fila antes de processar. Mensagem entregue não é mensagem válida.
 - **Sempre** valide payload de webhooks (Stripe, OAuth callbacks, provedores) após verificar assinatura HMAC. Assinatura prova origem, schema prova shape.
-- **Sempre** valide structured output de LLMs (`generateObject`, `responseFormat: json_schema`, function calling) com o mesmo schema usado no SDK.
+- **Sempre** valide structured output de LLMs (`Output.object` no AI SDK 7, `responseFormat: json_schema`, function calling) com o mesmo schema usado no SDK.
 - **Sempre** valide variáveis de ambiente no boot do processo. Falha de env é falha de inicialização, não erro silencioso em runtime.
 - **Sempre** valide resposta de APIs externas (Stripe, Slack, OpenAI, Gemini) com schema mínimo dos campos que você consome.
 - **Sempre** valide documentos lidos do Firestore quando o shape importa para a lógica downstream. Banco evolui; código antigo encontra documento novo.
@@ -104,7 +104,7 @@ Estas fronteiras **exigem** validação Zod sem exceção:
 ## 10. Output de LLM
 
 - **Sempre** valide structured output de LLM com Zod mesmo quando o SDK aceita o schema. Modelos quebram contrato em casos limítrofes.
-- **Nunca** assuma que `generateObject` do Vercel AI SDK ou `response_format: json_schema` da OpenAI garantem o schema 100%. Trate como hint, valide depois.
+- **Nunca** assuma que `Output.object` do AI SDK 7 ou `response_format: json_schema` da OpenAI garantem o schema 100%. Trate como hint, valide depois.
 - **Sempre** trate falha de validação de output de LLM como erro de domínio: retry com prompt ajustado, fallback, ou erro explícito ao usuário. Nunca silencie.
 - **Nunca** persista output de LLM no banco antes de validar. Lixo entra, lixo permanece.
 - **Sempre** versione schemas de output de LLM quando mudarem. Histórico de chamadas anteriores pode ter shape antigo.
