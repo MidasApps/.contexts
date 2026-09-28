@@ -1,0 +1,92 @@
+<h2>Layout do Header</h2>
+<p class="subtitle">Com breadcrumb, nome do relatório, botão editar e seletor de período</p>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Breadcrumb + Período à direita</h3>
+      <p>Breadcrumb navegável à esquerda, período e ações à direita. Limpo e funcional.</p>
+      <div class="mockup" style="margin-top: 12px;">
+        <div class="mockup-body" style="padding: 0; background: #0a0f1a; font-size: 13px;">
+          <div style="padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(148,163,184,0.1);">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="color: #64748b; font-size: 12px; cursor: pointer;">MCMV</span>
+              <span style="color: #475569; font-size: 11px;">/</span>
+              <span style="color: #e2e8f0; font-size: 14px; font-weight: 600;">Visão Geral</span>
+              <span style="width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; color: #64748b; cursor: pointer; border-radius: 6px; background: rgba(148,163,184,0.08); font-size: 12px; margin-left: 4px;" title="Editar relatório">&#9998;</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <div style="display: flex; align-items: center; gap: 6px; padding: 6px 12px; background: rgba(148,163,184,0.08); border-radius: 8px; cursor: pointer;">
+                <span style="color: #64748b; font-size: 12px;">&#128197;</span>
+                <span style="color: #e2e8f0; font-size: 12px;">Jan 2026</span>
+                <span style="color: #475569; font-size: 11px;">—</span>
+                <span style="color: #e2e8f0; font-size: 12px;">Mar 2026</span>
+              </div>
+              <div style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; color: #64748b; cursor: pointer; border-radius: 8px; background: rgba(148,163,184,0.08); font-size: 14px;" title="Filtros">&#9881;</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Duas linhas: breadcrumb em cima, ações embaixo</h3>
+      <p>Primeira linha com breadcrumb pequeno. Segunda linha com nome grande do relatório, botão editar, período e filtros.</p>
+      <div class="mockup" style="margin-top: 12px;">
+        <div class="mockup-body" style="padding: 0; background: #0a0f1a; font-size: 13px;">
+          <div style="padding: 8px 20px 0; display: flex; align-items: center; gap: 6px;">
+            <span style="color: #64748b; font-size: 11px; cursor: pointer;">MCMV</span>
+            <span style="color: #475569; font-size: 10px;">/</span>
+            <span style="color: #94a3b8; font-size: 11px;">Visão Geral</span>
+          </div>
+          <div style="padding: 6px 20px 12px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(148,163,184,0.1);">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span style="color: #e2e8f0; font-size: 18px; font-weight: 700;">Visão Geral</span>
+              <span style="width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; color: #64748b; cursor: pointer; border-radius: 6px; background: rgba(148,163,184,0.08); font-size: 13px;" title="Editar relatório">&#9998;</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <div style="display: flex; align-items: center; gap: 6px; padding: 6px 12px; background: rgba(148,163,184,0.08); border-radius: 8px; cursor: pointer;">
+                <span style="color: #64748b; font-size: 12px;">&#128197;</span>
+                <span style="color: #e2e8f0; font-size: 12px;">Jan 2026</span>
+                <span style="color: #475569; font-size: 11px;">—</span>
+                <span style="color: #e2e8f0; font-size: 12px;">Mar 2026</span>
+              </div>
+              <div style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; color: #64748b; cursor: pointer; border-radius: 8px; background: rgba(148,163,184,0.08); font-size: 14px;" title="Filtros">&#9881;</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Linha única compacta com separadores visuais</h3>
+      <p>Tudo em uma linha: Grupo | Relatório | Editar | --- | Período | Filtros. Maximiza área útil do dashboard.</p>
+      <div class="mockup" style="margin-top: 12px;">
+        <div class="mockup-body" style="padding: 0; background: #0a0f1a; font-size: 13px;">
+          <div style="padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(148,163,184,0.1);">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="padding: 3px 8px; background: rgba(99,102,241,0.15); color: #a78bfa; border-radius: 5px; font-size: 11px; font-weight: 600;">MCMV</span>
+              <span style="color: #475569;">|</span>
+              <span style="color: #e2e8f0; font-size: 14px; font-weight: 600;">Visão Geral</span>
+              <span style="width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; color: #64748b; cursor: pointer; border-radius: 5px; background: rgba(148,163,184,0.08); font-size: 11px;">&#9998;</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <div style="display: flex; align-items: center; gap: 6px; padding: 6px 12px; background: rgba(148,163,184,0.08); border-radius: 8px; cursor: pointer;">
+                <span style="color: #64748b; font-size: 12px;">&#128197;</span>
+                <span style="color: #e2e8f0; font-size: 12px;">Jan 2026 — Mar 2026</span>
+              </div>
+              <div style="width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; color: #64748b; cursor: pointer; border-radius: 8px; background: rgba(148,163,184,0.08); font-size: 13px;" title="Filtros">&#9881;</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

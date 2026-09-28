@@ -1,0 +1,269 @@
+<h2>Layout final: ClientSwitcher + ReportTypeSwitcher</h2>
+<p class="subtitle">ClientSwitcher permanece sempre visível (como hoje). Novo dropdown de relatório logo abaixo. Páginas do sidebar mudam conforme o report type ativo.</p>
+
+<div class="cards">
+  <!-- Sidebar fechado -->
+  <div class="card" data-choice="sidebar-closed" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding: 0; overflow: hidden;">
+      <div style="background: #0a0a0a; border-radius: 8px; font-family: system-ui; font-size: 11px; color: #e0e0e0; height: 480px; display: flex;">
+        <!-- Sidebar -->
+        <div style="width: 210px; border-right: 1px solid rgba(255,255,255,0.08); display: flex; flex-direction: column; padding: 12px; background: linear-gradient(180deg, rgba(255,255,255,0.015) 0%, transparent 100%);">
+
+          <!-- Client Switcher (como hoje, sempre visível) -->
+          <div style="display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.03); cursor: pointer; margin-bottom: 8px;">
+            <div style="width: 34px; height: 34px; background: rgba(243,161,105,0.15); border-radius: 8px; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(243,161,105,0.12);">
+              <span style="font-size: 14px; font-weight: 800; color: #F3A169;">O</span>
+            </div>
+            <div style="flex: 1; min-width: 0;">
+              <div style="display: flex; align-items: center; gap: 4px;">
+                <span style="font-size: 12px; font-weight: 700; color: rgba(255,255,255,0.9);">OM Securitizadora</span>
+                <span style="font-size: 9px; color: rgba(255,255,255,0.25);">▾</span>
+              </div>
+              <div style="font-size: 9px; color: rgba(255,255,255,0.35);">dataset_om</div>
+            </div>
+          </div>
+
+          <!-- NOVO: Report Type Switcher -->
+          <div style="display: flex; align-items: center; gap: 8px; padding: 5px 8px; border-radius: 8px; border: 1px solid rgba(243,161,105,0.2); background: rgba(243,161,105,0.05); cursor: pointer; margin-bottom: 16px;">
+            <div style="width: 26px; height: 26px; background: rgba(243,161,105,0.15); border-radius: 6px; display: flex; align-items: center; justify-content: center;">
+              <span style="font-size: 10px; font-weight: 800; color: #F3A169;">M</span>
+            </div>
+            <div style="flex: 1; min-width: 0;">
+              <div style="display: flex; align-items: center; gap: 4px;">
+                <span style="font-size: 11px; font-weight: 600; color: #F3A169;">MCMV</span>
+                <span style="font-size: 8px; color: rgba(243,161,105,0.4);">▾</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Nav Items -->
+          <div style="font-size: 8px; color: rgba(255,255,255,0.25); padding: 2px 8px; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 4px;">Carteira</div>
+          <div style="padding: 7px 10px; border-radius: 8px; background: rgba(243,161,105,0.12); color: #F3A169; font-size: 11px; font-weight: 500; display: flex; align-items: center; gap: 8px; margin-bottom: 2px;">
+            <span style="width: 16px; text-align: center; font-size: 12px;">📊</span> Visão Geral
+          </div>
+          <div style="padding: 7px 10px; font-size: 11px; color: rgba(255,255,255,0.45); display: flex; align-items: center; gap: 8px; margin-bottom: 2px;">
+            <span style="width: 16px; text-align: center; font-size: 12px;">📄</span> Contratos
+          </div>
+          <div style="padding: 7px 10px; font-size: 11px; color: rgba(255,255,255,0.45); display: flex; align-items: center; gap: 8px; margin-bottom: 2px;">
+            <span style="width: 16px; text-align: center; font-size: 12px;">💰</span> Pagamentos
+          </div>
+          <div style="padding: 7px 10px; font-size: 11px; color: rgba(255,255,255,0.45); display: flex; align-items: center; gap: 8px;">
+            <span style="width: 16px; text-align: center; font-size: 12px;">📈</span> Fluxo de Caixa
+          </div>
+
+          <div style="font-size: 8px; color: rgba(255,255,255,0.25); padding: 2px 8px; text-transform: uppercase; letter-spacing: 0.8px; margin-top: 14px; margin-bottom: 4px;">Risco</div>
+          <div style="padding: 7px 10px; font-size: 11px; color: rgba(255,255,255,0.45); display: flex; align-items: center; gap: 8px; margin-bottom: 2px;">
+            <span style="width: 16px; text-align: center; font-size: 12px;">🛡️</span> PDD
+          </div>
+          <div style="padding: 7px 10px; font-size: 11px; color: rgba(255,255,255,0.45); display: flex; align-items: center; gap: 8px;">
+            <span style="width: 16px; text-align: center; font-size: 12px;">💲</span> Pricing
+          </div>
+
+          <div style="font-size: 8px; color: rgba(255,255,255,0.25); padding: 2px 8px; text-transform: uppercase; letter-spacing: 0.8px; margin-top: 14px; margin-bottom: 4px;">Operacional</div>
+          <div style="padding: 7px 10px; font-size: 11px; color: rgba(255,255,255,0.45); display: flex; align-items: center; gap: 8px;">
+            <span style="width: 16px; text-align: center; font-size: 12px;">⚠️</span> Inadimplência
+          </div>
+
+          <div style="flex: 1;"></div>
+
+          <!-- Explore -->
+          <div style="padding: 8px 10px; border-radius: 8px; background: linear-gradient(135deg, rgba(243,161,105,0.1), rgba(243,161,105,0.05)); border: 1px solid rgba(243,161,105,0.15); font-size: 11px; color: #F3A169; display: flex; align-items: center; gap: 8px; cursor: pointer; margin-bottom: 8px;">
+            <span>🔍</span> Análise Conversacional
+          </div>
+
+          <!-- User -->
+          <div style="display: flex; align-items: center; gap: 8px; padding: 6px 4px;">
+            <div style="width: 28px; height: 28px; background: rgba(255,255,255,0.08); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; color: rgba(255,255,255,0.5);">G</div>
+            <div style="flex: 1;">
+              <div style="font-size: 10px; color: rgba(255,255,255,0.6);">Giulliano</div>
+              <div style="font-size: 8px; color: rgba(255,255,255,0.25);">Admin</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Content -->
+        <div style="flex: 1; display: flex; flex-direction: column;">
+          <!-- AppBar -->
+          <div style="display: flex; align-items: center; padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.08); gap: 8px;">
+            <div style="font-size: 10px; color: rgba(255,255,255,0.3);">MCMV</div>
+            <div style="font-size: 10px; color: rgba(255,255,255,0.15);">›</div>
+            <div style="font-size: 12px; font-weight: 600;">Visão Geral</div>
+            <div style="margin-left: auto; display: flex; gap: 8px;">
+              <div style="background: rgba(255,255,255,0.05); padding: 5px 12px; border-radius: 8px; font-size: 10px; border: 1px solid rgba(255,255,255,0.08);">Filtros</div>
+              <div style="background: rgba(255,255,255,0.05); padding: 5px 12px; border-radius: 8px; font-size: 10px; border: 1px solid rgba(255,255,255,0.08);">Jan–Mar 2026</div>
+            </div>
+          </div>
+          <!-- KPIs -->
+          <div style="padding: 14px; display: flex; flex-direction: column; gap: 10px;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px;">
+              <div style="background: rgba(255,255,255,0.03); border-radius: 10px; padding: 14px; border: 1px solid rgba(255,255,255,0.06);">
+                <div style="font-size: 8px; color: rgba(255,255,255,0.35); margin-bottom: 4px;">Saldo Devedor</div>
+                <div style="font-size: 18px; font-weight: 700; color: #F3A169;">R$ 2.4B</div>
+                <div style="font-size: 8px; color: #4ade80; margin-top: 4px;">↑ 2.3%</div>
+              </div>
+              <div style="background: rgba(255,255,255,0.03); border-radius: 10px; padding: 14px; border: 1px solid rgba(255,255,255,0.06);">
+                <div style="font-size: 8px; color: rgba(255,255,255,0.35); margin-bottom: 4px;">Total Contratos</div>
+                <div style="font-size: 18px; font-weight: 700; color: #F3A169;">12.847</div>
+                <div style="font-size: 8px; color: #4ade80; margin-top: 4px;">↑ 156</div>
+              </div>
+              <div style="background: rgba(255,255,255,0.03); border-radius: 10px; padding: 14px; border: 1px solid rgba(255,255,255,0.06);">
+                <div style="font-size: 8px; color: rgba(255,255,255,0.35); margin-bottom: 4px;">Inadimplência</div>
+                <div style="font-size: 18px; font-weight: 700; color: #ef4444;">3.2%</div>
+                <div style="font-size: 8px; color: #ef4444; margin-top: 4px;">↑ 0.4pp</div>
+              </div>
+              <div style="background: rgba(255,255,255,0.03); border-radius: 10px; padding: 14px; border: 1px solid rgba(255,255,255,0.06);">
+                <div style="font-size: 8px; color: rgba(255,255,255,0.35); margin-bottom: 4px;">PDD</div>
+                <div style="font-size: 18px; font-weight: 700; color: #facc15;">1.8%</div>
+                <div style="font-size: 8px; color: rgba(255,255,255,0.3); margin-top: 4px;">= 0.0pp</div>
+              </div>
+            </div>
+            <!-- Charts -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+              <div style="background: rgba(255,255,255,0.02); border-radius: 10px; height: 130px; border: 1px solid rgba(255,255,255,0.06); display: flex; align-items: center; justify-content: center;">
+                <span style="font-size: 10px; color: rgba(255,255,255,0.15);">Evolução do Saldo</span>
+              </div>
+              <div style="background: rgba(255,255,255,0.02); border-radius: 10px; height: 130px; border: 1px solid rgba(255,255,255,0.06); display: flex; align-items: center; justify-content: center;">
+                <span style="font-size: 10px; color: rgba(255,255,255,0.15);">Distribuição por Faixa</span>
+              </div>
+            </div>
+            <!-- Table -->
+            <div style="background: rgba(255,255,255,0.02); border-radius: 10px; height: 60px; border: 1px solid rgba(255,255,255,0.06); display: flex; align-items: center; justify-content: center;">
+              <span style="font-size: 10px; color: rgba(255,255,255,0.15);">Tabela de Detalhamento</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>Sidebar com dropdown fechado</h3>
+      <p>ClientSwitcher como hoje. Logo abaixo, o novo ReportTypeSwitcher com accent color. Páginas do sidebar refletem o report type ativo (MCMV).</p>
+    </div>
+  </div>
+
+  <!-- Sidebar com dropdown aberto -->
+  <div class="card" data-choice="sidebar-open" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding: 0; overflow: hidden;">
+      <div style="background: #0a0a0a; border-radius: 8px; font-family: system-ui; font-size: 11px; color: #e0e0e0; height: 480px; display: flex; position: relative;">
+        <!-- Sidebar -->
+        <div style="width: 210px; border-right: 1px solid rgba(255,255,255,0.08); display: flex; flex-direction: column; padding: 12px; background: linear-gradient(180deg, rgba(255,255,255,0.015) 0%, transparent 100%); position: relative; z-index: 10;">
+
+          <!-- Client Switcher -->
+          <div style="display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.03); cursor: pointer; margin-bottom: 8px;">
+            <div style="width: 34px; height: 34px; background: rgba(243,161,105,0.15); border-radius: 8px; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(243,161,105,0.12);">
+              <span style="font-size: 14px; font-weight: 800; color: #F3A169;">O</span>
+            </div>
+            <div style="flex: 1; min-width: 0;">
+              <div style="display: flex; align-items: center; gap: 4px;">
+                <span style="font-size: 12px; font-weight: 700; color: rgba(255,255,255,0.9);">OM Securitizadora</span>
+                <span style="font-size: 9px; color: rgba(255,255,255,0.25);">▾</span>
+              </div>
+              <div style="font-size: 9px; color: rgba(255,255,255,0.35);">dataset_om</div>
+            </div>
+          </div>
+
+          <!-- Report Type Switcher (active/open state) -->
+          <div style="display: flex; align-items: center; gap: 8px; padding: 5px 8px; border-radius: 8px 8px 0 0; border: 1px solid rgba(243,161,105,0.3); border-bottom: none; background: rgba(243,161,105,0.08); cursor: pointer;">
+            <div style="width: 26px; height: 26px; background: rgba(243,161,105,0.15); border-radius: 6px; display: flex; align-items: center; justify-content: center;">
+              <span style="font-size: 10px; font-weight: 800; color: #F3A169;">M</span>
+            </div>
+            <div style="flex: 1;">
+              <div style="display: flex; align-items: center; gap: 4px;">
+                <span style="font-size: 11px; font-weight: 600; color: #F3A169;">MCMV</span>
+                <span style="font-size: 8px; color: rgba(243,161,105,0.6); transform: rotate(180deg); display: inline-block;">▾</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Dropdown aberto -->
+          <div style="border: 1px solid rgba(243,161,105,0.2); border-top: 1px solid rgba(255,255,255,0.06); border-radius: 0 0 10px 10px; background: #0A0B10; margin-bottom: 14px; overflow: hidden; box-shadow: 0 8px 24px rgba(0,0,0,0.4);">
+            <!-- Search -->
+            <div style="display: flex; align-items: center; gap: 6px; padding: 8px 10px; border-bottom: 1px solid rgba(255,255,255,0.06);">
+              <span style="font-size: 10px; color: rgba(255,255,255,0.25);">🔍</span>
+              <span style="font-size: 10px; color: rgba(255,255,255,0.2); font-style: italic;">Buscar relatório...</span>
+            </div>
+            <!-- Items -->
+            <div style="padding: 4px;">
+              <!-- MCMV active -->
+              <div style="display: flex; align-items: center; gap: 8px; padding: 7px 8px; border-radius: 6px; background: rgba(255,255,255,0.06);">
+                <div style="width: 26px; height: 26px; background: rgba(243,161,105,0.15); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 10px; color: #F3A169;">M</div>
+                <div style="flex: 1;">
+                  <div style="font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.9);">MCMV</div>
+                  <div style="font-size: 8px; color: rgba(255,255,255,0.3);">Minha Casa Minha Vida</div>
+                </div>
+                <span style="font-size: 11px; color: #F3A169;">✓</span>
+              </div>
+              <!-- SBPE -->
+              <div style="display: flex; align-items: center; gap: 8px; padding: 7px 8px; border-radius: 6px; margin-top: 2px;">
+                <div style="width: 26px; height: 26px; background: rgba(99,179,237,0.12); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 10px; color: #63b3ed;">S</div>
+                <div style="flex: 1;">
+                  <div style="font-size: 11px; font-weight: 500; color: rgba(255,255,255,0.5);">SBPE</div>
+                  <div style="font-size: 8px; color: rgba(255,255,255,0.2);">Poupança e Empréstimo</div>
+                </div>
+              </div>
+              <!-- Backtest -->
+              <div style="display: flex; align-items: center; gap: 8px; padding: 7px 8px; border-radius: 6px; margin-top: 2px;">
+                <div style="width: 26px; height: 26px; background: rgba(167,139,250,0.12); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 10px; color: #a78bfa;">B</div>
+                <div style="flex: 1;">
+                  <div style="font-size: 11px; font-weight: 500; color: rgba(255,255,255,0.5);">Backtest</div>
+                  <div style="font-size: 8px; color: rgba(255,255,255,0.2);">Validação de modelos</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Nav items (behind dropdown visually) -->
+          <div style="font-size: 8px; color: rgba(255,255,255,0.25); padding: 2px 8px; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 4px;">Carteira</div>
+          <div style="padding: 7px 10px; border-radius: 8px; background: rgba(243,161,105,0.12); color: #F3A169; font-size: 11px; font-weight: 500; display: flex; align-items: center; gap: 8px; margin-bottom: 2px;">
+            <span style="width: 16px; text-align: center; font-size: 12px;">📊</span> Visão Geral
+          </div>
+          <div style="padding: 7px 10px; font-size: 11px; color: rgba(255,255,255,0.45); display: flex; align-items: center; gap: 8px; margin-bottom: 2px;">
+            <span style="width: 16px; text-align: center; font-size: 12px;">📄</span> Contratos
+          </div>
+          <div style="padding: 7px 10px; font-size: 11px; color: rgba(255,255,255,0.45); display: flex; align-items: center; gap: 8px;">
+            <span style="width: 16px; text-align: center; font-size: 12px;">💰</span> Pagamentos
+          </div>
+
+          <div style="flex: 1;"></div>
+          <div style="display: flex; align-items: center; gap: 8px; padding: 6px 4px;">
+            <div style="width: 28px; height: 28px; background: rgba(255,255,255,0.08); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; color: rgba(255,255,255,0.5);">G</div>
+            <div style="flex: 1;">
+              <div style="font-size: 10px; color: rgba(255,255,255,0.6);">Giulliano</div>
+              <div style="font-size: 8px; color: rgba(255,255,255,0.25);">Admin</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Content (dimmed when dropdown open) -->
+        <div style="flex: 1; display: flex; flex-direction: column; opacity: 0.4;">
+          <div style="display: flex; align-items: center; padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.08); gap: 8px;">
+            <div style="font-size: 10px; color: rgba(255,255,255,0.3);">MCMV</div>
+            <div style="font-size: 10px; color: rgba(255,255,255,0.15);">›</div>
+            <div style="font-size: 12px; font-weight: 600;">Visão Geral</div>
+          </div>
+          <div style="padding: 14px; display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px;">
+            <div style="background: rgba(255,255,255,0.03); border-radius: 10px; padding: 14px; border: 1px solid rgba(255,255,255,0.06);">
+              <div style="font-size: 8px; color: rgba(255,255,255,0.35);">Saldo Devedor</div>
+              <div style="font-size: 18px; font-weight: 700; color: #F3A169;">R$ 2.4B</div>
+            </div>
+            <div style="background: rgba(255,255,255,0.03); border-radius: 10px; padding: 14px; border: 1px solid rgba(255,255,255,0.06);">
+              <div style="font-size: 8px; color: rgba(255,255,255,0.35);">Contratos</div>
+              <div style="font-size: 18px; font-weight: 700; color: #F3A169;">12.847</div>
+            </div>
+            <div style="background: rgba(255,255,255,0.03); border-radius: 10px; padding: 14px; border: 1px solid rgba(255,255,255,0.06);">
+              <div style="font-size: 8px; color: rgba(255,255,255,0.35);">Inadimplência</div>
+              <div style="font-size: 18px; font-weight: 700; color: #ef4444;">3.2%</div>
+            </div>
+            <div style="background: rgba(255,255,255,0.03); border-radius: 10px; padding: 14px; border: 1px solid rgba(255,255,255,0.06);">
+              <div style="font-size: 8px; color: rgba(255,255,255,0.35);">PDD</div>
+              <div style="font-size: 18px; font-weight: 700; color: #facc15;">1.8%</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>Sidebar com dropdown aberto</h3>
+      <p>Ao clicar no ReportTypeSwitcher, o dropdown se expande inline com busca e lista de relatórios. Cada tipo tem cor própria (laranja MCMV, azul SBPE, roxo Backtest). Conteúdo principal fica dimmed.</p>
+    </div>
+  </div>
+</div>

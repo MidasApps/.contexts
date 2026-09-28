@@ -1,0 +1,414 @@
+<!doctype html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Protótipo — Header global + chat à direita</title>
+<style>
+  :root {
+    --background: oklch(3.5% 0.005 280);
+    --foreground: oklch(100% 0 0);
+    --muted: oklch(13% 0 0);
+    --muted-foreground: oklch(62% 0 0);
+    --primary: oklch(75.5% 0.14 50);
+    --card: oklch(7% 0.003 280);
+    --popover: oklch(9% 0.003 280);
+    --surface: oklch(5% 0.004 280);
+    --border: oklch(16% 0.005 280);
+    --radius-md: 0.5rem; --radius-lg: 0.75rem; --radius-xl: 1rem;
+  }
+  [data-theme="light"] {
+    --background: oklch(98.5% 0 0); --foreground: oklch(15% 0 0);
+    --muted: oklch(94% 0 0); --muted-foreground: oklch(45% 0 0);
+    --card: oklch(100% 0 0); --popover: oklch(100% 0 0);
+    --surface: oklch(96.8% 0 0); --border: oklch(89% 0 0);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Inter, system-ui, -apple-system, sans-serif; background: var(--background);
+         color: var(--foreground); -webkit-font-smoothing: antialiased; padding: 32px 24px 80px; }
+  .page-title { font-size: 24px; font-weight: 600; letter-spacing: -0.02em; }
+  .page-sub { color: var(--muted-foreground); font-size: 13px; margin-top: 6px; max-width: 78ch; line-height: 1.6; }
+  .page-sub b { color: var(--foreground); }
+
+  .controls { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin: 24px 0 8px;
+              position: sticky; top: 0; z-index: 50; background: var(--background);
+              padding: 12px 0; border-bottom: 1px solid var(--border); }
+  .controls button { font: inherit; font-size: 12px; font-weight: 500; cursor: pointer;
+                     background: var(--muted); color: var(--muted-foreground); border: 1px solid var(--border);
+                     border-radius: 999px; padding: 7px 14px; transition: all .15s; }
+  .controls button:hover { color: var(--foreground); }
+  .controls button[aria-pressed="true"] { background: color-mix(in oklch, var(--primary) 15%, transparent);
+    color: var(--primary); border-color: color-mix(in oklch, var(--primary) 30%, transparent); }
+  .controls .spacer { flex: 1; }
+
+  .variant { display: none; } .variant.active { display: block; }
+  .caption { display: flex; gap: 10px; align-items: baseline; margin: 28px 0 10px; flex-wrap: wrap; }
+  .caption h2 { font-size: 15px; font-weight: 600; }
+  .caption p { font-size: 12.5px; color: var(--muted-foreground); }
+  .tag { font-size: 10px; text-transform: uppercase; letter-spacing: .08em; font-weight: 700;
+         padding: 3px 8px; border-radius: 999px;
+         background: color-mix(in oklch, var(--primary) 15%, transparent); color: var(--primary); }
+  .tag.now { background: color-mix(in oklch, var(--muted-foreground) 18%, transparent); color: var(--muted-foreground); }
+  .tag.q { background: color-mix(in oklch, oklch(75.5% 0.14 50) 0%, transparent); border: 1px solid var(--border); color: var(--muted-foreground); }
+
+  .app { border: 1px solid var(--border); border-radius: var(--radius-xl); overflow: hidden;
+         background: var(--background); height: 470px; display: flex; flex-direction: column;
+         box-shadow: 0 10px 30px rgba(0,0,0,.25); position: relative; }
+  .app.narrow { max-width: 400px; height: 520px; }
+  .body-row { display: flex; flex: 1; min-height: 0; }
+
+  .hdr { height: 52px; flex: 0 0 52px; display: flex; align-items: center; gap: 8px; padding: 0 14px;
+         background: var(--surface); border-bottom: 1px solid var(--border); position: relative; z-index: 3; }
+  .hdr .grow { flex: 1; }
+
+  .pill { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px;
+          border: 1px solid var(--border); border-radius: 999px;
+          background: color-mix(in oklch, var(--muted) 55%, transparent);
+          font-size: 11px; font-weight: 500; color: var(--muted-foreground); white-space: nowrap; }
+  .pill.client { padding-left: 3px; color: var(--foreground); }
+  .pill .avatar { width: 22px; height: 22px; border-radius: 999px; display: grid; place-items: center;
+                  font-size: 10px; font-weight: 700; color: #000; background: var(--primary); }
+  .pill .kicker { font-size: 9.5px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted-foreground); }
+  .pill .count { min-width: 15px; height: 15px; padding: 0 4px; border-radius: 999px; background: var(--primary);
+                 color: #000; font-size: 9px; font-weight: 700; display: grid; place-items: center; }
+  .icon-btn { width: 30px; height: 30px; display: grid; place-items: center; border-radius: var(--radius-md);
+              color: var(--muted-foreground); border: 1px solid transparent; flex: 0 0 auto; }
+  .icon-btn.bordered { border-color: var(--border); border-radius: 999px;
+                       background: color-mix(in oklch, var(--muted) 55%, transparent); }
+  .icon-btn.on { background: color-mix(in oklch, var(--primary) 15%, transparent); color: var(--primary);
+                 border-color: color-mix(in oklch, var(--primary) 30%, transparent); }
+  .sep { width: 1px; height: 18px; background: var(--border); flex: 0 0 auto; }
+
+  .pages { flex: 0 0 190px; background: var(--background); border-right: 1px solid var(--border);
+           display: flex; flex-direction: column; min-height: 0; }
+  .pages .list { flex: 1; overflow: hidden; padding: 10px 6px; display: flex; flex-direction: column; gap: 2px; }
+  .pages .item { font-size: 11.5px; color: var(--muted-foreground); padding: 6px 8px; border-radius: var(--radius-md);
+                 display: flex; align-items: center; gap: 7px; white-space: nowrap; }
+  .pages .item.active { background: color-mix(in oklch, var(--muted) 50%, transparent); color: var(--foreground); }
+  .pages .item .dot { width: 5px; height: 5px; border-radius: 999px; background: var(--primary); flex: 0 0 auto; }
+  .pages .foot { border-top: 1px solid var(--border); padding: 7px 6px; display: flex; flex-direction: column; gap: 2px; }
+  .pages .profile { border-top: 1px solid var(--border); padding: 8px 10px; display: flex; align-items: center;
+                    gap: 8px; font-size: 11px; color: var(--muted-foreground); }
+  .pages .profile .av { width: 22px; height: 22px; border-radius: 999px; background: var(--muted);
+                        display: grid; place-items: center; font-size: 10px; }
+  .pages .profile .grow { flex: 1; }
+
+  .content { flex: 1; min-width: 0; padding: 10px; display: flex; flex-direction: column; }
+  .surface { flex: 1; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg);
+             display: flex; flex-direction: column; overflow: hidden; }
+  .canvas { flex: 1; padding: 14px; overflow: hidden; }
+
+  /* chat à DIREITA */
+  .chatpanel { flex: 0 0 215px; background: var(--background); border-left: 1px solid var(--border);
+               display: flex; flex-direction: column; padding: 12px; gap: 9px; }
+  .chatpanel.float { position: absolute; top: 62px; right: 10px; bottom: 10px; width: 230px; z-index: 4;
+                     border: 1px solid var(--border); border-radius: var(--radius-lg);
+                     background: var(--popover); box-shadow: 0 16px 40px rgba(0,0,0,.45); }
+  .chatpanel .chead { display: flex; align-items: center; gap: 6px; font-size: 11.5px;
+                      font-weight: 600; color: var(--foreground); margin-bottom: 2px; }
+  .chatpanel .chead .grow { flex: 1; }
+  .chatpanel .bubble { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-lg);
+                       padding: 9px 10px; font-size: 11px; color: var(--muted-foreground); line-height: 1.5; }
+  .chatpanel .input { margin-top: auto; background: var(--card); border: 1px solid var(--border);
+                      border-radius: var(--radius-lg); padding: 9px 10px; font-size: 11px; color: var(--muted-foreground); }
+
+  .hero { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+  .hero h1 { font-size: 21px; font-weight: 500; letter-spacing: -0.02em; }
+  .hero p { font-size: 11.5px; color: var(--muted-foreground); margin-top: 3px; }
+  .hero .acts { display: flex; align-items: center; gap: 6px; flex: 0 0 auto; }
+  .btn-sm { font-size: 11px; font-weight: 600; padding: 6px 12px; border-radius: var(--radius-md); }
+  .btn-sm.primary { background: var(--primary); color: #000; }
+  .btn-sm.ghost { color: var(--muted-foreground); }
+  .chip-edit { font-size: 9.5px; font-weight: 600; padding: 3px 8px; border-radius: 999px;
+               background: color-mix(in oklch, var(--primary) 12%, transparent); color: var(--primary); }
+
+  .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 12px; }
+  .kpi { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 10px 12px; }
+  .kpi .lbl { font-size: 10px; color: var(--muted-foreground); }
+  .kpi .val { font-size: 17px; font-weight: 600; margin-top: 5px; letter-spacing: -0.02em; }
+  .kpi .spark { height: 2px; background: var(--primary); opacity: .55; margin-top: 8px; border-radius: 2px; }
+  .charts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .chart { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-lg);
+           padding: 10px 12px; height: 118px; }
+  .chart .t { font-size: 11.5px; font-weight: 600; }
+  .chart .bars { display: flex; align-items: flex-end; gap: 5px; height: 70px; margin-top: 10px; }
+  .chart .bars span { flex: 1; background: var(--primary); opacity: .75; border-radius: 3px 3px 0 0; }
+
+  .note { display: flex; gap: 8px; align-items: flex-start; font-size: 12px; color: var(--muted-foreground);
+          margin-top: 10px; line-height: 1.55; max-width: 100ch; }
+  .note b { color: var(--foreground); font-weight: 600; }
+  .hl { outline: 2px dashed color-mix(in oklch, var(--primary) 55%, transparent); outline-offset: 3px; border-radius: 999px; }
+  .drawer { position: absolute; inset: 0; background: rgba(0,0,0,.55); display: flex; justify-content: flex-end; z-index: 5; }
+  .drawer .panel { width: 220px; background: var(--background); border-left: 1px solid var(--border);
+                   display: flex; flex-direction: column; padding: 12px; gap: 9px; }
+  @media (max-width: 900px) { .kpis { grid-template-columns: repeat(2, 1fr); } }
+</style>
+</head>
+<body>
+
+<div class="page-title">Header global + chat à direita</div>
+<p class="page-sub">
+  Header atravessando a janela, <b>cliente à esquerda</b>, <b>Filtros · Chat · tema à direita</b>, sem título de página.
+  O chat abre pela direita — com isso o rail de 64px da esquerda deixa de existir em qualquer estado,
+  e a coluna de páginas fica sozinha à esquerda. Sem lupa em nenhuma tela.
+</p>
+
+<div class="controls">
+  <button data-v="base" aria-pressed="true">1 · Padrão</button>
+  <button data-v="push" aria-pressed="false">2a · Chat empurra</button>
+  <button data-v="float" aria-pressed="false">2b · Chat flutua</button>
+  <button data-v="edit" aria-pressed="false">3 · Modo edição</button>
+  <button data-v="mob" aria-pressed="false">4 · Mobile</button>
+  <button data-v="now" aria-pressed="false">Hoje (comparar)</button>
+  <span class="spacer"></span>
+  <button id="theme">☀ / ☾ tema</button>
+</div>
+
+<!-- 1 PADRÃO -->
+<section class="variant active" data-v="base">
+  <div class="caption"><h2>Padrão — chat fechado</h2><span class="tag">resolvido</span>
+    <p>Nada ocupa a direita e não existe mais rail na esquerda. O conteúdo ganha os 64px que o rail consumia.</p></div>
+  <div class="app">
+    <div class="hdr">
+      <span class="pill client hl"><span class="avatar">V</span><span class="kicker">Cliente</span><b>Vila Rosa</b> ⌄</span>
+      <span class="grow"></span>
+      <span class="pill hl">⚙ Filtros <span class="count">3</span></span>
+      <span class="sep"></span><span class="icon-btn bordered hl">💬</span><span class="icon-btn">☀</span>
+    </div>
+    <div class="body-row">
+      <div class="pages">
+        <div class="list">
+          <div class="item active"><span class="dot"></span>Visão Geral</div>
+          <div class="item">Covenants</div><div class="item">Empreendimento</div><div class="item">Unidades</div>
+          <div class="item">Evolução de Obra</div><div class="item">Recebíveis</div><div class="item">Inadimplência</div>
+        </div>
+        <div class="foot"><div class="item">＋ Nova página</div><div class="item">⌸ Importar template</div></div>
+        <div class="profile"><span class="av">👤</span>Giulliano<span class="grow"></span>⇥</div>
+      </div>
+      <div class="content"><div class="surface"><div class="canvas">
+        <div class="hero"><div><h1>Visão Geral</h1><p>Saldos, inadimplência e faixas de atraso</p></div>
+          <div class="acts"><span class="icon-btn">✎</span></div></div>
+        <div class="kpis">
+          <div class="kpi"><div class="lbl">↗ Saldo Nominal</div><div class="val">R$ 86,32 mi</div><div class="spark"></div></div>
+          <div class="kpi"><div class="lbl">↗ Saldo Devedor</div><div class="val">R$ 86,32 mi</div><div class="spark"></div></div>
+          <div class="kpi"><div class="lbl">↗ Inadimplência</div><div class="val">0,87%</div><div class="spark"></div></div>
+          <div class="kpi"><div class="lbl">↗ Atraso > 90 dias</div><div class="val">R$ 556 mil</div><div class="spark"></div></div>
+        </div>
+        <div class="charts">
+          <div class="chart"><div class="t">Evolução do Saldo Devedor</div><div class="bars"><span style="height:55%"></span><span style="height:72%"></span><span style="height:48%"></span><span style="height:88%"></span><span style="height:64%"></span><span style="height:79%"></span></div></div>
+          <div class="chart"><div class="t">Contratos por Faixa de Atraso</div><div class="bars"><span style="height:88%"></span><span style="height:42%"></span><span style="height:30%"></span><span style="height:22%"></span><span style="height:15%"></span><span style="height:10%"></span></div></div>
+        </div>
+      </div></div></div>
+    </div>
+  </div>
+  <div class="note">✅ <span>Uma coluna à esquerda, conteúdo no resto. O chat existe só como ícone no header até ser chamado.</span></div>
+</section>
+
+<!-- 2a PUSH -->
+<section class="variant" data-v="push">
+  <div class="caption"><h2>2a — o chat empurra o conteúdo</h2><span class="tag q">decisão em aberto</span>
+    <p>Painel fixo à direita. Os gráficos reflow: de 2 colunas passam a caber mais apertados.</p></div>
+  <div class="app">
+    <div class="hdr">
+      <span class="pill client"><span class="avatar">V</span><span class="kicker">Cliente</span><b>Vila Rosa</b> ⌄</span>
+      <span class="grow"></span><span class="pill">⚙ Filtros <span class="count">3</span></span>
+      <span class="sep"></span><span class="icon-btn bordered on hl">💬</span><span class="icon-btn">☀</span>
+    </div>
+    <div class="body-row">
+      <div class="pages">
+        <div class="list">
+          <div class="item active"><span class="dot"></span>Visão Geral</div>
+          <div class="item">Covenants</div><div class="item">Unidades</div><div class="item">Recebíveis</div>
+        </div>
+        <div class="profile"><span class="av">👤</span>Giulliano<span class="grow"></span>⇥</div>
+      </div>
+      <div class="content"><div class="surface"><div class="canvas">
+        <div class="hero"><div><h1>Visão Geral</h1><p>Saldos e inadimplência</p></div>
+          <div class="acts"><span class="icon-btn">✎</span></div></div>
+        <div class="kpis" style="grid-template-columns:repeat(2,1fr)">
+          <div class="kpi"><div class="lbl">↗ Saldo Devedor</div><div class="val">R$ 86,32 mi</div><div class="spark"></div></div>
+          <div class="kpi"><div class="lbl">↗ Inadimplência</div><div class="val">0,87%</div><div class="spark"></div></div>
+        </div>
+        <div class="charts">
+          <div class="chart"><div class="t">Saldo Devedor</div><div class="bars"><span style="height:55%"></span><span style="height:72%"></span><span style="height:48%"></span><span style="height:88%"></span></div></div>
+          <div class="chart"><div class="t">Faixa de Atraso</div><div class="bars"><span style="height:88%"></span><span style="height:42%"></span><span style="height:30%"></span><span style="height:18%"></span></div></div>
+        </div>
+      </div></div></div>
+      <div class="chatpanel hl">
+        <div class="chead">✦ Assistente<span class="grow"></span><span style="opacity:.6">✕</span></div>
+        <div class="bubble">Como posso ajudar? Pergunte sobre indicadores, contratos ou qualquer dado do dashboard.</div>
+        <div class="bubble">Qual o resumo da carteira atual?</div>
+        <div class="input">Pergunte algo…&nbsp; ➤</div>
+      </div>
+    </div>
+  </div>
+  <div class="note">✅ <span>Nada fica escondido: gráfico e conversa convivem, dá para ler o dado enquanto pergunta.</span></div>
+  <div class="note">⚠️ <span>Toda abertura e fechamento reflui o canvas — os gráficos redesenham e o layout "pula".</span></div>
+</section>
+
+<!-- 2b FLOAT -->
+<section class="variant" data-v="float">
+  <div class="caption"><h2>2b — o chat flutua sobre o conteúdo</h2><span class="tag q">decisão em aberto</span>
+    <p>Painel sobreposto, com sombra. O conteúdo por baixo não se mexe.</p></div>
+  <div class="app">
+    <div class="hdr">
+      <span class="pill client"><span class="avatar">V</span><span class="kicker">Cliente</span><b>Vila Rosa</b> ⌄</span>
+      <span class="grow"></span><span class="pill">⚙ Filtros <span class="count">3</span></span>
+      <span class="sep"></span><span class="icon-btn bordered on hl">💬</span><span class="icon-btn">☀</span>
+    </div>
+    <div class="body-row">
+      <div class="pages">
+        <div class="list">
+          <div class="item active"><span class="dot"></span>Visão Geral</div>
+          <div class="item">Covenants</div><div class="item">Empreendimento</div>
+          <div class="item">Unidades</div><div class="item">Recebíveis</div>
+        </div>
+        <div class="profile"><span class="av">👤</span>Giulliano<span class="grow"></span>⇥</div>
+      </div>
+      <div class="content"><div class="surface"><div class="canvas">
+        <div class="hero"><div><h1>Visão Geral</h1><p>Saldos, inadimplência e faixas de atraso</p></div>
+          <div class="acts"><span class="icon-btn">✎</span></div></div>
+        <div class="kpis">
+          <div class="kpi"><div class="lbl">↗ Saldo Nominal</div><div class="val">R$ 86,32 mi</div><div class="spark"></div></div>
+          <div class="kpi"><div class="lbl">↗ Saldo Devedor</div><div class="val">R$ 86,32 mi</div><div class="spark"></div></div>
+          <div class="kpi"><div class="lbl">↗ Inadimplência</div><div class="val">0,87%</div><div class="spark"></div></div>
+          <div class="kpi"><div class="lbl">↗ Atraso > 90d</div><div class="val">R$ 556 mil</div><div class="spark"></div></div>
+        </div>
+        <div class="charts">
+          <div class="chart"><div class="t">Evolução do Saldo Devedor</div><div class="bars"><span style="height:55%"></span><span style="height:72%"></span><span style="height:48%"></span><span style="height:88%"></span><span style="height:64%"></span><span style="height:79%"></span></div></div>
+          <div class="chart"><div class="t">Contratos por Faixa de Atraso</div><div class="bars"><span style="height:88%"></span><span style="height:42%"></span><span style="height:30%"></span><span style="height:22%"></span><span style="height:15%"></span><span style="height:10%"></span></div></div>
+        </div>
+      </div></div></div>
+    </div>
+    <div class="chatpanel float hl">
+      <div class="chead">✦ Assistente<span class="grow"></span><span style="opacity:.6">✕</span></div>
+      <div class="bubble">Como posso ajudar? Pergunte sobre indicadores, contratos ou qualquer dado do dashboard.</div>
+      <div class="bubble">Qual o resumo da carteira atual?</div>
+      <div class="input">Pergunte algo…&nbsp; ➤</div>
+    </div>
+  </div>
+  <div class="note">✅ <span>Abrir e fechar não mexe em nada: os gráficos não redesenham, o layout fica estável.</span></div>
+  <div class="note">⚠️ <span>O painel cobre o canto direito do conteúdo — justo onde costuma cair o segundo gráfico.</span></div>
+</section>
+
+<!-- 3 EDIÇÃO -->
+<section class="variant" data-v="edit">
+  <div class="caption"><h2>Modo edição</h2><span class="tag q">decisão em aberto</span>
+    <p>Sem título no header, Salvar e Cancelar descem para o cabeçalho do conteúdo.</p></div>
+  <div class="app">
+    <div class="hdr">
+      <span class="pill client"><span class="avatar">V</span><span class="kicker">Cliente</span><b>Vila Rosa</b> ⌄</span>
+      <span class="grow"></span><span class="pill">⚙ Filtros <span class="count">3</span></span>
+      <span class="sep"></span><span class="icon-btn bordered on">💬</span><span class="icon-btn">☀</span>
+    </div>
+    <div class="body-row">
+      <div class="pages">
+        <div class="list"><div class="item active"><span class="dot"></span>Visão Geral</div>
+          <div class="item">Covenants</div><div class="item">Unidades</div></div>
+        <div class="profile"><span class="av">👤</span>Giulliano<span class="grow"></span>⇥</div>
+      </div>
+      <div class="content"><div class="surface"><div class="canvas">
+        <div class="hero hl" style="padding:4px">
+          <div><div style="display:flex;align-items:center;gap:8px"><h1>Visão Geral</h1><span class="chip-edit">Editando</span></div>
+            <p>Saldos, inadimplência e faixas de atraso</p></div>
+          <div class="acts"><span class="btn-sm ghost">Cancelar</span><span class="btn-sm primary">Salvar</span></div>
+        </div>
+        <div class="kpis" style="grid-template-columns:repeat(2,1fr)">
+          <div class="kpi"><div class="lbl">↗ Saldo Devedor</div><div class="val">R$ 86,32 mi</div><div class="spark"></div></div>
+          <div class="kpi"><div class="lbl">↗ Inadimplência</div><div class="val">0,87%</div><div class="spark"></div></div>
+        </div>
+        <div class="charts"><div class="chart"><div class="t">Saldo Devedor</div><div class="bars"><span style="height:55%"></span><span style="height:72%"></span><span style="height:48%"></span><span style="height:88%"></span></div></div>
+          <div class="chart"><div class="t">Faixa de Atraso</div><div class="bars"><span style="height:88%"></span><span style="height:42%"></span><span style="height:30%"></span><span style="height:18%"></span></div></div></div>
+      </div></div></div>
+      <div class="chatpanel">
+        <div class="chead">✦ Assistente<span class="grow"></span><span style="opacity:.6">✕</span></div>
+        <div class="bubble">Descreva o bloco que você quer adicionar…</div>
+        <div class="input">Pergunte algo…&nbsp; ➤</div>
+      </div>
+    </div>
+  </div>
+  <div class="note">❓ <span><b>Confirmar:</b> hoje Salvar e Cancelar vivem no header. Sem título lá, descem para junto do que está sendo editado — e o chat da direita é o mesmo painel, agora no modo de edição de relatório.</span></div>
+</section>
+
+<!-- 4 MOBILE -->
+<section class="variant" data-v="mob">
+  <div class="caption"><h2>Abaixo de 1024px</h2><span class="tag q">decisão em aberto</span>
+    <p>Páginas viram gaveta pela esquerda (☰) e o chat, gaveta pela direita (💬) — cada um do seu lado.</p></div>
+  <div class="app narrow">
+    <div class="hdr">
+      <span class="icon-btn hl">☰</span>
+      <span class="pill client" style="padding-right:8px"><span class="avatar">V</span><b>Vila Rosa</b> ⌄</span>
+      <span class="grow"></span>
+      <span class="pill" style="padding:0 8px">⚙ <span class="count">3</span></span>
+      <span class="icon-btn bordered on hl">💬</span><span class="icon-btn">☀</span>
+    </div>
+    <div class="body-row">
+      <div class="content"><div class="surface"><div class="canvas">
+        <div class="hero"><div><h1 style="font-size:18px">Visão Geral</h1><p>Saldos e inadimplência</p></div></div>
+        <div class="kpis" style="grid-template-columns:repeat(2,1fr)">
+          <div class="kpi"><div class="lbl">↗ Saldo Devedor</div><div class="val" style="font-size:15px">R$ 86,32 mi</div><div class="spark"></div></div>
+          <div class="kpi"><div class="lbl">↗ Inadimplência</div><div class="val" style="font-size:15px">0,87%</div><div class="spark"></div></div>
+        </div>
+        <div class="charts" style="grid-template-columns:1fr">
+          <div class="chart"><div class="t">Saldo Devedor</div><div class="bars"><span style="height:55%"></span><span style="height:72%"></span><span style="height:48%"></span><span style="height:88%"></span></div></div>
+        </div>
+      </div></div></div>
+    </div>
+    <div class="drawer">
+      <div class="panel">
+        <div class="chead" style="display:flex;align-items:center;gap:6px;font-size:11.5px;font-weight:600;color:var(--foreground)">✦ Assistente<span style="flex:1"></span><span style="opacity:.6">✕</span></div>
+        <div class="bubble">Como posso ajudar? Pergunte sobre indicadores, contratos ou qualquer dado do dashboard.</div>
+        <div class="input">Pergunte algo…&nbsp; ➤</div>
+      </div>
+    </div>
+  </div>
+  <div class="note">✅ <span>Direção coerente com o desktop: páginas sempre pela esquerda, chat sempre pela direita.</span></div>
+  <div class="note">❓ <span><b>Confirmar:</b> o cliente perde o rótulo "Cliente" e o Filtros vira só ícone com contador. Cabe, mas aperta.</span></div>
+</section>
+
+<!-- HOJE -->
+<section class="variant" data-v="now">
+  <div class="caption"><h2>Hoje</h2><span class="tag now">estado atual</span>
+    <p>Cliente na sidebar, filtros no conteúdo, lupa que abre o chat, chat à esquerda, título duplicado.</p></div>
+  <div class="app">
+    <div class="body-row">
+      <div style="flex:0 0 52px;border-right:1px solid var(--border);display:flex;flex-direction:column;align-items:center;padding-top:12px"><div class="icon-btn hl">💬</div></div>
+      <div class="pages">
+        <div style="height:46px;flex:0 0 46px;display:flex;align-items:center;padding:0 10px;border-bottom:1px solid var(--border)">
+          <span class="pill client hl" style="padding-right:8px"><span class="avatar">V</span><b>Vila Rosa</b> ⌄</span></div>
+        <div class="list"><div class="item active"><span class="dot"></span>Visão Geral</div>
+          <div class="item">Covenants</div><div class="item">Unidades</div></div>
+        <div class="profile"><span class="av">👤</span>Giulliano<span class="grow"></span>⇥</div>
+      </div>
+      <div class="content"><div class="surface">
+        <div class="hdr" style="border-radius:var(--radius-lg) var(--radius-lg) 0 0">
+          <span style="font-size:13.5px;font-weight:600">Visão Geral</span><span class="icon-btn">✎</span>
+          <span class="grow"></span><span class="pill hl">🔍 Buscar ⌘K</span><span class="icon-btn">☀</span></div>
+        <div class="canvas">
+          <div class="hero"><div><h1>Visão Geral</h1><p>Saldos, inadimplência e faixas de atraso</p></div>
+            <span class="pill hl">⚙ Filtros <span class="count">3</span></span></div>
+          <div class="kpis" style="grid-template-columns:repeat(2,1fr)">
+            <div class="kpi"><div class="lbl">↗ Saldo Devedor</div><div class="val">R$ 86,32 mi</div><div class="spark"></div></div>
+            <div class="kpi"><div class="lbl">↗ Inadimplência</div><div class="val">0,87%</div><div class="spark"></div></div>
+          </div>
+        </div>
+      </div></div>
+    </div>
+  </div>
+  <div class="note">⚠️ <span>"Visão Geral" duas vezes, e as ações globais espalhadas por sidebar, header e conteúdo.</span></div>
+</section>
+
+<script>
+  const btns = document.querySelectorAll('.controls button[data-v]');
+  const secs = document.querySelectorAll('.variant');
+  btns.forEach(b => b.addEventListener('click', () => {
+    btns.forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    secs.forEach(s => s.classList.toggle('active', s.dataset.v === b.dataset.v));
+  }));
+  document.getElementById('theme').addEventListener('click', () => {
+    const r = document.documentElement;
+    r.dataset.theme = r.dataset.theme === 'dark' ? 'light' : 'dark';
+  });
+</script>
+</body>
+</html>

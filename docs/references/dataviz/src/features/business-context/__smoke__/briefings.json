@@ -1,0 +1,32 @@
+[
+  {
+    "personaId": "diretor-fii-cri",
+    "clientId": "vila-rosa",
+    "briefing": "Quero ver OC, ES, WAL e Over 90 da carteira por safra do último ano."
+  },
+  {
+    "personaId": "gestor-carteira-securitizadora",
+    "clientId": "vila-rosa",
+    "briefing": "Mostre evolução do saldo da carteira e originação vs liquidações."
+  },
+  {
+    "personaId": "cfo-securitizadora",
+    "clientId": "vila-rosa",
+    "briefing": "VGV de lançamento, VSO 12m e queima de caixa por empreendimento."
+  },
+  {
+    "personaId": "controller",
+    "clientId": "vila-rosa",
+    "briefing": "PDD mínimo CMN 2.682 vs PDD projetada e covenants."
+  },
+  {
+    "personaId": "gestor-credito-obra",
+    "clientId": "vila-rosa",
+    "briefing": "Evolução de obra e liberações do plano empresário."
+  },
+  {
+    "personaId": "ceo-incorporadora",
+    "clientId": "vila-rosa",
+    "briefing": "VGV total, banco de terreno e caixa."
+  }
+]

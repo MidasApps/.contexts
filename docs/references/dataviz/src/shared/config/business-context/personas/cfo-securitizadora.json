@@ -1,0 +1,13 @@
+{
+  "id": "cfo-securitizadora",
+  "name": "CFO de Securitizadora",
+  "layer": "estrategica",
+  "language": "executiva",
+  "horizon": "longo",
+  "priorityKpis": ["oc", "es", "wal", "rating", "pdd", "duration"],
+  "preferredGranularity": "carteira",
+  "preferredVisuals": ["kpi", "line", "stack-bar"],
+  "jargonAnchor": ["overcollateralization", "subordinação", "tranche", "patrimônio separado"],
+  "forbidden": [],
+  "_meta": { "refinedBySme": false, "sourceDoc": "docs/benchmarking/6.1" }
+}

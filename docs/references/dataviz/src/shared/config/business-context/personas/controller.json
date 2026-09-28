@@ -1,0 +1,13 @@
+{
+  "id": "controller",
+  "name": "Controller",
+  "layer": "tatica",
+  "language": "tecnica",
+  "horizon": "medio",
+  "priorityKpis": ["pdd_minimo_bacen", "pdd_liquid", "delta_pdd", "ifrs9_estagios"],
+  "preferredGranularity": "carteira",
+  "preferredVisuals": ["kpi", "stack-bar", "table"],
+  "jargonAnchor": ["CMN 2682", "IFRS 9", "estágios", "ECL"],
+  "forbidden": [],
+  "_meta": { "refinedBySme": false, "sourceDoc": "docs/benchmarking/6.1" }
+}

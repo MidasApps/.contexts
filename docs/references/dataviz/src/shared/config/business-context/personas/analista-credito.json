@@ -1,0 +1,13 @@
+{
+  "id": "analista-credito",
+  "name": "Analista de Crédito",
+  "layer": "operacional",
+  "language": "tecnica",
+  "horizon": "curto",
+  "priorityKpis": ["aprovacao", "ltv", "comprometimento_renda", "restricao", "faixa_atraso"],
+  "preferredGranularity": "contrato",
+  "preferredVisuals": ["table", "kpi"],
+  "jargonAnchor": ["LTV", "comprometimento de renda", "restritivos"],
+  "forbidden": [],
+  "_meta": { "refinedBySme": false, "sourceDoc": "docs/benchmarking/6.1" }
+}

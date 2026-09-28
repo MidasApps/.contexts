@@ -1,0 +1,14 @@
+{
+  // Só para scripts rodados por `tsx` (ver `smoke:supervisor`). Difere do
+  // tsconfig do app em um ponto: neutraliza `server-only`, que existe para
+  // lançar quando importado fora de um Server Component. O build do app segue
+  // com o pacote real e a proteção intacta.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "paths": {
+      "@/*": ["./src/*"],
+      "@app/*": ["./app/*"],
+      "server-only": ["./scripts/shims/server-only.ts"]
+    }
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "id": "gestor-credito-obra",
+  "name": "Gestor de Crédito Obra",
+  "layer": "tatica",
+  "language": "tecnica",
+  "horizon": "medio",
+  "priorityKpis": ["evolucao_obra", "ltv", "comprometimento_renda", "status_repasse"],
+  "preferredGranularity": "contrato",
+  "preferredVisuals": ["table", "line"],
+  "jargonAnchor": ["evolução de obra", "LTV", "repasse"],
+  "forbidden": [],
+  "_meta": { "refinedBySme": false, "sourceDoc": "docs/benchmarking/6.1" }
+}

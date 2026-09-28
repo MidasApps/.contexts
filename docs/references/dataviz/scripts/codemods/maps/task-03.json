@@ -1,0 +1,1006 @@
+[
+  {
+    "file": "src/shared/lib/chat/erro-do-modelo.ts",
+    "line": 41,
+    "from": "statusDe",
+    "to": "statusOf",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false
+  },
+  {
+    "file": "src/shared/lib/__tests__/slug.test.ts",
+    "line": 24,
+    "from": "fonte",
+    "to": "source",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/shared/lib/__tests__/slug.test.ts",
+    "line": 25,
+    "from": "combinantes",
+    "to": "combining",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/shared/lib/__tests__/slug.test.ts",
+    "line": 60,
+    "from": "casos",
+    "to": "cases",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/shared/lib/__tests__/slug.test.ts",
+    "line": 111,
+    "from": "ocupados",
+    "to": "taken",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/shared/lib/chat/__tests__/erro-do-modelo.test.ts",
+    "line": 10,
+    "from": "erroDeCota",
+    "to": "quotaError",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/shared/lib/chat/__tests__/erro-do-modelo.test.ts",
+    "line": 26,
+    "from": "mensagem",
+    "to": "message",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 16
+  },
+  {
+    "file": "src/shared/lib/chat/__tests__/erro-do-modelo.test.ts",
+    "line": 40,
+    "from": "erro",
+    "to": "error",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 27
+  },
+  {
+    "file": "src/shared/lib/chat/__tests__/erro-do-modelo.test.ts",
+    "line": 41,
+    "from": "mensagem",
+    "to": "message",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 16
+  },
+  {
+    "file": "src/shared/lib/chat/__tests__/erro-do-modelo.test.ts",
+    "line": 59,
+    "from": "erro",
+    "to": "error",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 27
+  },
+  {
+    "file": "src/shared/lib/chat/__tests__/erro-do-modelo.test.ts",
+    "line": 60,
+    "from": "mensagem",
+    "to": "message",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 16
+  },
+  {
+    "file": "src/shared/lib/chat/__tests__/erro-do-modelo.test.ts",
+    "line": 68,
+    "from": "doServidor",
+    "to": "fromServer",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/shared/lib/chat/erro-do-modelo.ts",
+    "line": 18,
+    "from": "CodigoDeErroDoModelo",
+    "to": "ModelErrorCode",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/shared/lib/chat/erro-do-modelo.ts",
+    "line": 24,
+    "from": "ErroDoModelo",
+    "to": "ModelError",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/shared/lib/chat/erro-do-modelo.ts",
+    "line": 29,
+    "from": "MENSAGENS",
+    "to": "MESSAGES",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "src/shared/lib/chat/erro-do-modelo.ts",
+    "line": 41,
+    "from": "erro",
+    "to": "error",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 27
+  },
+  {
+    "file": "src/shared/lib/chat/erro-do-modelo.ts",
+    "line": 44,
+    "from": "bruto",
+    "to": "raw",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/shared/lib/chat/erro-do-modelo.ts",
+    "line": 48,
+    "from": "textoDe",
+    "to": "textOf",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/shared/lib/chat/erro-do-modelo.ts",
+    "line": 48,
+    "from": "erro",
+    "to": "error",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 27
+  },
+  {
+    "file": "src/shared/lib/chat/erro-do-modelo.ts",
+    "line": 63,
+    "from": "classificarErroDoModelo",
+    "to": "classifyModelError",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "src/shared/lib/chat/erro-do-modelo.ts",
+    "line": 63,
+    "from": "erro",
+    "to": "error",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 27
+  },
+  {
+    "file": "src/shared/lib/chat/erro-do-modelo.ts",
+    "line": 65,
+    "from": "texto",
+    "to": "text",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 16
+  },
+  {
+    "file": "src/shared/lib/chat/erro-do-modelo.ts",
+    "line": 67,
+    "from": "semCapacidade",
+    "to": "isOutOfCapacity",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/shared/lib/chat/erro-do-modelo.ts",
+    "line": 71,
+    "from": "semCredencial",
+    "to": "isMissingCredential",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/shared/lib/chat/erro-do-modelo.ts",
+    "line": 77,
+    "from": "indisponivel",
+    "to": "isUnavailable",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/shared/lib/chat/erro-do-modelo.ts",
+    "line": 84,
+    "from": "serializarErroDoModelo",
+    "to": "serializeModelError",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/shared/lib/chat/erro-do-modelo.ts",
+    "line": 84,
+    "from": "erro",
+    "to": "error",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 27
+  },
+  {
+    "file": "src/shared/lib/chat/erro-do-modelo.ts",
+    "line": 96,
+    "from": "mensagemDoErroDeChat",
+    "to": "chatErrorMessage",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 7,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/shared/lib/chat/erro-do-modelo.ts",
+    "line": 96,
+    "from": "erro",
+    "to": "error",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 27
+  },
+  {
+    "file": "src/shared/lib/chat/erro-do-modelo.ts",
+    "line": 97,
+    "from": "texto",
+    "to": "text",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 16
+  },
+  {
+    "file": "src/shared/lib/chat/last-conversation.ts",
+    "line": 21,
+    "from": "PREFIXO",
+    "to": "PREFIX",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/shared/lib/chat/last-conversation.ts",
+    "line": 23,
+    "from": "chave",
+    "to": "storageKey",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/shared/lib/chat/last-conversation.ts",
+    "line": 28,
+    "from": "lerUltimaConversa",
+    "to": "readLastConversation",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 1
+  },
+  {
+    "file": "src/shared/lib/chat/last-conversation.ts",
+    "line": 38,
+    "from": "guardarUltimaConversa",
+    "to": "saveLastConversation",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 1
+  },
+  {
+    "file": "src/shared/lib/claims/claim-patterns.ts",
+    "line": 28,
+    "from": "texto",
+    "to": "text",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 16
+  },
+  {
+    "file": "src/shared/lib/firestore/__tests__/audit.test.ts",
+    "line": 9,
+    "from": "AGORA",
+    "to": "NOW",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 8
+  },
+  {
+    "file": "src/shared/lib/firestore/audit.ts",
+    "line": 35,
+    "from": "agora",
+    "to": "now",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 8
+  },
+  {
+    "file": "src/shared/lib/firestore/poda-de-conversa.test.ts",
+    "line": 21,
+    "from": "grande",
+    "to": "large",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 8
+  },
+  {
+    "file": "src/shared/lib/firestore/poda-de-conversa.test.ts",
+    "line": 56,
+    "from": "podado",
+    "to": "pruned",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 15
+  },
+  {
+    "file": "src/shared/lib/firestore/poda-de-conversa.test.ts",
+    "line": 76,
+    "from": "podado",
+    "to": "pruned",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 15
+  },
+  {
+    "file": "src/shared/lib/firestore/poda-de-conversa.test.ts",
+    "line": 77,
+    "from": "saida",
+    "to": "output",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/shared/lib/firestore/poda-de-conversa.test.ts",
+    "line": 94,
+    "from": "podado",
+    "to": "pruned",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 15
+  },
+  {
+    "file": "src/shared/lib/firestore/poda-de-conversa.test.ts",
+    "line": 107,
+    "from": "antes",
+    "to": "before",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/shared/lib/firestore/poda-de-conversa.test.ts",
+    "line": 130,
+    "from": "antes",
+    "to": "before",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/shared/lib/firestore/poda-de-conversa.test.ts",
+    "line": 131,
+    "from": "depois",
+    "to": "after",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/shared/lib/firestore/poda-de-conversa.ts",
+    "line": 36,
+    "from": "TETO_DO_PART",
+    "to": "PART_BYTE_CAP",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/shared/lib/firestore/poda-de-conversa.ts",
+    "line": 39,
+    "from": "TAMANHO_DA_PREVIA",
+    "to": "PREVIEW_LENGTH",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/shared/lib/firestore/poda-de-conversa.ts",
+    "line": 42,
+    "from": "TIPOS_DE_NARRATIVA",
+    "to": "NARRATIVE_TYPES",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/shared/lib/firestore/poda-de-conversa.ts",
+    "line": 44,
+    "from": "valor",
+    "to": "value",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 19
+  },
+  {
+    "file": "src/shared/lib/firestore/poda-de-conversa.ts",
+    "line": 48,
+    "from": "ehRegistro",
+    "to": "isRecord",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/shared/lib/firestore/poda-de-conversa.ts",
+    "line": 59,
+    "from": "previaDe",
+    "to": "previewOf",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/shared/lib/firestore/poda-de-conversa.ts",
+    "line": 59,
+    "from": "valor",
+    "to": "value",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 19
+  },
+  {
+    "file": "src/shared/lib/firestore/poda-de-conversa.ts",
+    "line": 60,
+    "from": "texto",
+    "to": "text",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 16
+  },
+  {
+    "file": "src/shared/lib/firestore/poda-de-conversa.ts",
+    "line": 64,
+    "from": "resumoDe",
+    "to": "summaryOf",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/shared/lib/firestore/poda-de-conversa.ts",
+    "line": 64,
+    "from": "valor",
+    "to": "value",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 19
+  },
+  {
+    "file": "src/shared/lib/firestore/poda-de-conversa.ts",
+    "line": 64,
+    "from": "campo",
+    "to": "field",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/shared/lib/firestore/poda-de-conversa.ts",
+    "line": 80,
+    "from": "podarParte",
+    "to": "prunePart",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/shared/lib/firestore/poda-de-conversa.ts",
+    "line": 80,
+    "from": "parte",
+    "to": "part",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "src/shared/lib/firestore/poda-de-conversa.ts",
+    "line": 82,
+    "from": "tipo",
+    "to": "partType",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/shared/lib/firestore/poda-de-conversa.ts",
+    "line": 86,
+    "from": "podada",
+    "to": "prunedPart",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 14
+  },
+  {
+    "file": "src/shared/lib/firestore/poda-de-conversa.ts",
+    "line": 108,
+    "from": "podarParts",
+    "to": "pruneParts",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 9,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/shared/lib/format.ts",
+    "line": 58,
+    "from": "valor",
+    "to": "value",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 19
+  },
+  {
+    "file": "src/shared/lib/format.ts",
+    "line": 61,
+    "from": "ano",
+    "to": "year",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/shared/lib/format.ts",
+    "line": 61,
+    "from": "mes",
+    "to": "month",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 8
+  },
+  {
+    "file": "src/shared/lib/format.ts",
+    "line": 61,
+    "from": "dia",
+    "to": "day",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/shared/lib/format.ts",
+    "line": 66,
+    "from": "mes",
+    "to": "month",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 8
+  },
+  {
+    "file": "src/shared/lib/format.ts",
+    "line": 186,
+    "from": "faixaDeAtraso",
+    "to": "delinquencyBand",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/shared/lib/format.ts",
+    "line": 187,
+    "from": "intervalo",
+    "to": "range",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/shared/lib/format.ts",
+    "line": 190,
+    "from": "aberta",
+    "to": "openEnded",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/shared/lib/format.ts",
+    "line": 203,
+    "from": "faixa",
+    "to": "band",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/shared/lib/macro/bcb-sgs.ts",
+    "line": 37,
+    "from": "ultimos",
+    "to": "latest",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/shared/lib/memory/memory-service.test.ts",
+    "line": 276,
+    "from": "dados",
+    "to": "data",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/shared/lib/memory/memory-service.ts",
+    "line": 167,
+    "from": "semUndefined",
+    "to": "withoutUndefined",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/shared/lib/memory/memory-service.ts",
+    "line": 167,
+    "from": "valor",
+    "to": "value",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 19
+  },
+  {
+    "file": "src/shared/lib/memory/memory-service.ts",
+    "line": 172,
+    "from": "saida",
+    "to": "output",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/shared/lib/permissions/metric-route-map.ts",
+    "line": 35,
+    "from": "ROTA_DE_RELATORIO",
+    "to": "REPORT_ROUTE",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/shared/lib/rate-limit.ts",
+    "line": 28,
+    "from": "Janela",
+    "to": "HitWindow",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/shared/lib/rate-limit.ts",
+    "line": 33,
+    "from": "janelas",
+    "to": "windows",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 8
+  },
+  {
+    "file": "src/shared/lib/rate-limit.ts",
+    "line": 36,
+    "from": "MAX_CHAVES",
+    "to": "MAX_KEYS",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/shared/lib/rate-limit.ts",
+    "line": 60,
+    "from": "agora",
+    "to": "now",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 8
+  },
+  {
+    "file": "src/shared/lib/rate-limit.ts",
+    "line": 62,
+    "from": "inicio",
+    "to": "windowStart",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/shared/lib/rate-limit.ts",
+    "line": 63,
+    "from": "janela",
+    "to": "entry",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/shared/lib/rate-limit.ts",
+    "line": 69,
+    "from": "maisAntigo",
+    "to": "oldest",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/shared/lib/rate-limit.ts",
+    "line": 86,
+    "from": "coletarLixo",
+    "to": "collectGarbage",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/shared/lib/rate-limit.ts",
+    "line": 86,
+    "from": "inicio",
+    "to": "windowStart",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/shared/lib/rate-limit.ts",
+    "line": 93,
+    "from": "resultado",
+    "to": "result",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/shared/lib/rate-limit.ts",
+    "line": 93,
+    "from": "mensagem",
+    "to": "message",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 16
+  },
+  {
+    "file": "src/shared/lib/rate-limit.ts",
+    "line": 102,
+    "from": "emVoo",
+    "to": "inFlight",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 7
+  },
+  {
+    "file": "src/shared/lib/rate-limit.ts",
+    "line": 113,
+    "from": "atual",
+    "to": "current",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/shared/lib/rate-limit.ts",
+    "line": 116,
+    "from": "liberado",
+    "to": "released",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/shared/lib/security/__tests__/csp.test.ts",
+    "line": 82,
+    "from": "nomes",
+    "to": "names",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/shared/lib/semantic/__tests__/flatten-binding.test.ts",
+    "line": 145,
+    "from": "legado",
+    "to": "legacy",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/shared/lib/slug.ts",
+    "line": 62,
+    "from": "texto",
+    "to": "text",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 16
+  },
+  {
+    "file": "src/shared/lib/slug.ts",
+    "line": 63,
+    "from": "ocupados",
+    "to": "taken",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/shared/lib/slug.ts",
+    "line": 67,
+    "from": "usados",
+    "to": "used",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/shared/lib/slug.ts",
+    "line": 72,
+    "from": "candidato",
+    "to": "candidate",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/shared/lib/chat/__tests__/erro-do-modelo.test.ts",
+    "line": 0,
+    "from": "src/shared/lib/chat/__tests__/erro-do-modelo.test.ts",
+    "to": "src/shared/lib/chat/__tests__/model-error.test.ts",
+    "kind": "file",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 1
+  },
+  {
+    "file": "src/shared/lib/chat/erro-do-modelo.ts",
+    "line": 0,
+    "from": "src/shared/lib/chat/erro-do-modelo.ts",
+    "to": "src/shared/lib/chat/model-error.ts",
+    "kind": "file",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 1
+  },
+  {
+    "file": "src/shared/lib/firestore/poda-de-conversa.test.ts",
+    "line": 0,
+    "from": "src/shared/lib/firestore/poda-de-conversa.test.ts",
+    "to": "src/shared/lib/firestore/conversation-pruning.test.ts",
+    "kind": "file",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 1
+  },
+  {
+    "file": "src/shared/lib/firestore/poda-de-conversa.ts",
+    "line": 0,
+    "from": "src/shared/lib/firestore/poda-de-conversa.ts",
+    "to": "src/shared/lib/firestore/conversation-pruning.ts",
+    "kind": "file",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 1
+  }
+]

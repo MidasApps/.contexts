@@ -1,0 +1,822 @@
+[
+  {
+    "file": "src/pages/admin-sql-catalog/__tests__/CatalogFilters.test.tsx",
+    "line": 6,
+    "from": "CLIENTES",
+    "to": "CLIENTS",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "src/pages/admin-sql-catalog/ui/AdminSqlCatalogPage.tsx",
+    "line": 29,
+    "from": "filtrosVigentes",
+    "to": "activeFilters",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/pages/home/ui/HomePage.tsx",
+    "line": 34,
+    "from": "podeAbrirRelatorio",
+    "to": "canOpenReport",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/pages/landing/ui/LandingPage.tsx",
+    "line": 811,
+    "from": "cenario",
+    "to": "scenario",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "src/pages/landing/ui/LandingPage.tsx",
+    "line": 811,
+    "from": "desval",
+    "to": "devaluation",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/pages/landing/ui/LandingPage.tsx",
+    "line": 811,
+    "from": "atraso",
+    "to": "delay",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/pages/landing/ui/LandingPage.tsx",
+    "line": 811,
+    "from": "impacto",
+    "to": "impact",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/pages/landing/ui/LandingPage.tsx",
+    "line": 812,
+    "from": "cenario",
+    "to": "scenario",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "src/pages/landing/ui/LandingPage.tsx",
+    "line": 812,
+    "from": "desval",
+    "to": "devaluation",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/pages/landing/ui/LandingPage.tsx",
+    "line": 812,
+    "from": "atraso",
+    "to": "delay",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/pages/landing/ui/LandingPage.tsx",
+    "line": 812,
+    "from": "impacto",
+    "to": "impact",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/pages/landing/ui/LandingPage.tsx",
+    "line": 813,
+    "from": "cenario",
+    "to": "scenario",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "src/pages/landing/ui/LandingPage.tsx",
+    "line": 813,
+    "from": "desval",
+    "to": "devaluation",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/pages/landing/ui/LandingPage.tsx",
+    "line": 813,
+    "from": "atraso",
+    "to": "delay",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/pages/landing/ui/LandingPage.tsx",
+    "line": 813,
+    "from": "impacto",
+    "to": "impact",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/pages/landing/ui/LandingPage.tsx",
+    "line": 814,
+    "from": "cenario",
+    "to": "scenario",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "src/pages/landing/ui/LandingPage.tsx",
+    "line": 814,
+    "from": "desval",
+    "to": "devaluation",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/pages/landing/ui/LandingPage.tsx",
+    "line": 814,
+    "from": "atraso",
+    "to": "delay",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/pages/landing/ui/LandingPage.tsx",
+    "line": 814,
+    "from": "impacto",
+    "to": "impact",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/pages/landing/ui/__tests__/LandingPage.test.tsx",
+    "line": 6,
+    "from": "texto",
+    "to": "text",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/pages/landing/ui/__tests__/LandingPage.test.tsx",
+    "line": 16,
+    "from": "rotulo",
+    "to": "label",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/pages/report/ui/ReportPage.test.tsx",
+    "line": 27,
+    "from": "resumo",
+    "to": "summarize",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/pages/report/ui/ReportPage.test.tsx",
+    "line": 44,
+    "from": "rota",
+    "to": "route",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "src/pages/report/ui/ReportPage.test.tsx",
+    "line": 80,
+    "from": "FILTROS",
+    "to": "FILTERS",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/pages/report/ui/ReportPage.test.tsx",
+    "line": 126,
+    "from": "pagina",
+    "to": "page",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 15
+  },
+  {
+    "file": "src/pages/report/ui/ReportPage.test.tsx",
+    "line": 146,
+    "from": "VALOR_POR_METRICA",
+    "to": "VALUE_BY_METRIC",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/pages/report/ui/ReportPage.test.tsx",
+    "line": 155,
+    "from": "relatorio",
+    "to": "report",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "src/pages/report/ui/ReportPage.test.tsx",
+    "line": 167,
+    "from": "metricasPedidas",
+    "to": "requestedMetrics",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/pages/report/ui/ReportPage.test.tsx",
+    "line": 184,
+    "from": "assentar",
+    "to": "settle",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 12
+  },
+  {
+    "file": "src/pages/report/ui/ReportPage.test.tsx",
+    "line": 184,
+    "from": "turnos",
+    "to": "turns",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/pages/report/ui/ReportPage.test.tsx",
+    "line": 231,
+    "from": "rerenderPagina",
+    "to": "rerenderPage",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/pages/report/ui/ReportPage.test.tsx",
+    "line": 232,
+    "from": "abrirRelatorio",
+    "to": "openReport",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 13
+  },
+  {
+    "file": "src/pages/report/ui/ReportPage.test.tsx",
+    "line": 246,
+    "from": "pendentes",
+    "to": "pending",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 7
+  },
+  {
+    "file": "src/pages/report/ui/ReportPage.test.tsx",
+    "line": 277,
+    "from": "entregarB",
+    "to": "deliverB",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/pages/report/ui/ReportPage.test.tsx",
+    "line": 308,
+    "from": "leiturasAntes",
+    "to": "readsBefore",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/pages/report/ui/ReportPage.test.tsx",
+    "line": 363,
+    "from": "escritasNoStore",
+    "to": "storeWrites",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/pages/report/ui/ReportPage.test.tsx",
+    "line": 364,
+    "from": "desinscrever",
+    "to": "unsubscribe",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/pages/report/ui/ReportPage.test.tsx",
+    "line": 374,
+    "from": "buscasAposAssentar",
+    "to": "fetchesAfterSettle",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/pages/report/ui/ReportPage.test.tsx",
+    "line": 375,
+    "from": "escritasAposAssentar",
+    "to": "writesAfterSettle",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/pages/report/ui/ReportPage.test.tsx",
+    "line": 417,
+    "from": "pagina",
+    "to": "page",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 15
+  },
+  {
+    "file": "src/pages/report/ui/ReportPage.test.tsx",
+    "line": 430,
+    "from": "blockMapGravado",
+    "to": "savedBlockMap",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/pages/report/ui/ReportPage.test.tsx",
+    "line": 431,
+    "from": "gravado",
+    "to": "saved",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 9
+  },
+  {
+    "file": "src/pages/report/ui/ReportPage.test.tsx",
+    "line": 433,
+    "from": "bloco",
+    "to": "block",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "src/pages/report/ui/ReportPage.test.tsx",
+    "line": 467,
+    "from": "gravado",
+    "to": "saved",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 9
+  },
+  {
+    "file": "src/pages/report/ui/ReportPage.test.tsx",
+    "line": 548,
+    "from": "emQuatroBlocos",
+    "to": "inFourBlocks",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/pages/report/ui/ReportPage.test.tsx",
+    "line": 567,
+    "from": "celula",
+    "to": "cell",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/pages/report/ui/ReportPage.tsx",
+    "line": 50,
+    "from": "catalogoDeMetricas",
+    "to": "metricCatalog",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/pages/report/ui/ReportPage.tsx",
+    "line": 91,
+    "from": "lendoRelatorio",
+    "to": "isReadingReport",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/pages/report/ui/ReportPage.tsx",
+    "line": 92,
+    "from": "relerRelatorio",
+    "to": "rereadReport",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/pages/report/ui/ReportPage.tsx",
+    "line": 136,
+    "from": "reporCanvas",
+    "to": "restoreCanvas",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 8,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/pages/report/ui/ReportPage.tsx",
+    "line": 142,
+    "from": "aoAlterarEmLeitura",
+    "to": "onReadModeChange",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/pages/report/ui/ReportPage.tsx",
+    "line": 154,
+    "from": "aoMudarFiltro",
+    "to": "onFilterChange",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/pages/report/ui/ReportPage.tsx",
+    "line": 155,
+    "from": "alvo",
+    "to": "target",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/pages/report/ui/ReportPage.tsx",
+    "line": 217,
+    "from": "paginaEditada",
+    "to": "editedPage",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "src/pages/report/ui/ReportPage.tsx",
+    "line": 233,
+    "from": "configuracao",
+    "to": "configuration",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/pages/report/ui/ReportPage.tsx",
+    "line": 333,
+    "from": "blocosNaOrdem",
+    "to": "blocksInOrder",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/pages/report/ui/ReportPage.tsx",
+    "line": 361,
+    "from": "acoesDaPagina",
+    "to": "pageActions",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/pages/report/ui/ReportPage.tsx",
+    "line": 394,
+    "from": "barraDaPagina",
+    "to": "pageBar",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/pages/report/ui/ReportPage.tsx",
+    "line": 481,
+    "from": "metrica",
+    "to": "metric",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/pages/report/ui/ReportPage.tsx",
+    "line": 485,
+    "from": "naoSegueOPeriodo",
+    "to": "ignoresPeriod",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/pages/report/ui/ReportPage.tsx",
+    "line": 491,
+    "from": "mesFixado",
+    "to": "pinnedMonth",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/pages/report/ui/report-canvas.test.ts",
+    "line": 5,
+    "from": "pagina",
+    "to": "page",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 15
+  },
+  {
+    "file": "src/pages/report/ui/report-canvas.test.ts",
+    "line": 5,
+    "from": "bloco",
+    "to": "block",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "src/pages/report/ui/report-canvas.ts",
+    "line": 16,
+    "from": "paginaDoRelatorio",
+    "to": "reportPage",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 11
+  },
+  {
+    "file": "src/pages/report/ui/useCanvasSync.ts",
+    "line": 28,
+    "from": "aoAlterarEmLeitura",
+    "to": "onReadModeChange",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/pages/report/ui/useCanvasSync.ts",
+    "line": 36,
+    "from": "reporCanvas",
+    "to": "restoreCanvas",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 8,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/pages/report/ui/useCanvasSync.ts",
+    "line": 63,
+    "from": "aoAlterarEmLeitura",
+    "to": "onReadModeChange",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/pages/report/ui/useCanvasSync.ts",
+    "line": 74,
+    "from": "canvasCarregadoRef",
+    "to": "canvasLoadedRef",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/pages/report/ui/useCanvasSync.ts",
+    "line": 91,
+    "from": "assinaturaDosBlocos",
+    "to": "blocksSignature",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/pages/report/ui/useCanvasSync.ts",
+    "line": 95,
+    "from": "blockMapParaDados",
+    "to": "blockMapForData",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/pages/report/ui/useCanvasSync.ts",
+    "line": 100,
+    "from": "dados",
+    "to": "data",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/pages/report/ui/useCanvasSync.ts",
+    "line": 112,
+    "from": "paginaDoCanvas",
+    "to": "canvasPage",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/pages/report/ui/useCanvasSync.ts",
+    "line": 138,
+    "from": "assinatura",
+    "to": "signature",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/pages/report/ui/useCanvasSync.ts",
+    "line": 154,
+    "from": "pagina",
+    "to": "page",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 15
+  },
+  {
+    "file": "src/pages/report/ui/useCanvasSync.ts",
+    "line": 181,
+    "from": "indice",
+    "to": "index",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/pages/report/ui/useCanvasSync.ts",
+    "line": 182,
+    "from": "pagina",
+    "to": "page",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 15
+  },
+  {
+    "file": "src/pages/report/ui/useCanvasSync.ts",
+    "line": 184,
+    "from": "populado",
+    "to": "populated",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/pages/report/ui/useCanvasSync.ts",
+    "line": 185,
+    "from": "atual",
+    "to": "current",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/pages/report/ui/useCanvasSync.ts",
+    "line": 187,
+    "from": "dado",
+    "to": "blockData",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/pages/report/ui/useCanvasSync.ts",
+    "line": 202,
+    "from": "reporCanvas",
+    "to": "restoreCanvas",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 8,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/pages/report/ui/useCanvasSync.ts",
+    "line": 220,
+    "from": "reporCanvas",
+    "to": "restoreCanvas",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 8,
+    "note": "mixed-language"
+  }
+]

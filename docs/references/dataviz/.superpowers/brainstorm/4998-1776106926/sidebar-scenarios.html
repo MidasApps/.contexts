@@ -1,0 +1,231 @@
+<h2>Sidebar duplo: cenários com e sem client rail</h2>
+<p class="subtitle">O client rail só aparece quando há mais de 1 cliente. Veja como fica com 3 produtos (MCMV, SBPE, Backtest).</p>
+
+<div class="split">
+  <!-- Scenario 1: Single client (no client rail) -->
+  <div class="mockup">
+    <div class="mockup-header">Cliente único — sem client rail</div>
+    <div class="mockup-body" style="padding: 0;">
+      <div style="background: #0a0a0a; font-family: system-ui; font-size: 11px; color: #e0e0e0; height: 380px; display: flex; border-radius: 0 0 8px 8px;">
+        <!-- Report Type Rail (direto, sem client) -->
+        <div style="width: 48px; border-right: 1px solid rgba(255,255,255,0.08); padding: 10px 6px; display: flex; flex-direction: column; align-items: center; gap: 4px; background: rgba(255,255,255,0.015);">
+          <div style="font-size: 6px; color: rgba(255,255,255,0.25); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px;">Relatórios</div>
+          <!-- MCMV active -->
+          <div style="width: 36px; height: 36px; background: rgba(243,161,105,0.18); border: 1.5px solid rgba(243,161,105,0.5); border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer;">
+            <div style="font-size: 9px; font-weight: 700; color: #F3A169;">M</div>
+            <div style="font-size: 5.5px; color: #F3A169; margin-top: 1px;">MCMV</div>
+          </div>
+          <!-- SBPE -->
+          <div style="width: 36px; height: 36px; background: rgba(255,255,255,0.04); border: 1.5px solid transparent; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer;">
+            <div style="font-size: 9px; font-weight: 600; color: rgba(255,255,255,0.45);">S</div>
+            <div style="font-size: 5.5px; color: rgba(255,255,255,0.3); margin-top: 1px;">SBPE</div>
+          </div>
+          <!-- Backtest -->
+          <div style="width: 36px; height: 36px; background: rgba(255,255,255,0.04); border: 1.5px solid transparent; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer;">
+            <div style="font-size: 9px; font-weight: 600; color: rgba(255,255,255,0.45);">B</div>
+            <div style="font-size: 5.5px; color: rgba(255,255,255,0.3); margin-top: 1px;">Backtest</div>
+          </div>
+
+          <!-- Spacer -->
+          <div style="flex: 1;"></div>
+          <!-- Explore button -->
+          <div style="width: 36px; height: 36px; background: rgba(255,255,255,0.04); border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+            <div style="font-size: 9px; color: rgba(255,255,255,0.4);">🔍</div>
+          </div>
+        </div>
+        <!-- Page Sidebar -->
+        <div style="width: 130px; border-right: 1px solid rgba(255,255,255,0.08); padding: 10px 8px; display: flex; flex-direction: column; gap: 2px;">
+          <div style="font-size: 11px; font-weight: 700; color: #F3A169; padding: 2px 4px; margin-bottom: 6px;">MCMV</div>
+          <div style="font-size: 7px; color: rgba(255,255,255,0.25); padding: 2px 6px; text-transform: uppercase; letter-spacing: 0.5px;">Carteira</div>
+          <div style="padding: 5px 8px; border-radius: 6px; background: rgba(243,161,105,0.12); color: #F3A169; font-size: 10px; font-weight: 500; display: flex; align-items: center; gap: 5px;">
+            <span style="font-size: 10px;">📊</span> Visão Geral
+          </div>
+          <div style="padding: 5px 8px; font-size: 10px; color: rgba(255,255,255,0.5); display: flex; align-items: center; gap: 5px;">
+            <span style="font-size: 10px;">📄</span> Contratos
+          </div>
+          <div style="padding: 5px 8px; font-size: 10px; color: rgba(255,255,255,0.5); display: flex; align-items: center; gap: 5px;">
+            <span style="font-size: 10px;">💰</span> Pagamentos
+          </div>
+          <div style="padding: 5px 8px; font-size: 10px; color: rgba(255,255,255,0.5); display: flex; align-items: center; gap: 5px;">
+            <span style="font-size: 10px;">📈</span> Fluxo de Caixa
+          </div>
+          <div style="font-size: 7px; color: rgba(255,255,255,0.25); padding: 2px 6px; margin-top: 8px; text-transform: uppercase; letter-spacing: 0.5px;">Risco</div>
+          <div style="padding: 5px 8px; font-size: 10px; color: rgba(255,255,255,0.5); display: flex; align-items: center; gap: 5px;">
+            <span style="font-size: 10px;">🛡️</span> PDD
+          </div>
+          <div style="padding: 5px 8px; font-size: 10px; color: rgba(255,255,255,0.5); display: flex; align-items: center; gap: 5px;">
+            <span style="font-size: 10px;">💲</span> Pricing
+          </div>
+          <div style="font-size: 7px; color: rgba(255,255,255,0.25); padding: 2px 6px; margin-top: 8px; text-transform: uppercase; letter-spacing: 0.5px;">Operacional</div>
+          <div style="padding: 5px 8px; font-size: 10px; color: rgba(255,255,255,0.5); display: flex; align-items: center; gap: 5px;">
+            <span style="font-size: 10px;">⚠️</span> Inadimplência
+          </div>
+        </div>
+        <!-- Content Area -->
+        <div style="flex: 1; display: flex; flex-direction: column;">
+          <!-- AppBar -->
+          <div style="display: flex; align-items: center; padding: 10px 14px; border-bottom: 1px solid rgba(255,255,255,0.08); gap: 8px;">
+            <div style="font-size: 9px; color: rgba(255,255,255,0.35);">MCMV</div>
+            <div style="font-size: 9px; color: rgba(255,255,255,0.2);">›</div>
+            <div style="font-size: 10px; font-weight: 600;">Visão Geral</div>
+            <div style="margin-left: auto; display: flex; gap: 6px;">
+              <div style="background: rgba(255,255,255,0.06); padding: 4px 10px; border-radius: 6px; font-size: 9px; border: 1px solid rgba(255,255,255,0.08);">Filtros</div>
+              <div style="background: rgba(255,255,255,0.06); padding: 4px 10px; border-radius: 6px; font-size: 9px; border: 1px solid rgba(255,255,255,0.08);">Jan–Mar 2026</div>
+            </div>
+          </div>
+          <!-- KPIs -->
+          <div style="padding: 10px; display: flex; flex-direction: column; gap: 8px;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 6px;">
+              <div style="background: rgba(255,255,255,0.03); border-radius: 8px; padding: 10px; border: 1px solid rgba(255,255,255,0.06);">
+                <div style="font-size: 7px; color: rgba(255,255,255,0.35); margin-bottom: 3px;">Saldo Devedor</div>
+                <div style="font-size: 14px; font-weight: 700; color: #F3A169;">R$ 2.4B</div>
+                <div style="font-size: 7px; color: #4ade80; margin-top: 2px;">↑ 2.3%</div>
+              </div>
+              <div style="background: rgba(255,255,255,0.03); border-radius: 8px; padding: 10px; border: 1px solid rgba(255,255,255,0.06);">
+                <div style="font-size: 7px; color: rgba(255,255,255,0.35); margin-bottom: 3px;">Total Contratos</div>
+                <div style="font-size: 14px; font-weight: 700; color: #F3A169;">12.847</div>
+                <div style="font-size: 7px; color: #4ade80; margin-top: 2px;">↑ 156</div>
+              </div>
+              <div style="background: rgba(255,255,255,0.03); border-radius: 8px; padding: 10px; border: 1px solid rgba(255,255,255,0.06);">
+                <div style="font-size: 7px; color: rgba(255,255,255,0.35); margin-bottom: 3px;">Inadimplência</div>
+                <div style="font-size: 14px; font-weight: 700; color: #ef4444;">3.2%</div>
+                <div style="font-size: 7px; color: #ef4444; margin-top: 2px;">↑ 0.4pp</div>
+              </div>
+              <div style="background: rgba(255,255,255,0.03); border-radius: 8px; padding: 10px; border: 1px solid rgba(255,255,255,0.06);">
+                <div style="font-size: 7px; color: rgba(255,255,255,0.35); margin-bottom: 3px;">PDD</div>
+                <div style="font-size: 14px; font-weight: 700; color: #facc15;">1.8%</div>
+                <div style="font-size: 7px; color: rgba(255,255,255,0.3); margin-top: 2px;">= 0.0pp</div>
+              </div>
+            </div>
+            <!-- Chart placeholder -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
+              <div style="background: rgba(255,255,255,0.02); border-radius: 8px; height: 100px; border: 1px solid rgba(255,255,255,0.06); display: flex; align-items: center; justify-content: center;">
+                <div style="font-size: 9px; color: rgba(255,255,255,0.2);">Evolução do Saldo</div>
+              </div>
+              <div style="background: rgba(255,255,255,0.02); border-radius: 8px; height: 100px; border: 1px solid rgba(255,255,255,0.06); display: flex; align-items: center; justify-content: center;">
+                <div style="font-size: 9px; color: rgba(255,255,255,0.2);">Distribuição por Faixa</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scenario 2: Multiple clients (with client rail) -->
+  <div class="mockup">
+    <div class="mockup-header">Múltiplos clientes — com client rail</div>
+    <div class="mockup-body" style="padding: 0;">
+      <div style="background: #0a0a0a; font-family: system-ui; font-size: 11px; color: #e0e0e0; height: 380px; display: flex; border-radius: 0 0 8px 8px;">
+        <!-- Client Rail (only when multi-client) -->
+        <div style="width: 44px; border-right: 1px solid rgba(255,255,255,0.06); padding: 10px 4px; display: flex; flex-direction: column; align-items: center; gap: 6px; background: rgba(255,255,255,0.01);">
+          <div style="font-size: 5.5px; color: rgba(255,255,255,0.2); text-transform: uppercase; letter-spacing: 0.5px;">Clientes</div>
+          <!-- OM active -->
+          <div style="width: 32px; height: 32px; background: #F3A169; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 11px; color: #000; box-shadow: 0 0 8px rgba(243,161,105,0.3);">O</div>
+          <!-- BRZ -->
+          <div style="width: 32px; height: 32px; background: rgba(255,255,255,0.06); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 10px; color: rgba(255,255,255,0.4);">B</div>
+          <!-- CONX -->
+          <div style="width: 32px; height: 32px; background: rgba(255,255,255,0.06); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 10px; color: rgba(255,255,255,0.4);">C</div>
+        </div>
+        <!-- Report Type Rail -->
+        <div style="width: 48px; border-right: 1px solid rgba(255,255,255,0.08); padding: 10px 6px; display: flex; flex-direction: column; align-items: center; gap: 4px; background: rgba(255,255,255,0.015);">
+          <div style="font-size: 6px; color: rgba(255,255,255,0.25); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px;">Relatórios</div>
+          <!-- MCMV active -->
+          <div style="width: 36px; height: 36px; background: rgba(243,161,105,0.18); border: 1.5px solid rgba(243,161,105,0.5); border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer;">
+            <div style="font-size: 9px; font-weight: 700; color: #F3A169;">M</div>
+            <div style="font-size: 5.5px; color: #F3A169; margin-top: 1px;">MCMV</div>
+          </div>
+          <!-- SBPE -->
+          <div style="width: 36px; height: 36px; background: rgba(255,255,255,0.04); border: 1.5px solid transparent; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer;">
+            <div style="font-size: 9px; font-weight: 600; color: rgba(255,255,255,0.45);">S</div>
+            <div style="font-size: 5.5px; color: rgba(255,255,255,0.3); margin-top: 1px;">SBPE</div>
+          </div>
+          <!-- Backtest -->
+          <div style="width: 36px; height: 36px; background: rgba(255,255,255,0.04); border: 1.5px solid transparent; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer;">
+            <div style="font-size: 9px; font-weight: 600; color: rgba(255,255,255,0.45);">B</div>
+            <div style="font-size: 5.5px; color: rgba(255,255,255,0.3); margin-top: 1px;">Backtest</div>
+          </div>
+
+          <div style="flex: 1;"></div>
+          <div style="width: 36px; height: 36px; background: rgba(255,255,255,0.04); border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+            <div style="font-size: 9px; color: rgba(255,255,255,0.4);">🔍</div>
+          </div>
+        </div>
+        <!-- Page Sidebar -->
+        <div style="width: 110px; border-right: 1px solid rgba(255,255,255,0.08); padding: 10px 8px; display: flex; flex-direction: column; gap: 2px;">
+          <div style="font-size: 11px; font-weight: 700; color: #F3A169; padding: 2px 4px; margin-bottom: 6px;">MCMV</div>
+          <div style="font-size: 7px; color: rgba(255,255,255,0.25); padding: 2px 6px; text-transform: uppercase; letter-spacing: 0.5px;">Carteira</div>
+          <div style="padding: 5px 8px; border-radius: 6px; background: rgba(243,161,105,0.12); color: #F3A169; font-size: 10px; font-weight: 500;">📊 Visão Geral</div>
+          <div style="padding: 5px 8px; font-size: 10px; color: rgba(255,255,255,0.5);">📄 Contratos</div>
+          <div style="padding: 5px 8px; font-size: 10px; color: rgba(255,255,255,0.5);">💰 Pagamentos</div>
+          <div style="padding: 5px 8px; font-size: 10px; color: rgba(255,255,255,0.5);">📈 Fluxo Caixa</div>
+          <div style="font-size: 7px; color: rgba(255,255,255,0.25); padding: 2px 6px; margin-top: 8px; text-transform: uppercase; letter-spacing: 0.5px;">Risco</div>
+          <div style="padding: 5px 8px; font-size: 10px; color: rgba(255,255,255,0.5);">🛡️ PDD</div>
+          <div style="padding: 5px 8px; font-size: 10px; color: rgba(255,255,255,0.5);">💲 Pricing</div>
+          <div style="font-size: 7px; color: rgba(255,255,255,0.25); padding: 2px 6px; margin-top: 8px; text-transform: uppercase; letter-spacing: 0.5px;">Operacional</div>
+          <div style="padding: 5px 8px; font-size: 10px; color: rgba(255,255,255,0.5);">⚠️ Inadimpl.</div>
+        </div>
+        <!-- Content Area -->
+        <div style="flex: 1; display: flex; flex-direction: column;">
+          <div style="display: flex; align-items: center; padding: 10px 14px; border-bottom: 1px solid rgba(255,255,255,0.08); gap: 6px;">
+            <div style="background: #F3A169; color: #000; font-size: 8px; font-weight: 700; padding: 2px 6px; border-radius: 4px;">OM</div>
+            <div style="font-size: 9px; color: rgba(255,255,255,0.2);">›</div>
+            <div style="font-size: 9px; color: rgba(255,255,255,0.35);">MCMV</div>
+            <div style="font-size: 9px; color: rgba(255,255,255,0.2);">›</div>
+            <div style="font-size: 10px; font-weight: 600;">Visão Geral</div>
+            <div style="margin-left: auto; display: flex; gap: 6px;">
+              <div style="background: rgba(255,255,255,0.06); padding: 4px 10px; border-radius: 6px; font-size: 9px; border: 1px solid rgba(255,255,255,0.08);">Filtros</div>
+              <div style="background: rgba(255,255,255,0.06); padding: 4px 10px; border-radius: 6px; font-size: 9px; border: 1px solid rgba(255,255,255,0.08);">Jan–Mar 2026</div>
+            </div>
+          </div>
+          <div style="padding: 10px; display: flex; flex-direction: column; gap: 8px;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 6px;">
+              <div style="background: rgba(255,255,255,0.03); border-radius: 8px; padding: 10px; border: 1px solid rgba(255,255,255,0.06);">
+                <div style="font-size: 7px; color: rgba(255,255,255,0.35); margin-bottom: 3px;">Saldo Devedor</div>
+                <div style="font-size: 14px; font-weight: 700; color: #F3A169;">R$ 2.4B</div>
+                <div style="font-size: 7px; color: #4ade80; margin-top: 2px;">↑ 2.3%</div>
+              </div>
+              <div style="background: rgba(255,255,255,0.03); border-radius: 8px; padding: 10px; border: 1px solid rgba(255,255,255,0.06);">
+                <div style="font-size: 7px; color: rgba(255,255,255,0.35); margin-bottom: 3px;">Contratos</div>
+                <div style="font-size: 14px; font-weight: 700; color: #F3A169;">12.847</div>
+                <div style="font-size: 7px; color: #4ade80; margin-top: 2px;">↑ 156</div>
+              </div>
+              <div style="background: rgba(255,255,255,0.03); border-radius: 8px; padding: 10px; border: 1px solid rgba(255,255,255,0.06);">
+                <div style="font-size: 7px; color: rgba(255,255,255,0.35); margin-bottom: 3px;">Inadimplência</div>
+                <div style="font-size: 14px; font-weight: 700; color: #ef4444;">3.2%</div>
+                <div style="font-size: 7px; color: #ef4444; margin-top: 2px;">↑ 0.4pp</div>
+              </div>
+              <div style="background: rgba(255,255,255,0.03); border-radius: 8px; padding: 10px; border: 1px solid rgba(255,255,255,0.06);">
+                <div style="font-size: 7px; color: rgba(255,255,255,0.35); margin-bottom: 3px;">PDD</div>
+                <div style="font-size: 14px; font-weight: 700; color: #facc15;">1.8%</div>
+                <div style="font-size: 7px; color: rgba(255,255,255,0.3); margin-top: 2px;">= 0.0pp</div>
+              </div>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
+              <div style="background: rgba(255,255,255,0.02); border-radius: 8px; height: 100px; border: 1px solid rgba(255,255,255,0.06); display: flex; align-items: center; justify-content: center;">
+                <div style="font-size: 9px; color: rgba(255,255,255,0.2);">Evolução do Saldo</div>
+              </div>
+              <div style="background: rgba(255,255,255,0.02); border-radius: 8px; height: 100px; border: 1px solid rgba(255,255,255,0.06); display: flex; align-items: center; justify-content: center;">
+                <div style="font-size: 9px; color: rgba(255,255,255,0.2);">Distribuição por Faixa</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div style="margin-top: 24px;">
+  <h3>Comportamento adaptativo</h3>
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 12px;">
+    <div style="background: rgba(255,255,255,0.03); border-radius: 8px; padding: 16px; border: 1px solid rgba(255,255,255,0.08);">
+      <div class="label">1 Cliente</div>
+      <p style="margin: 8px 0 0; font-size: 13px; color: rgba(255,255,255,0.7);">Client rail <strong>some</strong>. Report type rail fica como primeiro nível. Sidebar de páginas ao lado. Breadcrumb: <code style="background: rgba(255,255,255,0.06); padding: 2px 6px; border-radius: 4px; font-size: 11px;">MCMV › Visão Geral</code></p>
+    </div>
+    <div style="background: rgba(255,255,255,0.03); border-radius: 8px; padding: 16px; border: 1px solid rgba(255,255,255,0.08);">
+      <div class="label">2+ Clientes</div>
+      <p style="margin: 8px 0 0; font-size: 13px; color: rgba(255,255,255,0.7);">Client rail <strong>aparece</strong> à esquerda do report type rail. Breadcrumb completo: <code style="background: rgba(255,255,255,0.06); padding: 2px 6px; border-radius: 4px; font-size: 11px;">OM › MCMV › Visão Geral</code></p>
+    </div>
+  </div>
+</div>

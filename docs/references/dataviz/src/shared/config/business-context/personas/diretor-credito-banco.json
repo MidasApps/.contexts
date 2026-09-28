@@ -1,0 +1,13 @@
+{
+  "id": "diretor-credito-banco",
+  "name": "Diretor de Crédito Imobiliário em Banco",
+  "layer": "estrategica",
+  "language": "executiva",
+  "horizon": "longo",
+  "priorityKpis": ["originacao", "over_90", "spread", "market_share", "direcionamento"],
+  "preferredGranularity": "carteira",
+  "preferredVisuals": ["kpi", "line", "bar"],
+  "jargonAnchor": ["direcionamento SBPE", "spread", "mark-to-market"],
+  "forbidden": [],
+  "_meta": { "refinedBySme": false, "sourceDoc": "docs/benchmarking/6.1" }
+}

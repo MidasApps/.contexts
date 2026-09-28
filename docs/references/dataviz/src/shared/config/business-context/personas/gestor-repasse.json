@@ -1,0 +1,13 @@
+{
+  "id": "gestor-repasse",
+  "name": "Gestor de Repasse",
+  "layer": "tatica",
+  "language": "tecnica",
+  "horizon": "medio",
+  "priorityKpis": ["pipeline_repasse", "conversao", "ltv_banco", "renda_suficiente", "grupos_repasse"],
+  "preferredGranularity": "contrato",
+  "preferredVisuals": ["kpi", "funnel", "table"],
+  "jargonAnchor": ["repasse", "LTV banco", "grupos de repasse"],
+  "forbidden": [],
+  "_meta": { "refinedBySme": false, "sourceDoc": "docs/benchmarking/6.1" }
+}

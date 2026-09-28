@@ -1,0 +1,13 @@
+{
+  "id": "diretor-fii-cri",
+  "name": "Diretor de FII de CRI",
+  "layer": "estrategica",
+  "language": "tecnica",
+  "horizon": "longo",
+  "priorityKpis": ["yield", "duration", "p_vp", "razao_pmt", "oc", "es"],
+  "preferredGranularity": "carteira",
+  "preferredVisuals": ["line", "kpi"],
+  "jargonAnchor": ["yield", "P/VP", "duration", "subordinação"],
+  "forbidden": [],
+  "_meta": { "refinedBySme": false, "sourceDoc": "docs/benchmarking/6.1" }
+}

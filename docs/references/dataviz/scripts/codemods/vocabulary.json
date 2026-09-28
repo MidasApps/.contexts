@@ -1,0 +1,2636 @@
+{
+  "description": "Shared Portuguese to English translations for identifier words. One translation per word keeps names consistent across batches. The first entry is the default; the others are allowed when the context calls for them. Add words as batches need them.",
+  "words": {
+    "aba": [
+      "tab"
+    ],
+    "abas": [
+      "tabs"
+    ],
+    "aberta": [
+      "open-ended"
+    ],
+    "aberto": [
+      "open"
+    ],
+    "abertura": [
+      "expand"
+    ],
+    "abrir": [
+      "open"
+    ],
+    "abrivel": [
+      "expandable"
+    ],
+    "acao": [
+      "action"
+    ],
+    "aceita": [
+      "supports"
+    ],
+    "acessivel": [
+      "accessible"
+    ],
+    "acesso": [
+      "access"
+    ],
+    "achado": [
+      "match"
+    ],
+    "achados": [
+      "findings"
+    ],
+    "achatar": [
+      "fold"
+    ],
+    "acima": [
+      "above"
+    ],
+    "acoes": [
+      "actions"
+    ],
+    "acumulado": [
+      "cumulative"
+    ],
+    "adiada": [
+      "deferred"
+    ],
+    "agente": [
+      "agent"
+    ],
+    "agentes": [
+      "agents"
+    ],
+    "agora": [
+      "now"
+    ],
+    "ainda": [
+      "yet"
+    ],
+    "alcanca": [
+      "reaches"
+    ],
+    "alerta": [
+      "alert"
+    ],
+    "alheio": [
+      "foreign"
+    ],
+    "alterar": [
+      "change"
+    ],
+    "alterna": [
+      "toggle"
+    ],
+    "alternar": [
+      "toggle"
+    ],
+    "alternativa": [
+      "alternative"
+    ],
+    "alternativas": [
+      "alternatives"
+    ],
+    "altura": [
+      "height"
+    ],
+    "alturas": [
+      "heights"
+    ],
+    "alvo": [
+      "target"
+    ],
+    "amarracao": [
+      "binding"
+    ],
+    "ambiente": [
+      "env"
+    ],
+    "ambos": [
+      "both"
+    ],
+    "amostra": [
+      "sample"
+    ],
+    "ancora": [
+      "anchor"
+    ],
+    "anel": [
+      "ring"
+    ],
+    "ano": [
+      "year"
+    ],
+    "anterior": [
+      "previous"
+    ],
+    "antes": [
+      "before",
+      "previous"
+    ],
+    "antiga": [
+      "old"
+    ],
+    "antigo": [
+      "old"
+    ],
+    "anual": [
+      "annual"
+    ],
+    "apagados": [
+      "deleted"
+    ],
+    "apagar": [
+      "delete"
+    ],
+    "aplica": [
+      "apply"
+    ],
+    "aplicada": [
+      "applied"
+    ],
+    "aplicadas": [
+      "applied"
+    ],
+    "aplicado": [
+      "applied"
+    ],
+    "aplicar": [
+      "apply"
+    ],
+    "aplicaveis": [
+      "applicable"
+    ],
+    "apoio": [
+      "support"
+    ],
+    "apontar": [
+      "point"
+    ],
+    "apos": [
+      "after"
+    ],
+    "arco": [
+      "arc"
+    ],
+    "area": [
+      "area"
+    ],
+    "armadilha": [
+      "trap"
+    ],
+    "armazenadas": [
+      "stored"
+    ],
+    "arquiva": [
+      "archive"
+    ],
+    "arquivo": [
+      "file"
+    ],
+    "arquivos": [
+      "files"
+    ],
+    "arrastando": [
+      "dragging"
+    ],
+    "arrastavel": [
+      "draggable"
+    ],
+    "arrasto": [
+      "drag"
+    ],
+    "aspas": [
+      "quote"
+    ],
+    "assentar": [
+      "settle"
+    ],
+    "assinatura": [
+      "signature"
+    ],
+    "assistente": [
+      "assistant"
+    ],
+    "atalho": [
+      "shortcut"
+    ],
+    "atencao": [
+      "warning"
+    ],
+    "atende": [
+      "serves"
+    ],
+    "ativa": [
+      "active"
+    ],
+    "ativos": [
+      "active"
+    ],
+    "atraso": [
+      "delinquency"
+    ],
+    "atributos": [
+      "attributes"
+    ],
+    "atuais": [
+      "current"
+    ],
+    "atual": [
+      "current"
+    ],
+    "atualizado": [
+      "updated"
+    ],
+    "atualizados": [
+      "updated"
+    ],
+    "ausente": [
+      "missing"
+    ],
+    "ausentes": [
+      "missing"
+    ],
+    "autor": [
+      "author"
+    ],
+    "autorada": [
+      "authored"
+    ],
+    "autoraveis": [
+      "authorable"
+    ],
+    "autoravel": [
+      "authorable"
+    ],
+    "autoria": [
+      "authoring"
+    ],
+    "avalia": [
+      "evaluate"
+    ],
+    "avancar": [
+      "advance"
+    ],
+    "aviso": [
+      "warning"
+    ],
+    "backup": [
+      "backup"
+    ],
+    "baixo": [
+      "bottom"
+    ],
+    "banco": [
+      "bank"
+    ],
+    "bancos": [
+      "banks"
+    ],
+    "barra": [
+      "bar"
+    ],
+    "base": [
+      "base"
+    ],
+    "basico": [
+      "basic"
+    ],
+    "bloco": [
+      "block"
+    ],
+    "blocos": [
+      "blocks"
+    ],
+    "bloqueado": [
+      "locked"
+    ],
+    "bloqueio": [
+      "blocker"
+    ],
+    "bom": [
+      "good"
+    ],
+    "borda": [
+      "border"
+    ],
+    "botao": [
+      "button"
+    ],
+    "botoes": [
+      "buttons"
+    ],
+    "branca": [
+      "blank"
+    ],
+    "branco": [
+      "white"
+    ],
+    "bruta": [
+      "raw"
+    ],
+    "bruto": [
+      "raw"
+    ],
+    "busca": [
+      "search"
+    ],
+    "buscando": [
+      "fetching"
+    ],
+    "buscar": [
+      "fetch"
+    ],
+    "buscas": [
+      "fetches"
+    ],
+    "cabe": [
+      "fits"
+    ],
+    "cabecalho": [
+      "header"
+    ],
+    "cabem": [
+      "fit"
+    ],
+    "calha": [
+      "gutter"
+    ],
+    "caminho": [
+      "path"
+    ],
+    "caminhos": [
+      "paths"
+    ],
+    "campo": [
+      "field"
+    ],
+    "campos": [
+      "fields"
+    ],
+    "canal": [
+      "channel"
+    ],
+    "candidata": [
+      "candidate"
+    ],
+    "candidato": [
+      "candidate"
+    ],
+    "capacidade": [
+      "capacity"
+    ],
+    "captura": [
+      "capture"
+    ],
+    "capturar": [
+      "capture"
+    ],
+    "carga": [
+      "load"
+    ],
+    "carregada": [
+      "loaded"
+    ],
+    "carregado": [
+      "loaded"
+    ],
+    "carregando": [
+      "loading"
+    ],
+    "carregar": [
+      "load"
+    ],
+    "cartao": [
+      "card"
+    ],
+    "carteira": [
+      "portfolio"
+    ],
+    "casas": [
+      "decimals"
+    ],
+    "casca": [
+      "shell"
+    ],
+    "caso": [
+      "case"
+    ],
+    "casos": [
+      "cases"
+    ],
+    "catalogo": [
+      "catalog"
+    ],
+    "categoria": [
+      "category"
+    ],
+    "categorias": [
+      "categories"
+    ],
+    "categorico": [
+      "categorical"
+    ],
+    "cauda": [
+      "tail"
+    ],
+    "cegas": [
+      "blind"
+    ],
+    "celula": [
+      "cell"
+    ],
+    "cenario": [
+      "scenario"
+    ],
+    "cenarios": [
+      "scenarios"
+    ],
+    "centro": [
+      "center"
+    ],
+    "chamada": [
+      "call"
+    ],
+    "chamadas": [
+      "calls"
+    ],
+    "chave": [
+      "key"
+    ],
+    "chaves": [
+      "keys"
+    ],
+    "cheia": [
+      "full"
+    ],
+    "cheio": [
+      "full"
+    ],
+    "cima": [
+      "top"
+    ],
+    "cita": [
+      "cites"
+    ],
+    "citados": [
+      "cited"
+    ],
+    "claro": [
+      "light"
+    ],
+    "classe": [
+      "kind",
+      "class"
+    ],
+    "classifica": [
+      "classify"
+    ],
+    "classificado": [
+      "classified"
+    ],
+    "classificar": [
+      "classify"
+    ],
+    "clicar": [
+      "click"
+    ],
+    "cliente": [
+      "client"
+    ],
+    "clientes": [
+      "clients"
+    ],
+    "cobertura": [
+      "coverage"
+    ],
+    "cobre": [
+      "covers"
+    ],
+    "codigo": [
+      "code"
+    ],
+    "colapsada": [
+      "collapsed"
+    ],
+    "colapsavel": [
+      "collapsible"
+    ],
+    "colecao": [
+      "collection"
+    ],
+    "colecoes": [
+      "collections"
+    ],
+    "coletar": [
+      "collect"
+    ],
+    "coletor": [
+      "collector"
+    ],
+    "coluna": [
+      "column"
+    ],
+    "colunas": [
+      "columns"
+    ],
+    "com": [
+      "with"
+    ],
+    "comandos": [
+      "statements"
+    ],
+    "combinantes": [
+      "combining"
+    ],
+    "comecar": [
+      "start"
+    ],
+    "compacto": [
+      "compact"
+    ],
+    "comparando": [
+      "comparing"
+    ],
+    "comparar": [
+      "compare"
+    ],
+    "comparativas": [
+      "comparison"
+    ],
+    "comparativo": [
+      "comparison"
+    ],
+    "comum": [
+      "common"
+    ],
+    "concluida": [
+      "finished"
+    ],
+    "condicoes": [
+      "conditions"
+    ],
+    "conectar": [
+      "connect"
+    ],
+    "conector": [
+      "connector"
+    ],
+    "conexao": [
+      "connection"
+    ],
+    "configuracao": [
+      "configuration"
+    ],
+    "configurado": [
+      "configured"
+    ],
+    "conflitos": [
+      "conflicts"
+    ],
+    "conhecida": [
+      "known"
+    ],
+    "conhecidas": [
+      "known"
+    ],
+    "consome": [
+      "consumes"
+    ],
+    "construidos": [
+      "built"
+    ],
+    "construto": [
+      "construct"
+    ],
+    "consulta": [
+      "query"
+    ],
+    "consultar": [
+      "query"
+    ],
+    "conta": [
+      "count"
+    ],
+    "contadores": [
+      "counters"
+    ],
+    "contagem": [
+      "count"
+    ],
+    "conteudo": [
+      "content"
+    ],
+    "contexto": [
+      "context"
+    ],
+    "contra": [
+      "against"
+    ],
+    "contraste": [
+      "contrast"
+    ],
+    "contratado": [
+      "contracted"
+    ],
+    "contrato": [
+      "contract"
+    ],
+    "contratos": [
+      "contracts"
+    ],
+    "conversa": [
+      "conversation"
+    ],
+    "conversas": [
+      "conversations"
+    ],
+    "convite": [
+      "invite"
+    ],
+    "copia": [
+      "copy"
+    ],
+    "cor": [
+      "color"
+    ],
+    "cores": [
+      "colors"
+    ],
+    "corpo": [
+      "body"
+    ],
+    "corpos": [
+      "bodies"
+    ],
+    "corrigindo": [
+      "fixing"
+    ],
+    "corrigir": [
+      "fix"
+    ],
+    "corte": [
+      "cutoff"
+    ],
+    "cota": [
+      "quota"
+    ],
+    "crases": [
+      "backticks"
+    ],
+    "cravada": [
+      "hardcoded"
+    ],
+    "credencial": [
+      "credential"
+    ],
+    "crescente": [
+      "ascending"
+    ],
+    "cria": [
+      "create"
+    ],
+    "criacao": [
+      "creation"
+    ],
+    "criada": [
+      "created"
+    ],
+    "criados": [
+      "created"
+    ],
+    "criar": [
+      "create"
+    ],
+    "criou": [
+      "created"
+    ],
+    "cru": [
+      "raw"
+    ],
+    "curva": [
+      "curve"
+    ],
+    "custo": [
+      "cost"
+    ],
+    "dado": [
+      "data"
+    ],
+    "dados": [
+      "data"
+    ],
+    "daqui": [
+      "fromHere"
+    ],
+    "datas": [
+      "dates"
+    ],
+    "decide": [
+      "decide"
+    ],
+    "declaracao": [
+      "declaration"
+    ],
+    "declaradas": [
+      "declared"
+    ],
+    "declarado": [
+      "declared"
+    ],
+    "declarados": [
+      "declared"
+    ],
+    "decodifica": [
+      "decode"
+    ],
+    "dela": [
+      "hers"
+    ],
+    "dele": [
+      "his"
+    ],
+    "delimitado": [
+      "delimited"
+    ],
+    "dentro": [
+      "inside"
+    ],
+    "depois": [
+      "after"
+    ],
+    "deps": [
+      "deps"
+    ],
+    "derrubadas": [
+      "dropped"
+    ],
+    "desabilitada": [
+      "disabled"
+    ],
+    "desatualizado": [
+      "stale"
+    ],
+    "desconhecida": [
+      "unknown"
+    ],
+    "desconhecido": [
+      "unknown"
+    ],
+    "descricao": [
+      "description"
+    ],
+    "descritivo": [
+      "descriptive"
+    ],
+    "desde": [
+      "from"
+    ],
+    "desembrulha": [
+      "unwrap"
+    ],
+    "desemprego": [
+      "unemployment"
+    ],
+    "desenho": [
+      "display"
+    ],
+    "desinscrever": [
+      "unsubscribe"
+    ],
+    "desligadas": [
+      "disabled"
+    ],
+    "deslocamento": [
+      "offset"
+    ],
+    "desmontar": [
+      "unmount"
+    ],
+    "desserializar": [
+      "deserialize"
+    ],
+    "destino": [
+      "destination",
+      "target"
+    ],
+    "desval": [
+      "devaluation"
+    ],
+    "detalhe": [
+      "detail"
+    ],
+    "detalhes": [
+      "details"
+    ],
+    "dia": [
+      "day"
+    ],
+    "dialogo": [
+      "dialog"
+    ],
+    "dias": [
+      "days"
+    ],
+    "dica": [
+      "hint"
+    ],
+    "direcao": [
+      "direction"
+    ],
+    "direita": [
+      "right"
+    ],
+    "direito": [
+      "right"
+    ],
+    "dispara": [
+      "fire"
+    ],
+    "disponiveis": [
+      "available"
+    ],
+    "disponivel": [
+      "available"
+    ],
+    "distancia": [
+      "distance"
+    ],
+    "divisa": [
+      "divider"
+    ],
+    "divisoes": [
+      "divisions"
+    ],
+    "docs": [
+      "docs"
+    ],
+    "dois": [
+      "two"
+    ],
+    "dominio": [
+      "domain"
+    ],
+    "duas": [
+      "two"
+    ],
+    "duplicar": [
+      "duplicate"
+    ],
+    "duplo": [
+      "double"
+    ],
+    "edicao": [
+      "edit"
+    ],
+    "edita": [
+      "edits"
+    ],
+    "editada": [
+      "edited"
+    ],
+    "editando": [
+      "editing"
+    ],
+    "editar": [
+      "edit"
+    ],
+    "efetiva": [
+      "effective"
+    ],
+    "efetivo": [
+      "effective"
+    ],
+    "eixo": [
+      "axis"
+    ],
+    "embrulhado": [
+      "wrapped"
+    ],
+    "embrulho": [
+      "wrapper"
+    ],
+    "emenda": [
+      "seam"
+    ],
+    "emissao": [
+      "issuance"
+    ],
+    "emitir": [
+      "emit"
+    ],
+    "empilhamento": [
+      "stacking"
+    ],
+    "empreendimento": [
+      "development"
+    ],
+    "empurrar": [
+      "nudge"
+    ],
+    "emulador": [
+      "emulator"
+    ],
+    "encerrado": [
+      "finished"
+    ],
+    "enquadramento": [
+      "compliance"
+    ],
+    "entidade": [
+      "entity"
+    ],
+    "entidades": [
+      "entities"
+    ],
+    "entrada": [
+      "input"
+    ],
+    "entradas": [
+      "inflows"
+    ],
+    "entregar": [
+      "deliver"
+    ],
+    "erro": [
+      "error"
+    ],
+    "erros": [
+      "errors"
+    ],
+    "escala": [
+      "scale"
+    ],
+    "escalar": [
+      "scalar"
+    ],
+    "escolhe": [
+      "choose"
+    ],
+    "escolher": [
+      "choose"
+    ],
+    "escolhida": [
+      "chosen"
+    ],
+    "escolhido": [
+      "chosen"
+    ],
+    "escondida": [
+      "hidden"
+    ],
+    "escopo": [
+      "scope"
+    ],
+    "escrever": [
+      "write"
+    ],
+    "escritas": [
+      "writes"
+    ],
+    "escritos": [
+      "written"
+    ],
+    "escuro": [
+      "dark"
+    ],
+    "especialista": [
+      "specialist"
+    ],
+    "especialistas": [
+      "specialists"
+    ],
+    "esperadas": [
+      "expected"
+    ],
+    "esperado": [
+      "expected"
+    ],
+    "espioes": [
+      "spies"
+    ],
+    "esqueleto": [
+      "skeleton"
+    ],
+    "esquerda": [
+      "left"
+    ],
+    "estado": [
+      "state"
+    ],
+    "estados": [
+      "states"
+    ],
+    "estavel": [
+      "stable"
+    ],
+    "estilo": [
+      "style"
+    ],
+    "estreito": [
+      "narrow"
+    ],
+    "estrutura": [
+      "structure"
+    ],
+    "etapa": [
+      "stage",
+      "step"
+    ],
+    "etiqueta": [
+      "tag"
+    ],
+    "excluir": [
+      "delete"
+    ],
+    "execucoes": [
+      "executions"
+    ],
+    "executar": [
+      "run"
+    ],
+    "executor": [
+      "executor"
+    ],
+    "exemplo": [
+      "example"
+    ],
+    "exemplos": [
+      "examples"
+    ],
+    "exigidos": [
+      "required"
+    ],
+    "existe": [
+      "exists"
+    ],
+    "existente": [
+      "existing"
+    ],
+    "existentes": [
+      "existing"
+    ],
+    "explicito": [
+      "explicit"
+    ],
+    "explorador": [
+      "explorer"
+    ],
+    "exportadas": [
+      "exported"
+    ],
+    "exportado": [
+      "exported"
+    ],
+    "exportar": [
+      "export"
+    ],
+    "expresso": [
+      "expressed"
+    ],
+    "externa": [
+      "outer"
+    ],
+    "externo": [
+      "outer"
+    ],
+    "extrato": [
+      "statement"
+    ],
+    "extremos": [
+      "extremes"
+    ],
+    "faixa": [
+      "range",
+      "band"
+    ],
+    "faixas": [
+      "ranges"
+    ],
+    "falha": [
+      "failure"
+    ],
+    "falso": [
+      "fake"
+    ],
+    "faltando": [
+      "missing"
+    ],
+    "familia": [
+      "family"
+    ],
+    "fantasma": [
+      "ghost"
+    ],
+    "fatia": [
+      "slice"
+    ],
+    "fatias": [
+      "slices"
+    ],
+    "fator": [
+      "factor"
+    ],
+    "fecho": [
+      "closer"
+    ],
+    "feito": [
+      "done"
+    ],
+    "ficha": [
+      "card"
+    ],
+    "fichas": [
+      "cards"
+    ],
+    "filhos": [
+      "children"
+    ],
+    "filtradas": [
+      "filtered"
+    ],
+    "filtrar": [
+      "filter"
+    ],
+    "filtraveis": [
+      "filterable"
+    ],
+    "filtravel": [
+      "filterable"
+    ],
+    "filtro": [
+      "filter"
+    ],
+    "filtros": [
+      "filters"
+    ],
+    "fim": [
+      "end"
+    ],
+    "fita": [
+      "ribbon"
+    ],
+    "fixa": [
+      "hardcoded"
+    ],
+    "fixada": [
+      "pinned"
+    ],
+    "fixadas": [
+      "pinned"
+    ],
+    "fixado": [
+      "pinned"
+    ],
+    "fixar": [
+      "pin"
+    ],
+    "fluxo": [
+      "cashflow"
+    ],
+    "foco": [
+      "focus"
+    ],
+    "folga": [
+      "headroom"
+    ],
+    "fonte": [
+      "source"
+    ],
+    "fora": [
+      "outside"
+    ],
+    "forma": [
+      "shape"
+    ],
+    "formas": [
+      "shapes"
+    ],
+    "formata": [
+      "format"
+    ],
+    "formatador": [
+      "formatter"
+    ],
+    "formato": [
+      "format"
+    ],
+    "formulario": [
+      "form"
+    ],
+    "fracao": [
+      "fraction"
+    ],
+    "frase": [
+      "sentence"
+    ],
+    "fundo": [
+      "background"
+    ],
+    "ganharia": [
+      "wouldGain"
+    ],
+    "gatilho": [
+      "trigger"
+    ],
+    "generica": [
+      "generic"
+    ],
+    "gerada": [
+      "generated"
+    ],
+    "geral": [
+      "general"
+    ],
+    "globais": [
+      "global"
+    ],
+    "glossario": [
+      "glossary"
+    ],
+    "grade": [
+      "grid"
+    ],
+    "gradiente": [
+      "gradient"
+    ],
+    "grafico": [
+      "chart"
+    ],
+    "grande": [
+      "large"
+    ],
+    "grava": [
+      "save"
+    ],
+    "gravada": [
+      "saved"
+    ],
+    "gravadas": [
+      "written"
+    ],
+    "gravado": [
+      "saved"
+    ],
+    "gravados": [
+      "written"
+    ],
+    "gravar": [
+      "write"
+    ],
+    "grid": [
+      "grid"
+    ],
+    "grupo": [
+      "group"
+    ],
+    "grupos": [
+      "groups"
+    ],
+    "guardada": [
+      "stored"
+    ],
+    "guardar": [
+      "save"
+    ],
+    "guias": [
+      "guides"
+    ],
+    "historico": [
+      "history"
+    ],
+    "honram": [
+      "honoring"
+    ],
+    "horizonte": [
+      "horizon"
+    ],
+    "icone": [
+      "icon"
+    ],
+    "identificador": [
+      "identifier"
+    ],
+    "identificadores": [
+      "identifiers"
+    ],
+    "ignoram": [
+      "ignoring"
+    ],
+    "igual": [
+      "matches"
+    ],
+    "igualdades": [
+      "equalities"
+    ],
+    "ilustrativo": [
+      "illustrative"
+    ],
+    "impacto": [
+      "impact"
+    ],
+    "inadimplencia": [
+      "delinquency"
+    ],
+    "incompativel": [
+      "incompatible"
+    ],
+    "indexadas": [
+      "indexed"
+    ],
+    "indicador": [
+      "indicator"
+    ],
+    "indicadores": [
+      "indicators"
+    ],
+    "indice": [
+      "index"
+    ],
+    "indisponivel": [
+      "unavailable"
+    ],
+    "infratores": [
+      "offenders"
+    ],
+    "inicial": [
+      "initial"
+    ],
+    "iniciar": [
+      "start"
+    ],
+    "inicio": [
+      "start"
+    ],
+    "instancia": [
+      "instance"
+    ],
+    "instantaneo": [
+      "snapshot"
+    ],
+    "instavel": [
+      "unstable"
+    ],
+    "instrucao": [
+      "instruction"
+    ],
+    "intactos": [
+      "untouched"
+    ],
+    "inteira": [
+      "full"
+    ],
+    "inteiros": [
+      "whole"
+    ],
+    "intensidade": [
+      "intensity"
+    ],
+    "interna": [
+      "inner"
+    ],
+    "interno": [
+      "inner"
+    ],
+    "intervalo": [
+      "range"
+    ],
+    "invalidas": [
+      "invalid"
+    ],
+    "invertida": [
+      "inverted"
+    ],
+    "item": [
+      "item"
+    ],
+    "itens": [
+      "items"
+    ],
+    "janela": [
+      "window"
+    ],
+    "janelas": [
+      "windows"
+    ],
+    "juiz": [
+      "judge"
+    ],
+    "juros": [
+      "interest"
+    ],
+    "lado": [
+      "side"
+    ],
+    "larga": [
+      "wide"
+    ],
+    "largura": [
+      "width"
+    ],
+    "larguras": [
+      "widths"
+    ],
+    "legado": [
+      "legacy"
+    ],
+    "legenda": [
+      "legend"
+    ],
+    "leitura": [
+      "read"
+    ],
+    "leituras": [
+      "reads"
+    ],
+    "lendo": [
+      "reading"
+    ],
+    "ler": [
+      "read"
+    ],
+    "levada": [
+      "batch"
+    ],
+    "liberado": [
+      "released"
+    ],
+    "liberar": [
+      "release"
+    ],
+    "lida": [
+      "parsed"
+    ],
+    "lidas": [
+      "parsed"
+    ],
+    "ligadas": [
+      "enabled"
+    ],
+    "limite": [
+      "limit"
+    ],
+    "limpar": [
+      "reset"
+    ],
+    "limpo": [
+      "cleaned",
+      "trimmed"
+    ],
+    "linear": [
+      "linear"
+    ],
+    "linha": [
+      "row",
+      "line"
+    ],
+    "linhas": [
+      "rows",
+      "lines"
+    ],
+    "lista": [
+      "list"
+    ],
+    "literal": [
+      "literal"
+    ],
+    "livre": [
+      "free"
+    ],
+    "lixo": [
+      "garbage"
+    ],
+    "lugar": [
+      "place"
+    ],
+    "luminancia": [
+      "luminance"
+    ],
+    "magra": [
+      "lean"
+    ],
+    "maior": [
+      "highest"
+    ],
+    "mapa": [
+      "map"
+    ],
+    "marca": [
+      "marker"
+    ],
+    "marcado": [
+      "checked"
+    ],
+    "marcar": [
+      "mark"
+    ],
+    "margem": [
+      "margin"
+    ],
+    "margens": [
+      "margins"
+    ],
+    "materializado": [
+      "materialized"
+    ],
+    "matriz": [
+      "matrix"
+    ],
+    "maxima": [
+      "max"
+    ],
+    "mediana": [
+      "median"
+    ],
+    "medicoes": [
+      "measurements"
+    ],
+    "medidas": [
+      "measures"
+    ],
+    "medido": [
+      "measured"
+    ],
+    "medidor": [
+      "gauge"
+    ],
+    "medidos": [
+      "measured"
+    ],
+    "meia": [
+      "half"
+    ],
+    "mensagem": [
+      "message"
+    ],
+    "mensagens": [
+      "messages"
+    ],
+    "mes": [
+      "month"
+    ],
+    "mescla": [
+      "merge"
+    ],
+    "mesclada": [
+      "merged"
+    ],
+    "meses": [
+      "months"
+    ],
+    "mesma": [
+      "same"
+    ],
+    "mesmo": [
+      "same"
+    ],
+    "meta": [
+      "meta"
+    ],
+    "metodo": [
+      "method"
+    ],
+    "metrica": [
+      "metric"
+    ],
+    "metricas": [
+      "metrics"
+    ],
+    "migra": [
+      "migrate"
+    ],
+    "migracao": [
+      "migration"
+    ],
+    "migrou": [
+      "migrated"
+    ],
+    "minima": [
+      "min"
+    ],
+    "minimo": [
+      "minimum"
+    ],
+    "mirada": [
+      "hovered"
+    ],
+    "mistos": [
+      "mixed"
+    ],
+    "modelo": [
+      "model"
+    ],
+    "modo": [
+      "mode"
+    ],
+    "monta": [
+      "build"
+    ],
+    "mostra": [
+      "shows"
+    ],
+    "mostrando": [
+      "showing"
+    ],
+    "mostrar": [
+      "show"
+    ],
+    "motivo": [
+      "reason"
+    ],
+    "mover": [
+      "move"
+    ],
+    "muda": [
+      "changes"
+    ],
+    "mudar": [
+      "change"
+    ],
+    "multi": [
+      "multi"
+    ],
+    "multiplos": [
+      "multiple"
+    ],
+    "narrativa": [
+      "narrative"
+    ],
+    "navegar": [
+      "navigate"
+    ],
+    "negado": [
+      "denied"
+    ],
+    "netos": [
+      "grandchildren"
+    ],
+    "nivel": [
+      "level",
+      "depth"
+    ],
+    "nome": [
+      "name"
+    ],
+    "nomeia": [
+      "names"
+    ],
+    "nomes": [
+      "names"
+    ],
+    "normaliza": [
+      "normalize"
+    ],
+    "normalizado": [
+      "normalized"
+    ],
+    "nota": [
+      "note"
+    ],
+    "nova": [
+      "new"
+    ],
+    "novas": [
+      "new"
+    ],
+    "novo": [
+      "new"
+    ],
+    "nulo": [
+      "null"
+    ],
+    "numerico": [
+      "numeric"
+    ],
+    "numero": [
+      "number"
+    ],
+    "objeto": [
+      "object"
+    ],
+    "obrigacoes": [
+      "obligations"
+    ],
+    "obrigatorios": [
+      "required"
+    ],
+    "observar": [
+      "observe"
+    ],
+    "obtem": [
+      "get"
+    ],
+    "obtido": [
+      "actual"
+    ],
+    "ocultas": [
+      "hidden"
+    ],
+    "ocupado": [
+      "used"
+    ],
+    "ocupados": [
+      "taken"
+    ],
+    "opcional": [
+      "optional"
+    ],
+    "opcoes": [
+      "options"
+    ],
+    "operador": [
+      "operator"
+    ],
+    "orcamento": [
+      "budget"
+    ],
+    "ordem": [
+      "order"
+    ],
+    "ordenado": [
+      "sorted"
+    ],
+    "orfa": [
+      "orphan"
+    ],
+    "orfas": [
+      "orphans"
+    ],
+    "origem": [
+      "source",
+      "origin"
+    ],
+    "outro": [
+      "other"
+    ],
+    "padrao": [
+      "default"
+    ],
+    "pagina": [
+      "page"
+    ],
+    "paginas": [
+      "pages"
+    ],
+    "pai": [
+      "parent"
+    ],
+    "palavra": [
+      "keyword"
+    ],
+    "paleta": [
+      "palette"
+    ],
+    "papel": [
+      "role"
+    ],
+    "par": [
+      "pair"
+    ],
+    "parametro": [
+      "parameter"
+    ],
+    "parcial": [
+      "partial"
+    ],
+    "parte": [
+      "part"
+    ],
+    "partes": [
+      "parts"
+    ],
+    "passo": [
+      "step"
+    ],
+    "passos": [
+      "steps"
+    ],
+    "passou": [
+      "exceeded"
+    ],
+    "pedidas": [
+      "requested"
+    ],
+    "pedido": [
+      "requested",
+      "request"
+    ],
+    "pedidos": [
+      "requests"
+    ],
+    "pendente": [
+      "pending"
+    ],
+    "pendentes": [
+      "pending"
+    ],
+    "percentual": [
+      "percent"
+    ],
+    "perderia": [
+      "wouldLose"
+    ],
+    "perfil": [
+      "profile"
+    ],
+    "pergunta": [
+      "question"
+    ],
+    "perigoso": [
+      "dangerous"
+    ],
+    "periodo": [
+      "period"
+    ],
+    "permitido": [
+      "allowed"
+    ],
+    "permitidos": [
+      "allowed"
+    ],
+    "persona": [
+      "persona"
+    ],
+    "pin": [
+      "pin"
+    ],
+    "pior": [
+      "worst"
+    ],
+    "piso": [
+      "floor"
+    ],
+    "poda": [
+      "pruning"
+    ],
+    "podada": [
+      "pruned"
+    ],
+    "podado": [
+      "pruned"
+    ],
+    "podar": [
+      "prune"
+    ],
+    "pode": [
+      "can"
+    ],
+    "ponteiro": [
+      "pointer"
+    ],
+    "ponto": [
+      "dot"
+    ],
+    "pontos": [
+      "points"
+    ],
+    "populado": [
+      "populated"
+    ],
+    "porque": [
+      "reason"
+    ],
+    "posicao": [
+      "position"
+    ],
+    "posicoes": [
+      "positions"
+    ],
+    "potencia": [
+      "power"
+    ],
+    "precisa": [
+      "needs"
+    ],
+    "preenchida": [
+      "filled"
+    ],
+    "preenchido": [
+      "filled"
+    ],
+    "preenchimento": [
+      "fill"
+    ],
+    "preferencia": [
+      "preference"
+    ],
+    "preferido": [
+      "preferred"
+    ],
+    "prefixo": [
+      "prefix"
+    ],
+    "preparar": [
+      "prepare"
+    ],
+    "presentes": [
+      "present"
+    ],
+    "preservados": [
+      "preserved"
+    ],
+    "previa": [
+      "preview"
+    ],
+    "primeira": [
+      "first"
+    ],
+    "primeiro": [
+      "first"
+    ],
+    "procedencia": [
+      "provenance"
+    ],
+    "producao": [
+      "production"
+    ],
+    "profundidade": [
+      "depth"
+    ],
+    "proibida": [
+      "forbidden"
+    ],
+    "proibidas": [
+      "forbidden"
+    ],
+    "proibido": [
+      "forbidden"
+    ],
+    "projecao": [
+      "projection"
+    ],
+    "projecoes": [
+      "projections"
+    ],
+    "projeto": [
+      "project"
+    ],
+    "proporcao": [
+      "proportion"
+    ],
+    "proposito": [
+      "purpose"
+    ],
+    "proprias": [
+      "owned"
+    ],
+    "prova": [
+      "proves"
+    ],
+    "provisionada": [
+      "provisioned"
+    ],
+    "proxima": [
+      "next"
+    ],
+    "proximo": [
+      "next"
+    ],
+    "puladas": [
+      "skipped"
+    ],
+    "purgado": [
+      "purged"
+    ],
+    "purgados": [
+      "purged"
+    ],
+    "puxador": [
+      "handle"
+    ],
+    "quando": [
+      "when"
+    ],
+    "quantas": [
+      "count"
+    ],
+    "quatro": [
+      "four"
+    ],
+    "raiz": [
+      "root"
+    ],
+    "raizes": [
+      "roots"
+    ],
+    "rascunho": [
+      "draft"
+    ],
+    "razao": [
+      "rationale"
+    ],
+    "real": [
+      "real"
+    ],
+    "recebidas": [
+      "received"
+    ],
+    "recebivel": [
+      "receivable"
+    ],
+    "recente": [
+      "recent"
+    ],
+    "recentes": [
+      "recent"
+    ],
+    "recomendado": [
+      "recommended"
+    ],
+    "recorte": [
+      "trim"
+    ],
+    "recusa": [
+      "refusal"
+    ],
+    "recusadas": [
+      "rejected"
+    ],
+    "redefinir": [
+      "redefine"
+    ],
+    "redimensionando": [
+      "resizing"
+    ],
+    "redimensionar": [
+      "resize"
+    ],
+    "redondo": [
+      "round"
+    ],
+    "reescritos": [
+      "rewritten"
+    ],
+    "referencias": [
+      "references"
+    ],
+    "registra": [
+      "register"
+    ],
+    "registradas": [
+      "registered"
+    ],
+    "registrados": [
+      "registered"
+    ],
+    "registro": [
+      "record"
+    ],
+    "regra": [
+      "rule"
+    ],
+    "regras": [
+      "rules"
+    ],
+    "regua": [
+      "ruler"
+    ],
+    "regulamento": [
+      "regulations"
+    ],
+    "reiniciar": [
+      "reset"
+    ],
+    "rejeita": [
+      "reject"
+    ],
+    "relativo": [
+      "relative"
+    ],
+    "relatorio": [
+      "report"
+    ],
+    "releitura": [
+      "reload"
+    ],
+    "reler": [
+      "reread"
+    ],
+    "relogio": [
+      "clock"
+    ],
+    "remover": [
+      "remove"
+    ],
+    "renderiza": [
+      "render"
+    ],
+    "renderizar": [
+      "render"
+    ],
+    "renomeado": [
+      "renamed"
+    ],
+    "renomear": [
+      "rename"
+    ],
+    "repetidas": [
+      "repeated"
+    ],
+    "repor": [
+      "restore"
+    ],
+    "representantes": [
+      "representatives"
+    ],
+    "representativo": [
+      "representative"
+    ],
+    "reprovada": [
+      "rejected"
+    ],
+    "reserva": [
+      "reserved"
+    ],
+    "resolucao": [
+      "resolution"
+    ],
+    "resolver": [
+      "resolve"
+    ],
+    "resolvida": [
+      "resolved"
+    ],
+    "resolvidas": [
+      "resolved"
+    ],
+    "resolvido": [
+      "resolved"
+    ],
+    "resolvidos": [
+      "resolved"
+    ],
+    "respiro": [
+      "padding"
+    ],
+    "responde": [
+      "respond"
+    ],
+    "resposta": [
+      "response"
+    ],
+    "respostas": [
+      "responses"
+    ],
+    "restantes": [
+      "remaining"
+    ],
+    "restaurado": [
+      "restored"
+    ],
+    "resto": [
+      "rest"
+    ],
+    "resultado": [
+      "result"
+    ],
+    "resumo": [
+      "summary"
+    ],
+    "retentativas": [
+      "retries"
+    ],
+    "retorno": [
+      "return"
+    ],
+    "reuso": [
+      "reuse"
+    ],
+    "revisao": [
+      "revision"
+    ],
+    "roda": [
+      "run"
+    ],
+    "rodape": [
+      "footer"
+    ],
+    "rolagem": [
+      "scroll"
+    ],
+    "rota": [
+      "route"
+    ],
+    "rotina": [
+      "routine"
+    ],
+    "rotinas": [
+      "routines"
+    ],
+    "rotulo": [
+      "label"
+    ],
+    "rotulos": [
+      "labels"
+    ],
+    "ruim": [
+      "bad"
+    ],
+    "ruptura": [
+      "breach"
+    ],
+    "sabe": [
+      "can"
+    ],
+    "safras": [
+      "vintages"
+    ],
+    "saida": [
+      "output"
+    ],
+    "saidas": [
+      "outflows"
+    ],
+    "sair": [
+      "exit"
+    ],
+    "saldo": [
+      "balance"
+    ],
+    "salva": [
+      "saved"
+    ],
+    "salvar": [
+      "save"
+    ],
+    "salvo": [
+      "saved"
+    ],
+    "secao": [
+      "section"
+    ],
+    "secundario": [
+      "secondary"
+    ],
+    "segmento": [
+      "segment"
+    ],
+    "segue": [
+      "follows"
+    ],
+    "segunda": [
+      "second"
+    ],
+    "selecao": [
+      "selection"
+    ],
+    "selecionado": [
+      "selected"
+    ],
+    "seletor": [
+      "selector"
+    ],
+    "seletores": [
+      "selectors"
+    ],
+    "selo": [
+      "badge"
+    ],
+    "selos": [
+      "badges"
+    ],
+    "sem": [
+      "without"
+    ],
+    "semear": [
+      "seed"
+    ],
+    "sentido": [
+      "direction"
+    ],
+    "serializada": [
+      "serialized"
+    ],
+    "serializar": [
+      "serialize"
+    ],
+    "serie": [
+      "series"
+    ],
+    "servidor": [
+      "server"
+    ],
+    "simples": [
+      "plain"
+    ],
+    "simula": [
+      "simulate"
+    ],
+    "sinais": [
+      "signals"
+    ],
+    "sinal": [
+      "sign"
+    ],
+    "situacao": [
+      "status"
+    ],
+    "so": [
+      "only"
+    ],
+    "soltar": [
+      "release"
+    ],
+    "soltas": [
+      "loose"
+    ],
+    "solto": [
+      "unbound"
+    ],
+    "soma": [
+      "sum"
+    ],
+    "sonda": [
+      "probe"
+    ],
+    "subcolecoes": [
+      "subcollections"
+    ],
+    "substitui": [
+      "replace"
+    ],
+    "sufixo": [
+      "suffix"
+    ],
+    "sugestao": [
+      "suggestion"
+    ],
+    "superou": [
+      "exceeded"
+    ],
+    "suspeitos": [
+      "suspects"
+    ],
+    "tabela": [
+      "table"
+    ],
+    "tabelas": [
+      "tables"
+    ],
+    "tamanho": [
+      "length",
+      "size"
+    ],
+    "taxa": [
+      "rate"
+    ],
+    "teclado": [
+      "keyboard"
+    ],
+    "tela": [
+      "screen"
+    ],
+    "tempo": [
+      "time"
+    ],
+    "terceiro": [
+      "third"
+    ],
+    "terminador": [
+      "terminator"
+    ],
+    "terminar": [
+      "end"
+    ],
+    "termo": [
+      "term"
+    ],
+    "termos": [
+      "terms"
+    ],
+    "teste": [
+      "test"
+    ],
+    "teto": [
+      "cap",
+      "ceiling"
+    ],
+    "texto": [
+      "text"
+    ],
+    "textos": [
+      "texts"
+    ],
+    "tick": [
+      "tick"
+    ],
+    "tier": [
+      "tier"
+    ],
+    "tinha": [
+      "had"
+    ],
+    "tinta": [
+      "ink"
+    ],
+    "tipo": [
+      "type",
+      "kind"
+    ],
+    "tipos": [
+      "types"
+    ],
+    "titulo": [
+      "title"
+    ],
+    "todas": [
+      "all"
+    ],
+    "todos": [
+      "all"
+    ],
+    "tom": [
+      "tone"
+    ],
+    "topico": [
+      "topic"
+    ],
+    "topo": [
+      "top"
+    ],
+    "totaliza": [
+      "showsTotal"
+    ],
+    "traco": [
+      "stroke"
+    ],
+    "transforma": [
+      "transform"
+    ],
+    "tratamento": [
+      "treatment"
+    ],
+    "tres": [
+      "three"
+    ],
+    "trilha": [
+      "track"
+    ],
+    "trilho": [
+      "rail"
+    ],
+    "triplo": [
+      "triple"
+    ],
+    "troca": [
+      "switch"
+    ],
+    "trocar": [
+      "switch"
+    ],
+    "trocas": [
+      "swaps"
+    ],
+    "truncado": [
+      "truncated"
+    ],
+    "tudo": [
+      "all"
+    ],
+    "turno": [
+      "turn"
+    ],
+    "turnos": [
+      "turns"
+    ],
+    "ultima": [
+      "latest"
+    ],
+    "ultimo": [
+      "last"
+    ],
+    "ultimos": [
+      "latest"
+    ],
+    "uma": [
+      "one"
+    ],
+    "unica": [
+      "single"
+    ],
+    "unico": [
+      "single"
+    ],
+    "url": [
+      "url"
+    ],
+    "usada": [
+      "used"
+    ],
+    "usados": [
+      "used"
+    ],
+    "usam": [
+      "use"
+    ],
+    "usar": [
+      "use"
+    ],
+    "uso": [
+      "usage"
+    ],
+    "usos": [
+      "uses",
+      "usages"
+    ],
+    "usuarios": [
+      "users"
+    ],
+    "util": [
+      "useful"
+    ],
+    "vaga": [
+      "slot"
+    ],
+    "vai": [
+      "will"
+    ],
+    "valida": [
+      "validate"
+    ],
+    "validacao": [
+      "validation"
+    ],
+    "validas": [
+      "valid"
+    ],
+    "valido": [
+      "valid"
+    ],
+    "valor": [
+      "value"
+    ],
+    "valores": [
+      "values"
+    ],
+    "variacao": [
+      "change"
+    ],
+    "variante": [
+      "variant"
+    ],
+    "variantes": [
+      "variants"
+    ],
+    "vazia": [
+      "empty"
+    ],
+    "vazio": [
+      "empty"
+    ],
+    "vencido": [
+      "stale"
+    ],
+    "verbo": [
+      "verb"
+    ],
+    "veredito": [
+      "verdict"
+    ],
+    "vereditos": [
+      "verdicts"
+    ],
+    "verifica": [
+      "check"
+    ],
+    "verificados": [
+      "checked"
+    ],
+    "versao": [
+      "version"
+    ],
+    "vigentes": [
+      "active"
+    ],
+    "vigiar": [
+      "watch"
+    ],
+    "vira": [
+      "becomes"
+    ],
+    "visiveis": [
+      "visible"
+    ],
+    "visivel": [
+      "visible"
+    ],
+    "visto": [
+      "seen"
+    ],
+    "vistos": [
+      "seen"
+    ],
+    "visual": [
+      "visual"
+    ],
+    "vizinho": [
+      "neighbor"
+    ],
+    "volta": [
+      "returns"
+    ],
+    "voo": [
+      "flight"
+    ]
+  }
+}

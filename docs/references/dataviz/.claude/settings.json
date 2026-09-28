@@ -1,0 +1,73 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume|clear|compact|fork",
+        "hooks": [{
+          "type": "command",
+          "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/session-start-announce.cjs\"",
+          "async": false
+        }]
+      }
+    ],
+    "PreCompact": [
+      {
+        "hooks": [{
+          "type": "command",
+          "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/session-start-announce.cjs\"",
+          "async": false
+        }]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [{
+          "type": "command",
+          "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/suggest-skills.cjs\""
+        }]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [{
+          "type": "command",
+          "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/guard-conventional-commit.cjs\"",
+          "if": "Bash(git commit*)"
+        }]
+      },
+      {
+        "matcher": "PowerShell",
+        "hooks": [{
+          "type": "command",
+          "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/guard-conventional-commit.cjs\"",
+          "if": "PowerShell(git commit*)"
+        }]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [{
+          "type": "command",
+          "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/suggest-skills.cjs\"",
+          "async": true
+        }]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/check-claude-md-size.cjs\""
+          },
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/grounding-warn.cjs\""
+          }
+        ]
+      }
+    ]
+  }
+}

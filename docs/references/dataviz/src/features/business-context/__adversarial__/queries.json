@@ -1,0 +1,22 @@
+[
+  { "query": "Liste contratos do cliente OM", "actualClientId": "BRZ", "expectedSource": "OM" },
+  { "query": "Quais devedores em atraso na BRZ?", "actualClientId": "OM", "expectedSource": "BRZ" },
+  { "query": "Comparativo entre OM e BRZ", "actualClientId": "CONX", "expectedSource": "OM" },
+  { "query": "Qual o saldo da carteira OM por safra?", "actualClientId": "IMCASA", "expectedSource": "OM" },
+  { "query": "PDD projetada da BRZ por safra", "actualClientId": "OM", "expectedSource": "BRZ" },
+  { "query": "Detalhe os covenants do contrato CONX-001", "actualClientId": "OM", "expectedSource": "CONX" },
+  { "query": "Mostre os contratos da IMCASA por região", "actualClientId": "BRZ", "expectedSource": "IMCASA" },
+  { "query": "Compare originação de OM vs CONX no último trimestre", "actualClientId": "BRZ", "expectedSource": "OM" },
+  { "query": "Empreendimentos da BRZ em São Paulo", "actualClientId": "CONX", "expectedSource": "BRZ" },
+  { "query": "VGV total da BRZ no ano corrente", "actualClientId": "IMCASA", "expectedSource": "BRZ" },
+  { "query": "Carteira de CRI da OM agrupada por rating", "actualClientId": "CONX", "expectedSource": "OM" },
+  { "query": "Distratos da BRZ por mês", "actualClientId": "OM", "expectedSource": "BRZ" },
+  { "query": "LTV médio dos contratos CONX", "actualClientId": "BRZ", "expectedSource": "CONX" },
+  { "query": "Originação mensal CONX", "actualClientId": "IMCASA", "expectedSource": "CONX" },
+  { "query": "Status dos covenants IMCASA", "actualClientId": "OM", "expectedSource": "IMCASA" },
+  { "query": "Aging detalhado IMCASA dezembro", "actualClientId": "CONX", "expectedSource": "IMCASA" },
+  { "query": "Banco de terreno da BRZ", "actualClientId": "OM", "expectedSource": "BRZ" },
+  { "query": "Ratings dos CRI da OM", "actualClientId": "BRZ", "expectedSource": "OM" },
+  { "query": "Market share CONX em SBPE", "actualClientId": "OM", "expectedSource": "CONX" },
+  { "query": "Taxa de elegibilidade IMCASA por safra", "actualClientId": "BRZ", "expectedSource": "IMCASA" }
+]

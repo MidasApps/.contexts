@@ -1,0 +1,13 @@
+{
+  "id": "analista-cobranca",
+  "name": "Analista de Cobrança",
+  "layer": "operacional",
+  "language": "operacional",
+  "horizon": "curto",
+  "priorityKpis": ["recuperacao", "valor_atraso", "matriz_cobranca", "perfil_cobranca"],
+  "preferredGranularity": "contrato",
+  "preferredVisuals": ["table", "kpi"],
+  "jargonAnchor": ["recuperação", "matriz de cobrança", "atraso"],
+  "forbidden": [],
+  "_meta": { "refinedBySme": false, "sourceDoc": "docs/benchmarking/6.1" }
+}

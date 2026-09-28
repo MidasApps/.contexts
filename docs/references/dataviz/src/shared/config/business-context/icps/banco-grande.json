@@ -1,0 +1,8 @@
+{
+  "id": "banco-grande",
+  "segment": "Banco grande SBPE/MCMV",
+  "examples": ["Caixa", "Itaú", "Bradesco", "Santander", "BB"],
+  "primaryKpis": ["originacao_sbpe", "direcionamento", "spread", "over_90"],
+  "decisionJourney": "comitê mensal + monitoramento contínuo",
+  "_meta": { "refinedBySme": false }
+}

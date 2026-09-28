@@ -1,0 +1,13 @@
+{
+  "id": "gestor-carteira-securitizadora",
+  "name": "Gestor de Carteira em Securitizadora",
+  "layer": "tatica",
+  "language": "tecnica",
+  "horizon": "medio",
+  "priorityKpis": ["razao_pmt", "aging", "vintage", "evolucao_obra", "over_90"],
+  "preferredGranularity": "safra",
+  "preferredVisuals": ["line", "heatmap", "table"],
+  "jargonAnchor": ["safra", "vintage", "aging", "razão PMT"],
+  "forbidden": [],
+  "_meta": { "refinedBySme": false, "sourceDoc": "docs/benchmarking/6.1" }
+}

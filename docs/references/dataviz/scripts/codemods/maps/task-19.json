@@ -1,0 +1,1015 @@
+[
+  {
+    "file": "app/api/admin/eval-runs/__tests__/route.test.ts",
+    "line": 6,
+    "from": "Chamada",
+    "to": "Call",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "app/api/admin/eval-runs/__tests__/route.test.ts",
+    "line": 6,
+    "from": "metodo",
+    "to": "method",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "app/api/admin/eval-runs/__tests__/route.test.ts",
+    "line": 6,
+    "from": "campo",
+    "to": "field",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 11
+  },
+  {
+    "file": "app/api/admin/eval-runs/__tests__/route.test.ts",
+    "line": 8,
+    "from": "estado",
+    "to": "state",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 8
+  },
+  {
+    "file": "app/api/admin/eval-runs/__tests__/route.test.ts",
+    "line": 10,
+    "from": "chamadas",
+    "to": "calls",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "app/api/admin/eval-runs/__tests__/route.test.ts",
+    "line": 20,
+    "from": "consulta",
+    "to": "query",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "app/api/admin/eval-runs/__tests__/route.test.ts",
+    "line": 21,
+    "from": "campo",
+    "to": "field",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 11
+  },
+  {
+    "file": "app/api/admin/eval-runs/__tests__/route.test.ts",
+    "line": 22,
+    "from": "metodo",
+    "to": "method",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "app/api/admin/eval-runs/__tests__/route.test.ts",
+    "line": 22,
+    "from": "campo",
+    "to": "field",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 11
+  },
+  {
+    "file": "app/api/admin/eval-runs/__tests__/route.test.ts",
+    "line": 25,
+    "from": "campo",
+    "to": "field",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 11
+  },
+  {
+    "file": "app/api/admin/eval-runs/__tests__/route.test.ts",
+    "line": 26,
+    "from": "metodo",
+    "to": "method",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "app/api/admin/eval-runs/__tests__/route.test.ts",
+    "line": 26,
+    "from": "campo",
+    "to": "field",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 11
+  },
+  {
+    "file": "app/api/admin/eval-runs/__tests__/route.test.ts",
+    "line": 39,
+    "from": "IndiceDeclarado",
+    "to": "DeclaredIndex",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "app/api/admin/eval-runs/__tests__/route.test.ts",
+    "line": 55,
+    "from": "indiceQueAtende",
+    "to": "indexThatServes",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "app/api/admin/eval-runs/__tests__/route.test.ts",
+    "line": 55,
+    "from": "chamadas",
+    "to": "calls",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "app/api/admin/eval-runs/__tests__/route.test.ts",
+    "line": 56,
+    "from": "igualdades",
+    "to": "equalities",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "app/api/admin/eval-runs/__tests__/route.test.ts",
+    "line": 60,
+    "from": "direcao",
+    "to": "direction",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "app/api/admin/eval-runs/__tests__/route.test.ts",
+    "line": 62,
+    "from": "ultimo",
+    "to": "last",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "app/api/admin/eval-runs/__tests__/route.test.ts",
+    "line": 63,
+    "from": "resto",
+    "to": "rest",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "app/api/admin/eval-runs/__tests__/route.test.ts",
+    "line": 67,
+    "from": "campo",
+    "to": "field",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 11
+  },
+  {
+    "file": "app/api/admin/eval-runs/__tests__/route.test.ts",
+    "line": 75,
+    "from": "consultar",
+    "to": "runQuery",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "app/api/admin/eval-runs/__tests__/route.test.ts",
+    "line": 103,
+    "from": "porJuiz",
+    "to": "byJudge",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "app/api/admin/eval-runs/__tests__/route.test.ts",
+    "line": 106,
+    "from": "outroCliente",
+    "to": "otherClient",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "app/api/admin/eval-runs/__tests__/route.test.ts",
+    "line": 109,
+    "from": "mesmaPersona",
+    "to": "samePersona",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2,
+    "note": "mixed-language"
+  },
+  {
+    "file": "app/api/admin/sql-catalog/[id]/revalidate/route.ts",
+    "line": 36,
+    "from": "reprovada",
+    "to": "rejected",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "app/api/chat/__tests__/phase-timer.test.ts",
+    "line": 5,
+    "from": "relogioFake",
+    "to": "fakeClock",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 8,
+    "note": "mixed-language"
+  },
+  {
+    "file": "app/api/chat/__tests__/phase-timer.test.ts",
+    "line": 5,
+    "from": "inicio",
+    "to": "start",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "app/api/chat/__tests__/phase-timer.test.ts",
+    "line": 8,
+    "from": "agora",
+    "to": "now",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 8
+  },
+  {
+    "file": "app/api/chat/__tests__/phase-timer.test.ts",
+    "line": 9,
+    "from": "avancar",
+    "to": "advance",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 11
+  },
+  {
+    "file": "app/api/chat/__tests__/phase-timer.test.ts",
+    "line": 13,
+    "from": "coletor",
+    "to": "collector",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 7
+  },
+  {
+    "file": "app/api/chat/__tests__/phase-timer.test.ts",
+    "line": 14,
+    "from": "linhas",
+    "to": "lines",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 8
+  },
+  {
+    "file": "app/api/chat/__tests__/phase-timer.test.ts",
+    "line": 17,
+    "from": "ultima",
+    "to": "last",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 8
+  },
+  {
+    "file": "app/api/chat/__tests__/phase-timer.test.ts",
+    "line": 18,
+    "from": "quantas",
+    "to": "count",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "app/api/chat/__tests__/phase-timer.test.ts",
+    "line": 38,
+    "from": "valor",
+    "to": "value",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "app/api/chat/__tests__/phase-timer.test.ts",
+    "line": 94,
+    "from": "detalhe",
+    "to": "detail",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 9
+  },
+  {
+    "file": "app/api/chat/__tests__/route.test.ts",
+    "line": 35,
+    "from": "execucoes",
+    "to": "executions",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "app/api/chat/__tests__/route.test.ts",
+    "line": 35,
+    "from": "pendentes",
+    "to": "pending",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "app/api/chat/__tests__/route.test.ts",
+    "line": 134,
+    "from": "postValido",
+    "to": "validPost",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5,
+    "note": "mixed-language"
+  },
+  {
+    "file": "app/api/chat/__tests__/route.test.ts",
+    "line": 139,
+    "from": "streamDePassos",
+    "to": "stepStream",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4,
+    "note": "mixed-language"
+  },
+  {
+    "file": "app/api/chat/__tests__/route.test.ts",
+    "line": 165,
+    "from": "opcoes",
+    "to": "options",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "app/api/chat/__tests__/route.test.ts",
+    "line": 180,
+    "from": "linha",
+    "to": "line",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 9
+  },
+  {
+    "file": "app/api/chat/__tests__/route.test.ts",
+    "line": 184,
+    "from": "registro",
+    "to": "record",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 7
+  },
+  {
+    "file": "app/api/chat/__tests__/route.test.ts",
+    "line": 213,
+    "from": "linha",
+    "to": "line",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 9
+  },
+  {
+    "file": "app/api/chat/__tests__/route.test.ts",
+    "line": 215,
+    "from": "registro",
+    "to": "record",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 7
+  },
+  {
+    "file": "app/api/chat/__tests__/route.test.ts",
+    "line": 358,
+    "from": "descritivoStream",
+    "to": "descriptiveStream",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3,
+    "note": "mixed-language"
+  },
+  {
+    "file": "app/api/chat/__tests__/thread-id.test.ts",
+    "line": 10,
+    "from": "indice",
+    "to": "index",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 12
+  },
+  {
+    "file": "app/api/chat/__tests__/thread-id.test.ts",
+    "line": 11,
+    "from": "posChaves",
+    "to": "keyPositions",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2,
+    "note": "mixed-language"
+  },
+  {
+    "file": "app/api/chat/__tests__/thread-id.test.ts",
+    "line": 39,
+    "from": "geral",
+    "to": "general",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "app/api/chat/__tests__/thread-id.test.ts",
+    "line": 40,
+    "from": "doIndicador",
+    "to": "forIndicator",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "app/api/chat/__tests__/thread-id.test.ts",
+    "line": 50,
+    "from": "dela",
+    "to": "hers",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "app/api/chat/__tests__/thread-id.test.ts",
+    "line": 51,
+    "from": "dele",
+    "to": "his",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "app/api/chat/__tests__/to-ui-chunk.test.ts",
+    "line": 17,
+    "from": "chunkInternoDoSubAgente",
+    "to": "subAgentInternalChunk",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3,
+    "note": "mixed-language"
+  },
+  {
+    "file": "app/api/chat/__tests__/workflow-routing.test.ts",
+    "line": 121,
+    "from": "capturarLogs",
+    "to": "captureLogs",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4,
+    "note": "mixed-language"
+  },
+  {
+    "file": "app/api/chat/__tests__/workflow-routing.test.ts",
+    "line": 122,
+    "from": "linhas",
+    "to": "lines",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 8
+  },
+  {
+    "file": "app/api/chat/__tests__/workflow-routing.test.ts",
+    "line": 123,
+    "from": "captura",
+    "to": "capture",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "app/api/chat/__tests__/workflow-routing.test.ts",
+    "line": 130,
+    "from": "linhas",
+    "to": "lines",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 8
+  },
+  {
+    "file": "app/api/chat/__tests__/workflow-routing.test.ts",
+    "line": 131,
+    "from": "resolucao",
+    "to": "resolution",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "app/api/chat/history/route.ts",
+    "line": 16,
+    "from": "LIMITE",
+    "to": "LIMIT",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "app/api/chat/history/route.ts",
+    "line": 34,
+    "from": "armazenadas",
+    "to": "stored",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "app/api/chat/phase-timer.ts",
+    "line": 47,
+    "from": "encerrado",
+    "to": "finished",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "app/api/chat/phase-timer.ts",
+    "line": 51,
+    "from": "inicio",
+    "to": "start",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "app/api/chat/resolve-chat-agent.ts",
+    "line": 63,
+    "from": "registraAgenteResolvido",
+    "to": "logResolvedAgent",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "app/api/chat/resolve-chat-agent.ts",
+    "line": 63,
+    "from": "agente",
+    "to": "agent",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "app/api/chat/resolve-chat-agent.ts",
+    "line": 63,
+    "from": "autoria",
+    "to": "authoring",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 8
+  },
+  {
+    "file": "app/api/chat/resolve-chat-agent.ts",
+    "line": 64,
+    "from": "linha",
+    "to": "line",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 9
+  },
+  {
+    "file": "app/api/chat/resolve-chat-agent.ts",
+    "line": 88,
+    "from": "escolhido",
+    "to": "chosen",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "app/api/chat/resolve-chat-agent.ts",
+    "line": 96,
+    "from": "especialista",
+    "to": "specialist",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "app/api/chat/route.ts",
+    "line": 68,
+    "from": "MAX_PASSOS_DO_TURNO",
+    "to": "MAX_TURN_STEPS",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4,
+    "note": "mixed-language"
+  },
+  {
+    "file": "app/api/chat/route.ts",
+    "line": 108,
+    "from": "limite",
+    "to": "limit",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "app/api/chat/route.ts",
+    "line": 181,
+    "from": "ultimaDoUsuario",
+    "to": "lastUserMessage",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "app/api/chat/route.ts",
+    "line": 208,
+    "from": "grupoDaRota",
+    "to": "routeGroup",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "app/api/chat/route.ts",
+    "line": 210,
+    "from": "relatorioDaRota",
+    "to": "routeReport",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "app/api/chat/route.ts",
+    "line": 260,
+    "from": "turno",
+    "to": "turn",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 8
+  },
+  {
+    "file": "app/api/chat/route.ts",
+    "line": 268,
+    "from": "registraChunk",
+    "to": "recordChunk",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2,
+    "note": "mixed-language"
+  },
+  {
+    "file": "app/api/chat/route.ts",
+    "line": 292,
+    "from": "erro",
+    "to": "error",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 8
+  },
+  {
+    "file": "app/api/chat/route.ts",
+    "line": 293,
+    "from": "classificado",
+    "to": "classified",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "app/api/chat/route.ts",
+    "line": 308,
+    "from": "resposta",
+    "to": "response",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "app/api/chat/route.ts",
+    "line": 319,
+    "from": "primeiroTexto",
+    "to": "firstText",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "app/api/chat/route.ts",
+    "line": 346,
+    "from": "contexto",
+    "to": "context",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "app/api/export-pdf/route.ts",
+    "line": 30,
+    "from": "limite",
+    "to": "limit",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "app/api/export-pdf/route.ts",
+    "line": 58,
+    "from": "liberarVaga",
+    "to": "releaseSlot",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "app/api/health/route.ts",
+    "line": 28,
+    "from": "inicio",
+    "to": "start",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "app/api/health/route.ts",
+    "line": 41,
+    "from": "corpo",
+    "to": "body",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "app/api/metrics/filter-values/route.test.ts",
+    "line": 187,
+    "from": "datasetMultiEntidade",
+    "to": "multiEntityDataset",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2,
+    "note": "mixed-language"
+  },
+  {
+    "file": "app/api/metrics/filter-values/route.test.ts",
+    "line": 217,
+    "from": "METRICA",
+    "to": "METRIC",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "app/api/metrics/filter-values/route.ts",
+    "line": 154,
+    "from": "valoresDoCampoDoIndicador",
+    "to": "indicatorFieldValues",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "app/api/metrics/filter-values/route.ts",
+    "line": 189,
+    "from": "declarados",
+    "to": "declared",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "app/api/metrics/filter-values/route.ts",
+    "line": 191,
+    "from": "disponiveis",
+    "to": "available",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "app/api/metrics/filter-values/schema.ts",
+    "line": 28,
+    "from": "PorAtributo",
+    "to": "ByAttribute",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "app/api/metrics/filter-values/schema.ts",
+    "line": 37,
+    "from": "PorCampoDoIndicador",
+    "to": "ByIndicatorField",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "app/api/metrics/route.ts",
+    "line": 272,
+    "from": "anterior",
+    "to": "previous",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 7
+  },
+  {
+    "file": "app/api/metrics/route.ts",
+    "line": 288,
+    "from": "naoExpressoPeloFormulario",
+    "to": "notExpressedByForm",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "app/api/reports/__tests__/route.test.ts",
+    "line": 106,
+    "from": "limparEstado",
+    "to": "resetState",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "app/api/reports/__tests__/route.test.ts",
+    "line": 332,
+    "from": "com",
+    "to": "withIt",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "app/api/reports/__tests__/route.test.ts",
+    "line": 332,
+    "from": "sem",
+    "to": "withoutIt",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "app/api/reports/route.ts",
+    "line": 24,
+    "from": "idsExistentes",
+    "to": "existingIds",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4,
+    "note": "mixed-language"
+  },
+  {
+    "file": "app/api/reports/route.ts",
+    "line": 201,
+    "from": "ocupadosNoDestino",
+    "to": "occupiedAtTarget",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "app/api/reports/route.ts",
+    "line": 243,
+    "from": "novoId",
+    "to": "newId",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "app/api/users/__tests__/route.test.ts",
+    "line": 15,
+    "from": "SnapshotDeUsuarios",
+    "to": "UsersSnapshot",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2,
+    "note": "mixed-language"
+  },
+  {
+    "file": "app/error.tsx",
+    "line": 29,
+    "from": "detalhe",
+    "to": "detail",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 9
+  }
+]

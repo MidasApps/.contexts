@@ -1,0 +1,63 @@
+# dependencies
+# Sem barra final de propósito: `node_modules/` só casa diretório, e num git
+# worktree o node_modules costuma ser symlink — que o `git add -A` commitaria.
+node_modules
+.pnpm-store/
+
+# next.js
+.next/
+out/
+
+# env files
+.env.local
+.env*.local
+# Backup de .env feito à mão (ex.: .env.local.bak-producao) — carrega credencial
+# de produção e NÃO é coberto pelos padrões acima, que exigem o sufixo `.local`.
+.env*.bak*
+
+# Dumps de base do cliente (BigQuery/Sheets/Looker, zips). São dados de
+# operação, não código: pesados e fora do escopo do repositório.
+docs/bases/
+
+# build
+*.tsbuildinfo
+# Saída do CLI do Mastra (`pnpm mastra:dev` / `mastra build`) — bundle local do
+# playground, regenerado a cada subida.
+.mastra/
+next-env.d.ts
+
+# misc
+.DS_Store
+*.pem
+.forja/
+
+# Claude Code runtime locks e worktrees locais (não versionar)
+.claude/scheduled_tasks.lock
+.claude/worktrees/
+
+# Build cache / Next.js backups antigos
+.next.old*/
+
+# Playwright MCP cache (screenshots + logs de teste local)
+.playwright-mcp/
+
+# Screenshots e logs avulsos na raiz (artifacts de teste/validação visual)
+/*.png
+/*.jpg
+/*.jpeg
+/*.log
+
+# Docker: chaves de service account e env do compose — NUNCA versionar
+secrets/*
+!secrets/.gitkeep
+.env
+.env.docker
+
+# Clone de configuração de produção (pnpm provisioning:export).
+# Fica FORA do git por padrão: mesmo sem PII (ver provisioning-manifest.ts), é
+# um retrato da configuração de um cliente real. Versione deliberadamente, com
+# `git add -f`, quando o objetivo for fixture de reprovisionamento.
+/fixtures/provisioning/
+
+# Dumps de configuração/PII de ambientes anteriores. Não versionar.
+docs/backups/

@@ -1,0 +1,1148 @@
+[
+  {
+    "file": "src/features/ai-agents/lib/__tests__/compact-messages.test.ts",
+    "line": 5,
+    "from": "texto",
+    "to": "textPart",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 104
+  },
+  {
+    "file": "src/features/ai-agents/lib/__tests__/compact-messages.test.ts",
+    "line": 120,
+    "from": "vazia",
+    "to": "empty",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/features/ai-agents/lib/__tests__/compact-messages.test.ts",
+    "line": 130,
+    "from": "orfa",
+    "to": "orphan",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/features/ai-agents/lib/__tests__/compact-messages.test.ts",
+    "line": 140,
+    "from": "parcial",
+    "to": "partial",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/features/ai-agents/lib/__tests__/compact-messages.test.ts",
+    "line": 182,
+    "from": "parte",
+    "to": "part",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/features/ai-agents/lib/__tests__/compact-messages.test.ts",
+    "line": 190,
+    "from": "vazia",
+    "to": "empty",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/features/ai-agents/lib/__tests__/compact-messages.test.ts",
+    "line": 195,
+    "from": "branca",
+    "to": "blank",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/features/ai-agents/lib/__tests__/require-citation.test.ts",
+    "line": 75,
+    "from": "uma",
+    "to": "one",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/features/ai-agents/lib/__tests__/require-citation.test.ts",
+    "line": 76,
+    "from": "duas",
+    "to": "two",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/features/ai-agents/lib/__tests__/sql-guard.blind-spots.test.ts",
+    "line": 19,
+    "from": "aceita",
+    "to": "accepts",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 13
+  },
+  {
+    "file": "src/features/ai-agents/lib/__tests__/sql-guard.test.ts",
+    "line": 11,
+    "from": "recusaEach",
+    "to": "rejectsEach",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/features/ai-agents/lib/__tests__/sql-guard.test.ts",
+    "line": 13,
+    "from": "aceita",
+    "to": "accepts",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 13
+  },
+  {
+    "file": "src/features/ai-agents/lib/__tests__/sql-guard.test.ts",
+    "line": 87,
+    "from": "erro",
+    "to": "error",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/features/ai-agents/lib/column-validator.ts",
+    "line": 5,
+    "from": "CONTRATOS_COLUMNS",
+    "to": "CONTRACT_COLUMNS",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/features/ai-agents/lib/compact-messages.ts",
+    "line": 48,
+    "from": "temTextoUtil",
+    "to": "hasUsefulText",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/features/ai-agents/lib/compact-messages.ts",
+    "line": 61,
+    "from": "temToolConcluida",
+    "to": "hasFinishedTool",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/features/ai-agents/lib/require-citation.ts",
+    "line": 30,
+    "from": "SINAIS_DE_FONTE",
+    "to": "SOURCE_SIGNALS",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/features/ai-agents/lib/require-citation.ts",
+    "line": 39,
+    "from": "AVISO_SEM_FONTE",
+    "to": "MISSING_SOURCE_WARNING",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/features/ai-agents/lib/require-citation.ts",
+    "line": 46,
+    "from": "precisaAviso",
+    "to": "needsWarning",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 8
+  },
+  {
+    "file": "src/features/ai-agents/lib/require-citation.ts",
+    "line": 49,
+    "from": "texto",
+    "to": "text",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 104
+  },
+  {
+    "file": "src/features/ai-agents/lib/require-citation.ts",
+    "line": 52,
+    "from": "temFonte",
+    "to": "hasSource",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/features/ai-agents/lib/require-citation.ts",
+    "line": 60,
+    "from": "texto",
+    "to": "text",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 104
+  },
+  {
+    "file": "src/features/ai-agents/lib/require-citation.ts",
+    "line": 63,
+    "from": "precisaAviso",
+    "to": "needsWarning",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 8
+  },
+  {
+    "file": "src/features/ai-agents/lib/sql-guard.ts",
+    "line": 33,
+    "from": "PROIBIDO",
+    "to": "FORBIDDEN",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/features/ai-agents/lib/sql-guard.ts",
+    "line": 55,
+    "from": "INICIO_PERMITIDO",
+    "to": "ALLOWED_START",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/features/ai-agents/lib/sql-guard.ts",
+    "line": 62,
+    "from": "SEGUE_COLUNA",
+    "to": "FOLLOWS_COLUMN",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/features/ai-agents/lib/sql-guard.ts",
+    "line": 85,
+    "from": "FORA_DO_ESCOPO_DO_DRY_RUN",
+    "to": "OUTSIDE_DRY_RUN_SCOPE",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/features/ai-agents/lib/sql-guard.ts",
+    "line": 120,
+    "from": "construtoForaDoEscopo",
+    "to": "outOfScopeConstruct",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/features/ai-agents/lib/sql-guard.ts",
+    "line": 120,
+    "from": "textoComIdentificadores",
+    "to": "textWithIdentifiers",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/features/ai-agents/lib/sql-guard.ts",
+    "line": 125,
+    "from": "msgForaDoEscopo",
+    "to": "outOfScopeMessage",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/features/ai-agents/lib/sql-guard.ts",
+    "line": 187,
+    "from": "fimDelimitado",
+    "to": "delimitedEnd",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/features/ai-agents/lib/sql-guard.ts",
+    "line": 187,
+    "from": "desde",
+    "to": "from",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/features/ai-agents/lib/sql-guard.ts",
+    "line": 187,
+    "from": "fecho",
+    "to": "closer",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/features/ai-agents/lib/sql-guard.ts",
+    "line": 204,
+    "from": "fim",
+    "to": "end",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 20
+  },
+  {
+    "file": "src/features/ai-agents/lib/sql-guard.ts",
+    "line": 218,
+    "from": "fim",
+    "to": "end",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 20
+  },
+  {
+    "file": "src/features/ai-agents/lib/sql-guard.ts",
+    "line": 227,
+    "from": "triplo",
+    "to": "triple",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/features/ai-agents/lib/sql-guard.ts",
+    "line": 229,
+    "from": "fimTriplo",
+    "to": "tripleEnd",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/features/ai-agents/lib/sql-guard.ts",
+    "line": 238,
+    "from": "fim",
+    "to": "end",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 20
+  },
+  {
+    "file": "src/features/ai-agents/lib/sql-guard.ts",
+    "line": 248,
+    "from": "fim",
+    "to": "end",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 20
+  },
+  {
+    "file": "src/features/ai-agents/lib/sql-guard.ts",
+    "line": 254,
+    "from": "conteudo",
+    "to": "content",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/features/ai-agents/lib/sql-guard.ts",
+    "line": 274,
+    "from": "decodificaIdentificador",
+    "to": "decodeIdentifier",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/features/ai-agents/lib/sql-guard.ts",
+    "line": 275,
+    "from": "simples",
+    "to": "plain",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/features/ai-agents/lib/sql-guard.ts",
+    "line": 296,
+    "from": "temMultiplosComandos",
+    "to": "hasMultipleStatements",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/features/ai-agents/lib/sql-guard.ts",
+    "line": 296,
+    "from": "normalizado",
+    "to": "normalized",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 8
+  },
+  {
+    "file": "src/features/ai-agents/lib/sql-guard.ts",
+    "line": 307,
+    "from": "normalizado",
+    "to": "normalized",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 8
+  },
+  {
+    "file": "src/features/ai-agents/lib/sql-guard.ts",
+    "line": 331,
+    "from": "foraDoEscopo",
+    "to": "outOfScope",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/features/ai-agents/lib/tenant-query.ts",
+    "line": 75,
+    "from": "semTerminador",
+    "to": "withoutTerminator",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/features/ai-agents/lib/tenant-query.ts",
+    "line": 107,
+    "from": "MSG_FORA_DO_TENANT",
+    "to": "OUT_OF_TENANT_MESSAGE",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/features/ai-agents/lib/tenant-query.ts",
+    "line": 112,
+    "from": "logRecusa",
+    "to": "logRefusal",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/features/ai-agents/lib/tenant-query.ts",
+    "line": 117,
+    "from": "RECUSA_GENERICA",
+    "to": "GENERIC_REFUSAL",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/features/ai-agents/lib/tenant-query.ts",
+    "line": 119,
+    "from": "recusaDoDryRun",
+    "to": "dryRunRefusal",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/features/ai-agents/lib/tenant-query.ts",
+    "line": 121,
+    "from": "classe",
+    "to": "errorClass",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/features/ai-agents/lib/tenant-query.ts",
+    "line": 149,
+    "from": "projetoPadrao",
+    "to": "defaultProject",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/features/ai-agents/lib/tenant-query.ts",
+    "line": 180,
+    "from": "fora",
+    "to": "outside",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/features/ai-agents/mastra/authoring-tools.test.ts",
+    "line": 4,
+    "from": "ctxDeMetrica",
+    "to": "metricCtx",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/features/ai-agents/mastra/authoring-tools.test.ts",
+    "line": 19,
+    "from": "pagina",
+    "to": "pageContexts",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 8
+  },
+  {
+    "file": "src/features/ai-agents/mastra/authoring-tools.test.ts",
+    "line": 47,
+    "from": "autoraveis",
+    "to": "authorable",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/features/ai-agents/mastra/authoring-tools.test.ts",
+    "line": 49,
+    "from": "esperadas",
+    "to": "expected",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/features/ai-agents/mastra/authoring-tools.test.ts",
+    "line": 76,
+    "from": "pagina",
+    "to": "pageTool",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 8
+  },
+  {
+    "file": "src/features/ai-agents/mastra/authoring-tools.test.ts",
+    "line": 89,
+    "from": "autoraveis",
+    "to": "authorable",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/features/ai-agents/mastra/authoring-tools.test.ts",
+    "line": 90,
+    "from": "tipo",
+    "to": "blockType",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/features/ai-agents/mastra/authoring-tools.test.ts",
+    "line": 128,
+    "from": "bloco",
+    "to": "block",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/features/ai-agents/mastra/authoring-tools.test.ts",
+    "line": 153,
+    "from": "antes",
+    "to": "before",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/features/ai-agents/mastra/authoring-tools.test.ts",
+    "line": 158,
+    "from": "depois",
+    "to": "after",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/features/ai-agents/mastra/authoring-tools.test.ts",
+    "line": 190,
+    "from": "texto",
+    "to": "text",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 104
+  },
+  {
+    "file": "src/features/ai-agents/mastra/authoring-tools.test.ts",
+    "line": 206,
+    "from": "texto",
+    "to": "text",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 104
+  },
+  {
+    "file": "src/features/ai-agents/mastra/authoring-tools.test.ts",
+    "line": 220,
+    "from": "texto",
+    "to": "text",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 104
+  },
+  {
+    "file": "src/features/ai-agents/mastra/authoring-tools.test.ts",
+    "line": 232,
+    "from": "texto",
+    "to": "text",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 104
+  },
+  {
+    "file": "src/features/ai-agents/mastra/authoring-tools.test.ts",
+    "line": 244,
+    "from": "texto",
+    "to": "text",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 104
+  },
+  {
+    "file": "src/features/ai-agents/mastra/authoring-tools.test.ts",
+    "line": 255,
+    "from": "texto",
+    "to": "text",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 104
+  },
+  {
+    "file": "src/features/ai-agents/mastra/authoring-tools.test.ts",
+    "line": 267,
+    "from": "texto",
+    "to": "text",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 104
+  },
+  {
+    "file": "src/features/ai-agents/mastra/authoring-tools.test.ts",
+    "line": 284,
+    "from": "texto",
+    "to": "text",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 104
+  },
+  {
+    "file": "src/features/ai-agents/mastra/authoring-tools.test.ts",
+    "line": 297,
+    "from": "texto",
+    "to": "text",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 104
+  },
+  {
+    "file": "src/features/ai-agents/mastra/authoring-tools.test.ts",
+    "line": 310,
+    "from": "texto",
+    "to": "text",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 104
+  },
+  {
+    "file": "src/features/ai-agents/mastra/authoring-tools.test.ts",
+    "line": 316,
+    "from": "texto",
+    "to": "text",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 104
+  },
+  {
+    "file": "src/features/ai-agents/mastra/authoring-tools.test.ts",
+    "line": 326,
+    "from": "texto",
+    "to": "text",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 104
+  },
+  {
+    "file": "src/features/ai-agents/mastra/authoring-tools.test.ts",
+    "line": 337,
+    "from": "texto",
+    "to": "text",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 104
+  },
+  {
+    "file": "src/features/ai-agents/mastra/authoring-tools.test.ts",
+    "line": 356,
+    "from": "texto",
+    "to": "text",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 104
+  },
+  {
+    "file": "src/features/ai-agents/mastra/authoring-tools.test.ts",
+    "line": 368,
+    "from": "texto",
+    "to": "text",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 104
+  },
+  {
+    "file": "src/features/ai-agents/mastra/authoring-tools.test.ts",
+    "line": 378,
+    "from": "texto",
+    "to": "text",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 104
+  },
+  {
+    "file": "src/features/ai-agents/mastra/authoring-tools.test.ts",
+    "line": 386,
+    "from": "texto",
+    "to": "text",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 104
+  },
+  {
+    "file": "src/features/ai-agents/mastra/authoring-tools.test.ts",
+    "line": 393,
+    "from": "texto",
+    "to": "text",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 104
+  },
+  {
+    "file": "src/features/ai-agents/mastra/authoring-tools.test.ts",
+    "line": 400,
+    "from": "texto",
+    "to": "text",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 104
+  },
+  {
+    "file": "src/features/ai-agents/mastra/authoring-tools.test.ts",
+    "line": 405,
+    "from": "texto",
+    "to": "text",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 104
+  },
+  {
+    "file": "src/features/ai-agents/mastra/authoring-tools.test.ts",
+    "line": 412,
+    "from": "texto",
+    "to": "text",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 104
+  },
+  {
+    "file": "src/features/ai-agents/mastra/authoring-tools.test.ts",
+    "line": 418,
+    "from": "texto",
+    "to": "text",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 104
+  },
+  {
+    "file": "src/features/ai-agents/mastra/authoring-tools.test.ts",
+    "line": 425,
+    "from": "texto",
+    "to": "text",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 104
+  },
+  {
+    "file": "src/features/ai-agents/mastra/authoring-tools.ts",
+    "line": 78,
+    "from": "catalogo",
+    "to": "catalog",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 20
+  },
+  {
+    "file": "src/features/ai-agents/mastra/authoring-tools.ts",
+    "line": 84,
+    "from": "registro",
+    "to": "turnLog",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/features/ai-agents/mastra/authoring-tools.ts",
+    "line": 85,
+    "from": "criacao",
+    "to": "creationDeps",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 17
+  },
+  {
+    "file": "src/features/ai-agents/mastra/authoring-tools.ts",
+    "line": 99,
+    "from": "contextoDoServidor",
+    "to": "serverContext",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 8
+  },
+  {
+    "file": "src/features/ai-agents/mastra/authoring-tools.ts",
+    "line": 165,
+    "from": "renderCatalogoDeBlocos",
+    "to": "renderBlockCatalog",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/features/ai-agents/mastra/authoring-tools.ts",
+    "line": 166,
+    "from": "fichas",
+    "to": "cards",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/features/ai-agents/mastra/authoring-tools.ts",
+    "line": 167,
+    "from": "recomendado",
+    "to": "recommended",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/features/ai-agents/mastra/authoring-tools.ts",
+    "line": 168,
+    "from": "largura",
+    "to": "width",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/features/ai-agents/mastra/authoring-tools.ts",
+    "line": 172,
+    "from": "linhas",
+    "to": "lines",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 12
+  },
+  {
+    "file": "src/features/ai-agents/mastra/authoring-tools.ts",
+    "line": 201,
+    "from": "comparativo",
+    "to": "comparison",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/features/ai-agents/mastra/authoring-tools.ts",
+    "line": 233,
+    "from": "paginas",
+    "to": "pages",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/features/ai-agents/mastra/authoring-tools.ts",
+    "line": 234,
+    "from": "blocos",
+    "to": "blocks",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/features/ai-agents/mastra/authoring-tools.ts",
+    "line": 236,
+    "from": "estado",
+    "to": "state",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/features/ai-agents/mastra/authoring-tools.ts",
+    "line": 238,
+    "from": "linhas",
+    "to": "lines",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 12
+  },
+  {
+    "file": "src/features/ai-agents/mastra/authoring-tools.ts",
+    "line": 239,
+    "from": "partes",
+    "to": "parts",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "src/features/ai-agents/mastra/authoring-tools.ts",
+    "line": 250,
+    "from": "selecao",
+    "to": "selection",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/features/ai-agents/mastra/build-supervisor-agent.test.ts",
+    "line": 14,
+    "from": "ultimaConfig",
+    "to": "lastConfig",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/features/ai-agents/mastra/build-supervisor-agent.ts",
+    "line": 75,
+    "from": "autoria",
+    "to": "authoring",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/features/ai-agents/mastra/build-supervisor-agent.ts",
+    "line": 108,
+    "from": "nome",
+    "to": "name",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/features/ai-agents/mastra/instance.ts",
+    "line": 49,
+    "from": "construidos",
+    "to": "built",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/features/ai-agents/mastra/tools-fidelity.test.ts",
+    "line": 90,
+    "from": "semTenancy",
+    "to": "withoutTenancy",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/features/ai-agents/mastra/tools-fidelity.test.ts",
+    "line": 91,
+    "from": "comTenancy",
+    "to": "withTenancy",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/features/ai-agents/mastra/tools-fidelity.test.ts",
+    "line": 92,
+    "from": "derrubadas",
+    "to": "dropped",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/features/ai-agents/model-registry.test.ts",
+    "line": 21,
+    "from": "budgetDoModelo",
+    "to": "modelBudget",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 9,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/features/ai-agents/model-registry.ts",
+    "line": 40,
+    "from": "modeloDoTier",
+    "to": "modelForTier",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/features/ai-agents/model-registry.ts",
+    "line": 84,
+    "from": "MAX_RETENTATIVAS_DO_MODELO",
+    "to": "MAX_MODEL_RETRIES",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 8,
+    "note": "mixed-language"
+  }
+]

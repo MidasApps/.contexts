@@ -1,0 +1,241 @@
+<h2>Design: /docs — Agent Architecture Explorer</h2>
+<p class="subtitle">Validando o design completo antes de implementar</p>
+
+<!-- ARCHITECTURE SECTION -->
+<div class="section">
+  <h3>1. Landing Page — Diagrama de Arquitetura Interativo</h3>
+  <div class="mockup">
+    <div class="mockup-header">http://localhost:3000/docs</div>
+    <div class="mockup-body" style="background:#0a0b10; padding:0; display:flex; min-height:500px;">
+      <!-- Sidebar -->
+      <div style="width:220px; border-right:1px solid #1a1a2e; padding:20px 16px; flex-shrink:0;">
+        <div style="color:#F3A169; font-size:10px; font-weight:700; letter-spacing:1px; margin-bottom:12px;">ARQUITETURA</div>
+        <div style="color:#fff; font-size:12px; padding:6px 10px; background:rgba(243,161,105,0.12); border-radius:6px; margin-bottom:2px; cursor:pointer;">Visao Geral</div>
+
+        <div style="color:#666; font-size:10px; font-weight:700; letter-spacing:1px; margin:16px 0 8px;">ORQUESTRADOR</div>
+        <div style="color:#aaa; font-size:12px; padding:6px 10px; margin-bottom:2px; cursor:pointer;">Canvas Orchestrator</div>
+
+        <div style="color:#666; font-size:10px; font-weight:700; letter-spacing:1px; margin:16px 0 8px;">SUB-AGENTES</div>
+        <div style="color:#888; font-size:12px; padding:6px 10px; margin-bottom:2px;">Descriptive</div>
+        <div style="color:#888; font-size:12px; padding:6px 10px; margin-bottom:2px;">Diagnostic</div>
+        <div style="color:#888; font-size:12px; padding:6px 10px; margin-bottom:2px;">Predictive</div>
+        <div style="color:#888; font-size:12px; padding:6px 10px; margin-bottom:2px;">Simulation</div>
+        <div style="color:#888; font-size:12px; padding:6px 10px; margin-bottom:2px;">Prescriptive</div>
+        <div style="color:#888; font-size:12px; padding:6px 10px; margin-bottom:2px;">Monitoring</div>
+        <div style="color:#888; font-size:12px; padding:6px 10px; margin-bottom:2px;">Cashflow</div>
+        <div style="color:#888; font-size:12px; padding:6px 10px; margin-bottom:2px;">External</div>
+
+        <div style="color:#666; font-size:10px; font-weight:700; letter-spacing:1px; margin:16px 0 8px;">CONTEXTO</div>
+        <div style="color:#888; font-size:12px; padding:6px 10px; margin-bottom:2px;">Business Rules</div>
+        <div style="color:#888; font-size:12px; padding:6px 10px; margin-bottom:2px;">Schema BigQuery</div>
+        <div style="color:#888; font-size:12px; padding:6px 10px; margin-bottom:2px;">SQL Rules</div>
+        <div style="color:#888; font-size:12px; padding:6px 10px; margin-bottom:2px;">Filtros Dinamicos</div>
+      </div>
+
+      <!-- Main content: Architecture diagram -->
+      <div style="flex:1; padding:32px; overflow:auto;">
+        <div style="text-align:center; color:#fff; font-size:16px; font-weight:600; margin-bottom:4px;">Arquitetura Multi-Agent</div>
+        <div style="text-align:center; color:#666; font-size:12px; margin-bottom:28px;">Clique em qualquer componente para ver detalhes</div>
+
+        <!-- User -->
+        <div style="text-align:center; margin-bottom:16px;">
+          <div style="display:inline-block; background:#1a1a2e; border:1px solid #333; border-radius:10px; padding:10px 24px; color:#888; font-size:12px;">Usuario (Chat)</div>
+        </div>
+        <div style="text-align:center; margin-bottom:16px;">
+          <div style="width:2px; height:20px; background:#333; margin:0 auto;"></div>
+        </div>
+
+        <!-- API -->
+        <div style="text-align:center; margin-bottom:16px;">
+          <div style="display:inline-block; background:#1a1a2e; border:1px solid #444; border-radius:10px; padding:8px 20px; color:#7AA2F7; font-size:11px;">POST /api/canvas-chat</div>
+        </div>
+        <div style="text-align:center; margin-bottom:16px;">
+          <div style="width:2px; height:20px; background:#333; margin:0 auto;"></div>
+        </div>
+
+        <!-- Orchestrator -->
+        <div style="text-align:center; margin-bottom:12px;">
+          <div style="display:inline-block; background:rgba(243,161,105,0.1); border:2px solid #F3A169; border-radius:14px; padding:14px 32px; cursor:pointer;">
+            <div style="color:#F3A169; font-size:14px; font-weight:700;">Canvas Orchestrator</div>
+            <div style="display:flex; gap:8px; margin-top:8px; justify-content:center;">
+              <span style="font-size:9px; background:rgba(243,161,105,0.15); color:#F3A169; padding:2px 8px; border-radius:4px;">reasoning</span>
+              <span style="font-size:9px; background:#1a1a2e; color:#888; padding:2px 8px; border-radius:4px;">30 steps</span>
+              <span style="font-size:9px; background:#1a1a2e; color:#888; padding:2px 8px; border-radius:4px;">18 tools</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tools row -->
+        <div style="display:flex; justify-content:center; gap:8px; flex-wrap:wrap; margin:16px 0; max-width:500px; margin-left:auto; margin-right:auto;">
+          <div style="background:#0d1117; border:1px solid #1a3a1a; border-radius:6px; padding:5px 10px; font-size:9px; color:#6ECB8A;">plan_analysis</div>
+          <div style="background:#0d1117; border:1px solid #1a3a1a; border-radius:6px; padding:5px 10px; font-size:9px; color:#6ECB8A;">query_data</div>
+          <div style="background:#0d1117; border:1px solid #1a2a3a; border-radius:6px; padding:5px 10px; font-size:9px; color:#7AA2F7;">create_page</div>
+          <div style="background:#0d1117; border:1px solid #1a2a3a; border-radius:6px; padding:5px 10px; font-size:9px; color:#7AA2F7;">add_*_block</div>
+          <div style="background:#0d1117; border:1px solid #1a2a3a; border-radius:6px; padding:5px 10px; font-size:9px; color:#7AA2F7;">update_*</div>
+          <div style="background:#0d1117; border:1px solid #3a1a1a; border-radius:6px; padding:5px 10px; font-size:9px; color:#F27C7C; font-weight:600;">analyze()</div>
+        </div>
+
+        <!-- Arrow to sub-agents -->
+        <div style="text-align:center; margin:8px 0;">
+          <div style="color:#F27C7C; font-size:10px;">delega via analyze()</div>
+          <div style="width:2px; height:16px; background:#F27C7C; margin:4px auto;"></div>
+        </div>
+
+        <!-- Sub-agents -->
+        <div style="display:flex; justify-content:center; gap:10px; flex-wrap:wrap; max-width:560px; margin:0 auto;">
+          <div style="background:rgba(242,124,124,0.06); border:1px solid rgba(242,124,124,0.2); border-radius:10px; padding:8px 14px; cursor:pointer; text-align:center;">
+            <div style="color:#F27C7C; font-size:11px; font-weight:600;">Descriptive</div>
+            <div style="color:#555; font-size:9px;">O que aconteceu?</div>
+          </div>
+          <div style="background:rgba(242,124,124,0.06); border:1px solid rgba(242,124,124,0.2); border-radius:10px; padding:8px 14px; cursor:pointer; text-align:center;">
+            <div style="color:#F27C7C; font-size:11px; font-weight:600;">Diagnostic</div>
+            <div style="color:#555; font-size:9px;">Por que aconteceu?</div>
+          </div>
+          <div style="background:rgba(242,124,124,0.06); border:1px solid rgba(242,124,124,0.2); border-radius:10px; padding:8px 14px; cursor:pointer; text-align:center;">
+            <div style="color:#F27C7C; font-size:11px; font-weight:600;">Predictive</div>
+            <div style="color:#555; font-size:9px;">O que vai acontecer?</div>
+          </div>
+          <div style="background:rgba(242,124,124,0.06); border:1px solid rgba(242,124,124,0.2); border-radius:10px; padding:8px 14px; cursor:pointer; text-align:center;">
+            <div style="color:#F27C7C; font-size:11px; font-weight:600;">Simulation</div>
+            <div style="color:#555; font-size:9px;">E se...?</div>
+          </div>
+          <div style="background:rgba(242,124,124,0.06); border:1px solid rgba(242,124,124,0.2); border-radius:10px; padding:8px 14px; cursor:pointer; text-align:center;">
+            <div style="color:#F27C7C; font-size:11px; font-weight:600;">Prescriptive</div>
+            <div style="color:#555; font-size:9px;">O que fazer?</div>
+          </div>
+          <div style="background:rgba(242,124,124,0.06); border:1px solid rgba(242,124,124,0.2); border-radius:10px; padding:8px 14px; cursor:pointer; text-align:center;">
+            <div style="color:#F27C7C; font-size:11px; font-weight:600;">Monitoring</div>
+            <div style="color:#555; font-size:9px;">Algo errado?</div>
+          </div>
+          <div style="background:rgba(242,124,124,0.06); border:1px solid rgba(242,124,124,0.2); border-radius:10px; padding:8px 14px; cursor:pointer; text-align:center;">
+            <div style="color:#F27C7C; font-size:11px; font-weight:600;">Cashflow</div>
+            <div style="color:#555; font-size:9px;">Fluxo de caixa</div>
+          </div>
+          <div style="background:rgba(242,124,124,0.06); border:1px solid rgba(242,124,124,0.2); border-radius:10px; padding:8px 14px; cursor:pointer; text-align:center;">
+            <div style="color:#F27C7C; font-size:11px; font-weight:600;">External</div>
+            <div style="color:#555; font-size:9px;">Macro / mercado</div>
+          </div>
+        </div>
+
+        <!-- Shared context -->
+        <div style="margin-top:24px; border-top:1px solid #1a1a2e; padding-top:16px;">
+          <div style="text-align:center; color:#555; font-size:10px; margin-bottom:10px;">CONTEXTO COMPARTILHADO (injetado em todos os agentes)</div>
+          <div style="display:flex; justify-content:center; gap:8px; flex-wrap:wrap;">
+            <div style="background:#0d1117; border:1px solid #222; border-radius:6px; padding:6px 12px; font-size:10px; color:#888;">Business Rules</div>
+            <div style="background:#0d1117; border:1px solid #222; border-radius:6px; padding:6px 12px; font-size:10px; color:#888;">Schema (contratos, pagamentos, fluxo)</div>
+            <div style="background:#0d1117; border:1px solid #222; border-radius:6px; padding:6px 12px; font-size:10px; color:#888;">SQL Rules</div>
+            <div style="background:#0d1117; border:1px solid #222; border-radius:6px; padding:6px 12px; font-size:10px; color:#888;">Dynamic Filters</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- AGENT DETAIL SECTION -->
+<div class="section">
+  <h3>2. Detalhe do Agente (ao clicar)</h3>
+  <div class="mockup">
+    <div class="mockup-header">Canvas Orchestrator — Detalhe</div>
+    <div class="mockup-body" style="background:#0a0b10; padding:24px;">
+      <!-- Header -->
+      <div style="display:flex; align-items:center; gap:16px; margin-bottom:20px;">
+        <div style="background:rgba(243,161,105,0.1); border:2px solid #F3A169; border-radius:12px; padding:12px; display:flex; align-items:center; justify-content:center; width:48px; height:48px;">
+          <span style="color:#F3A169; font-size:20px;">&#9881;</span>
+        </div>
+        <div>
+          <div style="color:#fff; font-size:18px; font-weight:700;">Canvas Orchestrator</div>
+          <div style="color:#888; font-size:12px;">Orquestrador principal — cria dashboards interativos via conversa</div>
+        </div>
+        <div style="margin-left:auto; display:flex; gap:8px;">
+          <span style="font-size:10px; background:rgba(243,161,105,0.15); color:#F3A169; padding:4px 10px; border-radius:6px; font-weight:600;">reasoning</span>
+          <span style="font-size:10px; background:#1a1a2e; color:#888; padding:4px 10px; border-radius:6px;">30 max steps</span>
+        </div>
+      </div>
+
+      <!-- Badges: shared context -->
+      <div style="display:flex; gap:6px; margin-bottom:20px; flex-wrap:wrap;">
+        <span style="font-size:10px; border:1px solid #222; color:#666; padding:3px 8px; border-radius:4px; cursor:pointer;">&#128279; Business Rules</span>
+        <span style="font-size:10px; border:1px solid #222; color:#666; padding:3px 8px; border-radius:4px; cursor:pointer;">&#128279; Schema</span>
+        <span style="font-size:10px; border:1px solid #222; color:#666; padding:3px 8px; border-radius:4px; cursor:pointer;">&#128279; SQL Rules</span>
+        <span style="font-size:10px; border:1px solid #222; color:#666; padding:3px 8px; border-radius:4px; cursor:pointer;">&#128279; Dynamic Filters</span>
+      </div>
+
+      <!-- System Prompt (collapsed) -->
+      <div style="border:1px solid #1a1a2e; border-radius:10px; margin-bottom:16px; overflow:hidden;">
+        <div style="background:#111; padding:12px 16px; display:flex; justify-content:space-between; align-items:center; cursor:pointer;">
+          <div style="color:#F3A169; font-size:13px; font-weight:600;">System Prompt</div>
+          <span style="color:#666; font-size:10px;">&#9660; Expandir prompt completo</span>
+        </div>
+        <div style="padding:16px; border-top:1px solid #1a1a2e;">
+          <div style="color:#fff; font-size:12px; font-weight:600; margin-bottom:8px;">Regras-chave:</div>
+          <ul style="color:#aaa; font-size:11px; line-height:1.8; padding-left:16px; margin:0;">
+            <li>SEMPRE comeca com <code style="color:#F3A169; background:#1a1a2e; padding:1px 4px; border-radius:3px;">plan_analysis</code></li>
+            <li>Usa <code style="color:#F3A169; background:#1a1a2e; padding:1px 4px; border-radius:3px;">get_table_schema</code> antes de SQL</li>
+            <li>Grid 3 colunas: KPIs colSpan=1, Charts colSpan=2-3, Tables colSpan=3</li>
+            <li>KPIs OBRIGAM sparkline de 10 meses</li>
+            <li>Para edicao: UPDATE na mesma pagina, NUNCA cria nova</li>
+            <li>Resposta SEMPRE em portugues brasileiro</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Tools -->
+      <div style="color:#fff; font-size:13px; font-weight:600; margin-bottom:12px;">Tools (18)</div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+        <div style="background:#111; border:1px solid #1a1a2e; border-radius:8px; padding:10px 14px; cursor:pointer;">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span style="color:#6ECB8A; font-size:12px; font-weight:600;">plan_analysis</span>
+            <span style="font-size:9px; background:rgba(110,203,138,0.1); color:#6ECB8A; padding:2px 6px; border-radius:3px;">planning</span>
+          </div>
+          <div style="color:#666; font-size:10px; margin-top:4px;">Planeja estrutura de paginas e blocos</div>
+        </div>
+        <div style="background:#111; border:1px solid #1a1a2e; border-radius:8px; padding:10px 14px; cursor:pointer;">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span style="color:#6ECB8A; font-size:12px; font-weight:600;">query_data</span>
+            <span style="font-size:9px; background:rgba(110,203,138,0.1); color:#6ECB8A; padding:2px 6px; border-radius:3px;">query</span>
+          </div>
+          <div style="color:#666; font-size:10px; margin-top:4px;">Executa SQL / BigQuery ML (max 500 rows)</div>
+        </div>
+        <div style="background:#111; border:1px solid #1a1a2e; border-radius:8px; padding:10px 14px; cursor:pointer;">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span style="color:#7AA2F7; font-size:12px; font-weight:600;">create_page</span>
+            <span style="font-size:9px; background:rgba(122,162,247,0.1); color:#7AA2F7; padding:2px 6px; border-radius:3px;">block</span>
+          </div>
+          <div style="color:#666; font-size:10px; margin-top:4px;">Cria nova aba/pagina no canvas</div>
+        </div>
+        <div style="background:#111; border:1px solid #1a1a2e; border-radius:8px; padding:10px 14px; cursor:pointer;">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span style="color:#F27C7C; font-size:12px; font-weight:600;">analyze</span>
+            <span style="font-size:9px; background:rgba(242,124,124,0.1); color:#F27C7C; padding:2px 6px; border-radius:3px;">delegation</span>
+          </div>
+          <div style="color:#666; font-size:10px; margin-top:4px;">Delega para sub-agente especializado</div>
+        </div>
+      </div>
+      <div style="color:#555; font-size:10px; margin-top:8px; text-align:center;">+ 14 tools (add_*, update_*, move, remove, filters, schema...)</div>
+    </div>
+  </div>
+</div>
+
+<!-- Approval -->
+<div style="margin-top:24px; padding:20px; background:rgba(110,203,138,0.06); border:1px solid rgba(110,203,138,0.2); border-radius:12px;">
+  <h3 style="margin:0 0 8px; color:#6ECB8A;">Esse design esta no caminho certo?</h3>
+  <p style="color:#888; font-size:13px; margin:0;">Se sim, clique abaixo. Se quiser ajustes, me diga no terminal.</p>
+</div>
+
+<div class="options" style="margin-top:16px;">
+  <div class="option" data-choice="approve" onclick="toggleSelect(this)">
+    <div class="letter">&#10003;</div>
+    <div class="content">
+      <h3>Aprovar e seguir para implementacao</h3>
+      <p>O design esta bom, pode comecar a construir</p>
+    </div>
+  </div>
+  <div class="option" data-choice="adjust" onclick="toggleSelect(this)">
+    <div class="letter">&#9998;</div>
+    <div class="content">
+      <h3>Precisa de ajustes</h3>
+      <p>Vou descrever o que mudar no terminal</p>
+    </div>
+  </div>
+</div>

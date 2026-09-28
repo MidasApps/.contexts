@@ -1,0 +1,195 @@
+<h2>Onde posicionar a seleção de Report Type?</h2>
+<p class="subtitle">O Report Type (MCMV, SBPE, Covenants, etc.) é uma dimensão de contexto que define quais páginas e indicadores aparecem. Onde ele deve ficar na hierarquia de navegação?</p>
+
+<div class="cards">
+  <!-- Option A: Tabs horizontais abaixo do header -->
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding: 0; overflow: hidden;">
+      <div style="background: #0a0a0a; border-radius: 8px; font-family: system-ui; font-size: 11px; color: #e0e0e0; height: 280px; display: flex; flex-direction: column;">
+        <!-- Header -->
+        <div style="display: flex; align-items: center; padding: 8px 12px; border-bottom: 1px solid rgba(255,255,255,0.08); gap: 8px;">
+          <div style="width: 24px; height: 24px; background: #F3A169; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 10px; color: #000;">OM</div>
+          <span style="font-weight: 600;">Liquid</span>
+          <div style="margin-left: auto; display: flex; gap: 6px;">
+            <div style="background: rgba(255,255,255,0.06); padding: 3px 8px; border-radius: 4px; font-size: 9px;">Filtros</div>
+            <div style="background: rgba(255,255,255,0.06); padding: 3px 8px; border-radius: 4px; font-size: 9px;">Jan-Mar 2026</div>
+          </div>
+        </div>
+        <!-- Report Type Tabs -->
+        <div style="display: flex; gap: 2px; padding: 6px 12px; border-bottom: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.02);">
+          <div style="padding: 4px 10px; border-radius: 6px; background: #F3A169; color: #000; font-weight: 600; font-size: 10px;">MCMV</div>
+          <div style="padding: 4px 10px; border-radius: 6px; font-size: 10px; color: rgba(255,255,255,0.5);">SBPE</div>
+          <div style="padding: 4px 10px; border-radius: 6px; font-size: 10px; color: rgba(255,255,255,0.5);">Covenants</div>
+          <div style="padding: 4px 10px; border-radius: 6px; font-size: 10px; color: rgba(255,255,255,0.5);">Backtest</div>
+        </div>
+        <!-- Body -->
+        <div style="display: flex; flex: 1;">
+          <!-- Sidebar -->
+          <div style="width: 55px; border-right: 1px solid rgba(255,255,255,0.08); padding: 8px 4px; display: flex; flex-direction: column; gap: 2px;">
+            <div style="font-size: 7px; color: rgba(255,255,255,0.3); padding: 2px 4px; text-transform: uppercase;">Carteira</div>
+            <div style="padding: 3px 4px; border-radius: 4px; background: rgba(243,161,105,0.15); color: #F3A169; font-size: 8px;">Visão Geral</div>
+            <div style="padding: 3px 4px; font-size: 8px; color: rgba(255,255,255,0.4);">Contratos</div>
+            <div style="padding: 3px 4px; font-size: 8px; color: rgba(255,255,255,0.4);">Pagamentos</div>
+            <div style="font-size: 7px; color: rgba(255,255,255,0.3); padding: 2px 4px; margin-top: 4px; text-transform: uppercase;">Risco</div>
+            <div style="padding: 3px 4px; font-size: 8px; color: rgba(255,255,255,0.4);">PDD</div>
+          </div>
+          <!-- Content -->
+          <div style="flex: 1; padding: 8px; display: flex; flex-direction: column; gap: 6px;">
+            <div style="font-size: 10px; font-weight: 600;">Visão Geral — MCMV</div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4px;">
+              <div style="background: rgba(255,255,255,0.04); border-radius: 6px; padding: 6px; border: 1px solid rgba(255,255,255,0.06);">
+                <div style="font-size: 7px; color: rgba(255,255,255,0.4);">Saldo Devedor</div>
+                <div style="font-size: 12px; font-weight: 700; color: #F3A169;">R$ 2.4B</div>
+              </div>
+              <div style="background: rgba(255,255,255,0.04); border-radius: 6px; padding: 6px; border: 1px solid rgba(255,255,255,0.06);">
+                <div style="font-size: 7px; color: rgba(255,255,255,0.4);">Contratos</div>
+                <div style="font-size: 12px; font-weight: 700; color: #F3A169;">12.847</div>
+              </div>
+              <div style="background: rgba(255,255,255,0.04); border-radius: 6px; padding: 6px; border: 1px solid rgba(255,255,255,0.06);">
+                <div style="font-size: 7px; color: rgba(255,255,255,0.4);">Inadimplência</div>
+                <div style="font-size: 12px; font-weight: 700; color: #ef4444;">3.2%</div>
+              </div>
+            </div>
+            <div style="flex: 1; background: rgba(255,255,255,0.02); border-radius: 6px; border: 1px solid rgba(255,255,255,0.06);"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A — Tabs horizontais no header</h3>
+      <p>Report Types como tabs abaixo do header principal, acima do sidebar. O sidebar mostra apenas as páginas do report type ativo. Hierarquia: <strong>Client → Report Type (tabs) → Pages (sidebar)</strong>.</p>
+      <div class="pros-cons">
+        <div class="pros"><h4>Prós</h4><ul><li>Report type sempre visível</li><li>Troca rápida com 1 clique</li><li>Sidebar permanece limpo e flat</li></ul></div>
+        <div class="cons"><h4>Contras</h4><ul><li>Ocupa espaço vertical</li><li>Pode não escalar bem com 6+ tipos</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Option B: Dentro do Sidebar como seção -->
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding: 0; overflow: hidden;">
+      <div style="background: #0a0a0a; border-radius: 8px; font-family: system-ui; font-size: 11px; color: #e0e0e0; height: 280px; display: flex;">
+        <!-- Sidebar com report type -->
+        <div style="width: 70px; border-right: 1px solid rgba(255,255,255,0.08); padding: 8px 4px; display: flex; flex-direction: column; gap: 2px;">
+          <div style="display: flex; align-items: center; gap: 4px; padding: 4px;">
+            <div style="width: 20px; height: 20px; background: #F3A169; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 8px; color: #000;">OM</div>
+            <span style="font-size: 9px; font-weight: 600;">Liquid</span>
+          </div>
+          <!-- Report Type Selector -->
+          <div style="margin: 4px 0; padding: 4px; background: rgba(255,255,255,0.04); border-radius: 6px; border: 1px solid rgba(255,255,255,0.08);">
+            <div style="font-size: 7px; color: rgba(255,255,255,0.3); text-transform: uppercase; margin-bottom: 3px;">Relatório</div>
+            <div style="display: flex; align-items: center; gap: 3px; padding: 3px 4px; background: rgba(243,161,105,0.15); border-radius: 4px;">
+              <div style="width: 4px; height: 4px; background: #F3A169; border-radius: 50%;"></div>
+              <span style="font-size: 8px; color: #F3A169; font-weight: 600;">MCMV</span>
+              <span style="margin-left: auto; font-size: 8px; color: rgba(255,255,255,0.3);">▾</span>
+            </div>
+          </div>
+          <div style="font-size: 7px; color: rgba(255,255,255,0.3); padding: 2px 4px; text-transform: uppercase;">Carteira</div>
+          <div style="padding: 3px 4px; border-radius: 4px; background: rgba(243,161,105,0.15); color: #F3A169; font-size: 8px;">Visão Geral</div>
+          <div style="padding: 3px 4px; font-size: 8px; color: rgba(255,255,255,0.4);">Contratos</div>
+          <div style="padding: 3px 4px; font-size: 8px; color: rgba(255,255,255,0.4);">Pagamentos</div>
+          <div style="font-size: 7px; color: rgba(255,255,255,0.3); padding: 2px 4px; margin-top: 4px; text-transform: uppercase;">Risco</div>
+          <div style="padding: 3px 4px; font-size: 8px; color: rgba(255,255,255,0.4);">PDD</div>
+          <div style="padding: 3px 4px; font-size: 8px; color: rgba(255,255,255,0.4);">Pricing</div>
+        </div>
+        <!-- Content -->
+        <div style="flex: 1; display: flex; flex-direction: column;">
+          <div style="display: flex; align-items: center; padding: 8px 12px; border-bottom: 1px solid rgba(255,255,255,0.08); gap: 8px;">
+            <span style="font-weight: 600; font-size: 10px;">Visão Geral — MCMV</span>
+            <div style="margin-left: auto; display: flex; gap: 6px;">
+              <div style="background: rgba(255,255,255,0.06); padding: 3px 8px; border-radius: 4px; font-size: 9px;">Filtros</div>
+              <div style="background: rgba(255,255,255,0.06); padding: 3px 8px; border-radius: 4px; font-size: 9px;">Jan-Mar 2026</div>
+            </div>
+          </div>
+          <div style="flex: 1; padding: 8px; display: flex; flex-direction: column; gap: 6px;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4px;">
+              <div style="background: rgba(255,255,255,0.04); border-radius: 6px; padding: 6px; border: 1px solid rgba(255,255,255,0.06);">
+                <div style="font-size: 7px; color: rgba(255,255,255,0.4);">Saldo Devedor</div>
+                <div style="font-size: 12px; font-weight: 700; color: #F3A169;">R$ 2.4B</div>
+              </div>
+              <div style="background: rgba(255,255,255,0.04); border-radius: 6px; padding: 6px; border: 1px solid rgba(255,255,255,0.06);">
+                <div style="font-size: 7px; color: rgba(255,255,255,0.4);">Contratos</div>
+                <div style="font-size: 12px; font-weight: 700; color: #F3A169;">12.847</div>
+              </div>
+              <div style="background: rgba(255,255,255,0.04); border-radius: 6px; padding: 6px; border: 1px solid rgba(255,255,255,0.06);">
+                <div style="font-size: 7px; color: rgba(255,255,255,0.4);">Inadimplência</div>
+                <div style="font-size: 12px; font-weight: 700; color: #ef4444;">3.2%</div>
+              </div>
+            </div>
+            <div style="flex: 1; background: rgba(255,255,255,0.02); border-radius: 6px; border: 1px solid rgba(255,255,255,0.06);"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B — Dropdown no sidebar</h3>
+      <p>Report Type como seletor/dropdown dentro do sidebar, abaixo do client switcher. As páginas mudam dinamicamente quando troca o report type. Hierarquia: <strong>Client → Report Type (dropdown) → Pages (sidebar)</strong>.</p>
+      <div class="pros-cons">
+        <div class="pros"><h4>Prós</h4><ul><li>Não ocupa espaço vertical extra</li><li>Escala bem com muitos tipos</li><li>Mantém tudo na lateral</li></ul></div>
+        <div class="cons"><h4>Contras</h4><ul><li>Report type fica "escondido"</li><li>Requer 2 cliques para trocar</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Option C: Sidebar com dois níveis -->
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding: 0; overflow: hidden;">
+      <div style="background: #0a0a0a; border-radius: 8px; font-family: system-ui; font-size: 11px; color: #e0e0e0; height: 280px; display: flex;">
+        <!-- Narrow icon rail -->
+        <div style="width: 36px; border-right: 1px solid rgba(255,255,255,0.08); padding: 6px 4px; display: flex; flex-direction: column; align-items: center; gap: 6px; background: rgba(255,255,255,0.02);">
+          <div style="width: 24px; height: 24px; background: #F3A169; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 8px; color: #000;">OM</div>
+          <div style="width: 1px; height: 1px; background: rgba(255,255,255,0.1); margin: 2px 0;"></div>
+          <div style="width: 24px; height: 24px; background: rgba(243,161,105,0.2); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 7px; color: #F3A169; font-weight: 700; border: 1px solid rgba(243,161,105,0.3);">M</div>
+          <div style="width: 24px; height: 24px; background: rgba(255,255,255,0.04); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 7px; color: rgba(255,255,255,0.4);">S</div>
+          <div style="width: 24px; height: 24px; background: rgba(255,255,255,0.04); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 7px; color: rgba(255,255,255,0.4);">C</div>
+          <div style="width: 24px; height: 24px; background: rgba(255,255,255,0.04); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 7px; color: rgba(255,255,255,0.4);">B</div>
+        </div>
+        <!-- Page sidebar -->
+        <div style="width: 55px; border-right: 1px solid rgba(255,255,255,0.08); padding: 8px 4px; display: flex; flex-direction: column; gap: 2px;">
+          <div style="font-size: 8px; font-weight: 600; color: #F3A169; padding: 2px 4px; margin-bottom: 2px;">MCMV</div>
+          <div style="font-size: 7px; color: rgba(255,255,255,0.3); padding: 2px 4px; text-transform: uppercase;">Carteira</div>
+          <div style="padding: 3px 4px; border-radius: 4px; background: rgba(243,161,105,0.15); color: #F3A169; font-size: 8px;">Visão Geral</div>
+          <div style="padding: 3px 4px; font-size: 8px; color: rgba(255,255,255,0.4);">Contratos</div>
+          <div style="padding: 3px 4px; font-size: 8px; color: rgba(255,255,255,0.4);">Pagamentos</div>
+          <div style="font-size: 7px; color: rgba(255,255,255,0.3); padding: 2px 4px; margin-top: 4px; text-transform: uppercase;">Risco</div>
+          <div style="padding: 3px 4px; font-size: 8px; color: rgba(255,255,255,0.4);">PDD</div>
+        </div>
+        <!-- Content -->
+        <div style="flex: 1; display: flex; flex-direction: column;">
+          <div style="display: flex; align-items: center; padding: 8px 12px; border-bottom: 1px solid rgba(255,255,255,0.08); gap: 8px;">
+            <span style="font-weight: 600; font-size: 10px;">Visão Geral — MCMV</span>
+            <div style="margin-left: auto; display: flex; gap: 6px;">
+              <div style="background: rgba(255,255,255,0.06); padding: 3px 8px; border-radius: 4px; font-size: 9px;">Filtros</div>
+              <div style="background: rgba(255,255,255,0.06); padding: 3px 8px; border-radius: 4px; font-size: 9px;">Jan-Mar 2026</div>
+            </div>
+          </div>
+          <div style="flex: 1; padding: 8px; display: flex; flex-direction: column; gap: 6px;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4px;">
+              <div style="background: rgba(255,255,255,0.04); border-radius: 6px; padding: 6px; border: 1px solid rgba(255,255,255,0.06);">
+                <div style="font-size: 7px; color: rgba(255,255,255,0.4);">Saldo Devedor</div>
+                <div style="font-size: 12px; font-weight: 700; color: #F3A169;">R$ 2.4B</div>
+              </div>
+              <div style="background: rgba(255,255,255,0.04); border-radius: 6px; padding: 6px; border: 1px solid rgba(255,255,255,0.06);">
+                <div style="font-size: 7px; color: rgba(255,255,255,0.4);">Contratos</div>
+                <div style="font-size: 12px; font-weight: 700; color: #F3A169;">12.847</div>
+              </div>
+              <div style="background: rgba(255,255,255,0.04); border-radius: 6px; padding: 6px; border: 1px solid rgba(255,255,255,0.06);">
+                <div style="font-size: 7px; color: rgba(255,255,255,0.4);">Inadimplência</div>
+                <div style="font-size: 12px; font-weight: 700; color: #ef4444;">3.2%</div>
+              </div>
+            </div>
+            <div style="flex: 1; background: rgba(255,255,255,0.02); border-radius: 6px; border: 1px solid rgba(255,255,255,0.06);"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C — Sidebar duplo (icon rail + pages)</h3>
+      <p>Estilo VS Code/Discord: rail estreito à esquerda com ícones dos report types + sidebar principal com as páginas do tipo ativo. Hierarquia: <strong>Client (rail) → Report Type (rail) → Pages (sidebar)</strong>.</p>
+      <div class="pros-cons">
+        <div class="pros"><h4>Prós</h4><ul><li>Todos os report types sempre visíveis</li><li>Troca instantânea com 1 clique</li><li>Escala bem visualmente</li></ul></div>
+        <div class="cons"><h4>Contras</h4><ul><li>Ocupa mais espaço horizontal</li><li>Mais complexo para implementar</li><li>Mobile precisa de adaptação maior</li></ul></div>
+      </div>
+    </div>
+  </div>
+</div>

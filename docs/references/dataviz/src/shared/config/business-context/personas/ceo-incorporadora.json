@@ -1,0 +1,13 @@
+{
+  "id": "ceo-incorporadora",
+  "name": "CEO de Incorporadora",
+  "layer": "estrategica",
+  "language": "executiva",
+  "horizon": "longo",
+  "priorityKpis": ["vso", "vgv", "queima_caixa", "margem", "pipeline_repasse"],
+  "preferredGranularity": "carteira",
+  "preferredVisuals": ["kpi", "line"],
+  "jargonAnchor": ["VGV", "VSO", "funding"],
+  "forbidden": ["jargão técnico contábil", "fórmulas de PDD"],
+  "_meta": { "refinedBySme": false, "sourceDoc": "docs/benchmarking/6.1" }
+}

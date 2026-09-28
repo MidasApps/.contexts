@@ -1,0 +1,11 @@
+{
+  "description": "Names that cross a persistence or model boundary and must not be renamed by a refactor (docs/plans/2026-09-25-english-identifiers.md, section 1.6). Renaming any of them is a data or prompt migration and needs its own ADR. LLM tool input params are detected separately (zod objects under the tool folders).",
+  "groups": {
+    "metricOutputColumns": ["etapa", "origem", "destino", "grupo", "mediana"],
+    "persistedBlockFields": ["legendaInterativa", "mostrarConversao", "etapas", "fluxos", "ordem", "grupos", "fatias", "projetos"],
+    "toolResultKeys": ["recusa", "motivo", "aviso"],
+    "logFields": ["passos", "maxPassos", "motivoFinal", "truncadoPorTeto", "delegacoes", "delegacoesDetalhe"]
+  },
+  "toolFolders": ["src/features/ai-agents/tools/", "src/features/report-authoring/tools/"],
+  "excludedFolders": ["scripts/onboarding-lote-2026-09/"]
+}

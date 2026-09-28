@@ -1,0 +1,1732 @@
+[
+  {
+    "file": "src/pages/explore/ui/blocks/__tests__/dominio-do-eixo.test.ts",
+    "line": 11,
+    "from": "piso",
+    "to": "floor",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 8
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/__tests__/dominio-do-eixo.test.ts",
+    "line": 11,
+    "from": "teto",
+    "to": "ceiling",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 7
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/__tests__/dominio-do-eixo.test.ts",
+    "line": 31,
+    "from": "piso",
+    "to": "floor",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 8
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/__tests__/dominio-do-eixo.test.ts",
+    "line": 31,
+    "from": "teto",
+    "to": "ceiling",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 7
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/__tests__/dominio-do-eixo.test.ts",
+    "line": 38,
+    "from": "piso",
+    "to": "floor",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 8
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/__tests__/dominio-do-eixo.test.ts",
+    "line": 38,
+    "from": "teto",
+    "to": "ceiling",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 7
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/__tests__/escala-de-limite.test.ts",
+    "line": 16,
+    "from": "escala",
+    "to": "scale",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 32
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/__tests__/escala-de-limite.test.ts",
+    "line": 28,
+    "from": "escala",
+    "to": "scale",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 32
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/__tests__/escala-de-limite.test.ts",
+    "line": 40,
+    "from": "escala",
+    "to": "scale",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 32
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/__tests__/escala-de-limite.test.ts",
+    "line": 46,
+    "from": "escala",
+    "to": "scale",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 32
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/__tests__/escala-de-limite.test.ts",
+    "line": 51,
+    "from": "escala",
+    "to": "scale",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 32
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/__tests__/escala-de-limite.test.ts",
+    "line": 59,
+    "from": "escala",
+    "to": "scale",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 32
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/__tests__/escala-de-limite.test.ts",
+    "line": 60,
+    "from": "faixas",
+    "to": "bands",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 12
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/__tests__/escala-de-limite.test.ts",
+    "line": 71,
+    "from": "escala",
+    "to": "scale",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 32
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/__tests__/escala-de-limite.test.ts",
+    "line": 72,
+    "from": "faixas",
+    "to": "bands",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 12
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/__tests__/escala-de-limite.test.ts",
+    "line": 77,
+    "from": "escala",
+    "to": "scale",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 32
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/__tests__/fantasma.test.ts",
+    "line": 20,
+    "from": "blocoVazio",
+    "to": "emptyBlock",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/__tests__/fantasma.test.ts",
+    "line": 23,
+    "from": "obrigatorios",
+    "to": "requiredFields",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/__tests__/fantasma.test.ts",
+    "line": 43,
+    "from": "bloco",
+    "to": "block",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/__tests__/fantasma.test.ts",
+    "line": 50,
+    "from": "comDado",
+    "to": "withData",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/__tests__/fantasma.test.ts",
+    "line": 64,
+    "from": "semMetrica",
+    "to": "withoutMetric",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/__tests__/fantasma.test.ts",
+    "line": 67,
+    "from": "comMetrica",
+    "to": "withMetric",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/__tests__/fantasma.test.ts",
+    "line": 74,
+    "from": "vazio",
+    "to": "empty",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/__tests__/fantasma.test.ts",
+    "line": 77,
+    "from": "cheio",
+    "to": "full",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/__tests__/fantasma.test.ts",
+    "line": 89,
+    "from": "fantasma",
+    "to": "ghost",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 8
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/__tests__/fantasma.test.ts",
+    "line": 102,
+    "from": "fantasma",
+    "to": "ghost",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 8
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/__tests__/fantasma.test.ts",
+    "line": 108,
+    "from": "bloco",
+    "to": "block",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/__tests__/fantasma.test.ts",
+    "line": 109,
+    "from": "fantasma",
+    "to": "ghost",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 8
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/dominio-do-eixo.ts",
+    "line": 14,
+    "from": "passoRedondo",
+    "to": "roundStep",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/dominio-do-eixo.ts",
+    "line": 14,
+    "from": "bruto",
+    "to": "raw",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/dominio-do-eixo.ts",
+    "line": 16,
+    "from": "potencia",
+    "to": "power",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/dominio-do-eixo.ts",
+    "line": 17,
+    "from": "normalizado",
+    "to": "normalized",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/dominio-do-eixo.ts",
+    "line": 28,
+    "from": "dominioDoEixo",
+    "to": "axisDomain",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 9
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/dominio-do-eixo.ts",
+    "line": 31,
+    "from": "divisoes",
+    "to": "divisions",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/dominio-do-eixo.ts",
+    "line": 37,
+    "from": "respiro",
+    "to": "padding",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/dominio-do-eixo.ts",
+    "line": 41,
+    "from": "passo",
+    "to": "step",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/dominio-do-eixo.ts",
+    "line": 55,
+    "from": "noPasso",
+    "to": "snapToStep",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/dominio-do-eixo.ts",
+    "line": 55,
+    "from": "multiplos",
+    "to": "multiple",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/dominio-do-eixo.ts",
+    "line": 55,
+    "from": "passo",
+    "to": "step",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/dominio-do-eixo.ts",
+    "line": 56,
+    "from": "casas",
+    "to": "decimals",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 7
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/escala-de-limite.ts",
+    "line": 18,
+    "from": "EscalaDeLimite",
+    "to": "LimitScale",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/escala-de-limite.ts",
+    "line": 38,
+    "from": "escalaDeLimite",
+    "to": "limitScale",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/escala-de-limite.ts",
+    "line": 39,
+    "from": "limite",
+    "to": "limit",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 34
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/escala-de-limite.ts",
+    "line": 44,
+    "from": "limite",
+    "to": "limit",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 34
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/escala-de-limite.ts",
+    "line": 44,
+    "from": "valor",
+    "to": "value",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/escala-de-limite.ts",
+    "line": 48,
+    "from": "porLimite",
+    "to": "byLimit",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/escala-de-limite.ts",
+    "line": 49,
+    "from": "porValor",
+    "to": "byValue",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/escala-de-limite.ts",
+    "line": 58,
+    "from": "fracaoNaEscala",
+    "to": "fractionOnScale",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/escala-de-limite.ts",
+    "line": 58,
+    "from": "valor",
+    "to": "value",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/escala-de-limite.ts",
+    "line": 58,
+    "from": "escala",
+    "to": "scale",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 32
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/escala-de-limite.ts",
+    "line": 61,
+    "from": "bruta",
+    "to": "raw",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/escala-de-limite.ts",
+    "line": 65,
+    "from": "FaixaDeLimite",
+    "to": "LimitBand",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/escala-de-limite.ts",
+    "line": 66,
+    "from": "tom",
+    "to": "tone",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 21
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/escala-de-limite.ts",
+    "line": 79,
+    "from": "faixasDeLimite",
+    "to": "limitBands",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/escala-de-limite.ts",
+    "line": 80,
+    "from": "limite",
+    "to": "limit",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 34
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/escala-de-limite.ts",
+    "line": 81,
+    "from": "atencao",
+    "to": "warning",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 8
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/escala-de-limite.ts",
+    "line": 82,
+    "from": "escalaInvertida",
+    "to": "invertedScale",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/escala-de-limite.ts",
+    "line": 83,
+    "from": "escala",
+    "to": "scale",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 32
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/escala-de-limite.ts",
+    "line": 85,
+    "from": "limite",
+    "to": "limit",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 34
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/escala-de-limite.ts",
+    "line": 85,
+    "from": "atencao",
+    "to": "warning",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 8
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/escala-de-limite.ts",
+    "line": 85,
+    "from": "escalaInvertida",
+    "to": "invertedScale",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/escala-de-limite.ts",
+    "line": 85,
+    "from": "escala",
+    "to": "scale",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 32
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/escala-de-limite.ts",
+    "line": 86,
+    "from": "fLimite",
+    "to": "limitFraction",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 7
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/escala-de-limite.ts",
+    "line": 90,
+    "from": "fAtencao",
+    "to": "warningFraction",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/escala-de-limite.ts",
+    "line": 92,
+    "from": "tom",
+    "to": "tone",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 21
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/escala-de-limite.ts",
+    "line": 93,
+    "from": "tom",
+    "to": "tone",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 21
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/escala-de-limite.ts",
+    "line": 94,
+    "from": "tom",
+    "to": "tone",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 21
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/escala-de-limite.ts",
+    "line": 98,
+    "from": "fAtencao",
+    "to": "warningFraction",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/escala-de-limite.ts",
+    "line": 100,
+    "from": "tom",
+    "to": "tone",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 21
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/escala-de-limite.ts",
+    "line": 101,
+    "from": "tom",
+    "to": "tone",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 21
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/escala-de-limite.ts",
+    "line": 102,
+    "from": "tom",
+    "to": "tone",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 21
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/escala-de-limite.ts",
+    "line": 106,
+    "from": "FatiaDeLimite",
+    "to": "LimitSlice",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/escala-de-limite.ts",
+    "line": 109,
+    "from": "tom",
+    "to": "tone",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 21
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/escala-de-limite.ts",
+    "line": 111,
+    "from": "tamanho",
+    "to": "size",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/escala-de-limite.ts",
+    "line": 115,
+    "from": "LARGURA_DA_MARCA",
+    "to": "MARK_WIDTH",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/escala-de-limite.ts",
+    "line": 126,
+    "from": "fatiasComMarca",
+    "to": "slicesWithMark",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 1
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/escala-de-limite.ts",
+    "line": 127,
+    "from": "faixas",
+    "to": "bands",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 12
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/escala-de-limite.ts",
+    "line": 128,
+    "from": "fracaoDoLimite",
+    "to": "limitFraction",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/escala-de-limite.ts",
+    "line": 131,
+    "from": "meia",
+    "to": "half",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/escala-de-limite.ts",
+    "line": 133,
+    "from": "faixa",
+    "to": "band",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 17
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/escala-de-limite.ts",
+    "line": 134,
+    "from": "marcaDentro",
+    "to": "markInside",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/escala-de-limite.ts",
+    "line": 136,
+    "from": "tom",
+    "to": "tone",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 21
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/escala-de-limite.ts",
+    "line": 136,
+    "from": "tamanho",
+    "to": "size",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/escala-de-limite.ts",
+    "line": 139,
+    "from": "tom",
+    "to": "tone",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 21
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/escala-de-limite.ts",
+    "line": 139,
+    "from": "tamanho",
+    "to": "size",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/escala-de-limite.ts",
+    "line": 140,
+    "from": "tom",
+    "to": "tone",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 21
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/escala-de-limite.ts",
+    "line": 140,
+    "from": "tamanho",
+    "to": "size",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/escala-de-limite.ts",
+    "line": 141,
+    "from": "tom",
+    "to": "tone",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 21
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/escala-de-limite.ts",
+    "line": 141,
+    "from": "tamanho",
+    "to": "size",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/escala-de-limite.ts",
+    "line": 155,
+    "from": "fatiasDoValor",
+    "to": "valueSlices",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 1
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/escala-de-limite.ts",
+    "line": 155,
+    "from": "fracao",
+    "to": "fraction",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/escala-de-limite.ts",
+    "line": 155,
+    "from": "preenchida",
+    "to": "filled",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/escala-de-limite.ts",
+    "line": 155,
+    "from": "tamanho",
+    "to": "size",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/escala-de-limite.ts",
+    "line": 156,
+    "from": "cheia",
+    "to": "full",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/escala-de-limite.ts",
+    "line": 158,
+    "from": "preenchida",
+    "to": "filled",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/escala-de-limite.ts",
+    "line": 158,
+    "from": "tamanho",
+    "to": "size",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/escala-de-limite.ts",
+    "line": 159,
+    "from": "preenchida",
+    "to": "filled",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/escala-de-limite.ts",
+    "line": 159,
+    "from": "tamanho",
+    "to": "size",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/escala-de-limite.ts",
+    "line": 163,
+    "from": "DistanciaDoLimite",
+    "to": "LimitDistance",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/escala-de-limite.ts",
+    "line": 165,
+    "from": "razao",
+    "to": "ratio",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 11
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/escala-de-limite.ts",
+    "line": 167,
+    "from": "texto",
+    "to": "text",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 15
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/escala-de-limite.ts",
+    "line": 178,
+    "from": "distanciaDoLimite",
+    "to": "limitDistance",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 8
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/escala-de-limite.ts",
+    "line": 180,
+    "from": "limite",
+    "to": "limit",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 34
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/escala-de-limite.ts",
+    "line": 181,
+    "from": "escalaInvertida",
+    "to": "invertedScale",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/escala-de-limite.ts",
+    "line": 182,
+    "from": "formataNumero",
+    "to": "formatNumber",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 11
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/escala-de-limite.ts",
+    "line": 182,
+    "from": "casas",
+    "to": "decimals",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 7
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/escala-de-limite.ts",
+    "line": 184,
+    "from": "valor",
+    "to": "value",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/escala-de-limite.ts",
+    "line": 184,
+    "from": "limite",
+    "to": "limit",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 34
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/escala-de-limite.ts",
+    "line": 184,
+    "from": "escalaInvertida",
+    "to": "invertedScale",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/escala-de-limite.ts",
+    "line": 184,
+    "from": "formataNumero",
+    "to": "formatNumber",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 11
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/escala-de-limite.ts",
+    "line": 185,
+    "from": "razao",
+    "to": "ratio",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 11
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/escala-de-limite.ts",
+    "line": 185,
+    "from": "texto",
+    "to": "text",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 15
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/escala-de-limite.ts",
+    "line": 187,
+    "from": "razao",
+    "to": "ratio",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 11
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/escala-de-limite.ts",
+    "line": 188,
+    "from": "folgaPct",
+    "to": "headroomPct",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/escala-de-limite.ts",
+    "line": 196,
+    "from": "razao",
+    "to": "ratio",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 11
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/escala-de-limite.ts",
+    "line": 196,
+    "from": "texto",
+    "to": "text",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 15
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/escala-de-limite.ts",
+    "line": 199,
+    "from": "razao",
+    "to": "ratio",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 11
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/escala-de-limite.ts",
+    "line": 199,
+    "from": "texto",
+    "to": "text",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 15
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/escala-de-limite.ts",
+    "line": 202,
+    "from": "razao",
+    "to": "ratio",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 11
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/escala-de-limite.ts",
+    "line": 203,
+    "from": "texto",
+    "to": "text",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 15
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/faixa-comparativa.ts",
+    "line": 18,
+    "from": "faixaComparativa",
+    "to": "comparisonBand",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 8
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/faixa-comparativa.ts",
+    "line": 23,
+    "from": "temSerie",
+    "to": "hasSeries",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/faixa-comparativa.ts",
+    "line": 23,
+    "from": "linha",
+    "to": "row",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/faixa-comparativa.ts",
+    "line": 24,
+    "from": "chave",
+    "to": "key",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/faixa-comparativa.ts",
+    "line": 28,
+    "from": "rotulos",
+    "to": "labels",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/faixa-comparativa.ts",
+    "line": 29,
+    "from": "linha",
+    "to": "row",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/faixa-comparativa.ts",
+    "line": 36,
+    "from": "primeiro",
+    "to": "first",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/faixa-comparativa.ts",
+    "line": 37,
+    "from": "ultimo",
+    "to": "last",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/fantasma.ts",
+    "line": 17,
+    "from": "MESES",
+    "to": "MONTHS",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/fantasma.ts",
+    "line": 20,
+    "from": "serie",
+    "to": "series",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/fantasma.ts",
+    "line": 30,
+    "from": "dadoFantasma",
+    "to": "ghostData",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/fantasma.ts",
+    "line": 45,
+    "from": "limite",
+    "to": "limit",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 34
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/fantasma.ts",
+    "line": 79,
+    "from": "chaves",
+    "to": "keys",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/fantasma.ts",
+    "line": 82,
+    "from": "mes",
+    "to": "month",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 8
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/fantasma.ts",
+    "line": 83,
+    "from": "linha",
+    "to": "row",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/fantasma.ts",
+    "line": 84,
+    "from": "chave",
+    "to": "key",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/fantasma.ts",
+    "line": 149,
+    "from": "linha",
+    "to": "row",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/fantasma.ts",
+    "line": 150,
+    "from": "coluna",
+    "to": "column",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/fantasma.ts",
+    "line": 173,
+    "from": "temDado",
+    "to": "hasData",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/fantasma.ts",
+    "line": 208,
+    "from": "EstadoDoDado",
+    "to": "DataState",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/fantasma.ts",
+    "line": 210,
+    "from": "estadoDoDado",
+    "to": "dataStateOf",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/fantasma.ts",
+    "line": 210,
+    "from": "consomeMetrica",
+    "to": "consumesMetric",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/numero-pt-br.ts",
+    "line": 15,
+    "from": "numeroDoTextoPtBr",
+    "to": "parsePtBrNumber",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 1
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/numero-pt-br.ts",
+    "line": 15,
+    "from": "texto",
+    "to": "text",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 15
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/numero-pt-br.ts",
+    "line": 17,
+    "from": "limpo",
+    "to": "cleaned",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/numero-pt-br.ts",
+    "line": 21,
+    "from": "numero",
+    "to": "parsed",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/valor-formatado.ts",
+    "line": 4,
+    "from": "FormatoDeValor",
+    "to": "ValueFormat",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/valor-formatado.ts",
+    "line": 13,
+    "from": "valorFormatado",
+    "to": "formattedValue",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/valor-formatado.ts",
+    "line": 15,
+    "from": "formato",
+    "to": "format",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 7
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/valor-formatado.ts",
+    "line": 17,
+    "from": "sufixo",
+    "to": "suffix",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/valor-formatado.ts",
+    "line": 31,
+    "from": "valorCompacto",
+    "to": "compactValue",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 1
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/valor-formatado.ts",
+    "line": 33,
+    "from": "formato",
+    "to": "format",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 7
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/valor-formatado.ts",
+    "line": 38,
+    "from": "prefixo",
+    "to": "prefix",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/valor-formatado.ts",
+    "line": 47,
+    "from": "casas",
+    "to": "fractionDigits",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 7
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/valor-formatado.ts",
+    "line": 60,
+    "from": "caminhoDeSparkline",
+    "to": "sparklinePath",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 1,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/valor-formatado.ts",
+    "line": 61,
+    "from": "pontos",
+    "to": "points",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 7
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/valor-formatado.ts",
+    "line": 62,
+    "from": "largura",
+    "to": "width",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/valor-formatado.ts",
+    "line": 63,
+    "from": "altura",
+    "to": "height",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/valor-formatado.ts",
+    "line": 64,
+    "from": "margem",
+    "to": "margin",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/valor-formatado.ts",
+    "line": 70,
+    "from": "util",
+    "to": "usable",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/valor-formatado.ts",
+    "line": 71,
+    "from": "passo",
+    "to": "step",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/__tests__/dominio-do-eixo.test.ts",
+    "line": 0,
+    "from": "src/pages/explore/ui/blocks/__tests__/dominio-do-eixo.test.ts",
+    "to": "src/pages/explore/ui/blocks/__tests__/axis-domain.test.ts",
+    "kind": "file",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 1
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/__tests__/escala-de-limite.test.ts",
+    "line": 0,
+    "from": "src/pages/explore/ui/blocks/__tests__/escala-de-limite.test.ts",
+    "to": "src/pages/explore/ui/blocks/__tests__/limit-scale.test.ts",
+    "kind": "file",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 1
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/__tests__/faixa-comparativa.test.ts",
+    "line": 0,
+    "from": "src/pages/explore/ui/blocks/__tests__/faixa-comparativa.test.ts",
+    "to": "src/pages/explore/ui/blocks/__tests__/comparison-band.test.ts",
+    "kind": "file",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 1
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/__tests__/fantasma.test.ts",
+    "line": 0,
+    "from": "src/pages/explore/ui/blocks/__tests__/fantasma.test.ts",
+    "to": "src/pages/explore/ui/blocks/__tests__/ghost-data.test.ts",
+    "kind": "file",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 1
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/dominio-do-eixo.ts",
+    "line": 0,
+    "from": "src/pages/explore/ui/blocks/dominio-do-eixo.ts",
+    "to": "src/pages/explore/ui/blocks/axis-domain.ts",
+    "kind": "file",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 1
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/escala-de-limite.ts",
+    "line": 0,
+    "from": "src/pages/explore/ui/blocks/escala-de-limite.ts",
+    "to": "src/pages/explore/ui/blocks/limit-scale.ts",
+    "kind": "file",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 1
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/faixa-comparativa.ts",
+    "line": 0,
+    "from": "src/pages/explore/ui/blocks/faixa-comparativa.ts",
+    "to": "src/pages/explore/ui/blocks/comparison-band.ts",
+    "kind": "file",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 1
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/fantasma.ts",
+    "line": 0,
+    "from": "src/pages/explore/ui/blocks/fantasma.ts",
+    "to": "src/pages/explore/ui/blocks/ghost-data.ts",
+    "kind": "file",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 1
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/numero-pt-br.ts",
+    "line": 0,
+    "from": "src/pages/explore/ui/blocks/numero-pt-br.ts",
+    "to": "src/pages/explore/ui/blocks/parse-number-pt-br.ts",
+    "kind": "file",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 1
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/valor-formatado.ts",
+    "line": 0,
+    "from": "src/pages/explore/ui/blocks/valor-formatado.ts",
+    "to": "src/pages/explore/ui/blocks/formatted-value.ts",
+    "kind": "file",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 1
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/escala-de-limite.ts",
+    "line": 40,
+    "from": "valor",
+    "to": "value",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/escala-de-limite.ts",
+    "line": 179,
+    "from": "valor",
+    "to": "value",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false
+  }
+]

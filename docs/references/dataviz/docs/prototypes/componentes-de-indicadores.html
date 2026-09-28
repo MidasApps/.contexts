@@ -1,0 +1,1057 @@
+<!doctype html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Componentes de indicadores — inventário, régua e propostas</title>
+<style>
+/* ═══════════════════════════════════════════════════════════════════════
+   TOKENS — copiados de app/globals.css (OKLch). Este protótipo usa os
+   valores REAIS do tema; nada aqui é cor inventada.
+   ═══════════════════════════════════════════════════════════════════════ */
+:root, :root[data-theme="dark"] {
+  --background: oklch(3.5% 0.005 280);
+  --foreground: oklch(100% 0 0);
+  --muted: oklch(13% 0 0);
+  --muted-foreground: oklch(62% 0 0);
+  --primary: oklch(75.5% 0.14 50);
+  --secondary: oklch(42% 0.03 150);
+  --destructive: oklch(55% 0.22 25);
+  --success: oklch(60% 0.15 155);
+  --warning: oklch(75.5% 0.14 50);          /* token morto: = primary */
+  --card: oklch(7% 0.003 280);
+  --popover: oklch(9% 0.003 280);
+  --surface: oklch(5% 0.004 280);
+  --border: oklch(16% 0.005 280);
+  --shadow-card: 0 4px 24px rgba(0,0,0,0.2);
+  /* proposto — ver seção 3 */
+  --attention: oklch(80% 0.15 85);
+  --chart-1: #F3A169; --chart-2: #576558; --chart-3: #D4976A; --chart-4: #8A9A6E;
+  --chart-5: #F2CB6E; --chart-6: #F27C7C; --chart-7: #A0B090; --chart-8: #E08A6E;
+}
+:root[data-theme="light"] {
+  --background: oklch(100% 0 0);
+  --foreground: oklch(13% 0.005 280);
+  --muted: oklch(96% 0 0);
+  --muted-foreground: oklch(44% 0 0);
+  --primary: oklch(58% 0.17 50);
+  --secondary: oklch(55% 0.04 150);
+  --destructive: oklch(55% 0.22 25);
+  --success: oklch(48% 0.15 155);
+  --warning: oklch(58% 0.17 50);
+  --card: oklch(100% 0 0);
+  --popover: oklch(100% 0 0);
+  --surface: oklch(96.8% 0 0);
+  --border: oklch(92% 0 0);
+  --shadow-card: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+  --attention: oklch(62% 0.14 75);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 15px; line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+.wrap { max-width: 1180px; margin: 0 auto; padding: 0 24px 120px; }
+
+/* ─── Cabeçalho ─── */
+header.top {
+  position: sticky; top: 0; z-index: 50;
+  background: color-mix(in oklab, var(--background) 88%, transparent);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--border);
+}
+.top-in { max-width: 1180px; margin: 0 auto; padding: 14px 24px;
+  display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.top h1 { font-size: 14px; font-weight: 650; letter-spacing: -0.01em; }
+.top .sub { font-size: 12px; color: var(--muted-foreground); }
+nav.jump { margin-left: auto; display: flex; gap: 4px; flex-wrap: wrap; }
+nav.jump a {
+  font-size: 11.5px; color: var(--muted-foreground); text-decoration: none;
+  padding: 4px 9px; border-radius: 6px; border: 1px solid transparent;
+}
+nav.jump a:hover { color: var(--foreground); border-color: var(--border); background: var(--muted); }
+.toggle {
+  font: inherit; font-size: 11.5px; cursor: pointer; color: var(--muted-foreground);
+  background: var(--muted); border: 1px solid var(--border);
+  border-radius: 7px; padding: 5px 11px;
+}
+.toggle:hover { color: var(--foreground); }
+
+/* ─── Estrutura ─── */
+section { padding-top: 56px; }
+h2 {
+  font-size: 22px; letter-spacing: -0.02em; font-weight: 680;
+  display: flex; align-items: baseline; gap: 12px; margin-bottom: 6px;
+}
+h2 .n {
+  font-size: 11px; font-weight: 600; color: var(--primary);
+  border: 1px solid color-mix(in oklab, var(--primary) 35%, transparent);
+  border-radius: 999px; padding: 2px 9px; letter-spacing: 0.04em;
+}
+h3 {
+  font-size: 13px; font-weight: 620; margin: 34px 0 12px;
+  letter-spacing: 0.02em; text-transform: uppercase; color: var(--muted-foreground);
+}
+.lede { color: var(--muted-foreground); font-size: 14.5px; max-width: 74ch; margin-bottom: 8px; }
+.lede + .lede { margin-top: 10px; }
+hr.sep { border: 0; border-top: 1px solid var(--border); margin: 56px 0 0; }
+code {
+  font-family: ui-monospace, SFMono-Regular, "Cascadia Code", Menlo, monospace;
+  font-size: 0.87em; background: var(--muted); border: 1px solid var(--border);
+  border-radius: 4px; padding: 1px 5px;
+}
+strong { font-weight: 640; }
+
+/* ─── Grade de demonstração ─── */
+.grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 16px; align-items: stretch; }
+.s1{grid-column:span 1}.s2{grid-column:span 2}.s3{grid-column:span 3}
+.s4{grid-column:span 4}.s6{grid-column:span 6}
+@media (max-width: 900px) { .grid { grid-template-columns: repeat(2, 1fr); }
+  .s1,.s2,.s3,.s4,.s6 { grid-column: span 2; } }
+
+/* ═══ A CASCA DE CARD — hoje há três variações; esta é a proposta ═══ */
+.card {
+  background: var(--popover);
+  border: 1px solid var(--border);
+  border-radius: 16px;      /* rounded-2xl */
+  padding: 20px;            /* p-5 */
+  height: 100%;
+  display: flex; flex-direction: column;
+}
+/* Divergência real do GaugeBlock.tsx hoje */
+.card--gauge-legado { border-radius: 12px; padding: 16px; }
+
+.card-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 12px; }
+.card-label { display: flex; align-items: center; gap: 10px; font-size: 12px; font-weight: 500; color: var(--muted-foreground); }
+.card-label svg { width: 16px; height: 16px; stroke-width: 1.5; opacity: .9; }
+
+.big { font-size: 30px; font-weight: 700; letter-spacing: -0.025em; line-height: 1; }
+.big--gradient {
+  font-size: 36px;
+  background: linear-gradient(to bottom right, var(--foreground), color-mix(in oklab, var(--foreground) 70%, transparent));
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.big-suffix { font-size: 20px; margin-left: 2px; }
+.unit { font-size: 11px; color: var(--muted-foreground); }
+
+.up { color: var(--success); } .down { color: var(--destructive); }
+.neutral { color: var(--muted-foreground); opacity: .6; }
+.attn { color: var(--attention); }
+.trend { display: inline-flex; align-items: center; gap: 2px; font-size: 11px; font-weight: 620; }
+.trend svg { width: 12px; height: 12px; }
+
+/* ─── Marcadores de anotação ─── */
+.nota {
+  border-left: 2px solid color-mix(in oklab, var(--primary) 55%, transparent);
+  background: color-mix(in oklab, var(--primary) 7%, transparent);
+  padding: 11px 15px; border-radius: 0 9px 9px 0;
+  font-size: 13px; color: var(--muted-foreground); margin: 16px 0;
+}
+.nota b { color: var(--foreground); font-weight: 620; }
+.nota--ruim { border-left-color: color-mix(in oklab, var(--destructive) 65%, transparent);
+  background: color-mix(in oklab, var(--destructive) 8%, transparent); }
+.nota--ok { border-left-color: color-mix(in oklab, var(--success) 60%, transparent);
+  background: color-mix(in oklab, var(--success) 8%, transparent); }
+
+.tag {
+  display: inline-block; font-size: 10px; font-weight: 600; letter-spacing: .04em;
+  text-transform: uppercase; padding: 2.5px 8px; border-radius: 999px;
+  border: 1px solid var(--border); color: var(--muted-foreground); background: var(--muted);
+  vertical-align: middle;
+}
+.tag--novo { color: var(--primary); border-color: color-mix(in oklab, var(--primary) 40%, transparent);
+  background: color-mix(in oklab, var(--primary) 12%, transparent); }
+.tag--existe { color: var(--success); border-color: color-mix(in oklab, var(--success) 40%, transparent);
+  background: color-mix(in oklab, var(--success) 10%, transparent); }
+.tag--corrigir { color: var(--destructive); border-color: color-mix(in oklab, var(--destructive) 40%, transparent);
+  background: color-mix(in oklab, var(--destructive) 10%, transparent); }
+
+.cap { font-size: 11.5px; color: var(--muted-foreground); margin-top: 9px; display: block; }
+.cap b { color: var(--foreground); font-weight: 600; }
+
+/* ─── Tabela ─── */
+table.t { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 8px; }
+table.t th, table.t td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+table.t th { font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted-foreground); font-weight: 600; }
+table.t td.num { text-align: right; font-variant-numeric: tabular-nums; }
+table.t tbody tr:hover { background: color-mix(in oklab, var(--muted) 50%, transparent); }
+.scroll { overflow-x: auto; }
+
+/* ─── Peças de indicador ─── */
+.spark-wrap { margin: 14px -20px -20px; height: 56px; overflow: hidden; border-radius: 0 0 16px 16px; }
+.bar-track { height: 7px; border-radius: 999px; background: var(--muted); overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 999px; }
+
+.status-row {
+  display: flex; align-items: center; gap: 11px;
+  padding: 9px 0; border-bottom: 1px solid var(--border);
+}
+.status-row:last-child { border-bottom: 0; }
+.dot { width: 8px; height: 8px; border-radius: 999px; flex: none; }
+.status-row .nm { font-size: 12.5px; flex: 1; min-width: 0;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.status-row .vl { font-size: 14px; font-weight: 650; font-variant-numeric: tabular-nums; }
+.status-row .lim { font-size: 10.5px; color: var(--muted-foreground); width: 62px; text-align: right; }
+
+.legend-card {
+  border: 1px solid var(--border); background: color-mix(in oklab, var(--muted) 55%, transparent);
+  border-radius: 10px; padding: 7px 10px;
+}
+.legend-card .l1 { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.legend-card .nm { font-size: 10.5px; color: var(--muted-foreground); display: flex; align-items: center; gap: 6px; min-width: 0; }
+.legend-card .vl { font-size: 15px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.legend-card .l2 { font-size: 10.5px; color: var(--muted-foreground); margin-top: 2px; }
+
+.empty {
+  display: flex; align-items: center; justify-content: center;
+  color: var(--muted-foreground); opacity: .45; font-size: 11.5px; font-style: italic;
+}
+.skel {
+  background: linear-gradient(90deg, var(--muted) 25%, color-mix(in oklab, var(--muted) 55%, var(--border)) 50%, var(--muted) 75%);
+  background-size: 200% 100%; animation: sh 1.5s ease-in-out infinite; border-radius: 6px;
+}
+@keyframes sh { 0% { background-position: 200% 0 } 100% { background-position: -200% 0 } }
+
+.swatch-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+.swatch { border: 1px solid var(--border); border-radius: 10px; overflow: hidden; width: 116px; }
+.swatch .chip { height: 42px; }
+.swatch .meta { padding: 7px 9px; font-size: 10.5px; color: var(--muted-foreground); }
+.swatch .meta b { display: block; color: var(--foreground); font-size: 11.5px; font-weight: 600; }
+
+.compare { display: flex; align-items: stretch; gap: 0; }
+.compare > div { flex: 1; padding: 0 14px; }
+.compare > div:first-child { padding-left: 0; }
+.compare > div + div { border-left: 1px solid var(--border); }
+.compare .k { font-size: 10.5px; color: var(--muted-foreground); margin-bottom: 5px; }
+
+.stack100 { display: flex; height: 26px; border-radius: 7px; overflow: hidden; }
+.stack100 > span { display: block; }
+.stack-key { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 10px; font-size: 11px; color: var(--muted-foreground); }
+.stack-key i { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 5px; }
+
+.mini-grid { display: grid; grid-template-columns: 1fr auto auto; gap: 4px 12px; align-items: center; font-size: 12px; }
+.mini-grid .nm { color: var(--muted-foreground); }
+.mini-grid .vl { font-variant-numeric: tabular-nums; font-weight: 600; }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-in">
+    <div>
+      <h1>Componentes de indicadores</h1>
+      <div class="sub">liquid-dataviz · inventário do que existe, régua de consistência e propostas</div>
+    </div>
+    <nav class="jump">
+      <a href="#hoje">1 · Hoje</a>
+      <a href="#quebras">2 · Quebras</a>
+      <a href="#regua">3 · Régua</a>
+      <a href="#novos">4 · Novos</a>
+      <a href="#mapa">5 · Mapa</a>
+    </nav>
+    <button class="toggle" id="tt" type="button">☾ tema</button>
+  </div>
+</header>
+
+<div class="wrap">
+
+<section id="intro" style="padding-top:44px">
+  <p class="lede">
+    Este arquivo é um protótipo estático. Ele usa os tokens OKLch reais de
+    <code>app/globals.css</code> e a paleta de <code>chart-theme.ts</code>, então
+    o que você vê aqui é a cor que a aplicação desenha — inclusive no modo claro,
+    que o botão do topo alterna.
+  </p>
+  <p class="lede">
+    São cinco seções: o que existe hoje, onde os componentes divergem entre si,
+    a régua proposta para unificá-los, os componentes novos que faltam, e um mapa
+    final ligando cada peça ao arquivo que a implementa.
+  </p>
+  <div class="nota nota--ok">
+    <b>Este protótipo foi implementado.</b> A seção 1 continua descrevendo o
+    estado ANTERIOR de propósito — é o registro do que se corrigiu. O que era
+    proposta nas seções 3 e 4 está no código: a casca única em
+    <code>blocks/block-shell.tsx</code>, o gauge com arco em
+    <code>blocks/gauge-arc.ts</code>, e os seis blocos novos com contrato em
+    <code>block-specs.ts</code>, tool de autoria própria e entrada na paleta.
+  </div>
+</section>
+
+<hr class="sep">
+
+<!-- ══════════════════════════════════════════════════════════════════
+     1 · HOJE
+     ══════════════════════════════════════════════════════════════════ -->
+<section id="hoje">
+  <h2><span class="n">01</span> O que a aplicação tem hoje</h2>
+  <p class="lede">
+    Seis tipos de bloco renderizam: <code>kpi</code>, <code>gauge</code>,
+    <code>donut</code>, <code>chart</code>, <code>table</code> e <code>text</code>.
+    Dentro de <code>chart</code> há seis variações. Abaixo, cada um desenhado como
+    é hoje — com os defeitos visíveis, não corrigidos.
+  </p>
+
+  <h3>KPI · variante <code>rich</code> — o componente principal</h3>
+  <div class="grid">
+    <div class="s2">
+      <div class="card">
+        <div class="card-head">
+          <span class="card-label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 17l6-6 4 4 8-8"/><path d="M17 7h4v4"/></svg>
+            Saldo devedor
+          </span>
+          <span class="trend up">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M17 7H9M17 7v8"/></svg>3,2%
+          </span>
+        </div>
+        <p class="big">R$ 48,2 mi</p>
+        <div class="spark-wrap">
+          <svg viewBox="0 0 240 56" preserveAspectRatio="none" style="width:100%;height:100%">
+            <defs><linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#F3A169" stop-opacity=".18"/>
+              <stop offset="100%" stop-color="#F3A169" stop-opacity="0"/>
+            </linearGradient></defs>
+            <path d="M0,44 L34,40 L69,42 L103,31 L137,34 L171,22 L206,18 L240,10 L240,56 L0,56 Z" fill="url(#g1)"/>
+            <path d="M0,44 L34,40 L69,42 L103,31 L137,34 L171,22 L206,18 L240,10" fill="none" stroke="#F3A169" stroke-width="1.5"/>
+          </svg>
+        </div>
+      </div>
+      <span class="cap"><b>KpiCard rich</b> · raio 16px, padding 20px, valor 30px</span>
+    </div>
+
+    <div class="s2">
+      <div class="card">
+        <div class="card-head">
+          <span class="card-label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+            Inadimplência 90+
+          </span>
+          <span class="trend down">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 7l10 10M17 17H9M17 17V9"/></svg>1,4%
+          </span>
+        </div>
+        <p class="big">4,81%</p>
+        <div style="display:flex;align-items:center;gap:6px;margin-top:5px">
+          <span class="trend down" style="font-size:10px">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 7l10 10M17 17H9M17 17V9"/></svg>−0,4%
+          </span>
+          <span style="font-size:9.5px;color:var(--muted-foreground);opacity:.7">vs comparativo</span>
+        </div>
+      </div>
+      <span class="cap"><b>Mesmo card</b> com <code>periodComparison</code> — a segunda forma de mostrar variação</span>
+    </div>
+
+    <div class="s2">
+      <div class="card" style="border-color:color-mix(in oklab,var(--destructive) 40%,transparent);position:relative">
+        <span style="position:absolute;top:12px;right:12px;width:8px;height:8px;border-radius:999px;background:#F27C7C"></span>
+        <div class="card-head">
+          <span class="card-label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L14.7 3.9a2 2 0 00-3.4 0z"/></svg>
+            Contratos em atraso
+          </span>
+        </div>
+        <p class="big">1.284</p>
+        <span class="cap" style="margin-top:auto;padding-top:12px">estado <b>alert</b></span>
+      </div>
+      <span class="cap">O ponto pulsante é <code>bg-[#F27C7C]</code> — hex fixo, não troca com o tema</span>
+    </div>
+  </div>
+
+  <h3>KPI · variante <code>compact</code> — outro componente, mesmo propósito</h3>
+  <div class="grid">
+    <div class="s2">
+      <div class="card">
+        <p style="font-size:12px;font-weight:500;text-transform:uppercase;letter-spacing:.06em;color:var(--muted-foreground);margin-bottom:8px">Carteira total</p>
+        <p class="big big--gradient">R$ 62,4 mi</p>
+        <div style="margin-top:12px;display:flex;align-items:flex-end;gap:3px;height:32px">
+          <span style="flex:1;background:var(--success);opacity:.4;height:40%;border-radius:2px"></span>
+          <span style="flex:1;background:var(--success);opacity:.4;height:55%;border-radius:2px"></span>
+          <span style="flex:1;background:var(--success);opacity:.4;height:48%;border-radius:2px"></span>
+          <span style="flex:1;background:var(--success);opacity:.4;height:72%;border-radius:2px"></span>
+          <span style="flex:1;background:var(--success);opacity:.4;height:66%;border-radius:2px"></span>
+          <span style="flex:1;background:var(--success);opacity:.9;height:88%;border-radius:2px"></span>
+        </div>
+      </div>
+      <span class="cap"><b>KpiCard compact</b> · valor 36px com gradiente, rótulo CAIXA ALTA, sparkline de barras</span>
+    </div>
+    <div class="s4">
+      <div class="nota nota--ruim">
+        <b>Dois KPIs que não se parecem.</b> O <code>rich</code> tem valor de 30px sólido e
+        rótulo em caixa baixa; o <code>compact</code> tem valor de 36px com gradiente e rótulo
+        em caixa alta com <code>tracking-wider</code>. A sparkline de um é área; a do outro,
+        barras. Lado a lado na mesma página, leem como produtos diferentes — e ambos são
+        acessíveis pelo mesmo bloco <code>kpi</code>.
+      </div>
+    </div>
+  </div>
+
+  <h3>Gauge — o nome promete um arco que não existe</h3>
+  <div class="grid">
+    <div class="s2">
+      <div class="card card--gauge-legado" style="border-color:color-mix(in oklab,var(--success) 40%,transparent)">
+        <div>
+          <p style="font-size:11px;color:var(--muted-foreground);opacity:.85;line-height:1.25;margin-bottom:4px">Índice de cobertura</p>
+          <p style="font-size:10px;color:var(--muted-foreground);opacity:.5;margin-bottom:8px">Recebíveis ÷ saldo devedor</p>
+        </div>
+        <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:8px;margin-top:auto">
+          <p class="big" style="color:var(--success)">1,38<span class="big-suffix">x</span></p>
+          <p style="font-size:10px;color:var(--muted-foreground);opacity:.75;padding-bottom:3px">Mín. 1,20x</p>
+        </div>
+      </div>
+      <span class="cap"><b>GaugeBlock</b> · raio 12px, padding 16px — <span class="tag tag--corrigir">diverge</span></span>
+    </div>
+    <div class="s2">
+      <div class="card card--gauge-legado" style="border-color:color-mix(in oklab,#d9a441 45%,transparent)">
+        <div>
+          <p style="font-size:11px;color:var(--muted-foreground);opacity:.85;line-height:1.25;margin-bottom:4px">Índice de recebíveis</p>
+          <p style="font-size:10px;color:var(--muted-foreground);opacity:.5;margin-bottom:8px">Faixa de atenção</p>
+        </div>
+        <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:8px;margin-top:auto">
+          <p class="big" style="color:#d9a441">1,22<span class="big-suffix">x</span></p>
+          <p style="font-size:10px;color:var(--muted-foreground);opacity:.75;padding-bottom:3px">Mín. 1,20x</p>
+        </div>
+      </div>
+      <span class="cap">O âmbar é <code>amber-600 dark:amber-400</code> escrito à mão no componente</span>
+    </div>
+    <div class="s2">
+      <div class="card card--gauge-legado" style="border-color:color-mix(in oklab,var(--destructive) 40%,transparent)">
+        <div>
+          <p style="font-size:11px;color:var(--muted-foreground);opacity:.85;line-height:1.25;margin-bottom:4px">Índice de obra</p>
+          <p style="font-size:10px;color:var(--muted-foreground);opacity:.5;margin-bottom:8px">Rompimento</p>
+        </div>
+        <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:8px;margin-top:auto">
+          <p class="big" style="color:var(--destructive)">0,94<span class="big-suffix">x</span></p>
+          <p style="font-size:10px;color:var(--muted-foreground);opacity:.75;padding-bottom:3px">Mín. 1,20x</p>
+        </div>
+      </div>
+      <span class="cap">Sem arco, sem escala, sem distância até o limite — só a cor</span>
+    </div>
+  </div>
+  <div class="nota nota--ruim">
+    <b>Não é um gauge, é um KPI colorido.</b> O componente chama-se
+    <code>GaugeBlock</code> e não desenha arco nenhum: é um número com a borda tingida.
+    Quem olha não sabe se 1,38x está folgado ou raspando no limite — 1,38 e 3,50 pintam
+    o mesmo verde. A informação que falta é justamente a que o produto vende:
+    <b>a distância até o rompimento</b>.
+  </div>
+
+  <h3>Donut — composição</h3>
+  <div class="grid">
+    <div class="s3">
+      <div class="card">
+        <div style="display:flex;align-items:center;gap:16px">
+          <div style="position:relative;width:150px;height:150px;flex:none">
+            <svg viewBox="0 0 120 120" style="width:100%;height:100%;transform:rotate(-90deg)">
+              <circle cx="60" cy="60" r="45" fill="none" stroke="var(--chart-1)" stroke-width="17" stroke-dasharray="118.7 282.7" stroke-dashoffset="0"/>
+              <circle cx="60" cy="60" r="45" fill="none" stroke="var(--chart-3)" stroke-width="17" stroke-dasharray="79.2 282.7" stroke-dashoffset="-118.7"/>
+              <circle cx="60" cy="60" r="45" fill="none" stroke="var(--chart-4)" stroke-width="17" stroke-dasharray="50.9 282.7" stroke-dashoffset="-197.9"/>
+              <circle cx="60" cy="60" r="45" fill="none" stroke="var(--chart-5)" stroke-width="17" stroke-dasharray="33.9 282.7" stroke-dashoffset="-248.8"/>
+            </svg>
+            <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px">
+              <p style="font-size:9px;font-weight:500;text-transform:uppercase;letter-spacing:.09em;color:var(--muted-foreground);opacity:.75">Total</p>
+              <p style="font-size:14px;font-weight:700">R$48,2mi</p>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:6px;flex:1;min-width:0">
+            <div class="legend-card"><div class="l1"><span class="nm"><i style="width:8px;height:8px;border-radius:999px;background:var(--chart-1);display:inline-block;flex:none"></i>Adimplente</span><span class="vl">R$ 20,2 mi</span></div><div class="l2">42,0% do total</div></div>
+            <div class="legend-card"><div class="l1"><span class="nm"><i style="width:8px;height:8px;border-radius:999px;background:var(--chart-3);display:inline-block;flex:none"></i>1–30 dias</span><span class="vl">R$ 13,5 mi</span></div><div class="l2">28,0% do total</div></div>
+            <div class="legend-card"><div class="l1"><span class="nm"><i style="width:8px;height:8px;border-radius:999px;background:var(--chart-4);display:inline-block;flex:none"></i>31–90 dias</span><span class="vl">R$ 8,7 mi</span></div><div class="l2">18,0% do total</div></div>
+            <div class="legend-card"><div class="l1"><span class="nm"><i style="width:8px;height:8px;border-radius:999px;background:var(--chart-5);display:inline-block;flex:none"></i>90+ dias</span><span class="vl">R$ 5,8 mi</span></div><div class="l2">12,0% do total</div></div>
+          </div>
+        </div>
+      </div>
+      <span class="cap"><b>DonutBlock</b> · valor da fatia em 15px, centro em 14px, rótulo em 10,5px</span>
+    </div>
+    <div class="s3">
+      <div class="nota">
+        <b>O donut é o componente mais bem resolvido do conjunto</b> — e mesmo assim
+        usa uma quarta escala tipográfica: 14px no centro, 15px na fatia, contra os
+        30px do KPI e 30px do gauge. Nada aqui está errado isoladamente; o problema
+        é que cada componente escolheu sozinho.
+      </div>
+      <div class="nota nota--ruim">
+        <b>Correção:</b> uma versão anterior desta página dizia que o donut não
+        tinha estado de carregamento. Ele tem — o <code>CanvasBlockRenderer</code>
+        troca o componente por <code>BlockLoadingDonut</code> enquanto a métrica
+        não chega. O que é verdade é o <b>vazio</b>: cada bloco escolheu uma
+        altura diferente para ele (180px no donut, 340px no gráfico, um travessão
+        no KPI), e a página pula quando um volta vazio e o vizinho não.
+      </div>
+    </div>
+  </div>
+
+  <h3>Gráficos — seis tipos dentro do bloco <code>chart</code></h3>
+  <div class="grid">
+    <div class="s2">
+      <div class="card">
+        <p class="card-label" style="margin-bottom:10px">bar</p>
+        <svg viewBox="0 0 200 90" style="width:100%;height:90px">
+          <g fill="var(--chart-1)">
+            <rect x="8"  y="42" width="22" height="48" rx="4"/><rect x="42" y="28" width="22" height="62" rx="4"/>
+            <rect x="76" y="52" width="22" height="38" rx="4"/><rect x="110" y="18" width="22" height="72" rx="4"/>
+            <rect x="144" y="36" width="22" height="54" rx="4"/>
+          </g>
+        </svg>
+      </div>
+    </div>
+    <div class="s2">
+      <div class="card">
+        <p class="card-label" style="margin-bottom:10px">line</p>
+        <svg viewBox="0 0 200 90" style="width:100%;height:90px">
+          <path d="M8,68 L46,54 L84,60 L122,32 L160,38 L192,16" fill="none" stroke="var(--chart-1)" stroke-width="2.2"/>
+          <path d="M8,80 L46,72 L84,74 L122,58 L160,64 L192,50" fill="none" stroke="var(--chart-2)" stroke-width="2.2" stroke-dasharray="5 4"/>
+        </svg>
+      </div>
+    </div>
+    <div class="s2">
+      <div class="card">
+        <p class="card-label" style="margin-bottom:10px">area</p>
+        <svg viewBox="0 0 200 90" style="width:100%;height:90px">
+          <defs><linearGradient id="ga" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="var(--chart-1)" stop-opacity=".35"/>
+            <stop offset="100%" stop-color="var(--chart-1)" stop-opacity="0"/></linearGradient></defs>
+          <path d="M8,66 L46,52 L84,58 L122,30 L160,36 L192,14 L192,90 L8,90 Z" fill="url(#ga)"/>
+          <path d="M8,66 L46,52 L84,58 L122,30 L160,36 L192,14" fill="none" stroke="var(--chart-1)" stroke-width="2.2"/>
+        </svg>
+      </div>
+    </div>
+    <div class="s2">
+      <div class="card">
+        <p class="card-label" style="margin-bottom:10px">stacked-bar</p>
+        <svg viewBox="0 0 200 90" style="width:100%;height:90px">
+          <g>
+            <rect x="10" y="50" width="26" height="40" rx="0" fill="var(--chart-1)"/><rect x="10" y="30" width="26" height="20" fill="var(--chart-3)"/><rect x="10" y="18" width="26" height="12" rx="4" fill="var(--chart-4)"/>
+            <rect x="52" y="44" width="26" height="46" fill="var(--chart-1)"/><rect x="52" y="26" width="26" height="18" fill="var(--chart-3)"/><rect x="52" y="14" width="26" height="12" rx="4" fill="var(--chart-4)"/>
+            <rect x="94" y="56" width="26" height="34" fill="var(--chart-1)"/><rect x="94" y="34" width="26" height="22" fill="var(--chart-3)"/><rect x="94" y="24" width="26" height="10" rx="4" fill="var(--chart-4)"/>
+            <rect x="136" y="48" width="26" height="42" fill="var(--chart-1)"/><rect x="136" y="24" width="26" height="24" fill="var(--chart-3)"/><rect x="136" y="12" width="26" height="12" rx="4" fill="var(--chart-4)"/>
+          </g>
+        </svg>
+      </div>
+    </div>
+    <div class="s2">
+      <div class="card">
+        <p class="card-label" style="margin-bottom:10px">waterfall</p>
+        <svg viewBox="0 0 200 90" style="width:100%;height:90px">
+          <rect x="8"  y="46" width="24" height="40" rx="4" fill="var(--chart-1)"/>
+          <rect x="42" y="32" width="24" height="14" rx="4" fill="var(--chart-1)"/>
+          <rect x="76" y="32" width="24" height="16" rx="4" fill="var(--chart-6)"/>
+          <rect x="110" y="24" width="24" height="12" rx="4" fill="var(--chart-1)"/>
+          <rect x="144" y="24" width="24" height="62" rx="4" fill="var(--chart-1)" opacity=".85"/>
+        </svg>
+      </div>
+    </div>
+    <div class="s2">
+      <div class="card">
+        <p class="card-label" style="margin-bottom:10px">composed</p>
+        <svg viewBox="0 0 200 90" style="width:100%;height:90px">
+          <g fill="var(--chart-1)" opacity=".85">
+            <rect x="10" y="48" width="24" height="42" rx="4"/><rect x="52" y="36" width="24" height="54" rx="4"/>
+            <rect x="94" y="56" width="24" height="34" rx="4"/><rect x="136" y="28" width="24" height="62" rx="4"/>
+          </g>
+          <path d="M22,40 L64,30 L106,44 L148,20" fill="none" stroke="var(--chart-2)" stroke-width="2.4"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+  <div class="nota nota--ruim">
+    <b>O <code>composed</code> tem um eixo Y só.</b> Barras em reais e linha em
+    percentual caem na mesma escala — a linha vira um risco colado no chão. É o
+    gráfico que o produto mais pede (saldo × taxa) e o que menos funciona hoje.
+  </div>
+
+  <h3>Estados — cada bloco inventou o seu</h3>
+  <div class="grid">
+    <div class="s2"><div class="card" style="min-height:132px"><div class="card-head"><span class="card-label">KPI sem valor</span></div><p class="big">—</p></div>
+      <span class="cap">KPI vazio: travessão</span></div>
+    <div class="s2"><div class="card" style="min-height:132px"><div class="card-head"><span class="card-label">Donut sem dado</span></div><div class="empty" style="flex:1">Sem dados para exibir</div></div>
+      <span class="cap">Donut vazio: 180px de altura</span></div>
+    <div class="s2"><div class="card" style="min-height:132px"><div class="card-head"><span class="card-label">Gráfico sem dado</span></div><div class="empty" style="flex:1">Sem dados para exibir</div></div>
+      <span class="cap">Gráfico vazio: 340px de altura</span></div>
+    <div class="s2"><div class="card" style="min-height:132px"><div class="card-head"><span class="card-label">KPI carregando</span></div><div class="skel" style="height:32px;width:112px"></div></div>
+      <span class="cap">Esqueleto só no valor <span class="tag tag--existe">bom</span></span></div>
+    <div class="s2"><div class="card card--gauge-legado" style="min-height:132px"><p style="font-size:11px;color:var(--muted-foreground);opacity:.85">Gauge carregando</p><div style="margin-top:auto;display:flex;justify-content:space-between;align-items:flex-end"><div class="skel" style="height:32px;width:96px"></div><p style="font-size:10px;color:var(--muted-foreground);opacity:.7">Mín. 1,20x</p></div></div>
+      <span class="cap">Também bom — mas em outra moldura</span></div>
+    <div class="s2"><div class="card" style="min-height:132px"><div class="card-head"><span class="card-label">Donut carregando</span></div><div class="empty" style="flex:1">Sem dados para exibir</div></div>
+      <span class="cap"><span class="tag tag--corrigir">não existe</span> cai no estado vazio</span></div>
+  </div>
+</section>
+
+<hr class="sep">
+
+<!-- ══════════════════════════════════════════════════════════════════
+     2 · QUEBRAS
+     ══════════════════════════════════════════════════════════════════ -->
+<section id="quebras">
+  <h2><span class="n">02</span> Onde a consistência quebra</h2>
+  <p class="lede">
+    Nove divergências, todas verificadas no código. Nenhuma é bug — cada componente
+    foi escrito num momento diferente e escolheu sozinho. Somadas, é o que faz a
+    página parecer montada por três pessoas que não se falaram.
+  </p>
+
+  <div class="scroll">
+  <table class="t">
+    <thead><tr><th style="width:20%">O quê</th><th>Como está hoje</th><th style="width:26%">Onde</th></tr></thead>
+    <tbody>
+      <tr><td><b>Raio do card</b></td>
+        <td>KpiCard e ChartWidget usam <code>rounded-2xl</code> (16px). GaugeBlock usa <code>rounded-xl</code> (12px). Cards de legenda do donut, <code>rounded-lg</code> (10px).</td>
+        <td><code>GaugeBlock.tsx:113</code></td></tr>
+      <tr><td><b>Padding</b></td>
+        <td>KpiCard e ChartWidget: <code>p-5</code> (20px). GaugeBlock: <code>p-4</code> (16px).</td>
+        <td><code>GaugeBlock.tsx:113</code></td></tr>
+      <tr><td><b>Escala do valor</b></td>
+        <td>Quatro tamanhos: 36px com gradiente (kpi compact), 30px sólido (kpi rich), 30px (gauge), 15px (fatia do donut).</td>
+        <td><code>KpiCard.tsx:129,343</code></td></tr>
+      <tr><td><b>Rótulo</b></td>
+        <td>Três tratamentos: 12px caixa baixa (rich), 12px CAIXA ALTA com <code>tracking-wider</code> (compact), 11px a 80% de opacidade (gauge).</td>
+        <td><code>GaugeBlock.tsx:121</code></td></tr>
+      <tr><td><b>Variação</b></td>
+        <td>Quatro representações no mesmo card: <code>trend</code>, <code>comparison</code>, <code>trendBadge</code>, <code>periodComparison</code>.</td>
+        <td><code>KpiCard.tsx:21–45</code></td></tr>
+      <tr><td><b>Cor fora do tema</b></td>
+        <td><code>sparkColor = alert ? '#F27C7C' : '#F3A169'</code> — hex fixo. No mesmo arquivo, <code>MiniBarChart</code> usa <code>var(--color-success)</code>. Duas técnicas, um componente.</td>
+        <td><code>KpiCard.tsx:221,515</code></td></tr>
+      <tr><td><b>Token de atenção</b></td>
+        <td><code>--color-warning</code> existe nos dois temas, tem <b>zero consumidores</b> — e vale exatamente o mesmo que <code>--color-primary</code>. Por isso o gauge escreveu âmbar à mão.</td>
+        <td><code>globals.css:38,157</code></td></tr>
+      <tr><td><b>Alerta</b></td>
+        <td>Compact: borda esquerda <code>#F27C7C</code>. Rich: borda <code>destructive/40</code> + ponto pulsante <code>#F27C7C</code>. Gauge: nenhum.</td>
+        <td><code>KpiCard.tsx:121,270</code></td></tr>
+      <tr><td><b>Vazio</b></td>
+        <td>Quatro tratamentos: travessão (kpi), caixa de 180px (donut), de 340px (chart), inexistente (gauge). A página pula quando um bloco volta vazio e o vizinho não. <i>(O carregamento, esse, é uniforme — o renderer resolve.)</i></td>
+        <td><code>DonutBlock.tsx:42</code></td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<hr class="sep">
+
+<!-- ══════════════════════════════════════════════════════════════════
+     3 · RÉGUA
+     ══════════════════════════════════════════════════════════════════ -->
+<section id="regua">
+  <h2><span class="n">03</span> A régua proposta</h2>
+  <p class="lede">
+    Uma casca só, uma escala só, um vocabulário de cor só. O mesmo movimento que o
+    <code>block-specs.ts</code> já fez com a largura dos blocos — largura vem do
+    contrato, não de número escrito no componente — aplicado à aparência.
+  </p>
+
+  <h3>Casca — todo indicador nasce daqui</h3>
+  <div class="grid">
+    <div class="s3">
+      <div class="card">
+        <div class="card-head"><span class="card-label">Rótulo · 12px, peso 500, muted</span></div>
+        <p class="big">30px · peso 700</p>
+        <p style="font-size:11px;color:var(--muted-foreground);margin-top:8px">Apoio · 11px, muted</p>
+      </div>
+      <span class="cap">Superfície <code>--popover</code> · borda <code>--border</code> · raio <b>16px</b> · padding <b>20px</b></span>
+    </div>
+    <div class="s3">
+      <div class="mini-grid" style="font-size:12.5px">
+        <span class="nm">Superfície</span><span class="vl" style="grid-column:span 2"><code>var(--popover)</code></span>
+        <span class="nm">Raio</span><span class="vl" style="grid-column:span 2">16px — <code>rounded-2xl</code></span>
+        <span class="nm">Padding</span><span class="vl" style="grid-column:span 2">20px — <code>p-5</code></span>
+        <span class="nm">Valor</span><span class="vl" style="grid-column:span 2">30px / 700 / <code>-0.025em</code></span>
+        <span class="nm">Rótulo</span><span class="vl" style="grid-column:span 2">12px / 500 / muted / caixa baixa</span>
+        <span class="nm">Apoio</span><span class="vl" style="grid-column:span 2">11px / muted</span>
+        <span class="nm">Variação</span><span class="vl" style="grid-column:span 2">11px / 620 / semântica</span>
+      </div>
+      <div class="nota nota--ok" style="margin-top:14px">
+        <b>Uma única saída:</b> gradiente no valor, caixa alta no rótulo e a variante
+        <code>compact</code> saem de cena. Um bloco <code>kpi</code> desenha um KPI —
+        não dois, dependendo de quem o criou.
+      </div>
+    </div>
+  </div>
+
+  <h3>Cor semântica — o que cada tom significa</h3>
+  <div class="swatch-row">
+    <div class="swatch"><div class="chip" style="background:var(--success)"></div><div class="meta"><b>positivo</b>--success</div></div>
+    <div class="swatch"><div class="chip" style="background:var(--attention)"></div><div class="meta"><b>atenção</b>--attention <span class="tag tag--novo">novo</span></div></div>
+    <div class="swatch"><div class="chip" style="background:var(--destructive)"></div><div class="meta"><b>ruptura</b>--destructive</div></div>
+    <div class="swatch"><div class="chip" style="background:var(--muted-foreground)"></div><div class="meta"><b>neutro</b>--muted-foreground</div></div>
+    <div class="swatch"><div class="chip" style="background:var(--primary)"></div><div class="meta"><b>marca</b>--primary</div></div>
+  </div>
+  <div class="nota">
+    <b><code>--color-warning</code> precisa morrer ou mudar de valor.</b> Hoje ele é o
+    laranja da marca — usar como "atenção" pintaria alerta com a mesma cor de um botão
+    comum. A proposta é <code>--attention</code> em âmbar de verdade, com contraste
+    aferido nos dois temas, substituindo o <code>amber-600 dark:amber-400</code>
+    hardcoded no gauge.
+  </div>
+
+  <h3>Estados — os mesmos quatro, em todo bloco</h3>
+  <div class="grid">
+    <div class="s3"><div class="card" style="min-height:118px"><div class="card-head"><span class="card-label">Carregando</span></div><div class="skel" style="height:30px;width:120px"></div><div class="skel" style="height:11px;width:78px;margin-top:9px"></div></div>
+      <span class="cap"><b>Esqueleto na moldura real.</b> Rótulo continua legível — vem do template, não da consulta. Nunca muda a altura do card.</span></div>
+    <div class="s3"><div class="card" style="min-height:118px"><div class="card-head"><span class="card-label">Sem dado</span></div><p class="big" style="color:var(--muted-foreground);opacity:.35">—</p><p style="font-size:11px;color:var(--muted-foreground);opacity:.6;margin-top:8px">A consulta não retornou linhas</p></div>
+      <span class="cap"><b>Vazio ≠ erro.</b> Mesma altura do card com dado, em todo tipo de bloco.</span></div>
+    <div class="s3"><div class="card" style="min-height:118px;border-color:color-mix(in oklab,var(--destructive) 45%,transparent)"><div class="card-head"><span class="card-label attn" style="color:var(--destructive)">Falhou</span></div><p style="font-size:12.5px;color:var(--muted-foreground)">Métrica indisponível</p><p style="font-size:10.5px;color:var(--muted-foreground);opacity:.6;margin-top:5px">covenants.indice_recebivel · 422</p></div>
+      <span class="cap"><b>Erro diz o que houve</b> e qual métrica. Hoje o bloco fica igual ao vazio.</span></div>
+    <div class="s3"><div class="card" style="min-height:118px;border-color:color-mix(in oklab,var(--destructive) 45%,transparent);position:relative"><span style="position:absolute;top:12px;right:12px;width:8px;height:8px;border-radius:999px;background:var(--destructive)"></span><div class="card-head"><span class="card-label">Em alerta</span></div><p class="big" style="color:var(--destructive)">1.284</p></div>
+      <span class="cap"><b>Um único tratamento:</b> borda <code>destructive</code> + ponto, com token — nunca hex.</span></div>
+  </div>
+</section>
+
+<hr class="sep">
+
+<!-- ══════════════════════════════════════════════════════════════════
+     4 · NOVOS
+     ══════════════════════════════════════════════════════════════════ -->
+<section id="novos">
+  <h2><span class="n">04</span> Os componentes que faltam</h2>
+  <p class="lede">
+    Escolhidos pelo que a securitização de recebíveis pergunta — enquadramento,
+    distância até o limite, composição, concentração de risco —, não por catálogo de
+    biblioteca. Cada um responde a uma pergunta que hoje não tem componente.
+  </p>
+
+  <h3>Gauge de verdade <span class="tag tag--novo">novo</span> — substitui o atual</h3>
+  <div class="grid">
+    <div class="s2">
+      <div class="card">
+        <div class="card-head"><span class="card-label">Índice de cobertura</span></div>
+        <div style="display:flex;justify-content:center;padding:2px 0 4px">
+          <svg viewBox="0 0 130 76" style="width:100%;max-width:190px">
+            <path d="M 15 66 A 50 50 0 0 1 115 66" fill="none" stroke="var(--muted)" stroke-width="11" stroke-linecap="round"/>
+            <path d="M 15 66 A 50 50 0 0 1 115 66" fill="none" stroke="var(--destructive)" stroke-width="11" stroke-dasharray="31 157" opacity=".45"/>
+            <path d="M 15 66 A 50 50 0 0 1 115 66" fill="none" stroke="var(--attention)" stroke-width="11" stroke-dasharray="16 157" stroke-dashoffset="-31" opacity=".45"/>
+            <path d="M 15 66 A 50 50 0 0 1 115 66" fill="none" stroke="var(--success)" stroke-width="11" stroke-dasharray="110 157" stroke-dashoffset="-47" opacity=".18"/>
+            <path d="M 15 66 A 50 50 0 0 1 115 66" fill="none" stroke="var(--success)" stroke-width="11" stroke-dasharray="88 157" stroke-linecap="round"/>
+            <line x1="62.5" y1="20" x2="62.5" y2="30" stroke="var(--foreground)" stroke-width="2" opacity=".7"/>
+            <text x="65" y="60" text-anchor="middle" font-size="21" font-weight="700" fill="var(--success)">1,38x</text>
+          </svg>
+        </div>
+        <p style="font-size:11px;color:var(--muted-foreground);text-align:center">Mín. 1,20x · folga de <b style="color:var(--success)">15%</b></p>
+      </div>
+      <span class="cap">Arco com faixas qualitativas; o traço marca o mínimo contratado</span>
+    </div>
+    <div class="s2">
+      <div class="card">
+        <div class="card-head"><span class="card-label">Índice de recebíveis</span></div>
+        <div style="display:flex;justify-content:center;padding:2px 0 4px">
+          <svg viewBox="0 0 130 76" style="width:100%;max-width:190px">
+            <path d="M 15 66 A 50 50 0 0 1 115 66" fill="none" stroke="var(--muted)" stroke-width="11" stroke-linecap="round"/>
+            <path d="M 15 66 A 50 50 0 0 1 115 66" fill="none" stroke="var(--destructive)" stroke-width="11" stroke-dasharray="31 157" opacity=".45"/>
+            <path d="M 15 66 A 50 50 0 0 1 115 66" fill="none" stroke="var(--attention)" stroke-width="11" stroke-dasharray="16 157" stroke-dashoffset="-31" opacity=".45"/>
+            <path d="M 15 66 A 50 50 0 0 1 115 66" fill="none" stroke="var(--attention)" stroke-width="11" stroke-dasharray="45 157" stroke-linecap="round"/>
+            <line x1="62.5" y1="20" x2="62.5" y2="30" stroke="var(--foreground)" stroke-width="2" opacity=".7"/>
+            <text x="65" y="60" text-anchor="middle" font-size="21" font-weight="700" fill="var(--attention)">1,22x</text>
+          </svg>
+        </div>
+        <p style="font-size:11px;color:var(--muted-foreground);text-align:center">Mín. 1,20x · folga de <b class="attn">1,7%</b></p>
+      </div>
+      <span class="cap">O mesmo verde de antes agora se lê como "quase rompendo"</span>
+    </div>
+    <div class="s2">
+      <div class="nota nota--ok">
+        <b>Isto é o que o gauge deveria ter sido.</b> A comparação entre os dois cards
+        acima é impossível no componente de hoje: 1,38x e 1,22x pintam verde e âmbar,
+        mas nada mostra que um tem 15% de folga e o outro tem 1,7%. O arco põe a
+        distância até o rompimento na tela.
+      </div>
+    </div>
+  </div>
+
+  <h3>Bullet <span class="tag tag--novo">novo</span> — vários covenants comparáveis num bloco</h3>
+  <div class="grid">
+    <div class="s4">
+      <div class="card">
+        <div class="card-head"><span class="card-label">Covenants — posição atual</span><span class="unit">valor · mín. contratado</span></div>
+        <div style="display:flex;flex-direction:column;gap:15px;margin-top:4px">
+          <div>
+            <div style="display:flex;justify-content:space-between;font-size:11.5px;margin-bottom:5px"><span style="color:var(--muted-foreground)">Índice de cobertura</span><span style="font-weight:650;color:var(--success)">1,38x</span></div>
+            <svg viewBox="0 0 300 14" style="width:100%;height:14px" preserveAspectRatio="none">
+              <rect x="0" y="0" width="90" height="14" fill="var(--destructive)" opacity=".22"/>
+              <rect x="90" y="0" width="45" height="14" fill="var(--attention)" opacity=".22"/>
+              <rect x="135" y="0" width="165" height="14" fill="var(--success)" opacity=".14"/>
+              <rect x="0" y="4" width="207" height="6" rx="3" fill="var(--success)"/>
+              <rect x="133" y="0" width="2.5" height="14" fill="var(--foreground)" opacity=".8"/>
+            </svg>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;font-size:11.5px;margin-bottom:5px"><span style="color:var(--muted-foreground)">Índice de recebíveis</span><span style="font-weight:650" class="attn">1,22x</span></div>
+            <svg viewBox="0 0 300 14" style="width:100%;height:14px" preserveAspectRatio="none">
+              <rect x="0" y="0" width="90" height="14" fill="var(--destructive)" opacity=".22"/>
+              <rect x="90" y="0" width="45" height="14" fill="var(--attention)" opacity=".22"/>
+              <rect x="135" y="0" width="165" height="14" fill="var(--success)" opacity=".14"/>
+              <rect x="0" y="4" width="141" height="6" rx="3" fill="var(--attention)"/>
+              <rect x="133" y="0" width="2.5" height="14" fill="var(--foreground)" opacity=".8"/>
+            </svg>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;font-size:11.5px;margin-bottom:5px"><span style="color:var(--muted-foreground)">Índice de obra</span><span style="font-weight:650;color:var(--destructive)">0,94x</span></div>
+            <svg viewBox="0 0 300 14" style="width:100%;height:14px" preserveAspectRatio="none">
+              <rect x="0" y="0" width="90" height="14" fill="var(--destructive)" opacity=".22"/>
+              <rect x="90" y="0" width="45" height="14" fill="var(--attention)" opacity=".22"/>
+              <rect x="135" y="0" width="165" height="14" fill="var(--success)" opacity=".14"/>
+              <rect x="0" y="4" width="70" height="6" rx="3" fill="var(--destructive)"/>
+              <rect x="133" y="0" width="2.5" height="14" fill="var(--foreground)" opacity=".8"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+      <span class="cap">Faixas ao fundo, barra = valor, traço vertical = meta. Três covenants em 4/6 de largura.</span>
+    </div>
+    <div class="s2">
+      <div class="nota">
+        <b>Um bloco, N covenants.</b> Hoje cada covenant ocupa um gauge de 2/6 —
+        três já consomem a linha inteira e ainda assim não se comparam entre si,
+        porque cada um tem seu próprio mínimo. O bullet normaliza pela meta e
+        empilha.
+      </div>
+    </div>
+  </div>
+
+  <h3>Meta vs. realizado <span class="tag tag--novo">novo</span> · Comparativo de período <span class="tag tag--novo">novo</span></h3>
+  <div class="grid">
+    <div class="s2">
+      <div class="card">
+        <div class="card-head"><span class="card-label">Repasses no mês</span><span class="trend up">78%</span></div>
+        <p class="big">R$ 3,9 mi</p>
+        <p style="font-size:11px;color:var(--muted-foreground);margin:9px 0 7px">de R$ 5,0 mi previstos</p>
+        <div class="bar-track"><div class="bar-fill" style="width:78%;background:var(--primary)"></div></div>
+      </div>
+      <span class="cap">KPI com progresso — responde "quanto falta", não só "quanto tem"</span>
+    </div>
+    <div class="s2">
+      <div class="card">
+        <div class="card-head"><span class="card-label">Inadimplência 90+</span></div>
+        <div class="compare" style="margin-top:2px">
+          <div><p class="k">Atual</p><p style="font-size:24px;font-weight:700;letter-spacing:-.02em">4,81%</p></div>
+          <div><p class="k">Anterior</p><p style="font-size:24px;font-weight:700;letter-spacing:-.02em;color:var(--muted-foreground)">5,24%</p></div>
+        </div>
+        <p style="margin-top:11px"><span class="trend up"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 7l10 10M17 17H9M17 17V9"/></svg>0,43 p.p.</span> <span style="font-size:11px;color:var(--muted-foreground)">de melhora</span></p>
+      </div>
+      <span class="cap">Comparativo explícito — hoje o número anterior só existe no tooltip</span>
+    </div>
+    <div class="s2">
+      <div class="card">
+        <div class="card-head"><span class="card-label">Composição da carteira</span></div>
+        <div class="stack100" style="margin-top:4px">
+          <span style="width:42%;background:var(--chart-1)"></span>
+          <span style="width:28%;background:var(--chart-3)"></span>
+          <span style="width:18%;background:var(--chart-4)"></span>
+          <span style="width:12%;background:var(--chart-5)"></span>
+        </div>
+        <div class="stack-key">
+          <span><i style="background:var(--chart-1)"></i>Adimpl. 42%</span>
+          <span><i style="background:var(--chart-3)"></i>1–30 28%</span>
+          <span><i style="background:var(--chart-4)"></i>31–90 18%</span>
+          <span><i style="background:var(--chart-5)"></i>90+ 12%</span>
+        </div>
+      </div>
+      <span class="cap">Barra 100% de linha única — a composição do donut em 1/3 do espaço</span>
+    </div>
+  </div>
+
+  <h3>Lista de status <span class="tag tag--novo">novo</span> · Sparkline em série <span class="tag tag--novo">novo</span></h3>
+  <div class="grid">
+    <div class="s3">
+      <div class="card">
+        <div class="card-head"><span class="card-label">Enquadramento por covenant</span><span class="unit">7 monitorados</span></div>
+        <div>
+          <div class="status-row"><span class="dot" style="background:var(--success)"></span><span class="nm">Índice de cobertura</span><span class="vl" style="color:var(--success)">1,38x</span><span class="lim">mín 1,20</span></div>
+          <div class="status-row"><span class="dot" style="background:var(--attention)"></span><span class="nm">Índice de recebíveis</span><span class="vl attn">1,22x</span><span class="lim">mín 1,20</span></div>
+          <div class="status-row"><span class="dot" style="background:var(--destructive)"></span><span class="nm">Índice de obra</span><span class="vl" style="color:var(--destructive)">0,94x</span><span class="lim">mín 1,20</span></div>
+          <div class="status-row"><span class="dot" style="background:var(--success)"></span><span class="nm">Liquidez de curto prazo</span><span class="vl" style="color:var(--success)">2,10x</span><span class="lim">mín 1,50</span></div>
+          <div class="status-row"><span class="dot" style="background:var(--success)"></span><span class="nm">Concentração por sacado</span><span class="vl" style="color:var(--success)">8,4%</span><span class="lim">máx 15%</span></div>
+        </div>
+      </div>
+      <span class="cap">Densidade que o gauge não alcança: 5 covenants em meia linha</span>
+    </div>
+    <div class="s3">
+      <div class="card">
+        <div class="card-head"><span class="card-label">Tendência por métrica</span><span class="unit">12 meses</span></div>
+        <div style="display:flex;flex-direction:column;gap:2px">
+          <div style="display:flex;align-items:center;gap:12px;padding:7px 0;border-bottom:1px solid var(--border)">
+            <span style="flex:1;font-size:12.5px;color:var(--muted-foreground)">Saldo devedor</span>
+            <svg viewBox="0 0 80 22" style="width:80px;height:22px"><path d="M0,17 L13,15 L26,16 L40,10 L53,12 L66,6 L80,3" fill="none" stroke="var(--success)" stroke-width="1.6"/></svg>
+            <span style="font-size:12.5px;font-weight:650;width:64px;text-align:right;font-variant-numeric:tabular-nums">48,2 mi</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:7px 0;border-bottom:1px solid var(--border)">
+            <span style="flex:1;font-size:12.5px;color:var(--muted-foreground)">Inadimplência</span>
+            <svg viewBox="0 0 80 22" style="width:80px;height:22px"><path d="M0,6 L13,9 L26,7 L40,12 L53,11 L66,15 L80,17" fill="none" stroke="var(--success)" stroke-width="1.6"/></svg>
+            <span style="font-size:12.5px;font-weight:650;width:64px;text-align:right;font-variant-numeric:tabular-nums">4,81%</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:7px 0;border-bottom:1px solid var(--border)">
+            <span style="flex:1;font-size:12.5px;color:var(--muted-foreground)">Ticket médio</span>
+            <svg viewBox="0 0 80 22" style="width:80px;height:22px"><path d="M0,12 L13,11 L26,13 L40,11 L53,12 L66,10 L80,11" fill="none" stroke="var(--muted-foreground)" stroke-width="1.6"/></svg>
+            <span style="font-size:12.5px;font-weight:650;width:64px;text-align:right;font-variant-numeric:tabular-nums">183 mil</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:7px 0">
+            <span style="flex:1;font-size:12.5px;color:var(--muted-foreground)">Prazo médio</span>
+            <svg viewBox="0 0 80 22" style="width:80px;height:22px"><path d="M0,8 L13,10 L26,9 L40,13 L53,15 L66,14 L80,18" fill="none" stroke="var(--destructive)" stroke-width="1.6"/></svg>
+            <span style="font-size:12.5px;font-weight:650;width:64px;text-align:right;font-variant-numeric:tabular-nums">96 m</span>
+          </div>
+        </div>
+      </div>
+      <span class="cap">Quatro KPIs com histórico no espaço de um — <i>small multiples</i></span>
+    </div>
+  </div>
+
+  <h3>Gráficos que faltam</h3>
+  <div class="grid">
+    <div class="s3">
+      <div class="card">
+        <div class="card-head"><span class="card-label">Eixo duplo <span class="tag tag--novo">novo</span></span><span class="unit">R$ · %</span></div>
+        <svg viewBox="0 0 300 120" style="width:100%;height:120px">
+          <g stroke="currentColor" stroke-opacity=".14" stroke-dasharray="3 6">
+            <line x1="28" y1="20" x2="272" y2="20"/><line x1="28" y1="50" x2="272" y2="50"/><line x1="28" y1="80" x2="272" y2="80"/>
+          </g>
+          <g fill="var(--chart-1)" opacity=".9">
+            <rect x="38" y="58" width="30" height="42" rx="4"/><rect x="86" y="46" width="30" height="54" rx="4"/>
+            <rect x="134" y="64" width="30" height="36" rx="4"/><rect x="182" y="34" width="30" height="66" rx="4"/>
+            <rect x="230" y="26" width="30" height="74" rx="4"/>
+          </g>
+          <path d="M53,76 L101,60 L149,68 L197,40 L245,30" fill="none" stroke="var(--chart-2)" stroke-width="2.4"/>
+          <g fill="var(--muted-foreground)" font-size="9">
+            <text x="4" y="24">60mi</text><text x="4" y="84">0</text>
+            <text x="276" y="24">8%</text><text x="276" y="84">0%</text>
+          </g>
+        </svg>
+      </div>
+      <span class="cap"><b>Saldo × taxa.</b> Uma escala à esquerda, outra à direita — o <code>composed</code> de hoje esmaga a linha no chão.</span>
+    </div>
+    <div class="s3">
+      <div class="card">
+        <div class="card-head"><span class="card-label">Dispersão <span class="tag tag--novo">novo</span></span><span class="unit">LTV × atraso</span></div>
+        <svg viewBox="0 0 300 120" style="width:100%;height:120px">
+          <g stroke="currentColor" stroke-opacity=".14" stroke-dasharray="3 6">
+            <line x1="30" y1="24" x2="288" y2="24"/><line x1="30" y1="60" x2="288" y2="60"/><line x1="30" y1="96" x2="288" y2="96"/>
+          </g>
+          <line x1="30" y1="10" x2="30" y2="104" stroke="currentColor" stroke-opacity=".2"/>
+          <g fill="var(--chart-1)" opacity=".62">
+            <circle cx="58" cy="92" r="4"/><circle cx="76" cy="86" r="5"/><circle cx="94" cy="94" r="3.5"/>
+            <circle cx="112" cy="80" r="6"/><circle cx="128" cy="88" r="4"/><circle cx="146" cy="72" r="5"/>
+            <circle cx="162" cy="82" r="3.5"/><circle cx="180" cy="64" r="7"/><circle cx="196" cy="76" r="4.5"/>
+          </g>
+          <g fill="var(--chart-6)" opacity=".75">
+            <circle cx="216" cy="44" r="6"/><circle cx="234" cy="34" r="8"/><circle cx="252" cy="52" r="5"/><circle cx="268" cy="26" r="6.5"/>
+          </g>
+          <line x1="204" y1="10" x2="204" y2="104" stroke="var(--destructive)" stroke-opacity=".45" stroke-dasharray="4 4"/>
+          <text x="208" y="18" font-size="8.5" fill="var(--destructive)" opacity=".8">LTV 80%</text>
+        </svg>
+      </div>
+      <span class="cap"><b>Concentração de risco contrato a contrato.</b> Hoje isso só existe como tabela de mil linhas.</span>
+    </div>
+    <div class="s3">
+      <div class="card">
+        <div class="card-head"><span class="card-label">Matriz de safra <span class="tag tag--novo">novo</span></span><span class="unit">safra × meses</span></div>
+        <svg viewBox="0 0 300 120" style="width:100%;height:120px">
+          <g font-size="8.5" fill="var(--muted-foreground)">
+            <text x="2" y="26">2023</text><text x="2" y="48">2024</text><text x="2" y="70">2025</text><text x="2" y="92">2026</text>
+            <text x="36" y="108">3m</text><text x="86" y="108">6m</text><text x="136" y="108">9m</text><text x="186" y="108">12m</text><text x="236" y="108">18m</text>
+          </g>
+          <g>
+            <rect x="30" y="14" width="46" height="18" fill="var(--chart-6)" opacity=".18" rx="2"/><rect x="80" y="14" width="46" height="18" fill="var(--chart-6)" opacity=".3" rx="2"/><rect x="130" y="14" width="46" height="18" fill="var(--chart-6)" opacity=".45" rx="2"/><rect x="180" y="14" width="46" height="18" fill="var(--chart-6)" opacity=".62" rx="2"/><rect x="230" y="14" width="46" height="18" fill="var(--chart-6)" opacity=".8" rx="2"/>
+            <rect x="30" y="36" width="46" height="18" fill="var(--chart-6)" opacity=".12" rx="2"/><rect x="80" y="36" width="46" height="18" fill="var(--chart-6)" opacity=".24" rx="2"/><rect x="130" y="36" width="46" height="18" fill="var(--chart-6)" opacity=".38" rx="2"/><rect x="180" y="36" width="46" height="18" fill="var(--chart-6)" opacity=".5" rx="2"/><rect x="230" y="36" width="46" height="18" fill="var(--chart-6)" opacity=".66" rx="2"/>
+            <rect x="30" y="58" width="46" height="18" fill="var(--chart-6)" opacity=".1" rx="2"/><rect x="80" y="58" width="46" height="18" fill="var(--chart-6)" opacity=".2" rx="2"/><rect x="130" y="58" width="46" height="18" fill="var(--chart-6)" opacity=".3" rx="2"/><rect x="180" y="58" width="46" height="18" fill="var(--chart-6)" opacity=".4" rx="2"/><rect x="230" y="58" width="46" height="18" fill="var(--muted)" opacity=".5" rx="2"/>
+            <rect x="30" y="80" width="46" height="18" fill="var(--chart-6)" opacity=".08" rx="2"/><rect x="80" y="80" width="46" height="18" fill="var(--chart-6)" opacity=".16" rx="2"/><rect x="130" y="80" width="46" height="18" fill="var(--muted)" opacity=".5" rx="2"/><rect x="180" y="80" width="46" height="18" fill="var(--muted)" opacity=".5" rx="2"/><rect x="230" y="80" width="46" height="18" fill="var(--muted)" opacity=".5" rx="2"/>
+          </g>
+        </svg>
+      </div>
+      <span class="cap"><b>Inadimplência por safra de originação.</b> A análise clássica de <i>vintage</i> — hoje impossível fora de tabela.</span>
+    </div>
+    <div class="s3">
+      <div class="card">
+        <div class="card-head"><span class="card-label">Histograma <span class="tag tag--novo">novo</span></span><span class="unit">saldo por faixa</span></div>
+        <svg viewBox="0 0 300 120" style="width:100%;height:120px">
+          <g stroke="currentColor" stroke-opacity=".14" stroke-dasharray="3 6">
+            <line x1="12" y1="26" x2="288" y2="26"/><line x1="12" y1="60" x2="288" y2="60"/><line x1="12" y1="94" x2="288" y2="94"/>
+          </g>
+          <g fill="var(--chart-1)">
+            <rect x="16" y="80" width="28" height="20" rx="2"/><rect x="48" y="58" width="28" height="42" rx="2"/>
+            <rect x="80" y="34" width="28" height="66" rx="2"/><rect x="112" y="20" width="28" height="80" rx="2"/>
+            <rect x="144" y="32" width="28" height="68" rx="2"/><rect x="176" y="52" width="28" height="48" rx="2"/>
+            <rect x="208" y="70" width="28" height="30" rx="2"/><rect x="240" y="84" width="28" height="16" rx="2"/>
+            <rect x="272" y="92" width="16" height="8" rx="2"/>
+          </g>
+          <line x1="126" y1="12" x2="126" y2="104" stroke="var(--foreground)" stroke-opacity=".55" stroke-dasharray="4 3"/>
+          <text x="130" y="19" font-size="8.5" fill="var(--muted-foreground)">mediana</text>
+        </svg>
+      </div>
+      <span class="cap"><b>Distribuição, não média.</b> Uma carteira com ticket médio de 183 mil pode ser homogênea ou bimodal — o KPI não distingue.</span>
+    </div>
+  </div>
+</section>
+
+<hr class="sep">
+
+<!-- ══════════════════════════════════════════════════════════════════
+     5 · MAPA
+     ══════════════════════════════════════════════════════════════════ -->
+<section id="mapa">
+  <h2><span class="n">05</span> Mapa: peça → arquivo → situação</h2>
+  <p class="lede">
+    O que já renderiza, o que renderiza mas você não alcança pela interface, e o que
+    não existe. As três colunas da direita são as três portas de entrada: a paleta
+    manual do editor, o inspetor de bloco, e as tools que a IA usa.
+  </p>
+
+  <div class="scroll">
+  <table class="t">
+    <thead><tr>
+      <th style="width:22%">Componente</th><th style="width:26%">Arquivo</th>
+      <th>Paleta</th><th>Inspetor</th><th>IA</th><th style="width:16%">Situação</th>
+    </tr></thead>
+    <tbody>
+      <tr><td>KPI</td><td><code>SingleKpiBlock.tsx</code></td><td>sim</td><td>sim</td><td>sim</td><td><span class="tag tag--corrigir">unificar</span></td></tr>
+      <tr><td>KPI compact</td><td><code>KpiCard.tsx</code></td><td>—</td><td>—</td><td>—</td><td><span class="tag tag--corrigir">remover</span></td></tr>
+      <tr><td>Gauge</td><td><code>GaugeBlock.tsx</code></td><td><b>não</b></td><td>sim</td><td>sim</td><td><span class="tag tag--corrigir">refazer</span></td></tr>
+      <tr><td>Donut</td><td><code>DonutBlock.tsx</code></td><td><b>não</b></td><td>sim</td><td>sim</td><td><span class="tag tag--corrigir">expor</span></td></tr>
+      <tr><td>Gráfico · bar, line, area</td><td><code>ChartBlock.tsx</code></td><td>sim</td><td>sim</td><td>sim</td><td><span class="tag tag--existe">ok</span></td></tr>
+      <tr><td>Gráfico · stacked-bar</td><td><code>ChartBlock.tsx</code></td><td>sim</td><td>sim</td><td>sim</td><td><span class="tag tag--existe">ok</span></td></tr>
+      <tr><td>Gráfico · waterfall</td><td><code>ChartBlock.tsx</code></td><td>sim</td><td><b>não</b></td><td>sim</td><td><span class="tag tag--corrigir">expor</span></td></tr>
+      <tr><td>Gráfico · composed</td><td><code>ChartBlock.tsx</code></td><td>sim</td><td>sim</td><td>sim</td><td><span class="tag tag--corrigir">eixo duplo</span></td></tr>
+      <tr><td>Tabela</td><td><code>TableBlock.tsx</code></td><td>sim</td><td>sim</td><td>sim</td><td><span class="tag tag--existe">ok</span></td></tr>
+      <tr><td>Texto</td><td><code>TextBlock.tsx</code></td><td>sim</td><td>sim</td><td>sim</td><td><span class="tag tag--existe">ok</span></td></tr>
+      <tr><td>Bullet</td><td>—</td><td>—</td><td>—</td><td>—</td><td><span class="tag tag--novo">novo</span></td></tr>
+      <tr><td>Meta vs. realizado</td><td>—</td><td>—</td><td>—</td><td>—</td><td><span class="tag tag--novo">novo</span></td></tr>
+      <tr><td>Comparativo de período</td><td>—</td><td>—</td><td>—</td><td>—</td><td><span class="tag tag--novo">novo</span></td></tr>
+      <tr><td>Barra 100% linha única</td><td>—</td><td>—</td><td>—</td><td>—</td><td><span class="tag tag--novo">novo</span></td></tr>
+      <tr><td>Lista de status</td><td>—</td><td>—</td><td>—</td><td>—</td><td><span class="tag tag--novo">novo</span></td></tr>
+      <tr><td>Sparkline em série</td><td>—</td><td>—</td><td>—</td><td>—</td><td><span class="tag tag--novo">novo</span></td></tr>
+      <tr><td>Dispersão</td><td>—</td><td>—</td><td>—</td><td>—</td><td><span class="tag tag--novo">novo</span></td></tr>
+      <tr><td>Matriz de safra</td><td>—</td><td>—</td><td>—</td><td>—</td><td><span class="tag tag--novo">novo</span></td></tr>
+      <tr><td>Histograma</td><td>—</td><td>—</td><td>—</td><td>—</td><td><span class="tag tag--novo">novo</span></td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="nota" style="margin-top:26px">
+    <b>Cada peça nova precisa de quatro coisas, não uma.</b> Um componente que só
+    renderiza fica inalcançável — é o que aconteceu com gauge e donut. O caminho
+    completo é: componente em <code>src/pages/explore/ui/blocks/</code>, entrada em
+    <code>block-specs.ts</code> (largura mín/recomendada/máx e quais formas de métrica
+    aceita), tool de autoria em <code>src/features/report-authoring/tools/</code>, e
+    exposição na paleta e no inspetor.
+  </div>
+  <div class="nota nota--ok">
+    <b>A régua já tem precedente neste código.</b> O <code>block-specs.ts</code> resolveu
+    a largura exatamente assim — uma fonte, e store, schema, prompt e normalização
+    derivam dela. A proposta aqui é o mesmo movimento para a aparência: a casca, a
+    escala e os quatro estados saem de um lugar só, e nenhum componente escolhe
+    sozinho de novo.
+  </div>
+</section>
+
+</div>
+
+<script>
+  var r = document.documentElement, b = document.getElementById('tt');
+  b.addEventListener('click', function () {
+    var next = r.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    r.setAttribute('data-theme', next);
+    b.textContent = next === 'dark' ? '☾ tema' : '☀ tema';
+  });
+</script>
+</body>
+</html>

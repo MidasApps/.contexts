@@ -1,0 +1,13 @@
+{
+  "id": "corretor",
+  "name": "Corretor",
+  "layer": "operacional",
+  "language": "operacional",
+  "horizon": "curto",
+  "priorityKpis": ["originacao", "conversao", "pipeline", "ticket_medio"],
+  "preferredGranularity": "carteira",
+  "preferredVisuals": ["kpi", "funnel"],
+  "jargonAnchor": ["pipeline", "conversão", "ticket médio"],
+  "forbidden": ["jargão financeiro avançado", "fórmulas de risco"],
+  "_meta": { "refinedBySme": false, "sourceDoc": "docs/benchmarking/6.1" }
+}

@@ -1,0 +1,152 @@
+[
+  {
+    "id": "p01",
+    "sql": "SELECT * FROM contratos WHERE cpf = '123.456.789-01'",
+    "pii": ["123.456.789-01"]
+  },
+  {
+    "id": "p02",
+    "sql": "SELECT * FROM contratos WHERE cpf = '12345678901'",
+    "pii": ["12345678901"]
+  },
+  {
+    "id": "p03",
+    "sql": "SELECT * FROM empresas WHERE cnpj = '12.345.678/0001-99'",
+    "pii": ["12.345.678/0001-99"]
+  },
+  {
+    "id": "p04",
+    "sql": "SELECT * FROM empresas WHERE cnpj = '12345678000199'",
+    "pii": ["12345678000199"]
+  },
+  {
+    "id": "p05",
+    "sql": "SELECT * FROM users WHERE email = 'joao.silva@example.com'",
+    "pii": ["joao.silva@example.com"]
+  },
+  {
+    "id": "p06",
+    "sql": "-- contato suporte: ana@dominio.com.br\nSELECT id FROM contratos",
+    "pii": ["ana@dominio.com.br"]
+  },
+  {
+    "id": "p07",
+    "sql": "SELECT JSON_EXTRACT(payload, '$.cpf_12345678901') FROM events",
+    "pii": ["12345678901"]
+  },
+  {
+    "id": "p08",
+    "sql": "SELECT * FROM contratos WHERE cpf LIKE '%12345678901%'",
+    "pii": ["12345678901"]
+  },
+  {
+    "id": "p09",
+    "sql": "SELECT id FROM contratos WHERE cpf = '111.222.333-44' UNION SELECT id FROM legacy WHERE cpf = '555.666.777-88'",
+    "pii": ["111.222.333-44", "555.666.777-88"]
+  },
+  {
+    "id": "p10",
+    "sql": "SELECT id FROM (SELECT id FROM contratos WHERE cpf = '999.888.777-66') sub",
+    "pii": ["999.888.777-66"]
+  },
+  {
+    "id": "p11",
+    "sql": "SELECT * FROM contratos /* CPF do diretor: 12345678901 */ WHERE ativo = true",
+    "pii": ["12345678901"]
+  },
+  {
+    "id": "p12",
+    "sql": "SELECT * FROM users WHERE email IN ('A@B.COM','c@d.com')",
+    "pii": ["A@B.COM", "c@d.com"]
+  },
+  {
+    "id": "p13",
+    "sql": "SELECT * FROM users WHERE email = 'first.last+tag@sub-domain.example.co.uk'",
+    "pii": ["first.last+tag@sub-domain.example.co.uk"]
+  },
+  {
+    "id": "p14",
+    "sql": "SELECT * FROM empresas WHERE cnpj LIKE '%12345678000199%'",
+    "pii": ["12345678000199"]
+  },
+  {
+    "id": "p15",
+    "sql": "SELECT * FROM contratos WHERE cpf IN ('123.456.789-01','987.654.321-09')",
+    "pii": ["123.456.789-01", "987.654.321-09"]
+  },
+  {
+    "id": "p16",
+    "sql": "-- TODO investigar 12.345.678/0001-99\nSELECT 1",
+    "pii": ["12.345.678/0001-99"]
+  },
+  {
+    "id": "p17",
+    "sql": "SELECT * FROM events WHERE payload LIKE '%cpf:12345678901,outro%'",
+    "pii": ["12345678901"]
+  },
+  {
+    "id": "p18",
+    "sql": "SELECT * FROM users WHERE LOWER(email) = LOWER('USER@EXAMPLE.COM')",
+    "pii": ["USER@EXAMPLE.COM"]
+  },
+  {
+    "id": "p19",
+    "sql": "SELECT JSON_EXTRACT_SCALAR(payload, '$.user.email_user@example.com') FROM events",
+    "pii": ["user@example.com"]
+  },
+  {
+    "id": "p20",
+    "sql": "SELECT * FROM contratos WHERE cpf = '00000000191' AND ativo = true",
+    "pii": ["00000000191"]
+  },
+  {
+    "id": "p21",
+    "sql": "SELECT * FROM empresas WHERE cnpj = '00.000.000/0001-91' OR cnpj = '11222333000181'",
+    "pii": ["00.000.000/0001-91", "11222333000181"]
+  },
+  {
+    "id": "p22",
+    "sql": "WITH t AS (SELECT cpf FROM contratos WHERE cpf = '321.654.987-00') SELECT * FROM t",
+    "pii": ["321.654.987-00"]
+  },
+  {
+    "id": "p23",
+    "sql": "SELECT * FROM users WHERE email = 'maria_souza-2026@empresa.io'",
+    "pii": ["maria_souza-2026@empresa.io"]
+  },
+  {
+    "id": "p24",
+    "sql": "SELECT * FROM contratos WHERE cpf = '147.258.369-00' OR cpf = '963.852.741-00' OR cpf = '258.147.369-11'",
+    "pii": ["147.258.369-00", "963.852.741-00", "258.147.369-11"]
+  },
+  {
+    "id": "p25",
+    "sql": "SELECT * FROM legacy WHERE doc = '47.846.516/0001-07' AND email = 'compliance@askliquid.com'",
+    "pii": ["47.846.516/0001-07", "compliance@askliquid.com"]
+  },
+  {
+    "id": "p26",
+    "sql": "SELECT * FROM events WHERE payload LIKE '%47846516000107%'",
+    "pii": ["47846516000107"]
+  },
+  {
+    "id": "p27",
+    "sql": "SELECT * FROM contratos WHERE cpf=' 123.456.789-01 ' OR cpf=' 12345678901 '",
+    "pii": ["123.456.789-01", "12345678901"]
+  },
+  {
+    "id": "p28",
+    "sql": "/* análise: ver email a@b.co e cpf 123.456.789-01 */ SELECT 1",
+    "pii": ["a@b.co", "123.456.789-01"]
+  },
+  {
+    "id": "p29",
+    "sql": "SELECT * FROM users WHERE email = 'José.Pereira@dominio.com'",
+    "pii": ["José.Pereira@dominio.com"]
+  },
+  {
+    "id": "p30",
+    "sql": "SELECT id FROM contratos WHERE devedor_cpf IN (SELECT cpf FROM raw WHERE cpf='12345678901') OR devedor_cpf = '987.654.321-00'",
+    "pii": ["12345678901", "987.654.321-00"]
+  }
+]

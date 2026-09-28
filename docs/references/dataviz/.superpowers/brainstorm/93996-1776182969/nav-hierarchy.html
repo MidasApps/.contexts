@@ -1,0 +1,80 @@
+<h2>Como organizar a navegação na sidebar?</h2>
+<p class="subtitle">Cada cliente tem grupos (MCMV, SBPE...) com relatórios dentro. Como mostrar isso?</p>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Grupos como accordion no menu</h3>
+      <p>Sidebar mostra os grupos como seções expansíveis. Clicar no grupo expande e mostra seus relatórios como sub-itens.</p>
+      <div class="mockup" style="margin-top: 12px;">
+        <div class="mockup-body" style="padding: 0; background: #0a0f1a; font-size: 13px; line-height: 1;">
+          <div style="padding: 10px 14px; color: #94a3b8; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em;">Grupos</div>
+          <div style="padding: 10px 14px; background: rgba(99,102,241,0.1); color: #e2e8f0; cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
+            <span>MCMV</span> <span style="font-size: 10px;">&#9660;</span>
+          </div>
+          <div style="padding: 8px 14px 8px 32px; color: #a78bfa; background: rgba(99,102,241,0.05); font-size: 12px;">Visao Geral</div>
+          <div style="padding: 8px 14px 8px 32px; color: #94a3b8; font-size: 12px;">Contratos</div>
+          <div style="padding: 8px 14px 8px 32px; color: #94a3b8; font-size: 12px;">Inadimplencia</div>
+          <div style="padding: 10px 14px; color: #e2e8f0; cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
+            <span>SBPE</span> <span style="font-size: 10px;">&#9654;</span>
+          </div>
+          <div style="padding: 10px 14px; color: #e2e8f0; cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
+            <span>Covenants</span> <span style="font-size: 10px;">&#9654;</span>
+          </div>
+          <div style="padding: 10px 14px; border-top: 1px solid rgba(148,163,184,0.1); color: #64748b; font-size: 12px; cursor: pointer; margin-top: 8px;">
+            + Novo grupo
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Seletor de grupo no topo + relatórios como lista</h3>
+      <p>Um dropdown/tabs no topo da sidebar seleciona o grupo ativo. Abaixo, lista plana dos relatórios daquele grupo.</p>
+      <div class="mockup" style="margin-top: 12px;">
+        <div class="mockup-body" style="padding: 0; background: #0a0f1a; font-size: 13px; line-height: 1;">
+          <div style="padding: 10px 14px; display: flex; gap: 6px; border-bottom: 1px solid rgba(148,163,184,0.1);">
+            <span style="padding: 4px 10px; background: rgba(99,102,241,0.2); color: #a78bfa; border-radius: 6px; font-size: 12px;">MCMV</span>
+            <span style="padding: 4px 10px; color: #64748b; font-size: 12px;">SBPE</span>
+            <span style="padding: 4px 10px; color: #64748b; font-size: 12px;">Covenants</span>
+            <span style="padding: 4px 10px; color: #475569; font-size: 12px;">+</span>
+          </div>
+          <div style="padding: 10px 14px; color: #94a3b8; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em;">Relatorios</div>
+          <div style="padding: 10px 14px; background: rgba(99,102,241,0.1); color: #a78bfa; border-left: 2px solid #a78bfa;">Visao Geral</div>
+          <div style="padding: 10px 14px; color: #94a3b8;">Contratos</div>
+          <div style="padding: 10px 14px; color: #94a3b8;">Inadimplencia</div>
+          <div style="padding: 10px 14px; color: #94a3b8;">PDD Detalhado</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Dois niveis: grupo como "workspace" + menu de relatorios</h3>
+      <p>Grupo funciona como um workspace (similar ao ClientSwitcher). Dropdown no topo troca o grupo. Menu abaixo mostra os relatorios do grupo selecionado. Mais limpo para muitos grupos.</p>
+      <div class="mockup" style="margin-top: 12px;">
+        <div class="mockup-body" style="padding: 0; background: #0a0f1a; font-size: 13px; line-height: 1;">
+          <div style="padding: 12px 14px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid rgba(148,163,184,0.1); cursor: pointer;">
+            <span style="width: 28px; height: 28px; background: rgba(99,102,241,0.2); color: #a78bfa; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600;">M</span>
+            <span style="color: #e2e8f0; flex: 1;">MCMV</span>
+            <span style="color: #64748b; font-size: 10px;">&#9660;</span>
+          </div>
+          <div style="padding: 10px 14px; color: #94a3b8; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em;">Relatorios</div>
+          <div style="padding: 10px 14px; background: rgba(99,102,241,0.1); color: #a78bfa; border-left: 2px solid #a78bfa;">Visao Geral</div>
+          <div style="padding: 10px 14px; color: #94a3b8;">Contratos</div>
+          <div style="padding: 10px 14px; color: #94a3b8;">Inadimplencia</div>
+          <div style="padding: 10px 14px; color: #94a3b8;">PDD Detalhado</div>
+          <div style="padding: 10px 14px; border-top: 1px solid rgba(148,163,184,0.1); color: #64748b; font-size: 12px; cursor: pointer; margin-top: 8px;">
+            + Novo relatorio
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
