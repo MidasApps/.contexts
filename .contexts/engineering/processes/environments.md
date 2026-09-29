@@ -2,7 +2,7 @@
 title: Convenção de Ambientes
 type: processes
 status: active
-last_updated: 2026-09-28
+last_updated: 2026-09-29
 ---
 
 # Convenção de Ambientes
@@ -47,7 +47,7 @@ Aplicar o princípio do **12-factor**: ambientes devem ser o mais idênticos pos
 
 - SQLite em local e Postgres em prod.
 - Mock LLM em local sem flag explícita que permita testar com modelo real.
-- Versões de runtime divergentes entre ambientes (ver `@stacks/runtime/node@26`). A única divergência de runtime aceita é a do ADR 0004 E1: Firebase Functions rodam `nodejs24` em todos os ambientes, e o resto em Node 26.
+- Versões de runtime divergentes entre ambientes (ver `@stacks/runtime/node@26`). As únicas divergências de runtime aceitas são as do ADR 0004: E1 (Firebase Functions em `nodejs24`) e E6 (`apps/web` no App Hosting em `nodejs24`), em todos os ambientes; o resto roda em Node 26.
 - Engine de banco diferente entre staging e prod.
 - Lib de filas, cache ou storage divergente.
 

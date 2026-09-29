@@ -112,7 +112,7 @@ A doutrina escreve caminhos a partir de `src/`. No monorepo, leia cada um pela t
 - **`eslint-plugin-boundaries`** (versão em `@.contexts/engineering/stacks/VERSIONS.md`; roda no ESLint da E3, ADR 0004): cada pacote e cada camada FSD é um tipo de elemento declarado por padrão de path; a tabela de fronteiras acima vira a regra `boundaries/dependencies`. A config mora em `packages/config`.
 - **Dependência declarada.** O `node_modules` do pnpm não expõe dependência não declarada: import de pacote ausente do `package.json` falha na resolução.
 - **Versão única.** Dependência compartilhada entre pacotes usa a mesma versão em todo o workspace (invariante 8 da `MEMORY.md`), declarada uma vez no `catalog:` do `pnpm-workspace.yaml`.
-- **`engines.node`:** faixas da invariante 6 da `MEMORY.md`, uma para a raiz, os apps e os pacotes e outra só para `apps/functions` (E1). `packageManager` na raiz com a versão do pnpm da `MEMORY.md`.
+- **`engines.node`:** faixas da invariante 6 da `MEMORY.md`, uma para a raiz, os apps e os pacotes e outra para `apps/functions` (E1) e `apps/web` (E6, runtime do App Hosting, ADR 0009). `packageManager` na raiz com a versão do pnpm da `MEMORY.md`.
 
 ### Pipelines Turbo
 

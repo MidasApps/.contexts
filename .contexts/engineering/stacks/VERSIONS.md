@@ -11,11 +11,11 @@ Registro do que o npm e as páginas oficiais mostravam em **2026-09-29** (mediç
 
 Método: `npm view <pkg> version` e, para runtimes sem pacote npm, a página de release do fornecedor. Não usar a memória do modelo como fonte.
 
-Reavalie antes de subir um pin. A coluna "por que não o mais novo" é parte do contrato de compatibilidade. **Política (ADR 0004):** o baseline é a última estável; pacote atrás do `latest` só com exceção `E1`–`E5` registrada em `decisions/0004-latest-stable-baseline-and-documented-exceptions.md`. Pré-release (canary, beta, rc) não é versão.
+Reavalie antes de subir um pin. A coluna "por que não o mais novo" é parte do contrato de compatibilidade. **Política (ADR 0004):** o baseline é a última estável; pacote atrás do `latest` só com exceção `E1`–`E6` registrada em `decisions/0004-latest-stable-baseline-and-documented-exceptions.md`. Pré-release (canary, beta, rc) não é versão.
 
 | Pacote / runtime | Medido | Baseline do framework | Por que não o mais novo, quando diferir |
 |---|---|---|---|
-| Node.js | 26.10.0 Current (2026-09-21, `nodejs.org/dist/index.json` em 2026-09-29); 24.21.0 LTS | **26.10.0** | ADR 0004. 26 entra em LTS em 2026-10-28 (Maintenance 2027-10-20, EOL 2029-04-30). **E1:** o deploy de Firebase Functions fica em `nodejs24` (EOL 2028-04-30), porque o Google não oferece `nodejs26`. |
+| Node.js | 26.10.0 Current (2026-09-21, `nodejs.org/dist/index.json` em 2026-09-29); 24.21.0 LTS | **26.10.0** | ADR 0004. 26 entra em LTS em 2026-10-28 (Maintenance 2027-10-20, EOL 2029-04-30). **E1:** o deploy de Firebase Functions fica em `nodejs24` (EOL 2028-04-30), porque o Google não oferece `nodejs26`. **E6:** o `apps/web` no Firebase App Hosting também roda `nodejs24` (Cloud Run lista `nodejs26` só como Preview, ADR 0009). O servidor Mastra no Cloud Run usa imagem própria `node:26-alpine`. |
 | @types/node | 26.6.3 | **26.6.3** | Acompanha o Node 26. O pacote de functions usa `@types/node@24`. |
 | typescript | 7.0.2 | **7.0.2** | API programática estável ainda não saiu (prevista para 7.1). |
 | @typescript/typescript6 | 6.0.2 | **6.0.2** | Só para ferramentas que importam a API JS (typescript-eslint, Volar, deployer Mastra). |
@@ -33,6 +33,8 @@ Reavalie antes de subir um pin. A coluna "por que não o mais novo" é parte do 
 | firebase | 12.19.0 | **12.19.0** | SDK cliente. |
 | @firebase/rules-unit-testing | 5.0.2 | **5.0.2** (dev) | Peer `firebase ^12`, engines Node `>=20`. Testes de Security Rules no emulator. |
 | firebase-tools | 15.32.0 | devDependency | Não vai para o runtime. |
+| @apphosting/adapter-nextjs | 14.0.21 | usado pelo build do App Hosting | Peer `next: *` não prova suporte ao Next 16; a tabela do App Hosting vai até 15.2.x (spike do SP0b, ADR 0009). |
+| @google-cloud/cloud-sql-connector | 1.12.0 | **1.12.0** (opcional) | Só se o `apps/mastra` usar IAM database auth sem o socket embutido do Cloud Run (`stacks/backend/cloud-run.md`). |
 | drizzle-orm | 0.45.3 | **0.45.3** | Ainda 0.x. drizzle-kit 0.31.11. |
 | PostgreSQL | 18.6 (2026-08-13). 18.5 não foi publicado. 19 beta 4 em 2026-09-24 | **18.6** | 19 não teve GA. pgvector 0.8.6 publica imagem `0.8.6-pg18`, não `pg19`. |
 | pgvector | 0.8.6 (2026-07-29) | **0.8.6** | Imagem `pgvector/pgvector:0.8.6-pg18`. |
