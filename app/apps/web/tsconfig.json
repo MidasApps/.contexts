@@ -8,6 +8,6 @@
     "incremental": true,
     "tsBuildInfoFile": ".tscache/tsbuildinfo"
   },
-  "include": ["next-env.d.ts", "src/**/*.ts", "src/**/*.tsx", ".next/types/**/*.ts", "*.ts", "*.js"],
+  "include": ["next-env.d.ts", "src/**/*.ts", "src/**/*.tsx", "scripts/**/*.ts", ".next/types/**/*.ts", "*.ts", "*.js"],
   "exclude": ["node_modules"]
 }
