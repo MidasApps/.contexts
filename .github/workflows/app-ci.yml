@@ -41,9 +41,29 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
       # .contexts/ and .claude/ are the DDC framework: app changes never touch them.
-      - name: Fail if .contexts or .claude changed against main
+      # Base: the PR base commit; on push, the previous tip of the branch (skipped
+      # when it is all zeros, i.e. a new branch); otherwise origin/main.
+      - name: Fail if .contexts or .claude changed
         working-directory: .
-        run: git diff --quiet origin/main -- .contexts .claude
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PUSH_BEFORE_SHA: ${{ github.event.before }}
+        run: |
+          case "$EVENT_NAME" in
+            pull_request) base="$PR_BASE_SHA" ;;
+            push) base="$PUSH_BEFORE_SHA" ;;
+            *) base="origin/main" ;;
+          esac
+          if [ -z "$base" ] || [ "$base" = "0000000000000000000000000000000000000000" ]; then
+            echo "No base commit to compare against; skipping the framework guard."
+            exit 0
+          fi
+          if ! git diff --quiet "$base" HEAD -- .contexts .claude; then
+            echo "::error::.contexts/ or .claude/ changed since $base; the framework is read-only."
+            git diff --stat "$base" HEAD -- .contexts .claude
+            exit 1
+          fi
 
   checks:
     name: lint, typecheck, test, contracts
