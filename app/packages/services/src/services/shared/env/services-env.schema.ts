@@ -45,6 +45,9 @@ const assertLocalStaysLocal = (env: BaseServicesEnv, ctx: RefinementContext) => 
   for (const key of REQUIRED_LOCAL_EMULATORS) {
     if (!env[key]) flag(ctx, key, "local requires this emulator");
   }
+  // Zod 4 still runs this refinement after a field issue; an unparsable URL is
+  // already reported by the field schema, so it is skipped here.
+  if (!URL.canParse(env.DATABASE_URL)) return;
   if (!LOCAL_DATABASE_HOSTS.has(new URL(env.DATABASE_URL).hostname)) {
     flag(ctx, "DATABASE_URL", "local must use the local Postgres container");
   }

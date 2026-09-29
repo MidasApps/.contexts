@@ -54,6 +54,10 @@ describe("ServicesEnvSchema", () => {
     expect(issuePaths(source)).toEqual(["FIREBASE_PROJECT_ID", "FIRESTORE_EMULATOR_HOST"]);
   });
 
+  it("reports an unparsable DATABASE_URL in local instead of crashing the refinement", () => {
+    expect(issuePaths({ ...LOCAL_ENV, DATABASE_URL: "nope" })).toEqual(["DATABASE_URL"]);
+  });
+
   it("rejects a non-postgres DATABASE_URL and an unknown AI_MODE", () => {
     const source = { ...REMOTE_ENV, DATABASE_URL: "mysql://x@10.0.0.5/app", AI_MODE: "mock" };
     expect(issuePaths(source)).toEqual(["DATABASE_URL", "AI_MODE"]);
