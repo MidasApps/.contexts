@@ -1,0 +1,21 @@
+[package]
+name = "core-desktop"
+version = "0.0.0"
+description = "Desktop shell of the core boilerplate (Tauri 2)"
+edition = "2024"
+# tauri 2.12 MSRV; the toolchain itself is pinned in rust-toolchain.toml.
+rust-version = "1.90"
+publish = false
+
+[lib]
+# The `_lib` suffix avoids a Windows name clash between the lib and bin
+# artifacts (cargo#8519). staticlib/cdylib are what Android and iOS link.
+name = "core_desktop_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "=2.7.0", features = [] }
+
+[dependencies]
+# Exact pins (spec §16.1); same minor as @tauri-apps/api and @tauri-apps/cli.
+tauri = { version = "=2.12.0", features = [] }

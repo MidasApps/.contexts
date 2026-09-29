@@ -1,0 +1,6 @@
+# Rust stable measured on 2026-09-29 (spec §16.1). rustup installs it on the
+# first cargo/tauri run in this directory (user-level toolchain only).
+[toolchain]
+channel = "1.98.1"
+profile = "minimal"
+components = ["clippy", "rustfmt"]

@@ -1,0 +1,14 @@
+/* Minimal neutral styles until the shared design system lands (SP2). No inline
+   styles anywhere: the CSP has no 'unsafe-inline' for style-src in builds. */
+:root {
+  color-scheme: light dark;
+  font-family: system-ui, sans-serif;
+}
+
+.shell {
+  padding: 2rem;
+}
+
+.muted {
+  opacity: 0.7;
+}
