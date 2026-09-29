@@ -71,6 +71,8 @@ allowBuilds:
 # pnpm 12 holds back releases younger than minimumReleaseAge. Next 16.3.7 is the
 # security release published on 2026-09-29 (spec §16.1), so its packages were
 # admitted explicitly by pnpm; drop these entries once they age past the window.
+# Remove after 2026-10-07 (7 days after the 2026-09-29 publish): every entry
+# below is a Next 16.3.7 package, so they all go together.
 minimumReleaseAgeExclude:
   - '@next/env@16.3.7'
   - '@next/eslint-plugin-next@16.3.7'
