@@ -224,6 +224,7 @@ Expected: só `done`.
 - Create/Modify: rules path-scoped em `.claude/rules/` para `apps/desktop/**` (tauri) e `packages/contracts/**` (data-catalog), apontando para `.contexts`
 - Modify: `CLAUDE.md` (novas skills; ADRs 0006–0013), hook `suggest-skills` (gatilhos novos), `decisions/README.md` (índice 0006–0013)
 
+- [ ] Follow-ups de revisões anteriores: `stacks/testing/vitest.md` → `resolve.tsconfigPaths` nativo (Vite 8) no lugar de `vite-tsconfig-paths` (review Task 3); pins antigos nas skills `next-16`, `react-19`, `vercel-ai-sdk`, `using-ddc`, `writing-plans-ddc` (review Task 1)
 - [ ] Steps: read → skills → rules → CLAUDE/hook → rodar hook `check-claude-md-size` → verify → ledger → commit `chore(harness): sync claude skills and rules with core doctrine`
 
 **Verify:** comum + `ls .claude/skills | wc -l` aumentou 8; hook de tamanho sem aviso.
