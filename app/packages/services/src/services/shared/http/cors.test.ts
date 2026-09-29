@@ -34,6 +34,10 @@ describe("CorsOriginListSchema", () => {
     expect(CorsOriginListSchema.safeParse(value).success).toBe(false);
   });
 
+  it("normalizes origins to lower case, as browsers send them in Origin", () => {
+    expect(CorsOriginListSchema.parse("HTTP://LocalHost:1420,Tauri://LOCALHOST")).toEqual([DESKTOP_DEV, "tauri://localhost"]);
+  });
+
   it("accepts an empty list (CORS disabled)", () => {
     expect(CorsOriginListSchema.parse("")).toEqual([]);
   });

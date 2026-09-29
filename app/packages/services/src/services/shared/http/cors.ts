@@ -17,13 +17,17 @@ const OriginSchema = z
   .regex(ORIGIN_PATTERN, { error: "expected scheme://host[:port]" })
   .refine((origin) => URL.canParse(origin), { error: "expected a parsable origin" });
 
-/** Comma-separated origins from env; blanks are dropped, `*` is rejected. */
+/**
+ * Comma-separated origins from env; blanks are dropped, `*` is rejected.
+ * Entries are lower-cased: browsers serialize the `Origin` header with a
+ * lower-case scheme and host, so a mixed-case entry would never match.
+ */
 export const CorsOriginListSchema = z
   .string()
   .transform((value) =>
     value
       .split(",")
-      .map((origin) => origin.trim())
+      .map((origin) => origin.trim().toLowerCase())
       .filter(Boolean),
   )
   .pipe(z.array(OriginSchema));
