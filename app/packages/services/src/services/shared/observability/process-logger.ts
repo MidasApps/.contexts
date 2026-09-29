@@ -6,14 +6,20 @@ const UNCONFIGURED: LogContext = { service: "unknown", env: "unknown" };
 // singletons that Next.js loads by re-export, so they cannot receive the app's
 // validated env through a constructor; the app's boot hook (web:
 // `src/instrumentation.ts`) sets the context once, before any request.
-let processLogContext: LogContext = UNCONFIGURED;
+// It lives on globalThis under a registered symbol because bundlers (Turbopack)
+// give instrumentation and route handlers separate module instances.
+const CONTEXT_KEY = Symbol.for("@core/services/process-log-context");
+
+type ContextHolder = { [CONTEXT_KEY]?: LogContext };
+
+const holder = globalThis as ContextHolder;
 
 /** Called once at boot with values from the app's validated `src/env.ts`. */
 export const configureProcessLogger = (context: LogContext): void => {
-  processLogContext = { ...context };
+  holder[CONTEXT_KEY] = { ...context };
 };
 
-export const readProcessLogContext = (): LogContext => processLogContext;
+export const readProcessLogContext = (): LogContext => holder[CONTEXT_KEY] ?? UNCONFIGURED;
 
 /** Default logger for driving adapters; tests build their own with `createLogger`. */
 export const processLogger: Logger = createLogger({ context: readProcessLogContext });

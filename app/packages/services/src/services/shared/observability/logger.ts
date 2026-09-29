@@ -2,7 +2,7 @@
  * Structured JSON logger (rules/observability.md): every line carries
  * `timestamp, level, message, service, env`, plus `requestId`/`traceId` and
  * `durationMs` when the caller has them. The only place that writes to the
- * process streams; runtime code never calls `console`.
+ * output streams; other runtime code never calls `console`.
  */
 export type LogLevel = "debug" | "info" | "warn" | "error";
 
@@ -40,10 +40,18 @@ export const serializeError = (err: unknown): SerializedError => {
   return { name: "NonError", message: String(err) };
 };
 
-/** One JSON line per record; errors go to stderr so platforms can split streams. */
+/**
+ * One JSON line per record; errors go to stderr so platforms can split streams.
+ * `console` (not `process.stdout`) keeps the sink valid in every Next.js
+ * runtime the bundler analyzes (proxy, instrumentation, route handlers).
+ */
 export const jsonLineSink: LogSink = (record) => {
-  const stream = record.level === "error" ? process.stderr : process.stdout;
-  stream.write(`${JSON.stringify(record)}\n`);
+  const line = JSON.stringify(record);
+  // The single sanctioned console call site: every other module logs through a Logger.
+  // eslint-disable-next-line no-console
+  if (record.level === "error") console.error(line);
+  // eslint-disable-next-line no-console
+  else console.log(line);
 };
 
 const buildRecord = (args: {

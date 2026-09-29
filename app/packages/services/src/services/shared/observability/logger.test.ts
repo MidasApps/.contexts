@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { createLogger, type LogRecord } from "./logger.ts";
 
 const FIXED_NOW = new Date("2026-09-29T12:00:00.000Z");
@@ -53,6 +53,19 @@ describe("createLogger", () => {
     logger.warn("override_attempted", { service: "other", level: "debug" });
 
     expect(records[0]).toMatchObject({ level: "warn", service: "web", message: "override_attempted" });
+  });
+
+  it("writes one JSON line per record by default, errors to stderr", () => {
+    const stdout = vi.spyOn(console, "log").mockImplementation(() => undefined);
+    const stderr = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    const logger = createLogger({ context: { service: "web", env: "local" }, now: () => FIXED_NOW });
+
+    logger.info("health_checked");
+    logger.error("health_failed");
+
+    expect(JSON.parse(String(stdout.mock.calls[0]?.[0]))).toMatchObject({ level: "info", message: "health_checked" });
+    expect(JSON.parse(String(stderr.mock.calls[0]?.[0]))).toMatchObject({ level: "error", message: "health_failed" });
+    vi.restoreAllMocks();
   });
 
   it("reads the context lazily so a boot-time configuration applies", () => {
