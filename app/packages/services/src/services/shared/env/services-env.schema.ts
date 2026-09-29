@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { toEnvIssues } from "./env-issues.ts";
 import { InvalidEnvError } from "./invalid-env-error.ts";
 
 /**
@@ -78,9 +79,5 @@ export type ServicesEnv = z.infer<typeof ServicesEnvSchema>;
 export const loadServicesEnv = (source: Record<string, string | undefined>): ServicesEnv => {
   const result = ServicesEnvSchema.safeParse(source);
   if (result.success) return result.data;
-  const issues = result.error.issues.map((issue) => ({
-    field: issue.path.map(String).join("."),
-    issue: issue.code.toUpperCase(),
-  }));
-  throw new InvalidEnvError(issues);
+  throw new InvalidEnvError(toEnvIssues(result.error));
 };

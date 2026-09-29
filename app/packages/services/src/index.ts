@@ -3,7 +3,8 @@ export {
   InvalidEnvError,
   type EnvIssue,
 } from "./services/shared/env/invalid-env-error.ts";
-export { loadServicesEnvWith } from "./services/shared/env/load-services-env-with.ts";
+export { toEnvIssues } from "./services/shared/env/env-issues.ts";
+export { EnvKeyCollisionError, loadServicesEnvWith } from "./services/shared/env/load-services-env-with.ts";
 export {
   loadServicesEnv,
   ServicesEnvSchema,
@@ -15,8 +16,12 @@ export {
   type LogFields,
   type Logger,
   type LogLevel,
+  type LogRecord,
+  type LogSink,
 } from "./services/shared/observability/logger.ts";
-export { configureProcessLogger } from "./services/shared/observability/process-logger.ts";
+export { type ErrorDetail, type ErrorEnvelope, errorResponse } from "./services/shared/http/error-envelope.ts";
+export { type RouteContext, type RouteHandler, withRouteBoundary } from "./services/shared/http/route-boundary.ts";
+export { configureProcessLogger, readProcessLogContext } from "./services/shared/observability/process-logger.ts";
 export {
   REQUEST_ID_HEADER,
   resolveRequestId,

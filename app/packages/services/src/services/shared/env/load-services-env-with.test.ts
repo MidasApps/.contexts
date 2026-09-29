@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
 import { InvalidEnvError } from "./invalid-env-error.ts";
-import { loadServicesEnvWith } from "./load-services-env-with.ts";
+import { EnvKeyCollisionError, loadServicesEnvWith } from "./load-services-env-with.ts";
 
 const LOCAL_ENV = {
   APP_ENV: "local",
@@ -35,5 +35,14 @@ describe("loadServicesEnvWith", () => {
 
     expect(load).toThrow(/APP_URL \(INVALID_FORMAT\)/);
     expect(load).not.toThrow(/s3cr3t/);
+  });
+});
+
+describe("loadServicesEnvWith key ownership", () => {
+  it("refuses an app schema that redeclares a services variable", () => {
+    const Overriding = z.object({ DATABASE_URL: z.string(), EXTRA: z.string().optional() });
+
+    expect(() => loadServicesEnvWith(Overriding, LOCAL_ENV)).toThrow(EnvKeyCollisionError);
+    expect(() => loadServicesEnvWith(Overriding, LOCAL_ENV)).toThrow(/DATABASE_URL/);
   });
 });
