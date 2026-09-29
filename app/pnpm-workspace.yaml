@@ -1,0 +1,22 @@
+packages:
+  - apps/*
+  - packages/*
+  - modules/*
+
+# Exact pins so every package resolves the same version (ADR 0004: latest stable,
+# measured with `npm view` on 2026-09-29; exceptions E2/E3 noted inline).
+catalog:
+  "@eslint/js": 9.39.5
+  "@types/node": 26.6.3
+  "@typescript/typescript6": 6.0.2
+  eslint: 9.39.5 # E3: eslint-plugin-react only accepts ^9.7
+  eslint-import-resolver-typescript: 4.4.5
+  eslint-plugin-boundaries: 7.2.0
+  turbo: 2.11.5
+  typescript: 7.0.2
+  typescript-eslint: 8.71.0 # E2: runs on the TS 6 API via .pnpmfile.cjs
+  vitest: 5.0.2
+  zod: 4.6.5
+
+engineStrict: true
+savePrefix: ""

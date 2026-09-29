@@ -1,0 +1,14 @@
+# Dependencies and build output
+node_modules/
+dist/
+.next/
+.turbo/
+.tscache/
+.mastra/
+
+# Local-only data and secrets (.env.example is versioned)
+.env.local
+.firebase-data/
+
+# Tauri/Rust build output
+src-tauri/target/
