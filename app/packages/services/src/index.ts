@@ -19,6 +19,14 @@ export {
   type LogRecord,
   type LogSink,
 } from "./services/shared/observability/logger.ts";
+export {
+  applyCorsHeaders,
+  CorsOriginListSchema,
+  type CorsPolicy,
+  createCorsPolicy,
+  isCorsPreflight,
+  preflightResponse,
+} from "./services/shared/http/cors.ts";
 export { type ErrorDetail, type ErrorEnvelope, errorResponse } from "./services/shared/http/error-envelope.ts";
 export { type RouteContext, type RouteHandler, withRouteBoundary } from "./services/shared/http/route-boundary.ts";
 export { configureProcessLogger, readProcessLogContext } from "./services/shared/observability/process-logger.ts";
