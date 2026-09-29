@@ -246,7 +246,7 @@ it("rejects a contract without description", () => {
 
 **Files:**
 - Create: `docs/plans/2026-09-29-sp0b-monorepo-foundation/reports/sp0-summary.md` com resultado de:
-  App Hosting emulator × Next 16.3.7 (produção já coberta pela Task 0); `@mastra/auth-firebase` 1.1.2 validando token do Auth Emulator
+  App Hosting emulator × Next 16.3.7 (produção já coberta pela Task 0); `MastraAuthProvider` próprio (ADR 0010) validando token do Auth Emulator e membership
   (script mínimo); peer `@mastra/evals` (E4); FCM/App Check no Tauri (pesquisa documentada);
   versões novas que exigirem exceção → linha E7+ no ADR 0004 (E6 = App Hosting nodejs24)
 

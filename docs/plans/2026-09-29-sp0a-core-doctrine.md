@@ -156,6 +156,7 @@ Expected: só `done`.
   `contracts:catalog` / `contracts:check`; paridade Drizzle↔Zod; 4 usos pela IA (conhecer,
   `renderForm`, SQL read-only semântico, comando→tool) com guard-rails
 - Modify: `contracts/schemas.md` (seção curta "Metadados de catálogo" → link)
+- Modify: `contracts/api.md` §12 — remover/ajustar `POST /v1/auth/refresh` conforme ADR 0010 (conflito registrado lá; review Task 5)
 - Modify: `MEMORY.md` (Contracts: 10 com agents)
 
 - [ ] Steps: read → ADR → contrato → link → verify → ledger → commit `docs(contexts): add data catalog contract`
@@ -169,12 +170,12 @@ Expected: só `done`.
 `@.contexts/engineering/rules/observability.md`, `@.contexts/engineering/stacks/frontend/shadcn-ui.md`
 
 **Files:**
-- Create: `decisions/0012-agent-runtime-supervisor-subagents-and-module-contract.md` (supervisor; `.network()` proibido; RequestContext; memória; durable+PubSub; auth-firebase)
+- Create: `decisions/0012-agent-runtime-supervisor-subagents-and-module-contract.md` (supervisor; `.network()` proibido; RequestContext; memória; durable+PubSub; auth provider próprio conforme ADR 0010)
 - Create: `contracts/agents.md` (ids, shapes de agent/tool/skill/workflow/processor/scorer; `defineModule()` com campos da spec §3; teto de permissões; aprovação; tools geradas de comandos)
 - Create: `rules/ai-agents.md` (cap de steps, mutação com aprovação, orçamento por tenant, citação em RAG, conteúdo recuperado não confiável, eval antes de trocar modelo/prompt, sem prompt em string solta)
 - Modify: `stacks/ai/mastra-sdk.md` — atualizar para docs de 2026-09-29: supervisor/subagents,
   RequestContext, Skills, Observational Memory, durable agents/PubSub, processors, scorers
-  (`createScorer` de `@mastra/core/evals`), datasets/experiments, `@mastra/auth-firebase`,
+  (`createScorer` de `@mastra/core/evals`), datasets/experiments, auth provider próprio (`MastraAuthProvider`, ADR 0010; `@mastra/auth-firebase` não adotado),
   `@mastra/ai-sdk` (`version: 'v7'`), Studio + Editor, voice, **Firestore não suportado**,
   deploy Docker/Cloud Run (deployer Vercel → "não usado no core v1")
 - Modify: `stacks/ai/harness-engineering.md` (tabela camada → pacote do core)

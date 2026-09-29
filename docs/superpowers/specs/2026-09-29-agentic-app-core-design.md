@@ -194,7 +194,7 @@ Pins em `MEMORY.md`. A última estável é medida antes de instalar (ADR 0004).
 - **Durabilidade:**
   - durable agents e PubSub (Google Cloud PubSub fora de `local`);
   - scheduler de workflows no host long-lived.
-- **Auth:** `@mastra/auth-firebase`, com `authorizeUser` checando a membership.
+- **Auth:** `MastraAuthProvider` próprio (`@mastra/core/server`) em `packages/agents`: `verifyIdToken` do firebase-admin 14.5.0, `authorizeUser` checando a membership em `services/access`, `mapUserToResourceId` = `tenantId:uid`. `@mastra/auth-firebase` não é adotado (usa a API legada removida no firebase-admin 14; ADR 0010).
 
 ## 8. Chat
 
@@ -303,7 +303,7 @@ Segue `processes/environments.md` §9:
   - supervisor, RequestContext, Skills, Observational Memory;
   - durable agents e PubSub, processors;
   - scorers, datasets e experiments;
-  - auth-firebase, `@mastra/ai-sdk` v7, Studio e Editor, voice;
+  - auth provider próprio (ADR 0010), `@mastra/ai-sdk` v7, Studio e Editor, voice;
   - Firestore não suportado;
   - deploy Docker/Cloud Run no lugar do deployer Vercel.
 - `stacks/ai/harness-engineering.md`: mapear as camadas para os pacotes.
@@ -334,9 +334,9 @@ Segue `processes/environments.md` §9:
 2. Versões estáveis e compatibilidade (TS 7, Node 26, React 19.3, Zod 4.6) de:
    - Tauri 2, Vite, TanStack Router;
    - `next-intl`, AI Elements;
-   - `@mastra/auth-firebase`, `@mastra/ai-sdk`, `@mastra/voice-*`, `@mastra/google-cloud-pubsub`.
+   - `@mastra/ai-sdk`, `@mastra/voice-*`, `@mastra/google-cloud-pubsub`.
 3. Peer atual de `@mastra/evals` com Vitest 5 (E4).
-4. `@mastra/auth-firebase` com tokens do Auth Emulator e `authorizeUser` custom.
+4. `MastraAuthProvider` próprio validando tokens do Auth Emulator e membership (ADR 0010).
 5. Push (FCM) e App Check no Tauri, principalmente no Android.
 6. Observational Memory contra semantic recall (custo e qualidade).
 
