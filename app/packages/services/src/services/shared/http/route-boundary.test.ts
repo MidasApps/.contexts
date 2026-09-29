@@ -64,6 +64,19 @@ describe("withRouteBoundary", () => {
     ]);
   });
 
+  it("echoes the request id on a response whose headers are immutable", async () => {
+    const { logger } = makeLogger();
+    // Response.redirect (like a proxied fetch response) has an immutable header guard.
+    const immutable = Response.redirect("http://localhost/elsewhere", 307);
+    const handler = withRouteBoundary({ operation: "thing_read", logger }, () => Promise.resolve(immutable));
+
+    const response = await handler(requestWith(VALID_ULID));
+
+    expect(response.status).toBe(307);
+    expect(response.headers.get("location")).toBe("http://localhost/elsewhere");
+    expect(response.headers.get("x-request-id")).toBe(VALID_ULID);
+  });
+
   it("generates a request id when the incoming one is missing", async () => {
     const { logger } = makeLogger();
     const handler = withRouteBoundary({ operation: "thing_read", logger }, () =>

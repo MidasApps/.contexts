@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { createLogger, type LogRecord } from "./logger.ts";
 
 const FIXED_NOW = new Date("2026-09-29T12:00:00.000Z");
@@ -10,6 +10,10 @@ const makeCapturingLogger = (context = { service: "web", env: "local" }) => {
 };
 
 describe("createLogger", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
   it("emits the stable base fields plus the structured fields", () => {
     const { logger, records } = makeCapturingLogger();
 
@@ -65,7 +69,6 @@ describe("createLogger", () => {
 
     expect(JSON.parse(String(stdout.mock.calls[0]?.[0]))).toMatchObject({ level: "info", message: "health_checked" });
     expect(JSON.parse(String(stderr.mock.calls[0]?.[0]))).toMatchObject({ level: "error", message: "health_failed" });
-    vi.restoreAllMocks();
   });
 
   it("reads the context lazily so a boot-time configuration applies", () => {
