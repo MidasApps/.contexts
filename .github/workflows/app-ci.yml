@@ -1,0 +1,140 @@
+# CI for the agentic app core in app/ (docs/plans/2026-09-29-sp0-app-foundation.md, Task 11).
+# Supply chain (.contexts/engineering/rules/security.md §9): third-party actions are
+# pinned by full commit SHA (tag in the trailing comment), permissions are read-only,
+# and installs use the committed lockfile.
+name: app-ci
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: app-ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+defaults:
+  run:
+    working-directory: app
+
+env:
+  NODE_VERSION: 26.10.0
+  PNPM_VERSION: 12.6.0
+  # Turbo and Next telemetry off in CI; Mastra CLI telemetry too (LGPD default).
+  TURBO_TELEMETRY_DISABLED: "1"
+  NEXT_TELEMETRY_DISABLED: "1"
+  MASTRA_TELEMETRY_DISABLED: "1"
+
+jobs:
+  framework-guard:
+    name: framework is read-only
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      # .contexts/ and .claude/ are the DDC framework: app changes never touch them.
+      - name: Fail if .contexts or .claude changed against main
+        working-directory: .
+        run: git diff --quiet origin/main -- .contexts .claude
+
+  checks:
+    name: lint, typecheck, test, contracts
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      # No corepack on Node 25+; same install as apps/mastra/Dockerfile.
+      - name: Install pnpm
+        run: npm install -g pnpm@${{ env.PNPM_VERSION }}
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Audit dependencies (high and critical block)
+        run: pnpm audit --audit-level high
+      - name: Lint
+        run: pnpm lint
+      - name: Typecheck
+        run: pnpm typecheck
+      - name: Unit tests
+        run: pnpm test
+      - name: Contracts catalog is up to date
+        run: pnpm contracts:check
+
+  emulators:
+    name: emulator tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      # Firestore and Pub/Sub emulators are Java programs.
+      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        with:
+          distribution: temurin
+          java-version: "21"
+      - name: Install pnpm
+        run: npm install -g pnpm@${{ env.PNPM_VERSION }}
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      # Builds apps/functions, then runs every *.emulator.test.ts inside
+      # `firebase emulators:exec --only auth,firestore,functions,storage` (demo-core).
+      - name: Emulator tests
+        run: pnpm test:emulators
+
+  postgres:
+    name: postgres tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: pgvector/pgvector:0.8.6-pg18
+        env:
+          POSTGRES_USER: app
+          POSTGRES_PASSWORD: app
+          POSTGRES_DB: app
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -h 127.0.0.1 -U app -d app"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 20
+    env:
+      # CI-only credentials of the throwaway service container above.
+      DATABASE_URL: postgresql://app:app@127.0.0.1:5432/app
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Install pnpm
+        run: npm install -g pnpm@${{ env.PNPM_VERSION }}
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      # Service containers start before checkout, so the compose init scripts
+      # (docker-entrypoint-initdb.d) are applied here; they are idempotent.
+      - name: Apply local init scripts
+        run: |
+          for file in infra/postgres/init/*.sql; do
+            psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f "$file"
+          done
+      - name: Postgres tests
+        run: pnpm test:postgres
