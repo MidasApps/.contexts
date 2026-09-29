@@ -51,13 +51,15 @@ use and that belongs to the release pipeline (Task 11/SP-deploy). Not tuned: `[p
 
 - `tauri.conf.json` `app.security.csp` (object form, Tauri appends its own nonces/hashes to bundled assets at compile time):
   `default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: blob:; font-src 'self';
-  connect-src 'self' ipc: http://ipc.localhost http://localhost:3000; object-src 'none'; base-uri 'self';
+  connect-src 'self' ipc: http://ipc.localhost; object-src 'none'; base-uri 'self';
   form-action 'self'; frame-ancestors 'none'`. No `'unsafe-inline'`/`'unsafe-eval'` in builds; the UI uses no inline styles.
 - `devCsp` differs only by `style-src 'self' 'unsafe-inline'` (Vite injects `<style>` for CSS HMR) and
   `ws://localhost:1420` (HMR socket) in `connect-src`. **Not verified** whether Tauri 2.12 enforces `devCsp` when the
   webview loads `devUrl` directly on desktop; the docs page on CSP does not say.
 - `freezePrototype: true`; TanStack Router and React ran fine with it.
-- **Configurable API origin:** the base config keeps `http://localhost:3000` so bare `pnpm tauri dev` works locally.
+- **Configurable API origin (fail closed, after review):** the base release `csp` allows no API origin at all; only
+  `devCsp` keeps `http://localhost:3000` so bare `pnpm tauri dev` works locally. `vite.config.ts` validates `VITE_API_URL`
+  for the mode (same loader), so `vite build`/`tauri build` fail without a valid value.
   `scripts/write-tauri-api-config.ts [mode]` resolves `VITE_API_URL` exactly as Vite does for that mode (`loadEnv`: shell
   env > `.env.[mode].local` > `.env.[mode]`), validates it with the same Zod schema as the app, and writes
   `src-tauri/tauri.api.conf.json` (gitignored), an RFC 7396 merge patch that replaces only `connect-src` in `csp` and

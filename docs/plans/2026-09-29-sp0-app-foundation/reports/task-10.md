@@ -101,3 +101,39 @@ The screenshot is local evidence only (scratchpad), not committed.
 3. **No README per app** (rule documentation asks one per executable app; none of the apps has one yet); commands are in `spike-tauri.md` and the root README update is Task 11.
 4. Release profile not tuned (lto/strip); installers (WiX/NSIS) not built.
 5. No component/E2E test of the route; the Tauri window was verified manually by screenshot. A Playwright check of `http://localhost:1420` could join `test:e2e` in Task 11.
+
+## Review fixes (Spec PASS / Quality APPROVED, one Important)
+
+1. **Fail closed (Important).**
+   - `scripts/load-desktop-build-env.ts`: `loadDesktopBuildEnv({ mode, envDir })` = Vite `loadEnv(mode, envDir, "VITE_")` + the app's Zod schema. It has 3 tests, which use temp env dirs, and was red first (`Cannot find module`).
+   - `vite.config.ts` calls it for every mode, so `vite build` and `vite dev` refuse a missing or invalid `VITE_API_URL`. `write-tauri-api-config.ts` reuses it.
+   - The base release `csp` `connect-src` is now `'self' ipc: http://ipc.localhost`, with no API origin. `http://localhost:3000` stays only in `devCsp`. A regression test asserts that the base `connect-src` equals `BASE_CONNECT_SRC`.
+2. **CORS lower case.** `CorsOriginListSchema` lower-cases entries, because browsers send `Origin` in lower case. The new test was red first.
+3. **Error screen.**
+   - `main.tsx` dynamically imports `@/env.ts` and `@/router.ts` inside `try`. On `InvalidDesktopEnvError` it renders `ConfigErrorScreen`, which shows variable names only.
+   - Router creation moved to `src/router.ts` (`createAppRouter(env)`, plus the `Register` typing).
+   - This screen was not exercised live: build-time validation now prevents such a bundle, and typecheck and lint cover the code.
+4. **Env location.** `src/config/env.ts` moved to `src/env.ts`, per the Global Constraints (`git mv`). The schema stays in `src/config/desktop-env.schema.ts`.
+
+Verify:
+
+```
+$ pnpm -F desktop build                                  (no VITE_API_URL for production)
+error during build: InvalidDesktopEnvError: invalid environment: VITE_API_URL
+$ VITE_API_URL=http://api.example.com pnpm -F desktop build -> InvalidDesktopEnvError: invalid environment: VITE_API_URL
+$ VITE_API_URL=https://api.example.com pnpm -F desktop build -> ✓ built in 138ms (index 214 kB / 67 kB gzip + lazy chunks);
+  dist has api.example.com, 0 occurrences of localhost:3000
+$ vite (development, .env.development) -> 200 on :1420 (stopped)
+$ pnpm tauri:config development -> connect-src 'self' ipc: http://ipc.localhost http://localhost:3000
+$ cargo check (src-tauri) -> Finished `dev` profile in 32.45s
+$ pnpm turbo run lint typecheck test --filter=@core/desktop --filter=@core/services --filter=@core/web
+  desktop 22 · services 59 · web 17 tests passed; Tasks: 9 successful, 9 total
+$ git diff --quiet main -- .contexts .claude && echo framework-ok -> framework-ok
+```
+
+**Note for Task 11 (CI):** `turbo run build` now needs `VITE_API_URL` for `@core/desktop`. Two options:
+- export it in CI, e.g. `https://api.example.invalid`, or the env's API;
+- or leave the desktop build out of CI.
+
+Lint, typecheck and test do not need it.
+
