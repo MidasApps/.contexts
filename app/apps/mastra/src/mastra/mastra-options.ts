@@ -18,16 +18,26 @@ export const buildStorageConfig = (env: MastraEnv) => ({
 });
 
 /**
- * HTTP server options. Outside local, Mastra is private and only the `/v1`
- * API calls it server to server, so CORS is off (spec §16.3).
+ * CORS: outside local, Mastra is private and only the `/v1` API calls it
+ * server to server, so CORS is off (spec §16.3). In local, an explicit
+ * allowlist: Studio's own origin plus `MASTRA_CORS_ORIGINS`, never `*`.
  */
+const buildCorsConfig = (env: MastraEnv): ServerConfig["cors"] =>
+  env.APP_ENV === "local"
+    ? { origin: [`http://localhost:${env.PORT}`, ...env.MASTRA_CORS_ORIGINS], credentials: false }
+    : false;
+
+/** HTTP server options; Swagger, OpenAPI docs and raw request logs stay off. */
 export const buildServerConfig = (env: MastraEnv): ServerConfig => ({
   host: env.MASTRA_HOST,
   port: env.PORT,
   timeout: env.MASTRA_SERVER_TIMEOUT_MS,
-  ...(env.APP_ENV === "local" ? {} : { cors: false as const }),
+  cors: buildCorsConfig(env),
   build: { swaggerUI: false, openAPIDocs: false, apiReqLogs: false },
 });
+
+/** Pino mixin adding an ISO `timestamp` to every record. */
+export const createTimestampMixin = (now: () => Date) => () => ({ timestamp: now().toISOString() });
 
 /**
  * Pino options for single-line JSON with the fields of rules/observability.md:
@@ -43,5 +53,5 @@ export const buildLoggerOptions = (env: MastraEnv, now: () => Date = () => new D
     level: (label) => ({ level: label }),
     bindings: () => ({ service: MASTRA_SERVICE_NAME, env: env.APP_ENV }),
   },
-  mixin: () => ({ timestamp: now().toISOString() }),
+  mixin: createTimestampMixin(now),
 });

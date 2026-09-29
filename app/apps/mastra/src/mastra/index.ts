@@ -3,7 +3,10 @@ import { PinoLogger } from "@mastra/loggers";
 import { MastraStorageExporter, Observability } from "@mastra/observability";
 import { PostgresStore } from "@mastra/pg";
 import { env } from "../env.ts";
+import { configureMastraProcessLogger } from "./process-log-context.ts";
 import { buildLoggerOptions, buildServerConfig, buildStorageConfig, MASTRA_SERVICE_NAME } from "./mastra-options.ts";
+
+configureMastraProcessLogger(env);
 
 /**
  * Mastra entry (`mastra dev` / `mastra build` look for this file and this

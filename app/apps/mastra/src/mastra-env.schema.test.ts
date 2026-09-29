@@ -11,14 +11,15 @@ const LOCAL_ENV = {
 };
 
 describe("loadMastraEnv", () => {
-  it("defaults to Mastra's local dev server: localhost:4111, info logs, one-hour timeout", () => {
+  it("defaults to Mastra's local dev server: localhost:4111, info logs, 15 min timeout", () => {
     expect(loadMastraEnv(LOCAL_ENV)).toMatchObject({
       APP_ENV: "local",
       AI_MODE: "real",
       MASTRA_HOST: "localhost",
       PORT: 4111,
       LOG_LEVEL: "info",
-      MASTRA_SERVER_TIMEOUT_MS: 3_600_000,
+      MASTRA_SERVER_TIMEOUT_MS: 900_000,
+      MASTRA_CORS_ORIGINS: ["http://localhost:3000", "http://localhost:1420", "tauri://localhost", "http://tauri.localhost"],
     });
   });
 
@@ -32,6 +33,14 @@ describe("loadMastraEnv", () => {
     expect(() => loadMastraEnv({ ...LOCAL_ENV, MASTRA_SERVER_TIMEOUT_MS: "3600001" })).toThrow(
       /MASTRA_SERVER_TIMEOUT_MS \(TOO_BIG\)/,
     );
+  });
+
+  it("parses MASTRA_CORS_ORIGINS as a comma-separated list of origins", () => {
+    expect(loadMastraEnv({ ...LOCAL_ENV, MASTRA_CORS_ORIGINS: "http://localhost:3000, http://localhost:5173" }).MASTRA_CORS_ORIGINS).toEqual([
+      "http://localhost:3000",
+      "http://localhost:5173",
+    ]);
+    expect(() => loadMastraEnv({ ...LOCAL_ENV, MASTRA_CORS_ORIGINS: "*" })).toThrow(/MASTRA_CORS_ORIGINS/);
   });
 
   it("names every invalid variable of the services and Mastra schemas, never its value", () => {

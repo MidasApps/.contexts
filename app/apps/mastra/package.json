@@ -7,7 +7,7 @@
     "node": ">=26.0.0 <27"
   },
   "scripts": {
-    "dev": "mastra dev --env ../../.env.local",
+    "dev": "node --eval \"process.getBuiltinModule('node:fs').rmSync('.mastra', { recursive: true, force: true })\" && mastra dev --env ../../.env.local",
     "build": "mastra build",
     "start": "node .mastra/output/index.mjs",
     "lint": "eslint .",

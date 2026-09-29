@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { loadMastraEnv, type MastraEnv } from "../mastra-env.schema.ts";
-import { buildLoggerOptions, buildServerConfig, buildStorageConfig } from "./mastra-options.ts";
+import { buildLoggerOptions, buildServerConfig, buildStorageConfig, createTimestampMixin } from "./mastra-options.ts";
 
 const LOCAL_SOURCE = {
   APP_ENV: "local",
@@ -32,15 +32,24 @@ describe("buildStorageConfig", () => {
 
 describe("buildServerConfig", () => {
   it("binds host and port from the env and lets streams outlive the 180 s default", () => {
-    expect(buildServerConfig(prodEnv)).toMatchObject({ host: "0.0.0.0", port: 8081, timeout: 3_600_000 });
+    expect(buildServerConfig(prodEnv)).toMatchObject({ host: "0.0.0.0", port: 8081, timeout: 900_000 });
   });
 
   it("turns CORS off outside local, where only the /v1 API calls Mastra", () => {
     expect(buildServerConfig(prodEnv).cors).toBe(false);
   });
 
-  it("keeps Mastra's default CORS in local for Studio", () => {
-    expect(buildServerConfig(localEnv)).not.toHaveProperty("cors");
+  it("allows only Studio and the configured dev origins in local, never *", () => {
+    expect(buildServerConfig(localEnv).cors).toEqual({
+      origin: [
+        "http://localhost:4111",
+        "http://localhost:3000",
+        "http://localhost:1420",
+        "tauri://localhost",
+        "http://tauri.localhost",
+      ],
+      credentials: false,
+    });
   });
 
   it("keeps Swagger, OpenAPI docs and raw request logs off in builds", () => {
@@ -61,6 +70,8 @@ describe("buildLoggerOptions", () => {
   });
 
   it("stamps every record with an ISO timestamp", () => {
-    expect(options.mixin?.({}, 30, undefined as never)).toEqual({ timestamp: "2026-09-29T12:00:00.000Z" });
+    const mixin = createTimestampMixin(() => new Date("2026-09-29T12:00:00.000Z"));
+
+    expect(mixin()).toEqual({ timestamp: "2026-09-29T12:00:00.000Z" });
   });
 });

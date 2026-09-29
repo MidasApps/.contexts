@@ -8,9 +8,13 @@ FROM node:26-alpine AS build
 RUN npm install -g pnpm@12.6.0
 WORKDIR /workspace
 ENV MASTRA_TELEMETRY_DISABLED=1
+# Lockfile-only layer: `pnpm fetch` fills the store from the lockfile, so this
+# layer stays cached until dependencies change, not on every source edit.
+COPY pnpm-lock.yaml pnpm-workspace.yaml .npmrc .pnpmfile.cjs ./
+RUN pnpm fetch
 COPY . .
-# Only the Mastra app and the workspace packages it depends on.
-RUN pnpm install --frozen-lockfile --filter "@core/mastra..."
+# Only the Mastra app and the workspace packages it depends on, from the store.
+RUN pnpm install --offline --frozen-lockfile --filter "@core/mastra..."
 # No --studio: Studio runs only in local via `mastra dev` (spec §16.3).
 RUN pnpm --filter @core/mastra build
 
