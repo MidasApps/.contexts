@@ -47,7 +47,7 @@ firebase-admin 14.5.0, firebase-functions 7.4.0, `@firebase/rules-unit-testing` 
 **Files:**
 - Create: `.nvmrc` (`26.10.0`), `package.json` (raiz, `private`, `packageManager: "pnpm@12.6.0"`,
   `engines`, scripts `dev|build|lint|typecheck|test|test:e2e|contracts:catalog|contracts:check|seed:local`
-  delegando para `turbo run`), `pnpm-workspace.yaml` (`apps/*`, `packages/*`, `modules/*`),
+  delegando para `turbo run`), `pnpm-workspace.yaml` (`apps/*`, `packages/*`, `modules/*` + `catalog:` com todas as dependências compartilhadas, ver `architecture/monorepo.md`),
   `turbo.json` (tasks com `dependsOn` e `outputs`), `.pnpmfile.cjs`, `.npmrc`
 - Modify: `.gitignore` (`node_modules`, `.turbo`, `.next`, `dist`, `.tscache`, `.env.local`,
   `.firebase-data`, `src-tauri/target`, `.mastra`)
@@ -71,7 +71,7 @@ firebase-admin 14.5.0, firebase-functions 7.4.0, `@firebase/rules-unit-testing` 
   `app`, `client`, `contracts`, `services`, `agents`, `i18n`, `module`; regras: `client` ↛ `services|agents`,
   `services|agents` ↛ `client`, `contracts` ↛ qualquer interno, `app` só compõe)
 - Create: `packages/config/vitest/preset.ts`
-- Test: `packages/config/eslint/boundaries.test.ts` (roda ESLint em fixtures `fixtures/client-imports-services.ts` → espera erro `boundaries/element-types`; `fixtures/client-imports-contracts.ts` → sem erro)
+- Test: `packages/config/eslint/boundaries.test.ts` (roda ESLint em fixtures `fixtures/client-imports-services.ts` → espera erro `boundaries/dependencies`; `fixtures/client-imports-contracts.ts` → sem erro)
 
 - [ ] Steps: read → teste falhando → config → teste passa → `pnpm -F @core/config test` → ledger → commit `build(config): add shared tsconfig, eslint boundaries and vitest preset`
 
@@ -84,7 +84,7 @@ firebase-admin 14.5.0, firebase-functions 7.4.0, `@firebase/rules-unit-testing` 
 `@.contexts/engineering/decisions/0005-firestore-document-ids-use-automatic-ids.md`
 
 **Files:**
-- Create: `packages/contracts/package.json` (`@core/contracts`, dep `zod@4.6.5`)
+- Create: `packages/contracts/package.json` (`@core/contracts`, dep `zod: catalog:` — versão 4.6.5 declarada uma vez no `catalog` do `pnpm-workspace.yaml`)
 - Create: `packages/contracts/src/contracts/primitives/{ids,money,locale,time-zone,iso-datetime}.schema.ts`
 - Create: `packages/contracts/src/contracts/primitives/catalog-meta.schema.ts` — `CatalogMetaSchema`
   (`id`, `description` obrigatório, `examples?`, `pii: none|personal|sensitive`,

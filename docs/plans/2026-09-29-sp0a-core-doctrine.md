@@ -42,7 +42,7 @@ firebase-admin 14.5.0, firebase-tools 15.32.0, drizzle-orm 0.45.3,
 
 ```bash
 cd /c/Projetos/.contexts
-for f in $(git diff --name-only HEAD~1 -- '*.md'); do
+for f in $(git diff --name-only HEAD~1 HEAD -- '*.md'); do
   for p in $(grep -oE '@\.contexts/[A-Za-z0-9_@./-]+\.md' "$f" | sort -u); do
     [ -f "${p#@}" ] || echo "MISSING $p in $f"; done; done; echo done
 ```
