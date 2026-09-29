@@ -26,3 +26,8 @@ ui-debug.log
 
 # Tauri/Rust build output
 src-tauri/target/
+
+# Functions: lib/ is the generated deploy source (apps/functions/build.ts).
+# .env.demo-core only holds non-secret emulator config for the demo project.
+apps/functions/lib/
+!apps/functions/.env.demo-core
