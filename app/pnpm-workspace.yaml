@@ -8,14 +8,21 @@ packages:
 catalog:
   "@eslint/js": 9.39.5
   "@firebase/rules-unit-testing": 5.0.2
+  "@next/eslint-plugin-next": 16.3.7
   "@types/node": 26.6.3
+  "@types/react": 19.3.0
+  "@types/react-dom": 19.3.0
   "@typescript/typescript6": 6.0.2
   eslint: 9.39.5 # E3: eslint-plugin-react only accepts ^9.7
   eslint-import-resolver-typescript: 4.4.5
   eslint-plugin-boundaries: 7.2.0
   firebase: 12.19.0
   firebase-tools: 15.32.0
+  next: 16.3.7
   postgres: 3.4.9
+  react: 19.3.0
+  react-dom: 19.3.0
+  server-only: 0.0.1
   turbo: 2.11.5
   typescript: 7.0.2
   typescript-eslint: 8.71.0 # E2: runs on the TS 6 API via .pnpmfile.cjs
@@ -23,6 +30,11 @@ catalog:
   vitest: 5.0.2
   yaml: 2.9.1
   zod: 4.6.5
+
+# apps/web runs on App Hosting nodejs24 (spec §14/§16.3): its Node types stay on 24.
+catalogs:
+  node24:
+    "@types/node": 24.19.0
 
 engineStrict: true
 savePrefix: ""
@@ -39,3 +51,19 @@ allowBuilds:
   protobufjs: false
   re2: false
   unrs-resolver: false
+
+# pnpm 12 holds back releases younger than minimumReleaseAge. Next 16.3.7 is the
+# security release published on 2026-09-29 (spec §16.1), so its packages were
+# admitted explicitly by pnpm; drop these entries once they age past the window.
+minimumReleaseAgeExclude:
+  - '@next/env@16.3.7'
+  - '@next/eslint-plugin-next@16.3.7'
+  - '@next/swc-darwin-arm64@16.3.7'
+  - '@next/swc-darwin-x64@16.3.7'
+  - '@next/swc-linux-arm64-gnu@16.3.7'
+  - '@next/swc-linux-arm64-musl@16.3.7'
+  - '@next/swc-linux-x64-gnu@16.3.7'
+  - '@next/swc-linux-x64-musl@16.3.7'
+  - '@next/swc-win32-arm64-msvc@16.3.7'
+  - '@next/swc-win32-x64-msvc@16.3.7'
+  - next@16.3.7
