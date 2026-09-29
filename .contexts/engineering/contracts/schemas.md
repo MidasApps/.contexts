@@ -3,7 +3,7 @@ title: Convenções de modelagem para schemas
 type: contracts
 scope: schemas zod compartilhados (boundaries, naming, organização, versionamento, sharing client/server)
 status: active
-last_updated: 2026-09-28
+last_updated: 2026-09-29
 ---
 
 # Convenções de modelagem para schemas
@@ -29,6 +29,8 @@ Este documento prescreve **como modelar schemas Zod** que atravessam fronteiras 
 | Primitivos compartilhados | `src/contracts/primitives/` |
 
 Regra de bolso: **se o schema cruza client ↔ server ou mais de um package/camada, pertence a `src/contracts/`; reuso entre slices só no client desce para `src/entities/<entity>/model/` (`@architecture/fsd`).** Schema interno de slice não é importado por outro slice: desça para `entities` ou promova para `contracts` conforme essa regra. Esta tabela é a fonte da localização (ADR 0003, Amendments).
+
+No monorepo, os caminhos da tabela ganham o prefixo do pacote: `src/contracts/` → `packages/contracts/src/contracts/`, `src/services/` → `packages/services/src/services/`, slices FSD → `packages/client/src/`. A tabela continua sendo a fonte da localização. Mapeamento completo: `@.contexts/engineering/architecture/monorepo.md` (ADR 0006).
 
 ## 3. Naming
 

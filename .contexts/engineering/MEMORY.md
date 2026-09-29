@@ -9,7 +9,7 @@
 > [`stacks/VERSIONS.md`](stacks/VERSIONS.md). Um projeto consumidor compara o
 > `package.json` dele com essa tabela antes de tratar a linha como fato local.
 
-**ADRs:** [0001](decisions/0001-ddc-engineering-baseline-and-harness-enforcement.md) (harness, IDs, secrets), [0002](decisions/0002-baseline-2026-09-version-and-naming-alignment.md) (pins e nomes entre camadas), [0003](decisions/0003-cross-doc-convention-conflicts-resolved.md) (qual documento vence em cada conflito) e [0004](decisions/0004-latest-stable-baseline-and-documented-exceptions.md) (política de última estável + exceções E1–E5) e [0005](decisions/0005-firestore-document-ids-use-automatic-ids.md) (ID automático no Firestore; ULID só em `eventId`, `Idempotency-Key`, `X-Request-Id`).
+**ADRs:** [0001](decisions/0001-ddc-engineering-baseline-and-harness-enforcement.md) (harness, IDs, secrets), [0002](decisions/0002-baseline-2026-09-version-and-naming-alignment.md) (pins e nomes entre camadas), [0003](decisions/0003-cross-doc-convention-conflicts-resolved.md) (qual documento vence em cada conflito), [0004](decisions/0004-latest-stable-baseline-and-documented-exceptions.md) (política de última estável + exceções E1–E5), [0005](decisions/0005-firestore-document-ids-use-automatic-ids.md) (ID automático no Firestore; ULID só em `eventId`, `Idempotency-Key`, `X-Request-Id`) e [0006](decisions/0006-monorepo-layout-and-package-boundaries.md) (monorepo pnpm + Turborepo; doutrina `src/` distribuída em pacotes).
 
 ## Matriz de compatibilidade (baseline de produção)
 
@@ -71,7 +71,7 @@ Stack pinado para ser **mutuamente compatível**. Não subir uma major isolada s
 - [accessibility](rules/accessibility.md) — WCAG 2.2 AA, semântica primeiro, ARIA como último recurso
 - [grounding](rules/grounding.md) — Anti-alucinação: verificar paths/símbolos/versões no repo
 
-## Architecture — 6 modelos estruturais
+## Architecture — 7 modelos estruturais
 
 - [fsd](architecture/fsd.md) — Feature-Sliced Design (layers/slices/segments)
 - [feature-based](architecture/feature-based.md) — Package by feature, vertical slicing
@@ -79,6 +79,7 @@ Stack pinado para ser **mutuamente compatível**. Não subir uma major isolada s
 - [hexagonal](architecture/hexagonal.md) — Ports & Adapters (driving/driven)
 - [ddd](architecture/ddd.md) — Strategic (Bounded Contexts) + Tactical (aggregates, VOs)
 - [clean-architecture](architecture/clean-architecture.md) — Quatro camadas concêntricas, Dependency Rule
+- [monorepo](architecture/monorepo.md) — apps/packages/modules, mapeamento `src/` → pacotes, fronteiras de import, pipelines Turbo (ADR 0006)
 
 ## Practices — 5 disciplinas
 
@@ -155,7 +156,7 @@ Stack pinado para ser **mutuamente compatível**. Não subir uma major isolada s
 - [monitoring](processes/monitoring.md) — Stack OTel, SLOs com error budget, on-call rotation
 - [rollback](processes/rollback.md) — Flag flip > deploy revert > forward fix; expand-and-contract enable
 
-## Decisions — 5 ADRs + índice
+## Decisions — 6 ADRs + índice
 
 - [README](decisions/README.md) — formato e numeração dos ADRs
 - [0001 — Baseline 2026-07 + harness DDC](decisions/0001-ddc-engineering-baseline-and-harness-enforcement.md) — uuidv7 no Postgres, using-ddc, plans, verification, hooks, remoção guard-secrets
@@ -163,6 +164,7 @@ Stack pinado para ser **mutuamente compatível**. Não subir uma major isolada s
 - [0003 — Conflitos de convenção](decisions/0003-cross-doc-convention-conflicts-resolved.md) — envelope de erro, schema, `views`, testes colocados, `function`/barrel, frontmatter: quem vence
 - [0004 — Última estável + exceções](decisions/0004-latest-stable-baseline-and-documented-exceptions.md) — Node 26 como baseline; E1 Functions `nodejs24`, E2 typescript-eslint, E3 ESLint 9, E4 `@mastra/evals`, E5 Playwright CT
 - [0005 — IDs do Firestore](decisions/0005-firestore-document-ids-use-automatic-ids.md) — ID automático no Firestore (ULID é monotônico e gera hotspot); ULID só em `eventId`, `Idempotency-Key`, `X-Request-Id`
+- [0006 — Monorepo](decisions/0006-monorepo-layout-and-package-boundaries.md) — pnpm + Turborepo; `apps/` só compõem, `packages/` recebem o `src/` da doutrina, fronteiras por `eslint-plugin-boundaries`
 
 ---
 

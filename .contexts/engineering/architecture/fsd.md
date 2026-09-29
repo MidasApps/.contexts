@@ -2,7 +2,7 @@
 title: Feature-Sliced Design
 type: architecture
 status: active
-last_updated: 2026-09-28
+last_updated: 2026-09-29
 upstream: https://feature-sliced.design/
 ---
 
@@ -158,6 +158,10 @@ O time usa os cinco segments oficiais (`ui`, `model`, `lib`, `api`, `config`) se
 - A camada `processes` não é utilizada — segue a recomendação oficial pós-deprecation. Fluxos multi-etapa moram em `widgets` ou em uma sequência de páginas coordenadas via roteamento.
 - A camada `shared` não recebe lógica de domínio. Qualquer tipo, schema ou função que mencione um conceito de negócio (usuário, produto, pedido) pertence a `entities`, não a `shared`.
 - Compartilhamento entre features da mesma camada acontece exclusivamente através de uma camada inferior (em geral `entities` ou `shared`) ou subindo para `widgets`.
+
+### No monorepo
+
+As camadas acima moram em `packages/client/src/`, consumidas por `apps/web` e `apps/desktop`; `src/app/` do Next vira `apps/web/src/app/` e `src/app-providers/` fica em cada app. A estrutura interna não muda. Mapeamento completo: `@.contexts/engineering/architecture/monorepo.md` (ADR 0006).
 
 ## Critérios de aplicação
 
