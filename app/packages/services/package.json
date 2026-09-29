@@ -12,8 +12,9 @@
   "scripts": {
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run --project unit --passWithNoTests",
-    "test:emulators": "vitest run --project emulators"
+    "test": "vitest run --project unit",
+    "test:emulators": "vitest run --project emulators",
+    "test:postgres": "vitest run --project postgres"
   },
   "dependencies": {
     "zod": "catalog:"
@@ -24,6 +25,7 @@
     "@types/node": "catalog:",
     "eslint": "catalog:",
     "firebase": "catalog:",
+    "postgres": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"
   }

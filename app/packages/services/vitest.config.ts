@@ -1,4 +1,5 @@
-import { defineCoreVitestConfig } from "@core/config/vitest";
+import { coreVitestConfig } from "@core/config/vitest";
+import { defineConfig } from "vitest/config";
 
 /**
  * Tests are split by what they need to run, encoded in the file suffix:
@@ -12,22 +13,27 @@ import { defineCoreVitestConfig } from "@core/config/vitest";
 const EMULATOR_TESTS = "src/**/*.emulator.test.ts";
 const POSTGRES_TESTS = "src/**/*.postgres.test.ts";
 
-// Config default export is required by Vitest's config loader.
-export default defineCoreVitestConfig({
+// Projects copy the preset instead of `extends: true`: mergeConfig concatenates
+// arrays, so the preset's `include` would leak unit tests into every project.
+const { coverage, include = [], exclude = [], ...presetDefaults } = coreVitestConfig.test ?? {};
+
+const defineProject = (args: { name: string; include: string[]; exclude?: string[] }) => ({
   test: {
+    ...presetDefaults,
+    name: args.name,
+    include: args.include,
+    exclude: [...exclude, ...(args.exclude ?? [])],
+  },
+});
+
+// Config default export is required by Vitest's config loader.
+export default defineConfig({
+  test: {
+    ...(coverage ? { coverage } : {}),
     projects: [
-      {
-        extends: true,
-        test: { name: "unit", exclude: ["**/node_modules/**", EMULATOR_TESTS, POSTGRES_TESTS] },
-      },
-      {
-        extends: true,
-        test: { name: "emulators", include: [EMULATOR_TESTS], testTimeout: 20_000 },
-      },
-      {
-        extends: true,
-        test: { name: "postgres", include: [POSTGRES_TESTS], testTimeout: 20_000 },
-      },
+      defineProject({ name: "unit", include, exclude: [EMULATOR_TESTS, POSTGRES_TESTS] }),
+      defineProject({ name: "emulators", include: [EMULATOR_TESTS] }),
+      defineProject({ name: "postgres", include: [POSTGRES_TESTS] }),
     ],
   },
 });

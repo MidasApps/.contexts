@@ -16,7 +16,8 @@
     "contracts:catalog": "turbo run contracts:catalog",
     "contracts:check": "turbo run contracts:check",
     "seed:local": "turbo run seed:local",
-    "test:emulators": "firebase emulators:exec --only auth,firestore,storage \"turbo run test:emulators\""
+    "test:emulators": "firebase emulators:exec --only auth,firestore,storage \"turbo run test:emulators\"",
+    "test:postgres": "turbo run test:postgres"
   },
   "devDependencies": {
     "firebase-tools": "catalog:",

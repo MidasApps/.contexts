@@ -29,6 +29,12 @@
         "STORAGE_EMULATOR_HOST"
       ]
     },
+    // Needs the compose Postgres (`docker compose up -d --wait`).
+    "test:postgres": {
+      "dependsOn": ["^build"],
+      "cache": false,
+      "passThroughEnv": ["DATABASE_URL"]
+    },
     "test:e2e": {
       "dependsOn": ["build"],
       "cache": false
