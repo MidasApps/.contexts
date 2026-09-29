@@ -23,3 +23,4 @@ read the **tail** of this file.
 - 2026-09-29 | SP0a Task 1 complete | plan: docs/plans/2026-09-29-sp0a-core-doctrine.md | commits: bdece6f..36d55a4 + fixup | review: Spec PASS; Quality CHANGES_REQUIRED fixed (stale pins, invariant 8 caveat)
 - 2026-09-29 | SP0a Task 2 complete | plan: docs/plans/2026-09-29-sp0a-core-doctrine.md | commits: 86563a6..c141338 | review: Spec PASS; Quality fixes verified by controller
 - 2026-09-29 | SP0a Task 3 complete | plan: docs/plans/2026-09-29-sp0a-core-doctrine.md | commits: 96b20dd..3f97811 | review: Spec PASS; Quality fixes verified by controller
+- 2026-09-29 | SP0a Task 4 complete | plan: docs/plans/2026-09-29-sp0a-core-doctrine.md | commits: da878f1..3c5216c | review: Spec PASS; Quality fixes verified by controller; human ratified E6 provisional + App Hosting spike as SP0b Task 0

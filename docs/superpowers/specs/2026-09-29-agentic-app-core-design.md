@@ -330,7 +330,7 @@ Segue `processes/environments.md` §9:
 
 ## 14. Riscos e pontos a confirmar (spikes do SP0)
 
-1. App Hosting emulator com Next 16.3. Fallback: `next dev`.
+1. **App Hosting em produção com Next 16.3** (suporte oficial não confirmado; issue `firebase/apphosting-adapters#690`) e o emulator local. Decisão humana 2026-09-29: manter App Hosting com E6 provisória (Node 24 em prod; `apps/web` engines `>=24 <27` + `@types/node@24`); spike é a primeira task do SP0b com critérios de saída da ADR 0009. Falhou → Next standalone no Cloud Run (`node:26`). Local: `next dev`.
 2. Versões estáveis e compatibilidade (TS 7, Node 26, React 19.3, Zod 4.6) de:
    - Tauri 2, Vite, TanStack Router;
    - `next-intl`, AI Elements;

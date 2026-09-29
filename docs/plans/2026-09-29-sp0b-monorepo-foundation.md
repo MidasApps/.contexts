@@ -25,7 +25,7 @@ firebase-admin 14.5.0, firebase-functions 7.4.0, `@firebase/rules-unit-testing` 
 ## Global Constraints
 
 - Pins exatos (sem `^`) em todo `package.json`; fora do `latest` só com linha no ADR 0004.
-- `engines.node` `>=26.0.0 <27` na raiz e pacotes; `apps/functions` `>=24.0.0 <25`.
+- `engines.node` `>=26.0.0 <27` na raiz e pacotes; `apps/functions` `>=24.0.0 <25` (E1); `apps/web` `>=24.0.0 <27` + `@types/node@24` (E6 provisória).
 - tsconfig canônico de `@.contexts/engineering/stacks/language/typescript@7.md` (§ "tsconfig canônico");
   libs/Functions em `nodenext`; `.pnpmfile.cjs` com hook TS 6 (mesmo doc).
 - Env: `src/env.ts` Zod por app, falha no boot (`@.contexts/engineering/contracts/secrets.md` §5.4,
@@ -38,6 +38,23 @@ firebase-admin 14.5.0, firebase-functions 7.4.0, `@firebase/rules-unit-testing` 
   `desktop`, `mastra`, `functions`, `ci`.
 
 ---
+
+### Task 0: Spike — Next 16.3.7 no Firebase App Hosting (bloqueante da topologia)
+
+**Contexts:** `@.contexts/engineering/decisions/0009-runtime-topology-next-v1-functions-events-mastra-cloud-run.md` (critérios de saída do spike e fallback), `@.contexts/engineering/stacks/backend/firebase-platform.md`, `@.contexts/engineering/decisions/0004-latest-stable-baseline-and-documented-exceptions.md` (E6 provisória)
+
+**Files:**
+- Create: `spikes/app-hosting-next16/` (app Next 16.3.7 mínimo, descartável, fora de `apps/`): 1 página com Cache Components, 1 rota ISR, 1 Route Handler SSE longo, `apphosting.yaml` com `runConfig` e engines `>=24.0.0 <27`
+- Create: `docs/plans/2026-09-29-sp0b-monorepo-foundation/reports/spike-app-hosting.md`
+
+- [ ] Step 1: Read contexts (critérios da ADR 0009)
+- [ ] Step 2: **Pedir ao usuário** um projeto Firebase de sandbox (não `demo-*`, não prod) e autorização para deploy nele
+- [ ] Step 3: Deploy via App Hosting; medir cada critério da ADR 0009 (build com `@apphosting/adapter-nextjs`, Cache Components + ISR, SSE ≥ 10 min, 2h de carga de prerender sem OOM/restart, cold start)
+- [ ] Step 4: Relatório com evidência (logs, métricas, prints do console) e veredito PASS/FAIL
+- [ ] Step 5: FAIL → parar e escalar ao usuário (fallback Cloud Run standalone muda ADR 0009/E6); PASS → seguir para Task 1
+- [ ] Step 6: Remover recursos do sandbox; ledger; commit `docs(contexts): record app hosting next 16 spike` (o código do spike não entra em `main`: apagar `spikes/` antes do PR)
+
+**Verify:** relatório com os 5 critérios, cada um com evidência e PASS/FAIL.
 
 ### Task 1: Toolchain local e raiz do workspace
 
@@ -229,9 +246,9 @@ it("rejects a contract without description", () => {
 
 **Files:**
 - Create: `docs/plans/2026-09-29-sp0b-monorepo-foundation/reports/sp0-summary.md` com resultado de:
-  App Hosting emulator × Next 16.3.7; `@mastra/auth-firebase` 1.1.2 validando token do Auth Emulator
+  App Hosting emulator × Next 16.3.7 (produção já coberta pela Task 0); `@mastra/auth-firebase` 1.1.2 validando token do Auth Emulator
   (script mínimo); peer `@mastra/evals` (E4); FCM/App Check no Tauri (pesquisa documentada);
-  versões novas que exigirem exceção → linha E6+ no ADR 0004
+  versões novas que exigirem exceção → linha E7+ no ADR 0004 (E6 = App Hosting nodejs24)
 
 - [ ] Steps: executar cada spike → registrar evidência → ledger → commit `docs(contexts): record sp0 spike results`
 
