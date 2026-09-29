@@ -1,0 +1,210 @@
+{
+  "catalogVersion": 1,
+  "contracts": [
+    {
+      "context": "example",
+      "description": "A free-text note inside an organization. Sample contract; remove it in derived apps.",
+      "examples": [
+        {
+          "authorId": "uA1b2C3d4E5f6G7h8I9j",
+          "body": "Call Ana about the invoice on Monday.",
+          "createdAt": "2026-09-29T14:30:00.000Z",
+          "id": "Xk2mQ9vLr3TnB7pWc1aZ",
+          "tenantId": "Jd8sK2lPq0WnR5tYu3bV",
+          "title": "Supplier follow-up",
+          "updatedAt": "2026-09-29T14:30:00.000Z"
+        }
+      ],
+      "fields": [
+        {
+          "description": "Firebase Auth uid of the author.",
+          "name": "authorId",
+          "pii": "personal",
+          "required": true,
+          "ui": {
+            "widget": "hidden"
+          }
+        },
+        {
+          "description": "Free text written by the author; may mention people.",
+          "examples": [
+            "Call Ana about the invoice on Monday."
+          ],
+          "name": "body",
+          "pii": "personal",
+          "required": true,
+          "ui": {
+            "labelKey": "example.note.body",
+            "order": 2,
+            "widget": "textarea"
+          }
+        },
+        {
+          "description": "When the note was created (UTC).",
+          "name": "createdAt",
+          "pii": "none",
+          "required": true,
+          "ui": {
+            "widget": "hidden"
+          }
+        },
+        {
+          "description": "Firestore automatic id of the note.",
+          "name": "id",
+          "pii": "none",
+          "required": true,
+          "ui": {
+            "widget": "hidden"
+          }
+        },
+        {
+          "description": "Organization that owns the note.",
+          "name": "tenantId",
+          "pii": "none",
+          "required": true,
+          "ui": {
+            "widget": "hidden"
+          }
+        },
+        {
+          "description": "Short title shown in lists.",
+          "examples": [
+            "Supplier follow-up"
+          ],
+          "name": "title",
+          "pii": "none",
+          "required": true,
+          "ui": {
+            "labelKey": "example.note.title",
+            "order": 1,
+            "widget": "text"
+          }
+        },
+        {
+          "description": "When the note last changed (UTC).",
+          "name": "updatedAt",
+          "pii": "none",
+          "required": true,
+          "ui": {
+            "widget": "hidden"
+          }
+        }
+      ],
+      "id": "example.Note",
+      "jsonSchema": {
+        "additionalProperties": false,
+        "description": "A free-text note inside an organization. Sample contract; remove it in derived apps.",
+        "examples": [
+          {
+            "authorId": "uA1b2C3d4E5f6G7h8I9j",
+            "body": "Call Ana about the invoice on Monday.",
+            "createdAt": "2026-09-29T14:30:00.000Z",
+            "id": "Xk2mQ9vLr3TnB7pWc1aZ",
+            "tenantId": "Jd8sK2lPq0WnR5tYu3bV",
+            "title": "Supplier follow-up",
+            "updatedAt": "2026-09-29T14:30:00.000Z"
+          }
+        ],
+        "properties": {
+          "authorId": {
+            "description": "Firebase Auth uid of the author.",
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "personal",
+            "x-ui": {
+              "widget": "hidden"
+            }
+          },
+          "body": {
+            "description": "Free text written by the author; may mention people.",
+            "examples": [
+              "Call Ana about the invoice on Monday."
+            ],
+            "maxLength": 10000,
+            "type": "string",
+            "x-pii": "personal",
+            "x-ui": {
+              "labelKey": "example.note.body",
+              "order": 2,
+              "widget": "textarea"
+            }
+          },
+          "createdAt": {
+            "description": "When the note was created (UTC).",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "type": "string",
+            "x-pii": "none",
+            "x-ui": {
+              "widget": "hidden"
+            }
+          },
+          "id": {
+            "description": "Firestore automatic id of the note.",
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none",
+            "x-ui": {
+              "widget": "hidden"
+            }
+          },
+          "tenantId": {
+            "description": "Organization that owns the note.",
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none",
+            "x-ui": {
+              "widget": "hidden"
+            }
+          },
+          "title": {
+            "description": "Short title shown in lists.",
+            "examples": [
+              "Supplier follow-up"
+            ],
+            "maxLength": 200,
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none",
+            "x-ui": {
+              "labelKey": "example.note.title",
+              "order": 1,
+              "widget": "text"
+            }
+          },
+          "updatedAt": {
+            "description": "When the note last changed (UTC).",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "type": "string",
+            "x-pii": "none",
+            "x-ui": {
+              "widget": "hidden"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "tenantId",
+          "authorId",
+          "title",
+          "body",
+          "createdAt",
+          "updatedAt"
+        ],
+        "type": "object",
+        "x-kind": "entity",
+        "x-permission": "example.note.read",
+        "x-pii": "personal",
+        "x-relations": [],
+        "x-tenancyScope": "organization"
+      },
+      "kind": "entity",
+      "name": "Note",
+      "permission": "example.note.read",
+      "pii": "personal",
+      "relations": [],
+      "tenancyScope": "organization"
+    }
+  ]
+}

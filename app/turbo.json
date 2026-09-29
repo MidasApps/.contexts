@@ -18,8 +18,9 @@
       "dependsOn": ["build"],
       "cache": false
     },
-    "contracts:catalog": {},
-    "contracts:check": {},
+    // Catalog tasks write and read app/docs, outside any package, so they are never cached.
+    "contracts:catalog": { "cache": false },
+    "contracts:check": { "cache": false },
     "seed:local": {
       "cache": false
     },

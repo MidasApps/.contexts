@@ -56,3 +56,5 @@ export { IsoDateTimeSchema, type IsoDateTime } from "./contracts/primitives/iso-
 export { LocaleSchema, type Locale } from "./contracts/primitives/locale.schema.ts";
 export { CurrencySchema, MoneySchema, type Currency, type Money } from "./contracts/primitives/money.schema.ts";
 export { TimeZoneSchema, type TimeZone } from "./contracts/primitives/time-zone.schema.ts";
+// Removable sample contract (keeps the catalog non-empty).
+export { NoteIdSchema, NoteSchema, type Note, type NoteId } from "./contracts/example/note.schema.ts";
