@@ -3,7 +3,7 @@ title: Convenções de modelagem para APIs
 type: contracts
 scope: api
 status: active
-last_updated: 2026-09-29
+last_updated: 2026-09-28
 related:
   - "@rules/api-design"
   - "@rules/data-modeling"
@@ -464,9 +464,7 @@ Servidor retorna apenas campos solicitados. Suporte é opcional por endpoint; qu
 - **Bearer tokens** via `Authorization: Bearer <token>`. OAuth 2.0 ou Firebase ID Token.
 - **Nunca** autenticação por session cookie em APIs públicas. Cookies (httpOnly, SameSite=Strict) apenas para sessões de UI Next.js no mesmo domínio, e nesse caso CSRF token explícito em mutations.
 - Tokens nunca em query string (vaza em logs).
-- Sem endpoint de refresh na API: a renovação do ID token é do SDK do Firebase Auth no cliente (ADR 0010). Provedor OAuth externo renova no próprio token endpoint dele, nunca por rota `/v1`.
-
-> **Core (ADR 0003, vence o mais específico):** o core refina esta seção. `/v1` aceita só `Authorization: Bearer` (nunca cookie), e o cookie de sessão do web é `HttpOnly` + `Secure` + `SameSite=Lax`, só para RSC e Server Actions, com a checagem de origem do Next. Ver `@.contexts/engineering/decisions/0010-tenancy-organization-project-units-and-rbac.md` ("Web: cookie de sessão e CSRF") e `@.contexts/engineering/rules/tenancy.md` §8.1.
+- Refresh tokens em endpoint dedicado: `POST /v1/auth/refresh`.
 
 Ver `@rules/security`.
 
@@ -546,7 +544,7 @@ data: {"requestId":"..."}
 
 ## 15. OpenAPI
 
-- Spec OpenAPI 3.1 gerada a partir dos schemas Zod (`z.toJSONSchema` + metadado de catálogo) pelo `pnpm contracts:catalog`; ver `@.contexts/engineering/contracts/data-catalog.md` §5 (ADR 0011).
+- Spec OpenAPI 3.1 gerada a partir dos schemas Zod via `zod-to-openapi`.
 - Commitada no repo em `docs/openapi/v1.yaml` (e v2, quando existir).
 - Cada endpoint documenta: parâmetros, request schema, response schema (sucesso e erros possíveis), exemplos.
 - **Examples obrigatórios** por endpoint, cobrindo: caso sucesso típico, caso erro de validação, caso erro de autorização quando aplicável.

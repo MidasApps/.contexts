@@ -3,7 +3,7 @@ title: Convenções de Modelagem — Firebase Firestore
 type: contracts
 scope: firestore
 status: active
-last_updated: 2026-09-29
+last_updated: 2026-09-28
 ---
 
 # Convenções de Modelagem — Firebase Firestore
@@ -159,7 +159,7 @@ audit-logs/{logId}
 - `tenantId` participa de **toda query** relevante e de **todo composite index**.
 - Security Rules DEVEM validar `resource.data.tenantId == request.auth.token.tenantId` (complementa `@rules/security`).
 - Subcoleções sob `organizations/{orgId}/...` herdam isolamento pelo path e podem omitir o campo redundante.
-- O modelo acima (um `tenantId` por documento = um claim no token) é o **default**. Produto com autorização por **conjunto** (usuário acessa vários tenants, claim `tenantIds[]`) ou com eixos adicionais (rota, papel) DEVE documentar o modelo em `@.contexts/engineering/rules/tenancy.md`, que prevalece sobre esta seção. O core adota esse modelo (Organização → Projeto → Unidades, ADR 0010): nos contextos do core, a rule vale no lugar desta seção, do exemplo de escrita do §19 e da subcoleção `members` do §22. Invariantes que não mudam: tenant efetivo é **server-bound** (do token/doc do usuário; `tenantId` vindo do corpo só é aceito após cross-check contra o conjunto autorizado), claim é **projeção** da fonte de verdade (nunca origem de concessão), e recurso sem mapeamento de tenant é **negado** (fail-closed).
+- O modelo acima (um `tenantId` por documento = um claim no token) é o **default**. Produto com autorização por **conjunto** (usuário acessa vários tenants, claim `tenantIds[]`) ou com eixos adicionais (rota, papel) DEVE documentar o modelo em `.contexts/engineering/rules/tenancy.md` (criado ao adotar esse modelo; não existe no template), que prevalece sobre esta seção. Invariantes que não mudam: tenant efetivo é **server-bound** (do token/doc do usuário; `tenantId` vindo do corpo só é aceito após cross-check contra o conjunto autorizado), claim é **projeção** da fonte de verdade (nunca origem de concessão), e recurso sem mapeamento de tenant é **negado** (fail-closed).
 
 ---
 
@@ -332,8 +332,6 @@ Sem schema explícito, todo documento é `any` — proibido.
 
 ## 19. Security Rules
 
-> **Core (ADR 0003, vence o mais específico):** nos contextos do core o cliente não escreve (D8). Leia o exemplo abaixo com `allow write: if false` e a leitura pela projeção `access`: `@.contexts/engineering/rules/tenancy.md` §6 e `@.contexts/engineering/decisions/0010-tenancy-organization-project-units-and-rbac.md`.
-
 - `firestore.rules` é **versionado no repo** e revisado em PR.
 - DEVE conter validação **básica de schema** como defense-in-depth: tipos esperados, campos required, `tenantId` matching token. Não substitui Zod no app — complementa.
 - Princípios gerais de segurança em `@rules/security`.
@@ -369,8 +367,6 @@ Para eventos de domínio que cruzam bounded contexts, use **Pub/Sub explícito**
 ---
 
 ## 22. Exemplos canônicos de paths
-
-> **Core (ADR 0003):** grants ficam em `memberships` top-level, e projetos e unidades em coleções top-level com `tenantId` e `nodePath`; não use `organizations/{orgId}/members/{uid}` nem projetos como subcoleção. Ver `@.contexts/engineering/rules/tenancy.md` §5 e ADR 0010.
 
 | Path | Propósito |
 |---|---|

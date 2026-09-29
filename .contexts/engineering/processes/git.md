@@ -3,7 +3,7 @@ title: Git Workflow
 type: processes
 status: active
 scope: engineering
-last_updated: 2026-09-29
+last_updated: 2026-09-28
 ---
 
 # Git Workflow
@@ -283,10 +283,24 @@ Submodules são justificáveis apenas para integrar repositórios externos que n
 
 ## 20. Monorepo
 
-Layout definido pela ADR 0006: monorepo pnpm workspaces + Turborepo, com `.contexts/` e `.claude/` na raiz. Pacotes, mapeamento da doutrina `src/` → pacotes, fronteiras de import e pipelines: `@.contexts/engineering/architecture/monorepo.md`.
+Layout do repositório (monorepo com workspaces vs `src/` único): **a definir pelo projeto** (ver `@architecture/fsd` e `@.contexts/engineering/MEMORY.md`). Se o projeto adotar monorepo, estrutura sugerida com pnpm workspaces:
 
-- Um PR pode tocar vários pacotes quando a mudança lógica é uma só (ver §7 e `processes/commits.md`); o scope do commit segue `@.contexts/engineering/processes/commits.md`.
-- CI seletivo com `turbo run <task> --affected`.
+```
+.
+├── apps/
+│   ├── web/          # Next.js
+│   └── api/          # Firebase Functions
+├── packages/
+│   ├── ui/
+│   ├── types/
+│   └── config/
+├── pnpm-workspace.yaml
+└── turbo.json
+```
+
+- **Turborepo** (ou Nx) para CI seletivo baseado em changed-affected.
+- Cada `app/` e `package/` tem seu próprio `package.json`.
+- Versão única no root para deps compartilhadas (via `pnpm.overrides`).
 
 ---
 

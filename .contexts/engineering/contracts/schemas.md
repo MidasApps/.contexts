@@ -3,7 +3,7 @@ title: Convenções de modelagem para schemas
 type: contracts
 scope: schemas zod compartilhados (boundaries, naming, organização, versionamento, sharing client/server)
 status: active
-last_updated: 2026-09-29
+last_updated: 2026-09-28
 ---
 
 # Convenções de modelagem para schemas
@@ -29,8 +29,6 @@ Este documento prescreve **como modelar schemas Zod** que atravessam fronteiras 
 | Primitivos compartilhados | `src/contracts/primitives/` |
 
 Regra de bolso: **se o schema cruza client ↔ server ou mais de um package/camada, pertence a `src/contracts/`; reuso entre slices só no client desce para `src/entities/<entity>/model/` (`@architecture/fsd`).** Schema interno de slice não é importado por outro slice: desça para `entities` ou promova para `contracts` conforme essa regra. Esta tabela é a fonte da localização (ADR 0003, Amendments).
-
-No monorepo, os caminhos da tabela ganham o prefixo do pacote: `src/contracts/` → `packages/contracts/src/contracts/`, `src/services/` → `packages/services/src/services/`, slices FSD → `packages/client/src/`. A tabela continua sendo a fonte da localização. Mapeamento completo: `@.contexts/engineering/architecture/monorepo.md` (ADR 0006).
 
 ## 3. Naming
 
@@ -99,10 +97,6 @@ Regras estruturais:
 - IDs, enums e tipos auxiliares declarados **antes** do schema agregador.
 - Tipo inferido **imediatamente abaixo** da declaração do schema (mantém visibilidade local da dupla schema/tipo).
 - Imports de outros contracts via path relativo dentro de `src/contracts/`; nunca via `import type` (precisamos do valor runtime).
-
-### 5.1 Metadados de catálogo
-
-Todo schema exportado de `src/contracts/` (no monorepo, `packages/contracts`) é registrado com `defineContract()`, e **todo campo** leva `.meta({ description, pii })`. No schema: `id` estável `<context>.<Name>`, `kind`, `description`, `examples`, `pii`, `tenancyScope`, `relations` e, quando couber, `ui` e `permission`. Isso vale para todo contrato, não só para os usados em prompt. O metadado gera OpenAPI, JSON Schema, `docs/catalog/**` e as views semânticas, e o `contracts:check` barra o que faltar. O exemplo acima omite o metadado para focar na estrutura. Doutrina completa: `@.contexts/engineering/contracts/data-catalog.md` (ADR 0011).
 
 ## 6. Branded types para IDs
 
@@ -230,17 +224,14 @@ Anti-pattern: `.refine(...)` inline duplicado em vários schemas.
 
 ## 15. OpenAPI export
 
-O OpenAPI (`docs/openapi/v1.yaml`) é gerado pelo `pnpm contracts:catalog` a partir do JSON Schema dos contratos (`z.toJSONSchema`), com o metadado de catálogo como extensões `x-` (`@.contexts/engineering/contracts/data-catalog.md` §5). Descrição de campo vem de `.meta({ description, pii })` (§5.1). `.openapi()` e `@asteasolutions/zod-to-openapi` não são mais prescritos: onde este texto divergir de `data-catalog.md`, vence o `data-catalog.md` (ADR 0003, mais específico; ADR 0011). Ver `@practices/sdd`.
+Schemas que servem APIs HTTP são anotados com `.describe()` e, quando aplicável, `.openapi()` via `@asteasolutions/zod-to-openapi`. Ver `@practices/sdd`.
 
 ```ts
-export const OrderOutputSchema = defineContract(
-  z.object({
-    id: OrderIdSchema.meta({ description: 'Unique order identifier', pii: 'none' }),
-    status: OrderStatusSchema.meta({ description: 'Current order status', pii: 'none' }),
-    // ...
-  }),
-  { id: 'orders.OrderOutput', kind: 'query', /* ...demais chaves de §5.1 */ },
-);
+export const OrderSchema = z.object({
+  id: OrderIdSchema.describe('Unique order identifier'),
+  status: OrderStatusSchema.describe('Current order status'),
+  // ...
+}).openapi('Order');
 ```
 
 - `operationId` é nomeado em camelCase: `createOrder`, `listOrders`, `getOrderById`.
@@ -261,7 +252,7 @@ const { output } = await generateText({
 });
 ```
 
-Schemas usados em prompts de IA têm `description` em **todos** os campos via `.meta({ description, pii })` (§5.1), como qualquer contrato: a descrição vira parte do prompt que o modelo lê, e o `pii` decide o que pode entrar nele (`@.contexts/engineering/contracts/data-catalog.md` §3.1).
+Schemas usados em prompts de IA devem ter `.describe()` em **todos** os campos — o describe vira parte do prompt que o modelo lê.
 
 ## 17. Drizzle integration
 
@@ -345,7 +336,7 @@ export const createOrder = async (raw: unknown) => createOrderAction(raw);
 Ver `@stacks/ai/vercel-ai-sdk`. Schemas para structured output de LLM:
 
 - Vivem em `src/contracts/<context>/` se reutilizados; se efêmeros, junto do use case server-only que chama o modelo (`src/services/<context>/application/use-cases/<use-case>.schema.ts`), conforme a tabela da seção 2.
-- Sempre com `.meta({ description, pii })` em todos os campos (§5.1); os efêmeros, fora de `contracts/`, pelo menos com `description`.
+- Sempre com `.describe()` em todos os campos.
 - Preferir tipos primitivos a complex unions — modelos LLMs lidam pior com unions profundas.
 - Para evals, fixar schema da resposta esperada e usar diff estrutural.
 
@@ -385,7 +376,7 @@ Aplicação errada — evite:
 - IDs de entidade sem branded type.
 - `.passthrough()` em wire format público (vaza estrutura inesperada).
 - Validar duas vezes a mesma forma na mesma cadeia sem motivo (defense-in-depth tem lugar; ruído tem outro).
-- Campo de contrato sem `.meta({ description, pii })` (o `contracts:check` rejeita).
+- Schema em OpenAPI export sem `.describe()`.
 - Mesmo schema cobrindo forma de domínio e forma de wire.
 - `z.union([...])` quando existe campo discriminador — use `z.discriminatedUnion`.
 - Versionamento ad hoc sem discriminador de versão (`eventVersion` em eventos, `schemaVersion` em outros wire formats persistentes).
@@ -393,7 +384,7 @@ Aplicação errada — evite:
 - `z.any()` por preguiça. Use `unknown` + narrowing — ver `@rules/validation`.
 - Lançar `ZodError` diretamente ao cliente externo. Envelope de erro padronizado em `@contracts/api`.
 - Tipo declarado manualmente "para não importar Zod no client" — Zod é leve, schema é único.
-- Schema usado em prompt de LLM sem `description` por campo, ou com campo `sensitive` entrando no prompt.
+- Schema sem `.describe()` quando usado em prompt de LLM.
 
 ## 25. Referências cruzadas
 

@@ -2,7 +2,7 @@
 title: Feature-Based Architecture
 type: architecture
 status: active
-last_updated: 2026-09-29
+last_updated: 2026-09-28
 ---
 
 # Feature-Based Architecture
@@ -188,8 +188,6 @@ Esta é a **árvore de referência** do backend. `@architecture/hexagonal`, `@ar
 - Testes ficam colocados, `foo.test.ts` ao lado do código.
 
 O interior (`domain`, `application`, `adapters`) segue `@architecture/hexagonal`. DDD tático e Clean Architecture entram nesse interior quando o contexto justifica. Não criam outra raiz.
-
-No monorepo, `src/services/` mora em `packages/services/src/services/` com a mesma árvore; `route.ts`, `actions.ts` e handlers de Function ficam em `apps/web` e `apps/functions` e re-exportam os driving adapters. Mapeamento completo: `@.contexts/engineering/architecture/monorepo.md` (ADR 0006).
 
 ### Convenções de naming
 

@@ -2,7 +2,7 @@
 title: Atomic Design
 type: architecture
 status: active
-last_updated: 2026-09-29
+last_updated: 2026-09-28
 upstream: https://atomicdesign.bradfrost.com/
 ---
 
@@ -94,8 +94,6 @@ src/shared/ui/
 `LoginForm` e demais organisms com conceito de domínio (autenticação, checkout) ficam na feature, por exemplo `features/auth-by-email/ui/LoginForm.tsx`, e não em `shared/ui/organisms/`.
 
 A camada `pages` da metodologia **não vive** dentro de `src/shared/ui/`. Pages no sentido Atomic correspondem ao conteúdo real renderizado pelas features e pelas rotas — esse papel é absorvido pela camada de roteamento do Next.js 16 (App Router) e pelas features que renderizam dentro dela. Manter pages Atomic dentro da biblioteca de UI compartilhada introduziria acoplamento de domínio em uma área que deve permanecer neutra.
-
-No monorepo, `src/shared/ui/` é `packages/client/src/shared/ui/`, a mesma biblioteca para `apps/web` e `apps/desktop`; a estrutura acima não muda. Mapeamento completo: `@.contexts/engineering/architecture/monorepo.md` (ADR 0006).
 
 ### Integração com shadcn/ui e Radix UI
 

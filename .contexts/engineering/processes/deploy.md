@@ -3,7 +3,7 @@ title: Deploy
 type: processes
 status: active
 scope: engineering
-last_updated: 2026-09-29
+last_updated: 2026-09-28
 ---
 
 # Deploy
@@ -65,8 +65,6 @@ Cada passo é gate: falha em qualquer etapa impede progresso. Nunca pule etapas 
 | Postgres migrations | `pnpm db:migrate` em job dedicado | sequencial pré-deploy do app |
 | pgvector indexes | `CREATE INDEX CONCURRENTLY` dentro de migration | não bloqueante |
 | Edge configs / Static assets | CDN do alvo do app (Vercel ou App Hosting) | atômico via deploy do app |
-
-No core v1 o Next.js vai para o Firebase App Hosting e o Vercel não é usado (ADR 0009). Componentes, ordem e rollback do core: §21.
 
 **Granularidade é obrigatória em Functions**: deploy de todas as functions quando apenas uma mudou propaga risco desnecessariamente. Veja `@stacks/backend/firebase-functions`.
 
@@ -259,55 +257,6 @@ Reprovar em review qualquer PR que apresente:
 
 ---
 
-## 21. Componentes do core v1
-
-Topologia decidida em `@.contexts/engineering/decisions/0009-runtime-topology-next-v1-functions-events-mastra-cloud-run.md`; stores em `@.contexts/engineering/decisions/0008-data-stores-split-firestore-postgres-storage-bigquery.md`. Esta seção prevalece sobre as menções a Vercel nas §2, §9, §12 e §15, que ficam como alternativa de projeto derivado, não usada no core v1.
-
-### 21.1 Componentes
-
-| Componente | Host | Deploy canônico | Artefato / versão | Stack |
-|---|---|---|---|---|
-| `apps/web` (UI, Server Actions, `/v1`) | Firebase App Hosting, `nodejs24` (ADR 0004 E6) | `firebase deploy --only apphosting:<backendId>` a partir do commit da tag, ou `firebase apphosting:rollouts:create` | build do App Hosting por commit | `@.contexts/engineering/stacks/backend/firebase-platform.md` |
-| `apps/mastra` | Cloud Run, imagem `node:26-alpine` | build da imagem com tag `GIT_SHA` → `gcloud run deploy mastra --no-traffic` → `update-traffic` | revisão do Cloud Run | `@.contexts/engineering/stacks/backend/cloud-run.md` |
-| `apps/functions` | Functions Gen 2, `nodejs24` (E1) | `firebase deploy --only functions:<name>` (§14) | código da tag | `@.contexts/engineering/stacks/backend/firebase-functions.md` |
-| Firestore rules + indexes, Storage rules | Firebase | `firebase deploy --only firestore`, `--only storage` (§4) | commit da tag | `@.contexts/engineering/stacks/database/firebase-firestore.md` |
-| Postgres (schema `ai` do projeto) | Cloud SQL for PostgreSQL 18 | `pnpm db:migrate` em job dedicado (§13) | migration versionada | `@.contexts/engineering/stacks/database/postgres.md` |
-| Postgres (schema `mastra`) | Cloud SQL, mesma instância | o adapter `@mastra/pg` cria e evolui as próprias tabelas no boot do `apps/mastra` | versão do `@mastra/pg` | 0008 |
-| `apps/desktop` | Binário Tauri assinado + manifesto do updater | CI por plataforma gera instaladores assinados e publica o manifesto do updater (ADR 0007) | versão semver do app (`tauri.conf.json`) | `@.contexts/engineering/stacks/desktop/tauri@2.md` |
-
-- Em `staging`, o merge em `main` dispara os componentes afetados (`turbo run --affected`, `architecture/monorepo.md`). Em `prod`, só a tag `vX.Y.Z` com aprovação (§3, §11).
-- Rollout automático do App Hosting por push só na branch de `staging`. O backend de `prod` não tem branch viva: o pipeline da tag dispara o rollout.
-- O `/health` do Mastra é liveness. Readiness com dependências (§8) é rota do core, definida no SP0b.
-
-### 21.2 Ordem de deploy
-
-Numa release que toca vários componentes, a ordem é do que é lido para quem lê. Cada passo espera o health do anterior:
-
-1. **Schema:** migrations do schema `ai` (expand, §5 e `@.contexts/engineering/rules/migration.md`); Firestore indexes novos (esperar o build do índice antes de código que depende dele); Firestore e Storage rules só quando aditivas.
-2. **`apps/functions`:** consumidores de evento novos antes dos produtores, para nenhum evento cair sem consumidor.
-3. **`apps/mastra`:** revisão nova sem tráfego → canary por `update-traffic` (§6) → 100%. Tools e workflows novos precisam existir antes de o `/v1` expô-los.
-4. **`apps/web`:** rollout do App Hosting. Rotas do `/v1` e telas que usam os passos anteriores entram atrás de feature flag.
-5. **`apps/desktop`:** publicar o update só depois do `/v1` da mesma release estar em 100% em `prod`. O desktop instalado convive com versões antigas: o `/v1` segue compatível dentro da major (`@.contexts/engineering/rules/api-design.md` §7).
-6. **Contract:** remoção de campo, rota ou rule antiga em release posterior, depois de verificar que nenhum leitor sobrou.
-
-Upgrade de minor do Mastra que migra tabelas do schema `mastra` sai em release própria, sem outra mudança, e sem tráfego dividido entre revisões nova e antiga (`@.contexts/engineering/stacks/backend/cloud-run.md`, "Deploy e rollback").
-
-### 21.3 Rollback por componente
-
-| Componente | Mecanismo | Cuidado |
-|---|---|---|
-| `apps/web` | App Hosting: "Roll back to this build" na aba Rollouts (instantâneo, mesma imagem) | "Rebuild and rollback" aplica a configuração atual; use quando o problema foi secret ou env |
-| `apps/mastra` | `gcloud run services update-traffic mastra --to-revisions=<rev-anterior>=100` | Se a revisão nova migrou tabelas do schema `mastra`, rollback de código pode não bastar: forward fix |
-| `apps/functions` | redeploy da tag anterior por function, ou `update-traffic` da revisão anterior (§9) | Eventos processados pela versão nova não se desfazem: consumidor idempotente |
-| Rules e indexes | redeploy do commit anterior (§9) | Index removido demora para reconstruir |
-| Postgres `ai` | forward-only (§9, §13) | Plano de rollback no PR da migration |
-| `apps/desktop` | Não há rollback de binário instalado. Publicar nova versão com a correção pelo updater (versão maior que a ruim) ou desligar a feature por flag no servidor | A chave de assinatura do updater precisa estar acessível ao pipeline de hotfix |
-| Feature flag | flip para `off` (§9) | Primeiro recurso para qualquer componente |
-
-Ordem de rollback: o inverso da §21.2, parando no primeiro componente cujo rollback resolve.
-
----
-
 ## Referências cruzadas
 
 - `@processes/release` — esquema de versionamento e cadência de release.
@@ -318,8 +267,6 @@ Ordem de rollback: o inverso da §21.2, parando no primeiro componente cujo roll
 - `@rules/observability` — métricas, logs estruturados, tagging de releases.
 - `@rules/security` — manuseio de credenciais em pipeline.
 - `@stacks/backend/firebase-functions` — region pinning, minInstances, deploy granular.
-- `@stacks/backend/cloud-run` — imagem, billing por instância e rollback por revisão do servidor Mastra.
-- `@stacks/backend/firebase-platform` — App Hosting (rollout, rollback, runtime E6) e Emulator Suite.
 - `@stacks/frontend/next@16` — Vercel deployment, ISR, edge cache.
 - `@stacks/ai/harness-engineering` — eval gate para prompts.
 - `@contracts/secrets` — naming, escopo e separação por ambiente.
