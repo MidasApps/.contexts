@@ -15,7 +15,7 @@ The web app validates the env and configures logging once, in `src/instrumentati
 
 - `process-logger.ts` keeps the context on `globalThis` under `Symbol.for("@core/services/process-log-context")`. No other file reads or writes that key.
 - `configureProcessLogger(context)` stores a **frozen copy**.
-- Each app calls `configureProcessLogger` once at boot, with values from its validated env. The web app does this in `instrumentation.ts`; Mastra and Functions will do it in their own entry points.
+- Each app calls `configureProcessLogger` once at boot, with values from its validated env. The web app does this in `instrumentation.ts`; Mastra does it in its own entry point. Functions does not use it (see the amendment below).
 - Until then, records carry `service/env: "unknown"`, and the first record is preceded by one `process_logger_unconfigured` warning, so a missing boot hook is visible.
 - Tests build their own logger with `createLogger({ context, sink })`. The global is only for the default `processLogger`.
 
@@ -32,3 +32,11 @@ This is the same pattern as the OpenTelemetry JS global API, which registers its
 - One small, documented piece of mutable process state, with a single writer function.
 - Logs are correct wherever the bundler places modules.
 - Revisit when OTel lands: `service`/`env` may then come from the OTel `Resource` instead.
+
+## Amendment (2026-09-29): Functions inject a sink instead
+
+`app/apps/functions` does not call `configureProcessLogger` and does not use `processLogger`.
+
+- **Why:** `stacks/backend/firebase-functions.md` makes `firebase-functions/logger` the only log channel in Functions and forbids `console`. The default `jsonLineSink` behind `processLogger` writes through `console`.
+- **What instead:** `src/index.ts` is a real composition root, because every exported function is built there. It creates `createLogger({ context: { service: "functions", env: env.APP_ENV }, sink: makeFirebaseLogSink({ write }) })` from the validated env and injects it into the shared handlers (`makeHealthzHandler({ logger })`, `serveWebHandler({ operation, logger }, …)`).
+- **Effect:** the record shape is unchanged (`timestamp, level, message, service, env` plus fields); the sink only adds the Cloud Logging `severity`. No process-wide state is involved, so the global holder stays a web and Mastra concern.

@@ -154,3 +154,39 @@ framework-ok
 3. **Deploy resolves transitive dependencies fresh:** `lib/` has no lockfile, so Cloud Build's npm resolves transitive dependencies of firebase-functions and firebase-admin at deploy time. The direct dependencies are exact. Generating a `package-lock.json` in `build.ts` would close this (SP deploy work).
 4. **Local ADC warning:** the emulator prints "Application Default Credentials detected. Non-emulated services will access production". This is harmless for the `demo-core` project, which cannot reach real services, but developers should know about it.
 5. The emulator runs the functions on host Node 26 while production runs Node 24 (E1). CI should also run the emulator tests on Node 24, or at least keep the `node24` target of the bundle.
+
+## Review fixes (Spec PASS / Quality APPROVED with follow-ups)
+
+1. **Outer boundary in the bridge.**
+   - `serveWebHandler({ operation, logger }, handler)` now wraps request conversion, the handler call and the body read.
+   - Any failure logs one `<operation>_failed` line at error level, with `requestId` (the client's valid ULID or a new one), `durationMs` and `err`. It returns the api.md §6 `INTERNAL_ERROR` 500 envelope with `x-request-id` and never includes the cause.
+   - Tests cover a rejecting handler (checking that the secret text is not in the body) and an unparsable URL (`//[bad`). Both were red before the change.
+2. **Header hygiene.**
+   - `Set-Cookie` values are copied one by one from `getSetCookie()`, never comma-joined.
+   - `x-powered-by` is removed.
+   - The body is written with `res.end(buffer)`, so Express adds no weak ETag.
+   - `X-Content-Type-Options: nosniff` is added to every response.
+   - `healthz` now accepts GET and HEAD. The 405 response carries `Allow: GET, HEAD`, and Node sends no body for HEAD.
+   - Unit and emulator tests cover this. In the emulator, `etag` is gone and `nosniff` is present, but `X-Powered-By: Express` still appears, most likely added by the emulator's own proxy on port 5001. The emulator test therefore does not assert it, and the bridge unit test covers the removal.
+3. **Private by default.** `GlobalOptions.invoker` exists in the installed `firebase-functions` 7.4.0 types (`lib/v2/options.d.ts`: `"public" | "private" | string | string[]`), and `https.js` applies the global value before the per-function one. The code now calls `setGlobalOptions({ region, maxInstances: 10, invoker: "private" })`, and `healthz` keeps `invoker: "public"`. The built endpoint shows `httpsTrigger: {"invoker":["public"]}`.
+4. **Decisions.**
+   - `app/docs/decisions/0002-...` gains an amendment: Functions inject a `firebase-functions/logger` sink from the composition root instead of calling `configureProcessLogger`.
+   - New `app/docs/decisions/0004-functions-env-files.md`: committed `.env.<projectId>` files hold non-secret config only; `.env.demo-core` is the local file; secrets go only through `defineSecret`. It deviates from the "only `.env.example` is versioned" rule. `.env.demo-core` now cites the decision.
+5. **Follow-ups** #4 and #5 were added to `follow-ups.md`:
+   - #4: the `lib/` deploy manifest has no lockfile, which blocks the first real deploy.
+   - #5: `pnpm dev` must build and watch Functions before the emulator starts (Task 11).
+
+### Verify (review fixes)
+
+```
+$ pnpm -F @core/functions test        -> Test Files 4 passed, Tests 22 passed (22)
+$ pnpm -F @core/functions typecheck   -> tsc --noEmit (exit 0)
+$ pnpm -F @core/functions lint        -> eslint . (exit 0)
+$ pnpm -F @core/functions build && pnpm exec firebase emulators:exec --only functions "pnpm -F @core/functions test:emulators"
+ Test Files  1 passed (1)
+      Tests  4 passed (4)
++  Script exited successfully (code 0)
+$ curl -si …/healthz (emulator): 200, x-content-type-options: nosniff, no etag, content-length: 24
+$ git diff --quiet main -- .contexts .claude && echo framework-ok
+framework-ok
+```

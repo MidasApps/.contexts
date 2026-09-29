@@ -28,13 +28,22 @@ describe("healthz", () => {
     expect(response.headers.get("cache-control")).toBe("no-store");
   });
 
+  it("answers HEAD like GET so probes can skip the body", async () => {
+    const { healthz } = makeHandler();
+
+    const response = await healthz(healthzRequest("HEAD"));
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get("cache-control")).toBe("no-store");
+  });
+
   it.each(["POST", "PUT", "DELETE", "PATCH"])("rejects %s with 405 and the error envelope", async (method) => {
     const { healthz } = makeHandler();
 
     const response = await healthz(healthzRequest(method));
 
     expect(response.status).toBe(405);
-    expect(response.headers.get("allow")).toBe("GET");
+    expect(response.headers.get("allow")).toBe("GET, HEAD");
     expect(await response.json()).toEqual({
       error: { code: "METHOD_NOT_ALLOWED", message: "Method not allowed.", requestId: VALID_ULID },
     });

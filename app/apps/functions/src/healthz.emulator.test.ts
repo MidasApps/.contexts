@@ -17,6 +17,17 @@ describe("healthz on the Functions emulator", () => {
     expect(await response.json()).toEqual({ data: { status: "ok" } });
     expect(response.headers.get("cache-control")).toBe("no-store");
     expect(response.headers.get("x-request-id")).toMatch(ULID_PATTERN);
+    expect(response.headers.get("x-content-type-options")).toBe("nosniff");
+    // x-powered-by is not asserted here: the emulator's own proxy (port 5001) adds it back;
+    // the bridge unit test covers its removal from the function's response.
+    expect(response.headers.has("etag")).toBe(false);
+  });
+
+  it("answers HEAD with 200 and no body", async () => {
+    const response = await fetch(HEALTHZ_URL, { method: "HEAD" });
+
+    expect(response.status).toBe(200);
+    expect(await response.text()).toBe("");
   });
 
   it("keeps a well-formed client request id", async () => {
@@ -33,7 +44,7 @@ describe("healthz on the Functions emulator", () => {
     });
 
     expect(response.status).toBe(405);
-    expect(response.headers.get("allow")).toBe("GET");
+    expect(response.headers.get("allow")).toBe("GET, HEAD");
     expect(await response.json()).toEqual({
       error: { code: "METHOD_NOT_ALLOWED", message: "Method not allowed.", requestId: CLIENT_REQUEST_ID },
     });
