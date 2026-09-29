@@ -105,6 +105,24 @@ describe("defineContract", () => {
     );
   });
 
+  it("requires meta on fields of an object catchall", () => {
+    const schema = z.object({
+      extras: z.object({}).catchall(z.object({ ssn: z.string() })).meta(field("sensitive")),
+    });
+    expect(() => defineContract(schema, buildMeta({ pii: "sensitive" }))).toThrow(
+      expect.objectContaining({ code: "MISSING_FIELD_META", fields: ["extras{}.ssn"] }),
+    );
+  });
+
+  it("rejects a field whose pii is below the pii of its catchall", () => {
+    const schema = z.object({
+      extras: z.object({}).catchall(z.string().meta(field("sensitive"))).meta(field("none")),
+    });
+    expect(() => defineContract(schema, buildMeta({ pii: "sensitive" }))).toThrow(
+      expect.objectContaining({ code: "PII_BELOW_FIELDS", fields: ["extras"] }),
+    );
+  });
+
   it("accepts nested fields whose parent pii covers them", () => {
     const schema = z.object({
       profile: z.object({ ssn: z.string().meta(field("sensitive")) }).nullable().meta(field("sensitive")),

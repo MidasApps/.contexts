@@ -37,6 +37,10 @@ const effectivePii = (node: unknown): PiiLevel => {
   );
 };
 
+/** True when the node (or a combinator member) declares `x-pii` itself. */
+const declaresPii = (node: unknown): boolean =>
+  isJsonRecord(node) && (PII_LEVELS.has(node["x-pii"]) || typeof node["$ref"] === "string" || membersOf(node).some(declaresPii));
+
 const referencesAny = (node: unknown, refs: ReadonlySet<string>): boolean => {
   if (Array.isArray(node)) return node.some((child) => referencesAny(child, refs));
   if (!isJsonRecord(node)) return false;
@@ -46,11 +50,13 @@ const referencesAny = (node: unknown, refs: ReadonlySet<string>): boolean => {
 
 const redactObject = (value: JsonRecord, node: JsonRecord, resolve: RefResolver): JsonRecord => {
   const properties = isJsonRecord(node["properties"]) ? node["properties"] : {};
-  const additional = isJsonRecord(node["additionalProperties"]) ? node["additionalProperties"] : undefined;
+  // An undeclared key is classified only by an additionalProperties schema that
+  // declares its own pii (a catchall or record value with meta, or a contract $ref);
+  // otherwise it cannot be classified, so it never goes out.
+  const additional = declaresPii(node["additionalProperties"]) ? (node["additionalProperties"] as JsonRecord) : undefined;
   const entries = Object.entries(value).flatMap(([key, child]): [string, unknown][] => {
     const childNode = properties[key] ?? additional;
-    // A key the schema does not declare cannot be classified, so it never goes out.
-    if (childNode === undefined) return node["additionalProperties"] === false ? [] : [[key, child]];
+    if (childNode === undefined) return [];
     const redacted = redactNode(child, childNode, resolve);
     return redacted === DROP ? [] : [[key, redacted]];
   });

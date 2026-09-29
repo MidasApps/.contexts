@@ -26,6 +26,7 @@ type LooseDef = {
   items?: readonly z.core.$ZodType[];
   in?: z.core.$ZodType;
   shape?: Record<string, z.core.$ZodType>;
+  catchall?: z.core.$ZodType;
 };
 
 const WRAPPER_TYPES = new Set(["optional", "nullable", "default", "prefault", "readonly", "catch", "nonoptional", "success"]);
@@ -65,8 +66,22 @@ const mergeInspections = (inspections: readonly FieldMetaInspection[]): FieldMet
 });
 
 /**
+ * Undeclared keys of an object take the catchall schema (`.catchall(x)`); its own
+ * pii (when it has meta) counts towards the object's, and its nested fields are
+ * walked like a record value. `z.strictObject`'s never and `z.looseObject`'s
+ * unknown carry nothing to walk.
+ */
+const inspectCatchall = (catchall: z.core.$ZodType | undefined, path: string, seen: Set<z.core.$ZodType>): FieldMetaInspection => {
+  if (catchall === undefined) return { problems: [], maxPii: "none" };
+  const catchallPath = joinPath(path, "{}");
+  const inner = inspectSchema(catchall, catchallPath, seen);
+  const own = readFieldMeta(catchall, z.globalRegistry)?.pii ?? "none";
+  return { problems: inner.problems, maxPii: maxPii([own, inner.maxPii]) };
+};
+
+/**
  * Walks every object field reachable from `schema` (through wrappers, arrays,
- * records, unions): each field needs `description` + `pii`, and a field's pii
+ * records, unions, catchalls): each field needs `description` + `pii`, and a field's pii
  * must cover the highest pii of the fields nested in it.
  */
 export function inspectSchema(schema: z.core.$ZodType, path = "", seen = new Set<z.core.$ZodType>()): FieldMetaInspection {
@@ -74,7 +89,8 @@ export function inspectSchema(schema: z.core.$ZodType, path = "", seen = new Set
   const nextSeen = new Set(seen).add(schema);
   const def = schema._zod.def as LooseDef;
   if (def.type === "object") {
-    return mergeInspections(Object.entries(def.shape ?? {}).map(([name, field]) => inspectField(name, field, path, nextSeen)));
+    const fields = Object.entries(def.shape ?? {}).map(([name, field]) => inspectField(name, field, path, nextSeen));
+    return mergeInspections([...fields, inspectCatchall(def.catchall, path, nextSeen)]);
   }
   return mergeInspections(childSchemasOf(def).map((child) => inspectSchema(child.schema, joinPath(path, child.segment), nextSeen)));
 }

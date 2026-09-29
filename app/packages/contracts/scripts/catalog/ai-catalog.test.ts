@@ -98,7 +98,14 @@ describe("redactExampleValue", () => {
           },
         },
         contacts: { type: "array", items: { type: "object", properties: { phone: { type: "string", "x-pii": "personal" } } } },
-        byKey: { type: "object", additionalProperties: { type: "object", properties: { ssn: { type: "string", "x-pii": "sensitive" } } } },
+        byKey: {
+          type: "object",
+          additionalProperties: { type: "object", "x-pii": "sensitive", properties: { ssn: { type: "string", "x-pii": "sensitive" } } },
+        },
+        byLabel: {
+          type: "object",
+          additionalProperties: { type: "object", "x-pii": "none", properties: { text: { type: "string", "x-pii": "none" } } },
+        },
         maybe: { anyOf: [{ type: "string", "x-pii": "sensitive" }, { type: "null" }] },
       },
     };
@@ -106,12 +113,41 @@ describe("redactExampleValue", () => {
       profile: { ssn: "111", nickname: "Ana", city: "Recife" },
       contacts: [{ phone: "555" }],
       byKey: { a: { ssn: "222" } },
+      byLabel: { a: { text: "hi" } },
       maybe: "333",
     };
     expect(redactExampleValue(example, schema, noRefs)).toEqual({
       profile: { nickname: REDACTED, city: "Recife" },
       contacts: [{ phone: REDACTED }],
-      byKey: { a: {} },
+      byKey: {},
+      byLabel: { a: { text: "hi" } },
     });
+  });
+
+  it.each([
+    ["no additionalProperties keyword", {}],
+    ["additionalProperties: true", { additionalProperties: true }],
+    ["an unclassified additionalProperties schema", { additionalProperties: { type: "string" } }],
+  ])("drops undeclared keys with %s", (_label, extra) => {
+    const schema = { type: "object", properties: { city: { type: "string", "x-pii": "none" } }, ...extra };
+    expect(redactExampleValue({ city: "Recife", ssn: "111" }, schema, noRefs)).toEqual({ city: "Recife" });
+  });
+
+  it("classifies undeclared keys by an additionalProperties schema that carries x-pii", () => {
+    const open = { type: "object", additionalProperties: { type: "string", "x-pii": "none" } };
+    const personal = { type: "object", additionalProperties: { type: "string", "x-pii": "personal" } };
+    const nullable = { type: "object", additionalProperties: { anyOf: [{ type: "string", "x-pii": "sensitive" }, { type: "null" }] } };
+    expect(redactExampleValue({ a: "x" }, open, noRefs)).toEqual({ a: "x" });
+    expect(redactExampleValue({ a: "x" }, personal, noRefs)).toEqual({ a: REDACTED });
+    expect(redactExampleValue({ a: "x" }, nullable, noRefs)).toEqual({});
+  });
+
+  it("keeps catchall examples out unless the catchall has its own pii", () => {
+    const loose = z.toJSONSchema(z.looseObject({ city: z.string().meta({ description: "City.", pii: "none" }) }), {
+      override: ({ jsonSchema }) => {
+        if ("pii" in jsonSchema) jsonSchema["x-pii"] = jsonSchema["pii"];
+      },
+    }) as Record<string, unknown>;
+    expect(redactExampleValue({ city: "Recife", ssn: "111" }, loose, noRefs)).toEqual({ city: "Recife" });
   });
 });
