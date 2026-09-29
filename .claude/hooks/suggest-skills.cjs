@@ -4,8 +4,10 @@
  *  - PostToolUse(Edit|Write): path → skills + @.contexts sugeridos
  *  - UserPromptSubmit: keywords → skills + @.contexts
  *
- * Saída: `systemMessage` (visível ao usuário) + `hookSpecificOutput.additionalContext`
- * (o campo que chega ao Claude). Toda skill citada aqui tem que existir como
+ * Saída: só `hookSpecificOutput.additionalContext`, o campo que chega ao Claude
+ * (`systemMessage` iria só ao usuário e repetiria a dica a cada edição).
+ * Paths são relativos ao projeto: o diretório do projeto pode se chamar `.contexts`.
+ * Toda skill citada aqui tem que existir como
  * `name:` em `.claude/skills/**\/SKILL.md`; todo `@.contexts/...` tem que existir em disco.
  */
 const fs = require('fs');
@@ -59,7 +61,7 @@ const PROMPT_RULES = [
   [/\b(claude|anthropic)\b/, ['anthropic', 'anthropic-sdk'], [`${E}/stacks/ai/anthropic.md`, `${E}/stacks/ai/anthropic-sdk.md`]],
   [/\b(openai|gpt)\b/, ['openai', 'openai-sdk'], [`${E}/stacks/ai/openai.md`, `${E}/stacks/ai/openai-sdk.md`]],
   [/\b(gemini|genai|vertex)\b/, ['gemini', 'google-genai-sdk'], [`${E}/stacks/ai/gemini.md`, `${E}/stacks/ai/google-genai-sdk.md`]],
-  [/\b(llm|rag|harness|evals?)\b/, ['harness-engineering'], [`${E}/stacks/ai/harness-engineering.md`]],
+  [/\b(llm|rag|evals?|harness[- ]engineering|ai harness)\b/, ['harness-engineering'], [`${E}/stacks/ai/harness-engineering.md`]],
   [/\bvitest\b|\bunit test/, ['vitest'], [`${E}/stacks/testing/vitest.md`, `${E}/rules/testing.md`]],
   [/\bplaywright\b|\be2e\b/, ['playwright'], [`${E}/stacks/testing/playwright.md`]],
   [/\b(eventos?|events?|outbox|pub\/?sub)\b/, ['events'], [`${E}/contracts/events.md`]],
@@ -91,13 +93,16 @@ const PROMPT_RULES = [
 const uniq = (arr) => [...new Set(arr.filter(Boolean))];
 
 const emit = (eventName, message) => {
-  process.stdout.write(
-    JSON.stringify({
-      systemMessage: message,
-      hookSpecificOutput: { hookEventName: eventName, additionalContext: message },
-    })
-  );
+  process.stdout.write(JSON.stringify({ hookSpecificOutput: { hookEventName: eventName, additionalContext: message } }));
   process.exit(0);
+};
+
+// Remove o prefixo do projeto (case-insensitive, por causa do Windows).
+const relativize = (filePath, root) => {
+  const fp = String(filePath).replace(/\\/g, '/');
+  const base = String(root || '').replace(/\\/g, '/').replace(/\/+$/, '');
+  if (base && fp.toLowerCase().startsWith(`${base.toLowerCase()}/`)) return fp.slice(base.length + 1);
+  return fp;
 };
 
 const collect = (rules, subject) => {
@@ -133,8 +138,8 @@ const suggestForHarness = (fp) => {
   return null;
 };
 
-const handlePath = (filePath) => {
-  const fp = String(filePath).replace(/\\/g, '/');
+const handlePath = (filePath, root) => {
+  const fp = relativize(filePath, root);
   const found = suggestForHarness(fp) || collect(PATH_RULES, fp);
   if (!found.skills.length && !found.contexts.length) process.exit(0);
   if (!found.skills.includes('using-ddc')) found.skills.push('using-ddc');
@@ -155,7 +160,7 @@ try {
   const filePath = (input.tool_input && (input.tool_input.file_path || input.tool_input.path)) || '';
 
   if (event === 'UserPromptSubmit' || (!event && input.prompt)) handlePrompt(input.prompt);
-  if (filePath) handlePath(filePath);
+  if (filePath) handlePath(filePath, process.env.CLAUDE_PROJECT_DIR || input.cwd);
   process.exit(0);
 } catch {
   process.exit(0);

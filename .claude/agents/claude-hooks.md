@@ -115,6 +115,8 @@ process.exit(0);
 
 ## Forma em `settings.json`
 
+Exemplo ilustrativo: `guard-destructive-git` e `suggest-typecheck` não existem neste repo.
+
 ```json
 {
   "hooks": {
@@ -150,10 +152,10 @@ Não recriar. Atualizar apenas se o usuário pedir explicitamente.
 
 | Hook | Evento | Bloqueante? | Propósito |
 |---|---|---|---|
-| `guard-conventional-commit` | PreToolUse Bash/PowerShell | Sim | Valida formato de commit antes de `git commit` (aspas, heredoc Bash, here-string PowerShell) |
-| `suggest-skills` | PostToolUse Edit/Write (async) + UserPromptSubmit | Não | Sugere skills e `@.contexts` existentes (`systemMessage` + `additionalContext`) |
+| `guard-conventional-commit` | PreToolUse Bash/PowerShell | Sim | Valida o header (formato, tipo, escopo de um nível, até 72 caracteres) em qualquer `git commit` do comando, inclusive composto (`git add … && git commit`); lê `-m` com aspas, heredoc Bash, here-string PowerShell, `-F -` com heredoc e `-F <arquivo>` |
+| `suggest-skills` | PostToolUse Edit/Write (async) + UserPromptSubmit | Não | Sugere skills e `@.contexts` existentes, só via `additionalContext`; path relativo ao projeto |
 | `check-claude-md-size` | Stop | Não | `systemMessage` se CLAUDE.md passar de 200 linhas |
-| `grounding-warn` | Stop | Não | Lê o `transcript_path` do turn atual; `systemMessage` se houve Edit/Write em app sem leitura de `.contexts` (heurístico) |
+| `grounding-warn` | Stop | Não | Lê o `transcript_path` do turn atual; se houve Edit/Write em app sem leitura de `.contexts` (paths relativos ao projeto), manda `additionalContext` ao Claude uma vez por turn (marcador em tmp evita loop) e `systemMessage` ao usuário |
 | `session-start-announce` | SessionStart (`startup\|resume\|clear\|compact\|fork`) | Não | Injeta using-ddc + catálogo + tail do ledger via `additionalContext`; o matcher `compact` faz a reinjeção pós-compactação |
 
 *(Não há hook em PreCompact: o evento não aceita `additionalContext`.)*
