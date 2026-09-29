@@ -113,3 +113,38 @@ framework-ok
 2. `mastra build` runs its own `pnpm install` inside `.mastra/output`, so the Docker build stage needs registry access. It resolves only the exact versions the deployer writes, not our lockfile.
 3. `PostgresStore` auto-creates 43 tables at boot. Remote environments should decide between runtime DDL and `disableInit: true` plus a migration step (SP3).
 4. Mastra CLI telemetry (PostHog) is on by default in local dev. The image disables it; a developer can set `MASTRA_TELEMETRY_DISABLED=1`.
+
+## Review fixes (Quality CHANGES_REQUIRED)
+
+Commits: `d5a78ee` refactor(services): share env issue mapper and guard env key collisions; `745bcd2` fix(mastra): allowlist local cors origins and configure process logger; plus the docs commit that adds `follow-ups.md` and this section.
+
+1. **Process logger at boot.** `src/mastra/process-log-context.ts` adds `configureMastraProcessLogger(env)`, which calls `configureProcessLogger({ service: "mastra", env: env.APP_ENV })`. `src/mastra/index.ts` calls it before `new Mastra` (decision `app/docs/decisions/0002`).
+   - The test reads the context back through `readProcessLogContext`, now exported from `@core/services`.
+   - It saves and restores the global holder, as the services test does.
+2. **Local CORS allowlist.** The new env var `MASTRA_CORS_ORIGINS` is a comma-separated list of origins, each checked with `z.url()`, so `*` is rejected.
+   - The default is `http://localhost:3000,http://localhost:1420,tauri://localhost,http://tauri.localhost`, applied with `.prefault` so the default goes through the same split and validation as any input.
+   - In local, `cors` is `{ origin: ["http://localhost:${PORT}", ...MASTRA_CORS_ORIGINS], credentials: false }`. Outside local it is `false`, and the variable is ignored.
+   - Verified in the image under `APP_ENV=local`: a preflight from `http://evil.example` gets 204 with **no** `access-control-allow-origin`, and one from `http://localhost:3000` gets `access-control-allow-origin: http://localhost:3000`. In `mastra dev`, the Studio origin `http://localhost:4111` is echoed back.
+3. **`follow-ups.md`** created with three items: PostgresStore auto-init versus `disableInit` plus a least-privilege role (SP3); the nested `pnpm install` in `mastra build` (SP3/deploy); and the Cloud SQL socket DSN rejected by `DATABASE_URL`. I verified the third: `postgresql://svc@/app?host=/cloudsql/...` fails with `invalid_format`.
+4. **Minor fixes**
+   - **`.env.example`:** now lists `# PORT=4111` (commented, with the reason), `MASTRA_CORS_ORIGINS`, `MASTRA_TELEMETRY_DISABLED=1` and `MASTRA_SERVER_TIMEOUT_MS=900000`.
+   - **Shared issue mapper:** `toEnvIssues` lives in `shared/env/env-issues.ts`, is exported once, and has its own test. `loadServicesEnv` and `loadServicesEnvWith` both use it.
+   - **Web env:** `apps/web/src/web-env.schema.ts` now composes through `loadServicesEnvWith`. Its own copy of the logic is removed, its public names are unchanged, and its tests still pass.
+   - **Key collisions:** `loadServicesEnvWith` accepts only a `z.ZodObject`. It throws `EnvKeyCollisionError` (code `ENV_KEY_COLLISION`, a bug per rule `error-handling`) when the app schema redeclares a services key, and a test covers this.
+   - **Dockerfile:** the build first copies `pnpm-lock.yaml`, `pnpm-workspace.yaml`, `.npmrc` and `.pnpmfile.cjs`, then runs `RUN pnpm fetch`, then `COPY . .` and `pnpm install --offline --frozen-lockfile --filter "@core/mastra..."`. `docker build` passed, and the image serves `/health` with 200.
+   - **Timeout:** the default is now 15 min (900 000 ms), still configurable and capped at 3 600 000.
+   - **Test cast removed:** `createTimestampMixin(now)` is exported and tested directly, so the `undefined as never` cast is gone.
+5. **Found while verifying:** running `pnpm -F mastra dev` after `pnpm -F mastra build` failed with "Stripping types is currently unsupported for files under node_modules". The build's `.mastra/output/node_modules` (the packed `@core/services` tarball) shadowed the workspace source. The `dev` script now removes `.mastra` first, and build followed by dev now serves `/health` with 200.
+
+Verify:
+
+```
+$ pnpm turbo run lint typecheck test --filter=@core/mastra --filter=@core/services --filter=@core/web
+@core/services Tests 40 passed · @core/mastra Tests 14 passed · @core/web Tests 9 passed
+ Tasks:    9 successful, 9 total
+$ docker build -f apps/mastra/Dockerfile -t core-mastra:sp0 .   -> ok (fetch layer, offline install)
+$ docker run ... core-mastra:sp0; curl localhost:8081/health     -> {"success":true} 200 (container stopped)
+$ git diff --quiet main -- .contexts .claude && echo framework-ok -> framework-ok
+```
+
+Note: the image was built from the working tree, which contained Task 9's uncommitted lockfile and workspace changes. The build passed with them.
