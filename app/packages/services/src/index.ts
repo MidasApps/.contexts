@@ -3,6 +3,7 @@ export {
   InvalidEnvError,
   type EnvIssue,
 } from "./services/shared/env/invalid-env-error.ts";
+export { loadServicesEnvWith } from "./services/shared/env/load-services-env-with.ts";
 export {
   loadServicesEnv,
   ServicesEnvSchema,
