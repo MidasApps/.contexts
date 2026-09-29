@@ -1,6 +1,6 @@
 # 0006. Monorepo pnpm + Turborepo e mapeamento da doutrina `src/` para pacotes
 
-- **Status:** proposed
+- **Status:** accepted
 - **Date:** 2026-09-29
 - **Deciders:** projeto DDC / spec do core agêntico (`docs/superpowers/specs/2026-09-29-agentic-app-core-design.md`, D1, D2, D6)
 - **Tags:** `engineering`, `architecture`, `monorepo`, `boundaries`

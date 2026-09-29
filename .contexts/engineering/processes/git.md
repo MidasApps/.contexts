@@ -285,7 +285,7 @@ Submodules são justificáveis apenas para integrar repositórios externos que n
 
 Layout definido pela ADR 0006: monorepo pnpm workspaces + Turborepo, com `.contexts/` e `.claude/` na raiz. Pacotes, mapeamento da doutrina `src/` → pacotes, fronteiras de import e pipelines: `@.contexts/engineering/architecture/monorepo.md`.
 
-- Um PR pode tocar vários pacotes quando a mudança lógica é uma só (ver §7); o scope do commit segue `@.contexts/engineering/processes/commits.md`.
+- Um PR pode tocar vários pacotes quando a mudança lógica é uma só (ver §7 e `processes/commits.md`); o scope do commit segue `@.contexts/engineering/processes/commits.md`.
 - CI seletivo com `turbo run <task> --affected`.
 
 ---

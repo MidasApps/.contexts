@@ -21,7 +21,7 @@ Cada ADR é **imutável** após accepted. Decisão superada gera ADR nova com `-
 | [0003](0003-cross-doc-convention-conflicts-resolved.md) | Conflitos de convenção entre documentos: qual vence | accepted | 2026-09-28 |
 | [0004](0004-latest-stable-baseline-and-documented-exceptions.md) | Baseline na última versão estável, com exceções documentadas | accepted | 2026-09-28 |
 | [0005](0005-firestore-document-ids-use-automatic-ids.md) | IDs de documento do Firestore usam o ID automático | accepted | 2026-09-28 |
-| [0006](0006-monorepo-layout-and-package-boundaries.md) | Monorepo pnpm + Turborepo e mapeamento da doutrina `src/` para pacotes | proposed | 2026-09-29 |
+| [0006](0006-monorepo-layout-and-package-boundaries.md) | Monorepo pnpm + Turborepo e mapeamento da doutrina `src/` para pacotes | accepted | 2026-09-29 |
 
 ## Como criar
 

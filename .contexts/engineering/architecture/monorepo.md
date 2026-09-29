@@ -24,7 +24,7 @@ O ganho estrutural é transformar fronteiras de pasta em fronteiras de pacote, q
 
 ## Como o time adotou
 
-pnpm 12.6.0 (workspaces) + turbo 2.11.5, pins em `@.contexts/engineering/MEMORY.md` (linha Monorepo, invariantes 6 e 8). `.contexts/` e `.claude/` ficam na raiz: quem clona só o harness leva esses dois diretórios; quem clona tudo leva também `apps/`, `packages/` e `modules/`.
+pnpm workspaces + Turborepo; versões na linha Monorepo de `@.contexts/engineering/MEMORY.md` (invariantes 6 e 8), não repetidas aqui. `.contexts/` e `.claude/` ficam na raiz: quem clona só o harness leva esses dois diretórios; quem clona tudo leva também `apps/`, `packages/` e `modules/`.
 
 ### Layout
 
@@ -49,6 +49,8 @@ pnpm-workspace.yaml  turbo.json  package.json
 
 `pnpm-workspace.yaml` declara `apps/*`, `packages/*` e `modules/*`. O `/admin` existe só em `apps/web`.
 
+**Nome dos pacotes.** Os pacotes do core se chamam `@core/<pkg>` (`@core/client`, `@core/contracts`, `@core/services`, `@core/agents`, `@core/i18n`, `@core/config`) e declaram `private: true`: nunca são publicados em registry. Uma aplicação derivada pode renomear o escopo. O naming dos pacotes de módulo fica em `contracts/agents.md`, a ser criado em SP0a Task 7.
+
 ### Papel de cada pacote
 
 | Pacote | Contém | Doutrina interna |
@@ -58,7 +60,7 @@ pnpm-workspace.yaml  turbo.json  package.json
 | `packages/services` | Um bounded context por pasta, interior hexagonal, `services/shared/` para clients compartilhados | `@.contexts/engineering/architecture/feature-based.md`, `@.contexts/engineering/architecture/hexagonal.md` |
 | `packages/agents` | Agents, tools, skills, workflows, processors e scorers do Mastra | `@.contexts/engineering/stacks/ai/mastra-sdk.md`; contrato em `contracts/agents.md`, a ser criado em SP0a Task 7 |
 | `packages/i18n` | Catálogos de mensagens ICU e resolução de locale | `@.contexts/engineering/rules/internationalization.md` |
-| `packages/config` | Configuração compartilhada de tooling; só `devDependency` | `@.contexts/engineering/stacks/language/typescript@7.md` |
+| `packages/config` | Configuração compartilhada de tooling; só `devDependency`, consumida por `extends` de tsconfig e ESLint (não é import de código) | `@.contexts/engineering/stacks/language/typescript@7.md` |
 
 Contextos de backend do core, cada um em `packages/services/src/services/<context>/`: `identity`, `tenancy`, `access`, `profile`, `conversations`, `knowledge`, `connectors`, `audit`, `usage`, `notifications`.
 
@@ -90,40 +92,43 @@ A doutrina escreve caminhos a partir de `src/`. No monorepo, leia cada um pela t
 
 | Pacote | Pode importar | Não pode importar |
 |---|---|---|
-| `apps/*` | qualquer pacote de `packages/*` | outro app |
+| `apps/*` | qualquer pacote de `packages/*`; `modules/*` só no registro de módulos (`apps/<app>/modules.config.ts`) | outro app; `modules/*` fora do arquivo de registro |
 | `packages/client` | `contracts`, `i18n` | `services`, `agents`, `apps/*` |
-| `packages/services` | `contracts` | `client`, `agents`, `apps/*` |
-| `packages/agents` | `contracts`, API pública dos contextos de `services` (use cases) | `client`, `apps/*`, interior de um contexto (`domain/`, `adapters/`) |
+| `packages/services` | `contracts`, `i18n` (mensagens localizadas, por exemplo em `notifications`) | `client`, `agents`, `apps/*` |
+| `packages/agents` | `contracts`, o que o `exports` de `@core/services` expõe (use cases e os tipos e erros de domínio que ele re-exporta) | `client`, `apps/*`, import profundo no interior de um contexto (`services/<context>/domain/...`, `adapters/...`) |
 | `packages/contracts` | nenhum pacote do workspace | todos |
 | `packages/i18n` | nenhum pacote do workspace | todos |
-| `packages/config` | nenhum pacote do workspace | todos |
+| `packages/config` | nenhum pacote do workspace | todos (é `devDependency`; `extends` de tsconfig/ESLint não conta como import de código) |
 | `packages/*` | — | `modules/*` (o core nunca importa um módulo específico) |
+| `modules/*` | regras próprias em `contracts/agents.md`, a ser criado em SP0a Task 7 | `apps/*` |
 
 - Import entre pacotes só pelo nome do pacote e pelo que o `exports` do `package.json` expõe. Nada de caminho relativo atravessando pacotes nem import profundo em `src/` de outro pacote.
 - O `exports` segue a regra de barrel da ADR 0003: API pública mínima, named exports, sem `export *`.
 - Dentro de um pacote valem as regras internas: regra de dependência do FSD em `packages/client`, anéis do hexagonal em `packages/services`.
-- Um módulo em `modules/<name>/` declara o que oferece via `defineModule()`. O contrato e o registro pelos apps ficam em `contracts/agents.md`, a ser criado em SP0a Task 7.
+- Um módulo em `modules/<name>/` declara o que oferece via `defineModule()`. O único ponto em que o core toca um módulo é o registro em `apps/<app>/modules.config.ts`; nenhum pacote de `packages/*` importa `modules/*`. O contrato de `defineModule()` e as regras de import internas do módulo ficam em `contracts/agents.md`, a ser criado em SP0a Task 7.
 
 ### Enforcement
 
-- **`eslint-plugin-boundaries` 7.2.0** (roda no ESLint 9.39.5, ADR 0004 E3): cada pacote e cada camada FSD é um tipo de elemento declarado por padrão de path; a tabela de fronteiras acima vira a regra `boundaries/dependencies`. A config mora em `packages/config`.
+- **`eslint-plugin-boundaries`** (versão em `@.contexts/engineering/stacks/VERSIONS.md`; roda no ESLint da E3, ADR 0004): cada pacote e cada camada FSD é um tipo de elemento declarado por padrão de path; a tabela de fronteiras acima vira a regra `boundaries/dependencies`. A config mora em `packages/config`.
 - **Dependência declarada.** O `node_modules` do pnpm não expõe dependência não declarada: import de pacote ausente do `package.json` falha na resolução.
 - **Versão única.** Dependência compartilhada entre pacotes usa a mesma versão em todo o workspace (invariante 8 da `MEMORY.md`), declarada uma vez no `catalog:` do `pnpm-workspace.yaml`.
-- **`engines.node`:** `>=26.0.0 <27` na raiz, nos apps e nos pacotes; `apps/functions` declara `>=24.0.0 <25` (E1). `packageManager: pnpm@12.6.0` na raiz.
+- **`engines.node`:** faixas da invariante 6 da `MEMORY.md`, uma para a raiz, os apps e os pacotes e outra só para `apps/functions` (E1). `packageManager` na raiz com a versão do pnpm da `MEMORY.md`.
 
 ### Pipelines Turbo
 
-`turbo.json` (chave `tasks`) define as tasks que os scripts da raiz chamam:
+`turbo.json` (chave `tasks`) define as tasks que os scripts da raiz chamam. A tabela lista as tasks do core e não é exaustiva: pacotes e módulos podem acrescentar outras.
 
 | Script da raiz | Task Turbo | Configuração |
 |---|---|---|
 | `pnpm dev` | `dev` | `persistent: true`, `cache: false`; sobe os processos de dev dos apps (ambiente local em `@.contexts/engineering/processes/environments.md` §9) |
 | `pnpm build` | `build` | `dependsOn: ["^build"]`, `outputs` por app |
 | `pnpm lint` | `lint` | inclui `eslint-plugin-boundaries` |
-| `pnpm typecheck` | `typecheck` | `tsc --noEmit` com TS 7 por pacote |
+| `pnpm typecheck` | `typecheck` | `tsc --noEmit` por pacote |
 | `pnpm test` | `test` | Vitest por pacote |
 | `pnpm test:e2e` | `test:e2e` | Playwright em `apps/<app>/e2e/` |
+| `pnpm contracts:catalog` | `contracts:catalog` | gera os artefatos de `packages/contracts`; `outputs: ["docs/catalog/**", "docs/openapi/**"]` |
 | `pnpm contracts:check` | `contracts:check` | regenera catálogo e OpenAPI de `packages/contracts` e falha se houver diff |
+| `pnpm seed:local` | `seed:local` | `cache: false`; popula emulators e Postgres locais |
 
 No CI, `turbo run <task> --affected` roda só pacotes afetados pela mudança e seus dependentes. Fluxo de CI e deploy: `@.contexts/engineering/processes/deploy.md`.
 
@@ -160,6 +165,5 @@ O monorepo decide **em qual pacote** o código mora. FSD, Feature-Based, Hexagon
 
 ## Aspectos intencionalmente omitidos
 
-- O nome do escopo npm dos pacotes (`@<scope>/client`) fica para o projeto; o core não fixa marca.
 - Estrutura interna de `packages/agents` e o contrato de `defineModule()`: `contracts/agents.md`, a ser criado em SP0a Task 7.
 - Detalhes de build do Tauri e do servidor Mastra: nos stacks e ADRs de desktop e topologia de runtime.
