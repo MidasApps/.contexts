@@ -9,6 +9,19 @@ last_updated: 2026-09-28
 
 **Escopo: backend.** Cada bounded context mora em `services/<context>/`. O frontend é `@architecture/fsd` e não usa esta pasta. Hexagonal, DDD e Clean Architecture descrevem o interior do contexto, não uma segunda raiz.
 
+## Guia de escolha
+
+Consolida a precedência que hexagonal, ddd e clean-architecture já descrevem. Detalhes em cada documento.
+
+| Modelo | Eixo | Quando usar |
+|---|---|---|
+| @architecture/fsd | Frontend (Next.js): camadas e slices em `src/{app,views,widgets,features,entities,shared}` | Sempre no frontend de médio a grande porte |
+| @architecture/atomic-design | Frontend: granularidade visual da biblioteca em `src/shared/ui` | Biblioteca de UI compartilhada; ortogonal ao FSD |
+| @architecture/feature-based | Backend: um diretório por bounded context em `services/<context>/` | Sempre que houver backend; define só a raiz do contexto, não o interior |
+| @architecture/hexagonal | Interior do contexto: ports e adapters | Default: regra de negócio rica ou infraestrutura substituível; CRUD simples dispensa |
+| @architecture/ddd | Modelagem do domínio (tático e estratégico) | Default junto do hexagonal quando o domínio é rico (light DDD); domínio simples dispensa |
+| @architecture/clean-architecture | Interior do contexto: quatro anéis (superset opcional do hexagonal) | Alternativa por feature, quando regras corporativas e de aplicação são distintas; não coexiste com hexagonal na mesma feature; adoção em larga escala pede ADR |
+
 Feature-Based Architecture — também referenciada na literatura como **package by feature** ou **vertical slicing** — é um modelo de organização de código fonte que agrupa arquivos pela funcionalidade de negócio que eles entregam, em vez de agrupá-los pela natureza técnica que possuem. A unidade primária de modularização é a **feature**: um recorte vertical do produto que reúne, sob um mesmo diretório, todos os artefatos necessários para que aquela funcionalidade exista — UI, estado, chamadas de API, tipos, hooks, testes, estilos.
 
 A premissa central é que a coesão por contexto de negócio supera a coesão por tipo técnico para a maioria das aplicações de produto. Quando uma mudança no produto raramente atravessa apenas uma camada técnica (alterar um botão sem alterar o hook que ele chama, ou alterar uma rota sem alterar o componente que ela renderiza), agrupar o código por tipo técnico espalha a mudança por múltiplas pastas distantes. Agrupar por feature concentra a mudança em um único diretório.
@@ -95,8 +108,8 @@ features/checkout/
     create-order.ts
     fetch-cart.ts
   types.ts          # ou types/
-  tests/            # opcional — testes podem ficar ao lado dos arquivos
-  index.ts          # ponto de entrada (opcional)
+                    # testes: colocados `foo.test.ts` ao lado do código, sem pasta tests/
+  index.ts          # API pública mínima (opcional; só named exports, sem export *)
 ```
 
 Note que isso reintroduz uma estrutura tipo-técnica, mas **restrita ao escopo da feature**. A diferença para package-by-layer é que `features/checkout/hooks/` só contém hooks de checkout — não há acúmulo cross-feature em uma pasta `hooks/` global.
@@ -137,14 +150,16 @@ Cada uma dessas decisões é deixada para o time. É justamente nesse ponto que 
 
 ## Como o time adotou
 
-O backend agrupa cada bounded context em `services/<context>/`. O App Router e as pastas FSD (`src/pages`, `src/widgets`, `src/features`, `src/entities`) são só frontend. Um contexto de servidor não entra em `src/features`.
+O backend agrupa cada bounded context em `src/services/<context>/`. O App Router e as pastas FSD (`src/views`, `src/widgets`, `src/features`, `src/entities`) são só frontend. Um contexto de servidor não entra em `src/features`.
 
 ```
-services/
+src/services/
+  shared/                 # clients compartilhados entre contextos (Postgres, Firebase Admin, telemetria)
   orders/
     domain/
       entities/
       value-objects/
+      errors/             # erros de domínio: classe com `code`
       events/
     application/
       ports/
@@ -152,10 +167,11 @@ services/
         driven/
       use-cases/
     adapters/
-      driving/
-      driven/
+      driving/            # route handlers, actions, function handlers: casca fina sobre o use case
+      driven/             # repositórios e gateways
+    infrastructure/       # opcional: configuração de driver específica do contexto
     composition.ts
-    index.ts
+    index.ts              # API pública mínima do contexto
   billing/
     domain/
     application/
@@ -164,13 +180,20 @@ services/
     index.ts
 ```
 
+Esta é a **árvore de referência** do backend. `@architecture/hexagonal`, `@architecture/ddd` e `@architecture/clean-architecture` a detalham; nenhum cria outra raiz. Clean Architecture pode declarar um superset opcional dela (ver `@architecture/clean-architecture`).
+
+- `services/shared/` guarda apenas clients compartilhados entre contextos (por exemplo o pool Postgres, Firebase Admin, telemetria). Não contém regra de negócio nem importa de um contexto. Não confundir com `src/shared`, que é a camada FSD do frontend.
+- `src/app/**/route.ts` re-exporta o driving adapter em `services/<context>/adapters/driving/`, que chama o use case; `actions.ts` é wrapper `"use server"` de uma linha que chama o adapter (ADR 0003, Amendments). Nenhum dos dois contém lógica.
+- `src/contracts/<context>/` fica fora das camadas FSD e de `services/`; existe só para schemas compartilhados entre cliente e servidor (`*.schema.ts`).
+- Testes ficam colocados, `foo.test.ts` ao lado do código.
+
 O interior (`domain`, `application`, `adapters`) segue `@architecture/hexagonal`. DDD tático e Clean Architecture entram nesse interior quando o contexto justifica. Não criam outra raiz.
 
 ### Convenções de naming
 
 - Contexto em `kebab-case`: `orders`, `billing`, `identity`.
 - Arquivo que não é componente React em `kebab-case`: `place-order.ts`. O export da função é `placeOrder`. O tipo é `PlaceOrder`.
-- `index.ts` é a API pública do contexto para outros contextos. Dentro do contexto, importe o módulo direto.
+- `index.ts` é a API pública do contexto para outros contextos: mínimo, só named exports, sem `export *`. Dentro do contexto, importe o módulo direto.
 
 ### Critérios para criar um novo contexto
 
@@ -197,7 +220,7 @@ Não há regra de dependência formal enforce, mas a convenção observada é mi
 2. Publicar um evento (`@contracts/events`) em vez de importar o outro contexto.
 3. Como último recurso, importar a API pública (`index.ts`) do outro contexto.
 
-A ausência de regra mecânica no conceito não autoriza o backend a morar na árvore FSD. Frontend que cresce continua em `@architecture/fsd`. Backend que cresce ganha outro `services/<context>/`, não uma camada `pages/`.
+A ausência de regra mecânica no conceito não autoriza o backend a morar na árvore FSD. Frontend que cresce continua em `@architecture/fsd`. Backend que cresce ganha outro `services/<context>/`, não uma camada `views/`.
 
 ## Critérios de aplicação
 

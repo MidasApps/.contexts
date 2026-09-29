@@ -5,7 +5,8 @@ last_updated: 2026-09-28
 status: current
 upstream: https://ai-sdk.dev
 repository: https://github.com/vercel/ai
-type: stack
+type: stacks
+category: ai
 ---
 
 # Vercel AI SDK
@@ -23,7 +24,7 @@ Pins medidos em 2026-09-28. A major de `@ai-sdk/*` **não** é a major de `ai`. 
 | `@ai-sdk/google` | 4.0.84 |
 | `@ai-sdk/google-vertex` | 5.0.97 |
 
-Exige Node >= 22. O projeto está no Node 24.21. Peer de Zod: `^3.25.76 || ^4.1.8`. O bundle usa só Zod 4.6.5. ESM obrigatório.
+Exige Node >= 22. O projeto está no Node 26.10. Peer de Zod: `^3.25.76 || ^4.1.8`. O bundle usa só Zod 4.6.5. ESM obrigatório.
 
 `@mastra/core@1.71.0` aceita `LanguageModelV4` (a spec da v7) desde o 1.47. Quando o loop é do Mastra, não aplique renome de tool do AI SDK por conta própria: quem lê o gate humano é o Mastra.
 
@@ -31,12 +32,14 @@ Codemod da v6 para a v7: `npx @ai-sdk/codemod v7`. A referência de API é https
 
 ## O que não copiar de guia antigo
 
-- `toDataStreamResponse()` e `result.toUIMessageStreamResponse()`.
+- `toDataStreamResponse()` e `result.toUIMessageStreamResponse()` (este ainda existe no `ai@7`, mas está `@deprecated` em favor dos helpers `createUIMessageStreamResponse` + `toUIMessageStream`).
 - `generateObject` / `streamObject` como API atual. Saída estruturada é `generateText` / `streamText` com `Output`.
-- `system:`. O campo é `instructions:`.
+- `system:`. O campo é `instructions:` (`system` segue no `ai@7.0.120` só como alias `@deprecated`).
 - `tool({ parameters })`. O campo é `inputSchema`.
 - `maxSteps`. O limite do loop é `stopWhen: isStepCount(n)`.
 - `useChat` devolvendo `input` e `handleInputChange`. Esse formato é da linha 4.
+- `experimental_telemetry`. O campo é `telemetry` (o nome antigo é alias `@deprecated`).
+- `MockLanguageModelV3` em teste novo. Use `MockLanguageModelV4` de `ai/test`.
 
 ## Provider
 
@@ -136,7 +139,7 @@ No cliente, `useChat` vem de `@ai-sdk/react@4`. Siga o guia v7 em https://ai-sdk
 
 Imagem, vídeo, realtime e transcrição têm página própria na doc v7. Não reutilize amostra da linha 4 (`experimental_generateImage` com `dall-e-3`) sem conferir o nome da função na versão instalada.
 
-Telemetria: https://ai-sdk.dev/docs/ai-sdk-core/telemetry. Não grave prompt nem completion quando puder haver PII (`@rules/observability`, `@rules/governance`).
+Telemetria: `telemetry: { isEnabled: true, recordInputs: false }` na chamada; guia em https://ai-sdk.dev/docs/ai-sdk-core/telemetry. Não grave prompt nem completion quando puder haver PII (`@rules/observability`, `@rules/governance`).
 
 ## Quando não usar este SDK direto
 

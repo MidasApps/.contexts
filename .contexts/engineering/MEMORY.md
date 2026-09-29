@@ -9,7 +9,7 @@
 > [`stacks/VERSIONS.md`](stacks/VERSIONS.md). Um projeto consumidor compara o
 > `package.json` dele com essa tabela antes de tratar a linha como fato local.
 
-**ADRs:** [0001](decisions/0001-ddc-engineering-baseline-and-harness-enforcement.md) (harness, IDs, secrets) e [0002](decisions/0002-baseline-2026-09-version-and-naming-alignment.md) (pins e nomes entre camadas).
+**ADRs:** [0001](decisions/0001-ddc-engineering-baseline-and-harness-enforcement.md) (harness, IDs, secrets), [0002](decisions/0002-baseline-2026-09-version-and-naming-alignment.md) (pins e nomes entre camadas), [0003](decisions/0003-cross-doc-convention-conflicts-resolved.md) (qual documento vence em cada conflito) e [0004](decisions/0004-latest-stable-baseline-and-documented-exceptions.md) (política de última estável + exceções E1–E5) e [0005](decisions/0005-firestore-document-ids-use-automatic-ids.md) (ID automático no Firestore; ULID só em `eventId`, `Idempotency-Key`, `X-Request-Id`).
 
 ## Matriz de compatibilidade (baseline de produção)
 
@@ -17,29 +17,31 @@ Stack pinado para ser **mutuamente compatível**. Não subir uma major isolada s
 
 | Camada | Baseline | Notas de compatibilidade |
 |---|---|---|
-| Runtime | **Node.js 24.21.0** LTS (Krypton) | Node 26.10 é Current até LTS em 2026-10-28. 24 entra em Maintenance em 2026-10-20. |
-| Linguagem | **TypeScript 7.0.2** | `@typescript/typescript6@6.0.2` só para API programática (eslint, Volar, deployer). |
+| Runtime | **Node.js 26.10.0** (Current; LTS em 2026-10-28) | ADR 0004. **Exceção E1:** deploy de Firebase Functions fica em `nodejs24` (o Google não tem `nodejs26`). Node 24 entra em Maintenance em 2026-10-20. |
+| Linguagem | **TypeScript 7.0.2** | `@typescript/typescript6@6.0.2` só para API programática (typescript-eslint, Volar, deployer). E2. |
+| Lint | **ESLint 9.39.5** | E3: a última é 10.11.0, mas `eslint-plugin-react@7.37.5` só aceita `^9.7`. |
 | Frontend app | **Next.js 16.3.6** + React **19.3.0** | 16.3 é Active LTS. 16.4 é canary. 16.3.7 anunciado para 2026-09-30. |
 | UI | **Tailwind 4.3.3** + **shadcn/ui** + **radix-ui 1.6.7** | React 19.3. |
 | Validação | **Zod 4.6.5** | Schema-first; `z.infer` único source de tipos. Sem Zod 3 no bundle. |
 | State client | **Zustand 5.0.15** | Só client components; server state fora. |
-| Backend serverless | **firebase-functions@7.4.0** + **firebase-admin@14.5.0**, runtime **nodejs24** | Gen 2 only. |
+| Backend serverless | **firebase-functions@7.4.0** + **firebase-admin@14.5.0**, runtime **nodejs24** | Gen 2 only. `nodejs24` é o mais novo que o Google oferece (E1). |
 | OLTP | **PostgreSQL 18.6** + Drizzle 0.45.3 | `uuidv7()` nativo. 18.5 não foi publicado. Postgres 19 segue em beta. |
 | Vectors | **pgvector 0.8.6** em Postgres 18 | Imagem `pgvector/pgvector:0.8.6-pg18`. HNSW default. |
 | OLAP | **BigQuery** | Inalterado em major; ver stack. |
 | Unit/integration | **Vitest 5.0.2** | Vite ^6.4, ^7 ou ^8 como peer (medido: 8.3.1). Pacotes `@vitest/*` na mesma versão. |
-| E2E | **Playwright 1.63.0** | `@playwright/experimental-ct-react` ainda em 1.62.1. |
-| AI default | **`ai@7.0.120`** | Providers nas majors medidas em `VERSIONS.md` (não a mesma major do `ai`). `@mastra/core@1.71.0` aceita `LanguageModelV4`. |
+| E2E | **Playwright 1.63.0** | E5: `@playwright/experimental-ct-react` (1.62.1) não é adotado; componente roda no Vitest. |
+| AI default | **`ai@7.0.120`** | Providers nas majors medidas em `VERSIONS.md` (não a mesma major do `ai`). `@mastra/core@1.71.0` aceita `LanguageModelV4`. E4: `@mastra/evals` fora (peer `vitest <5`). |
 
 **Invariantes de compatibilidade:**
 
-1. Todo JS/TS de app/functions/CI roda em **Node 24**.
+1. App, CI, Docker e tooling rodam em **Node 26**; **só o deploy de Firebase Functions** roda em **Node 24** (E1, ADR 0004).
 2. Typecheck com **TS 7** (`tsc --noEmit`); emit de app via bundler (Next/Turbopack).
 3. Next 16 ↔ React 19 — peers obrigatórios; sem React 18.
 4. Zod 4 em **todas** as boundaries (não misturar Zod 3 no mesmo bundle).
 5. Postgres 18.6 + pgvector 0.8.6 no mesmo cluster; imagens de dev/CI `postgres:18` / `pgvector/pgvector:0.8.6-pg18`.
-6. Firebase Functions Gen 2 em **nodejs24** com o mesmo `engines.node` do monorepo.
-7. Vitest 5 e Playwright 1.63 compartilham o browser quando o browser mode está ativo. O pacote experimental de component testing do Playwright pode estar um patch atrás; não force a mesma versão se o npm não a publicou.
+6. Firebase Functions Gen 2 em **nodejs24**, com `engines.node` `>=24.0.0 <25` no pacote de functions (o resto do monorepo `>=26.0.0 <27`).
+7. Vitest 5 e Playwright 1.63 compartilham o browser quando o browser mode está ativo. Component testing do Playwright não é usado (E5).
+8. **Política (ADR 0004):** o baseline é sempre a última estável. Pré-release (canary, beta, rc) não é versão. Pacote atrás do `latest` só com linha de exceção no ADR 0004.
 
 ---
 
@@ -53,7 +55,7 @@ Stack pinado para ser **mutuamente compatível**. Não subir uma major isolada s
 - [code-review](rules/code-review.md) — Escopo de PR, checklists, severidade de comentários
 - [documentation](rules/documentation.md) — Quando documentar (WHY) e quando não, TSDoc, ADRs
 - [api-design](rules/api-design.md) — Recursos, HTTP, idempotência, versionamento, webhooks
-- [data-modeling](rules/data-modeling.md) — Nomes por camada, UUIDv7/ULID, timestamps UTC, `amountMinor` inteiro
+- [data-modeling](rules/data-modeling.md) — Nomes por camada, IDs (Postgres `uuidv7()`, Firestore ID automático, ULID em `eventId`), timestamps UTC, `amountMinor` inteiro
 - [migration](rules/migration.md) — Expand-and-contract, CONCURRENTLY, dual-write, runbook
 - [state-management](rules/state-management.md) — Server vs client state, derivação, race conditions
 - [error-handling](rules/error-handling.md) — Taxonomia, Result vs throw, retry, boundaries
@@ -84,7 +86,7 @@ Stack pinado para ser **mutuamente compatível**. Não subir uma major isolada s
 ## Stacks — 25 tecnologias
 
 ### runtime/
-- [node@24](stacks/runtime/node@24.md) — Node.js 24 LTS (Krypton), strip-types, Permission Model
+- [node@26](stacks/runtime/node@26.md) — Node.js 26 (Current, LTS 2026-10-28), Temporal, strip-types, Permission Model; Functions ficam em `nodejs24` (ADR 0004 E1)
 
 ### language/
 - [typescript@7](stacks/language/typescript@7.md) — TS 7 nativo (Go), strict + `erasableSyntaxOnly`, side-by-side com TS 6 API (`.pnpmfile.cjs` com Next 16.3)
@@ -124,7 +126,7 @@ Stack pinado para ser **mutuamente compatível**. Não subir uma major isolada s
 
 ### testing/
 - [vitest](stacks/testing/vitest.md) — Vitest 5.0, projects, browser-playwright, `clearMocks` ligado
-- [playwright](stacks/testing/playwright.md) — E2E 1.63 + component + a11y, locators role-first
+- [playwright](stacks/testing/playwright.md) — E2E 1.63 + a11y, locators role-first; component testing fica no Vitest (ADR 0004 E5)
 
 ## Contracts — 8 doutrinas de modelagem
 
@@ -134,7 +136,7 @@ Stack pinado para ser **mutuamente compatível**. Não subir uma major isolada s
 - [postgres](contracts/postgres.md) — snake_case, **uuidv7() PKs** (default), audit+soft-delete, TIMESTAMPTZ, outbox
 - [pgvector](contracts/pgvector.md) — Schema `ai`, `chunks_v1`, PKs uuidv7, versionamento de embeddings
 - [schemas](contracts/schemas.md) — Zod compartilhado em `src/contracts/<context>/`, branded IDs, versioning
-- [events](contracts/events.md) — Envelope CloudEvents-like; **eventId = ULID** (wire); outbox TEXT
+- [events](contracts/events.md) — Envelope CloudEvents-like; **eventId = ULID** (wire); `aggregateId` = id do store; outbox TEXT
 - [secrets](contracts/secrets.md) — Secret Manager, rotação 90d, validação Zod no boot
 
 ## Processes — 8 fluxos operacionais
@@ -148,10 +150,14 @@ Stack pinado para ser **mutuamente compatível**. Não subir uma major isolada s
 - [monitoring](processes/monitoring.md) — Stack OTel, SLOs com error budget, on-call rotation
 - [rollback](processes/rollback.md) — Flag flip > deploy revert > forward fix; expand-and-contract enable
 
-## Decisions
+## Decisions — 5 ADRs + índice
 
-- [0001 — Baseline 2026-07 + harness DDC](decisions/0001-ddc-engineering-baseline-and-harness-enforcement.md) — uuidv7/ULID, using-ddc, plans, verification, hooks, remoção guard-secrets
+- [README](decisions/README.md) — formato e numeração dos ADRs
+- [0001 — Baseline 2026-07 + harness DDC](decisions/0001-ddc-engineering-baseline-and-harness-enforcement.md) — uuidv7 no Postgres, using-ddc, plans, verification, hooks, remoção guard-secrets
 - [0002 — Baseline 2026-09 + nomes](decisions/0002-baseline-2026-09-version-and-naming-alignment.md) — pins medidos e tradução camelCase/snake_case entre camadas
+- [0003 — Conflitos de convenção](decisions/0003-cross-doc-convention-conflicts-resolved.md) — envelope de erro, schema, `views`, testes colocados, `function`/barrel, frontmatter: quem vence
+- [0004 — Última estável + exceções](decisions/0004-latest-stable-baseline-and-documented-exceptions.md) — Node 26 como baseline; E1 Functions `nodejs24`, E2 typescript-eslint, E3 ESLint 9, E4 `@mastra/evals`, E5 Playwright CT
+- [0005 — IDs do Firestore](decisions/0005-firestore-document-ids-use-automatic-ids.md) — ID automático no Firestore (ULID é monotônico e gera hotspot); ULID só em `eventId`, `Idempotency-Key`, `X-Request-Id`
 
 ---
 

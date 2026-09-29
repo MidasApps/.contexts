@@ -1,5 +1,6 @@
 ---
 title: Mastra
+type: stacks
 version: "@mastra/core@1.71.0 / mastra@1.31.3"
 last_updated: 2026-09-28
 status: current
@@ -29,7 +30,8 @@ Pin sempre a versão exata em `package.json`. Mastra ainda evolui rapidamente; m
     "@mastra/rag": "2.6.4",
     "@mastra/mcp": "2.1.0",
     "@mastra/pg": "1.27.1",
-    "@mastra/ai-sdk": "1.10.5"
+    "@mastra/ai-sdk": "1.10.5",
+    "@mastra/observability": "1.18.1"
   },
   "devDependencies": {
     "mastra": "1.31.3"
@@ -41,7 +43,7 @@ Toda interface pública de Mastra usa **Zod** (ver `@stacks/validation/zod@4`) �
 
 As majors não andam juntas: `rag` e `mcp` estão na 2.x com peer `@mastra/core >=1 <2`. Não force tudo para a major do core.
 
-`@mastra/evals@1.10.3` declara peer `vitest >=3 <5`. O runner do projeto é Vitest 5.0.2, então esse pacote **não entra** no install até o peer aceitar a 5. Métrica de eval do Mastra, quando voltar a ser instalável, continua sendo sinal estatístico, não substituto de teste.
+`@mastra/evals@1.10.3` declara peer `vitest >=3 <5`. O runner do projeto é Vitest 5.0.2, então esse pacote **não entra** no install até o peer aceitar a 5 (ADR 0004, E4). Métrica de eval do Mastra, quando voltar a ser instalável, continua sendo sinal estatístico, não substituto de teste.
 
 ## Componentes principais
 
@@ -65,7 +67,7 @@ const result = await supportAgent.generate('Como resetar minha senha?');
 const stream = await supportAgent.stream('Como resetar minha senha?');
 ```
 
-Agents executam **agent loop** com tool use multi-step automático: o modelo decide quando chamar tools, Mastra executa, devolve resultado, e o loop continua até resposta final ou limite (`maxSteps`).
+Agents executam **agent loop** com tool use multi-step automático: o modelo decide quando chamar tools, Mastra executa, devolve resultado, e o loop continua até resposta final ou limite. As opções de `generate`/`stream` aceitam `maxSteps` e `stopWhen` (a condição do AI SDK 7); defina um dos dois em todo agent com tools.
 
 ### Workflows
 
@@ -107,7 +109,7 @@ export const searchKnowledge = createTool({
   description: 'Busca semântica na base de conhecimento por similaridade de vetores.',
   inputSchema: z.object({ query: z.string(), topK: z.number().int().min(1).max(20).default(5) }),
   outputSchema: z.object({ results: z.array(z.object({ id: z.string(), text: z.string(), score: z.number() })) }),
-  execute: async ({ context }) => { /* ... */ },
+  execute: async ({ query, topK }, { abortSignal }) => { /* ... */ },
 });
 ```
 
@@ -123,7 +125,7 @@ Camada de persistência conversacional. Três modos coexistentes:
 
 ```ts
 import { Memory } from '@mastra/memory';
-import { PostgresStore } from '@mastra/pg';
+import { PostgresStore, PgVector } from '@mastra/pg';
 
 export const memory = new Memory({
   storage: new PostgresStore({ connectionString: process.env.DATABASE_URL! }),
@@ -178,12 +180,12 @@ Cliente e servidor do Model Context Protocol.
 
 Deployers oficiais empacotam Mastra para a plataforma alvo:
 
-- `@mastra/deployer-vercel` — preferido neste projeto (alinhado com `@stacks/frontend/next@16`).
+- `@mastra/deployer-vercel@1.2.30` — preferido neste projeto (alinhado com `@stacks/frontend/next@16`).
 - `@mastra/deployer-cloudflare` — workers/edge.
 - `@mastra/deployer-netlify`.
 - Standalone Node — para containers, Cloud Run, ECS.
 
-Configure em `mastra.config.ts`. O deployer compila workflows, registra rotas e injeta storage adapters.
+O deployer entra no construtor `new Mastra({ deployer })`, no entry point `src/mastra/index.ts` (o arquivo que o CLI `mastra` procura; não existe `mastra.config.ts`). O deployer compila workflows, registra rotas e injeta storage adapters.
 
 ### Mastra Dev
 
@@ -226,19 +228,26 @@ Store de memory e vetores. Ver `@stacks/database/pgvector`. Configure `DATABASE_
 
 ### TypeScript 7
 
-Ver `@stacks/language/typescript@7`. Toda fronteira pública tipa com Zod e infere com `z.infer<typeof schema>`. Nunca use `any` em `execute` de tools — derive o tipo do `inputSchema`.
+Ver `@stacks/language/typescript@7`. Toda fronteira pública tipa com Zod e infere com `z.infer<typeof SearchInputSchema>`. Nunca use `any` em `execute` de tools — derive o tipo do `inputSchema`.
 
 ### Observability
 
-OpenTelemetry built-in. Configure exporter em `mastra.config.ts` para Langfuse, Braintrust, SigNoz, Datadog ou OTLP genérico. Ver `@rules/observability`.
+Tracing vem de `@mastra/observability@1.18.1`, passado em `new Mastra({ observability })` no `src/mastra/index.ts`. A chave `telemetry` da linha 0.x não existe no `Config` do `@mastra/core@1.71.0`. Exporters para Langfuse, Braintrust, Datadog ou OTLP genérico são pacotes à parte; confira o nome na doc da versão instalada. Ver `@rules/observability`.
 
 ```ts
-telemetry: {
-  serviceName: 'support-service',
-  enabled: true,
-  export: { type: 'otlp', endpoint: process.env.OTEL_ENDPOINT! },
-}
+// src/mastra/index.ts
+import { Mastra } from '@mastra/core';
+import { Observability } from '@mastra/observability';
+
+export const mastra = new Mastra({
+  agents: { supportAgent },
+  observability: new Observability({
+    configs: { default: { serviceName: 'support-service', exporters: [otlpExporter] } },
+  }),
+});
 ```
+
+`Observability` aplica `SensitiveDataFilter` por padrão. Não desligue sem motivo registrado: é a redação de PII dos spans.
 
 ### Error handling
 
@@ -248,7 +257,7 @@ Ver `@rules/error-handling`. Tools devem lançar erros tipados — Mastra captur
 
 - **Usar Mastra para single completion** — overhead de agent loop, memory, telemetria. Use `generateText` do AI SDK 7 (`Output.object` quando a saída é estruturada).
 - **Agent sem `instructions` claros** — system prompt vago produz tool selection errática. Escreva instructions com persona, escopo e regras de invocação de tools.
-- **Tools sem schema Zod completo** — LLM alucina inputs se `inputSchema` for permissivo. Use `.strict()`, enums, `min`/`max`, `.describe()` em cada campo.
+- **Tools sem schema Zod completo** — LLM alucina inputs se `inputSchema` for permissivo. Use `z.strictObject()`, enums, `min`/`max`, `.describe()` em cada campo.
 - **Memory sem TTL/limite** — `lastMessages` sem cap explode o contexto e a fatura. Sempre defina `lastMessages` numérico e revise working memory periodicamente.
 - **Workflows sem observabilidade** — workflows sem telemetria são pior que código imperativo. Se desligou OTEL, não use workflows; use funções TS.
 - **Misturar agent loop com workflow para o mesmo passo** — se a sequência é determinística, é workflow. Se depende de decisão do LLM, é agent. Não force agent a executar pipeline ETL.
@@ -257,7 +266,7 @@ Ver `@rules/error-handling`. Tools devem lançar erros tipados — Mastra captur
 
 ## Roadmap de upgrade
 
-Antes de subir minor version: leia o changelog em `github.com/mastra-ai/mastra/releases`, rode evals existentes contra a nova versão, compare scores. APIs marcadas como experimental (workflow `.suspend`, working memory templates) podem mudar entre minors.
+Antes de subir minor version: leia o changelog em `github.com/mastra-ai/mastra/releases`, rode o eval set do harness próprio (`@stacks/ai/harness-engineering`; `@mastra/evals` está fora pela E4) contra a nova versão, compare scores. APIs marcadas como experimental (workflow `.suspend`, working memory templates) podem mudar entre minors.
 
 ## Referências cruzadas
 

@@ -1,9 +1,10 @@
 # 0001. Baseline de engenharia 2026-07 e enforcement do harness DDC
 
-- **Status:** accepted
+- **Status:** accepted (matriz de versões superseded pela 0002)
 - **Date:** 2026-07-14
 - **Deciders:** projeto DDC / sessão de modernização do monorepo de contextos
 - **Tags:** `engineering`, `stacks`, `harness`, `claude-code`, `ssot`, `superpowers-inspired`
+- **Superseded in part by:** [0005](0005-firestore-document-ids-use-automatic-ids.md) (IDs de documento do Firestore).
 
 ## Context
 
@@ -120,7 +121,7 @@ Não misturar ULID e UUIDv7 como PK no **mesmo** bounded context sem ADR futuro.
 
 | Hook | Evento | Script | Comportamento |
 |---|---|---|---|
-| session-start-announce | SessionStart (`startup\|resume\|clear\|compact`) + PreCompact | `session-start-announce.cjs` | Injeta **using-ddc completo** + catálogo + tail do progress ledger |
+| session-start-announce | SessionStart (`startup\|resume\|clear\|compact\|fork`) | `session-start-announce.cjs` | Injeta **using-ddc completo** + catálogo + tail do progress ledger |
 | suggest-skills | UserPromptSubmit + PostToolUse Edit\|Write | `suggest-skills.cjs` | Sugere skills **e** paths `@.contexts` (typescript-7, api, plans, etc.) |
 | guard-conventional-commit | PreToolUse Bash `git commit*` | `guard-conventional-commit.cjs` | Mantido |
 | check-claude-md-size | Stop | `check-claude-md-size.cjs` | Aviso se CLAUDE.md > 200 linhas |

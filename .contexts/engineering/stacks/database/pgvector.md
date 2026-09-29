@@ -1,5 +1,7 @@
 ---
 title: pgvector
+type: stacks
+category: database
 version: 0.8.6
 last_updated: 2026-09-28
 status: current
@@ -15,7 +17,7 @@ Este documento cobre **a extensão como tecnologia** (versão, tipos, operadores
 ## Versão fixada
 
 - **0.8.6** (2026-07-29). Requer Postgres compatível — no projeto, **Postgres 18.6** (`@stacks/database/postgres`). Imagem de referência: `pgvector/pgvector:0.8.6-pg18`.
-- `0.7` introduziu: `halfvec` (float16), `sparsevec`, binary quantization sobre `bit`, operator classes, HNSW paralelo, operador `<+>` (L1).
+- `0.6` introduziu build paralelo de índice HNSW. `0.7` introduziu: `halfvec` (float16), `sparsevec`, binary quantization sobre `bit`, indexação HNSW para distância L1 (operador `<+>`).
 - `0.8` adiciona iterative index scans (filtered ANN melhor), suporte formal a Postgres 18, e melhorias de memória em IVFFlat.
 - Providers expõem versões específicas — fixar via variável do provider (Neon, Supabase, Cloud SQL, RDS, Crunchy, Aiven, Timescale) e validar com `SELECT extversion FROM pg_extension WHERE extname = 'vector';`.
 
@@ -138,11 +140,10 @@ Referencie `@stacks/ai/vercel-ai-sdk` para geração.
 |---|---|---|---|
 | OpenAI | `text-embedding-3-small` | 1536 | Padrão custo/qualidade. |
 | OpenAI | `text-embedding-3-large` | 3072 (truncável via `dimensions`) | Suporta Matryoshka — truncar para 512/1024/1536 mantém boa qualidade. |
-| Gemini | `gemini-embedding-001` | 3072 | Default. `text-embedding-004` saiu da Gemini API. |
-| Gemini | `gemini-embedding-001` | até 3072 | Configurável. |
+| Gemini | `gemini-embedding-001` | 3072 (default; `outputDimensionality` de 128 a 3072, recomendados 768/1536/3072) | `text-embedding-004` saiu da Gemini API. Abaixo de 3072, normalizar manualmente (ai.google.dev/gemini-api/docs/embeddings). |
 | Cohere / Voyage / Jina | — | varia | Alternativas; Voyage forte em retrieval especializado. |
 
-- **Normalizar** vetores quando usar inner product. Cosine ignora magnitude. Alguns providers já normalizam (OpenAI sim, Gemini sim por default).
+- **Normalizar** vetores quando usar inner product. Cosine ignora magnitude. Alguns providers já normalizam (OpenAI sim; `gemini-embedding-001` só em 3072 dims, truncado exige normalização manual).
 - **Quantization no app**: Matryoshka (truncar dims), depois cast para `halfvec` ou `bit` para storage.
 - **Versionar provider + modelo + dimensão** em coluna de metadado — misturar embedding spaces é silently wrong.
 
@@ -152,10 +153,11 @@ Referencie `@stacks/language/typescript@7` e `@stacks/database/postgres`.
 
 **Drizzle** (pgvector adapter):
 ```ts
-import { pgTable, vector } from 'drizzle-orm/pg-core';
+import { sql } from 'drizzle-orm';
+import { pgTable, uuid, vector } from 'drizzle-orm/pg-core';
 
 export const chunks = pgTable('chunks', {
-  id: uuid().primaryKey(),
+  id: uuid('id').primaryKey().default(sql`uuidv7()`), // uuidv7() nativo do Postgres 18
   embedding: vector('embedding', { dimensions: 1536 }),
 });
 ```

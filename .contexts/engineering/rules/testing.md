@@ -68,7 +68,7 @@ Aplica-se a todo código de teste do projeto: testes unitários, de integração
 - **Sempre** use seeds fixos para qualquer aleatoriedade necessária. Random sem seed é flakiness disfarçada.
 - **Nunca** dependa de timezone do host. Sempre force `TZ=UTC` ou use datas com offset explícito.
 
-## 6. Pirâmide e troféu de testes
+## 6. Troféu de testes
 
 - **Sempre** prefira a forma de **troféu** para aplicações web: muitos testes de integração, base sólida de unitários, poucos E2E, static analysis no topo.
 - **Sempre** privilegie testes de **integração** quando estão na fronteira entre módulos do mesmo bounded context. Eles capturam mais bugs por unidade de manutenção do que unit puro com mock pesado.
@@ -177,8 +177,8 @@ Aplica-se a todo código de teste do projeto: testes unitários, de integração
 
 - **Sempre** coloque o teste **próximo do código testado**: `foo.ts` + `foo.test.ts` no mesmo diretório. Distância entre teste e código é fricção.
 - **Nunca** mantenha pasta `tests/` separada espelhando a estrutura do `src/`. Move um arquivo, esquece de mover o teste.
-- **Sempre** use sufixos consistentes: `.test.ts` para unit/integração, `.spec.ts` para E2E, ou padronize no time e enforce com lint.
-- **Nunca** misture testes E2E com testes unitários no mesmo diretório. E2E vive em pasta dedicada (`e2e/`, `playwright/`) por isolamento de runner e tooling.
+- **Sempre** use sufixos consistentes: `.test.ts` para unit/integração, `.spec.ts` reservado a E2E.
+- **Nunca** misture testes E2E com testes unitários no mesmo diretório. E2E vive em pasta dedicada (`e2e/`, com Playwright `testDir: './e2e'`) por isolamento de runner e tooling.
 
 ## 20. Testes em produção e validação contínua
 

@@ -1,3 +1,11 @@
+---
+title: Rollback
+type: processes
+status: active
+scope: engineering
+last_updated: 2026-09-28
+---
+
 # Rollback
 
 Processo operacional de reversão de mudanças em produção. Define quando rolar back, como rolar back cada componente do stack, e o que precisa estar no lugar para que o rollback seja uma operação rotineira — não uma improvisação durante incidente.

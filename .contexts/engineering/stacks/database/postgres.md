@@ -1,5 +1,7 @@
 ---
 title: PostgreSQL
+type: stacks
+category: database
 version: 18.6
 last_updated: 2026-09-28
 status: current
@@ -76,8 +78,8 @@ CREATE INDEX events_data_gin ON events USING GIN (data jsonb_path_ops);
 ### Generated columns, partial e expression indexes
 
 ```sql
-ALTER TABLE invoices ADD COLUMN total_brl numeric(12,2)
-  GENERATED ALWAYS AS (subtotal + tax) STORED;
+ALTER TABLE invoices ADD COLUMN total_minor bigint
+  GENERATED ALWAYS AS (subtotal_minor + tax_minor) STORED;
 
 CREATE INDEX users_active_email_idx ON users (email)
   WHERE deleted_at IS NULL;
@@ -200,10 +202,11 @@ Use **somente em edge runtime**. Em Node runtime padrão, prefira `postgres` + p
 - Tipos inferidos: `typeof users.$inferSelect`, `typeof users.$inferInsert`.
 
 ```typescript
-import { pgTable, text, timestamp, boolean } from 'drizzle-orm/pg-core';
+import { sql } from 'drizzle-orm';
+import { pgTable, uuid, text, timestamp, boolean } from 'drizzle-orm/pg-core';
 
 export const users = pgTable('users', {
-  id: text('id').primaryKey(),
+  id: uuid('id').primaryKey().default(sql`uuidv7()`),
   email: text('email').notNull().unique(),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   deletedAt: timestamp('deleted_at', { withTimezone: true }),
@@ -348,7 +351,7 @@ Foco em tecnologia. Convenções de modelagem ficam em `@contracts/postgres`.
 
 - `varchar(n)` com `n` arbitrário em vez de `text`.
 - `timestamp` sem timezone — **sempre** `timestamptz`.
-- `serial`/`bigserial` como PK em entidades de domínio (use `uuid` ou ULID `text`).
+- `serial`/`bigserial` como PK em entidades de domínio (use `uuid DEFAULT uuidv7()`; ULID `text` só em bounded context legado com ADR, ver `@contracts/postgres`).
 - `float`/`double precision` para money — use `bigint` `amount_minor`. `numeric(p,s)` é para taxa e quantidade fracionária.
 - String concat em SQL (`sql.unsafe('... ' + userInput)`) — sempre parametrizado.
 - Connection per request sem pooler em serverless/edge.
@@ -366,7 +369,7 @@ Foco em tecnologia. Convenções de modelagem ficam em `@contracts/postgres`.
 
 ## Referências
 
-- PostgreSQL 16 docs: https://www.postgresql.org/docs/16/
+- PostgreSQL 18 docs: https://www.postgresql.org/docs/18/
 - postgres.js: https://github.com/porsager/postgres
 - Drizzle ORM: https://orm.drizzle.team
 - pgvector: ver `@stacks/database/pgvector`

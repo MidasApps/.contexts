@@ -1,5 +1,6 @@
 ---
 title: TypeScript
+type: stacks
 version: 7.0.2
 last_updated: 2026-09-28
 status: current
@@ -12,16 +13,16 @@ category: language
 
 Linguagem oficial do projeto. TypeScript 7 (GA em 2026-07-08) é o **port nativo em Go** do toolchain TypeScript: type-checking e language service tipicamente **8-12x mais rápidos** que TypeScript 6, com paralelização (`--checkers`, `--builders`) e menor uso de memória. Pin medido em 2026-09-28: **7.0.2**. A 7.1, que deve expor a API programática, ainda não estava no npm. A semântica de type-checking é compatível com TypeScript 6.0 (com `stableTypeOrdering` e sem `ignoreDeprecations`).
 
-TypeScript 6 permanece o baseline de **API programática** (eslint, Volar, etc.) via pacote de compatibilidade. Código de aplicação e `tsc` do projeto usam TypeScript 7. O runtime JS/TS é `@stacks/runtime/node@24`.
+TypeScript 6 permanece o baseline de **API programática** (eslint, Volar, etc.) via pacote de compatibilidade. Código de aplicação e `tsc` do projeto usam TypeScript 7. O runtime JS/TS é `@stacks/runtime/node@26`.
 
 ## Baseline da release
 
-- **Versão alvo do projeto**: TypeScript **7.x** (`typescript@^7`).
+- **Versão alvo do projeto**: TypeScript **7.x** (`typescript@7.0.2`, pin exato conforme `stacks/VERSIONS.md`).
 - **Compatibilidade de tipos**: idêntica a TypeScript 6.0 estável (código limpo em TS 6 compila em TS 7).
-- **Node mínimo para rodar `tsc`**: Node 20 LTS. Recomendado **Node 24** (ver `@stacks/runtime/node@24`).
+- **Node para rodar `tsc`**: baseline do projeto é **Node 26** (Node 20 está em EOL) (ver `@stacks/runtime/node@26`).
 - **`lib` baseline**: `ES2024` + `DOM` (apps web) ou `ES2024` puro (Node).
 - **Browser baseline implícito**: navegadores com suporte a ES2023+.
-- **Pacote**: `typescript@^7` em devDependencies; nunca em dependencies.
+- **Pacote**: `typescript@7.0.2` em devDependencies; nunca em dependencies.
 
 ### Side-by-side com TypeScript 6 (tooling)
 
@@ -30,8 +31,8 @@ TS 7 **ainda não expõe API programática estável** (prevista em 7.1+). Ferram
 ```json
 {
   "devDependencies": {
-    "@typescript/native": "npm:typescript@^7.0.2",
-    "typescript": "npm:@typescript/typescript6@^6.0.2"
+    "@typescript/native": "npm:typescript@7.0.2",
+    "typescript": "npm:@typescript/typescript6@6.0.2"
   }
 }
 ```
@@ -39,7 +40,7 @@ TS 7 **ainda não expõe API programática estável** (prevista em 7.1+). Ferram
 - `npx tsc` / `@typescript/native` → compilador 7.
 - `typescript` (peer de eslint) → API 6 via `@typescript/typescript6` (binário `tsc6`).
 
-Projetos **sem** Vue/Svelte/MDX/Astro/Angular language plugins podem instalar só `typescript@^7`.
+Projetos **sem** Vue/Svelte/MDX/Astro/Angular language plugins podem instalar só `typescript@7.0.2`.
 
 **Com Next.js 16.3+, o alias acima quebra o build.** O Next 16.3 usa
 `experimental.useTypeScriptCli: true` por padrão e exige que o pacote `typescript`
@@ -47,7 +48,7 @@ tenha `bin/tsc`; com o alias ele só tem `bin/tsc6`, e o `next build` falha com
 "do not have the required package(s) installed" (verificado em projeto DDC em
 2026-09-25). Nesse caso:
 
-- a raiz mantém `typescript@^7` (`tsc` e `next build` no 7);
+- a raiz mantém `typescript@7.0.2` (`tsc` e `next build` no 7);
 - só quem precisa da API 6 a recebe, via hook `readPackage` em `.pnpmfile.cjs`,
   trocando o peer `typescript` por dependência de
   `npm:@typescript/typescript6@<pin exato>` nos pacotes `@typescript-eslint/*`,
@@ -61,17 +62,17 @@ tenha `bin/tsc`; com o alias ele só tem `bin/tsc6`, e o `next build` falha com
 // .pnpmfile.cjs
 const NEEDS_TS6_API = new Set(["@typescript-eslint/parser", "@typescript-eslint/typescript-estree", "ts-api-utils", "typescript-paths" /* … */]);
 const TS6_API = "npm:@typescript/typescript6@6.0.2";
-function readPackage(pkg) {
+const readPackage = (pkg) => {
   if (NEEDS_TS6_API.has(pkg.name) && pkg.peerDependencies?.typescript) {
     delete pkg.peerDependencies.typescript;
     pkg.dependencies = { ...pkg.dependencies, typescript: TS6_API };
   }
   return pkg;
-}
+};
 module.exports = { hooks: { readPackage } };
 ```
 
-Reavaliar quando o typescript-eslint aceitar TS 7 ou o TS 7.1 expuser a API.
+Reavaliar quando o typescript-eslint aceitar TS 7 ou o TS 7.1 expuser a API. Motivo medido: `typescript-eslint@8.71.0` declara peer `typescript >=4.8.4 <6.1.0` (ADR 0004, E2).
 Ao migrar: `baseUrl` foi removido (TS5102) — seguro quando as `paths` já são relativas.
 
 ## O que mudou vs TypeScript 6
@@ -96,7 +97,7 @@ Deprecations de 6.0 viram **hard errors** em 7: `target: es5`, `moduleResolution
 - **`erasableSyntaxOnly`**: proíbe `enum`, `namespace` runtime, parameter properties, decorators legados — alinha com Node strip-types.
 - **Emit**: apps com bundler → `module: "preserve"` + `moduleResolution: "bundler"`. Libs/Functions → `nodenext`.
 
-Codemod: adotar TS 6 limpo (`npx @typescript/migrate-6` se ainda em 5.x), depois `npm i -D typescript@^7`.
+Caminho: zerar `tsc --noEmit` no TS 6.0 sem `ignoreDeprecations` (cada deprecation vira erro no 7), depois `npm i -D -E typescript@7.0.2`. Não existe codemod oficial `@typescript/migrate-6` no npm (conferido em 2026-09-28).
 
 ## Features marcantes (5.4 → 7)
 
@@ -108,10 +109,10 @@ Resumo do que acumulou entre 5.4 e 6.x e o que vale usar.
 Bloqueia inferência de um parâmetro de tipo a partir de um argumento específico, deixando a inferência vir de outro:
 
 ```ts
-function createStreetLight<C extends string>(
+const createStreetLight = <C extends string>(
   colors: C[],
   defaultColor?: NoInfer<C>,
-): void { /* ... */ }
+): void => { /* ... */ };
 
 createStreetLight(["red", "yellow", "green"], "red");     // OK
 createStreetLight(["red", "yellow", "green"], "blue");    // erro
@@ -160,11 +161,11 @@ Note `Partial<Record<...>>` — chaves não são garantidas. Combine com `noUnch
 }  // dispose chamado aqui, mesmo em throw
 ```
 
-Substitui `try/finally` para recursos disponíveis. Em Node 24, suporte nativo. Use para conexões de banco, locks, spans de tracing.
+Substitui `try/finally` para recursos disponíveis. Em Node 24+ (baseline: 26), suporte nativo. Use para conexões de banco, locks, spans de tracing.
 
 ### Iterator helpers tipados (5.6+)
 
-`map`, `filter`, `take`, `drop`, `flatMap`, `reduce`, `toArray` em iterators (não só arrays). Tipos completos. Disponível em runtime ES2025+ (Node 24).
+`map`, `filter`, `take`, `drop`, `flatMap`, `reduce`, `toArray` em iterators (não só arrays). Tipos completos. Disponível em runtime ES2025+ (Node 24+; baseline: 26).
 
 ### `--noUncheckedSideEffectImports` (5.6)
 
@@ -176,7 +177,7 @@ Erro quando `import "./side-effect"` aponta para módulo inexistente — antes e
 
 ### `--erasableSyntaxOnly` (5.8+, obrigatório no projeto)
 
-Restringe a sintaxe permitida ao que pode ser apagado sem transformação semântica — proíbe `enum`, `namespace` com conteúdo runtime, `import =`/`export =` legacy, parameter properties em construtores, decoradores legados. Alinha com Node strip-types (ver `@stacks/runtime/node@24`), permitindo executar `.ts` direto sem `tsx`/`ts-node`.
+Restringe a sintaxe permitida ao que pode ser apagado sem transformação semântica — proíbe `enum`, `namespace` com conteúdo runtime, `import =`/`export =` legacy, parameter properties em construtores, decoradores legados. Alinha com Node strip-types (ver `@stacks/runtime/node@26`), permitindo executar `.ts` direto sem `tsx`/`ts-node`.
 
 Código que dependia de `enum` ou parameter properties precisa migrar antes de habilitar.
 
@@ -320,7 +321,7 @@ type Event =
 Use `switch` com `never` exhaustiveness:
 
 ```ts
-function handle(e: Event): void {
+const handle = (e: Event): void => {
   switch (e.type) {
     case "click": return;
     case "key": return;
@@ -330,7 +331,7 @@ function handle(e: Event): void {
       throw new Error(`unhandled: ${JSON.stringify(_exhaustive)}`);
     }
   }
-}
+};
 ```
 
 ### `satisfies`
@@ -368,26 +369,27 @@ function pick<T extends object, K extends keyof T>(obj: T, keys: K[]): Pick<T, K
 ### `using` para resource management
 
 ```ts
-async function withTransaction(db: Db) {
+const withTransaction = async (db: Db) => {
   await using tx = await db.begin();
   await tx.exec("...");
   await tx.commit();
   // se throw entre begin e commit, dispose roda rollback
-}
+};
 ```
 
-Disponível em Node 24 nativo.
+Disponível nativamente em Node 24+ (baseline: 26).
 
 ## Execução local e build
 
 ### Rodar `.ts` direto
 
-Com Node 24 strip-types (ver `@stacks/runtime/node@24`):
+Com strip-types (Node 24+; baseline 26; ver `@stacks/runtime/node@26`):
 
 ```bash
-node script.ts                    # strip-types automático
-node --experimental-strip-types script.ts   # versões mais antigas
+node script.ts                    # strip-types automático, sem flag
 ```
+
+Type stripping é Stable desde Node v25.2.0/v24.12.0; `--no-strip-types` desliga. A flag `--experimental-strip-types` não aparece mais na CLI do Node 26.
 
 `tsx` deixa de ser obrigatório para scripts simples. Continua útil quando precisa de transformação além de apagar tipos (decorators, JSX em CLI, etc).
 
@@ -436,18 +438,18 @@ Use `--generateTrace` para diagnosticar "type olympics" — funções genéricas
 
 ## Lint complementar
 
-TypeScript não substitui linter. Use ESLint type-aware (`@typescript-eslint/parser` com `projectService: true`) ou Biome. Regras mínimas: `no-floating-promises`, `no-misused-promises`, `consistent-type-imports`, `no-explicit-any`, `prefer-as-const`, `switch-exhaustiveness-check`. Veja `@rules/development`.
+TypeScript não substitui linter. Use ESLint **9.39.5** (E3: ESLint 10 fica de fora porque `eslint-plugin-react@7.37.5` só aceita `^9.7`) type-aware com `typescript-eslint@8.71.0` (`@typescript-eslint/parser` com `projectService: true`). O typescript-eslint roda na API do TS 6 (`@typescript/typescript6@6.0.2`, E2, ver "Side-by-side" acima); o `tsc` segue no 7. Regras mínimas: `no-floating-promises`, `no-misused-promises`, `consistent-type-imports`, `no-explicit-any`, `prefer-as-const`, `switch-exhaustiveness-check`. Veja `@rules/development`.
 
 ## Migração 5.x / 6 → 7
 
-1. Atualize Node para 20 LTS mínimo (**24 recomendado** — `@stacks/runtime/node@24`).
-2. Se ainda em 5.x: rode `npx @typescript/migrate-6` e estabilize em TS 6.
+1. Rode no Node do baseline: **26** (`@stacks/runtime/node@26`; Functions em 24, E1). `typescript@7.0.2` declara `engines.node >=16.20.0`, então o Node não é o bloqueio.
+2. Se ainda em 5.x: suba para TS 6.0 e zere os avisos de deprecation.
 3. Substitua `enum` por `as const` + union literal; parameter properties por fields explícitos.
 4. Remova `experimentalDecorators` legados; remova `baseUrl` (paths relativos à raiz do projeto).
 5. Ative `erasableSyntaxOnly` + `verbatimModuleSyntax` e zere `tsc --noEmit`.
 6. Liste `types` explicitamente (`["node"]`, etc.).
-7. Instale `typescript@^7`. Se typescript-eslint/Volar quebrar, use side-by-side com `@typescript/typescript6`.
-8. CI: `npx tsc --noEmit` com Node 24; em runners pequenos use `--singleThreaded`.
+7. Instale `typescript@7.0.2` (pin exato). Se typescript-eslint/Volar quebrar, use side-by-side com `@typescript/typescript6`.
+8. CI: `npx tsc --noEmit` com Node 26; em runners pequenos use `--singleThreaded`.
 9. Editor: VS Code — extensão TypeScript 7 / native-preview; desligar só se plugin de Vue/Svelte exigir TS 6.
 
 ## Anti-patterns
@@ -466,7 +468,7 @@ TypeScript não substitui linter. Use ESLint type-aware (`@typescript-eslint/par
 
 ## Referências cruzadas
 
-- `@stacks/runtime/node@24` — runtime, strip-types, `using` nativo.
+- `@stacks/runtime/node@26` — runtime, strip-types, `using` nativo.
 - `@stacks/validation/zod@4` — schema runtime + `z.infer`.
 - `@stacks/frontend/next@16` — config de TS em apps Next.
 - `@stacks/frontend/react@19` — types de React 19.

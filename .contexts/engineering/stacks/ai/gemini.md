@@ -1,5 +1,7 @@
 ﻿---
 title: Gemini API
+type: stacks
+category: ai
 version: gemini-3.5-flash
 last_updated: 2026-09-28
 status: current
@@ -22,7 +24,7 @@ Default de produção nova, lido no Vertex em 2026-09-28:
 
 `gemini-2.5-pro`, `gemini-2.5-flash` e `gemini-2.5-flash-lite` aposentam no **Vertex em 2026-10-20**. Não comece trabalho novo neles. O console AI Studio, na mesma data, ainda não anunciava shutdown dos 2.5 de texto. O framework segue o Vertex, que é o caminho de produção.
 
-`gemini-3.8-flash` é mais novo e está GA, mas a página de lifecycle o lista como disponibilidade curta (sem data de aposentadoria publicada). Não é o default.
+`gemini-3.8-flash` é mais novo e está GA, mas a página de lifecycle o lista como disponibilidade curta (sem data de aposentadoria publicada). Não é o default. O AI Studio (lido em 2026-09-28) rotula `gemini-3.5-flash` como "Legacy Flash" e `gemini-3.8-flash` como o mais recente; `@stacks/VERSIONS` segue o Vertex, então o default do framework continua `gemini-3.5-flash`.
 
 Região: a doc do Vertex descreve endpoint regional e endpoint `global`. Confirme o location na ficha do modelo antes de fixar. `global` para fluxo com `pii` continua exigindo aprovação de compliance (`@rules/governance`), não troca silenciosa.
 
@@ -62,7 +64,7 @@ Os modelos de texto atuais são multimodais nativos: text, image, audio, video e
 
 - **Context window**: 1.048.576 tokens na geração 3 de texto listada na ficha de migração do Vertex.
 - **Multimodal nativo**: vídeo inteiro como input, áudio longo, PDFs estruturados — não há conversão para texto antes.
-- **Thinking/reasoning**: `thinkingConfig` com budget de tokens de pensamento (campo `thoughtsTokenCount` no `usageMetadata`).
+- **Thinking/reasoning**: `thinkingConfig.thinkingLevel` nos modelos 3.x (`MINIMAL`/`LOW`/`MEDIUM`/`HIGH` no enum `ThinkingLevel` do `@google/genai`); `thinkingBudget` em tokens é o controle da geração 2.5. Consumo em `thoughtsTokenCount` no `usageMetadata`.
 - **Grounding with Google Search**: tool built-in (`googleSearch`) que injeta resultados de busca no contexto, com citações estruturadas no response.
 - **Code execution**: tool built-in (`codeExecution`) que roda Python sandbox e retorna stdout/stderr.
 - **URL context**: tool built-in (`urlContext`) para fetch e ingestão de URLs.
@@ -117,7 +119,7 @@ wss://generativelanguage.googleapis.com/.../models.bidiGenerateContent
     responseSchema: { /* JSON Schema subset */ },
     responseModalities: ["TEXT"],
     seed: 42,
-    thinkingConfig: { thinkingBudget: 1024 }
+    thinkingConfig: { thinkingLevel: "LOW" }   // 3.x; thinkingBudget é da 2.5
   },
   safetySettings: [
     { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_MEDIUM_AND_ABOVE" },
@@ -146,10 +148,10 @@ wss://generativelanguage.googleapis.com/.../models.bidiGenerateContent
 Para JSON estruturado garantido pelo decoder:
 
 1. Defina `generationConfig.responseMimeType: "application/json"`.
-2. Defina `generationConfig.responseSchema` com um **JSON Schema subset** (Gemini não aceita JSON Schema completo — sem `$ref`, sem `oneOf` em alguns níveis).
-3. Pareie com Zod usando `z.toJSONSchema` e valide o parsed result com `Schema.parse()` — ver `@stacks/validation/zod@4`.
+2. Defina `generationConfig.responseJsonSchema` com a saída de `z.toJSONSchema(Schema)` (aceita JSON Schema, com subconjunto de keywords: `$ref`/`$defs`, `anyOf`, `enum`, `minimum`/`maximum`, `required`, `additionalProperties` etc.). `responseSchema` (tipo `Schema` estilo OpenAPI) é a alternativa; os dois são mutuamente exclusivos.
+3. Valide o parsed result com `Schema.parse()` — ver `@stacks/validation/zod@4`.
 
-Sem `responseMimeType: "application/json"`, `responseSchema` é ignorado silenciosamente — bug recorrente.
+Sem `responseMimeType: "application/json"`, o schema não se aplica — bug recorrente.
 
 ## Function calling
 
@@ -196,7 +198,7 @@ Endpoint regional obrigatório — `us-central1`, `europe-west4`, `southamerica-
 - `promptTokenCount` — input tokens.
 - `candidatesTokenCount` — output tokens (visíveis).
 - `cachedContentTokenCount` — tokens servidos via cache (faturados com desconto).
-- `thoughtsTokenCount` — tokens de raciocínio interno (faturados em modelos 2.5 com thinking).
+- `thoughtsTokenCount` — tokens de raciocínio interno (faturados como output).
 - `totalTokenCount` — soma de todos os anteriores.
 
 Emita spans OpenTelemetry com atributos padrão `gen_ai.*`:
@@ -211,7 +213,7 @@ Ver `@rules/observability`.
 
 - **Multimodal pesado**: vídeo, PDFs grandes, áudio longo como input direto.
 - **Context window >200k tokens** (documentos inteiros, repositórios de código).
-- **Custo/latência**: Flash 2.5 e Flash-Lite competem agressivamente em throughput.
+- **Custo/latência**: `gemini-3.5-flash` e `gemini-3.5-flash-lite` competem agressivamente em throughput.
 - **Grounding obrigatório com Google Search** com citações estruturadas.
 - **Region pinning Vertex** para compliance LGPD/GDPR — ver `@rules/governance`.
 - **Caching explícito de prompts longos repetidos** (system prompts grandes, RAG context fixo).
@@ -237,11 +239,11 @@ Não use bibliotecas comunitárias não-oficiais para Gemini.
 - Expor API key da AI Studio ou credenciais Vertex no client bundle.
 - Desabilitar todos os `safetySettings` para `BLOCK_NONE` sem justificativa documentada.
 - Usar `inlineData` (base64) para arquivos grandes (>20MB) em vez de **Files API** — estoura limite de request.
-- Definir `responseSchema` **sem** `responseMimeType: "application/json"` — schema é silenciosamente ignorado.
+- Definir `responseJsonSchema`/`responseSchema` **sem** `responseMimeType: "application/json"` — schema não se aplica.
 - Logar `contents` inteiros com PII em produção — viola governança, ver `@rules/governance`.
 - Usar AI Studio em produção: sem SLA, sem IAM, sem data residency, billing pessoal.
 - Confiar em grounding com Google Search sem revisão humana ou citação visível ao usuário.
-- `thinkingBudget` ilimitado em Flash quando o caso não exige raciocínio profundo — custo explode silenciosamente via `thoughtsTokenCount`.
+- `thinkingLevel: "HIGH"` (ou `thinkingBudget` alto na 2.5) em Flash quando o caso não exige raciocínio profundo — custo explode silenciosamente via `thoughtsTokenCount`.
 - Recriar `cachedContents` a cada request em vez de reaproveitar TTL — anula o benefício de custo.
 - Misturar built-in tools (`googleSearch`, `codeExecution`) com `functionDeclarations` sem checar suporte do modelo.
 - Codificar `region` Vertex como string mágica espalhada — centralize em config.

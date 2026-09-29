@@ -2,7 +2,7 @@
 title: Atomic Design
 type: architecture
 status: active
-last_updated: 2026-05-20
+last_updated: 2026-09-28
 upstream: https://atomicdesign.bradfrost.com/
 ---
 
@@ -70,10 +70,7 @@ A estrutura interna adotada:
 
 ```
 src/shared/ui/
-  tokens/                # camada zero — design tokens
-    colors.ts
-    spacing.ts
-    typography.ts
+  # camada zero (tokens): variáveis CSS do Tailwind 4, sem arquivos .ts (ver "Tokens e Tailwind CSS 4")
   atoms/
     Button/
     Input/
@@ -88,12 +85,13 @@ src/shared/ui/
     Header/
     Sidebar/
     DataTable/
-    LoginForm/
   templates/
     DashboardLayout/
     AuthLayout/
     MarketingLayout/
 ```
+
+`LoginForm` e demais organisms com conceito de domínio (autenticação, checkout) ficam na feature, por exemplo `features/auth-by-email/ui/LoginForm.tsx`, e não em `shared/ui/organisms/`.
 
 A camada `pages` da metodologia **não vive** dentro de `src/shared/ui/`. Pages no sentido Atomic correspondem ao conteúdo real renderizado pelas features e pelas rotas — esse papel é absorvido pela camada de roteamento do Next.js 16 (App Router) e pelas features que renderizam dentro dela. Manter pages Atomic dentro da biblioteca de UI compartilhada introduziria acoplamento de domínio em uma área que deve permanecer neutra.
 
@@ -104,6 +102,7 @@ A biblioteca @stacks/frontend/shadcn-ui distribui componentes diretamente como c
 - Componentes **primitivos** distribuídos pela shadcn/ui (`Button`, `Input`, `Label`, `Checkbox`, `Switch`, `Avatar`, `Badge`, `Separator`) são tratados como **atoms** e instalados em `src/shared/ui/atoms/`.
 - Componentes **compostos** da shadcn/ui (`Dialog`, `Popover`, `Dropdown`, `Tabs`, `Tooltip`, `Toast`) — que são wrappers sobre primitives de @stacks/frontend/radix-ui contendo gatilho + conteúdo + handlers — são tratados como **molecules** quando representam um padrão de interação reutilizável simples, e como **organisms** quando agregam estrutura maior (ex.: um `Command` com input + lista + grupos).
 - Primitives diretos da @stacks/frontend/radix-ui consumidos sem wrapper da shadcn/ui (raro neste projeto) também moram em `atoms/`, com o entendimento de que são átomos sem skin opinada.
+- Sob FSD/atomic, ajuste os aliases do `components.json` para `@/shared/ui` e `@/shared/lib`; `@/components/ui` é o padrão da shadcn/ui fora de FSD.
 
 O critério de divisão entre molecule e organism, quando aplicado a componentes vindos da shadcn/ui, segue os critérios canônicos: responsabilidade única vs. agregação de múltiplas responsabilidades.
 
@@ -111,7 +110,7 @@ O critério de divisão entre molecule e organism, quando aplicado a componentes
 
 - Cada componente da biblioteca de UI vive em uma pasta própria com `PascalCase`: `atoms/Button/`, `molecules/SearchField/`.
 - Dentro de cada pasta, o arquivo principal é nomeado igual à pasta: `Button.tsx`.
-- Variantes e subcomponentes vivem na mesma pasta como arquivos auxiliares (`Button.variants.ts`, `Button.stories.tsx` se aplicável).
+- Variantes e subcomponentes vivem na mesma pasta como arquivos auxiliares (`button-variants.ts`, `Button.stories.tsx` se aplicável).
 - Atoms e molecules são **neutros de domínio** no naming: `Button`, não `SubmitButton`; `Card`, não `ProductCard`. Nomes que mencionam domínio sinalizam que o componente pertence a uma feature, não à biblioteca compartilhada.
 - Organisms podem carregar contexto quando justificado, mas se carregam, devem permanecer dentro de uma feature, não em `shared/ui/organisms/`.
 

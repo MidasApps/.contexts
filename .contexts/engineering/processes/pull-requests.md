@@ -1,4 +1,12 @@
-﻿# Pull Requests
+---
+title: Pull Requests
+type: processes
+status: active
+scope: engineering
+last_updated: 2026-09-28
+---
+
+# Pull Requests
 
 Convenção operacional do ciclo de vida de Pull Requests no repositório. Governa estrutura, revisão, automação e merge. Para regras de conduta de revisão, ver `@rules/code-review`. Para fluxo de branches e merge strategy, ver `@processes/git`. Para mensagens de commit, ver `@processes/commits`. Para gates automatizados, ver `@processes/deploy`.
 

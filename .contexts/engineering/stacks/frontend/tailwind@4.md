@@ -1,5 +1,7 @@
 ---
 title: Tailwind CSS
+type: stacks
+category: frontend
 version: 4.3.3
 last_updated: 2026-09-28
 status: current
@@ -79,16 +81,16 @@ Sem `content: [...]`. O engine descobre os arquivos. Para escopos não-óbvios:
 | Antes (3) | Agora (4) |
 |---|---|
 | `addUtilities` em JS plugin | `@utility nome { ... }` em CSS |
-| `addVariant` em JS plugin | `@variant nome (seletor) { ... }` |
+| `addVariant` em JS plugin | `@custom-variant nome (seletor);` |
 | `addBase` em JS plugin | `@layer base { ... }` (cascade layer nativa) |
-| `theme()` em CSS via PostCSS | `var(--...)` direto, ou `--alias-*: --value(--color-*);` |
+| `theme(colors.red.500)` em CSS (deprecated no 4) | `var(--color-red-500)` direto; em media query, onde var não funciona, `theme(--breakpoint-xl)`; dentro de `@utility nome-*` funcional, `--value(--color-*)` resolve o valor pelo namespace do tema |
 
 ```css
 @utility content-auto {
   content-visibility: auto;
 }
 
-@variant pointer-fine (@media (pointer: fine));
+@custom-variant pointer-fine (@media (pointer: fine));
 ```
 
 ### 6. Container queries built-in
@@ -212,8 +214,8 @@ Nada além disso. Sem `autoprefixer` (o Oxide já cuida), sem `postcss-import` (
   --animate-fade-in: fade-in 200ms ease-out;
 }
 
-/* Dark mode via @variant: ativa em html[data-theme="dark"] */
-@variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+/* Dark mode via @custom-variant: ativa em html[data-theme="dark"] */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
 @layer base {
   :where([data-theme="dark"]) {
@@ -233,7 +235,7 @@ Nada além disso. Sem `autoprefixer` (o Oxide já cuida), sem `postcss-import` (
 Notas:
 
 - `@theme inline` (não `@theme`) quando os valores **referenciam** outros vars (`var(--font-inter)`). Sem `inline`, Tailwind congela o valor no build e perde a referência ao `--font-inter` injetado em runtime por `next/font`.
-- A escolha entre `data-theme="dark"` e `.dark` é convenção do projeto — o `@variant dark` deve casar com o que o provider de tema escreve no `<html>`. Ver @stacks/frontend/shadcn-ui.
+- A escolha entre `data-theme="dark"` e `.dark` é convenção do projeto — o `@custom-variant dark` deve casar com o que o provider de tema escreve no `<html>`. Ver @stacks/frontend/shadcn-ui.
 - Não duplicar tokens semânticos em `tailwind.config.ts` legado. A fonte é o `@theme` deste arquivo.
 
 ### Integração com `next/font`
@@ -354,7 +356,7 @@ Conjunto canônico no projeto, em ordem aproximada de uso:
 | `has-*` (`has-[:focus]:ring-2`) | Estado do pai derivado de filho |
 | `not-*` (`not-data-[state=open]:hidden`) | Negação |
 | `motion-safe:`, `motion-reduce:` | A11y de movimento |
-| `dark:` | Tema (via `@variant dark` configurado) |
+| `dark:` | Tema (via `@custom-variant dark` configurado) |
 | `@container`, `@sm:`, `@md:` | Container queries |
 | `sm:`, `md:`, `lg:`, `xl:`, `2xl:` | Viewport queries |
 | `starting:` | `@starting-style` para transições de entrada |
@@ -422,7 +424,7 @@ export function cn(...inputs: ClassValue[]) {
 | `animate-*` sem `motion-safe:` | `motion-safe:animate-*` | Ignora `prefers-reduced-motion`; ver @rules/accessibility |
 | `bg-gradient-to-r` | `bg-linear-to-r` | Forma deprecada; preferir nova |
 | `safelist` extensa "por garantia" | `@source inline(...)` específico, ou mapa | Inflate bundle; mascara classes dinâmicas problemáticas |
-| `addUtilities`/`addVariant` via plugin JS | `@utility` / `@variant` em CSS | API JS é legacy em 4; CSS é a forma canônica |
+| `addUtilities`/`addVariant` via plugin JS | `@utility` / `@custom-variant` em CSS | API JS é legacy em 4; CSS é a forma canônica |
 | `theme('colors.brand.500')` em CSS via PostCSS | `var(--color-brand-500)` | Tokens são CSS vars de verdade em 4 |
 | `<style jsx>` ou CSS-in-JS para algo que utility resolve | Utility | Custo de runtime, perde estática, sem ordenação determinística |
 

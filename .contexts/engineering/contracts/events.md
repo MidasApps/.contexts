@@ -67,12 +67,12 @@ Todo evento publicado no projeto **DEVE** conformar com o envelope abaixo. Inspi
   "eventName": "ORDER_PLACED",
   "eventVersion": 1,
   "occurredAt": "2026-05-20T14:30:00.000Z",
-  "tenantId": "tenant-123",
+  "tenantId": "01932a7c-5b14-7c3a-8e2d-6f4b9a1c0d12",
   "aggregateType": "Order",
   "aggregateId": "01932a7c-5b14-7c3a-8e2d-6f4b9a1c0d11",
   "causationId": "01HZW9G2H7VN3P5Q7R9S2T4W6Y",
   "correlationId": "trace-abc-123",
-  "actor": { "type": "user", "id": "01HZV8F1G6VN3P5Q7R9S2T4W6Y" },
+  "actor": { "type": "user", "id": "01932a7c-5b14-7c3a-8e2d-6f4b9a1c0d13" },
   "source": "orders-service",
   "schemaVersion": 1,
   "data": { "...": "payload específico do evento" }
@@ -124,7 +124,7 @@ Todo evento publicado no projeto **DEVE** conformar com o envelope abaixo. Inspi
 ### 3.2 Aggregate
 
 - `aggregateType`: PascalCase singular (`Order`, `User`, `Invoice`).
-- `aggregateId`: a string do id da entidade, sem prefixo. `uuidv7` quando a entidade mora no Postgres, ULID quando mora no Firestore.
+- `aggregateId`: a string do id da entidade, sem prefixo. `uuidv7` quando a entidade mora no Postgres, ID automático do documento quando mora no Firestore (ADR 0005). Só o `eventId` é ULID.
 
 ### 3.3 Topics
 
@@ -228,7 +228,7 @@ export const OrderPlacedEventV1Schema = EventEnvelopeSchema.extend({
     orderId: OrderIdSchema,
     userId: UserIdSchema,
     amountMinor: z.number().int().nonnegative(),
-    currency: z.string().length(3),
+    currency: z.string().regex(/^[A-Z]{3}$/), // ISO 4217
     items: z.array(OrderItemSchema).min(1),
   }),
 });
@@ -357,8 +357,8 @@ Tabela de eventos em BQ segue convenções de `@contracts/bigquery` (particionam
 {
   "eventName": "DOCUMENT_PROCESSED",
   "data": {
-    "documentId": "doc-01HZX...",
-    "claim": { "ref": "gs://bucket/path/doc-01HZX.json", "size": 4823100 }
+    "documentId": "Xk3pQ9rT2mWv8LbN4cYz",
+    "claim": { "ref": "gs://bucket/path/Xk3pQ9rT2mWv8LbN4cYz.json", "size": 4823100 }
   }
 }
 ```

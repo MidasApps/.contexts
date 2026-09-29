@@ -1,4 +1,12 @@
-﻿# Regras de Governança
+---
+title: Regras de Governança
+type: rules
+status: active
+scope: engineering
+last_updated: 2026-09-28
+---
+
+# Regras de Governança
 
 Regras imperativas sobre como decisões técnicas são tomadas, registradas, aprovadas e revisadas no projeto. Governança aqui significa **quem decide, com que rigor, com que rastro e com que reversibilidade** — não cobre estilo de código (ver @rules/development), segurança operacional (ver @rules/security), observabilidade (ver @rules/observability) ou formato de release (ver Processes/release).
 

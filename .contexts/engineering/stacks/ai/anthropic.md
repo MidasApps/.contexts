@@ -1,9 +1,11 @@
 ---
 title: Anthropic API (Claude)
+type: stacks
 category: ai
+version: anthropic-version 2023-06-01 (SDK @anthropic-ai/sdk 0.129.0)
 status: current
-last_updated: 2026-07-13
-upstream: https://docs.anthropic.com
+last_updated: 2026-09-28
+upstream: https://platform.claude.com/docs
 ---
 
 # Anthropic API (Claude)
@@ -38,14 +40,16 @@ exige residência de dados em conta da cloud (ver `@rules/governance`).
 
 `claude-opus-4-7` e `claude-sonnet-4-6` continuam Active, mas não são o default. No Bedrock, a geração 4.6 em diante não usa sufixo `-v1:0`: `anthropic.claude-sonnet-5-5`. Haiku 4.5 ainda é datado.
 
-Thinking atual é adaptativo. `thinking: { type: "enabled", budget_tokens }` devolve 400 no Sonnet 5 e posteriores. O id de produção vive na config, nunca em alias `latest`.
+Thinking atual é adaptativo. `thinking: { type: "enabled", budget_tokens }` devolve 400 no Sonnet 5 e posteriores. No `claude-opus-5-5` o thinking não desliga (`disabled` → 400) e o `effort` default é `medium`: declare o `effort` explícito. No `claude-sonnet-5-5`, desligar é `thinking: { type: "between_tools" }` (effort `high` ou menor). O id de produção vive na config, nunca em alias `latest`.
+
+Nos 5.x (`claude-sonnet-5-5`, `claude-opus-5-5`, `claude-fable-5-1`): `tool_choice` `any`/`tool` devolve 400, `temperature`/`top_p`/`top_k` não são aceitos (Sonnet 5.5 só aceita o default) e prefill de assistant devolve 400. Verifique `stop_reason === "refusal"` antes de ler `content`.
 
 ## Endpoints principais
 
 | Endpoint | Uso |
 |---|---|
 | `POST /v1/messages` | Chat (sync ou streaming SSE) |
-| `POST /v1/messages?betas=...` | Habilitar features beta (computer-use, 1m-context, files) |
+| `POST /v1/messages` + header `anthropic-beta` | Features beta (ex. `compact-2026-01-12`, `task-budgets-2026-03-13`) |
 | `POST /v1/messages/batches` | Batch async (50% desconto, até 100k requests) |
 | `GET  /v1/messages/batches/{id}` | Status do batch |
 | `POST /v1/files` | Upload de arquivos reutilizáveis |
@@ -55,7 +59,7 @@ Thinking atual é adaptativo. `thinking: { type: "enabled", budget_tokens }` dev
 
 ```jsonc
 {
-  "model": "claude-opus-4-7",
+  "model": "claude-sonnet-5-5",
   "max_tokens": 4096,              // obrigatório
   "system": "You are ...",         // string OU array de blocks (com cache_control)
   "messages": [
@@ -69,12 +73,10 @@ Thinking atual é adaptativo. `thinking: { type: "enabled", budget_tokens }` dev
       "input_schema": { /* JSON Schema */ }
     }
   ],
-  "tool_choice": { "type": "auto" },   // "auto" | "any" | { "type": "tool", "name": "..." } | "none"
-  "thinking": { "type": "enabled", "budget_tokens": 8000 },
-  "temperature": 1.0,
-  "top_p": 0.95,
-  "top_k": 40,
-  "stop_sequences": ["\n\nHuman:"],
+  "tool_choice": { "type": "auto" },   // "auto" | "none"; "any"/"tool" devolvem 400 nos 5.x
+  "thinking": { "type": "adaptive" },
+  "output_config": { "effort": "high" },   // low | medium | high | xhigh | max
+  "stop_sequences": ["</answer>"],
   "stream": true,
   "metadata": { "user_id": "<opaque-hash>" }  // ver @rules/security: nunca PII
 }
@@ -89,13 +91,13 @@ Campos obrigatórios mínimos: `model`, `max_tokens`, `messages`.
   "id": "msg_01...",
   "type": "message",
   "role": "assistant",
-  "model": "claude-opus-4-7",
+  "model": "claude-sonnet-5-5",
   "content": [
     { "type": "thinking", "thinking": "..." },        // se extended thinking
     { "type": "text", "text": "..." },
     { "type": "tool_use", "id": "toolu_01...", "name": "get_weather", "input": { "city": "SP" } }
   ],
-  "stop_reason": "tool_use",                          // end_turn | max_tokens | tool_use | stop_sequence
+  "stop_reason": "tool_use",                          // end_turn | max_tokens | tool_use | stop_sequence | pause_turn | refusal
   "stop_sequence": null,
   "usage": {
     "input_tokens": 1234,
@@ -142,9 +144,9 @@ para reduzir custo de input em até 90% e latência em ~85% em prompts repetidos
 
 Regras operacionais:
 
-- **TTL**: 5 minutos por padrão (refresh em cada hit). `ttl: "1h"` disponível em modelos suportados (cobra a mais).
+- **TTL**: 5 minutos por padrão (refresh em cada hit). `cache_control: { type: "ephemeral", ttl: "1h" }` para 1 hora (escrita cobra a mais).
 - **4 breakpoints máximos** por request (system + messages + tools combinados).
-- **Mínimo cacheable**: ~1024 tokens (Opus/Sonnet) / ~2048 tokens (Haiku) por block. Blocks menores são ignorados.
+- **Mínimo cacheable**: depende do modelo (512 a 4096 tokens de prefixo; Haiku 4.5 pede 4096). Prefixo menor não cacheia e não dá erro.
 - **Cache key**: hash exato do conteúdo até o breakpoint — qualquer caractere diferente invalida.
 - Verificar adoção via `usage.cache_read_input_tokens` > 0.
 
@@ -181,29 +183,30 @@ parte do `assistant` turn, e a resposta vai em um `user` turn como `tool_result`
 **Parallel tool calls** são suportados — múltiplos `tool_use` blocks em um único
 `assistant` turn. Forçar serial com `disable_parallel_tool_use: true` no `tool_choice`.
 
-**Structured output** sem ambiguidade: `tool_choice: { type: "tool", name: "schema" }`
-+ uma tool dummy cujo `input_schema` é o shape desejado. O `input` do `tool_use`
-é o objeto validado.
+**Structured output**: `output_config: { format: ... }` (no SDK TS,
+`client.messages.parse` + `zodOutputFormat(Schema)`). Para argumentos de tool
+conformes ao schema, `strict: true` na definição da tool. Forçar uma tool dummy com
+`tool_choice: { type: "tool" }` devolve 400 nos modelos 5.x.
 
 ## Vision e documentos
 
 - **Imagens**: block `{ "type": "image", "source": { "type": "base64" | "url", ... } }`. JPEG/PNG/GIF/WebP, até ~5MB cada.
-- **PDFs nativos**: block `{ "type": "document", "source": { ... } }`. Até 32MB / 100 páginas. Modelo enxerga texto + layout + imagens das páginas.
+- **PDFs nativos**: block `{ "type": "document", "source": { ... } }`. Até 32MB por request e 600 páginas (100 nos modelos de 200K). Modelo enxerga texto + layout + imagens das páginas.
 - **Citations**: passar `{ "citations": { "enabled": true } }` no document block. Resposta inclui `citations` apontando spans (`start_char_index`, `end_char_index`) no source. Não confundir com citações de busca web.
 
 ## Extended thinking
 
-Reasoning explícito com budget controlado:
+Reasoning explícito, adaptativo: o modelo decide quanto pensar e o `effort` (`low` | `medium` | `high` | `xhigh` | `max`) orienta o esforço:
 
 ```jsonc
-{ "thinking": { "type": "enabled", "budget_tokens": 8000 } }
+{ "thinking": { "type": "adaptive" }, "output_config": { "effort": "high" } }
 ```
 
-- `budget_tokens` é teto, não cota. Modelo pode usar menos.
+- `thinking: { type: "enabled", budget_tokens }` (modo manual) não é aceito nos modelos atuais (400). Use `adaptive` + `effort`.
 - O block `thinking` retornado conta como output tokens (cobra como output).
-- **Sempre** cap `budget_tokens` em produção — sem cap, custo escala de forma não-óbvia.
-- `temperature` deve ser `1.0` quando thinking está ativo (restrição da API).
-- Thinking blocks precisam ser preservados no histórico em multi-turn com tool use.
+- **Sempre** defina `max_tokens` e `effort` em produção — thinking conta como output e o custo escala de forma não-óbvia.
+- Thinking blocks voltam ao histórico **inalterados** em multi-turn com tool use. Editar turnos anteriores invalida os blocks (histórico append-only).
+- Nos 5.x o texto do thinking vem vazio por padrão (`display: "omitted"`). Para mostrar resumo, `thinking: { type: "adaptive", display: "summarized" }`.
 
 ## Batch API
 
@@ -241,7 +244,7 @@ combina bem com prompt caching.
 | Plataforma | Como |
 |---|---|
 | Direct | header `x-api-key: $ANTHROPIC_API_KEY` + `anthropic-version: 2023-06-01` |
-| Bedrock | AWS SDK assina com SigV4; chamar `bedrock-runtime:InvokeModel` |
+| Bedrock | AWS SigV4 / IAM. Código novo usa o cliente Mantle (`AnthropicBedrockMantle`); `bedrock-runtime:InvokeModel` é o caminho legado |
 | Vertex | OAuth bearer via ADC; endpoint regional Vertex |
 
 Headers obrigatórios na API direta:
@@ -297,8 +300,8 @@ Nunca mostrar `message` raw em UI — pode vazar contexto interno.
 
 - Tarefas onde Claude tem vantagem mensurada: writing longo, análise de documento, código de engenharia, agentes complexos com tool use, raciocínio multi-step.
 - Prompt caching é game-changer: RAG, chatbots com persona grande, code review com codebase no contexto.
-- Computer use beta (Opus 4.7).
-- 1M context (Opus opt-in) para codebases inteiros ou corpora grandes.
+- Computer use (`computer_toolset_20260801` nos 5.x, GA na API direta e no Google Cloud; o Bedrock ainda usa `computer_20251124` com beta header).
+- 1M de context (padrão nos 5.x) para codebases inteiros ou corpora grandes.
 - Extended thinking quando o problema é genuinamente "reasoning hard".
 - Bedrock/Vertex quando há requisito de residência/compliance (LGPD/HIPAA) — ver `@rules/governance`.
 
@@ -310,7 +313,7 @@ Ordem de preferência:
 
 1. **`@stacks/ai/vercel-ai-sdk` + `@ai-sdk/anthropic@4`** — caminho padrão. Cobre chat, tool use, structured output via `Output.object`, streaming e multimodal. Provider-agnostic, fácil trocar Anthropic, OpenAI e Gemini sem reescrever a feature.
 2. **`@anthropic-ai/sdk` direto** (`@stacks/ai/anthropic-sdk`) — quando precisar de features que o AI SDK não expõe ainda:
-   - Computer use (beta)
+   - Computer use (`computer_toolset_20260801`)
    - Message Batches
    - Files API
    - Prompt caching com controle fino de breakpoints / TTL custom
@@ -334,32 +337,32 @@ Ver `@rules/observability`. Specificamente para Anthropic:
 - API key em código client-side (browser, app mobile, extension).
 - Ignorar prompt caching em system prompts > 1K tokens reutilizados — desperdício direto de custo.
 - Tool sem `input_schema` completo — modelo improvisa JSON e quebra parse.
-- Extended thinking sem `budget_tokens` cap em produção — custo de output escala silenciosamente.
+- Extended thinking sem `max_tokens`/`effort` definidos em produção — custo de output escala silenciosamente.
 - Logar `messages` ou `content` sem redaction — vaza PII e prompts proprietários (ver `@rules/security`).
 - Tratar texto livre quando `tool_use` com schema resolve o problema com determinismo.
 - Misturar versão de `@ai-sdk/anthropic` incompatível com a versão de `ai` core.
 - Não inspecionar `stop_reason` — `max_tokens` cortado silencioso vira bug em prod.
 - Usar `@anthropic-ai/sdk` direto quando `@stacks/ai/vercel-ai-sdk` já cobre — duplica conhecimento de provider no codebase.
-- Hardcode de `claude-opus-4-7` espalhado no código — model ID deve ser config (env var ou arquivo de modelos).
+- Hardcode de `claude-sonnet-5-5` espalhado no código — model ID deve ser config (env var ou arquivo de modelos).
 - Retry agressivo em 400/401/403 — são erros determinísticos, retry só piora.
-- Confiar em `temperature: 0` para determinismo total — Claude não é determinístico mesmo a 0.
+- Mandar `temperature`/`top_p`/`top_k` para os modelos 5.x — devolve 400. Controle por `effort` e prompt; não espere determinismo.
 
 ## Comparação rápida com outros providers
 
-- vs **OpenAI** (ver `@stacks/ai/openai`): Anthropic tem prompt caching explícito superior, melhor em writing longo e análise; OpenAI tem function calling com `strict: true` (Anthropic não tem equivalente nativo — usar Zod no input_schema).
-- vs **Gemini** (ver `@stacks/ai/gemini`): Anthropic tem extended thinking e computer use; Gemini tem context window maior nativo e custo mais baixo em Flash.
+- vs **OpenAI** (ver `@stacks/ai/openai`): Anthropic tem prompt caching explícito com breakpoints; os dois têm tool use com `strict: true` e saída estruturada por schema. Valide com Zod dos dois lados.
+- vs **Gemini** (ver `@stacks/ai/gemini`): Anthropic tem computer use e thinking adaptativo com `effort`; Gemini tem grounding com Google Search e custo mais baixo em Flash.
 - Em agentes complexos, ver `@stacks/ai/harness-engineering` para padrões de orquestração.
 
 ## Referências
 
-- API docs: https://docs.anthropic.com
-- Changelog de modelos: https://www.anthropic.com/news
-- API reference: https://docs.anthropic.com/en/api/messages
-- Beta features: https://docs.anthropic.com/en/api/beta-headers
-- Prompt caching: https://docs.anthropic.com/en/docs/build-with-claude/prompt-caching
-- Tool use: https://docs.anthropic.com/en/docs/build-with-claude/tool-use
-- Extended thinking: https://docs.anthropic.com/en/docs/build-with-claude/extended-thinking
-- Computer use: https://docs.anthropic.com/en/docs/build-with-claude/computer-use
+- Modelos: https://platform.claude.com/docs/en/about-claude/models/overview
+- Migração entre modelos: https://platform.claude.com/docs/en/about-claude/models/migration-guide
+- Prompt caching: https://platform.claude.com/docs/en/build-with-claude/prompt-caching
+- Tool use: https://platform.claude.com/docs/en/agents-and-tools/tool-use/overview
+- Adaptive thinking: https://platform.claude.com/docs/en/build-with-claude/adaptive-thinking
+- Effort: https://platform.claude.com/docs/en/build-with-claude/effort
+- Structured outputs: https://platform.claude.com/docs/en/build-with-claude/structured-outputs
+- Computer use: https://platform.claude.com/docs/en/agents-and-tools/tool-use/computer-use-tool
 
 ## Referências cruzadas
 

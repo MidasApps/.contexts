@@ -1,5 +1,7 @@
 ---
 title: Google Gen AI SDK (@google/genai)
+type: stacks
+category: ai
 package: "@google/genai"
 version: 2.24.0
 last_updated: 2026-09-28
@@ -52,10 +54,10 @@ A diferença estrutural mais importante: **não existe mais o conceito de "model
 ## Instalação
 
 ```bash
-pnpm add @google/genai
+pnpm add @google/genai@2.24.0 --save-exact
 ```
 
-Requer Node 24 (referencie `@stacks/runtime/node@24`) e TypeScript 7.0.2 (referencie `@stacks/language/typescript@7`). Pacote medido: `@google/genai@2.24.0`. Os exemplos usam `gemini-3.5-flash` / `gemini-3.5-flash-lite`, o default do `@stacks/ai/gemini`.
+Requer Node 26 (referencie `@stacks/runtime/node@26`) e TypeScript 7.0.2 (referencie `@stacks/language/typescript@7`). Pacote medido: `@google/genai@2.24.0`. Os exemplos usam `gemini-3.5-flash` / `gemini-3.5-flash-lite`, o default do `@stacks/ai/gemini`.
 
 ---
 
@@ -210,7 +212,7 @@ Live API: sessão WebSocket bidirecional com áudio/vídeo de entrada e áudio/t
 
 ```ts
 const session = await ai.live.connect({
-  model: 'gemini-3.8-live',
+  model: process.env.GEMINI_LIVE_MODEL!, // id do modelo Live vigente: confira na ficha de modelos antes de fixar
   config: { responseModalities: ['AUDIO'] },
   callbacks: {
     onmessage: (msg) => { /* LiveServerMessage */ },
@@ -229,7 +231,7 @@ await session.sendClientContent({ turns: '...' });
 Polling/wait para long-running operations (Veo, Imagen async, tuning jobs).
 
 ```ts
-let op = await ai.models.generateVideos({ model: 'veo-2.0', prompt: '...' });
+let op = await ai.models.generateVideos({ model: process.env.VEO_MODEL!, prompt: '...' }); // id vigente na ficha de modelos
 while (!op.done) {
   await new Promise((r) => setTimeout(r, 5000));
   op = await ai.operations.getVideosOperation({ operation: op });
@@ -258,7 +260,7 @@ import type {
 } from '@google/genai';
 ```
 
-`Schema` é um subset de JSON Schema. Para gerar `Schema` a partir de Zod, use o adapter do Vercel AI SDK (`@ai-sdk/google`) — não há conversor Zod→Schema embutido no `@google/genai` (referencie `@stacks/validation/zod@4`).
+`Schema` é o formato estilo OpenAPI 3.0. Para partir de Zod, passe `z.toJSONSchema(XSchema)` nos campos JSON Schema do SDK: `config.responseJsonSchema` (saída estruturada) e `FunctionDeclaration.parametersJsonSchema` (tools). Cada um é mutuamente exclusivo com o par `responseSchema` / `parameters` (referencie `@stacks/validation/zod@4`).
 
 ---
 
@@ -274,16 +276,14 @@ await ai.models.generateContent({
   contents,
   config: {
     temperature: 0.4,
-    topP: 0.95,
-    topK: 40,
     maxOutputTokens: 2048,
     responseMimeType: 'application/json',
-    responseSchema: outputSchema,
+    responseJsonSchema: z.toJSONSchema(ClassificationSchema),
     systemInstruction: 'Você é um classificador estrito.',
     tools: [{ functionDeclarations: [...] }],
     toolConfig: { functionCallingConfig: { mode: 'ANY' } },
     safetySettings: [...],
-    thinkingConfig: { thinkingBudget: 1024 },
+    thinkingConfig: { thinkingLevel: ThinkingLevel.LOW }, // 3.x; thinkingBudget é da 2.5
     seed: 42,
     abortSignal: controller.signal,
   },
@@ -303,22 +303,22 @@ const content = createUserContent([
 
 ### Function calling
 
-Declare tools com `FunctionDeclaration`. O `parameters` é `Schema` (JSON Schema):
+Declare tools com `FunctionDeclaration`. Com Zod, use `parametersJsonSchema`:
 
 ```ts
+const GetWeatherInputSchema = z.object({
+  city: z.string().min(1),
+  unit: z.enum(['C', 'F']).optional(),
+});
+
 const getWeather: FunctionDeclaration = {
   name: 'getWeather',
   description: 'Retorna previsão do tempo para uma cidade.',
-  parameters: {
-    type: 'OBJECT',
-    properties: {
-      city: { type: 'STRING' },
-      unit: { type: 'STRING', enum: ['C', 'F'] },
-    },
-    required: ['city'],
-  },
+  parametersJsonSchema: z.toJSONSchema(GetWeatherInputSchema),
 };
 ```
+
+Valide `functionCall.args` com `GetWeatherInputSchema.safeParse` antes de executar.
 
 ### Cancelamento
 
@@ -366,7 +366,8 @@ Referencie `@stacks/frontend/next@16`.
 
 - **Route Handler** (App Router) para streaming HTTP:
   ```ts
-  // app/api/generate/route.ts
+  // src/services/generation/adapters/driving/generate-route-handler.ts
+  // (src/app/v1/generate/route.ts re-exporta POST; ver @stacks/frontend/next@16)
   export async function POST(req: Request) {
     const { prompt } = await req.json();
     const stream = await ai.models.generateContentStream({
@@ -386,7 +387,7 @@ Referencie `@stacks/frontend/next@16`.
   }
   ```
 - **Server Actions** para chamadas non-streaming.
-- **Edge runtime**: `ai.models.generateContent` e streaming funcionam, mas `ai.live` **não** — Live API exige `runtime = 'nodejs'`.
+- **Runtime**: `nodejs` (default). `runtime = 'edge'` está deprecated no Next 16 e é incompatível com `cacheComponents: true` (`@stacks/frontend/next@16`); a Live API (`ai.live`) também exige Node.
 - **API keys em client**: proibido. Toda chamada origina-se de server.
 
 ---
@@ -465,7 +466,7 @@ span.end();
 - `@stacks/ai/vercel-ai-sdk` — wrapper cross-provider; default para chat/completion comum.
 - `@stacks/validation/zod@4` — geração de schemas para structured output (via AI SDK adapter).
 - `@stacks/language/typescript@7` — tipos TS first-class.
-- `@stacks/runtime/node@24` — runtime mínimo.
+- `@stacks/runtime/node@26` — runtime mínimo.
 - `@stacks/frontend/next@16` — Route Handlers, Server Actions, runtimes.
 - `@rules/security` — API keys nunca em client.
 - `@rules/observability` — spans OpenTelemetry e atributos `gen_ai.*`.

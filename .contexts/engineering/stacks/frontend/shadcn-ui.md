@@ -1,5 +1,7 @@
 ﻿---
 title: shadcn/ui
+type: stacks
+category: frontend
 version: distribuição via CLI (sem SemVer)
 last_updated: 2026-09-28
 status: current
@@ -24,7 +26,7 @@ shadcn/ui inverte o modelo tradicional de design system em npm:
 - **Copy, not install.** A CLI copia o código fonte do componente para o repo, aplicando o `components.json` do projeto (style, aliases, tokens).
 - **Você possui o código.** Edição livre: trocar variantes, remover props, adicionar slots, ajustar comportamento. Não há "monkey patch" — é seu arquivo.
 - **Stack composta, não monolítica.** Radix UI primitives + Tailwind 4 + `class-variance-authority` (cva) + `tailwind-merge` + `clsx` (via `cn`) + Lucide React (ícones default). Cada peça é trocável.
-- **Updates são diffs explícitos.** `shadcn update` mostra a diferença entre a versão upstream e a sua; você decide o que aceitar.
+- **Updates são explícitos.** Não há `shadcn update` nem `shadcn diff` na CLI atual: compare com `shadcn view <component>` (código upstream) ou reinstale com `shadcn add <component> --overwrite`, revisando o git diff; você decide o que aceitar.
 
 Consequência operacional: shadcn é mais "manual de origem" do que "dependência". O snapshot do que está no seu repo é a verdade; o upstream é referência.
 
@@ -32,14 +34,14 @@ Consequência operacional: shadcn é mais "manual de origem" do que "dependênci
 
 - **shadcn não usa SemVer estável.** A CLI é versionada (`shadcn@latest`), o catálogo de componentes evolui continuamente, mas não há "shadcn 1.x" vs "2.x" governando o que está no seu repo.
 - **A "versão" do projeto é a tripla:** (a) o snapshot dos arquivos em `src/components/ui/` em um dado commit, (b) o `components.json`, (c) as versões pinadas de Radix UI, Tailwind, cva, tailwind-merge, clsx, lucide-react no `package.json`.
-- **Atualizações são opt-in.** Rodar `shadcn update <component>` ou `shadcn diff <component>` quando há necessidade (bug upstream relevante, melhoria desejada). Nunca em massa sem revisão.
-- **Estilos:** `new-york` é o style oficial atual (escolha do projeto); `default` existe como alternativa. **Não misturar** os dois — escolher um no `components.json` e manter.
+- **Atualizações são opt-in.** Rodar `shadcn view <component>` (comparar) ou `shadcn add <component> --overwrite` (aplicar) quando há necessidade (bug upstream relevante, melhoria desejada). Nunca em massa sem revisão.
+- **Base e estilo (padrão do projeto):** primitives **Radix** (`shadcn init -b radix`) com o visual `new-york`. A CLI atual (`shadcn@4.21.0` no npm em 2026-09-28) tem `init -b, --base <base>` com `base` (Base UI), `radix` (Radix UI) e `aria` (React Aria), e presets de estilo (`vega`, `nova`, `maia`, `lyra`, `mira`, `luma`, `sera`, `rhea`). Sem `-b` e sem `components.json`, a CLI pergunta a base; `-d/--defaults` usa template `next` + preset Nova sobre **Base UI**, então **não use `-d`** neste projeto. Um `components.json` com `style` legado sem prefixo (`new-york`, `new-york-v4`) é tratado pela CLI como base Radix. A página de `components.json` ainda lista só `new-york` (com `default` deprecated); ela está atrás da CLI.
 
 ## Stack subjacente
 
 | Dependência | Função | Notas |
 |---|---|---|
-| `@radix-ui/react-*` | Comportamento + acessibilidade dos componentes interativos | Headless; cada primitive é um pacote separado. Ver @stacks/frontend/radix-ui |
+| `radix-ui` | Comportamento + acessibilidade dos componentes interativos | Headless; pacote unificado (`import { Dialog } from 'radix-ui'`). Ver @stacks/frontend/radix-ui |
 | `tailwindcss` 4.x | Estilo | Ver @stacks/frontend/tailwind@4 |
 | `class-variance-authority` (`cva`) | Variants tipadas (`variant`, `size`, `defaultVariants`, `compoundVariants`) | Componentes com múltiplas formas |
 | `tailwind-merge` | Resolver conflitos de utilities | Usado via `cn()` |
@@ -56,7 +58,7 @@ Consequência operacional: shadcn é mais "manual de origem" do que "dependênci
 | `input-otp` | OTP input | Base para `InputOTP` |
 | `next-themes` | Dark/light toggling SSR-safe | Provider de tema no App Router |
 
-Versões pinadas no `package.json`. Atualizações coordenadas com o snapshot dos componentes (rodar `shadcn diff` quando bumpar Radix para detectar drift).
+Versões pinadas no `package.json`. Atualizações coordenadas com o snapshot dos componentes (rodar `shadcn view <component>` e comparar quando bumpar Radix para detectar drift).
 
 ## CLI
 
@@ -64,31 +66,31 @@ A CLI é o ponto de entrada para tudo. Invocada via `pnpm dlx shadcn@latest <com
 
 | Comando | Função |
 |---|---|
-| `shadcn init` | Bootstrap do projeto: cria `components.json`, instala deps base (`cn`, `class-variance-authority`, `tailwind-merge`, `clsx`, `lucide-react`), registra aliases |
+| `shadcn init -b radix` (ou `create`) | Bootstrap do projeto: cria `components.json`, instala deps base (`cn`, `class-variance-authority`, `tailwind-merge`, `clsx`, `lucide-react`), registra aliases. `-b` escolhe a biblioteca de primitives (`base`, `radix`, `aria`); o projeto usa `radix` |
 | `shadcn add <component>` | Instala um componente: cria `src/components/ui/<name>.tsx`, instala deps necessárias, copia sub-componentes |
 | `shadcn add <component-1> <component-2> ...` | Vários de uma vez |
 | `shadcn add` (sem args) | Modo interativo (lista para seleção) |
-| `shadcn diff <component>` | Compara o snapshot local com o upstream atual |
-| `shadcn update <component>` | Aplica diff upstream (revisar antes de aceitar) |
-| `shadcn view <component>` | Mostra o código upstream sem instalar |
+| `shadcn view <component>` | Mostra o código upstream sem instalar (base para comparar drift) |
+| `shadcn add <component> --overwrite` | Reinstala sobre o arquivo local (revisar o git diff antes de aceitar) |
+| `shadcn search`, `docs`, `info`, `apply`, `preset`, `migrate`, `eject` | Utilitários: busca em registries, docs, diagnóstico, presets, migrações, ejetar |
 | `shadcn add <url>` | Instala componente de registry de terceiros (Origin UI, Aceternity, registry interno) |
 | `shadcn build` | Gera registry próprio (para publicar componentes internos como registry) |
 
 Padrão de uso no projeto:
 
 ```bash
-# bootstrap (uma vez)
-pnpm dlx shadcn@latest init
+# bootstrap (uma vez) — base Radix explícita; nunca -d (cai em Base UI)
+pnpm dlx shadcn@latest init -b radix
 
 # adicionar componente
 pnpm dlx shadcn@latest add button card dialog
 
-# atualizar quando upstream muda
-pnpm dlx shadcn@latest diff button
-pnpm dlx shadcn@latest update button   # aplica após revisar
+# comparar / atualizar quando upstream muda
+pnpm dlx shadcn@latest view button
+pnpm dlx shadcn@latest add button --overwrite   # aplica; revisar o git diff
 ```
 
-Não rodar `update` em loop automatizado — cada update é revisão manual.
+Não rodar `add --overwrite` em loop automatizado — cada atualização é revisão manual.
 
 ## `components.json`
 
@@ -109,7 +111,7 @@ Arquivo de configuração na raiz, lido pela CLI a cada operação. Contrato com
   },
   "aliases": {
     "components": "@/components",
-    "utils": "@/lib/utils",
+    "utils": "@/lib/cn",
     "ui": "@/components/ui",
     "lib": "@/lib",
     "hooks": "@/hooks"
@@ -118,14 +120,16 @@ Arquivo de configuração na raiz, lido pela CLI a cada operação. Contrato com
 }
 ```
 
+Paths acima valem **fora de FSD**. Sob FSD/atomic o código de UI vive em `shared`: ajuste `aliases` para `"components": "@/shared/ui"`, `"ui": "@/shared/ui"`, `"utils": "@/shared/lib/cn"`, `"lib": "@/shared/lib"`, `"hooks": "@/shared/lib"` e o `tsconfig` `paths` correspondente. Componente de domínio (ex. `LoginForm`) vai em `features/`, nunca em `shared/ui`. Onde o texto abaixo diz `src/components/ui`, leia `src/shared/ui` sob FSD.
+
 Campos críticos:
 
-- **`style`:** `new-york` (padrão do projeto) ou `default`. Define o visual base (radius, density, sombras) e algumas variantes default. **Imutável** depois de adotado sem refactor.
+- **`style`:** `new-york` no projeto (visual base: radius, density, sombras e variantes default; a CLI lê o valor legado sem prefixo como base Radix). `default` está deprecated. **Imutável** depois de adotado sem refactor. Os presets novos da CLI (`nova`, `vega`, …) não são adotados sem ADR.
 - **`rsc`: `true`** para Next App Router. Faz a CLI gerar componentes com `"use client"` apenas onde necessário (componentes que dependem de hooks/state). Ver @stacks/frontend/next@16.
 - **`tsx`: `true`** — TypeScript é padrão.
 - **`tailwind.config`:** em Tailwind 4 dispensa arquivo de config; manter `""` (a CLI lê o CSS para resolver tokens). Se ainda existir `tailwind.config.ts` como ponte legacy, apontar para ele.
 - **`tailwind.css`:** caminho do CSS principal que importa Tailwind e declara `@theme`. Ver @stacks/frontend/tailwind@4.
-- **`tailwind.baseColor`:** paleta neutra base — `neutral`, `gray`, `zinc`, `stone`, `slate`. Decide a tonalidade dos cinzas em tokens semânticos não-coloridos. **Imutável** sem regenerar tokens.
+- **`tailwind.baseColor`:** paleta neutra base — `neutral`, `stone`, `zinc`, `mauve`, `olive`, `mist`, `taupe`. Decide a tonalidade dos cinzas em tokens semânticos não-coloridos. **Imutável** sem regenerar tokens.
 - **`tailwind.cssVariables`: `true`** — usar CSS vars (recomendado, e contrato com Tailwind 4 `@theme`). `false` (utilities Tailwind diretas) é caminho deprecado para o projeto.
 - **`aliases`:** seguem o `tsconfig.json` `paths`. Mudar aqui obriga mudar o `tsconfig`.
 - **`iconLibrary`:** `lucide` (padrão). `radix` (ícones do Radix) é alternativa.
@@ -156,7 +160,7 @@ Regras:
 - **Componentes shadcn consomem semânticos**, nunca paleta crua. `bg-primary` no `Button`, não `bg-blue-600`.
 - **Mudar tema = redeclarar semânticos**, não editar componentes. Dark mode redeclara apenas estes tokens (em `:where([data-theme="dark"])` ou `.dark`).
 - **Nomes coincidem entre `@theme` e o que os componentes esperam.** Renomear um token exige busca global em `src/components/ui/`.
-- **Dark mode via classe.** Convenção do projeto: `data-theme="dark"` no `<html>`, casado com `@variant dark` no CSS (ver @stacks/frontend/tailwind@4). `next-themes` cuida do toggle SSR-safe.
+- **Dark mode via classe.** Convenção do projeto: `data-theme="dark"` no `<html>`, casado com `@custom-variant dark` no CSS (ver @stacks/frontend/tailwind@4). `next-themes` cuida do toggle SSR-safe.
 
 ## Catálogo de componentes
 
@@ -216,13 +220,13 @@ Cada componente adicionado vive em `src/components/ui/<name>.tsx` e é livre par
 | Tooltip | Radix Tooltip |
 | Typography | Receitas de classes para `<h1>...<p>...<blockquote>` (não é componente único) |
 
-**`Toast` está descontinuado** em favor de `Sonner`. Novo código usa Sonner; código legado que ainda usa `Toast` migra em janela dedicada.
+**O componente `toast` do shadcn está deprecated** em favor de `Sonner` (a página do componente diz isso; o primitive `Toast` do Radix continua publicado). Novo código usa Sonner; código legado que ainda usa `Toast` migra em janela dedicada.
 
 ## Padrões de uso
 
 ### `cn()` helper
 
-`src/lib/utils.ts`:
+`src/lib/cn.ts` (sob FSD: `src/shared/lib/cn.ts`; o alias `utils` do `components.json` deve apontar para ele):
 
 ```ts
 import { clsx, type ClassValue } from 'clsx';
@@ -237,38 +241,60 @@ Toda composição condicional de className passa por `cn()`. Nunca concatenar st
 
 ### Variants com `cva`
 
-```ts
+Formato atual do `button.tsx` gerado pela CLI (registry `new-york-v4`, conferido em ui.shadcn.com/r/styles/new-york-v4/button.json): props de `React.ComponentProps<"button">` (sem `forwardRef`; ref é prop no React 19), `data-slot="button"` e `Slot.Root` do pacote unificado `radix-ui`.
+
+```tsx
+import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
+import { Slot } from 'radix-ui';
+import { cn } from '@/lib/cn';
 
 const buttonVariants = cva(
-  'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
+  "inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
   {
     variants: {
       variant: {
         default: 'bg-primary text-primary-foreground hover:bg-primary/90',
-        destructive: 'bg-destructive text-destructive-foreground hover:bg-destructive/90',
-        outline: 'border border-input bg-background hover:bg-accent hover:text-accent-foreground',
+        destructive: 'bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:bg-destructive/60 dark:focus-visible:ring-destructive/40',
+        outline: 'border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50',
         secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/80',
-        ghost: 'hover:bg-accent hover:text-accent-foreground',
+        ghost: 'hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50',
         link: 'text-primary underline-offset-4 hover:underline',
       },
       size: {
-        default: 'h-10 px-4 py-2',
-        sm: 'h-9 rounded-md px-3',
-        lg: 'h-11 rounded-md px-8',
-        icon: 'h-10 w-10',
+        default: 'h-9 px-4 py-2 has-[>svg]:px-3',
+        sm: 'h-8 gap-1.5 rounded-md px-3 has-[>svg]:px-2.5',
+        lg: 'h-10 rounded-md px-6 has-[>svg]:px-4',
+        icon: 'size-9',
       },
     },
     defaultVariants: { variant: 'default', size: 'default' },
   },
 );
 
-export interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof buttonVariants> {
-  asChild?: boolean;
+function Button({
+  className,
+  variant = 'default',
+  size = 'default',
+  asChild = false,
+  ...props
+}: React.ComponentProps<'button'> & VariantProps<typeof buttonVariants> & { asChild?: boolean }) {
+  const Comp = asChild ? Slot.Root : 'button';
+  return (
+    <Comp
+      data-slot="button"
+      data-variant={variant}
+      data-size={size}
+      className={cn(buttonVariants({ variant, size, className }))}
+      {...props}
+    />
+  );
 }
+
+export { Button, buttonVariants };
 ```
+
+O registry atual traz ainda os tamanhos `xs`, `icon-xs`, `icon-sm` e `icon-lg`; o trecho acima os omite por brevidade.
 
 `compoundVariants` para combinações específicas (ex.: `variant="outline" size="icon"` precisa de ajuste de padding). Evitar adicionar props booleanas paralelas (`isDanger`, `isLarge`) — promovê-las a `variant`.
 
@@ -282,7 +308,7 @@ Permite delegar o rendering para o filho, mesclando props e refs:
 </Button>
 ```
 
-O `Button` não renderiza `<button>`; mescla suas classes/handlers no `<a>` que o `Link` renderiza. Padrão herdado do Radix (`@radix-ui/react-slot`). Disponível em quase todos os componentes shadcn que aceitam children semânticos. Ver @stacks/frontend/radix-ui.
+O `Button` não renderiza `<button>`; mescla suas classes/handlers no `<a>` que o `Link` renderiza. Padrão herdado do Radix: `import { Slot } from 'radix-ui'` e `<Slot.Root>` (pacote unificado `radix-ui`, não mais `@radix-ui/react-slot`). Disponível em quase todos os componentes shadcn que aceitam children semânticos. Ver @stacks/frontend/radix-ui.
 
 ### Forms
 
@@ -294,26 +320,22 @@ Stack: `react-hook-form` + `zod` resolver + componentes shadcn `<Form>`.
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
+import { LoginSchema } from '@/features/auth/model/login.schema'; // z.object({ email: z.email(), password: z.string().min(8) })
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 
-const schema = z.object({
-  email: z.string().email(),
-  password: z.string().min(8),
-});
-
-type FormValues = z.infer<typeof schema>;
+type FormValues = z.infer<typeof LoginSchema>;
 
 export function LoginForm() {
   const form = useForm<FormValues>({
-    resolver: zodResolver(schema),
+    resolver: zodResolver(LoginSchema),
     defaultValues: { email: '', password: '' },
   });
 
-  function onSubmit(values: FormValues) {
+  const onSubmit = (values: FormValues) => {
     // ...
-  }
+  };
 
   return (
     <Form {...form}>
@@ -336,7 +358,7 @@ export function LoginForm() {
 }
 ```
 
-Schema único (`zod`) governa client e server. Ver @rules/validation e Stacks/Zod (futuro).
+Schema único (`zod`, em `login.schema.ts` fora do componente) governa client e server. Arquivo do componente: `features/auth/ui/LoginForm.tsx`. Ver @rules/validation e @stacks/validation/zod@4.
 
 ### Tabelas (DataTable)
 
@@ -396,10 +418,10 @@ Componentes em `src/components/ui/` são SEUS — editar é o caminho esperado. 
 
 1. **Tokens semânticos, não paleta crua.** `bg-primary`, `text-foreground`, `border-border`. Hardcode (`bg-blue-600`) só em ilustrações pontuais.
 2. **Variantes via `cva`, não props booleanas.** Adicionar `variant="success"` em vez de `isSuccess`.
-3. **Comentário curto onde editou.** Quando uma divergência intencional do upstream é não-óbvia, `// shadcn diff: removido X porque Y` torna o próximo `shadcn update` revisável. Ver @rules/documentation quando aplicável.
-4. **Wrappers de domínio em camada acima.** `src/features/<feature>/components/<X>.tsx` consome `src/components/ui/`. **Não** colocar componentes de domínio dentro de `ui/`. Ver @architecture/fsd / @architecture/feature-based.
-5. **`shadcn update` periódico, com revisão.** Janela trimestral para revisar diffs upstream relevantes; aplicar o que faz sentido, ignorar o que não se aplica ao seu fork.
-6. **Versionamento conjunto com Radix.** Bump de Radix → rodar `shadcn diff` nos componentes que dependem do primitive afetado.
+3. **Comentário curto onde editou.** Quando uma divergência intencional do upstream é não-óbvia, `// shadcn: removido X porque Y` torna a próxima comparação com o upstream revisável. Ver @rules/documentation quando aplicável.
+4. **Wrappers de domínio em camada acima.** `src/features/<feature>/ui/<X>.tsx` consome `src/components/ui/`. **Não** colocar componentes de domínio dentro de `ui/`. Ver @architecture/fsd / @architecture/feature-based.
+5. **Comparação periódica com o upstream, com revisão.** Janela trimestral (`shadcn view`) para revisar diferenças relevantes; aplicar o que faz sentido, ignorar o que não se aplica ao seu fork.
+6. **Versionamento conjunto com Radix.** Bump de Radix → rodar `shadcn view` e comparar nos componentes que dependem do primitive afetado.
 
 ## Registry de terceiros
 
@@ -425,10 +447,10 @@ Para componentes internos reutilizáveis entre apps, o projeto pode publicar seu
 Projetos vindos de shadcn em Tailwind 3:
 
 1. Migrar Tailwind 3 → 4 (ver @stacks/frontend/tailwind@4 — seção de migração).
-2. Rodar `pnpm dlx shadcn@latest init` no projeto migrado — a CLI detecta Tailwind 4 e atualiza `components.json` (`tailwind.config: ""`, `cssVariables: true`).
+2. Rodar `pnpm dlx shadcn@latest init -b radix` no projeto migrado — a CLI detecta Tailwind 4 e atualiza `components.json` (`tailwind.config: ""`, `cssVariables: true`).
 3. Mover tokens de `tailwind.config.ts` para `@theme inline` em `globals.css`. Nomes dos tokens semânticos permanecem (`--background`, `--primary`, etc.) — só a sintaxe muda.
-4. **Não rodar `shadcn update` em massa.** Componentes locais editados podem perder customizações. Atualizar individualmente, revisando cada diff.
-5. Validar dark mode: `next-themes` com `attribute="data-theme"` casado com `@variant dark (&:where([data-theme="dark"], [data-theme="dark"] *))` em CSS.
+4. **Não rodar `shadcn add --overwrite` em massa.** Componentes locais editados podem perder customizações. Atualizar individualmente, revisando cada diff.
+5. Validar dark mode: `next-themes` com `attribute="data-theme"` casado com `@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *))` em CSS.
 
 ## Anti-patterns
 
@@ -437,13 +459,13 @@ Projetos vindos de shadcn em Tailwind 3:
 | Tratar `src/components/ui/` como off-limits ("não posso mexer no shadcn") | Editar livremente; é seu código | A premissa do shadcn é ownership |
 | `import { Button } from 'shadcn-ui'` | `import { Button } from '@/components/ui/button'` | Pacote não existe; shadcn é copy, não install |
 | `bg-blue-600` no `Button` | `bg-primary` | Hardcode quebra tema, dark mode e rebrand |
-| Componente de domínio (`UserProfileCard`) dentro de `src/components/ui/` | `src/features/users/components/user-profile-card.tsx` consumindo `Card` de `ui/` | `ui/` é base; domínio mora acima |
+| Componente de domínio (`UserProfileCard`) dentro de `src/components/ui/` | `src/features/users/ui/UserProfileCard.tsx` (arquivo de componente em PascalCase) consumindo `Card` de `ui/` | `ui/` é base; domínio mora acima |
 | Reimplementar comportamento do Radix manualmente "para customizar" | Estender via `asChild`, slots, edição mínima do componente shadcn | Perde acessibilidade testada; ver @stacks/frontend/radix-ui |
 | Esquecer `asChild` quando precisaria (renderiza `<button>` dentro de `<a>`) | `<Button asChild><Link .../></Button>` | HTML inválido; perde semântica |
-| Rodar `shadcn update` em todos os componentes sem revisão | `shadcn diff` por componente, aceitar com critério | Sobrescreve edits intencionais |
-| Misturar `style="new-york"` e `"default"` em componentes diferentes | Escolher um no `components.json` e manter | Visual inconsistente; tokens divergem |
+| Rodar `shadcn add --overwrite` em todos os componentes sem revisão | `shadcn view` por componente, aceitar com critério | Sobrescreve edits intencionais |
+| Usar `style="default"`, misturar styles ou rodar `init -d` (Base UI + preset Nova) | `init -b radix` e `new-york` no `components.json` | `default` deprecated; `-d` troca a base de primitives; visual inconsistente |
 | Forms com `useState` local | `react-hook-form` + `zod` via `<Form>` | Validação fragmentada; UX inferior; ver @rules/validation |
-| Usar `Toast` legado em código novo | `Sonner` | `Toast` está descontinuado upstream |
+| Usar o `toast` legado do shadcn em código novo | `Sonner` | O componente `toast` do shadcn está deprecated upstream |
 | Carregar todos os componentes em layout/raiz quando uso é localizado | Importar onde se usa; deixar code splitting trabalhar | Bundle inflado em rotas que não usam |
 | `cssVariables: false` em `components.json` | `true` | Quebra contrato com `@theme` do Tailwind 4 |
 | Editar `Button` global para um caso pontual de feature | Wrapper de feature consumindo `Button` com variant | Acopla `ui/` a domínio |
@@ -460,7 +482,7 @@ Projetos vindos de shadcn em Tailwind 3:
 
 - **shadcn CLI:** seguir releases; mudanças em `components.json` são raras mas costumam aditivas.
 - **Tailwind 5:** sem timeline. Tailwind 4 é a fronteira atual; quando 5 sair, shadcn provavelmente lança nova geração de componentes.
-- **Radix UI:** acompanhar majors (causa principal de `shadcn diff` relevante).
+- **Radix UI:** acompanhar majors (causa principal de drift relevante contra o upstream).
 - **Componentes em incubação upstream:** revisar `ui.shadcn.com` periodicamente; adicionar quando entra no catálogo estável.
 
 ## Referências
@@ -483,4 +505,4 @@ Projetos vindos de shadcn em Tailwind 3:
 - @rules/documentation — comentários mínimos em divergências intencionais do upstream.
 - @rules/governance — política de adoção de registries de terceiros.
 - @architecture/fsd / @architecture/feature-based — onde moram wrappers de domínio que consomem `ui/`.
-- @decisions — ADRs sobre adoção de shadcn, escolha de `style`/`baseColor`, eventual saída para outra base.
+- @decisions — ADRs sobre adoção de shadcn, escolha de `baseColor`, eventual saída para outra base.

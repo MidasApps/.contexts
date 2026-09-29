@@ -1,6 +1,6 @@
 ﻿---
 title: Convenções de Commit
-type: process
+type: processes
 status: active
 last_updated: 2026-09-28
 standard: Conventional Commits 1.0.0
@@ -78,7 +78,7 @@ O subject é a parte humana da mensagem. Regras absolutas:
 Body é separado do header por linha em branco e explica o **porquê**.
 
 - O diff já mostra **o quê**; o body existe para registrar motivação, contexto, tradeoffs considerados.
-- Wrap em **72-100 caracteres** por linha.
+- Wrap em **até 72 caracteres** por linha.
 - Múltiplos parágrafos são permitidos; use linha em branco entre eles.
 - Listas com `-` são permitidas quando enumeram causas, efeitos ou itens não-óbvios.
 - Para mudanças não-óbvias, body é obrigatório. Ver `@rules/documentation` sobre densidade de prosa.
@@ -127,7 +127,7 @@ feat(orders): add idempotency key to checkout
 ```
 
 ```
-fix(auth): redirect loop on expired session
+fix(auth): prevent redirect loop on expired session
 
 Sessão expirada retornava 302 para /login que por sua vez relia
 o cookie ainda inválido e redirecionava de novo. Agora o middleware
@@ -137,11 +137,11 @@ Fixes: #482
 ```
 
 ```
-refactor(billing)!: rename amount to amount_minor
+feat(billing)!: replace amount with amountMinor
 
 BREAKING CHANGE: campos monetários agora são inteiros na menor
-unidade da moeda (`amount_minor`). A UI formata com o expoente
-da currency.
+unidade da moeda (`amountMinor` + `currency`). A UI formata com
+o expoente da currency.
 ```
 
 ```
@@ -166,7 +166,7 @@ Cada commit captura **um propósito**.
 Esta política se conjuga com `@processes/git` e `@processes/pull-requests`.
 
 - **Squash merge** é o default para features curtas — o resultado é **um commit final** na branch principal.
-- Commits intermediários da branch da feature podem ser informais (`wip`, `fix lint`, `address review`) **se e somente se** serão squashed.
+- Commits intermediários da branch da feature podem ser informais (`wip`, `fix lint`, `address review`) **se e somente se** forem locais e serão squashed antes do PR. `wip` nunca entra em PR nem em `main`.
 - O **título do PR deve seguir Conventional Commits**, pois é usado como mensagem do squash commit.
 - O **corpo do PR** é usado como corpo do squash commit — escreva-o com o cuidado de uma mensagem de commit, não como rascunho.
 - Branches de longa duração (ex.: release branches) **não usam squash**; commits são preservados e devem ser bem formados desde a origem.
@@ -185,7 +185,7 @@ Ver `@rules/code-review` para o que deve aparecer no corpo do PR antes do squash
 Configuração canônica em `commitlint.config.js`:
 
 ```js
-module.exports = {
+export default {
   extends: ['@commitlint/config-conventional'],
   rules: {
     'header-max-length': [2, 'always', 72],
@@ -214,7 +214,7 @@ Ferramenta de release (Release Please, semantic-release ou changesets) é defini
 Quando uma mensagem é produzida com assistência de Claude Code ou agente equivalente, adicione no footer:
 
 ```
-Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
 ```
 
 A transparência sobre autoria humana versus assistida é exigida por `@rules/governance`. Não omita o co-author para "limpar" o histórico — o registro tem valor de auditoria.

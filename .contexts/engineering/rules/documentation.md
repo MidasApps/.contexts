@@ -19,13 +19,13 @@ Este documento governa apenas o **quando e como** da documentação. Conteúdos 
 
 ## Frontmatter dos contextos
 
-Todo markdown em `.contexts/` abre com:
+Todo markdown em `.contexts/` abre com o frontmatter abaixo. Exceção: ADRs usam o header MADR em bullets (`decisions/README.md`); `MEMORY.md` é índice sem frontmatter.
 
 ```yaml
 ---
 title:
-type: rules | contract | stack | architecture | practice | process | decision | business | product | index
-status: active | template | accepted | needs-revision
+type: rules | contracts | stacks | architecture | practices | processes | decisions | business | product   # = nome da pasta
+status: active | current | template   # current = stack doc da versão vigente; accepted/superseded só em ADR
 last_updated: YYYY-MM-DD
 version:   # só stack, com o pin medido
 ---

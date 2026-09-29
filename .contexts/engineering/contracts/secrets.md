@@ -2,13 +2,13 @@
 title: Convenções de Modelagem para Secrets
 type: contracts
 scope: secrets, credentials, API keys, signing keys, encryption keys
-last_updated: 2026-05-20
+last_updated: 2026-09-28
 status: active
 ---
 
 # Convenções de Modelagem para Secrets
 
-Este documento define **como o time modela, nomeia, armazena e opera secrets** no stack Node 24 + TypeScript 7 + Next.js 16 + Firebase Functions + GCP. Não é manual de ferramenta nem regra de implementação isolada — é a doutrina que governa toda fronteira onde um valor confidencial entra ou sai do sistema.
+Este documento define **como o time modela, nomeia, armazena e opera secrets** no stack Node 26 + TypeScript 7 + Next.js 16 + Firebase Functions + GCP. Não é manual de ferramenta nem regra de implementação isolada — é a doutrina que governa toda fronteira onde um valor confidencial entra ou sai do sistema.
 
 Para regras imperativas de implementação, ver `@rules/security`. Para política de rotação e governança, ver `@rules/governance`. Para logging e redaction, ver `@rules/observability`. Para validação de schema no boot, ver `@rules/validation` e `@stacks/validation/zod@4`. Para uso operacional em Cloud Functions, ver `@stacks/backend/firebase-functions`. Para boundary client/server no frontend, ver `@stacks/frontend/next@16`.
 
@@ -236,7 +236,7 @@ Todo secret consumido pelo app é declarado e validado no `src/env.ts` via Zod (
 ```ts
 import { z } from 'zod';
 
-const schema = z.object({
+const EnvSchema = z.object({
   OPENAI_API_KEY: z.string().min(1),
   ANTHROPIC_API_KEY: z.string().min(1),
   DATABASE_URL: z.url(),
@@ -244,7 +244,7 @@ const schema = z.object({
   STRIPE_WEBHOOK_SECRET: z.string().startsWith('whsec_'),
 });
 
-export const env = schema.parse(process.env);
+export const env = EnvSchema.parse(process.env);
 ```
 
 Fail-fast no startup. Secret ausente derruba o boot — nunca é silent fail em runtime.
@@ -429,10 +429,10 @@ Merge é **bloqueado** se reviewer identifica introdução de secret hardcoded.
 - Boundary é estático, validado em build time. Ver `@stacks/frontend/next@16`.
 
 ```ts
-// app/api/chat/route.ts (server)
+// src/app/v1/chat/route.ts (server)
 const apiKey = process.env.OPENAI_API_KEY;           // certo
 
-// app/components/chat.tsx (client component "use client")
+// src/features/chat/ui/ChatPanel.tsx (client component "use client")
 const apiKey = process.env.OPENAI_API_KEY;           // undefined em runtime
 const apiKey = process.env.NEXT_PUBLIC_OPENAI_API_KEY; // vaza no bundle — proibido
 ```

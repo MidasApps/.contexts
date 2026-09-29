@@ -1,7 +1,9 @@
 ---
 title: OpenAI API
+type: stacks
 category: ai
 kind: product-protocol
+version: 7.23.0
 status: current
 last_updated: 2026-09-28
 upstream: https://platform.openai.com/docs
@@ -23,19 +25,19 @@ API legacy estável. Continua suportada e amplamente usada em produção. Para c
 
 ### Responses API — `POST /v1/responses`
 
-API unificada introduzida em 2024-2025 que **substitui gradualmente Chat Completions e Assistants API**. Diferenciais:
+API unificada introduzida em 2024-2025 que **substituiu a Assistants API (encerrada) e é o caminho recomendado no lugar de Chat Completions**. Diferenciais:
 
 - `previous_response_id`: continuidade de conversa server-side, sem reenviar o histórico inteiro a cada request.
-- **Built-in tools** hospedados pela OpenAI: `web_search`, `file_search`, `computer_use`, `code_interpreter`.
+- **Built-in tools** hospedados pela OpenAI: `web_search`, `file_search`, `computer`, `code_interpreter`.
 - `input` aceita texto simples, array de messages ou content array multimodal.
 - `instructions` substitui o role `system` do Chat Completions.
 - Stream de eventos tipados (mais granular que SSE do Chat Completions).
 
 Padrão para código novo no projeto.
 
-### Assistants API — `POST /v1/assistants` (e correlatos)
+### Assistants API (encerrada)
 
-**Deprecada** em favor da Responses API. Não usar em código novo. Migração documentada em platform.openai.com/docs/assistants/migration.
+**Encerrada em 2026-08-26.** Os endpoints não respondem mais. Não escreva código novo contra ela; use a Responses API.
 
 ### Embeddings — `POST /v1/embeddings`
 
@@ -43,12 +45,12 @@ Modelos: `text-embedding-3-small` (1536 dims default), `text-embedding-3-large` 
 
 ### Images — `POST /v1/images/generations` (`/edits`, `/variations`)
 
-Modelos: `gpt-image-1` (atual, melhor qualidade/instrução), `dall-e-3`, `dall-e-2` (legacy). `gpt-image-1` aceita `quality`, `size`, `background`, `output_format`.
+Modelos: `gpt-image-2.5-sunburst` (edição) e `gpt-image-2.5-flare` (geração rápida). DALL-E foi desligado em 2026-05-12. Os modelos de imagem aceitam `quality`, `size`, `background`, `output_format`.
 
 ### Audio
 
-- **Transcrição**: `POST /v1/audio/transcriptions` — `whisper-1`, `gpt-4o-transcribe`, `gpt-4o-mini-transcribe`.
-- **TTS**: `POST /v1/audio/speech` — `tts-1`, `tts-1-hd`, `gpt-4o-mini-tts` (suporta instructions de estilo).
+- **Transcrição**: `POST /v1/audio/transcriptions` — `gpt-transcribe` (default para código novo); `gpt-live-transcribe` e `gpt-realtime-whisper` para streaming. Ids mais antigos da ficha não são default.
+- **TTS**: `POST /v1/audio/speech` — `gpt-4o-mini-tts` (único TTS listado na ficha de 2026-09-28; suporta instructions de estilo).
 - **Translations**: `POST /v1/audio/translations` — apenas para EN.
 
 ### Moderations — `POST /v1/moderations`
@@ -57,7 +59,7 @@ Modelos: `gpt-image-1` (atual, melhor qualidade/instrução), `dall-e-3`, `dall-
 
 ### Files — `POST /v1/files`
 
-Upload para uso em Batch, Fine-tuning, Assistants legacy, file_search da Responses API.
+Upload para uso em Batch, Fine-tuning, file_search da Responses API.
 
 ### Batch API — `POST /v1/batches`
 
@@ -65,11 +67,11 @@ Submissão assíncrona (até 24h de janela). **50% de desconto** vs requests sí
 
 ### Fine-tuning — `POST /v1/fine_tuning/jobs`
 
-Suporta SFT, DPO e reinforcement fine-tuning conforme modelo base. Resulta em model id custom (`ft:gpt-4o-mini:org::<id>`).
+Suporta SFT, DPO e reinforcement fine-tuning conforme modelo base. Resulta em model id custom (`ft:<modelo-base>:org::<id>`). Confira na doc quais modelos da ficha aceitam fine-tuning.
 
 ### Realtime API — WebSocket / WebRTC
 
-`wss://api.openai.com/v1/realtime` ou WebRTC SDP exchange. Voice-to-voice low-latency (< 800ms typical). Sessions configuráveis: `input_audio_transcription`, `turn_detection` (server VAD ou client-controlled), `voice` (alloy, echo, shimmer, etc.), `instructions`, `tools`.
+`wss://api.openai.com/v1/realtime` ou WebRTC (`/v1/realtime/calls`). Voice-to-voice de baixa latência. Detalhes em "Realtime API" abaixo.
 
 ---
 
@@ -83,9 +85,10 @@ O id de produção fica na config. Esta tabela é o default para código novo, l
 | Dia a dia | `gpt-6-sol` |
 | Volume | `gpt-6-luna` |
 | Imagem | `gpt-image-2.5-sunburst` (edição) ou `gpt-image-2.5-flare` (geração rápida) |
-| Voz em tempo real | `gpt-realtime-2.1` |
+| Voz em tempo real | `gpt-realtime-2.1` (`gpt-realtime-2.1-mini` para volume) |
+| Transcrição | `gpt-transcribe` |
 
-`gpt-4o`, `gpt-5` e `dall-e-3` não são default. Reasoning tokens continuam cobrados à parte. Defina teto de saída. Não use alias `latest` em produção.
+Modelos anteriores à linha `gpt-6` não são default. Reasoning tokens continuam cobrados à parte. Defina teto de saída. Não use alias `latest` em produção.
 
 ### Moderation
 
@@ -123,7 +126,7 @@ Campos relevantes (visão de protocolo, sem sintaxe de SDK):
 - `model`.
 - `input`: string, array de messages, ou content array (multimodal).
 - `instructions`: equivalente a `system` (string).
-- `tools`: mistura functions custom + built-in (`{ type: "web_search" }`, `{ type: "file_search", vector_store_ids: [...] }`, `{ type: "computer_use_preview" }`, `{ type: "code_interpreter" }`).
+- `tools`: mistura functions custom + built-in (`{ type: "web_search" }`, `{ type: "file_search", vector_store_ids: [...] }`, `{ type: "computer" }`, `{ type: "code_interpreter" }`). `computer_use_preview` foi substituído por `computer`.
 - `tool_choice`, `parallel_tool_calls`.
 - `previous_response_id`: continuidade de turn anterior sem reenviar histórico.
 - `stream`: stream de eventos tipados (`response.created`, `response.output_text.delta`, `response.tool_call.delta`, `response.completed`, etc.).
@@ -185,7 +188,6 @@ Campo `prediction: { type: "content", content: "<draft>" }` em Chat Completions.
 - `Authorization: Bearer <OPENAI_API_KEY>` (obrigatório).
 - `OpenAI-Organization: org_...` (opcional — fixa qual org cobra).
 - `OpenAI-Project: proj_...` (opcional — fixa qual project; restringe escopo da key).
-- `OpenAI-Beta: assistants=v2` (apenas Assistants legacy).
 
 **NUNCA** expor a API key em browser, mobile bundle, ou qualquer client. Sempre proxy server-side. Referencie `@rules/security` e `@contracts/secrets`.
 
@@ -235,15 +237,21 @@ Controle de custo:
 
 Dois transportes:
 
-- **WebSocket**: `wss://api.openai.com/v1/realtime?model=gpt-4o-realtime-preview`. Auth via header. Server-to-server ou backend → relay → client.
-- **WebRTC**: SDP exchange via `POST /v1/realtime/sessions` retorna ephemeral key + ICE config. Permite conexão **client ↔ OpenAI** direta sem expor API key (usa ephemeral token de curta duração). Padrão para voice apps em browser/mobile.
+- **WebSocket**: `wss://api.openai.com/v1/realtime?model=gpt-realtime-2.1`. Auth via header. Server-to-server ou backend → relay → client.
+- **WebRTC**: o backend emite uma chave efêmera em `POST /v1/realtime/client_secrets`; o cliente troca o SDP em `/v1/realtime/calls`. Conexão **client ↔ OpenAI** direta sem expor API key. Padrão para voice apps em browser/mobile.
 
-Configuração de session:
+Configuração de session (GA; o shape da beta, com `input_audio_transcription` no topo, não vale mais):
 
-- `voice`: `alloy`, `ash`, `ballad`, `coral`, `echo`, `sage`, `shimmer`, `verse`.
-- `input_audio_transcription`: `{ model: "whisper-1" | "gpt-4o-transcribe" }`.
-- `turn_detection`: `{ type: "server_vad", threshold, silence_duration_ms }` ou `null` (push-to-talk client-controlled).
-- `instructions`, `tools`, `temperature`, `max_response_output_tokens`.
+```jsonc
+{
+  "session": {
+    "type": "realtime",
+    "model": "gpt-realtime-2.1",
+    "audio": { "output": { "voice": "marin" } }
+    // instructions, tools, turn detection: conferir o shape na doc da versão instalada
+  }
+}
+```
 
 Eventos bidirecionais tipados (`session.update`, `input_audio_buffer.append`, `response.create`, `response.audio.delta`, etc.).
 
@@ -253,11 +261,11 @@ Eventos bidirecionais tipados (`session.update`, `input_audio_buffer.append`, `r
 
 Capacidades únicas que justificam OpenAI sobre alternativas:
 
-- **Reasoning models** (o1/o3/o4-mini): math, code, planning multi-step rigoroso.
+- **Reasoning models** (`gpt-6-astra`): math, code, planning multi-step rigoroso.
 - **Realtime voice** (voice-to-voice nativo com latência < 1s).
-- **Built-in tools** via Responses API: `web_search`, `computer_use`, `code_interpreter` sem precisar implementar a infra.
-- **Whisper / gpt-4o-transcribe**: estado-da-arte em transcrição multilíngue.
-- **gpt-image-1**: image gen com aderência a instrução superior a competidores.
+- **Built-in tools** via Responses API: `web_search`, `computer`, `code_interpreter` sem precisar implementar a infra.
+- **`gpt-transcribe`**: transcrição multilíngue.
+- **gpt-image-2.5-***: image gen com aderência a instrução superior a competidores.
 - **Batch 50% off**: backfills em massa, embeddings offline.
 
 Para tarefas genéricas de chat onde Anthropic / Gemini empatam, escolha por preço/latência/contexto — não por default. Compare com `@stacks/ai/anthropic` e `@stacks/ai/gemini`.
@@ -267,7 +275,7 @@ Para tarefas genéricas de chat onde Anthropic / Gemini empatam, escolha por pre
 ## Acesso no projeto
 
 - **Padrão**: Vercel AI SDK + provider `@ai-sdk/openai`. Cobre Chat Completions, Responses, embeddings, structured outputs, tool calling, streaming. Referencie `@stacks/ai/vercel-ai-sdk`.
-- **SDK direto** (`openai` npm): usar **apenas** para features que o AI SDK não cobre — Realtime, Batch, Files, Fine-tuning, Moderations, Assistants legacy em migração. Detalhes em `@stacks/ai/openai-sdk`.
+- **SDK direto** (`openai` npm): usar **apenas** para features que o AI SDK não cobre — Realtime, Batch, Files, Fine-tuning, Moderations. Detalhes em `@stacks/ai/openai-sdk`.
 - **Avaliação / evals**: pode usar Batch API direto independentemente de qual SDK roda em produção. Referencie `@stacks/ai/harness-engineering`.
 
 ---
@@ -288,7 +296,7 @@ Spans: um span por request; eventos por tool call e por chunk de stream quando r
 ## Anti-patterns
 
 - API key em client (browser/mobile bundle). Sempre proxy server-side.
-- Adotar **Assistants API** em código novo — está deprecada. Use Responses API.
+- Usar a **Assistants API** — foi encerrada em 2026-08-26. Use Responses API.
 - `response_format: json_schema` sem `strict: true` — perde a garantia de shape; parsing downstream fica frágil.
 - Tools sem `strict: true` — arguments podem vir malformados.
 - Reasoning model sem `max_completion_tokens` — risco de gastar milhares de reasoning tokens silenciosamente.
@@ -305,11 +313,11 @@ Spans: um span por request; eventos por tool call e por chunk de stream quando r
 
 ## Referências
 
-- platform.openai.com/docs
-- platform.openai.com/docs/api-reference
+- https://developers.openai.com/api/docs/models (ficha de modelos)
+- https://developers.openai.com/api/docs/guides/tools-computer-use
+- https://developers.openai.com/api/docs/guides/realtime-webrtc
 - platform.openai.com/docs/guides/structured-outputs
 - platform.openai.com/docs/guides/prompt-caching
-- platform.openai.com/docs/guides/realtime
 
 Stacks relacionados: `@stacks/ai/openai-sdk`, `@stacks/ai/vercel-ai-sdk`, `@stacks/ai/anthropic`, `@stacks/ai/gemini`, `@stacks/ai/harness-engineering`, `@stacks/validation/zod@4`.
 

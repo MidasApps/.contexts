@@ -1,4 +1,12 @@
-﻿# Monitoring
+---
+title: Monitoring
+type: processes
+status: active
+scope: engineering
+last_updated: 2026-09-28
+---
+
+# Monitoring
 
 Processo operacional de monitoramento de produção: ferramentas, dashboards, SLOs, alertas, on-call e resposta a incidentes.
 
@@ -152,6 +160,7 @@ Padrão **RED** (Rate, Errors, Duration) + saturação:
 | Postgres connections | > 80% do pool | P2 |
 | Firestore quota | > 80% do limite | P2 |
 | Synthetic probe | falha em 2 regiões consecutivas | P1 |
+| Audit log gap | nenhum evento por > 5 min em fluxo ativo | P2 |
 
 ### Ação ligada ao 5xx
 
@@ -165,7 +174,6 @@ Uma tabela só. Deploy e rollback não inventam outro número.
 | Bug estreito | < 1% dos usuários e sem perda de dado | Forward fix. Rollback aqui espalha mais do que corrige. |
 
 O 2% antigo de page ficava acima do SLO de 1% e deixava a meta furar sem acordar ninguém. O page agora é o próprio SLO sustentado. O pico de 5% e o desvio de 1 ponto contra o baseline do deploy continuam gatilhos diferentes: um é incidente, o outro é o deploy que acabou de sair.
-| Audit log gap | nenhum evento por > 5 min em fluxo ativo | P2 |
 
 ---
 

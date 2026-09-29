@@ -2,7 +2,7 @@
 title: Hexagonal Architecture (Ports & Adapters)
 type: architecture
 status: active
-last_updated: 2026-05-20
+last_updated: 2026-09-28
 upstream: https://alistair.cockburn.us/hexagonal-architecture/
 ---
 
@@ -35,18 +35,18 @@ Cockburn distingue dois tipos de port:
 | **Driving** | Primary, inbound, "uso da aplicação" | Mundo → núcleo | O adapter chama o port; o núcleo executa |
 | **Driven** | Secondary, outbound, "dependência da aplicação" | Núcleo → mundo | O núcleo chama o port; o adapter executa |
 
-**Driving ports** descrevem o que a aplicação **faz** — são a API pública do núcleo, expressa como casos de uso. Exemplos típicos: `RegisterUser`, `PlaceOrder`, `GenerateMonthlyReport`. Em TypeScript, um driving port pode ser uma interface, uma classe abstrata, ou diretamente a assinatura de uma função de use case exportada.
+**Driving ports** descrevem o que a aplicação **faz** — são a API pública do núcleo, expressa como casos de uso. Exemplos típicos: `RegisterUser`, `PlaceOrder`, `GenerateMonthlyReport`. Em TypeScript, um driving port é um `type` de função: a assinatura do use case.
 
-**Driven ports** descrevem o que a aplicação **precisa** do mundo — são as dependências do núcleo, expressas em vocabulário de domínio. Exemplos típicos: `UserRepository`, `EmailSender`, `PaymentGateway`, `Clock`. O nome do port nunca menciona a tecnologia: é `UserRepository`, nunca `PostgresUserRepository`.
+**Driven ports** descrevem o que a aplicação **precisa** do mundo — são as dependências do núcleo, expressas em vocabulário de domínio. Exemplos típicos: `UserRepository`, `EmailSender`, `PaymentGateway`, `Clock`. O nome do port nunca menciona a tecnologia: é `UserRepository`, nunca `postgresUserRepository`.
 
 ### Adapters
 
 Um adapter é a **implementação concreta** de um port em uma tecnologia específica. Espelhando a divisão dos ports:
 
 - **Driver adapters** (primary): traduzem entradas do mundo exterior em chamadas a driving ports. Um handler de rota HTTP que extrai o body do request, valida, monta o input do use case e invoca um driving port é um driver adapter. Outros exemplos: handler de Server Action no Next.js, comando de CLI, job agendado, consumidor de fila.
-- **Driven adapters** (secondary): implementam driven ports em uma tecnologia específica. `PostgresUserRepository implements UserRepository`. `ResendEmailSender implements EmailSender`. `FirestoreOrderRepository implements OrderRepository`. Outros exemplos: gateway HTTP para API externa, publisher de fila, sistema de arquivos.
+- **Driven adapters** (secondary): implementam driven ports em uma tecnologia específica. `postgresUserRepository` satisfaz `UserRepository`. `resendEmailSender` satisfaz `EmailSender`. `firestoreOrderRepository` satisfaz `OrderRepository`. Outros exemplos: gateway HTTP para API externa, publisher de fila, sistema de arquivos.
 
-A simetria é deliberada: do ponto de vista do núcleo, **todo adapter é substituível**. Trocar Postgres por Firestore exige uma nova classe que implementa `UserRepository`; o núcleo não sabe e não precisa saber.
+A simetria é deliberada: do ponto de vista do núcleo, **todo adapter é substituível**. Trocar Postgres por Firestore exige um novo adapter que satisfaz `UserRepository`; o núcleo não sabe e não precisa saber.
 
 ### Regra de dependência
 
@@ -54,7 +54,7 @@ A regra fundamental de Hexagonal é unidirecional e simples:
 
 1. **Adapters dependem do núcleo.** Drivers importam driving ports para chamá-los; drivens importam interfaces de driven port para implementá-las.
 2. **O núcleo nunca depende de adapters.** Nenhum import do núcleo aponta para fora do hexágono.
-3. **A dependência conceitual "núcleo → infraestrutura" é invertida via port.** O núcleo precisa persistir um usuário, mas não chama Postgres — chama `UserRepository`, que é uma interface dele mesmo. A implementação concreta é injetada do lado de fora na composition root.
+3. **A dependência conceitual "núcleo → infraestrutura" é invertida via port.** O núcleo precisa persistir um usuário, mas não chama Postgres — chama `UserRepository`, um port dele mesmo (no projeto, declarado como `type`). A implementação concreta é injetada do lado de fora na composition root.
 
 Essa regra é a aplicação direta do **Dependency Inversion Principle** ao limite entre aplicação e infraestrutura.
 
@@ -66,7 +66,7 @@ A composition root é o único lugar onde código de aplicação encontra códig
 
 ### Testabilidade como consequência direta
 
-A simetria ports/adapters torna o núcleo testável sem infraestrutura. Em testes unitários de use cases, basta substituir cada driven adapter por uma implementação **fake** ou **in-memory** que satisfaça o port. Um `InMemoryUserRepository` que guarda usuários em um `Map<string, User>` é suficiente para exercitar a maioria dos casos de uso em milissegundos. Testes de adapter (que validam que `PostgresUserRepository` se comporta como `UserRepository` promete) são separados — em geral integration tests com banco real.
+A simetria ports/adapters torna o núcleo testável sem infraestrutura. Em testes unitários de use cases, basta substituir cada driven adapter por uma implementação **fake** ou **in-memory** que satisfaça o port. Um fake `makeInMemoryUserRepository()` que guarda usuários em um `Map<string, User>` é suficiente para exercitar a maioria dos casos de uso em milissegundos. Testes de adapter (que validam que `postgresUserRepository` se comporta como `UserRepository` promete) são separados — em geral integration tests com banco real.
 
 Esse benefício é frequentemente citado como o principal **payoff** da arquitetura: a velocidade e estabilidade dos testes de núcleo crescem dramaticamente, e a confiança em refatorar o domínio aumenta na mesma proporção.
 
@@ -80,49 +80,58 @@ A aplicação combina Next.js 16 (frontend + Server Actions + route handlers), F
 
 ### Localização no projeto
 
-A separação entre núcleo e adapters vive dentro do recorte de cada feature, não em pastas globais de "domain" e "infrastructure" no nível raiz. Isso preserva a coesão por contexto de negócio promovida por @architecture/feature-based / @architecture/fsd e evita o anti-pattern clássico de "tudo do domínio numa pasta gigante separada de tudo da infra numa outra pasta gigante".
+A separação entre núcleo e adapters vive dentro do recorte de cada feature, não em pastas globais de "domain" e "infrastructure" no nível raiz. Isso preserva a coesão por contexto de negócio promovida por @architecture/feature-based e evita o anti-pattern clássico de "tudo do domínio numa pasta gigante separada de tudo da infra numa outra pasta gigante".
 
-A estrutura interna canônica adotada para uma feature de backend ou um módulo com lógica de negócio rica:
+A árvore de referência do contexto é a de @architecture/feature-based (seção "Como o time adotou"). Abaixo, a mesma árvore com os arquivos típicos de um contexto hexagonal:
 
 ```
 services/<context>/
-  domain/                        # núcleo — entidades, value objects, regras invariantes
-    user.ts
-    order.ts
-    pricing.ts
-  application/                   # núcleo — use cases e ports
+  domain/                          # núcleo — entidades, value objects, regras invariantes
+    entities/
+      user.ts
+      order.ts
+    value-objects/
+      pricing.ts
+    errors/
+      email-already-registered-error.ts  # erro de domínio: classe com `code`
+  application/                     # núcleo — use cases e ports
     ports/
       driving/
-        register-user.ts         # interface ou assinatura do use case
+        register-user.ts           # type do use case
         place-order.ts
       driven/
-        user-repository.ts       # interface UserRepository
-        email-sender.ts          # interface EmailSender
-        payment-gateway.ts       # interface PaymentGateway
+        user-repository.ts         # type UserRepository
+        email-sender.ts            # type EmailSender
+        payment-gateway.ts         # type PaymentGateway
     use-cases/
-      register-user.ts           # implementa o driving port; depende de driven ports
+      register-user.ts             # factory makeRegisterUser; depende de driven ports
+      register-user.schema.ts      # RegisterUserInputSchema (Zod) e tipo z.infer
       place-order.ts
-  adapters/                      # fora do hexágono — implementações concretas
+  adapters/                        # fora do hexágono — implementações concretas
     driving/
-      register-user-route.ts     # route handler Next.js que invoca o use case
-      place-order-action.ts      # Server Action
+      register-user-route-handler.ts  # handler Next.js: valida e invoca o use case
+      place-order-action.ts           # Server Action
     driven/
-      postgres-user-repository.ts  # implements UserRepository
-      firestore-user-repository.ts # alternativa
-      resend-email-sender.ts      # implements EmailSender
-      stripe-payment-gateway.ts   # implements PaymentGateway
-  composition.ts                 # fiação local da feature
-  index.ts                       # public API
+      postgres-user-repository.ts
+      firestore-user-repository.ts    # alternativa
+      resend-email-sender.ts
+      stripe-payment-gateway.ts
+  composition.ts                   # fiação local do contexto
+  index.ts                         # API pública mínima, consumida por outros contextos
 ```
+
+Entry points: `src/app/**/route.ts` re-exporta o driving adapter acima, que chama o use case; `actions.ts` é wrapper `"use server"` de uma linha que chama o adapter (ADR 0003, Amendments). Clientes compartilhados entre contextos (por exemplo o pool Postgres) vêm de `services/shared/`. Testes ficam colocados, `foo.test.ts` ao lado do código.
+
+O `index.ts` é o único barrel permitido: mínimo, só named exports, sem `export *`. Dentro do contexto, importe o módulo direto.
 
 Features que são puramente UI (sem lógica de negócio rica, sem necessidade de troca de infra) **não** seguem a estrutura ports/adapters — Hexagonal só é aplicado onde paga. Ver "Critérios de aplicação" abaixo.
 
 ### Convenções de naming
 
-- **Driving ports** são nomeados pelo caso de uso em forma verbal: `RegisterUser`, `PlaceOrder`, `GenerateMonthlyReport`. Quando o use case é implementado como função, a função é o port; quando como classe, a interface declara o método `execute`.
-- **Driven ports** são nomeados em vocabulário de domínio, **sem menção a tecnologia**: `UserRepository`, `EmailSender`, `PaymentGateway`, `Clock`. Não existe `PostgresUserRepository` no port — só no adapter.
-- **Driver adapters** são nomeados pela tecnologia de entrada, em arquivo kebab-case: `register-user-route.ts`, `place-order-action.ts`, `monthly-report-cron.ts`. O export pode ser `registerUserRoute`.
-- **Driven adapters** combinam tecnologia + nome do port: `PostgresUserRepository`, `FirestoreUserRepository`, `ResendEmailSender`, `OpenAICompletionGateway`.
+- **Driving ports** são nomeados pelo caso de uso em forma verbal: `RegisterUser`, `PlaceOrder`, `GenerateMonthlyReport`. O use case é uma função (factory `makeRegisterUser`); o port é o `type` da sua assinatura.
+- **Driven ports** são nomeados em vocabulário de domínio, **sem menção a tecnologia**: `UserRepository`, `EmailSender`, `PaymentGateway`, `Clock`. Não existe `postgresUserRepository` no port — só no adapter.
+- **Driver adapters** são nomeados pela tecnologia de entrada, em arquivo kebab-case: `register-user-route-handler.ts`, `place-order-action.ts`, `monthly-report-cron.ts`. O export pode ser `registerUserRouteHandler`.
+- **Driven adapters** combinam tecnologia + nome do port: `postgresUserRepository`, `firestoreUserRepository`, `resendEmailSender`, `openAICompletionGateway` (constantes ou factories em camelCase, arquivo kebab-case, sem classe).
 
 A regra de ouro: **o nome do port nunca contém o nome de uma tecnologia; o nome do adapter sempre contém**.
 
@@ -131,26 +140,35 @@ A regra de ouro: **o nome do port nunca contém o nome de uma tecnologia; o nome
 Port (vive no núcleo, em `application/ports/driven/user-repository.ts`):
 
 ```typescript
-import type { User, UserId } from '../../../domain/user';
+import type { User, UserId } from '@/services/users/domain/entities/user';
 
-export interface UserRepository {
+export type UserRepository = {
   findById(id: UserId): Promise<User | null>;
   findByEmail(email: string): Promise<User | null>;
   save(user: User): Promise<void>;
-}
+};
+```
+
+Input do use case (schema Zod; o tipo vem de `z.infer`), em `application/use-cases/register-user.schema.ts`:
+
+```typescript
+import { z } from 'zod';
+
+export const RegisterUserInputSchema = z.strictObject({
+  email: z.email(),
+  name: z.string().min(1),
+});
+export type RegisterUserInput = z.infer<typeof RegisterUserInputSchema>;
 ```
 
 Use case (vive no núcleo, em `application/use-cases/register-user.ts`):
 
 ```typescript
-import type { UserRepository } from '../ports/driven/user-repository';
-import type { EmailSender } from '../ports/driven/email-sender';
-import { User } from '../../domain/user';
-
-export interface RegisterUserInput {
-  email: string;
-  name: string;
-}
+import type { UserRepository } from '@/services/users/application/ports/driven/user-repository';
+import type { EmailSender } from '@/services/users/application/ports/driven/email-sender';
+import type { RegisterUserInput } from '@/services/users/application/use-cases/register-user.schema';
+import { User } from '@/services/users/domain/entities/user';
+import { EmailAlreadyRegisteredError } from '@/services/users/domain/errors/email-already-registered-error';
 
 export const makeRegisterUser = (deps: {
   users: UserRepository;
@@ -158,7 +176,7 @@ export const makeRegisterUser = (deps: {
 }) => {
   return async (input: RegisterUserInput): Promise<User> => {
     const existing = await deps.users.findByEmail(input.email);
-    if (existing) throw new Error('email already registered');
+    if (existing) throw new EmailAlreadyRegisteredError(input.email);
 
     const user = User.create(input);
     await deps.users.save(user);
@@ -171,50 +189,79 @@ export const makeRegisterUser = (deps: {
 Adapter driven (vive em `adapters/driven/postgres-user-repository.ts`):
 
 ```typescript
-import type { UserRepository } from '../../application/ports/driven/user-repository';
-import type { User, UserId } from '../../domain/user';
+import type { UserRepository } from '@/services/users/application/ports/driven/user-repository';
+import type { User, UserId } from '@/services/users/domain/entities/user';
 import { db } from '@/services/shared/postgres';
 
-export const PostgresUserRepository: UserRepository = {
+export const postgresUserRepository: UserRepository = {
   async findById(id: UserId) { /* SQL */ },
   async findByEmail(email: string) { /* SQL */ },
   async save(user: User) { /* SQL */ },
 };
 ```
 
-Adapter driver (vive em `adapters/driving/register-user-route.ts`):
+Adapter driver (vive em `adapters/driving/register-user-route-handler.ts`). Valida na borda com `safeParse` e responde com os envelopes de `@.contexts/engineering/contracts/api.md` §5 (sucesso) e §6 (erro). O `requestId` vem do header `X-Request-Id` (ULID) que o proxy do Next (`src/proxy.ts`) garante em todo request; autenticação fica fora do exemplo:
 
 ```typescript
 import { NextResponse } from 'next/server';
-import { registerUser } from '../../composition';
+import { registerUser } from '@/services/users/composition';
+import { RegisterUserInputSchema } from '@/services/users/application/use-cases/register-user.schema';
 
 export async function POST(req: Request) {
-  const body = await req.json();
-  const user = await registerUser({ email: body.email, name: body.name });
-  return NextResponse.json({ id: user.id });
+  // X-Request-Id (ULID) é injetado pelo proxy quando o cliente não envia.
+  const requestId = req.headers.get('x-request-id');
+  const parsed = RegisterUserInputSchema.safeParse(await req.json());
+  if (!parsed.success) {
+    return NextResponse.json(
+      {
+        error: {
+          code: 'VALIDATION_FAILED',
+          message: 'One or more fields are invalid.',
+          details: parsed.error.issues.map((i) => ({
+            field: i.path.map(String).join('.'),
+            issue: i.code.toUpperCase(),
+          })),
+          requestId,
+        },
+      },
+      { status: 400 },
+    );
+  }
+  const user = await registerUser(parsed.data);
+  return NextResponse.json(
+    { data: user, meta: { requestId, respondedAt: new Date().toISOString() } },
+    { status: 201, headers: { Location: `/v1/users/${user.id}` } },
+  );
 }
+```
+
+O arquivo de rota do App Router é só um re-export e atende `POST /v1/users` (`contracts/api.md` §2.1):
+
+```typescript
+// src/app/v1/users/route.ts
+export { POST } from '@/services/users/adapters/driving/register-user-route-handler';
 ```
 
 Composition root local (`composition.ts`):
 
 ```typescript
-import { makeRegisterUser } from './application/use-cases/register-user';
-import { PostgresUserRepository } from './adapters/driven/postgres-user-repository';
-import { ResendEmailSender } from './adapters/driven/resend-email-sender';
+import { makeRegisterUser } from '@/services/users/application/use-cases/register-user';
+import { postgresUserRepository } from '@/services/users/adapters/driven/postgres-user-repository';
+import { resendEmailSender } from '@/services/users/adapters/driven/resend-email-sender';
 
 export const registerUser = makeRegisterUser({
-  users: PostgresUserRepository,
-  email: ResendEmailSender,
+  users: postgresUserRepository,
+  email: resendEmailSender,
 });
 ```
 
-A escolha entre `PostgresUserRepository` e `FirestoreUserRepository` se faz aqui — substituir um pelo outro é uma linha de código, sem mudança no núcleo.
+A escolha entre `postgresUserRepository` e `firestoreUserRepository` se faz aqui — substituir um pelo outro é uma linha de código, sem mudança no núcleo.
 
 ### Integração com Next.js 16
 
 A superfície de entrada do Next.js é tratada inteiramente como **adapters driver**:
 
-- **Route handlers** (`app/api/.../route.ts`) e **Server Actions** funcionam como driver adapters HTTP. Extraem dados do request, validam com @stacks/validation/zod@4, invocam o use case e formatam a resposta. Não contêm lógica de negócio.
+- **Route handlers** e **Server Actions** funcionam como driver adapters HTTP. O código vive em `services/<context>/adapters/driving/`; `app/**/route.ts` re-exporta o driving adapter; `actions.ts` é wrapper `"use server"` de uma linha que chama o adapter. Extraem dados do request, validam com @stacks/validation/zod@4, invocam o use case e formatam a resposta. Não contêm lógica de negócio.
 - **Server Components** que renderizam dados consomem use cases de leitura (driving ports de query) e passam o resultado para a UI. A UI propriamente dita (componentes) não conhece nem use cases nem adapters — recebe dados prontos.
 - **Client Components** que disparam mutações invocam Server Actions, que por sua vez invocam use cases.
 
@@ -232,17 +279,17 @@ Use cases compartilhados entre Next.js e Functions vivem em pacotes compartilhad
 
 A coexistência de Firestore e Postgres no projeto é exatamente o cenário em que Hexagonal paga melhor. Cada bounded context escolhe sua persistência sem contaminar o domínio:
 
-- Contextos com leitura/escrita transacional e queries relacionais complexas usam `Postgres<X>Repository`.
-- Contextos com escrita orientada a documento, alta cardinalidade e listening em tempo real usam `Firestore<X>Repository`.
+- Contextos com leitura/escrita transacional e queries relacionais complexas usam `postgres<X>Repository`.
+- Contextos com escrita orientada a documento, alta cardinalidade e listening em tempo real usam `firestore<X>Repository`.
 - O use case que coordena ambos depende dos dois ports e recebe os dois adapters via composition root — sem saber em qual banco cada um vive.
 
 ### SDKs de IA como driven adapters
 
-Chamadas a OpenAI, Gemini e outros provedores ficam atrás de driven ports do tipo `CompletionGateway`, `EmbeddingGateway`, `ImageGenerationGateway`. Cada provedor recebe um adapter (`OpenAICompletionGateway`, `GeminiCompletionGateway`). O núcleo invoca o port pelo seu papel — "preciso gerar uma completion para este prompt" — sem saber qual modelo está por trás. Trocar OpenAI por Gemini para uma feature específica vira uma troca na composition root. Ver @stacks/ai/vercel-ai-sdk, @stacks/ai/openai, @stacks/ai/gemini para os manuais de cada stack.
+Chamadas a OpenAI, Gemini e outros provedores ficam atrás de driven ports do tipo `CompletionGateway`, `EmbeddingGateway`, `ImageGenerationGateway`. Cada provedor recebe um adapter (`openAICompletionGateway`, `geminiCompletionGateway`). O núcleo invoca o port pelo seu papel — "preciso gerar uma completion para este prompt" — sem saber qual modelo está por trás. Trocar OpenAI por Gemini para uma feature específica vira uma troca na composition root. Ver @stacks/ai/vercel-ai-sdk, @stacks/ai/openai, @stacks/ai/gemini para os manuais de cada stack.
 
 ### Composition root: localização
 
-A composition root é local por contexto (`services/<context>/composition.ts`). Cliente Postgres, Firebase Admin e telemetria compartilhados ficam em `services/shared/` e são importados pelas compositions. Não ficam em `src/shared`, que é a camada FSD do frontend.
+A composition root é local por contexto (`services/<context>/composition.ts`). Clientes compartilhados entre contextos (Postgres, Firebase Admin, telemetria) ficam em `services/shared/` e são importados pelos adapters. Configuração de driver específica de um único contexto fica em `services/<context>/infrastructure/` (opcional). Nada disso mora em `src/shared`, que é a camada FSD do frontend.
 
 ## Critérios de aplicação
 
@@ -285,10 +332,10 @@ A composition root é local por contexto (`services/<context>/composition.ts`). 
 - **Domínio importando framework.** `import { NextRequest } from 'next/server'` dentro de `application/` ou `domain/`. É a violação mais grave — apaga toda a justificativa da arquitetura. Detectar via lint ou path-scoped review.
 - **Ports demais para CRUD trivial.** Criar `ListUsers`, `GetUser`, `CreateUser`, `UpdateUser`, `DeleteUser` como driving ports em uma feature que é literalmente uma tela de admin sem regras. O CRUD direto é honesto.
 - **Composition root distribuída.** Adapters sendo instanciados dentro de route handlers ou dentro de use cases. A fiação tem que viver em um só lugar por feature; caso contrário, trocar adapter exige caçada por toda a base.
-- **Use case chamando adapter concreto.** `import { PostgresUserRepository }` dentro de `use-cases/register-user.ts`. Use case importa **port**, nunca **adapter**. A composition root injeta o adapter.
+- **Use case chamando adapter concreto.** `import { postgresUserRepository }` dentro de `use-cases/register-user.ts`. Use case importa **port**, nunca **adapter**. A composition root injeta o adapter.
 - **Port com nome de tecnologia.** `PostgresRepository`, `FirebaseStorage`, `OpenAIClient` como nome de port. Sinal de que o port foi desenhado de fora para dentro (a partir da tecnologia) em vez de dentro para fora (a partir da necessidade do domínio).
 - **Wrapper sem inversão.** Criar `MyDatabase` que apenas encapsula o cliente do banco mas é importado diretamente pelo use case (sem injeção). Não há inversão — só uma camada extra de função.
-- **Testar adapter como se fosse use case.** Testes que sobem banco real para validar `registerUser` end-to-end são integration tests legítimos, mas não substituem o teste unitário do use case com `InMemoryUserRepository`. Ambos têm papel; confundi-los desperdiça o payoff.
+- **Testar adapter como se fosse use case.** Testes que sobem banco real para validar `registerUser` end-to-end são integration tests legítimos, mas não substituem o teste unitário do use case com `makeInMemoryUserRepository()`. Ambos têm papel; confundi-los desperdiça o payoff.
 - **Múltiplos níveis de port sobre o mesmo recurso.** `UserRepository` que internamente chama `UserDataSource` que internamente chama `UserApiClient`. Cada camada adicional sem justificativa concreta soma custo sem ganho.
 
 ## Referências cruzadas
@@ -306,5 +353,5 @@ A composition root é local por contexto (`services/<context>/composition.ts`). 
 - O vocabulário tático de DDD (aggregate, value object, domain event, repository pattern, anti-corruption layer) e o estratégico (bounded context, context map, ubiquitous language) pertence a @architecture/ddd.
 - Convenções específicas de teste por tipo de port (fakes vs mocks vs stubs, integration vs unit, contract testing entre port e adapter) não são definidas aqui — vivem nas práticas de teste do projeto.
 - Padrões de propagação de erro entre adapter e núcleo (mapeamento de exceptions de infra para erros de domínio) são tratados em @rules/error-handling.
-- A escolha entre use case como função (`makeRegisterUser`) ou como classe (`class RegisterUserUseCase`) é estilística e tratada em regras de implementação, não aqui.
+- Use case é função ou factory (`makeRegisterUser`), nunca classe com `execute`; ver `@rules/development`. Erros de domínio são classes com `code`.
 - Estratégias de migração incremental de uma base sem Hexagonal para Hexagonal não estão escopadas — quando aplicável, são registradas como decisions dedicadas.

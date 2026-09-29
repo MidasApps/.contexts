@@ -34,7 +34,7 @@ A mesma ideia tem um nome por camada. A tradução acontece na boundary de persi
 | Campo JSON, Firestore e propriedade TypeScript | camelCase | `createdAt`, `amountMinor`, `tenantId` |
 | Tipo, classe, componente React, schema Zod exportado | PascalCase | `Order`, `Money`, `UserSchema` |
 | Constante imutável de módulo | SCREAMING_SNAKE_CASE | `MAX_PAGE_SIZE` |
-| Arquivo que não é componente React | kebab-case | `place-order.ts`, `user-schema.ts` |
+| Arquivo que não é componente React | kebab-case | `place-order.ts`, `user.schema.ts` (schema Zod: `UserSchema`) |
 | Arquivo de componente React | PascalCase | `Button.tsx` |
 | Segmento de URL | kebab-case, coleção no plural | `/order-items` |
 | Identificador Postgres ou BigQuery | snake_case | `created_at`, `amount_minor`, `tenant_id` |
@@ -44,7 +44,7 @@ A mesma ideia tem um nome por camada. A tradução acontece na boundary de persi
 
 `eventName` não é um enum de status. Os dois namespaces não compartilham caixa.
 
-Identificador público no JSON é a string do store, sem prefixo de tipo. Postgres gera `uuidv7()`. Firestore e `eventId` usam ULID. Log carrega `entityType` e `id` em campos separados.
+Identificador público no JSON é a string do store, sem prefixo de tipo. Postgres gera `uuidv7()`. Firestore usa o ID automático do documento (ADR 0005). `eventId`, `Idempotency-Key` e `X-Request-Id` usam ULID. Log carrega `entityType` e `id` em campos separados.
 
 Dinheiro é inteiro na menor unidade da moeda mais `currency` (ISO 4217). No JSON e no Firestore o campo é `amountMinor`. No SQL e no BigQuery a coluna é `amount_minor` (`BIGINT` / `INT64`). `NUMERIC` guarda taxa, razão ou quantidade fracionária, não o valor monetário.
 
@@ -64,7 +64,7 @@ Dinheiro é inteiro na menor unidade da moeda mais `currency` (ISO 4217). No JSO
 
 - **Sempre** gere identificadores opacos. O identificador não carrega significado de negócio, não revela ordem de criação para o usuário final, não embute tenant id, nem categoria.
 - **Nunca** use auto-increment numérico como identificador de entidades expostas externamente. Vaza volume, é previsível, conflita em sistemas distribuídos.
-- **Sempre** prefira **UUIDv7** (`uuidv7()` no Postgres 18) ou **ULID** quando a ordenação por tempo de criação for útil para indexação ou paginação. Em **Postgres**, default = `uuidv7()`; em **Firestore**/event IDs client-side, ULID continua o padrão textual.
+- **Sempre** use **UUIDv7** (`uuidv7()` no Postgres 18) como PK no Postgres. No **Firestore**, o ID de documento é o **ID automático** (`collection.doc()` / `add()`); ULID e UUIDv7 são monotônicos e geram hotspot de escrita como ID de documento (ADR 0005, `@contracts/firebase-firestore` §2). Ordem por tempo no Firestore vem de `createdAt`, nunca do ID. **ULID** fica para `eventId`, `Idempotency-Key` e `X-Request-Id`.
 - **Sempre** prefira UUID v4 quando ordenação temporal for indesejada por questões de privacidade ou enumeração (tokens públicos, identificadores expostos em URLs sensíveis).
 - **Nunca** use UUID v1. Vaza MAC address e timestamp em formato decodificável.
 - **Nunca** misture UUIDv7 e ULID como PK no mesmo bounded context sem ADR (ver `@contracts/postgres`).

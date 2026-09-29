@@ -3,7 +3,7 @@ title: Convenções de modelagem para pgvector
 type: contracts
 scope: schemas com embeddings em PostgreSQL + pgvector
 status: active
-last_updated: 2026-05-20
+last_updated: 2026-09-28
 related:
   - "@stacks/database/pgvector"
   - "@stacks/database/postgres"
@@ -159,7 +159,7 @@ Matriz de referência. Documente no projeto qual é o **default ativo** e manten
 | Tipo | Quando usar |
 |---|---|
 | `vector(N)` | Default. Qualidade máxima de distance computation. |
-| `halfvec(N)` | N >= 2048 e storage/perf prioritários. Aceita perda marginal de recall. |
+| `halfvec(N)` | Obrigatório para indexar N > 2.000 (limite de índice sobre `vector`; `halfvec` indexa até 4.000). Abaixo disso, quando storage/perf pesam. Aceita perda marginal de recall. |
 | `bit(N)` | Apenas em estágio de pre-filter de quantization binária. Nunca como fonte de verdade. |
 
 ---
@@ -323,7 +323,7 @@ Estratégias por seletividade do filtro:
 |---|---|
 | Baixa (filtra > 90%) | Pre-filter explícito + busca brute-force no subset |
 | Média | Particionamento físico pela dimensão de filtro |
-| Alta (filtra < 10%) | Iterative scans do pgvector 0.8+ (`SET hnsw.iterative_scan = on`) |
+| Alta (filtra < 10%) | Iterative scans do pgvector 0.8+ (`SET hnsw.iterative_scan = relaxed_order`, ou `strict_order` quando a ordem exata por distância importa; `on` não é valor válido) |
 
 Filtrar por `tenant_id` via particionamento sempre vence filtro post-hoc.
 

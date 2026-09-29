@@ -4,6 +4,8 @@
 - **Date:** 2026-09-28
 - **Deciders:** projeto DDC / revisão de contextos
 - **Tags:** `engineering`, `stacks`, `naming`, `ssot`
+- **Superseded in part by:** [0004](0004-latest-stable-baseline-and-documented-exceptions.md) (linha de runtime: Node 26 passa a baseline; Functions ficam em Node 24).
+- **Superseded in part by:** [0005](0005-firestore-document-ids-use-automatic-ids.md) (IDs de documento do Firestore).
 - **Supersedes:** a matriz de versões de [0001](0001-ddc-engineering-baseline-and-harness-enforcement.md). IDs (`uuidv7` / ULID), harness e a decisão sobre secrets da 0001 permanecem.
 
 ## Context

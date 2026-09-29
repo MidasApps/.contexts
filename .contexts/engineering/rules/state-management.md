@@ -1,4 +1,12 @@
-﻿# Regras de State Management
+---
+title: Regras de State Management
+type: rules
+status: active
+scope: engineering
+last_updated: 2026-09-28
+---
+
+# Regras de State Management
 
 Regras imperativas e agnósticas de biblioteca para gerenciamento de estado no front-end. Aplicam-se a qualquer camada cliente do projeto. Para uso específico de bibliotecas, ver `@stacks/state/zustand@5`, `@stacks/frontend/react@19`, `@stacks/frontend/next@16`.
 

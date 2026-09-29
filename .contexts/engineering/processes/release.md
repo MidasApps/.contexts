@@ -1,4 +1,12 @@
-﻿# Release
+---
+title: Release
+type: processes
+status: active
+scope: engineering
+last_updated: 2026-09-28
+---
+
+# Release
 
 Convenções de processo para versionamento, empacotamento e disponibilização de funcionalidades ao usuário final. Define como o time transforma código mergeado em release tags, changelog, comunicação e artefatos auditáveis, com automação determinística baseada em Conventional Commits.
 
@@ -90,7 +98,7 @@ Use em:
 ### 4.4. Regras universais
 
 - **Sempre automatizado em `main`.** Nunca há release manual em produção.
-- A tool é configurada uma vez e versionada no repo (`.release-please-config.json`, `release.config.js`, `.changeset/config.json`).
+- A tool é configurada uma vez e versionada no repo (`release-please-config.json` + `.release-please-manifest.json`, `release.config.js`, `.changeset/config.json`).
 - Credenciais (`GITHUB_TOKEN`, `NPM_TOKEN`) gerenciadas via secrets do CI — ver `@processes/deploy`.
 
 ---
@@ -229,7 +237,7 @@ Sequência operacional:
 1. **Branch:** `hotfix/<issue-id>-<slug>` criada da tag de produção (não de `main`).
 2. **Fix + tests:** correção mínima, testes regressivos cobrindo o bug.
 3. **PR + fast-track review:** processo de PR conforme `@processes/pull-requests` com label `hotfix` e revisor on-call.
-4. **Merge + tag PATCH:** tool de release incrementa patch automaticamente.
+4. **Tag PATCH:** no commit aprovado do hotfix (ou da release branch, se existir — seção 8); a tool de release incrementa o patch.
 5. **Deploy:** seguindo `@processes/deploy`.
 6. **Backfill em `main`:** cherry-pick ou merge garantindo que o fix não regride na próxima release.
 7. **Postmortem:** obrigatório para hotfix em produção. Ver `@rules/governance`.
@@ -257,8 +265,8 @@ Disciplina obrigatória quando uma release contém breaking change:
 
 1. **Seção dedicada** em release notes, separada de `Changed`/`Added`.
 2. **Migration guide** publicado em docs antes da release. Ver `@rules/migration` e `@rules/documentation`.
-3. **Versão anterior mantida em paralelo** durante janela de deprecation declarada (mínimo recomendado: 90 dias).
-4. **Header `Sunset` (RFC 8594)** em APIs deprecadas, com data ISO 8601.
+3. **Versão anterior mantida em paralelo** durante janela de deprecation declarada (APIs HTTP públicas: mínimo 6 meses, `@contracts/api` seção 17; demais superfícies: mínimo recomendado 90 dias).
+4. **Headers `Deprecation: @<epoch-segundos>` (RFC 9745) e `Sunset: <HTTP-date>` (RFC 8594)**, mais `Link rel="successor-version"`, em APIs deprecadas, no formato de `@contracts/api` seção 17.
 5. **Conformidade com `@rules/api-design` e `@contracts/api`** — breaking change em API exige bump major e contrato versionado.
 
 > Breaking change em release MINOR é violação de SemVer e do framework. Não merge.
@@ -280,7 +288,7 @@ Disciplina obrigatória quando uma release contém breaking change:
 
 ### 14.3. Deprecation Notices
 
-- Anunciar com janela mínima de 90 dias.
+- Anunciar com janela mínima de 90 dias (6 meses para APIs HTTP públicas, `@contracts/api` seção 17).
 - Migration guide publicado simultaneamente.
 - Reforçar em N-1 e N-2 releases antes da remoção efetiva.
 

@@ -37,7 +37,7 @@ As camadas são fixas e definidas pela metodologia. Em ordem decrescente de espe
 |---|---|
 | `app` | Composição global da aplicação: providers, roteamento de alto nível, configuração de estilo, instanciação de stores globais, error boundaries de topo. |
 | `processes` | **Deprecated** desde 2023. Processos de negócio multi-página (ex.: checkout multi-step). A metodologia oficial recomenda hoje absorver esse conteúdo em `pages` ou `widgets`. |
-| `pages` | Composição de tela completa. Cada slice de `pages` representa uma rota navegável da aplicação. |
+| `pages` (neste projeto, `views`) | Composição de tela completa. Cada slice de `pages` representa uma rota navegável da aplicação. |
 | `widgets` | Blocos compostos e independentes de UI que agregam features e entities para formar uma região completa da interface (header, sidebar, feed). |
 | `features` | Interações que entregam valor ao usuário — verbos do produto (autenticar, comentar, filtrar, favoritar). |
 | `entities` | Conceitos de domínio (substantivos do produto): usuário, produto, post. Carregam o modelo de dados e a UI básica de cada entidade. |
@@ -76,18 +76,18 @@ Segments não são obrigatórios em conjunto. Um slice pode conter apenas `ui` e
 
 ### Public API por slice
 
-Cada slice expõe um arquivo `index.ts` (e/ou `index.tsx`) que funciona como sua **public API**. Apenas o que é exportado por esse arquivo pode ser consumido por outros slices ou camadas. O interior do slice — submódulos e arquivos privados — não deve ser importado diretamente de fora.
+Cada slice expõe um arquivo `index.ts` (e/ou `index.tsx`) que funciona como sua **public API**. Apenas o que é exportado por esse arquivo pode ser consumido por outros slices ou camadas. O interior do slice — submódulos e arquivos privados — não deve ser importado diretamente de fora. O `index.ts` é mínimo, só com named exports e sem `export *`. Dentro do slice, importe o módulo direto, sem passar pelo `index.ts`.
 
 ```
 features/auth-by-email/
   ui/
     LoginForm.tsx
   model/
-    store.ts
-    schema.ts
+    use-auth-store.ts
+    login.schema.ts
   api/
     login.ts
-  index.ts          <-- public API: re-exporta apenas o que é consumível
+  index.ts          <-- public API mínima: re-exporta apenas o que é consumível
 ```
 
 Essa fronteira é a base de toda a regra de dependência da metodologia.
@@ -110,9 +110,9 @@ A aplicação organiza o código frontend dentro de `src/` seguindo a hierarquia
 
 O App Router do Next.js 16 reserva a pasta `app/` (na raiz ou em `src/app/`) para o roteamento baseado em sistema de arquivos. Isso colide nominalmente com a camada `app` de FSD. A convenção adotada resolve a colisão da seguinte forma:
 
-- A pasta `src/app/` do Next.js é tratada como **superfície de roteamento**, não como camada FSD. Cada `page.tsx`, `layout.tsx`, `loading.tsx` e `error.tsx` é um arquivo fino de composição que importa um slice da camada FSD `pages` e o renderiza.
+- A pasta `src/app/` do Next.js é tratada como **superfície de roteamento**, não como camada FSD. Cada `page.tsx`, `layout.tsx`, `loading.tsx` e `error.tsx` é um arquivo fino de composição que importa um slice da camada FSD `views` e o renderiza. `route.ts` e `actions.ts` sob `src/app/` também são finos: `route.ts` re-exporta o driving adapter de `services/<context>/adapters/driving/`, que chama o use case; `actions.ts` é wrapper `"use server"` de uma linha que chama o adapter (`@architecture/feature-based`).
 - A camada FSD `app` (composição global) vive em `src/app-providers/` ou `src/app-shell/` para evitar a colisão de nomes. Lá moram providers globais, instanciação de stores, error boundaries de topo e configuração de estilo.
-- A camada FSD `pages` vive em `src/pages/` (ou `src/views/` quando há preferência por desambiguar). Cada slice de `pages` representa o conteúdo lógico de uma rota e exporta o componente que `src/app/<rota>/page.tsx` consome.
+- A camada FSD `pages` vive em `src/views/`, nunca em `src/pages/`, que o Next.js interpreta como Pages Router. Cada slice de `views` representa o conteúdo lógico de uma rota e exporta o componente que `src/app/<rota>/page.tsx` consome.
 
 Estrutura resultante:
 
@@ -120,13 +120,13 @@ Estrutura resultante:
 src/
   app/                        # Next.js App Router (roteamento)
     layout.tsx
-    page.tsx                  # importa src/pages/home
+    page.tsx                  # importa src/views/home
     dashboard/
-      page.tsx                # importa src/pages/dashboard
+      page.tsx                # importa src/views/dashboard
   app-providers/              # FSD layer "app" renomeada
     providers.tsx
     index.ts
-  pages/                      # FSD layer "pages"
+  views/                      # FSD layer "pages" (renomeada para views)
     home/
       ui/
       model/
@@ -145,8 +145,8 @@ src/
 
 - Slices em `kebab-case`, descritivos e curtos: `auth-by-email`, `add-to-cart`, `user-profile`.
 - Componentes React dentro de `ui/` em `PascalCase`: `LoginForm.tsx`, `ProductCard.tsx`.
-- Stores e schemas em arquivo `kebab-case`, export em camelCase ou PascalCase: `use-auth-store.ts` exporta `useAuthStore`, `user-schema.ts` exporta `UserSchema`.
-- Public API sempre via `index.ts` na raiz do slice.
+- Stores e schemas em arquivo `kebab-case`, export em camelCase ou PascalCase: `model/use-auth-store.ts` exporta `useAuthStore`, `model/user.schema.ts` exporta `UserSchema` (sufixo de papel `.schema.ts`). Schema de um slice mora em `src/<layer>/<slice>/model/<nome>.schema.ts`; schema reusado por slices da mesma camada desce para `src/entities/<entity>/model/`; schema que cruza client ↔ server mora em `src/contracts/<context>/` (tabela de `@contracts/schemas` §2).
+- Public API sempre via `index.ts` mínimo na raiz do slice, só com named exports e sem `export *`.
 
 ### Segments adotados
 
@@ -154,6 +154,7 @@ O time usa os cinco segments oficiais (`ui`, `model`, `lib`, `api`, `config`) se
 
 ### Limites observados
 
+- `src/contracts/<context>/` fica fora das camadas FSD e serve só a contratos (`*.schema.ts`) compartilhados entre cliente e servidor.
 - A camada `processes` não é utilizada — segue a recomendação oficial pós-deprecation. Fluxos multi-etapa moram em `widgets` ou em uma sequência de páginas coordenadas via roteamento.
 - A camada `shared` não recebe lógica de domínio. Qualquer tipo, schema ou função que mencione um conceito de negócio (usuário, produto, pedido) pertence a `entities`, não a `shared`.
 - Compartilhamento entre features da mesma camada acontece exclusivamente através de uma camada inferior (em geral `entities` ou `shared`) ou subindo para `widgets`.

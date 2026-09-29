@@ -18,7 +18,7 @@ related:
 
 # Convenções de Modelagem para BigQuery
 
-Este documento define a doutrina de modelagem de dados no BigQuery. Não cobre o manual da ferramenta (não existe `@stacks/database/bigquery` — BigQuery é tratado como destino analítico, não como stack de aplicação). Aqui ficam as regras de como o time desenha datasets, tabelas, colunas, partitioning, clustering, schema evolution, governance e ingestion no warehouse.
+Este documento define a doutrina de modelagem de dados no BigQuery. Manual da ferramenta em `@stacks/database/bigquery`; aqui só a doutrina de modelagem. Aqui ficam as regras de como o time desenha datasets, tabelas, colunas, partitioning, clustering, schema evolution, governance e ingestion no warehouse.
 
 ---
 
@@ -104,7 +104,7 @@ Quando o time convencionar pluralidade explicitamente (ex.: agregados pré-compu
 Padrão: `snake_case` **sempre**. BigQuery é case-insensitive em nomes de coluna mas armazena o case original — não confie nisso.
 
 Correto:
-- `event_id`, `event_time`, `tenant_id`, `prompt_tokens`
+- `event_id`, `occurred_at`, `tenant_id`, `prompt_tokens`
 
 Incorreto:
 - `eventId` (camelCase)
@@ -140,7 +140,7 @@ Correto:
 ```sql
 CREATE TABLE billing_facts.payment_event (
   event_id STRING,
-  event_time TIMESTAMP,
+  occurred_at TIMESTAMP,
   tenant_id STRING,
   user_id STRING,
   payment STRUCT<
@@ -191,10 +191,11 @@ Regras:
 
 ## 7. IDs
 
-IDs são `STRING`. `event_id` é ULID. `aggregate_id` é o id opaco da entidade, sem prefixo (`uuidv7` ou ULID). **Nunca** invente `AUTO_INCREMENT` — BigQuery não tem sequences.
+IDs são `STRING`. `event_id` é ULID. `aggregate_id` é o id opaco da entidade, sem prefixo (`uuidv7` do Postgres ou ID automático do Firestore, ADR 0005). **Nunca** invente `AUTO_INCREMENT` — BigQuery não tem sequences.
 
 Correto:
-- `event_id STRING` contendo `01HXYZ...` (ULID) ou `f47ac10b-58cc-...` (UUID).
+- `event_id STRING` contendo `01HXYZ...` (ULID, `@contracts/events`).
+- `aggregate_id STRING` contendo `01932a7c-5b14-7c3a-...` (UUIDv7 do Postgres) ou `a7Fq2LmN9pR4sT6uV8wX` (ID automático do Firestore).
 
 Incorreto:
 - `event_id INT64` autoincrementado pela aplicação (sujeito a colisão entre sources).
@@ -208,18 +209,17 @@ Toda tabela de evento deve conter ao menos:
 
 | Coluna | Tipo | Descrição |
 |---|---|---|
-| `event_id` | `STRING` | ULID/UUID, PK lógica, gerado na origem |
-| `event_time` | `TIMESTAMP` | UTC, momento em que o evento ocorreu no domínio (não o ingest) |
+| `event_id` | `STRING` | ULID, PK lógica, gerado na origem |
+| `occurred_at` | `TIMESTAMP` | UTC, momento em que o evento ocorreu no domínio (não o ingest) |
 | `ingested_at` | `TIMESTAMP` | UTC, momento em que chegou ao warehouse |
 | `event_name` | `STRING` | `SCREAMING_SNAKE_CASE`, ex.: `USER_SIGNED_UP` |
 | `event_version` | `INT64` | Versão do schema do evento |
 | `tenant_id` | `STRING` | Multi-tenant; obrigatório em SaaS |
 | `user_id` | `STRING` | Quando aplicável |
-| `org_id` | `STRING` | Quando aplicável |
 | `source` | `STRING` | Sistema de origem (ex.: `web-api`, `billing-worker`) |
 | `payload` | `STRUCT` ou `JSON` | Conteúdo específico do evento |
 
-Para tabelas de dimensão, use `*_id` como PK lógica e inclua `valid_from` / `valid_to` se aplicar SCD Type 2.
+Para tabelas de dimensão, use `*_id` como PK lógica e inclua `valid_from_at` / `valid_until_at` se aplicar SCD Type 2.
 
 ---
 
@@ -228,7 +228,7 @@ Para tabelas de dimensão, use `*_id` como PK lógica e inclua `valid_from` / `v
 **Partitioning é obrigatório** em qualquer tabela que cresça além de algumas dezenas de GB.
 
 Doutrina:
-- **Time-unit partitioning** é o default: `PARTITION BY DATE(event_time)`.
+- **Time-unit partitioning** é o default: `PARTITION BY DATE(occurred_at)`.
 - Granularidade `DAY` por default; `HOUR` para alto volume (>10M eventos/dia); `MONTH` para histórico cold.
 - **Integer range partitioning** quando time não é a dimensão primária de acesso (ex.: particionar por `tenant_id_hash` em multi-tenant denso).
 - **Sempre exija partition filter** em tabelas grandes:
@@ -238,7 +238,7 @@ Doutrina:
     require_partition_filter = true
   )
   ```
-- Particione pelo `event_time` (domínio), não pelo `ingested_at` — análise temporal é sobre quando o fato ocorreu.
+- Particione pelo `occurred_at` (domínio), não pelo `ingested_at` — análise temporal é sobre quando o fato ocorreu.
 
 Anti-pattern: tabela sem partitioning forçando full scan a cada query.
 
@@ -256,7 +256,7 @@ CLUSTER BY tenant_id, user_id, event_name
 Regras:
 - Coluna mais filtrada primeiro.
 - Não cluster por colunas de alta cardinalidade pura (ex.: `event_id`) — clustering perde valor.
-- Não cluster por `event_time` se já está particionado por ele (redundante).
+- Não cluster por `occurred_at` se já está particionado por ele (redundante).
 
 ---
 
@@ -289,16 +289,16 @@ Ver `@rules/migration` para o protocolo de mudança forward-only.
 
 Para breaking changes de schema, crie tabela paralela versionada:
 
-- `events` → tabela atual
-- `events_v2` → nova estrutura
-- View `events_current` apontando para a versão promovida
+- `domain_event` → tabela atual
+- `domain_event_v2` → nova estrutura
+- View `domain_event_current` apontando para a versão promovida
 
 Promoção:
-1. Crie `events_v2` com novo schema.
+1. Crie `domain_event_v2` com novo schema.
 2. Dual-write durante período de carência.
 3. Backfill histórico se aplicar.
-4. Recrie view `events_current` apontando para `v2`.
-5. Deprecie `events` (v1) com `partition_expiration_days` para TTL.
+4. Recrie view `domain_event_current` apontando para `v2`.
+5. Deprecie `domain_event` (v1) com `partition_expiration_days` para TTL.
 
 **Nunca** faça rename in-place de tabela ativa em produção. Sem rollback simples no BQ (ver `@rules/migration`).
 
@@ -323,10 +323,10 @@ Tabela canônica `ai_observability.llm_calls`:
 | Coluna | Tipo |
 |---|---|
 | `request_id` | `STRING` (ULID) |
-| `event_time` | `TIMESTAMP` |
+| `occurred_at` | `TIMESTAMP` |
 | `tenant_id` | `STRING` |
 | `user_id` | `STRING` |
-| `model` | `STRING` (ex.: `claude-opus-4-7`) |
+| `model` | `STRING` (ex.: `claude-sonnet-5-5`) |
 | `prompt_tokens` | `INT64` |
 | `completion_tokens` | `INT64` |
 | `cached_tokens` | `INT64` |
@@ -336,7 +336,7 @@ Tabela canônica `ai_observability.llm_calls`:
 | `tool_calls` | `ARRAY<STRUCT<name STRING, arguments JSON, latency_ms INT64>>` |
 | `error` | `STRUCT<code STRING, message STRING>` |
 
-Particionado por `DATE(event_time)`, clusterizado por `tenant_id, model`. Suporta análise de custo, qualidade e latência por modelo e tenant.
+Particionado por `DATE(occurred_at)`, clusterizado por `tenant_id, model`. Suporta análise de custo, qualidade e latência por modelo e tenant.
 
 ---
 
@@ -376,7 +376,7 @@ Regras de schema na ingestão:
 ## 17. Transformação: dbt e Dataform
 
 Para camadas modeladas (staging → intermediate → marts), use **dbt** ou **Dataform**:
-- Modelagem incremental com `event_time` como cursor.
+- Modelagem incremental com `occurred_at` como cursor.
 - Testes de dados (`not_null`, `unique`, `relationships`, custom).
 - Lineage automático e documentação.
 - CI sobre PR em modelos.
@@ -422,9 +422,9 @@ Padrão canônico para sink de `@contracts/events`:
 
 **Opção A — tabela única por contexto:**
 ```
-<bc>_events.events
+<bc>_events.domain_event
 ```
-Com colunas canônicas (seção 8) + `payload STRUCT versionado`. `event_name` e `event_version` discriminam o tipo. Particionado por `DATE(event_time)`, clusterizado por `tenant_id, event_name`.
+Com colunas canônicas (seção 8) + `payload STRUCT versionado`. `event_name` e `event_version` discriminam o tipo. Particionado por `DATE(occurred_at)`, clusterizado por `tenant_id, event_name`.
 
 **Opção B — tabela por evento versionada:**
 ```
@@ -461,7 +461,7 @@ Default do projeto: **Opção A** para contextos com muitos tipos de evento de b
 - **JOINs massivos** quando `STRUCT`/`ARRAY` resolveria.
 - **View sobre view sobre view** (3+ níveis).
 - Datasets genéricos (`data`, `misc`, `tmp`) sem bounded context.
-- `event_id` autoincrementado pela aplicação em vez de ULID/UUID.
+- `event_id` autoincrementado pela aplicação em vez de ULID.
 
 ---
 

@@ -1,7 +1,9 @@
 ---
 title: Firebase Firestore
-category: backend
+type: stacks
+category: database
 edition: Native
+version: 14.5.0
 sdks:
   client: firebase 12.19.0
   admin: firebase-admin 14.5.0
@@ -106,8 +108,6 @@ Firestore suporta OR limitado via `where('field', 'in', [...])` (até 30 valores
 ### Vector search (`findNearest`)
 
 ```ts
-import { findNearest } from 'firebase-admin/firestore'
-
 await db.collection('docs')
   .findNearest({
     vectorField: 'embedding',
@@ -174,19 +174,19 @@ batch.delete(ref3)
 await batch.commit()
 ```
 
-Até 500 operações atômicas. Sem leitura dentro do batch.
+Operações atômicas, sem leitura dentro do batch. A página de quotas (conferida em 2026-09-28) não fixa teto de operações por batch: os limites são 10 MiB por request e 500 field transformations por documento no mesmo commit. O teto antigo de "500 operações por batch" não vale mais; batch grande ainda aumenta contention, então para backfill use BulkWriter.
 
 ### Transactions
 
 ```ts
 await db.runTransaction(async (tx) => {
   const snap = await tx.get(ref)
-  if (!snap.exists) throw new Error('missing')
+  if (!snap.exists) throw new NotFoundError('counter', ref.id) // erro de domínio com `code`
   tx.update(ref, { count: snap.data()!.count + 1 })
 })
 ```
 
-Read-then-write com retry automático em contention. Até 500 docs por transação. Mantenha o callback curto — toda lógica pesada deve sair da transação. Para incrementos puros prefira `FieldValue.increment`.
+Read-then-write com retry automático em contention. Não há teto publicado de documentos por transação; valem os 10 MiB por request e as 500 field transformations por documento. Mantenha o callback curto — toda lógica pesada deve sair da transação. Para incrementos puros prefira `FieldValue.increment`.
 
 ### Bulk writer (Admin SDK)
 
@@ -218,14 +218,15 @@ const unsubscribe = onSnapshot(query, (snap) => {
 |---|---|
 | Tamanho de documento | 1 MiB |
 | Writes sustained por doc | 1/sec |
-| Writes por transaction/batch | 500 |
+| Tamanho de request (commit/batch/transação) | 10 MiB |
+| Field transformations por documento em um commit | 500 |
 | Reads sustained por coleção | ~30k/min |
 | Writes sustained por coleção | ~6k/min |
 | Composite indexes por database | 200 |
 | Vector field dimensões | 2048 |
 | Valores em `in`/`not-in`/`array-contains-any` | 30 |
 
-Valores sustained dependem de sharding interno e da forma das chaves. Hotspotting (chaves monotônicas como timestamps ISO no início do ID) reduz throughput drasticamente — use ULIDs ou IDs aleatórios (veja `@rules/data-modeling`).
+Valores sustained dependem de sharding interno e da forma das chaves. Hotspotting (chaves monotônicas como timestamps ISO no início do ID) reduz throughput drasticamente — use o ID automático do Firestore (`collection.doc()` / `add()`); ULID e UUIDv7 também são monotônicos e não servem como ID de documento (ADR 0005, `@contracts/firebase-firestore` §2).
 
 ## Security Rules
 
@@ -260,9 +261,10 @@ Pontos críticos:
 Use `Converter` para tipar leituras e escritas:
 
 ```ts
-const userConverter: FirestoreDataConverter<User> = {
-  toFirestore: (u) => UserSchema.parse(u),
-  fromFirestore: (snap) => UserSchema.parse(snap.data()),
+// UserDocSchema / type UserDoc: forma persistida, em src/contracts/<context>/user-doc.schema.ts (@contracts/schemas §3)
+const userConverter: FirestoreDataConverter<UserDoc> = {
+  toFirestore: (u) => UserDocSchema.parse(u),
+  fromFirestore: (snap) => UserDocSchema.parse(snap.data()),
 }
 
 const ref = db.collection('users').withConverter(userConverter)
@@ -376,7 +378,7 @@ Comparar com `@stacks/database/postgres`:
 | Scaling sem ops | sim | requer trabalho |
 | Hierarquia natural de dados | excelente | possível mas verboso |
 | Joins complexos | impossível | nativo |
-| Transações multi-table com integridade referencial | limitado a 500 docs | ACID completo |
+| Transações multi-table com integridade referencial | sem FK; transação limitada a 10 MiB e sujeita a contention | ACID completo |
 | Queries ad-hoc / analítica | ruim (use export para BigQuery) | excelente |
 | Full-text avançado | requer integração externa (Algolia, Typesense) | nativo (tsvector) |
 | Vector search alta dimensionalidade (>2048) | não suportado | pgvector (`@stacks/database/pgvector`) |
@@ -386,12 +388,12 @@ Comparar com `@stacks/database/postgres`:
 
 - **OR arbitrário entre campos**: queries paralelas + merge cliente custa caro. Re-modele.
 - **Listener sem `unsubscribe`**: memory leak garantido em SPA.
-- **Transactions longas ou com >500 docs**: alta probabilidade de contention; quebre em batches ou use BulkWriter.
+- **Transactions longas ou com centenas de docs**: alta probabilidade de contention; quebre em batches ou use BulkWriter.
 - **Read-modify-write fora de transação**: race condition. Use `runTransaction` ou `FieldValue.increment`.
 - **Cursor com `startAt(value)` sem `orderBy`** no mesmo campo: resultado imprevisível.
 - **Arrays mutáveis grandes sem dedup**: cada modificação reenviada para todos os listeners; custo de leitura explode.
 - **Documentos > 500 KB lidos com frequência**: divida em subdocumentos.
-- **Hotspotting com chaves monotônicas**: timestamps ISO no início do ID criam hotspot. Use ULIDs ou IDs aleatórios (`@rules/data-modeling`).
+- **Hotspotting com chaves monotônicas**: timestamps ISO, ULID ou UUIDv7 no ID criam hotspot. Use o ID automático do Firestore (ADR 0005, `@contracts/firebase-firestore` §2).
 - **Coleção raiz com > 1 M docs sem partition strategy**: queries e listings degradam. Particione por tenant, mês, ou outra chave estável.
 - **Listeners em queries broad** (`collection('users').onSnapshot`): custo amplificado a cada change. Restrinja com `where` ou pagine.
 - **SDK errado no contexto errado**: Admin SDK em código que sai pro cliente é vazamento de credencial; Client SDK no servidor desperdiça round-trip de autenticação.

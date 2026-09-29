@@ -2,7 +2,7 @@
 title: Convenção de Ambientes
 type: processes
 status: active
-last_updated: 2026-05-20
+last_updated: 2026-09-28
 ---
 
 # Convenção de Ambientes
@@ -47,7 +47,7 @@ Aplicar o princípio do **12-factor**: ambientes devem ser o mais idênticos pos
 
 - SQLite em local e Postgres em prod.
 - Mock LLM em local sem flag explícita que permita testar com modelo real.
-- Versões de runtime divergentes entre ambientes (ver `@stacks/runtime/node@24`).
+- Versões de runtime divergentes entre ambientes (ver `@stacks/runtime/node@26`). A única divergência de runtime aceita é a do ADR 0004 E1: Firebase Functions rodam `nodejs24` em todos os ambientes, e o resto em Node 26.
 - Engine de banco diferente entre staging e prod.
 - Lib de filas, cache ou storage divergente.
 
@@ -317,7 +317,7 @@ Os seguintes padrões são proibidos e devem ser bloqueados em review:
 - `@rules/governance` — LGPD, audit, cost.
 - `@rules/validation` — validação Zod no boot.
 - `@contracts/secrets` — convenção de naming e referência de secrets.
-- `@stacks/runtime/node@24` — runtime canônico.
+- `@stacks/runtime/node@26` — runtime canônico.
 - `@stacks/frontend/next@16` — configuração de env vars no Next.js.
 - `@stacks/validation/zod@4` — schemas de validação de env.
 - `@stacks/backend/firebase-functions` — projetos Firebase por ambiente.

@@ -1,3 +1,11 @@
+---
+title: Deploy
+type: processes
+status: active
+scope: engineering
+last_updated: 2026-09-28
+---
+
 # Deploy
 
 Convenções operacionais para entregar mudanças aos ambientes `dev`, `staging` e `prod` de forma frequente, pequena, automatizada, observável e reversível. Este documento governa o fluxo de deploy ponta-a-ponta — desde merge em `main` até health check pós-rollout — e define as regras para componentes Next.js, Firebase Functions, Firestore, Postgres e prompts de IA.
@@ -89,7 +97,7 @@ Breaking schema **nunca** compartilha deploy com código que depende dele. O rol
 - Toda release de prod recebe tag `vMAJOR.MINOR.PATCH` no commit promovido. Detalhes do esquema em `@processes/release`.
 - Build embute `GIT_SHA` + `RELEASE_TAG` em variáveis de ambiente de runtime.
 - Endpoint `/health` expõe `{ version, commit, builtAt }` para inspeção rápida.
-- Logs estruturados incluem atributos `version` e `commit_sha` em todo registro (veja `@rules/observability`).
+- Logs estruturados incluem atributos `version` e `commitSha` em todo registro (veja `@rules/observability`).
 
 ---
 

@@ -3,6 +3,7 @@ title: Regras de Acessibilidade
 type: rules
 scope: a11y / WCAG 2.2 AA
 status: active
+last_updated: 2026-09-28
 ---
 
 # Regras de Acessibilidade

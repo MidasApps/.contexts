@@ -3,7 +3,7 @@ title: Regras de Observability
 type: rules
 status: active
 scope: engineering
-last_updated: 2026-05-20
+last_updated: 2026-09-28
 ---
 
 # Regras de Observability
@@ -26,7 +26,7 @@ Erros e exceções estruturadas são governados por `@.contexts/engineering/rule
 - **Mantenha schema estável de log**. Campos com mesmo nome carregam mesmo tipo em toda a aplicação (`userId` é sempre string, `durationMs` é sempre number).
 - **Use snake_case ou camelCase consistentemente em todos os campos de log**. Não misture os dois estilos.
 - **Sempre inclua `timestamp`, `level`, `message`, `service`, `env`** em todo log emitido. Adicione `requestId` ou `traceId` quando disponível no contexto.
-- **Mensagem do log é descritiva e estável**, não interpolada. Use `logger.info("user signed in", { userId })` ao invés de `logger.info(`user ${userId} signed in`)`. A mensagem precisa ser agrupável.
+- **Mensagem do log é uma string estável em snake_case** (`<entidade>_<evento>` no passado ou `<operação>_start|ok|failed`), nunca frase livre nem interpolada. Use `logger.info("user_signed_in", { userId })` ao invés de `logger.info("user signed in", { userId })` ou `logger.info(`user ${userId} signed in`)`. Dados variáveis vão em campos. A mensagem precisa ser agrupável e buscável por igualdade (ADR 0003, Amendments).
 - **Não logue objetos grandes inteiros**. Extraia campos relevantes; arrays e payloads completos vão para storage separado, não para o stream de logs.
 
 ## Níveis de log
@@ -42,7 +42,7 @@ Erros e exceções estruturadas são governados por `@.contexts/engineering/rule
 ## Correlation e contexto
 
 - **Sempre propague `traceId` e `spanId` cruzando fronteiras** (HTTP, fila, função). Use OpenTelemetry context propagation; não invente headers próprios.
-- **Toda requisição HTTP recebe um `requestId`** atribuído no edge (middleware no Next.js, gateway, ou pelo runtime). Esse ID aparece em todo log, métrica de exemplar e span da requisição.
+- **Toda requisição HTTP recebe um `requestId`** atribuído no edge (`proxy.ts` no Next.js 16, gateway, ou pelo runtime). Esse ID aparece em todo log, métrica de exemplar e span da requisição.
 - **Headers padrão de propagação são `traceparent` e `tracestate`** (W3C Trace Context). Não use `X-Request-ID` como substituto de trace context.
 - **Em jobs assíncronos e mensagens em fila**, serialize o trace context no envelope da mensagem e restaure-o no consumidor. O trace começa no producer, não no consumer.
 - **Use AsyncLocalStorage (Node) ou equivalente** para carregar contexto através de chamadas sem passar `ctx` em todo lugar.

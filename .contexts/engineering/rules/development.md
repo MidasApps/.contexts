@@ -33,14 +33,16 @@ Aplica-se a todo código-fonte do projeto: backend (Firebase Functions, serviço
 - Sempre use imports nomeados. Evite `default export` exceto onde o framework exige (páginas Next.js, componentes lazy-loaded).
 - Nunca importe de caminhos relativos profundos (`../../../`). Configure aliases (`@/`) e use-os.
 - Sempre ordene imports: built-in Node → libs externas → aliases internos → relativos. Deixe para o linter automatizar.
-- Nunca importe de arquivos `index.ts` barrel quando puder importar do módulo direto. Barrels mascaram dependências circulares.
+- Nunca use `export *` nem barrels internos. Dentro de um slice/feature/bounded context, importe do módulo direto: barrels mascaram dependências circulares.
+- Exceção: um `index.ts` mínimo, só com named exports, é permitido como API pública de slice (FSD), feature ou bounded context, consumido de fora dele.
+- Efeito de módulo (ex.: `initializeApp`, criação de client) só é permitido em `composition.ts` (composition root). Fora dele, nenhum side effect em import time.
 
 ## Nomenclatura
 
 - Sempre use `camelCase` para variáveis, funções e propriedades.
 - Sempre use `PascalCase` para tipos, classes, componentes React e enums-como-objeto.
 - Sempre use `SCREAMING_SNAKE_CASE` para constantes verdadeiramente imutáveis exportadas no nível de módulo.
-- Sempre use `kebab-case` para nomes de arquivo (`place-order.ts`, `user-schema.ts`, `use-auth-store.ts`). Exceção: o arquivo de um componente React usa `PascalCase` (`Button.tsx`).
+- Sempre use `kebab-case` para nomes de arquivo (`place-order.ts`, `user.schema.ts`, `use-auth-store.ts`). Exceção: o arquivo de um componente React usa `PascalCase` (`Button.tsx`).
 - O nome físico do dado em SQL, JSON e evento segue `@.contexts/engineering/rules/data-modeling.md`. Esta seção governa o identificador TypeScript, não a coluna.
 - Nunca use abreviações ambíguas (`usr`, `btn`, `cfg`). Use o nome completo (`user`, `button`, `config`).
 - Nunca prefixe interfaces com `I` (`IUser`). Nunca sufixe tipos com `Type` (`UserType`).
@@ -59,7 +61,8 @@ Aplica-se a todo código-fonte do projeto: backend (Firebase Functions, serviço
 ## Funções e controle de fluxo
 
 - Sempre prefira funções puras quando possível. Side effects devem ser explícitos no nome (`saveUser`, `sendEmail`).
-- Nunca use `function` declaration no nível de módulo para lógica de aplicação. Use `const fn = () => {}` para consistência. Exceção: assinaturas que precisam de hoisting ou `this` léxico.
+- Prefira `const fn = () => {}` no nível de módulo para lógica de aplicação. `function` declaration é permitida para componentes React, handlers de framework (`GET`/`POST`, `page.tsx`) e exports nomeados de lógica onde hoisting não importa.
+- Use case, adapter e repository são funções ou factories (`makePlaceOrder`, `postgresUserRepository` como constante camelCase), não classes. Classes só para erros de domínio (obrigatório, com `code`) e, opcionalmente, agregados. Value object é tipo Zod-branded. Ports são `type`, não `interface`.
 - Sempre use early return para reduzir aninhamento. Nunca aninhe mais de 3 níveis de `if`/`for`.
 - Nunca use `else` após `return`, `throw`, `continue` ou `break`.
 - Sempre prefira composição funcional (`map`, `filter`, `reduce`) a loops imperativos quando o resultado é uma transformação.
@@ -72,7 +75,7 @@ Aplica-se a todo código-fonte do projeto: backend (Firebase Functions, serviço
 - Sempre crie classes de erro de domínio (`ValidationError`, `NotFoundError`) em vez de usar `Error` genérico em fronteiras.
 - Nunca use `try/catch` para controle de fluxo. Use-o apenas para erros excepcionais.
 - Nunca capture erros silenciosamente. Todo `catch` deve logar, re-lançar ou converter para erro de domínio.
-- Sempre tipifique o erro em `catch` como `unknown` (TypeScript 7 default (useUnknownInCatchVariables)) e estreite antes de usar.
+- Sempre tipifique o erro em `catch` como `unknown` (`useUnknownInCatchVariables`, incluído em `strict`) e estreite antes de usar.
 - Nunca retorne `null` para indicar erro. Use union de resultado (`Result<T, E>`) ou lance.
 - Sempre valide entrada externa (API, formulário, env vars) com schema antes de processar. Erros de validação são esperados, não excepcionais.
 
@@ -163,7 +166,7 @@ Certo:
 try {
   return await fetchUser(id);
 } catch (error) {
-  logger.error('fetchUser failed', { id, error });
+  logger.error('user_fetch_failed', { userId: id, err: error });
   throw new UserFetchError(id, { cause: error });
 }
 ```
@@ -183,7 +186,7 @@ Certo:
 ```ts
 } catch (error: unknown) {
   const message = error instanceof Error ? error.message : 'unknown error';
-  logger.error('operation failed', { message });
+  logger.error('operation_failed', { message });
 }
 ```
 
@@ -192,24 +195,22 @@ Certo:
 Errado:
 
 ```ts
-function addItem(list: Item[], item: Item) {
+const addItem = (list: Item[], item: Item) => {
   list.push(item);
   return list;
-}
+};
 ```
 
 Certo:
 
 ```ts
-function addItem(list: ReadonlyArray<Item>, item: Item): ReadonlyArray<Item> {
-  return [...list, item];
-}
+const addItem = (list: ReadonlyArray<Item>, item: Item): ReadonlyArray<Item> => [...list, item];
 ```
 
 ## Referências cruzadas
 
 - Regras específicas de TypeScript: `@.contexts/engineering/stacks/language/typescript@7.md`
-- Regras específicas de Node: `@.contexts/engineering/stacks/runtime/node@24.md`
+- Regras específicas de Node: `@.contexts/engineering/stacks/runtime/node@26.md`
 - Validação com Zod: `@.contexts/engineering/stacks/validation/zod@4.md`
 - Convenções de modelagem de schemas: `@.contexts/engineering/contracts/`
 - Regras de segurança detalhadas: `@.contexts/engineering/rules/security.md`

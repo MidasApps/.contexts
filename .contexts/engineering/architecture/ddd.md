@@ -2,7 +2,7 @@
 title: Domain-Driven Design
 type: architecture
 status: active
-last_updated: 2026-05-20
+last_updated: 2026-09-28
 upstream: https://www.domainlanguage.com/ddd/
 ---
 
@@ -163,7 +163,7 @@ DDD não é adotado como abordagem **uniforme** no projeto — é aplicado **sel
 
 ### Localização no projeto
 
-A modelagem DDD vive **dentro** do recorte de cada feature, dentro do hexágono definido por @architecture/hexagonal, casada com a organização por contexto promovida por @architecture/feature-based e @architecture/fsd. A estrutura interna canônica para uma feature com domínio rico:
+A modelagem DDD vive **dentro** do recorte de cada feature, dentro do hexágono definido por @architecture/hexagonal, casada com a organização por contexto promovida por @architecture/feature-based. A árvore de referência é a de @architecture/feature-based; abaixo, o detalhe tático de `domain/` (`services/` e `specifications/` são extensões opcionais do DDD). Estrutura para um contexto com domínio rico:
 
 ```
 services/<context>/
@@ -175,6 +175,8 @@ services/<context>/
       money.ts                     # Value Object
       order-status.ts
       order-id.ts                  # branded type
+    errors/
+      order-not-cancellable-error.ts # erro de domínio: classe com `code`
     services/
       pricing-policy.ts            # Domain Service
       shipping-calculator.ts
@@ -186,16 +188,16 @@ services/<context>/
   application/                     # application services / use cases
     ports/
       driven/
-        order-repository.ts        # interface do Repository
+        order-repository.ts        # type do Repository
       driving/
-        place-order.ts             # interface do use case
+        place-order.ts             # type do use case
     use-cases/
       place-order.ts               # Application Service
   adapters/
     driven/
       firestore-order-repository.ts  # implementação concreta do Repository
   composition.ts
-  index.ts
+  index.ts                         # API pública mínima do bounded context; dentro do contexto, importe o módulo direto
 ```
 
 A simetria com @architecture/hexagonal é deliberada: `domain/` é o coração do hexágono, `application/` é a camada que orquestra, `adapters/` são as implementações concretas.
@@ -210,7 +212,7 @@ Cada feature de domínio rico é candidata a virar um bounded context próprio. 
 
 Quando dois bounded contexts precisam conversar, a integração acontece por:
 
-- **Eventos de domínio publicados** (preferido para acoplamento fraco e evolução independente). Eventos são publicados em uma camada de mensageria (Firebase Pub/Sub, EventArc, Postgres LISTEN/NOTIFY, dependendo do contexto). Ver futuro `@contracts/events` para o formato canônico de eventos publicados.
+- **Eventos de domínio publicados** (preferido para acoplamento fraco e evolução independente). Eventos são publicados em uma camada de mensageria (Firebase Pub/Sub, EventArc, Postgres LISTEN/NOTIFY, dependendo do contexto). Ver `@.contexts/engineering/contracts/events.md` para o formato canônico de eventos publicados.
 - **APIs HTTP/RPC** com schema explícito (quando há necessidade síncrona). Ver @contracts/schemas para convenções de modelagem de payloads.
 - **Anticorruption layer (ACL)** quando o contexto downstream consome um modelo externo (sistema legado, parceiro, SaaS) que não casa com seu vocabulário. A ACL traduz; o domínio downstream nunca vê o modelo de fora.
 
@@ -219,8 +221,8 @@ Quando dois bounded contexts precisam conversar, a integração acontece por:
 A linguagem ubíqua se materializa principalmente em três lugares:
 
 1. **Nomes de tipos e funções.** `Order.approve()`, `Customer.findByDocument()`, `Payment.refund()`. Métodos descrevem operações de negócio, não operações técnicas.
-2. **Tipos branded para identidades e value objects.** `type OrderId = string & { readonly __brand: 'OrderId' }`. Impedem mistura acidental entre identidades de aggregates diferentes e dão peso semântico a tipos primitivos. Ver @rules/validation e regras de data modeling.
-3. **Schemas Zod que validam invariantes de value objects.** `const Money = z.object({ amount: z.number().positive(), currency: z.enum(['BRL', 'USD']) }).brand<'Money'>()`. A construção de um value object **falha** se os invariantes não forem satisfeitos — não existe `Money` inválido em circulação. Ver @stacks/validation/zod@4.
+2. **Tipos branded para identidades e value objects.** `const OrderIdSchema = z.string().min(1).brand<'OrderId'>()` e `type OrderId = z.infer<typeof OrderIdSchema>` (`z.uuid()` só quando o id for UUID, como o uuidv7 do Postgres; ID automático do Firestore usa `min(1)`). Impedem mistura acidental entre identidades de aggregates diferentes e dão peso semântico a tipos primitivos. Ver @rules/validation e regras de data modeling.
+3. **Schemas Zod que validam invariantes de value objects.** `const MoneySchema = z.object({ amountMinor: z.number().int().nonnegative(), currency: z.enum(['BRL', 'USD']) }).brand<'Money'>()` e `type Money = z.infer<typeof MoneySchema>`, com o valor em unidade menor inteira (`amountMinor`), nunca float. A construção de um value object **falha** se os invariantes não forem satisfeitos — não existe `Money` inválido em circulação. Ver @stacks/validation/zod@4.
 
 A regra é dura: **se a linguagem ubíqua diz X, o código diz X**. Renomear um conceito de negócio sem renomear todos os lugares onde ele aparece no código é dívida técnica imediata.
 
@@ -236,7 +238,7 @@ Para contextos onde aggregates não casam bem com a forma natural do banco (ex.:
 
 ### Domain events e mensageria
 
-Eventos de domínio publicados externamente seguem convenções específicas de payload, naming e versionamento — tratadas em `@contracts/events` (a ser definido). Em síntese:
+Eventos de domínio publicados externamente seguem convenções específicas de payload, naming e versionamento — tratadas em `@.contexts/engineering/contracts/events.md`. Em síntese:
 
 - O tipo TypeScript é PascalCase (`OrderPlaced`). O `eventName` no fio é `ORDER_PLACED`. O arquivo é `order-placed.ts`.
 - Payload mínimo: identificadores e dados essenciais; não é DTO inteiro do aggregate.
@@ -306,7 +308,7 @@ Heavy DDD pleno (CQRS + Event Sourcing + saga orchestration + read models materi
 - Modelos arquiteturais complementares: @architecture/hexagonal (DDD preenche o interior do hexágono), @architecture/clean-architecture (Clean é tática arquitetural; DDD é abordagem completa estratégica + tática).
 - Modelos arquiteturais ortogonais que coexistem: @architecture/feature-based, @architecture/fsd (organizam features no espaço; DDD oferece o critério de fronteira), @architecture/atomic-design (organiza biblioteca de UI).
 - Stacks que tipicamente aparecem na implementação tática: @stacks/language/typescript@7 (branded types para identidades e value objects), @stacks/validation/zod@4 (validação de invariantes na construção de value objects), @stacks/database/firebase-firestore e @stacks/database/postgres (implementação de repositories), @stacks/backend/firebase-functions (publishers e consumers de domain events).
-- Contratos relacionados: @contracts/schemas (modelagem de payloads de APIs entre bounded contexts), `@contracts/events` (formato canônico de eventos publicados — a ser definido).
+- Contratos relacionados: @contracts/schemas (modelagem de payloads de APIs entre bounded contexts), `@.contexts/engineering/contracts/events.md` (formato canônico de eventos publicados).
 - Regras de implementação que aplicam disciplina sobre código DDD: @rules/validation (invariantes de value objects), @rules/error-handling (mapeamento de erros de adapter para erros de domínio), @rules/data-modeling (naming e estrutura de tipos do domínio).
 - Documentação canônica:
   - Eric Evans. *Domain-Driven Design: Tackling Complexity in the Heart of Software* (2003).
@@ -318,7 +320,7 @@ Heavy DDD pleno (CQRS + Event Sourcing + saga orchestration + read models materi
 
 - O detalhamento mecânico de **como** isolar o domínio de tecnologia (ports, adapters, composition root, regra de dependência) pertence a @architecture/hexagonal, não a este documento.
 - O detalhamento de camadas concêntricas internas (entities / use cases / interface adapters / frameworks & drivers) e da regra de dependência radial pertence a @architecture/clean-architecture.
-- O **formato canônico de domain events publicados** (envelope, metadados, versionamento, naming) pertence a `@contracts/events` (a ser definido), não a este documento.
+- O **formato canônico de domain events publicados** (envelope, metadados, versionamento, naming) pertence a `@.contexts/engineering/contracts/events.md`, não a este documento.
 - O **formato canônico de schemas de API** que servem como published language entre bounded contexts pertence a @contracts/schemas.
 - Convenções específicas sobre branded types, schemas Zod e validação de invariantes vivem em @rules/validation e em regras de data modeling, não aqui.
 - Padrões específicos de saga, orquestração de processos longos e compensating actions não são tratados aqui — quando aplicáveis, viram @decisions ou documentos específicos por contexto.
