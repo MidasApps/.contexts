@@ -6,7 +6,8 @@ const fs = require('fs');
 const path = require('path');
 
 const TYPES = 'feat|fix|chore|docs|refactor|test|build|ci|perf|style|revert';
-const HEADER = new RegExp(`^(${TYPES})(\\([a-z0-9][a-z0-9-]*\\))?!?: \\S.*$`);
+// Descrição começa minúscula, dígito ou crase e não termina com ponto (rule commits).
+const HEADER = new RegExp(`^(${TYPES})(\\([a-z0-9][a-z0-9-]*\\))?!?: [a-z0-9\`](.*[^.\\s])?$`);
 const MAX_HEADER = 72;
 
 // `git commit`, `git -C dir commit`, `git -c k=v commit`, após início, ;, &&, || ou |.
@@ -52,7 +53,7 @@ try {
   if (!header) process.exit(0);
 
   const problems = [];
-  if (!HEADER.test(header)) problems.push('formato <type>(scope?)!?: <descrição>');
+  if (!HEADER.test(header)) problems.push('formato <type>(scope?)!?: <descrição minúscula, sem ponto final>');
   if (header.length > MAX_HEADER) problems.push(`header com ${header.length} caracteres (máx. ${MAX_HEADER})`);
   if (!problems.length) process.exit(0);
 

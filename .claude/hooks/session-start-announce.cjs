@@ -25,7 +25,6 @@ const skillPath = path.join(
   projectDir,
   '.claude',
   'skills',
-  'processes',
   'using-ddc',
   'SKILL.md'
 );

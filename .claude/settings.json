@@ -24,7 +24,7 @@
         "hooks": [{
           "type": "command",
           "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/guard-conventional-commit.cjs\"",
-          "if": "Bash(git commit*)"
+          "if": "Bash(git *)"
         }]
       },
       {
@@ -32,7 +32,7 @@
         "hooks": [{
           "type": "command",
           "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/guard-conventional-commit.cjs\"",
-          "if": "PowerShell(git commit*)"
+          "if": "PowerShell(git *)"
         }]
       }
     ],

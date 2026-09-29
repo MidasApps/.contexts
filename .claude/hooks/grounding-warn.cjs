@@ -37,7 +37,7 @@ const parse = (line) => {
 // Prompt real do usuário: role user sem tool_result (tool results também chegam como "user").
 const isUserPrompt = (entry) => {
   const msg = entry && entry.type === 'user' && entry.message;
-  if (!msg || entry.isSidechain) return false;
+  if (!msg || entry.isSidechain || entry.isMeta) return false;
   if (typeof msg.content === 'string') return true;
   return Array.isArray(msg.content) && !msg.content.some((b) => b && b.type === 'tool_result');
 };
@@ -116,7 +116,8 @@ try {
       'Reaplique using-ddc: Read MEMORY/contracts/rules relevantes antes de mais implementação. ' +
       'Skill: using-ddc · verification-before-completion.';
     const payload = { systemMessage: message };
-    if (firstWarningOfTurn(input.session_id, turnStart)) {
+    // stop_hook_active: outro Stop hook já continuou a conversa; não empilha continuação.
+    if (!input.stop_hook_active && firstWarningOfTurn(input.session_id, turnStart)) {
       payload.hookSpecificOutput = { hookEventName: 'Stop', additionalContext: message };
     }
     process.stdout.write(JSON.stringify(payload));

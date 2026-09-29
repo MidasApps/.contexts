@@ -58,7 +58,8 @@ const PROMPT_RULES = [
   [/\bradix\b/, ['radix-ui'], [`${E}/stacks/frontend/radix-ui.md`]],
   [/\b(ai sdk|vercel ai|streamtext|generatetext|usechat)\b/, ['vercel-ai-sdk'], [`${E}/stacks/ai/vercel-ai-sdk.md`]],
   [/\bmastra\b/, ['mastra-sdk'], [`${E}/stacks/ai/mastra-sdk.md`]],
-  [/\b(claude|anthropic)\b/, ['anthropic', 'anthropic-sdk'], [`${E}/stacks/ai/anthropic.md`, `${E}/stacks/ai/anthropic-sdk.md`]],
+  // `.claude/`, `CLAUDE.md` e "Claude Code" falam do harness, não do provider.
+  [/\banthropic\b|(?<![.\/\w-])claude\b(?![\s-]*(code|\.md|\.ai))/, ['anthropic', 'anthropic-sdk'], [`${E}/stacks/ai/anthropic.md`, `${E}/stacks/ai/anthropic-sdk.md`]],
   [/\b(openai|gpt)\b/, ['openai', 'openai-sdk'], [`${E}/stacks/ai/openai.md`, `${E}/stacks/ai/openai-sdk.md`]],
   [/\b(gemini|genai|vertex)\b/, ['gemini', 'google-genai-sdk'], [`${E}/stacks/ai/gemini.md`, `${E}/stacks/ai/google-genai-sdk.md`]],
   [/\b(llm|rag|evals?|harness[- ]engineering|ai harness)\b/, ['harness-engineering'], [`${E}/stacks/ai/harness-engineering.md`]],
@@ -117,10 +118,14 @@ const collect = (rules, subject) => {
   return { skills: uniq(skills), contexts: uniq(contexts) };
 };
 
+// Dica curta: acima disso vira ruído e o Claude ignora.
+const MAX_SKILLS = 6;
+const MAX_CONTEXTS = 6;
+
 const format = ({ skills, contexts }) => {
   const parts = [];
-  if (skills.length) parts.push(`Skills: ${skills.join(', ')}`);
-  if (contexts.length) parts.push(`Contexts: ${contexts.join(', ')}`);
+  if (skills.length) parts.push(`Skills: ${skills.slice(0, MAX_SKILLS).join(', ')}`);
+  if (contexts.length) parts.push(`Contexts: ${contexts.slice(0, MAX_CONTEXTS).join(', ')}`);
   return parts.join(' · ');
 };
 
@@ -149,6 +154,8 @@ const handlePath = (filePath, root) => {
 const handlePrompt = (rawPrompt) => {
   const prompt = String(rawPrompt || '').toLowerCase();
   if (!prompt) process.exit(0);
+  // Notificações de subagent/tarefa chegam como prompt mas não são pedido do usuário.
+  if (/^\s*<(task-notification|system-reminder|local-command|command-name)/.test(prompt)) process.exit(0);
   const found = collect(PROMPT_RULES, prompt);
   if (!found.skills.length && !found.contexts.length) process.exit(0);
   emit('UserPromptSubmit', `${format(found)}. Aplique using-ddc: Read nos paths @.contexts antes de Write em app.`);
