@@ -104,9 +104,10 @@ firebase-admin 14.5.0, firebase-functions 7.4.0, `@firebase/rules-unit-testing` 
 - Create: `packages/contracts/package.json` (`@core/contracts`, dep `zod: catalog:` — versão 4.6.5 declarada uma vez no `catalog` do `pnpm-workspace.yaml`)
 - Create: `packages/contracts/src/contracts/primitives/{ids,money,locale,time-zone,iso-datetime}.schema.ts`
 - Create: `packages/contracts/src/contracts/primitives/catalog-meta.schema.ts` — `CatalogMetaSchema`
-  (`id`, `description` obrigatório, `examples?`, `pii: none|personal|sensitive`,
-  `tenancyScope: platform|org|project|unit`, `relations?`, `ui?`)
-- Create: `packages/contracts/src/contracts/registry.ts` — `contractRegistry = z.registry<CatalogMeta>()` + `defineContract(schema, meta)` que valida meta com `CatalogMetaSchema.parse`
+  — shape **exatamente** como em `@.contexts/engineering/contracts/data-catalog.md` (campos obrigatórios
+  `id`, `kind`, `description`, `examples` ≥ 1, `pii`, `tenancyScope`, `relations`; opcionais
+  `ui`, `permission`, `deprecated`); o doc vence se este plano divergir
+- Create: `packages/contracts/src/contracts/registry.ts` — `contractRegistry` + `defineContract(schema, meta)` + `listContracts()` conforme `contracts/data-catalog.md` (Map próprio, porque o registry do Zod não é enumerável; duplicata de `id` falha cedo)
 - Test: `packages/contracts/src/contracts/primitives/money.schema.test.ts`, `registry.test.ts`
 
 ```ts
@@ -132,7 +133,7 @@ it("rejects a contract without description", () => {
 **Contexts:** `@.contexts/engineering/contracts/data-catalog.md`, `@.contexts/engineering/contracts/api.md` (§15)
 
 **Files:**
-- Create: `packages/contracts/scripts/build-catalog.ts` (lê `contractRegistry`, emite `docs/catalog/catalog.json`, `docs/catalog/<ctx>/<entity>.md` e JSON Schema via `z.toJSONSchema`)
+- Create: `packages/contracts/scripts/build-catalog.ts` (lê `listContracts()`, emite `docs/catalog/catalog.json`, `catalog.ai.json` (sem `sensitive`, `personal` redigido em examples), `docs/catalog/<context>/<Name>.md` e JSON Schema via `z.toJSONSchema` com `override` gravando chaves `x-` e resolvendo `$defs/$ref`)
 - Create: `packages/contracts/scripts/check-catalog.ts` (regera em memória, compara com disco; falha se diferente, se campo sem `description` ou sem `pii`)
 - Create: `packages/contracts/src/contracts/example/note.schema.ts` (contrato de exemplo neutro, removível)
 - Test: `packages/contracts/scripts/build-catalog.test.ts` (catálogo do exemplo contém `id`, campos, `pii`; `check` falha quando um campo perde `description`)
