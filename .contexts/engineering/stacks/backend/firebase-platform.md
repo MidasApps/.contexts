@@ -42,8 +42,8 @@ Papel: host do `apps/web` (UI, Server Actions e `/v1`), 0009.
 | Tema | Estado em 2026-09-29 |
 |---|---|
 | Next.js suportado | Tabela oficial vai até **15.2.x** (atualizada em 2026-09-24). Next 16.3 **não confirmado**: spike do SP0b (spec §14 item 1) |
-| Runtime Node | Exemplos da doc: `nodejs20`, `nodejs22`, `nodejs24`, "espelhando o Cloud Run", onde `nodejs26` é Preview. O core usa **`nodejs24`** (ADR 0004, **E6**) |
-| `engines` | O runtime escolhido precisa ser compatível com `engines.node` do `package.json`, ou o Cloud Build falha. `apps/web` declara `>=24.0.0 <25` (E6) |
+| Runtime Node | "Supports even-numbered Node.js versions, mirroring Cloud Run's support"; no Cloud Run, `nodejs26` é Preview. O mais novo GA é **`nodejs24`** (ADR 0004, **E6** provisória) |
+| `engines` | O runtime escolhido precisa ser compatível com `engines.node` do `package.json`, ou o Cloud Build falha. `apps/web` declara `>=24.0.0 <27` com `@types/node@24`; local e CI em 26, o App Hosting escolhe `nodejs24` (E6) |
 | Configuração | `apphosting.yaml` na raiz do app: `runConfig` (`cpu`, `memoryMiB`, `minInstances`, `maxInstances`, `concurrency`, `vpcAccess`) e `env` |
 | Secrets | `env` com `secret:` apontando para o Secret Manager (`variable: X`, `secret: nome`) |
 | Rollout | automático a cada push na branch viva, ou manual (`firebase apphosting:rollouts:create BACKEND_ID`) |
@@ -62,8 +62,8 @@ env:
     value: prod
   - variable: MASTRA_URL
     value: https://mastra-<hash>-<region>.a.run.app
-  - variable: OPENAI_API_KEY
-    secret: OPENAI_API_KEY
+  - variable: SESSION_SIGNING_KEY   # exemplo neutro: o web não guarda chave de provider de IA (fica no apps/mastra)
+    secret: SESSION_SIGNING_KEY
 ```
 
 - **Monorepo:** o `firebase deploy` sobe o diretório pai do `firebase.json` inteiro para o build. O `firebase.json` fica na raiz e aponta `rootDir: apps/web`; `ignore` exclui `apps/desktop`, `apps/mastra` e artefatos.
@@ -135,7 +135,7 @@ Os demais processos locais usam 3000 (`next dev`) e 4111 (`mastra dev` e Studio)
 - `FIREBASE_AUTH_EMULATOR_HOST` fora de `local`: o Admin SDK passa a aceitar token sem assinatura.
 - Rollout automático do App Hosting ligado na branch de produção: pula a tag e a aprovação de `processes/deploy.md` §11.
 - `apphosting.local.yaml` commitado: pode conter secret em texto puro.
-- `engines.node` do `apps/web` em `>=26` com runtime `nodejs24`: o build falha no Cloud Build.
+- `engines.node` do `apps/web` sem incluir a 24 (por exemplo `>=26`): o build falha no Cloud Build.
 - Escrita do cliente no Storage ou no Firestore "só para upload": viola D8.
 - Enforcement de App Check ligado antes de medir: bloqueia clientes reais.
 - Secret em Remote Config.

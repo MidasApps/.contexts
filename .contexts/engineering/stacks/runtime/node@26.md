@@ -13,7 +13,7 @@ supersedes: node@24
 
 Runtime JavaScript do projeto. Versão **26.10.0** (2026-09-21), a última estável na data de medição (2026-09-28). Node 26 está na linha **Current** até **2026-10-28**, quando vira LTS; entra em Maintenance em 2027-10-20 e chega ao EOL em 2029-04-30. O projeto adota a política **"manter sempre a última versão estável; qualquer incompatibilidade vira ADR"**. O projeto Node recomenda LTS em produção; o desvio consciente dessa recomendação e as exceções (Firebase Functions em `nodejs24`) estão registrados em [ADR 0004](../../decisions/0004-latest-stable-baseline-and-documented-exceptions.md). **Node 24** (Krypton) entra em Maintenance em 2026-10-20 e chega ao EOL em 2028-04-30; Node 20 está em EOL.
 
-> Single source of truth para qualquer ambiente que execute código JS/TS no projeto: scripts locais, CI, ferramentas de build, server runtime de Next.js. As exceções são o deploy de Firebase Functions (E1, ver "Exceção: Firebase Functions") e o do `apps/web` no Firebase App Hosting (E6, ver "Exceção: Firebase App Hosting"), ambos em `nodejs24`. Versão é fixada em `.nvmrc`, `package.json#engines` e imagem base do Docker/CI.
+> Single source of truth para qualquer ambiente que execute código JS/TS no projeto: scripts locais, CI, ferramentas de build, server runtime de Next.js. As exceções são o deploy de Firebase Functions (E1, ver "Exceção: Firebase Functions") e o runtime de prod do `apps/web` no Firebase App Hosting (E6 provisória, ver "Exceção: Firebase App Hosting"), ambos em `nodejs24`. Versão é fixada em `.nvmrc`, `package.json#engines` e imagem base do Docker/CI.
 
 ## Por que Node 26 importa para o projeto
 
@@ -284,10 +284,6 @@ Setar `runtime: 'nodejs24'` em todas as functions e não abrir função nova em 
 
 Ver [@stacks/backend/firebase-functions](../backend/firebase-functions.md).
 
-## Exceção: Firebase App Hosting (nodejs24)
-
-O `apps/web` roda no App Hosting (ADR 0009), que cita `nodejs20`, `nodejs22` e `nodejs24` e espelha o Cloud Run, onde `nodejs26` é Preview (medido em 2026-09-29). O runtime precisa bater com `engines.node`, então `apps/web` declara `">=24.0.0 <25"` e `@types/node@24` (E6, [ADR 0004](../../decisions/0004-latest-stable-baseline-and-documented-exceptions.md)). `next dev` local segue na 26; o que o web importa de `packages/*` não usa API só da 26. O servidor Mastra no Cloud Run não entra nesta exceção: usa imagem própria `node:26-alpine` ([@stacks/backend/cloud-run](../backend/cloud-run.md)).
-
 Anti-pattern crítico em Functions: **imports caros no top-level**. Inflam cold start. Mover imports pesados para dentro do handler ou usar dynamic `import()` sob demanda.
 
 ```ts
@@ -302,9 +298,19 @@ export const handler = async (...) => {
 };
 ```
 
+## Exceção: Firebase App Hosting (nodejs24, provisória)
+
+O `apps/web` roda no App Hosting (ADR 0009). O App Hosting "supports even-numbered Node.js versions, mirroring Cloud Run's support", e o Cloud Run lista `nodejs26` só como Preview (medido em 2026-09-29). Preview não é versão (ADR 0004, regra 1), então o mais novo GA é `nodejs24` (E6, [ADR 0004](../../decisions/0004-latest-stable-baseline-and-documented-exceptions.md)).
+
+- `apps/web` declara `engines.node` `">=24.0.0 <27"` e `@types/node@24` como guarda de tipos: o código do web não usa API que só existe na 26.
+- Local e CI rodam Node 26 (`next dev`, `next build`, testes); em prod o App Hosting escolhe `nodejs24`.
+- O que o web importa de `packages/*` segue a mesma guarda.
+- A exceção é provisória: sai quando `nodejs26` for GA ou se o spike de App Hosting do SP0b falhar (fallback Next standalone no Cloud Run com `node:26-alpine`).
+- O servidor Mastra no Cloud Run não entra nesta exceção: usa imagem própria `node:26-alpine` ([@stacks/backend/cloud-run](../backend/cloud-run.md)).
+
 ## Integração com Next.js 16
 
-Next.js 16 server runtime roda sobre Node 26 (dev, CI, build). Nenhuma configuração especial — `package.json#engines.node` é fonte da verdade. Em Firebase App Hosting o runtime é escolhido no backend; confira a versão oferecida. Ver [@stacks/frontend/next@16](../frontend/next@16.md).
+Next.js 16 server runtime roda sobre Node 26 (dev, CI, build). Nenhuma configuração especial — `package.json#engines.node` é fonte da verdade. Em Firebase App Hosting o runtime de prod é `nodejs24` (E6, seção acima). Ver [@stacks/frontend/next@16](../frontend/next@16.md).
 
 ## Integração com TypeScript
 
@@ -356,5 +362,5 @@ Política: manter sempre a última versão estável; qualquer incompatibilidade 
 | Node 24 (Krypton) | Active LTS | 2026-10-20 | 2028-04-30 |
 
 - Node 26 é o baseline de app, CI, Docker do app, tooling e `tsc`.
-- Node 24 permanece apenas onde a plataforma exige: Firebase Functions (E1) e Firebase App Hosting (E6), ambos `nodejs24`. Reavaliar quando cada plataforma publicar `nodejs26` GA.
+- Node 24 permanece apenas onde a plataforma exige: Firebase Functions (E1) e o runtime de prod do App Hosting (E6 provisória; `apps/web` com `engines` `>=24.0.0 <27` e `@types/node@24`, local e CI em 26). Reavaliar quando cada plataforma publicar `nodejs26` GA.
 - Ao virar LTS (2026-10-28), atualizar o status deste doc e acompanhar o changelog do 26 por novas remoções/deprecações.

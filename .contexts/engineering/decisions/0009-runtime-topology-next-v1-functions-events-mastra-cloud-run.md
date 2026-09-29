@@ -22,7 +22,7 @@ Fatos medidos em 2026-09-29:
 - **Scheduler do Mastra.** O scheduler embutido faz polling do storage atrás de schedules vencidos e exige processo long-lived. Para plataformas serverless (Vercel, Netlify, Lambda, Cloudflare Workers) a doc manda usar `@mastra/inngest` (`mastra.ai/docs/workflows/scheduled-workflows`).
 - **Deploy do Mastra.** A doc de deployment lista servidor próprio, Docker/VM/PaaS e 14 provedores. Cloud Run e Firebase **não aparecem**. Rodar a saída do `mastra build` numa imagem Docker no Cloud Run é inferência a partir do contrato de container do Cloud Run, não caminho documentado pelo Mastra.
 - **Cloud Run.** O container escuta em `0.0.0.0:$PORT` (default 8080). No shutdown recebe `SIGTERM` e tem 10 s antes do `SIGKILL`. Com billing por request (default), a CPU só existe durante o request. Com billing por instância (`--no-cpu-throttling`), a CPU fica alocada o tempo todo, o que a doc recomenda para trabalho em background (`docs.cloud.google.com/run/docs/container-contract`, `.../configuring/billing-settings`).
-- **App Hosting.** Roda Next.js via `@apphosting/adapter-nextjs`. A tabela de suporte de Next.js da doc (atualizada em 2026-09-24) vai até **15.2.x**; Next 16 **não está listado**. Os runtimes citados são `nodejs20`, `nodejs22` e `nodejs24`, "espelhando o suporte do Cloud Run", e a página de runtimes do Cloud Run lista `nodejs26` só como **Preview** (`firebase.google.com/docs/app-hosting/frameworks-tooling`, `docs.cloud.google.com/run/docs/runtime-support`).
+- **App Hosting.** Roda Next.js via `@apphosting/adapter-nextjs`. A tabela de suporte de Next.js da doc (atualizada em 2026-09-24) vai até **15.2.x**; Next 16 **não está listado**. O App Hosting "supports even-numbered Node.js versions, mirroring Cloud Run's support", e a página de runtimes do Cloud Run lista `nodejs26` só como **Preview** (`firebase.google.com/docs/app-hosting/frameworks-tooling`, `docs.cloud.google.com/run/docs/runtime-support`). Pela regra 1 da 0004, preview não é versão: o mais novo GA é `nodejs24`. Há relato público de Next 16.3.6 em produção no App Hosting com OOM por prerender em disco (firebase/apphosting-adapters#690).
 
 ## Decision Drivers
 
@@ -48,7 +48,7 @@ C) **Mastra como único backend.** Rotas de negócio registradas no servidor Hon
 - \+ Um deploy para UI e API web: mudança de contrato e de tela sai junta.
 - \+ Rollback instantâneo por build no App Hosting.
 - − O `/v1` escala junto com o render da UI.
-- − O App Hosting não oferece Node 26 GA nem lista Next 16 na tabela de suporte: exceção de runtime (E6) e spike (spec §14 item 1).
+- − O App Hosting não oferece Node 26 GA nem lista Next 16 na tabela de suporte: exceção de runtime provisória (E6) e spike com critério de saída (abaixo).
 
 **B) `/v1` em Functions**
 - \+ API escala separada da UI.
@@ -89,9 +89,26 @@ Operação de cada host: `@.contexts/engineering/stacks/backend/cloud-run.md`, `
 
 Por que não B: espalha a API em functions `nodejs24` e divide autenticação e CORS entre dois hosts. Por que não C: amarra o contrato de negócio ao ciclo de release do framework de agentes e quebra a fronteira da 0006.
 
-**Fallback do host web.** Se o spike do SP0b (spec §14 item 1) mostrar que o App Hosting não roda Next 16.3 de forma confiável, o `apps/web` passa a imagem Docker própria no Cloud Run (`output: 'standalone'`, `node:26-alpine`), com o mesmo papel. A troca é ADR novo que supersede a linha do `apps/web` desta tabela e remove a E6.
+**Spike de App Hosting (primeira task do SP0b, spec §14 item 1).** O App Hosting para o `apps/web` é provisório até o spike passar. Critérios de saída; o spike passa só se todos passarem:
 
-**Versões:** App Hosting não oferece Node 26 GA; o `apps/web` roda `nodejs24` nele. Isso entra como **E6** na tabela de exceções da 0004, na mesma política da E1. O Cloud Run roda imagem própria, então o Mastra fica em Node 26 como o baseline.
+| # | Critério | Passa quando |
+|---|---|---|
+| 1 | Build | `apps/web` (Next 16.3.7) builda e sobe no App Hosting com `@apphosting/adapter-nextjs` 14.0.21, runtime `nodejs24` |
+| 2 | Cache | Cache Components (`use cache`) e ISR (`revalidateTag`/`revalidatePath`) funcionam em produção, com `x-nextjs-cache` coerente entre instâncias |
+| 3 | Stream | SSE por um Route Handler do `/v1` fica aberto ≥ 10 min sem corte e sem bufferização |
+| 4 | Memória | 2 h de carga de prerender sob demanda (várias rotas e locales) sem OOM nem restart de instância. O filesystem do Cloud Run é em memória, e prerender gravado em `.next/server/app/` acumula até o OOM-kill (firebase/apphosting-adapters#690); workaround testado: `experimental.isrFlushToDisk: false` no `next.config` |
+| 5 | Cold start | Cold start medido e registrado (p50 e p95 da primeira resposta com `minInstances: 0` e com `1`) como baseline de custo |
+
+**Fallback do host web.** Se qualquer critério falhar, o `apps/web` passa a imagem Docker própria no Cloud Run, com o mesmo papel:
+- Next `output: 'standalone'` em `node:26-alpine` (a E6 sai; `engines` volta a `>=26.0.0 <27`).
+- Assets estáticos (`.next/static`, `public/`) servidos por Firebase Hosting com rewrite para o serviço Cloud Run, ou por Load Balancer + Cloud CDN.
+- Cache handler compartilhado entre instâncias (`cacheHandler` do Next apontando para um store externo), porque o cache em disco/memória de uma instância não vale para as outras.
+- `sharp` instalado para musl (Alpine) na imagem, para a otimização de imagem do Next.
+- Domínio customizado mapeado no Load Balancer ou no Firebase Hosting.
+
+A troca é ADR novo que supersede a linha do `apps/web` desta tabela e remove a E6.
+
+**Versões:** App Hosting não oferece Node 26 GA; o `apps/web` roda `nodejs24` nele em prod. Isso entra como **E6 provisória** na tabela de exceções da 0004, na mesma política da E1. `apps/web` declara `engines.node` `>=24.0.0 <27` com `@types/node@24` como guarda; local e CI rodam Node 26 e o App Hosting escolhe `nodejs24`. O Cloud Run roda imagem própria, então o Mastra fica em Node 26 como o baseline.
 
 ## Consequences
 
@@ -104,14 +121,13 @@ Por que não B: espalha a API em functions `nodejs24` e divide autenticação e 
 **Piora:**
 - Um salto de rede a mais no chat (`/v1` → Mastra). O Route Handler precisa repassar o stream sem bufferizar (`rules/api-design.md` §11) e propagar `AbortSignal` quando o cliente desconecta.
 - Custo fixo do Mastra: billing por instância com `min-instances >= 1` cobra mesmo sem tráfego.
-- Duas divergências de runtime no workspace: Functions (E1) e `apps/web` no App Hosting (E6) em Node 24; o resto em Node 26. Código de `packages/client`, `packages/services` e `packages/contracts` que o web usa não pode depender de API só da 26.
+- Duas divergências de runtime no workspace: Functions (E1) e o runtime de prod do `apps/web` no App Hosting (E6) em Node 24; o resto em Node 26. Código de `packages/client`, `packages/services` e `packages/contracts` que o web usa não pode depender de API só da 26.
 - O App Hosting não documenta traffic split: canary do web fica restrito a feature flag (`processes/deploy.md` §6).
 - Três hosts para observar, cada um com seu log e métricas RED.
 
 **Pontos em aberto (spikes do SP0b):**
-- Next 16.3 no App Hosting e no emulator do App Hosting (spec §14 item 1). Fallback local: `next dev`.
-- Várias instâncias do Mastra rodando o scheduler ao mesmo tempo: confirmar que o `@mastra/pg` impede disparo duplicado do mesmo tick.
-- Stream longo do chat através do Route Handler no App Hosting (timeout de request do backend).
+- Spike de App Hosting com os critérios acima, incluindo o emulator do App Hosting com Next 16.3 (fallback local: `next dev`).
+- Várias instâncias do Mastra rodando o scheduler ao mesmo tempo. A doc diz que o scheduler faz polling da tabela de schedules e "claim due rows", e que runs com eventos exigem adapter com update concorrente atômico; não diz como evita disparo duplicado entre instâncias. Confirmar com `@mastra/pg` e 2+ instâncias.
 - Como o App Hosting alcança o Cloud Run com IAM (service account do backend, audiência do ID token).
 
 **Arquivos que passam a mudar:**

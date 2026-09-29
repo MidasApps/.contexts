@@ -28,7 +28,7 @@ A 0002 deixou Node 26 e outros itens de fora "até estabilizar", sem uma regra g
 | E3 | **ESLint** 10.11.0 | 10.x | **9.39.5** | `eslint-plugin-react@7.37.5` (a última publicada) declara peer `eslint ^9.7`. `eslint-config-next@16.3.6` aceita `>=9`, mas o plugin entra por ele. | `eslint-plugin-react` publicar suporte a ESLint 10 |
 | E4 | **@mastra/evals** 1.10.3 | 1.10.3 | fora do baseline | Peer `vitest >=3.0.0 <5.0.0`, incompatível com Vitest 5.0.2. Evals seguem no harness próprio (`stacks/ai/harness-engineering.md`). | O peer aceitar Vitest 5 |
 | E5 | **@playwright/experimental-ct-react** 1.62.1 | 1.62.1 | não adotado | Depende de `@playwright/experimental-ct-core` **exato** 1.62.1, uma versão atrás de `@playwright/test` 1.63.0. Testes de componente rodam no Vitest (browser mode). | O pacote acompanhar o `@playwright/test` |
-| E6 | Runtime do **Firebase App Hosting** (`apps/web`, ADR 0009) | Node 26 | `nodejs24` | Medido em 2026-09-29: a doc do App Hosting cita `nodejs20`, `nodejs22` e `nodejs24` e diz espelhar o Cloud Run, cuja página de runtimes lista `nodejs26` só como Preview. O build falha se o runtime não bater com `engines.node`, então `apps/web` declara `>=24.0.0 <25`. Esta linha substitui a nota informativa sobre App Hosting abaixo. | `nodejs26` GA no App Hosting, ou o `apps/web` sair do App Hosting (fallback da 0009) |
+| E6 | Runtime do **Firebase App Hosting** (`apps/web`, ADR 0009) — **provisória** | Node 26 | `nodejs24` | Medido em 2026-09-29: o App Hosting "supports even-numbered Node.js versions, mirroring Cloud Run's support", e a página de runtimes do Cloud Run lista `nodejs26` só como **Preview**. Pela regra 1 (preview não é versão), o mais novo GA é `nodejs24`. `apps/web` declara `engines.node` `>=24.0.0 <27` com `@types/node@24` como guarda; local e CI rodam Node 26, o App Hosting escolhe `nodejs24` em prod. Provisória até o spike de App Hosting (primeira task do SP0b). | `nodejs26` GA no Cloud Run/App Hosting, **ou** falha do spike (o `apps/web` passa a Next standalone no Cloud Run com `node:26`, e a E6 sai) |
 
 ## Não são exceções (informativo)
 
@@ -51,3 +51,7 @@ A 0002 deixou Node 26 e outros itens de fora "até estabilizar", sem uma regra g
 - https://raw.githubusercontent.com/nodejs/Release/main/schedule.json
 - https://docs.cloud.google.com/functions/docs/runtime-support
 - https://www.postgresql.org/support/versioning/
+
+## Amendments
+
+- **2026-09-29 (conformidade, SP0a Task 4 / ADR 0009):** a nota informativa "Firebase App Hosting: a doc oficial não lista versões de Node" em "Não são exceções" está **retirada**: a doc de 2026-09-24 declara suporte a versões pares espelhando o Cloud Run, e o runtime do App Hosting passou a ser a exceção E6. Nas Consequences, leia "citam E1 a E6" no lugar de "E1 a E5" e "só o deploy de Functions (E1) e o runtime de prod do `apps/web` no App Hosting (E6) rodam em 24" no lugar de "só o deploy de Functions roda em 24". A decisão (última estável, exceções em tabela) não muda.

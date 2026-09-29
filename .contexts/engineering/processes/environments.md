@@ -47,7 +47,7 @@ Aplicar o princípio do **12-factor**: ambientes devem ser o mais idênticos pos
 
 - SQLite em local e Postgres em prod.
 - Mock LLM em local sem flag explícita que permita testar com modelo real.
-- Versões de runtime divergentes entre ambientes (ver `@stacks/runtime/node@26`). As únicas divergências de runtime aceitas são as do ADR 0004: E1 (Firebase Functions em `nodejs24`) e E6 (`apps/web` no App Hosting em `nodejs24`), em todos os ambientes; o resto roda em Node 26.
+- Versões de runtime divergentes entre ambientes (ver `@stacks/runtime/node@26`). As únicas divergências de runtime aceitas são as do ADR 0004: E1 (Firebase Functions em `nodejs24` em todos os ambientes) e E6, provisória (`apps/web` declara `engines` `>=24.0.0 <27` com `@types/node@24` como guarda; local e CI rodam Node 26, e o App Hosting escolhe `nodejs24` em `dev`, `staging` e `prod`). O resto roda em Node 26.
 - Engine de banco diferente entre staging e prod.
 - Lib de filas, cache ou storage divergente.
 

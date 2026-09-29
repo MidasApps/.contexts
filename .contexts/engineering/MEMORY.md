@@ -17,7 +17,7 @@ Stack pinado para ser **mutuamente compatível**. Não subir uma major isolada s
 
 | Camada | Baseline | Notas de compatibilidade |
 |---|---|---|
-| Runtime | **Node.js 26.10.0** (Current; LTS em 2026-10-28) | ADR 0004. **Exceção E1:** deploy de Firebase Functions fica em `nodejs24` (o Google não tem `nodejs26`). **E6:** `apps/web` no App Hosting também em `nodejs24` (ADR 0009). Node 24 entra em Maintenance em 2026-10-20. |
+| Runtime | **Node.js 26.10.0** (Current; LTS em 2026-10-28) | ADR 0004. **Exceção E1:** deploy de Firebase Functions fica em `nodejs24` (o Google não tem `nodejs26`). **E6 (provisória):** `apps/web` roda `nodejs24` em prod no App Hosting; local e CI em 26 (ADR 0009). Node 24 entra em Maintenance em 2026-10-20. |
 | Linguagem | **TypeScript 7.0.2** | `@typescript/typescript6@6.0.2` só para API programática (typescript-eslint, Volar, deployer). E2. |
 | Lint | **ESLint 9.39.5** | E3: a última é 10.11.0, mas `eslint-plugin-react@7.37.5` só aceita `^9.7`. |
 | Frontend app | **Next.js 16.3.7** + React **19.3.0** | 16.3 é Active LTS; 16.3.7 (release de segurança) é o `latest` medido em 2026-09-29. 16.4 é canary. `eslint-config-next` na mesma versão do `next`. |
@@ -31,19 +31,19 @@ Stack pinado para ser **mutuamente compatível**. Não subir uma major isolada s
 | Unit/integration | **Vitest 5.0.2** | Vite ^6.4, ^7 ou ^8 como peer (medido: 8.3.1). Pacotes `@vitest/*` na mesma versão. |
 | E2E | **Playwright 1.63.0** | E5: `@playwright/experimental-ct-react` (1.62.1) não é adotado; componente roda no Vitest. |
 | AI default | **`ai@7.0.122`** | Providers nas majors medidas em `VERSIONS.md` (não a mesma major do `ai`). `@mastra/core@1.71.0` aceita `LanguageModelV4`. E4: `@mastra/evals` fora (peer `vitest <5`). |
-| Monorepo | **pnpm 12.6.0** + **turbo 2.11.5** | `packageManager: pnpm@12.6.0` na raiz; turbo orquestra build/lint/test por pacote. `engines.node` `>=26.0.0 <27` em todo pacote, exceto `apps/functions` (E1) e `apps/web` (E6), ambos `>=24.0.0 <25`. |
+| Monorepo | **pnpm 12.6.0** + **turbo 2.11.5** | `packageManager: pnpm@12.6.0` na raiz; turbo orquestra build/lint/test por pacote. `engines.node` `>=26.0.0 <27` em todo pacote, exceto `apps/functions` (`>=24.0.0 <25`, E1) e `apps/web` (`>=24.0.0 <27` + `@types/node@24`, E6). |
 | Desktop | **Tauri 2.12.0** (`@tauri-apps/cli` + `@tauri-apps/api`) + **Vite 8.3.1** + **TanStack Router 1.170.40** | CLI e API na mesma versão. Rust **1.98.1** pinado em `rust-toolchain.toml` (stable de 2026-09-01; MSRV do crate `tauri` 2.12.0: 1.90). ADR 0007. Vite 8.3.1 é o mesmo medido como peer do Vitest 5. TanStack Router: peer React `>=18 \|\| >=19` (React 19.3 ok), engines Node `>=20.19`. |
 | i18n | **next-intl 4.14.8** / **use-intl 4.14.8** | `next-intl` no Next (peer `next ^16`); `use-intl` fora do Next (desktop). Mesma versão nos dois. |
 | Firebase client | **firebase 12.19.0** + **firebase-tools 15.32.0** (dev) | `@firebase/rules-unit-testing@5.0.2` (peer `firebase ^12`) testa Security Rules no emulator. firebase-tools não vai para o runtime. |
 
 **Invariantes de compatibilidade:**
 
-1. App, CI, Docker e tooling rodam em **Node 26**; **só o deploy de Firebase Functions (E1) e o do `apps/web` no App Hosting (E6)** rodam em **Node 24** (ADR 0004). O Mastra no Cloud Run roda imagem `node:26-alpine`.
+1. App, CI, Docker e tooling rodam em **Node 26**; **só o deploy de Firebase Functions (E1) e o runtime de prod do `apps/web` no App Hosting (E6, provisória)** rodam em **Node 24** (ADR 0004); o `apps/web` roda Node 26 em local e CI. O Mastra no Cloud Run roda imagem `node:26-alpine`.
 2. Typecheck com **TS 7** (`tsc --noEmit`); emit de app via bundler (Next/Turbopack).
 3. Next 16 ↔ React 19 — peers obrigatórios; sem React 18.
 4. Zod 4 em **todas** as boundaries (não misturar Zod 3 no mesmo bundle).
 5. Postgres 18.6 + pgvector 0.8.6 no mesmo cluster; imagens de dev/CI `postgres:18` / `pgvector/pgvector:0.8.6-pg18`.
-6. Firebase Functions Gen 2 em **nodejs24**, com `engines.node` `>=24.0.0 <25` no pacote de functions (E1); o `apps/web` no App Hosting declara a mesma faixa (E6); **todo o resto do monorepo** (raiz, demais apps e packages) declara `>=26.0.0 <27`. Código de `packages/*` usado pelo web ou pelas functions roda em Node 24.
+6. Firebase Functions Gen 2 em **nodejs24**, com `engines.node` `>=24.0.0 <25` no pacote de functions (E1); o `apps/web` declara `>=24.0.0 <27` com `@types/node@24` como guarda (E6 provisória: local e CI em 26, App Hosting escolhe `nodejs24`); **todo o resto do monorepo** (raiz, demais apps e packages) declara `>=26.0.0 <27`. Código de `packages/*` usado pelo web ou pelas functions roda em Node 24.
 7. Vitest 5 e Playwright 1.63 compartilham o browser quando o browser mode está ativo. Component testing do Playwright não é usado (E5).
 8. Monorepo em **pnpm 12.6.0** (workspaces) + **turbo 2.11.5**; uma única versão de cada dependência compartilhada no workspace (sem duas majors de React, Zod ou `ai`). **Pendência conhecida:** `@mastra/auth-firebase@1.1.2` traz `firebase-admin ^13.7.0` como dependência direta, ao lado do baseline 14.5.0; a decisão (exceção no ADR 0004, `pnpm.overrides` validado por teste ou não adotar o pacote) fica para o ADR de tenancy (SP0a Task 5) e o spike do SP0b.
 9. **Política (ADR 0004):** o baseline é sempre a última estável. Pré-release (canary, beta, rc) não é versão. Pacote atrás do `latest` só com linha de exceção no ADR 0004.
@@ -129,7 +129,7 @@ Stack pinado para ser **mutuamente compatível**. Não subir uma major isolada s
 ### backend/
 - [firebase-functions](stacks/backend/firebase-functions.md) — Functions Gen 2, firebase-functions@7.4, firebase-admin@14.5, runtime nodejs24
 - [cloud-run](stacks/backend/cloud-run.md) — Servidor Mastra: imagem `node:26-alpine`, `MASTRA_HOST`, billing por instância para o scheduler, IAM invoker, Cloud SQL (ADR 0009)
-- [firebase-platform](stacks/backend/firebase-platform.md) — Auth/Identity Platform, App Hosting (`nodejs24`, E6), Storage, App Check, Remote Config, FCM, Emulator Suite e portas
+- [firebase-platform](stacks/backend/firebase-platform.md) — Auth/Identity Platform, App Hosting (`nodejs24`, E6 provisória), Storage, App Check, Remote Config, FCM, Emulator Suite e portas
 
 ### database/
 - [firebase-firestore](stacks/database/firebase-firestore.md) — SDKs Client/Admin, queries, vector

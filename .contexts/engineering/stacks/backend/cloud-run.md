@@ -78,11 +78,11 @@ gcloud run deploy mastra \
   --min-instances=1 --max-instances=10 \
   --concurrency=40 --timeout=900 \
   --set-env-vars="APP_ENV=$APP_ENV" \
-  --set-secrets="DATABASE_URL=DATABASE_URL:latest" \
+  --set-secrets="DATABASE_URL=DATABASE_URL:<version>" \
   --add-cloudsql-instances="$PROJECT:$REGION:core-pg"
 ```
 
-Os números são ponto de partida para o spike, não baseline.
+Os números são ponto de partida para o spike, não baseline. `<version>` é o número da versão do secret: fixo em `staging` e `prod`; `:latest` só em `dev`.
 
 - **`--no-cpu-throttling` (billing por instância) é obrigatório.** O scheduler do Mastra faz polling do storage. Com o billing por request (default), a CPU só existe durante requests e o schedule não dispara.
 - **`--min-instances=1`** em `staging` e `prod`: mantém o scheduler vivo e tira o cold start do chat. Em `dev` pode ser 0 se o ambiente não depender de workflow agendado.
@@ -138,7 +138,7 @@ CORS: nenhum browser chama o Mastra. Configure `server.cors: false` (o default �
 
 ## Desenvolvimento local
 
-`local` não usa Cloud Run. `mastra dev` sobe o servidor e o Studio na 4111 contra o Postgres do Docker (`processes/environments.md` §9). Para testar a imagem: `docker build -f apps/mastra/Dockerfile .` e `docker run -e PORT=8080 -e MASTRA_HOST=0.0.0.0 -p 8080:8080 ...`, com `DATABASE_URL` apontando para o Postgres local.
+`local` não usa Cloud Run. `mastra dev` sobe o servidor e o Studio na 4111 contra o Postgres do Docker (`processes/environments.md` §9). Para testar a imagem: `docker build -f apps/mastra/Dockerfile .` e `docker run -e PORT=8081 -e MASTRA_HOST=0.0.0.0 -p 8081:8081 ...` (a 8080 é do emulator do Firestore), com `DATABASE_URL` apontando para o Postgres local.
 
 ## Anti-patterns
 
