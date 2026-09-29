@@ -22,13 +22,15 @@ Two verdicts are required. Do not re-implement.
 {CONTEXT_PATHS}
 
 Also apply always-on rules: security, validation, api-design, error-handling,
-testing, grounding — flag invented `@.contexts` paths or pin violations vs MEMORY.
+testing, grounding — flag invented `@.contexts` paths or pin violations vs MEMORY
+(a package behind `latest` without an exception row in ADR 0004 is a defect).
+Convention conflicts between docs: ADR 0003 says which one wins.
 
 ## Review method
 
 1. List task requirements; map each to evidence in the diff  
 2. Flag **missing**, **extra** (YAGNI), **wrong**  
-3. Quality: naming, error envelope, validation at boundary, tests real (not mock theater)  
+3. Quality: naming, error envelope `{ error: { code, message, details?, requestId } }`, validation at boundary, colocated `*.test.ts` (e2e in `e2e/*.spec.ts`), tests real (not mock theater)  
 4. Do **not** re-run the full suite unless report lacks test evidence — then request re-run  
 5. Do **not** pre-excuse plan weaknesses; if plan conflicts with a defect, mark **plan-mandated** for human
 

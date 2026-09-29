@@ -16,6 +16,7 @@ Modelar software a partir do **domínio do negócio**, usando linguagem ubíqua 
 - **Repository:** uma per aggregate root. Devolve aggregate completo.
 - **Domain event:** algo relevante que aconteceu (`OrderPlaced`). Acopla contexts via mensageria.
 - **Anti-corruption layer (ACL):** traduz modelo externo no seu — protege seu contexto.
+- **Layout:** `src/services/<context>/domain/` (árvore de referência em `feature-based.md`). Value object = tipo Zod-branded; erro de domínio = classe com `code`; agregado pode ser classe.
 
 ## Procedimento mínimo
 1. Conversar com especialista; mapear termos em **glossário ubíquo**.
@@ -32,11 +33,20 @@ Modelar software a partir do **domínio do negócio**, usando linguagem ubíqua 
 
 ## Mini-exemplo
 ```ts
-class Money { constructor(readonly cents: number, readonly currency: Currency) {} add(o: Money){ /*...*/ } }
-class Order { // aggregate root
-  private constructor(readonly id: OrderId, private items: OrderItem[], private status: OrderStatus){}
+// domain/value-objects/money.schema.ts
+export const MoneySchema = z.strictObject({
+  amountMinor: z.number().int().nonnegative(),
+  currency: z.string().regex(/^[A-Z]{3}$/), // ISO 4217
+}).brand<"Money">();
+export type Money = z.infer<typeof MoneySchema>; // value object: tipo Zod-branded
+export class InvalidTransitionError extends Error { readonly code = "INVALID_TRANSITION"; }
+export class Order { // aggregate root (classe opcional); sem parameter properties (erasableSyntaxOnly)
+  readonly id: OrderId;
+  #items: OrderItem[];
+  #status: OrderStatus;
+  private constructor(id: OrderId, items: OrderItem[], status: OrderStatus) { this.id = id; this.#items = items; this.#status = status; }
   static place(input: PlaceOrderInput): { order: Order; events: OrderPlaced[] } { /* invariants */ }
-  ship(): OrderShipped { if (this.status !== "paid") throw new InvalidTransition(); /*...*/ }
+  ship(): OrderShipped { if (this.#status !== "paid") throw new InvalidTransitionError(); /*...*/ }
 }
 ```
 

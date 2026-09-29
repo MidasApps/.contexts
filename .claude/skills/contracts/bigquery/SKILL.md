@@ -14,9 +14,9 @@ Convenções para datasets/tabelas BigQuery: naming, particionamento, clustering
   - `raw_*` (bronze): dados brutos como chegaram, append-only.
   - `staging_*` (silver): limpos, deduplicados, tipados.
   - `prod_*` (gold): modelos analíticos prontos para consumo.
-- **Partitioning:** sempre — por `DATE(event_time)`, `_PARTITIONTIME` (ingestion-time) ou integer range. Sem partição = full scan.
+- **Partitioning:** sempre — por `DATE(occurred_at)`, `_PARTITIONTIME` (ingestion-time) ou integer range. Sem partição = full scan.
 - **Clustering:** até 4 colunas de filtro frequente (`tenant_id`, `user_id`, `event_name`).
-- **Tipos:** `STRING`, `INT64`, `FLOAT64`, `NUMERIC(p,s)` (preciso), `BIGNUMERIC` (super-preciso), `BOOL`, `DATE`, `TIMESTAMP` (UTC), `DATETIME` (sem TZ — evite), `JSON`, `STRUCT`, `ARRAY`.
+- **Tipos:** `STRING`, `INT64`, `FLOAT64`, `NUMERIC(p,s)` (taxa/quantidade fracionária; dinheiro é `INT64` em unidade menor), `BIGNUMERIC` (super-preciso), `BOOL`, `DATE`, `TIMESTAMP` (UTC), `DATETIME` (sem TZ — evite), `JSON`, `STRUCT`, `ARRAY`.
 - **Timestamps em UTC** sempre. Para event time: `occurred_at TIMESTAMP NOT NULL`.
 - **Nested/repeated:** `STRUCT<...>` e `ARRAY<>` evitam JOIN; ideal para eventos com props variáveis.
 - **Schema evolution:** adicionar coluna nullable ✓; remover coluna ✗ (drop ou create new table); mudar tipo ✗.
@@ -36,7 +36,7 @@ Convenções para datasets/tabelas BigQuery: naming, particionamento, clustering
 ## Anti-patterns
 - Tabela sem particionamento → custo descontrolado.
 - `TIMESTAMP` armazenando local time → bug ao mudar timezone.
-- `FLOAT64` para dinheiro → use `NUMERIC`.
+- `FLOAT64` para dinheiro → `amount_minor INT64` + `currency STRING`.
 - Tabela "tudo num lugar" sem dataset por domínio → governance vira caos.
 - Schema mudado direto no console sem PR → drift.
 
@@ -46,15 +46,15 @@ CREATE TABLE `proj.raw_orders.orders_events` (
   event_id STRING NOT NULL,
   tenant_id STRING NOT NULL,
   order_id STRING NOT NULL,
-  event_type STRING NOT NULL,             -- 'placed' | 'paid' | 'shipped' | 'cancelled'
-  total_cents INT64,
+  event_name STRING NOT NULL,             -- 'ORDER_PLACED' | 'ORDER_PAID' | 'ORDER_SHIPPED' | 'ORDER_CANCELLED'
+  total_minor INT64,
   currency STRING,
   metadata JSON,
   occurred_at TIMESTAMP NOT NULL,
   ingested_at TIMESTAMP NOT NULL
 )
 PARTITION BY DATE(occurred_at)
-CLUSTER BY tenant_id, event_type
+CLUSTER BY tenant_id, event_name
 OPTIONS (
   description = "Append-only stream of order lifecycle events. Always filter by DATE(occurred_at).",
   partition_expiration_days = 730

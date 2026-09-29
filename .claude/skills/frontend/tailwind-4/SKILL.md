@@ -1,22 +1,23 @@
 ---
 name: tailwind-4
-description: Use para Tailwind CSS 4 — utilitários, theming, design tokens. Keywords: tailwind, css, utility classes.
+description: Use para Tailwind CSS 4 (tailwindcss@4.3.3 + @tailwindcss/postcss) — utilitários, @theme, tokens como CSS vars, @utility, @custom-variant, dark mode, migração do 3. Keywords: tailwind, css, utility classes, @theme, globals.css, postcss.
 allowed-tools: Read, Edit, Write, Grep, Glob, Bash
 ---
 # Tailwind CSS 4
 
-Utility-first CSS com engine Rust (Oxide), config CSS-first via `@theme`, suporte nativo a CSS variables, container queries, has-selector, modos `data-*`. Compila rápido e gera só o CSS usado.
+Utility-first CSS com engine Rust (Oxide), config CSS-first via `@theme`, suporte nativo a CSS variables, container queries, has-selector, modos `data-*`. Baseline **tailwindcss@4.3.3** + `@tailwindcss/postcss@4.3.3` (pin exato, juntos) no PostCSS do Next 16. Browsers: Safari 16.4+, Chrome 111+, Firefox 128+.
 
 ## Essência
 - **CSS-first config:** define design tokens em CSS com `@theme { --color-primary-500: oklch(...); }` no arquivo de entrada (`globals.css`).
-- **Sem `tailwind.config.js`** obrigatório — `@theme` substitui em casos comuns; JS config ainda permitido.
+- **Sem `tailwind.config.js`** — `@theme` é a fonte da verdade; JS config só como ponte de migração via `@config`. Tokens são variáveis CSS (`var(--color-brand)`); `theme()` em CSS está deprecated.
+- **Renomes do 4:** `bg-linear-to-*` (o `bg-gradient-to-*` ainda compila como legado), `shadow-xs`/`shadow-sm`, `rounded-xs`/`rounded-sm`, `outline-hidden`, `ring-3` (o `ring` agora tem 1px).
 - **`@import "tailwindcss"`** carrega base+components+utilities.
 - **Container queries:** `@container` + utilidades `@sm:` etc.
 - **Has/group/peer:** `has-[input:checked]:bg-blue`, `group-hover:`, `peer-focus:`.
 - **Data attributes:** `data-[state=open]:bg-foo` — combina lindo com Radix.
 - **Arbitrary values:** `w-[37.5%]`, `bg-[#abc123]`, `[mask-image:...]`.
 - **Layers:** `@layer base/components/utilities` para ordem de specificity.
-- **Dark mode:** `@variant dark` ou classe `dark:`.
+- **Dark mode:** `@custom-variant dark` (definir a variante) ou classe `dark:`.
 - **Plugins JS** ainda funcionam; cli `tailwindcss` direto ou via PostCSS/framework.
 
 ## Procedimento mínimo

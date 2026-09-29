@@ -1,6 +1,6 @@
 ---
 name: typescript-7
-description: Use para TypeScript 7 — tipos avançados, branded types, generics, strictness. Keywords: typescript, ts, types.
+description: Use para TypeScript 7 (typescript@7.0.2; API TS 6 para lint) — tsconfig, tipos avançados, branded types, generics, strictness, typescript-eslint. Keywords: typescript, ts, tsc, tsconfig, types, typescript-eslint.
 allowed-tools: Read, Edit, Write, Grep, Glob, Bash
 ---
 # TypeScript 7
@@ -21,7 +21,7 @@ Linguagem com tipos estruturais, inferência forte, narrowing, generics, branded
 
 ## Procedimento mínimo
 1. `tsconfig` com `strict: true` + `erasableSyntaxOnly` + `verbatimModuleSyntax`; `target: "ES2024"`, apps com bundler: `module: "preserve"` + `moduleResolution: "bundler"`.
-2. Typecheck com **TypeScript 7** (`typescript@^7`). Se typescript-eslint/Volar precisar de API TS 6, use side-by-side (`@typescript/typescript6`).
+2. Typecheck com **TypeScript 7** (`typescript@7.0.2`, pin exato; `tsc --noEmit`). Lint (E2): `typescript-eslint@8.71.0` aceita só `typescript <6.1.0`, então recebe a API de `@typescript/typescript6@6.0.2`. Com Next 16.3 o alias de `typescript` quebra o `next build`: a raiz fica no 7 e a API 6 entra só nos pacotes de lint via hook `readPackage` em `.pnpmfile.cjs`. ESLint fica em **9.39.5** (E3).
 3. Modelar dado com union/branded; evitar `any` e `enum` (bloqueados por `erasableSyntaxOnly`).
 4. Para validação runtime (input externo), use Zod (skill `zod-4`) e inferir tipo.
 5. `satisfies` + exhaustive switch com `never`.
@@ -35,13 +35,22 @@ Linguagem com tipos estruturais, inferência forte, narrowing, generics, branded
 ## Mini-exemplo
 ```ts
 type OrderId = string & { readonly __brand: "OrderId" };
-type Result<T, E> = { ok: true; value: T } | { ok: false; error: E };
+type PaymentEvent =
+  | { kind: "authorized"; amountMinor: number; currency: string }
+  | { kind: "refunded"; amountMinor: number; currency: string }
+  | { kind: "failed"; code: string };
 
-function handle(r: Result<number, string>): number {
-  if (r.ok) return r.value;
-  switch (true) { /* narrow */ }
-  return 0;
-}
+const describePayment = (e: PaymentEvent): string => {
+  switch (e.kind) {
+    case "authorized": return `+${e.amountMinor} ${e.currency}`;
+    case "refunded": return `-${e.amountMinor} ${e.currency}`;
+    case "failed": return e.code;
+    default: {
+      const unreachable: never = e;
+      return unreachable;
+    }
+  }
+};
 
 const config = { region: "us-east-1", retries: 3 } satisfies { region: string; retries: number };
 ```

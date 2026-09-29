@@ -13,19 +13,20 @@ Document DB serverless do Firebase/GCP: coleções → documentos → subcoleç�
 - **Queries:** `.where(field, op, val)`, `.orderBy`, `.limit`, `.startAfter`. Compostos requerem **índice composto** (criado via UI/CLI/`firestore.indexes.json`).
 - **Limitations:** `or` limitado, sem `not-in`+orderBy em campos diferentes, sem `like`/`contains`, range em UM campo por query.
 - **Real-time:** `onSnapshot` listener — entrega initial + diffs.
-- **Transactions:** `db.runTransaction(tx => ...)` — leituras + writes atomicamente; até 500 docs por write batch.
+- **Transactions:** `db.runTransaction(tx => ...)` — leituras + writes atomicamente. Sem teto de operações por batch/transação: limite é 10 MiB por request e 500 field transformations por documento.
 - **Security Rules:** `firestore.rules` — validação no servidor por path, leitura/escrita por user/role. Rules é a primeira (e às vezes única) linha de auth.
 - **Custos:** por **leitura/escrita/delete** + storage + bandwidth. Listener real-time = 1 read inicial + 1 read por mudança.
 - **Modelagem:** denormalize para minimizar reads; `arrayUnion`/`arrayRemove` para coleções pequenas.
 - **Composite indexes** declarados em `firestore.indexes.json`, deploy via CLI.
-- **Server timestamps:** `serverTimestamp()` para `created_at`/`updated_at`.
+- **Server timestamps:** `serverTimestamp()` para `createdAt`/`updatedAt`.
 - **Pagination:** cursor com `startAfter(lastDoc)`.
+- **IDs de documento:** ID automático (`collection.doc()` / `add()` no Admin SDK, `doc(collection(...))` no client). Nunca ULID, UUIDv7 ou timestamp no ID (monotônico → hotspot de escrita). ADR 0005.
 
 ## Procedimento mínimo
 1. Modelar: documentos pequenos, denormalize relações comuns, subcoleção quando 1-to-many "filha".
 2. `firestore.rules` cobrindo cada path com `request.auth.uid` checks.
 3. Índices compostos no `firestore.indexes.json`; deploy com `firebase deploy --only firestore:indexes`.
-4. Para mutação consistente, `runTransaction`. Para escrita em lote, `writeBatch` (até 500 ops).
+4. Para mutação consistente, `runTransaction`. Para escrita em lote, `writeBatch` (≤ 10 MiB); backfill grande com `BulkWriter` (Admin SDK).
 5. Real-time: `onSnapshot` em UI; cleanup unsubscribe no unmount.
 6. Server timestamps em vez de `Date.now()` para criação/atualização.
 
@@ -39,15 +40,15 @@ Document DB serverless do Firebase/GCP: coleções → documentos → subcoleç�
 ## Mini-exemplo
 ```ts
 // firestore.rules
-match /tenants/{tid}/orders/{oid} {
+match /organizations/{orgId}/orders/{orderId} {
   allow read: if request.auth.uid != null && resource.data.userId == request.auth.uid;
   allow create: if request.auth.uid != null && request.resource.data.userId == request.auth.uid;
 }
 
 // client
 const q = query(
-  collection(db, "tenants", tid, "orders"),
-  where("status", "==", "open"),
+  collection(db, "organizations", orgId, "orders"),
+  where("status", "==", "pending"),
   orderBy("createdAt", "desc"),
   limit(20),
 );

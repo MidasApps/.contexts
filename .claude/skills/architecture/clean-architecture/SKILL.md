@@ -14,13 +14,13 @@ Quatro círculos concêntricos com **dependency rule**: dependências apontam s�
 - **Frameworks/drivers (externo):** web, DB, UI, dispositivos.
 - **Dependency rule:** sempre aponta pra dentro. Use case **não conhece** controller; entidade **não conhece** use case.
 - **DTOs/boundaries:** entrada e saída de use case são dados simples — não tipos de framework.
-- Variante de hexagonal com camadas explícitas.
+- Variante de hexagonal com camadas explícitas. Layout: `src/services/<context>/`, superset opcional da árvore de referência (`feature-based.md`); a feature escolhe hexagonal OU clean.
 
 ## Procedimento mínimo
 1. Modelar entidades (sem framework).
-2. Para cada ação do sistema, criar **use case** com input/output DTOs.
+2. Para cada ação do sistema, criar **use case** com schemas Zod `<UseCase>InputSchema`/`<UseCase>OutputSchema` em `dto/<use-case>.schema.ts` (tipos via `z.infer`).
 3. Controller (HTTP/CLI) recebe request → monta input DTO → chama use case → presenter formata output.
-4. Gateways (interfaces) declaradas no use-case layer; implementações em adapter.
+4. Ports (`type`) em `application/ports/{input,output}/`, sem nome de tecnologia; implementações em `adapters/gateways/` com a tecnologia no nome (constante camelCase, ex. `postgresOrderRepository`).
 5. Injeção de dependência no composition root.
 
 ## Anti-patterns
@@ -30,14 +30,19 @@ Quatro círculos concêntricos com **dependency rule**: dependências apontam s�
 
 ## Mini-exemplo
 ```ts
-// use-cases/RegisterUser.ts
-export interface RegisterUserInput { email: string; password: string }
-export interface RegisterUserOutput { userId: string }
-export class RegisterUser {
-  constructor(private users: UserGateway, private hasher: Hasher) {}
-  async exec(i: RegisterUserInput): Promise<RegisterUserOutput> { /*...*/ }
-}
-// adapters/http/UserController.ts → chama RegisterUser
+// application/dto/register-user.schema.ts (arquivos em kebab-case)
+export const RegisterUserInputSchema = z.strictObject({ email: z.email(), password: z.string().min(12) });
+export type RegisterUserInput = z.infer<typeof RegisterUserInputSchema>;
+export const RegisterUserOutputSchema = z.strictObject({ userId: z.string().min(1).brand<"UserId">() }); // ID automático do Firestore
+export type RegisterUserOutput = z.infer<typeof RegisterUserOutputSchema>;
+
+// application/ports/input/register-user.ts — input boundary é um type
+export type RegisterUser = (request: RegisterUserInput) => Promise<RegisterUserOutput>;
+
+// application/use-cases/register-user.ts — interactor = factory; UserRepository/PasswordHasher são types em ports/output
+export const makeRegisterUser = (deps: { users: UserRepository; hasher: PasswordHasher }): RegisterUser =>
+  async (request) => { /*...*/ };
+// adapters/controllers/register-user-route-handler.ts → safeParse(request) → 400 com envelope; chama registerUser
 ```
 
 ---

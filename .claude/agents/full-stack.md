@@ -74,7 +74,7 @@ Você opera com as rules sempre-ativas do projeto já carregadas (security, vali
 - **using-ddc** — bootstrap SSOT: contexts antes de código.
 - **verification-before-completion** — evidência antes de claim de done.
 - **writing-plans-ddc** — planos multi-task com contexts por task.
-- **fsd** — Feature-Sliced Design: layers (app/pages/widgets/features/entities/shared), regras de dependência entre layers, como organizar uma feature nova sem vazar.
+- **fsd** — Feature-Sliced Design: layers (app/views/widgets/features/entities/shared — `views`, nunca `src/pages/`), regras de dependência entre layers, como organizar uma feature nova sem vazar.
 - **feature-based** — Feature-Based Architecture: variante mais pragmática, uma pasta por feature com todos os seus artefatos internos.
 - **clean-code** — Naming expressivo, funções coesas, arquivos dentro do orçamento de linhas, dependências explícitas.
 
@@ -86,8 +86,8 @@ Você opera com as rules sempre-ativas do projeto já carregadas (security, vali
 2. Verifique se o escopo é realmente cross-cutting. Se for só server ou só UI, defira para o specialist.
 3. Identifique as dependências de sequência: schema/contrato → server action/handler → componente.
 4. Multi-step: plano com `writing-plans-ddc`; subagents usam `implementer-brief.md` / `task-reviewer-brief.md`.
-3. Leia os contratos existentes relevantes (`@.contexts/engineering/contracts/`) para não criar novos schemas incompatíveis.
-4. Verifique se existe feature similar no projeto para reusar padrão (Glob por nome da feature).
+5. Leia os contratos existentes relevantes (`@.contexts/engineering/contracts/`) para não criar novos schemas incompatíveis.
+6. Verifique se existe feature similar no projeto para reusar padrão (Glob por nome da feature).
 
 ### Durante a implementação
 
@@ -95,9 +95,9 @@ Você opera com as rules sempre-ativas do projeto já carregadas (security, vali
 |---|---|---|
 | Schema Zod | 1 | Nenhuma — define o contrato |
 | Tipos TS | 2 | `z.infer<typeof Schema>` |
-| Server action / route handler | 3 | Schema |
+| Use case em `src/services/<context>/` + `route.ts` re-exportando o driving adapter + `actions.ts` como wrapper `"use server"` de uma linha | 3 | Schema |
 | Componente de UI | 4 | Tipos + action |
-| Teste de comportamento | 5 | Comportamento observável |
+| Teste de comportamento (`*.test.ts` colocado; e2e em `e2e/*.spec.ts`) | 5 | Comportamento observável |
 
 ### Critério de delegação durante execução
 
@@ -108,7 +108,8 @@ Você opera com as rules sempre-ativas do projeto já carregadas (security, vali
 ## Anti-patterns
 
 - Implementar todas as camadas em paralelo sem respeitar dependências — schema deve existir antes do componente que o usa.
-- Criar schemas inline nos route handlers — schemas vivem em arquivos próprios (`*.schema.ts`).
+- Criar schemas inline nos route handlers — schemas vivem em arquivos próprios (`user.schema.ts` exportando `UserSchema`).
+- Lógica de negócio dentro de `src/app/**/route.ts` ou `actions.ts` — eles só chamam o use case de `src/services/<context>/`.
 - Misturar server e client components no mesmo arquivo sem necessidade — clareza sobre o boundary é fundamental.
 - Vazar lógica de negócio para componentes de UI — actions e handlers são os portadores de lógica.
 - Ignorar features existentes similares ao invés de reusar padrões — consistência reduz o custo cognitivo do time.
@@ -117,7 +118,7 @@ Você opera com as rules sempre-ativas do projeto já carregadas (security, vali
 
 - Todo input externo é validado com schema Zod na borda — nunca `as unknown as Type`.
 - Auth/authz antes de qualquer side effect no handler: `requireUser → validate → authorize → act`.
-- Erros retornam envelope estável `{ code, message, traceId }` — nunca 200 com `{ ok: false }`.
+- Erros retornam envelope estável `{ error: { code, message, details?, requestId } }` (`@.contexts/engineering/contracts/api.md`) — nunca 200 com `{ ok: false }`.
 - Arquivos seguem orçamento de 150-500 linhas — se ultrapassar, dividir por responsabilidade.
 
 # Persistent Agent Memory

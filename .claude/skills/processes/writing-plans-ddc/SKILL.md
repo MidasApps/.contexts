@@ -43,7 +43,8 @@ docs/plans/YYYY-MM-DD-<feature-kebab>.md
 
 ## Global Constraints
 
-- Node 24.21 / TypeScript 7.0.2 / Next 16.3.6 / React 19.3 / Zod 4.6.5 / Vitest 5.0.2 (ver `@.contexts/engineering/MEMORY.md`)
+- Pins copiados de `@.contexts/engineering/MEMORY.md` no dia do plano (ex. 2026-09-28: Node 26.10.0 / TypeScript 7.0.2 / ESLint 9.39.5 / Next 16.3.6 / React 19.3.0 / Zod 4.6.5 / Vitest 5.0.2 / Playwright 1.63.0; Functions em `nodejs24`)
+- Pacote fora do `latest` só se houver linha de exceção no ADR 0004 (E1–E5); incompatibilidade nova → reportar, não improvisar pin
 - [contratos e rules que amarram o plano — paths @.contexts exatos]
 - [compliance / multi-tenant / region se aplicável]
 
@@ -116,6 +117,8 @@ Após cada task completa e review limpa, append em
 ## Referências
 
 - `@.contexts/engineering/MEMORY.md`
-- `@.contexts/engineering/decisions/0001-ddc-engineering-baseline-and-harness-enforcement.md`
+- `@.contexts/engineering/decisions/0001-ddc-engineering-baseline-and-harness-enforcement.md` (harness, plans, ledger)
+- `@.contexts/engineering/decisions/0003-cross-doc-convention-conflicts-resolved.md` (qual doc vence)
+- `@.contexts/engineering/decisions/0004-latest-stable-baseline-and-documented-exceptions.md` (versões)
 - `@.contexts/engineering/practices/sdd.md` / skill `sdd`
 - Skills: `using-ddc`, `verification-before-completion`, `tdd`

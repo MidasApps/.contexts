@@ -8,6 +8,8 @@ allowed-tools: Read, Edit, Write, Grep, Glob, Bash
 Conjunto de métricas que dizem se o negócio está saudável e em que direção. North Star (a métrica de cima), input metrics (alavancas), guardrails (não-piorar).
 
 ## Essência
+> **Status atual:** `.contexts/business/metrics.md` está `status: template` (não preenchido). Enquanto estiver assim, declare "métricas oficiais não definido" e não invente números, segmentos ou regras; a lista abaixo é só a estrutura esperada.
+
 - **North Star Metric (NSM):** UMA métrica que melhor captura valor entregue + crescimento. Não é receita per se — é o que LEVA à receita ("weekly active teams that completed a workflow").
 - **Input metrics (drivers):** alavancas que movem NSM (activation rate, retention week-1, average usage/user).
 - **Guardrails:** métricas que não podem piorar mesmo com NSM crescendo (margin, NPS, error rate, support tickets/user).
@@ -20,7 +22,7 @@ Conjunto de métricas que dizem se o negócio está saudável e em que direção
 - **Dashboards:** north-star + input + guardrails em um lugar; revisão semanal/mensal cadenciada.
 
 ## Procedimento mínimo
-1. Ler `@` para identificar NSM e métricas oficiais deste projeto.
+1. Ler `@.contexts/business/metrics.md` para identificar NSM e métricas oficiais deste projeto. Se `status: template`, pare e sinalize a lacuna.
 2. Em decisão de feature: pergunta "qual input metric isso move? qual guardrail pode piorar?".
 3. Mudança de definição de métrica → versionar (`metric@v2`) e anotar break no dashboard.
 4. Antes de quote'ar número, verificar fonte canônica (data warehouse, não planilha desatualizada).

@@ -5,18 +5,19 @@ Cada commit segue Conventional Commits: tipo + escopo opcional + descrição imp
 ## Princípios
 - Formato: `<type>(<scope>)<!>: <description>` — ex. `feat(orders): add idempotency key`, `fix(auth)!: drop legacy token`.
 - Tipos: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`, `revert`.
-- Descrição em **imperativo presente**, minúscula, sem ponto final: "add", não "added"/"adds".
-- `!` ou footer `BREAKING CHANGE:` para mudança incompatível.
+- Descrição em **imperativo presente**, minúscula, sem ponto final: "add", não "added"/"adds". Header inteiro ≤ 72 chars (conta type, scope, `!` e `:`).
+- Scope em kebab-case, um nível, nome de bounded context ou área estável (`orders`, `auth`, `deps`); obrigatório quando a área é clara; nada de `app`/`core`/`misc`.
+- `!` (preferido) e/ou footer `BREAKING CHANGE:` para mudança incompatível.
 - Body explica **por quê** + contexto não-óbvio. Linhas ≤ 72 chars.
-- Footer: `Refs: #123`, `Closes: #123`, `BREAKING CHANGE: <descrição>`.
+- Footer: `Refs: #123`, `Fixes: #123`/`Closes: #123`, `BREAKING CHANGE: <descrição>`, `Co-Authored-By:` quando houve assistência de IA.
 - Um commit = uma mudança lógica. Se a mensagem tem "and", provavelmente são dois commits.
-- Sem mensagens vazias: `wip`, `fix`, `update`, `.` → rejeitar.
+- Sem mensagens vazias: `fix`, `update`, `.` → rejeitar. `wip` só em branch local antes de squash, nunca em PR.
 
 ## Checklist (aplicar a todo turn)
 - [ ] Tipo presente e válido.
-- [ ] Descrição imperativa, minúscula, sem ponto, ≤ ~72 chars.
-- [ ] Escopo (quando útil) é módulo/feature, não arquivo.
-- [ ] Breaking change marcada com `!` E `BREAKING CHANGE:` no footer.
+- [ ] Descrição imperativa, minúscula, sem ponto; header ≤ 72 chars.
+- [ ] Escopo é bounded context/área, não arquivo.
+- [ ] Breaking change marcada com `!` e/ou `BREAKING CHANGE:` no footer.
 - [ ] Body presente quando o "por quê" não é óbvio.
 
 ## Anti-patterns

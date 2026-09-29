@@ -67,7 +67,7 @@ Preferência de leitura (ajuste ao caso):
 Confirme existência com Glob/Read. Caminhos canônicos de stack (exemplos):
 
 - `@.contexts/engineering/stacks/language/typescript@7.md`
-- `@.contexts/engineering/stacks/runtime/node@24.md`
+- `@.contexts/engineering/stacks/runtime/node@26.md`
 - `@.contexts/engineering/stacks/frontend/next@16.md`
 - `@.contexts/engineering/stacks/validation/zod@4.md`
 
@@ -84,21 +84,19 @@ Anuncie em uma linha: `Using <skill|context> to <purpose>`.
 
 Auth → validate → authorize → act; schemas Zod; pins da MEMORY; sem path inventado.
 
-## Matriz mínima de pins (produção)
+## Pins (produção)
 
-Consulte sempre a tabela em `@.contexts/engineering/MEMORY.md`. Snapshot:
+A matriz vive **só** em `@.contexts/engineering/MEMORY.md` (evidência de medição em
+`@.contexts/engineering/stacks/VERSIONS.md`). Leia lá antes de citar versão. Snapshot
+de orientação (2026-09-28), não fonte:
 
-| Camada | Baseline |
-|---|---|
-| Runtime | Node 24.21 LTS |
-| Language | TypeScript 7.0.2 |
-| App | Next 16.3.6 + React 19.3 |
-| Validation | Zod 4.6.5 |
-| OLTP | Postgres 18.6 (`uuidv7()` PKs) |
-| Serverless | firebase-functions@7.4 / firebase-admin@14.5 / nodejs24 |
-| Unit | Vitest 5.0.2 |
-| E2E | Playwright 1.63 |
-| AI | ai@7.0 + @mastra/core@1.71 (`@mastra/evals` fora: peer Vitest <5) |
+- Node **26.10.0** em app/CI/Docker/tooling; deploy de Firebase Functions em `nodejs24` (E1).
+- TypeScript **7.0.2** (typescript-eslint na API do TS 6, E2); ESLint **9.39.5** (E3).
+- Next **16.3.6** + React **19.3.0**; Tailwind **4.3.3**; Zod **4.6.5**; Postgres **18.6** (`uuidv7()`).
+- Vitest **5.0.2**; Playwright **1.63.0** (sem component testing, E5); `ai@7.0.120`; `@mastra/evals` fora (E4).
+
+Política (ADR 0004): baseline = última estável; pacote atrás do `latest` só com linha
+de exceção no ADR 0004 (ou ADR novo). Pré-release não é versão.
 
 ## Red flags — PARE
 
@@ -123,7 +121,7 @@ Só pule o protocolo se o humano disser explicitamente para ignorar DDC/contexts
 
 ## Integração com hooks
 
-- **SessionStart / PreCompact:** este skill é reinjetado — releia o espírito após compactação.
+- **SessionStart (`startup|resume|clear|compact|fork`):** este skill é reinjetado — releia o espírito após compactação.
 - **suggest-skills:** sugestões de skill e de `@.contexts` são **dicas**, não substituto de Read.
 - **Agents:** ao despachar subagent, passe lista explícita de `@.contexts/...` no brief.
 
@@ -135,6 +133,9 @@ Só pule o protocolo se o humano disser explicitamente para ignorar DDC/contexts
 - [ ] Nenhum `@.contexts/...` inventado
 - [ ] Pins compatíveis com MEMORY
 
-## ADR
+## ADRs
 
-Política de bootstrap + baseline: `@.contexts/engineering/decisions/0001-ddc-engineering-baseline-and-harness-enforcement.md`
+- Harness e bootstrap (using-ddc, plans, verification, hooks): `@.contexts/engineering/decisions/0001-ddc-engineering-baseline-and-harness-enforcement.md`
+- Qual documento vence em conflito de convenção: `@.contexts/engineering/decisions/0003-cross-doc-convention-conflicts-resolved.md`
+- Versões (última estável + exceções E1–E5): `@.contexts/engineering/decisions/0004-latest-stable-baseline-and-documented-exceptions.md`
+- IDs de documento do Firestore (ID automático; ULID só em `eventId`, `Idempotency-Key`, `X-Request-Id`): `@.contexts/engineering/decisions/0005-firestore-document-ids-use-automatic-ids.md`

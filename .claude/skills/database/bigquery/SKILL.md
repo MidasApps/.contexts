@@ -37,7 +37,8 @@ Data warehouse serverless do GCP. SQL columnar massivamente paralelo. Cobra por 
 
 ## Mini-exemplo
 ```sql
-CREATE TABLE `proj.ds.events` (
+-- dataset <bc>_events, tabela domain_event (contracts/bigquery.md)
+CREATE TABLE `orders_events.domain_event` (
   event_id STRING NOT NULL,
   tenant_id STRING NOT NULL,
   user_id STRING,
@@ -50,7 +51,7 @@ CLUSTER BY tenant_id, user_id;
 
 -- Query barata
 SELECT event_name, COUNT(*) AS n
-FROM `proj.ds.events`
+FROM `orders_events.domain_event`
 WHERE DATE(occurred_at) BETWEEN '2026-05-01' AND '2026-05-25'
   AND tenant_id = @tenant
 GROUP BY event_name;

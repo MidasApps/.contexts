@@ -1,76 +1,80 @@
 ---
 name: decisions
-description: Use para criar ou atualizar ADRs (Architecture Decision Records). Keywords: ADR, decisão arquitetural, registrar decisão, trade-off.
+description: Use para criar ou atualizar ADRs (Architecture Decision Records). Keywords: ADR, decisão arquitetural, registrar decisão, trade-off, supersede, exceção de versão, pin atrás do latest.
 allowed-tools: Read, Edit, Write, Grep, Glob, Bash
 ---
 # Architecture Decision Records (ADR)
 
-Registra decisões arquiteturais relevantes em arquivos curtos, versionados, imutáveis após aceitos. Cada ADR captura **contexto**, **opções consideradas**, **decisão tomada** e **consequências**.
+Registra decisões arquiteturais relevantes em arquivos curtos, versionados, imutáveis após aceitos. Cada ADR captura **contexto**, **opções consideradas**, **decisão tomada** e **consequências**. SSOT: `.contexts/engineering/decisions/`.
 
 ## Essência
-- Uma decisão = um arquivo. Imutável após status "Accepted"; mudanças vêm como ADR novo que **supersedes** o anterior.
-- **Numeração:** `NNNN-kebab-case-title.md` com **4 dígitos** sequenciais (`0001-`, `0042-`).
-- **Formato MADR (Markdown Any Decision Record)** é o padrão recomendado:
-  - `# <NNNN>. <title>`
-  - **Status:** `proposed` | `accepted` | `rejected` | `deprecated` | `superseded by NNNN`
-  - **Date** (YYYY-MM-DD)
-  - **Context:** problema, restrições, forças em jogo (sem mencionar solução ainda).
-  - **Decision Drivers:** critérios para escolher (lista curta).
-  - **Considered Options:** 2-5 alternativas reais (não palhas).
-  - **Decision Outcome:** opção escolhida + justificativa.
-  - **Consequences:** positivas + negativas + riscos + ações de follow-up.
-  - **Pros/Cons of Options** (opcional, recomendado).
-- ADR é **sobre decisão**, não sobre design detalhado. Design técnico pode ir em RFC/spec separada.
-- ADR ruim: "vamos usar X porque é bom". ADR bom: alternativas comparadas com critérios.
-- Mover para `deprecated`/`superseded` em vez de editar/deletar — histórico importa.
-- Pasta canônica: `docs/adr/` ou `engineering/decisions/` no projeto.
+- Uma decisão = um arquivo em `.contexts/engineering/decisions/` (não `docs/adr/`). Índice obrigatório em `decisions/README.md`.
+- **Numeração:** `NNNN-kebab-case-title.md`, 4 dígitos sequenciais sem pular (existentes: `0001`–`0004`; próximo = maior + 1).
+- **Formato real dos ADRs 0001–0004 (MADR com header em bullets):**
+  ```markdown
+  # NNNN. Título
+
+  - **Status:** proposed | accepted | rejected | deprecated | superseded by NNNN
+  - **Date:** YYYY-MM-DD
+  - **Deciders:** ...
+  - **Tags:** `engineering`, `stacks`, ...
+  - **Supersedes:** / **Superseded in part by:** / **Complements:** [NNNN](NNNN-slug.md) (o que exatamente)
+  ```
+  Seções: `## Context` → `## Decision Drivers` → `## Considered Options` → `## Decision Outcome` → `## Consequences` → `## References`. ADR curto de desempate/política (0003, 0004) pode usar `## Decision` direto no lugar de Drivers/Options/Outcome. Opcionais: `## Pros and Cons of the Options`, `## Notes`, `## Amendments`.
+- **Imutável após `accepted`.** Mudou a decisão → ADR novo com `Supersedes:` (total ou parcial, dizendo qual parte) e o antigo ganha só a linha `Superseded in part by:` / status. `## Amendments` datado só para correção de conformidade que não altera a decisão (ver 0001). Única adição de conteúdo prevista pela própria decisão: linha nova na tabela de exceções do 0004.
+- **Versões (ADR 0004):** baseline = última estável; canary/beta/rc não é versão e não pede ADR. Pacote que precisa ficar atrás do `latest` por incompatibilidade comprovada → **linha nova na tabela de exceções do 0004** (`E6`…, com fato, data e gatilho de revisão) quando é a mesma política; mudança de política ou de baseline → ADR novo que supersede. Exceção sem linha no 0004 é bug de documentação. Atualizar `MEMORY.md` e `stacks/VERSIONS.md` junto.
+- **Conflito entre documentos:** a regra de desempate está no 0003 (vence o doc mais específico do assunto); conflito novo que exige decisão → ADR, não edição silenciosa.
+- ADR é **sobre decisão**, não design detalhado. ADR bom compara alternativas reais com critérios e registra o rejeitado e por quê (rule `governance`).
 
 ## Procedimento mínimo
-1. Identificar próximo número (próximo da maior numeração existente).
-2. Criar `NNNN-kebab-title.md` com template MADR.
-3. Preencher Context sem antecipar solução.
-4. Listar 2+ opções reais com prós/contras.
-5. Decision: opção + 1-3 frases de justificativa amarrando aos drivers.
-6. Consequences: o que melhora, o que piora, follow-ups (issues a criar).
-7. PR para review. Status `proposed` → `accepted` no merge.
-8. Cross-link: rule/skill/código que aplicam a decisão referenciam o ADR.
+1. Ler `decisions/README.md` e o ADR mais recente do mesmo tema (pode ser caso de supersede parcial ou de linha de exceção no 0004).
+2. Criar `NNNN-kebab-title.md` com o header em bullets acima.
+3. Context sem antecipar solução; Drivers; 2+ opções reais.
+4. Decision Outcome: opção + justificativa amarrada aos drivers.
+5. Consequences: o que melhora, o que piora, arquivos que passam a mudar (rules/skills/MEMORY).
+6. Adicionar linha no índice do README (`# | Título | Status | Data`) e, se supersede, a linha `Superseded in part by:` no ADR antigo.
+7. PR antes da implementação (rule `governance`). `proposed` → `accepted` no merge.
+8. Cross-link: rule/skill/MEMORY que aplicam a decisão referenciam o ADR pelo path real (`.contexts/engineering/decisions/<número>-<slug>.md`; nunca um placeholder).
 
 ## Anti-patterns
-- ADR depois do fato, "para documentar" → vira teatro; capture decisão antes de implementar quando possível.
+- ADR depois do fato, "para documentar" → capture antes de implementar.
 - "Opções consideradas" com 1 real e 2 absurdas → não é trade-off real.
-- Editar ADR aceito → quebra histórico; faça superseding ADR.
-- ADR para qualquer escolha pequena → ruído; só decisões com impacto não-trivial e duráveis.
+- Editar o corpo de ADR aceito → supersede; só header de status, `Amendments` de conformidade e linha de exceção no 0004.
+- Pin atrás do `latest` "por cautela", sem incompatibilidade comprovada nem linha no 0004.
+- ADR para escolha trivial → ruído.
 
 ## Mini-exemplo
 ```markdown
-# 0007. Adopt cursor-based pagination for v1 list endpoints
+# NNNN. Adopt cursor-based pagination for v1 list endpoints
 
-- Status: accepted
-- Date: 2026-05-25
+- **Status:** proposed
+- **Date:** 2026-09-28
+- **Deciders:** tech lead / time de API
+- **Tags:** `engineering`, `api`
 
 ## Context
-Offset pagination produces inconsistent results when items shift (insertions/deletions)
-and degrades on large offsets (O(N) at the DB). Mobile clients report duplicate items.
+Offset pagination returns duplicates when rows shift and degrades on large offsets.
 
 ## Decision Drivers
 - Consistency under concurrent writes.
 - Performance at >1M rows.
-- Client implementation complexity.
 
 ## Considered Options
 1. Keep offset pagination (status quo).
-2. Cursor-based with opaque base64 cursor.
-3. Time-based (`createdAt`) cursor.
+2. Opaque cursor (`meta.page: { cursor, hasMore, limit }`).
+3. Raw `createdAt` cursor exposed to clients.
 
 ## Decision Outcome
-**Option 2** — opaque cursor. Wins consistency + perf without leaking schema.
+**Option 2.** Consistent and O(log N) without leaking schema.
 
 ## Consequences
-+ Stable under concurrent writes; O(log N) reads.
-+ Clients treat cursor as opaque (no schema coupling).
-− Random-jump pagination ("page 50") no longer possible — acceptable per UX research.
-Follow-up: deprecate `?page` over 2 releases; SDK exposes `nextCursor` helper.
++ Stable under concurrent writes.
+− No random page jump; offset stays only for UI with page-jump.
+Follow-up: `contracts/api.md` já descreve `meta.page`; nenhum doc muda de forma.
+
+## References
+- `contracts/api.md`
 ```
 
 ---
-**Detalhes/convenções específicas do projeto:** `@.contexts/engineering/decisions/README.md`
+**Formato, índice e numeração:** `@.contexts/engineering/decisions/README.md` · política de versões: `@.contexts/engineering/decisions/0004-latest-stable-baseline-and-documented-exceptions.md`

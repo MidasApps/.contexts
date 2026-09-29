@@ -1,15 +1,15 @@
 ---
 name: playwright
-description: Use para testes E2E com Playwright. Keywords: playwright, e2e, browser test.
+description: Use para testes E2E com Playwright (@playwright/test@1.63.0) — config, locators role-first, storage state, network mock, a11y, visual regression, CI. Keywords: playwright, e2e, browser test, .spec.ts, axe, trace.
 allowed-tools: Read, Edit, Write, Grep, Glob, Bash
 ---
 # Playwright
 
-Test runner E2E multi-browser (Chromium, Firefox, WebKit) com auto-wait, trace viewer, codegen e parallelismo nativo. Capabilities: web, API testing, mobile emulation, network mocking.
+Test runner E2E multi-browser (Chromium, Firefox, WebKit) com auto-wait, trace viewer, codegen e parallelismo nativo. Baseline **@playwright/test@1.63.0**. Capabilities: web, API testing, mobile emulation, network mocking. **Component testing (`@playwright/experimental-ct-react`) não é adotado (E5, ADR 0004):** teste de componente roda no Vitest browser mode (skill `vitest`).
 
 ## Essência
 - **Test runner:** `@playwright/test`. Config em `playwright.config.ts` (projects, baseURL, retries, reporter).
-- **Page object pattern** recomendado para tests grandes — encapsula seletores em classes.
+- **Fixtures (`test.extend`)** e helpers de página para tests grandes — encapsulam seletores e setup; prefira funções/fixtures a hierarquias de classes.
 - **Locators:** preferir **role-based** (`page.getByRole("button", { name: /save/i })`), `getByLabel`, `getByText`. CSS/xpath em último caso.
 - **Auto-wait:** locators esperam por visibilidade/enabled automaticamente — sem `sleep`.
 - **Assertions web-first:** `await expect(locator).toBeVisible()`, `toHaveText()`, `toHaveURL()`. Retry built-in.
@@ -22,8 +22,8 @@ Test runner E2E multi-browser (Chromium, Firefox, WebKit) com auto-wait, trace v
 - **CI:** `--reporter=html,github`; tracing on first retry.
 
 ## Procedimento mínimo
-1. `npm init playwright@latest` — gera config + workflows.
-2. Setup login uma vez (`auth.setup.ts`) → salva storage; demais tests reusam.
+1. `pnpm add -D @playwright/test@1.63.0` + `pnpm exec playwright install --with-deps` (ou `pnpm create playwright` para gerar config + workflow).
+2. Testes e2e em `e2e/` (`testDir: './e2e'`, arquivos `*.spec.ts`). Setup login uma vez (`e2e/global.setup.ts`) → salva storage em `e2e/.auth/` (gitignored); demais tests reusam.
 3. Escrever tests com locators role-based; `expect(locator)` para assertions.
 4. Mock external API com `page.route` quando flakiness/lentidão.
 5. CI: rodar headless, trace on retry, upload HTML report como artifact.

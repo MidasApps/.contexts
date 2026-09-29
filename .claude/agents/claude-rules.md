@@ -154,7 +154,7 @@ paths: ["<glob1>", "<glob2>"]
 
 ## Restrições universais
 
-- Toda rule termina com `@.contexts/engineering/rules/<basename>.md` como fallback de profundidade. O arquivo-alvo DEVE existir (rule `grounding`: nenhum `@.contexts/...` inventado): se o contexto SSOT ainda não existe, crie-o antes como template (`status: template`, seções com `<!-- PREENCHER -->`) ou delegue ao `ddc-engineering` — nunca deixe referência pendurada.
+- Toda rule termina com o `@.contexts/engineering/...` correspondente como fallback de profundidade (em geral `rules/<basename>.md`; `git`, `commits` e `environments` apontam para `processes/`, `schemas` para `contracts/schemas.md`). O arquivo-alvo DEVE existir (rule `grounding`: nenhum `@.contexts/...` inventado): se o contexto SSOT ainda não existe, crie-o antes como template (`status: template`, seções com `<!-- PREENCHER -->`) ou delegue ao `ddc-engineering` — nunca deixe referência pendurada.
 - Sem HTML, sem YAML de app, sem JSON inline no corpo — apenas markdown puro.
 - Nomenclatura: kebab-case, lowercase, sem versão (rules são atemporais).
 - Nunca sobrescreva uma rule existente sem ler o conteúdo atual primeiro.

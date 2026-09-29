@@ -10,13 +10,14 @@ Especifica comportamento em linguagem natural (Gherkin: **Given/When/Then**) com
 ## Essência
 - **Feature → Scenario → Given/When/Then.** `Given` = contexto; `When` = ação; `Then` = resultado observável.
 - Escrito do ponto de vista do usuário, em domínio de negócio — sem detalhes de UI/HTTP.
-- **Step definitions** mapeiam frases para código (Cucumber, Playwright BDD, vitest-cucumber).
+- **Step definitions** mapeiam frases para código: `@cucumber/cucumber` + Playwright para E2E (`e2e/features/*.feature`); sem audiência não-técnica, BDD-style em Vitest (`describe("Feature: …")`) colocado em `*.test.ts`.
+- BDD é conversa (três amigos, example mapping) antes de ser Gherkin; Gherkin sem conversa é teatro.
 - **Examples table** (`Scenario Outline`) para variações da mesma regra.
 - Cenários são independentes — sem ordem.
 - BDD complementa TDD: TDD guia design interno, BDD descreve comportamento externo.
 
 ## Procedimento mínimo
-1. Conversar com PM/QA; escrever cenários em `.feature` antes de implementar.
+1. Conversar com PM/QA (três amigos); escrever cenários em `.feature` (ou `describe`/`it` BDD-style) antes de implementar.
 2. Cada cenário = um Scenario único e auto-explicativo.
 3. Implementar step definitions (`Given("user is logged in", ...)`).
 4. Rodar; cenários pendentes → implementar feature até passarem.
@@ -24,7 +25,8 @@ Especifica comportamento em linguagem natural (Gherkin: **Given/When/Then**) com
 
 ## Anti-patterns
 - Cenário com detalhe de UI (`When user clicks #submit-btn`) → falar em ação (`When user submits the form`).
-- `Given` enorme reconstruindo todo o sistema → usar fixtures/factories.
+- `Given` enorme reconstruindo todo o sistema → usar factories e esconder setup técnico no glue.
+- Glue code com lógica de negócio → o glue só traduz; a regra vive no sistema.
 - Step duplicado com fraseado diferente → consolidar.
 
 ## Mini-exemplo

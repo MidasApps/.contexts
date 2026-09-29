@@ -8,7 +8,9 @@ allowed-tools: Read, Edit, Write, Grep, Glob, Bash
 Documento que descreve **como o produto cria, entrega e captura valor**. Carregue antes de decisões que afetam monetização, pricing, segmentação, prioridade de features.
 
 ## Essência
-Conteúdo típico de um documento de business model (ver `@`):
+> **Status atual:** `.contexts/business/business-model.md` está `status: template` (não preenchido). Enquanto estiver assim, declare "modelo de negócio não definido" e não invente números, segmentos ou regras; a lista abaixo é só a estrutura esperada.
+
+Conteúdo típico de um documento de business model (ver `@.contexts/business/business-model.md`):
 - **Value proposition:** o problema resolvido, para quem, e por que essa solução é melhor que alternativas.
 - **Revenue model:** como o dinheiro entra — SaaS subscription, transaction fee, usage-based, marketplace take rate, licença, freemium, ads.
 - **Pricing:** tiers, métricas (per-seat, per-API-call, per-tenant), trial/free, anchor.
@@ -20,7 +22,7 @@ Conteúdo típico de um documento de business model (ver `@`):
 - **Moat / defensibility:** o que torna difícil copiar — dado, rede, switching cost, marca.
 
 ## Procedimento mínimo
-1. Ler o `@` deste skill para entender modelo específico deste projeto.
+1. Ler `@.contexts/business/business-model.md` para entender o modelo específico deste projeto. Se `status: template`, pare e sinalize a lacuna.
 2. Em decisão de feature/pricing, verificar:
    - alinha com value proposition?
    - afeta unit economics (margem, CAC)?

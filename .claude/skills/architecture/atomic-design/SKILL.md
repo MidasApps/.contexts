@@ -10,16 +10,16 @@ Hierarquia de componentes UI proposta por Brad Frost: **atoms → molecules → 
 ## Essência
 - **Atoms:** primitivas indivisíveis (Button, Input, Label, Icon).
 - **Molecules:** combinações pequenas com propósito (SearchField = Input + Button).
-- **Organisms:** seções complexas autocontidas (Header, ProductCard).
+- **Organisms:** seções complexas autocontidas (Header, DataTable).
 - **Templates:** layout de página sem dados reais (skeleton de posições).
-- **Pages:** templates com dados concretos (rota/screen).
+- **Pages:** templates com dados concretos (rota/screen); no projeto são absorvidas por `app/**/page.tsx` e `views`, não vivem em `shared/ui`.
 - Dependência sobe apenas: organism usa molecules e atoms; molecule usa atoms.
 - Atoms são "dumb": sem estado de negócio, recebem props.
 - Atomic design ≠ FSD; foca só em UI, não em arquitetura completa.
 
 ## Procedimento mínimo
 1. Identificar nível: é primitiva (atom) ou composição (molecule+)?
-2. Criar `src/components/<nivel>/<Nome>/` com `<Nome>.tsx`, `<Nome>.stories.tsx`, `index.ts`.
+2. Criar `src/shared/ui/<nivel>/<Nome>/` com `<Nome>.tsx` e `<Nome>.stories.tsx` (import direto do arquivo, sem barrel). Componente com conceito de domínio vai em `features/<slice>/ui/`. Tokens são variáveis CSS do Tailwind, sem `tokens/*.ts`.
 3. Manter atoms sem dependência de estado global; aceitar props para customização.
 4. Documentar variantes em Storybook por nível.
 5. Subir composição para o nível imediatamente acima quando reutilizada.
@@ -31,7 +31,7 @@ Hierarquia de componentes UI proposta por Brad Frost: **atoms → molecules → 
 
 ## Mini-exemplo
 ```
-components/
+shared/ui/
   atoms/Button/Button.tsx
   molecules/SearchField/SearchField.tsx
   organisms/Header/Header.tsx

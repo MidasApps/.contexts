@@ -8,32 +8,29 @@ allowed-tools: Read, Edit, Write, Grep, Glob, Bash
 PRs são unidade de revisão e merge. Pequenos, focados, descritos claramente. Code review é diálogo técnico, não posturing.
 
 ## Essência
-- **Pequeno:** < 400 linhas mudadas é fácil revisar; > 1000 é quase certamente refatorável em PRs menores.
+- **Pequeno:** alvo < 400 LOC reais (sem lockfile/gerado); acima de 800 LOC, dividir é obrigatório (incremental ou stacked). Exceção: codemod/regeneração, sinalizada no título.
 - **Foco único:** uma intenção (feature, fix, refactor) por PR. Refactor + feature na mesma PR esconde mudanças.
-- **Descrição:**
-  - **What:** o que mudou.
-  - **Why:** por que (link issue/ADR).
-  - **How:** abordagem se não óbvia.
-  - **Screenshots/recordings** em mudança de UI.
-  - **Test plan:** como verificar (manual + automatizado).
-  - **Risk/rollback:** o que pode quebrar; como reverter.
+- **Título** em Conventional Commits (`type(scope): description`) — vira a mensagem do squash commit em `main`.
+- **Descrição** segue `.github/pull_request_template.md`: Summary, Changes, Why, How to test, Screenshots/Recordings, Risks (breaking, rollback, migrations), Checklist. Seção vazia é removida, não deixada com placeholder.
+- **WIP** = PR em Draft, não título `WIP`.
 - **CI verde** antes de pedir review. Reviewer não é debugger de lint.
 - **Self-review:** ler o próprio diff antes de pedir review pega 50% dos problemas.
 - **Reviewers:** code-owner do path + 1 cross-domain quando útil. Não pedir review pra 10 pessoas.
 - **Code review etiquette:**
   - Pergunte > afirme ("could we…?", "what if…?").
-  - Distinguir bloqueante vs nit (prefixar `nit:`, `question:`, `suggestion:`, `blocking:`).
+  - Prefixos obrigatórios (rule `code-review`): `blocker:`, `issue:`, `suggestion:`, `nit:`, `question:`, `praise:`.
   - Aprovar com nits — não bloquear por estilo se há linter.
   - Sugerir via "GitHub suggested change" quando aplicável.
-- **Merge strategy:** squash (default), merge commit, ou rebase — escolher política do projeto e ser consistente.
+- **Merge strategy:** squash por padrão (`processes/git.md`); merge commit só em release branch/auditoria. Sync com `main` por rebase + `git push --force-with-lease`, nunca `git merge main` no PR.
+- **SLA:** primeira review < 24h úteis; resposta do autor < 24h úteis.
 - **Conventional commit** na mensagem final (ver rule `commits`).
 - **Stacked PRs** para mudanças grandes: cada PR é review unit, próximo PR depende do anterior.
 
 ## Procedimento mínimo
-1. Branch curta com nome `<tipo>/<scope>-...`.
+1. Branch curta a partir de `main` atualizada, nome `<type>/<short-description>` (ex. `feat/orders-idempotency`).
 2. Commits atômicos durante desenvolvimento.
-3. Antes de abrir PR: rebase com main, rode CI local, self-review.
-4. Abrir PR com descrição completa + test plan.
+3. Antes de marcar ready: `git fetch origin && git rebase origin/main`, CI local, self-review do diff.
+4. Abrir PR (Draft enquanto WIP) com template preenchido.
 5. Pedir review do code-owner; responder feedback em horas, não dias.
 6. CI verde + approvals → merge (squash conforme política).
 7. Deletar branch após merge.
@@ -47,24 +44,27 @@ PRs são unidade de revisão e merge. Pequenos, focados, descritos claramente. C
 
 ## Mini-exemplo
 ```markdown
-## What
-Add idempotency-key header support on POST /v1/orders.
+<!-- título: feat(orders): support idempotency-key header -->
+## Summary
+- Add Idempotency-Key support on POST /v1/orders to prevent double charge on client retry.
+
+## Changes
+- New `idempotency_keys` table (24h TTL).
+- Middleware checks the key before the handler; replays the stored response on hit.
 
 ## Why
-Closes #482. Prevents double-charge on client retry after network blip.
+Closes #482.
 
-## How
-- New `idempotency_keys` table (24h TTL).
-- Middleware checks key before handler; replays cached response on hit.
-- Cache key includes path + body hash.
-
-## Test plan
-- [x] Unit: middleware caches/serves
-- [x] Integration: duplicate POST returns same response/status
+## How to test
+- [x] Integration: duplicate POST returns the same response/status
 - [x] Load: 1000 concurrent same-key requests → 1 charge
 
-## Risk / rollback
-Feature-flagged via `IDEMPOTENCY_ENABLED`. Off by default. Rollback = flip flag.
+## Risks
+Feature-flagged via `IDEMPOTENCY_ENABLED`, off by default. Rollback = flip flag.
+
+## Checklist
+- [x] Tests adicionados/atualizados
+- [x] Feature flag quando aplicável
 ```
 
 ---

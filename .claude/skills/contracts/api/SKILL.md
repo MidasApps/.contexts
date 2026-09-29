@@ -9,11 +9,11 @@ Documento o **shape** de uma API (endpoints, payloads, status codes, erros, vers
 
 ## Essência
 - **OpenAPI 3.1** (compatível com JSON Schema) é o padrão dominante. Alternativas: AsyncAPI (eventos), gRPC `.proto`.
-- **Spec-first** OU **code-first com codegen**: ambos válidos; importa que ambos os lados (server, client) derivem da MESMA fonte.
-- **Naming** consistente no wire format (escolha snake_case OU camelCase para toda a API).
+- **Zod-first:** os schemas Zod são a fonte; o OpenAPI (`docs/openapi/v1.yaml`) é GERADO deles. Codegen a partir de spec só para specs de terceiros.
+- **Naming** consistente no wire format (camelCase no JSON da API).
 - **Versionamento:** `/v1/...` no path ou header. Breaking → nova versão. Aditivo → mesma versão.
-- **Error envelope estável:** `{ code, message, details?, traceId }`. Cliente programa contra `code`, não mensagem.
-- **Paginação:** cursor-based para listas grandes; sempre incluir `nextCursor` no response.
+- **Error envelope estável:** `{ error: { code, message, details?, requestId } }`. Cliente programa contra `code`, não mensagem.
+- **Paginação:** cursor-based para listas grandes; resposta traz `meta.page: { cursor, hasMore, limit }`. Ordem `?sort=-createdAt,name`; filtros com sufixos `After/Before`, `Min/Max`.
 - **Idempotency-key** em mutations retryable. Documentar TTL.
 - **Auth:** declarar mecanismo (Bearer, OAuth, Basic) em `securitySchemes`; aplicar em `security` por operação.
 - **Status codes** documentados por operação (200/201/400/401/403/404/409/422/429/5xx).
@@ -25,11 +25,11 @@ Documento o **shape** de uma API (endpoints, payloads, status codes, erros, vers
 2. Modelar schemas reutilizáveis em `components.schemas/`.
 3. Para cada operação: requestBody schema, responses por status, errors documentados.
 4. `securitySchemes` global + `security` por operação onde requer auth.
-5. Gerar client/server stubs via codegen; CI valida que implementação responde conforme spec (contract testing).
+5. Gerar o OpenAPI dos schemas Zod; CI valida que implementação responde conforme spec (contract testing).
 6. Mudança breaking → bump major; aditiva → minor; correção de doc → patch.
 
 ## Anti-patterns
-- Atualizar implementação sem atualizar spec → desincroniza; CI deveria pegar.
+- Atualizar implementação sem regenerar o OpenAPI → desincroniza; CI deveria pegar.
 - Status 200 com `{ ok: false, error }` → use status code real (4xx/5xx).
 - Cada endpoint com error shape diferente → consolidar envelope.
 - `additionalProperties: true` sem motivo em schema fechado → permite payload lixo.
@@ -60,8 +60,12 @@ components:
   schemas:
     Error:
       type: object
-      required: [code, message, traceId]
-      properties: { code: { type: string }, message: { type: string }, traceId: { type: string } }
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code, message, requestId]
+          properties: { code: { type: string }, message: { type: string }, requestId: { type: string } }
 ```
 
 ---

@@ -8,20 +8,13 @@ allowed-tools: Read, Edit, Write, Grep, Glob, Bash
 Convenções de modelagem para tabelas com embeddings em pgvector: dimensão, métrica de distância, metadata, índice, particionamento por tenant.
 
 ## Essência
-- **Dimensão fixa** por coleção: declare `vector(N)` baseado no modelo de embedding (`text-embedding-3-small` → 1536; `-large` → 3072; gemini-embedding-001 → 768/3072 configurable). Misturar dimensões na mesma coluna é impossível.
+- **Dimensão fixa** por coleção: declare `vector(N)` baseado no modelo de embedding (`text-embedding-3-small` → 1536; `-large` → 3072; `gemini-embedding-001` → até 3072, configurável (Matryoshka)). Misturar dimensões na mesma coluna é impossível.
 - **Modelo de embedding** documentado em metadata da tabela (comment ou coluna `embedding_model text`).
 - **Métrica única por índice:** cosine (`vector_cosine_ops`), L2 (`vector_l2_ops`) ou inner product (`vector_ip_ops`). Cosine é default para RAG.
-- **Index type:** HNSW para uso geral (build incremental, alta recall); IVFFlat só com dataset estável e grande.
-- **Metadata estável:**
-  - `id` (PK)
-  - `tenant_id` / `workspace_id` (multi-tenant — partial index ou composto)
-  - `source_type`, `source_id` — referência ao documento original
-  - `chunk_index`, `chunk_total` — quando documento é fatiado
-  - `content text` — texto original do chunk (para citation)
-  - `metadata jsonb` — atributos para filtragem (categoria, autor, data)
-  - `embedding vector(N)`
-  - `created_at`, `updated_at`, `embedding_model`, `model_version`
-- **Re-embedding:** trocar modelo = nova coluna `embedding_v2 vector(M)` + backfill + dual-read durante transição (ver rule `migration`).
+- **Index type:** HNSW é o default (build incremental, alto recall); IVFFlat só com dataset estável e grande. Versão pinada: pgvector 0.8.6 (imagem `pgvector/pgvector:0.8.6-pg18`). Índice sobre `vector` vai até 2.000 dimensões; acima disso, `halfvec(N)` (até 4.000).
+- **Tabelas** no schema `ai`: `ai.documents` (fonte, mutável) e `ai.chunks_v1` (unidade de retrieval, imutável, versionada pelo sufixo).
+- **Colunas de `ai.chunks_v1`:** `id uuid DEFAULT uuidv7()`, `document_id` (FK `ON DELETE CASCADE`), `tenant_id`, `chunk_index` (0-based), `text`, `token_count`, `embedding vector(N)`, `embedding_model`, `embedding_version`, `metadata jsonb`, `created_at`. Sem `updated_at`: chunk não é atualizado. Chave natural `(document_id, chunk_index)`.
+- **Re-embedding:** trocar modelo/dimensão = nova tabela `ai.chunks_v2` + backfill idempotente + switch de leitura + `DROP` da v1 (expand/contract, ver rule `migration`). Nunca `UPDATE` de `embedding`.
 - **Filtros pré-vector:** queries filtram por tenant/source ANTES do top-k. Índices em `tenant_id`, `source_type` essenciais.
 - **Particionamento** por tenant grande quando volume cresce — partition por hash/list.
 - **Normalização:** se usar `<#>` (inner product), normalize embeddings na ingestão.
@@ -32,34 +25,35 @@ Convenções de modelagem para tabelas com embeddings em pgvector: dimensão, m�
 2. Tabela com `embedding vector(N)`, metadata acima, FKs adequadas.
 3. Índice HNSW com `vector_cosine_ops` (ou métrica escolhida).
 4. Índice em `tenant_id` (+ outros filtros frequentes) — partial onde aplicável.
-5. Pipeline de ingestão registra `embedding_model` + `model_version`.
-6. Re-embedding: nova coluna, backfill, switch leitura, drop antiga (ver migration).
+5. Pipeline de ingestão registra `embedding_model` + `embedding_version`.
+6. Re-embedding: `ai.chunks_v2`, backfill, switch leitura, drop da v1 (ver migration).
 
 ## Anti-patterns
-- Mudar modelo sem versionar coluna → dimensões batem por sorte, qualidade despenca.
+- Mudar modelo sem versionar a tabela → dimensões batem por sorte, qualidade despenca.
 - Sem `tenant_id` indexado → seq scan no top-k.
 - Guardar embedding sem o texto original → impossível citar/inspecionar.
 - IVFFlat em tabela com escrita contínua → recall degrada.
 
 ## Mini-exemplo
 ```sql
-CREATE TABLE doc_chunks (
-  id bigserial PRIMARY KEY,
-  tenant_id uuid NOT NULL,
-  source_type text NOT NULL,           -- 'gdrive', 'notion', 'web'
-  source_id text NOT NULL,
-  chunk_index int NOT NULL,
-  chunk_total int NOT NULL,
-  content text NOT NULL,
-  metadata jsonb NOT NULL DEFAULT '{}'::jsonb,
-  embedding vector(1536) NOT NULL,
-  embedding_model text NOT NULL,       -- 'text-embedding-3-small'
-  model_version text NOT NULL,         -- '2024-01'
-  created_at timestamptz NOT NULL DEFAULT now(),
-  UNIQUE (tenant_id, source_type, source_id, chunk_index)
+CREATE TABLE ai.chunks_v1 (
+  id                uuid PRIMARY KEY DEFAULT uuidv7(),
+  document_id       uuid NOT NULL REFERENCES ai.documents(id) ON DELETE CASCADE,
+  tenant_id         uuid NOT NULL,
+  chunk_index       int NOT NULL,
+  text              text NOT NULL,
+  token_count       int,
+  embedding         vector(1536) NOT NULL,
+  embedding_model   text NOT NULL,       -- 'text-embedding-3-small'
+  embedding_version text NOT NULL,       -- 'v1-2026-05'
+  metadata          jsonb NOT NULL DEFAULT '{}'::jsonb,
+  created_at        timestamptz NOT NULL DEFAULT now(),
+  UNIQUE (document_id, chunk_index)
 );
-CREATE INDEX ON doc_chunks USING hnsw (embedding vector_cosine_ops) WITH (m = 16, ef_construction = 64);
-CREATE INDEX ON doc_chunks(tenant_id, source_type);
+CREATE INDEX chunks_v1_document_idx ON ai.chunks_v1 (document_id);
+CREATE INDEX chunks_v1_tenant_idx ON ai.chunks_v1 (tenant_id);
+CREATE INDEX CONCURRENTLY chunks_v1_embedding_hnsw
+  ON ai.chunks_v1 USING hnsw (embedding vector_cosine_ops) WITH (m = 16, ef_construction = 64);
 ```
 
 ---

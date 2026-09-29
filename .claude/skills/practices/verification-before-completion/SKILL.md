@@ -40,7 +40,7 @@ Pular passo = claim inválida.
 | Build ok | Build exit 0 | Typecheck sozinho |
 | Bug fixed | Reprodução do sintoma falhando → passando | Diff “parece certo” |
 | Conforme contrato API | Read `@.contexts/engineering/contracts/api.md` + check do shape | “segui REST” |
-| Conforme pin de stack | Read `MEMORY.md` ou stack doc | Memória do modelo |
+| Conforme pin de stack | Read `MEMORY.md` (+ exceções E1–E5 do ADR 0004) ou stack doc | Memória do modelo |
 | Agent “terminou” | Diff/VCS ou arquivos alterados inspecionados | Relato do subagent |
 | Requirements met | Checklist do plano/task vs diff | “testes verdes” sozinho |
 

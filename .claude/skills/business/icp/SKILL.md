@@ -8,7 +8,9 @@ allowed-tools: Read, Edit, Write, Grep, Glob, Bash
 Descrição do **tipo de empresa/usuário** que melhor se beneficia do produto e melhor monetiza para o negócio. Não é toda persona possível — é a interseção de "tem dor", "valoriza solução" e "paga".
 
 ## Essência
-Conteúdo típico de um documento de ICP (ver `@`):
+> **Status atual:** `.contexts/business/icp.md` está `status: template` (não preenchido). Enquanto estiver assim, declare "ICP não definido" e não invente números, segmentos ou regras; a lista abaixo é só a estrutura esperada.
+
+Conteúdo típico de um documento de ICP (ver `@.contexts/business/icp.md`):
 - **Firmographics (B2B):** tamanho (funcionários, receita), indústria, geografia, maturidade, stack tecnológico.
 - **Demographics (B2C):** idade, ocupação, renda, geografia, tecnologia familiar.
 - **Triggering events:** o que faz o ICP entrar no mercado agora (ex.: novo cargo, regulação, fundraising, crescimento >X%).
@@ -20,7 +22,7 @@ Conteúdo típico de um documento de ICP (ver `@`):
 - **Sinal de fit:** o que o cliente diz/faz quando o produto resolve a dor real.
 
 ## Procedimento mínimo
-1. Ler `@` para o ICP atual do projeto antes de decisão de feature/marketing/sales.
+1. Ler `@.contexts/business/icp.md` para o ICP atual do projeto antes de decisão de feature/marketing/sales. Se `status: template`, pare e sinalize a lacuna.
 2. Em decisão de feature: pergunta "qual ICP isso atende? está no alvo?".
 3. Em onboarding/marketing: validar que mensagem fala com triggers/pain do ICP.
 4. Em descoberta de novo segmento: hipótese → entrevista → ajuste de ICP, não inverso.

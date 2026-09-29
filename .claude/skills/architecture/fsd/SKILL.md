@@ -1,6 +1,6 @@
 ---
 name: fsd
-description: Use ao aplicar Feature-Sliced Design para organizar camadas (app/pages/widgets/features/entities/shared). Keywords: FSD, feature-sliced, slice.
+description: Use ao aplicar Feature-Sliced Design para organizar camadas (app/views/widgets/features/entities/shared). Keywords: FSD, feature-sliced, slice.
 allowed-tools: Read, Edit, Write, Grep, Glob, Bash
 ---
 # Feature-Sliced Design (FSD)
@@ -8,12 +8,13 @@ allowed-tools: Read, Edit, Write, Grep, Glob, Bash
 Metodologia de arquitetura de frontend que organiza código em camadas hierárquicas com dependência unidirecional. Carregue quando estruturar app novo ou refatorar layout monolítico.
 
 ## Essência
-- **6 camadas (de baixo pra cima):** `shared` → `entities` → `features` → `widgets` → `pages` → `app`.
+- **6 camadas (de baixo pra cima):** `shared` → `entities` → `features` → `widgets` → `views` → `app`. `views` é a camada `pages` do FSD renomeada: `src/pages/` é lido pelo Next como Pages Router.
 - **Dependency rule:** camada superior importa de inferior, nunca o contrário. Mesma camada não cruza.
 - **Slice:** subdiretório de uma camada que representa um domínio de negócio (`entities/user`, `features/auth`).
 - **Segments dentro de slice:** `ui/`, `model/` (store, types), `api/`, `lib/`, `config/`.
-- **Public API por slice:** `index.ts` exporta o que é público. Fora do slice, só importa via `index`.
-- `app/`: providers, router root, estilos globais. `shared/`: UI kit, utils, libs internas sem domínio.
+- **Public API por slice:** `index.ts` mínimo (só named exports, sem `export *`) exporta o que é público. Fora do slice, só importa via `index`; dentro do slice importe o módulo direto.
+- `src/app-providers/` (camada `app` do FSD; `src/app/` é o roteamento do Next): providers, instanciação de stores, estilos globais. `shared/`: UI kit, utils, libs internas sem domínio.
+- Schemas: `model/<name>.schema.ts` no slice ou em `entities`. `src/contracts/<context>/` fica fora das camadas (só contratos cliente/servidor). Backend não mora aqui: ver `feature-based`.
 
 ## Procedimento mínimo
 1. Identificar a camada correta para o código novo (regra: o quão alto ele compõe).
@@ -32,7 +33,7 @@ Metodologia de arquitetura de frontend que organiza código em camadas hierárqu
 ```
 src/
   app/         providers, router
-  pages/       home, settings (compõem widgets)
+  views/       home, settings (FSD pages; compõem widgets)
   widgets/     Header, Sidebar (compõem features+entities)
   features/    auth-by-email, create-order (caso de uso)
   entities/    user, order (modelo + UI básica)

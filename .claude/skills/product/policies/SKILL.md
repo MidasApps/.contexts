@@ -8,8 +8,10 @@ allowed-tools: Read, Edit, Write, Grep, Glob, Bash
 Regras de produto que afetam UX, dados de usuário, consentimento, retenção, comunicação. Não são leis (jurídico), mas como produto operacionaliza obrigações e princípios.
 
 ## Essência
-Conteúdo típico de um documento de policies (ver `@`):
-- **Privacy:** quais dados coleta, finalidade, base legal (LGPD/GDPR), retenção, direito de acesso/correção/exclusão. Privacy by design.
+> **Status atual:** `.contexts/product/policies.md` está `status: template` (não preenchido). Enquanto estiver assim, declare "política de produto não definido" e não invente números, segmentos ou regras; a lista abaixo é só a estrutura esperada.
+
+Conteúdo típico de um documento de policies (ver `@.contexts/product/policies.md`):
+- **Privacy:** quais dados coleta, finalidade, base legal (enquanto `@.contexts/business/compliance.md` for template: trate todo dado de usuário como PII sob LGPD), retenção, direito de acesso/correção/exclusão. Privacy by design.
 - **Consent:** quando pedir consent explícito (cookies não-essenciais, marketing, sharing com terceiros), versionamento, banner UX, revogação.
 - **Onboarding flow:** dados obrigatórios vs opcionais, validações, anti-friction, gates de progresso.
 - **Communication policy:** o que enviar por email/push, frequência, opt-in/opt-out, transactional vs marketing.
@@ -22,7 +24,7 @@ Conteúdo típico de um documento de policies (ver `@`):
 - **Localization:** idiomas/regions suportados; texto canônico em qual idioma.
 
 ## Procedimento mínimo
-1. Ler `@` para policy atual antes de feature que toca usuário/dado.
+1. Ler `@.contexts/product/policies.md` para policy atual antes de feature que toca usuário/dado. Se `status: template`, pare e sinalize a lacuna.
 2. Form/onboarding novo: verificar campos obrigatórios, validação, consent quando aplicável.
 3. Comunicação nova (email/push): classificar (transactional vs marketing), respeitar opt-out.
 4. Coletar dado novo: justificar finalidade, definir retenção, atualizar política se exposto ao usuário.

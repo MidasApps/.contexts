@@ -29,12 +29,13 @@ Garante higiene mínima de segurança a cada mudança de código: validação na
 
 ## Mini-exemplo
 ```ts
-// handler: authz first, validate, then act
+// handler: authn first, validate, authorize, then act
 export async function POST(req: Request) {
-  const user = await requireUser(req);          // 401 se faltar
-  const input = CreateOrderSchema.parse(await req.json()); // 400 se inválido
-  await assertCanCreateOrder(user, input.tenantId);        // 403 se IDOR
-  return createOrder(user, input);
+  const user = await requireUser(req);                          // 401 se faltar
+  const parsed = PlaceOrderInputSchema.safeParse(await req.json()); // 400 se inválido
+  if (!parsed.success) return validationError(parsed.error, requestId);
+  await assertCanPlaceOrder(user, parsed.data.tenantId);        // 403 se IDOR (tenant alheio)
+  return Response.json({ data: await placeOrder(parsed.data) }, { status: 201 });
 }
 ```
 

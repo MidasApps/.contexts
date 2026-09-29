@@ -12,12 +12,12 @@ Ciclo curto **red → green → refactor**: escreva o teste que falha, faça pas
 - **Green:** escreva o código mais simples possível que faça passar. Sem polish.
 - **Refactor:** com testes verdes, melhore design (extrair, renomear, remover duplicação). Rodar testes a cada mudança.
 - Ciclos curtos: minutos, não horas. Se travou > 10 min sem passar, reduza o escopo do teste.
-- Tipos de TDD: classic (state-based, mocka pouco) vs london (behavior-based, mocka deps).
+- Escolas: classical (state-based) vs mockist/London (interaction-based). **Default do projeto: classical**, com fakes em memória nos ports driven, assertando resultado e não chamadas; mockist só quando a interação é o próprio resultado.
 - Teste é especificação executável — escrito do ponto de vista do consumidor da API.
 
 ## Procedimento mínimo
 1. Definir próximo comportamento pequeno e observável.
-2. Escrever teste no arquivo `*.test.ts`; rodar → red.
+2. Escrever teste colocado ao lado do código (`foo.test.ts`; `.spec.ts` só e2e em `e2e/`); rodar → red.
 3. Implementar mínimo para passar; rodar → green.
 4. Refatorar produção E teste; rodar → ainda green.
 5. Repetir até a feature estar completa.
@@ -32,10 +32,10 @@ Ciclo curto **red → green → refactor**: escreva o teste que falha, faça pas
 ```ts
 // 1) red
 it("returns total for cart with 2 items", () => {
-  expect(cartTotal([{ price: 10, qty: 2 }, { price: 5, qty: 1 }])).toBe(25);
+  expect(cartTotalMinor([{ priceMinor: 1000, quantity: 2 }, { priceMinor: 500, quantity: 1 }])).toBe(2500);
 });
 // 2) green (mínimo)
-export const cartTotal = (items: Item[]) => items.reduce((s, i) => s + i.price * i.qty, 0);
+export const cartTotalMinor = (items: CartItem[]) => items.reduce((sum, i) => sum + i.priceMinor * i.quantity, 0);
 // 3) refactor: extrair, renomear se necessário
 ```
 

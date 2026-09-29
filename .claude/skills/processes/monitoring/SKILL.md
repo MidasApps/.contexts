@@ -15,15 +15,16 @@ Conjunto coordenado de SLIs, SLOs, alertas e dashboards que indicam se o sistema
 - **RED** (Rate, Errors, Duration) para serviços; **USE** (Utilization, Saturation, Errors) para recursos.
 - **Alertas:** baseados em **sintoma** (user-visible) > causa (CPU alta). Cada alerta tem runbook.
 - **Alert fatigue:** se dispara sem ação, é ruído — silencie ou ajuste threshold. Cada alerta deve ser acionável.
-- **Burn rate alerts** para SLO: detecta queima rápida do budget (e.g., gastando 10% do budget mensal em 1h).
+- **Burn rate alerts** para SLO: fast (1h consome 2% do budget mensal) → P1; slow (6h consome 5%) → P2.
+- **5xx — uma tabela só** (em `processes/monitoring.md`): SLO < 1%; page P1 em > 1% por 5 min ou > 5% em 1 min; nos 30 min pós-deploy, baseline + 1 p.p. dispara rollback automático. Deploy e rollback não inventam outro número.
 - **Dashboards:** por serviço (overview) + por incident (debugging). Curto, focado.
 - **On-call:** rotação clara; runbook por alerta; escalation path.
 - **Synthetics / health checks** externos para detectar problema antes do user.
-- **Stack típica:** Prometheus + Grafana, Datadog, New Relic, Cloud Monitoring (GCP), CloudWatch (AWS).
+- **Stack canônica:** Cloud Monitoring + Cloud Logging, OpenTelemetry → Cloud Trace, Sentry (erros), Langfuse (LLM), PagerDuty (on-call), status page. Ferramenta nova entra por ADR.
 
 ## Procedimento mínimo
 1. Definir 3-5 SLIs críticos por serviço (latência, error rate, disponibilidade, saturação).
-2. SLOs realistas (não 100%); error budget calculado.
+2. SLOs a partir dos defaults do projeto (99.9% disponibilidade crítica, p95 < 800 ms, 5xx < 1%, TTFT < 1 s); desvio exige ADR. Error budget calculado.
 3. Alertas por sintoma (user-impacting) + burn-rate alertas para SLO.
 4. Runbook por alerta: o que verificar, como mitigar, quando escalar.
 5. Dashboard "overview" do serviço para on-call.
@@ -31,23 +32,22 @@ Conjunto coordenado de SLIs, SLOs, alertas e dashboards que indicam se o sistema
 
 ## Anti-patterns
 - Alerta em CPU > 80% que dispara toda noite → fadiga; alertar em latência/error percebida.
-- SLO 100% → vai violar; alvo realista (99.9% serviços críticos, 99% gerais).
+- SLO 100% → vai violar; use os defaults (99.9% para serviços críticos).
 - Alerta sem runbook → on-call não sabe agir.
 - Dashboard de 50 gráficos → ninguém olha; foco no que decide ação.
 
 ## Mini-exemplo
 ```yaml
-# SLO: 99.5% das requests /v1/* abaixo de 500ms em 30 dias
-sli: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{route=~"/v1/.+"}[5m])) by (le))
-slo_target: 0.995
-budget_remaining_alert:
-  expr: error_budget_remaining < 0.1
-  for: 15m
-  severity: warning
-fast_burn_alert:
-  expr: error_budget_burn_rate_1h > 14
-  for: 5m
-  severity: page
+# Esquemático (independente de ferramenta; implementar em Cloud Monitoring SLO)
+slo: availability /v1/*  target: 0.999  window: 30d   # budget = 0.1%
+alerts:
+  - name: fast_burn   # 1h consome 2% do budget mensal (burn rate ≈ 14.4)
+    severity: P1      # PagerDuty page + #incidents
+  - name: slow_burn   # 6h consome 5% do budget mensal (burn rate ≈ 6)
+    severity: P2      # PagerDuty notify + #alerts
+  - name: http_5xx_sustained  # > 1% por 5 min
+    severity: P1
+runbook: link obrigatório em cada alerta
 ```
 
 ---

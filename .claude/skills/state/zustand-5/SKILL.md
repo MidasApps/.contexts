@@ -1,11 +1,11 @@
 ---
 name: zustand-5
-description: Use para state management com Zustand 5 — stores, slices, persistência. Keywords: zustand, store, state.
+description: Use para state management client-side com Zustand 5 (zustand@5.0.15) — stores, selectors, useShallow, slices, persist, store por request no Next. Keywords: zustand, store, state, useShallow, persist, use-*-store.
 allowed-tools: Read, Edit, Write, Grep, Glob, Bash
 ---
 # Zustand 5
 
-Store global minimalista para React: API baseada em hooks, sem Context boilerplate, sem reducers obrigatórios, com middlewares (persist, immer, devtools, subscribeWithSelector).
+Store global minimalista para React (baseline **zustand@5.0.15**, peer `react >=18`; o projeto usa React 19.3.0): API baseada em hooks, sem Context boilerplate, sem reducers obrigatórios, com middlewares (persist, immer, devtools, subscribeWithSelector). Só em Client Components.
 
 ## Essência
 - **Store = hook:** `const useStore = create<S>()((set, get) => ({ ...state, ...actions }))`.
@@ -15,11 +15,11 @@ Store global minimalista para React: API baseada em hooks, sem Context boilerpla
 - **Middlewares:** `persist(store, { name, storage })` para localStorage; `immer(store)` para mutate-style; `devtools(store)` para Redux DevTools; `subscribeWithSelector` para subscribers granulares.
 - **Sem Provider:** store é singleton no módulo. Para teste/SSR isolado, crie store por request via factory.
 - **SSR:** em Next, criar store por request (factory + Context) para evitar vazamento de estado entre usuários.
-- **Equality function:** `useStore(s => s.list, shallow)` para arrays/objetos.
+- **Equality:** o 2º argumento `equalityFn` de `useStore` foi removido na v5; use `useShallow` (abaixo) ou `createWithEqualityFn` de `zustand/traditional`.
 - **`useShallow`** hook em v5 para shorthand de shallow comparison em objetos.
 
 ## Procedimento mínimo
-1. Definir tipo do state + actions.
+1. Arquivo `model/use-<name>-store.ts` do slice FSD (ex. `features/cart/model/use-cart-store.ts`); definir tipo do state + actions.
 2. `create<State>()((set, get) => ({ ...defaults, action: (x) => set({ field: x }) }))`.
 3. Consumir com selector específico: `const user = useStore(s => s.user)`.
 4. Persistência via `persist`; auth/theme/feature flags são candidatos típicos.
@@ -33,15 +33,18 @@ Store global minimalista para React: API baseada em hooks, sem Context boilerpla
 
 ## Mini-exemplo
 ```ts
-type State = { count: number; inc: () => void };
-export const useCounter = create<State>()((set) => ({
+// features/counter/model/use-counter-store.ts
+import { create } from "zustand";
+
+type CounterState = { count: number; inc: () => void };
+export const useCounterStore = create<CounterState>()((set) => ({
   count: 0,
   inc: () => set((s) => ({ count: s.count + 1 })),
 }));
 
-// component:
-const count = useCounter((s) => s.count);
-const inc = useCounter((s) => s.inc);
+// Client Component:
+const count = useCounterStore((s) => s.count);
+const inc = useCounterStore((s) => s.inc);
 ```
 
 ---

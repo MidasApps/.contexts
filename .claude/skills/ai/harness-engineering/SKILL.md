@@ -16,7 +16,7 @@ Disciplina de construir o "andaime" ao redor de um LLM: system prompt, tool surf
 - **Guardrails:** validação de input ANTES do LLM (Zod), validação de output DEPOIS (schema enforce, content filter), allowlist de tools por contexto.
 - **Loop control:** `stopWhen` (n steps, tool específico, condição). Sem loop infinito.
 - **Telemetry:** logar cada step (input, tool calls, tokens, latência, resultado). Indispensável para debug.
-- **Evals:** testes automáticos com casos canônicos + métricas (correctness, format compliance, regression). Eval > "perguntei e funcionou".
+- **Evals:** testes automáticos com casos canônicos + métricas (correctness, format compliance, regression). Eval > "perguntei e funcionou". Runner próprio no Vitest 5; `@mastra/evals` fora (ADR 0004 E4).
 - **Prompt caching:** estabilize prefixo (system + tools) para hit de cache em loops.
 - **Failure modes:** plano para: model recusa, tool falha, output malformado, loop, custo excedido.
 
@@ -38,17 +38,29 @@ Disciplina de construir o "andaime" ao redor de um LLM: system prompt, tool surf
 
 ## Mini-exemplo
 ```ts
-const agent = {
-  systemPrompt: `You are a triage agent for customer support tickets.
-- Output format: { category: string, urgency: "low"|"high", suggestedReply: string }
-- Use the search tool when context is missing; never invent ticket history.`,
-  tools: [{
-    name: "search_tickets",
-    description: "Use when you need past tickets from this customer. Returns up to 5 most recent.",
-    inputSchema: z.object({ customerId: z.string() }),
-  }],
-  stopWhen: stepCountIs(5),
-};
+import { generateText, isStepCount, Output, tool } from "ai";
+import { z } from "zod";
+
+const TriageSchema = z.object({
+  category: z.string(),
+  urgency: z.enum(["low", "high"]),
+  suggestedReply: z.string(),
+});
+
+const result = await generateText({
+  model: anthropic(config.anthropicModelId),
+  instructions: "You triage support tickets. Use the search tool when context is missing; never invent ticket history.",
+  prompt: ticketText,
+  tools: {
+    searchTickets: tool({
+      description: "Use when you need past tickets from this customer. Returns up to 5 most recent.",
+      inputSchema: z.object({ customerId: z.string().min(1) }),
+      execute: async ({ customerId }) => searchTickets(customerId),
+    }),
+  },
+  output: Output.object({ schema: TriageSchema }),
+  stopWhen: isStepCount(5),
+});
 ```
 
 ---
