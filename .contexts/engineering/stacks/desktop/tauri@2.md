@@ -27,9 +27,14 @@ Medido em 2026-09-29 (`npm view`, crates.io, `static.rust-lang.org`):
 | `@tauri-apps/cli`, `@tauri-apps/api` | **2.12.0** | Mesma versão nos dois (pin em `MEMORY.md`). |
 | crate `tauri` | 2.12.0 | `rust-version` 1.90 (MSRV). |
 | crate `tauri-build` | 2.7.0 | Versionado à parte do `tauri`. |
-| Rust | canal **stable** (1.98.1 em 2026-09-01) | Via `rustup`. A máquina de medição tinha 1.95.0, acima do MSRV. |
+| Rust | **1.98.1** (stable de 2026-09-01) | Pin via `rust-toolchain.toml`. Toolchain local abaixo do pin é atualizado com `rustup`; o `rust-toolchain.toml` força a versão. |
 
-- Tauri recebe a versão Rust pelo canal `stable` do `rustup`, não por pin fixo no framework. Um `rust-toolchain.toml` com `channel = "stable"` em `apps/desktop/src-tauri/` deixa o CI e o dev no mesmo canal.
+- Rust é pinado, não flutua: `apps/desktop/src-tauri/rust-toolchain.toml` com `channel = "1.98.1"` deixa CI e dev na mesma versão. Subir o pin segue a política da ADR 0004 (última estável), registrada em `stacks/VERSIONS.md`.
+
+  ```toml
+  [toolchain]
+  channel = "1.98.1"
+  ```
 - Mantenha `@tauri-apps/api` e o crate `tauri` na mesma major.minor. O mesmo vale para cada plugin: `@tauri-apps/plugin-<x>` no npm e `tauri-plugin-<x>` no crates.io.
 - **Pitfall medido:** as duas metades de um plugin nem sempre saem juntas. Em 2026-09-29, `@tauri-apps/plugin-http` estava em 2.7.0 e o crate `tauri-plugin-http` em 2.8.0; `@tauri-apps/plugin-updater` e o crate estavam ambos em 2.13.0. Confira os dois registries antes de subir um plugin.
 
@@ -81,6 +86,7 @@ apps/desktop/
 }
 ```
 
+- `style-src 'unsafe-inline'` tem justificativa (rule `security` §6): Radix e shadcn aplicam atributos `style` inline em runtime (posicionamento de popover, variáveis CSS), e esses atributos não são cobertos pelos nonces e hashes que o Tauri injeta nos assets empacotados. `script-src` continua sem `unsafe-inline`. Revisar no spike SP0b Task 10 se dá para restringir (por exemplo, `style-src-attr` separado de `style-src-elem`).
 - `devUrl` usa a mesma porta do `server.port` do Vite, com `strictPort: true`.
 - `frontendDist` aponta para o output do Vite. O app de produção nunca carrega URL remota.
 - O `identifier` é permanente: vira o application id no Android e o bundle id no iOS.
@@ -106,6 +112,7 @@ O frontend só alcança o que uma capability concede. Arquivos em `src-tauri/cap
 
 - Identificadores seguem `core:<área>:<permissão>` e `<plugin>:<permissão>` (`core:window:allow-set-title`, `opener:allow-open-url`). Escopos (paths, URLs) restringem permissões de plugins como `fs` e `http`.
 - Uma janela coberta por duas capabilities recebe a **união** das permissões. Separe por janela e por plataforma (`platforms`) em vez de empilhar.
+- A CLI gera os schemas em `src-tauri/gen/schemas/`: `desktop-schema.json` e, depois de `tauri android|ios init`, também o schema de mobile. Capability só de mobile aponta o `$schema` para o de mobile.
 - Updater só em capability de desktop (`platforms: ["linux", "macOS", "windows"]`): o plugin não existe no mobile.
 - **Não use `remote.urls`.** No Linux e no Android o Tauri não distingue request de iframe de request da janela.
 - Comandos do próprio app: registre-os em `build.rs` com `tauri_build::AppManifest::new().commands(&[...])`. Isso gera `allow-<comando>`/`deny-<comando>` e nega os comandos não listados.
@@ -143,7 +150,7 @@ O frontend só alcança o que uma capability concede. Arquivos em `src-tauri/cap
   ```
 - `pnpm tauri android init` gera `src-tauri/gen/android/`, que é versionado. `pnpm tauri android dev` roda no emulator ou no aparelho; `--open` abre o Android Studio.
 - **Emulator → máquina host:** dentro do emulator, `127.0.0.1` é o próprio emulator. Serviços locais da máquina (Next com o `/v1`, Firebase Emulator Suite, Postgres) são alcançados por **`10.0.2.2`**, o alias do loopback do host. A URL da API do ambiente `local` no Android usa esse host, e vem de env validada, nunca de literal (rule `environments`).
-- Aparelho físico: o dev server escuta no IP informado por `TAURI_DEV_HOST`, e o Vite usa esse host e o HMR em `ws` (ver `stacks/frontend/vite.md`).
+- Aparelho físico Android: o upstream (`v2.tauri.app/develop`) não descreve host de dev específico para Android; confirmar no spike do SP0b. `TAURI_DEV_HOST` é documentado para aparelho físico **iOS** (`tauri ios dev --force-ip-prompt`, ou `--open --host` com Xcode): o dev server escuta nesse IP e o Vite usa o mesmo host para o HMR em `ws` (ver `stacks/frontend/vite.md`).
 - HTTP em claro para `10.0.2.2` no dev: o comportamento da política de cleartext do projeto Android gerado não foi confirmado. Verificar no spike.
 - Assinatura de release: keystore gerado com `keytool` e `src-tauri/gen/android/keystore.properties` (`password`, `keyAlias`, `storeFile`) lido pelo `build.gradle.kts`. Keystore e `keystore.properties` **nunca** entram no git. No CI, o keystore vai em base64 como secret (`@.contexts/engineering/contracts/secrets.md`).
 - Push remoto (FCM) e App Check: sem plugin oficial. É o ponto aberto do ADR 0007 (spec §14 item 5).

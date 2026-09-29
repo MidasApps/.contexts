@@ -41,7 +41,7 @@ import { ProjectOverviewView } from "@core/client";
 import { ProjectSearchSchema } from "@core/contracts";
 
 export const Route = createFileRoute("/projects/$projectId")({
-  validateSearch: (search) => ProjectSearchSchema.parse(search),
+  validateSearch: ProjectSearchSchema, // Zod 4 é Standard Schema: sem adapter e sem .parse()
   component: ProjectOverviewRoute,
 });
 
@@ -74,7 +74,7 @@ declare module "@tanstack/react-router" {
 
 ## Search params
 
-- Search param é input externo: passa por schema Zod em `validateSearch` (rule `validation`). Um schema compartilhado com o web mora em `packages/contracts`.
+- Search param é input externo: passa por schema Zod em `validateSearch` (rule `validation`). Com Zod 4, passe o schema direto (Standard Schema). Não use `.parse()` que lança nem o `@tanstack/zod-adapter`, que é para Zod 3. Use `.catch()`/`.default()` no schema para parâmetro inválido virar default em vez de erro de rota. Um schema compartilhado com o web mora em `packages/contracts`.
 - Nome de parâmetro e formato seguem a doutrina de API (`?cursor=`, `?sort=-createdAt`, `@.contexts/engineering/contracts/api.md`) quando o parâmetro espelha uma listagem do `/v1`.
 
 ## Guards e dados
@@ -90,9 +90,10 @@ declare module "@tanstack/react-router" {
 
 ```ts
 // packages/client/src/shared/lib/router/router-port.ts  (forma ilustrativa)
+// cada membro é um hook: chame no topo do componente (rules of hooks)
 export type RouterPort = {
-  navigate: (to: string, options?: { replace?: boolean }) => void;
-  back: () => void;
+  useNavigate: () => (to: string, options?: { replace?: boolean }) => void;
+  useBack: () => () => void;
   usePathname: () => string;
   useSearchParam: (name: string) => string | null;
 };
@@ -103,16 +104,19 @@ export type RouterPort = {
 import { useLocation, useNavigate, useRouter } from "@tanstack/react-router";
 import type { RouterPort } from "@core/client";
 
-export function useTanstackRouterPort(): RouterPort {
-  const navigate = useNavigate();
-  const router = useRouter();
-  return {
-    navigate: (to, options) => void navigate({ to, replace: options?.replace }),
-    back: () => router.history.back(),
-    usePathname: () => useLocation({ select: (l) => l.pathname }),
-    useSearchParam: (name) => useLocation({ select: (l) => new URLSearchParams(l.searchStr).get(name) }),
-  };
-}
+// objeto constante, criado fora de render; o provider injeta este valor
+export const tanstackRouterPort: RouterPort = {
+  useNavigate: () => {
+    const navigate = useNavigate();
+    return (to, options) => void navigate({ to, replace: options?.replace });
+  },
+  useBack: () => {
+    const router = useRouter();
+    return () => router.history.back();
+  },
+  usePathname: () => useLocation({ select: (l) => l.pathname }),
+  useSearchParam: (name) => useLocation({ select: (l) => new URLSearchParams(l.searchStr).get(name) }),
+};
 ```
 
 - O port expõe só o que as duas implementações cumprem. Recurso exclusivo de um router (loader, `beforeLoad`, Server Component) fica no arquivo de rota do app, fora do port.
@@ -124,7 +128,7 @@ export function useTanstackRouterPort(): RouterPort {
 
 - `import { Link } from "@tanstack/react-router"` dentro de `packages/client` → port.
 - Tela inteira no arquivo de rota em vez de em `views` de `packages/client`.
-- `validateSearch` que devolve o objeto cru sem schema.
+- `validateSearch` que devolve o objeto cru sem schema, ou que chama `.parse()` em vez de receber o schema.
 - Autorizar no `beforeLoad` e confiar nisso no servidor.
 - Editar `routeTree.gen.ts` à mão ou deixá-lo no lint.
 - Registrar rotas `/admin` no desktop.

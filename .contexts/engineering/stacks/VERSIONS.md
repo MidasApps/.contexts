@@ -63,7 +63,7 @@ Reavalie antes de subir um pin. A coluna "por que não o mais novo" é parte do 
 | @tauri-apps/cli / @tauri-apps/api | 2.12.0 | **2.12.0** | CLI e API na mesma versão. Shell desktop. |
 | vite | 8.3.1 | **8.3.1** | Bundler do app desktop; mesma versão aceita como peer do Vitest 5. Engines Node `^20.19 \|\| >=22.12`. |
 | @tanstack/react-router | 1.170.40 | **1.170.40** | Router do app desktop. Peer React `>=18 \|\| >=19`, engines Node `>=20.19`. |
-| Rust (toolchain) | 1.98.1 stable (`static.rust-lang.org/dist/channel-rust-stable.toml`, 2026-09-01) | canal **stable** | Sem pin fixo: `rust-toolchain.toml` com `channel = "stable"`. MSRV do crate `tauri` 2.12.0: 1.90. |
+| Rust (toolchain) | 1.98.1 stable (`static.rust-lang.org/dist/channel-rust-stable.toml`, 2026-09-01) | **1.98.1** | Pin em `apps/desktop/src-tauri/rust-toolchain.toml` (`channel = "1.98.1"`). MSRV do crate `tauri` 2.12.0: 1.90. |
 | crate tauri / tauri-build | 2.12.0 / 2.7.0 (crates.io) | **2.12.0** / **2.7.0** | `tauri` na mesma major.minor de `@tauri-apps/api`. `tauri-build` tem numeração própria. |
 | @tauri-apps/plugin-* (npm) / tauri-plugin-* (crate) | updater 2.13.0/2.13.0; http 2.7.0/2.8.0; deep-link 2.5.0/2.5.0; notification 2.5.0/2.5.0; store 2.5.0/2.5.0; opener 2.6.0/2.6.0 | latest de cada registry | As duas metades de um plugin nem sempre saem juntas (http em 2026-09-29). Conferir npm e crates.io antes de subir. |
 | @tanstack/router-plugin | 1.168.41 | **1.168.41** | Plugin de Vite do router; peer `@tanstack/react-router ^1.170.40`, `vite >=5`. Linha de versão própria. |

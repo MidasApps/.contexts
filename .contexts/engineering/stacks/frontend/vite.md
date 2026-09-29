@@ -77,14 +77,14 @@ export default defineConfig({
 
 - O bloco `server`/`envPrefix`/`build` é o recomendado pelo guia de Vite do Tauri. `target` fica **abaixo** do default do Vite 8 de propósito, para cobrir as webviews do sistema.
 - `server.port` e `strictPort` casam com `build.devUrl` no `tauri.conf.json`. Se a porta estiver ocupada, o dev falha em vez de subir em outra.
-- `TAURI_DEV_HOST` é preenchido pela CLI do Tauri em dev de mobile com aparelho físico. Sem ele, o server escuta só em localhost.
+- `TAURI_DEV_HOST` é documentado pelo upstream para dev em aparelho físico iOS (`tauri ios dev --force-ip-prompt` ou `--open --host`). Sem ele, o server escuta só em localhost. Aparelho físico Android: não confirmado no upstream (`stacks/desktop/tauri@2.md`, Android).
 
 ## Aliases
 
 - Um alias por app, igual ao do web: `"paths": { "@/*": ["./src/*"] }` no `tsconfig.json` de `apps/desktop`, sem `baseUrl` (removido no TS 7; `@.contexts/engineering/stacks/language/typescript@7.md`).
 - O Vite lê o alias do tsconfig (`resolve.tsconfigPaths: true`). Não repita aliases em `resolve.alias`: um valor duplicado diverge do tsconfig. Em `vitest.config.ts`, a doutrina atual resolve com `vite-tsconfig-paths` (`stacks/testing/vitest.md`); as duas formas leem a mesma fonte.
 - Código de outro pacote entra pelo nome do pacote e pelo `exports` (`@core/client`), nunca por alias apontando para `packages/*/src` (`architecture/monorepo.md`, Fronteiras).
-- **Pitfall:** `packages/client` é compilado pelo bundler do app. Um alias `@/` usado dentro do pacote seria resolvido contra o `src/` do app. Não foi confirmado se `resolve.tsconfigPaths` usa o tsconfig mais próximo de cada arquivo. Até o spike do SP0b confirmar, imports internos de pacote não usam o alias do app.
+- **Pitfall:** `packages/client` é compilado pelo bundler do app, e um alias `@/` usado dentro do pacote pode colidir com o `@/` do app. A doc do Vite diz que "`paths` only applies to a file matched by a `tsconfig.json` through its `files` or `include`" (`vite.dev/config/shared-options`). Isso indica resolução pelo tsconfig que inclui o arquivo, mas o comportamento com pacote do workspace (symlink em `node_modules`) não foi testado. Até o spike do SP0b confirmar, imports internos de pacote não usam alias.
 
 ## Tailwind
 
