@@ -1,32 +1,25 @@
 {
-  "name": "@core/functions",
+  "name": "@core/scripts",
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "main": "lib/index.js",
   "engines": {
-    "node": ">=24.0.0 <25"
+    "node": ">=26.0.0 <27"
   },
   "scripts": {
-    "build": "node build.ts",
-    "dev": "node build.ts --watch",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run --project unit",
     "test:emulators": "vitest run --project emulators"
   },
   "dependencies": {
-    "firebase-admin": "catalog:",
-    "firebase-functions": "catalog:"
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@core/config": "workspace:*",
-    "@core/services": "workspace:*",
-    "@types/node": "catalog:node24",
-    "esbuild": "catalog:",
+    "@types/node": "catalog:",
     "eslint": "catalog:",
     "typescript": "catalog:",
-    "vitest": "catalog:",
-    "zod": "catalog:"
+    "vitest": "catalog:"
   }
 }

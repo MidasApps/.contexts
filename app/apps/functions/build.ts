@@ -10,9 +10,12 @@
  * 3. `lib/node_modules` links to this package's node_modules, so local deploy
  *    analysis and the emulator resolve the SDK and its binary. Firebase never
  *    uploads node_modules.
+ * `--watch` (the `dev` script, started by app/scripts/dev.ts after one full
+ * build) only rebuilds `lib/index.js` in place: the emulator watches `lib/` and
+ * reloads, and a clean rebuild would pull the folder from under it.
  * See docs/plans/2026-09-29-sp0-app-foundation/reports/task-9.md.
  */
-import { build } from "esbuild";
+import { build, context, type BuildOptions } from "esbuild";
 import { mkdir, readFile, rm, symlink, unlink, writeFile } from "node:fs/promises";
 import path from "node:path";
 
@@ -38,18 +41,26 @@ const resolveInstalledVersions = async (names: string[]): Promise<Record<string,
   return Object.fromEntries(entries);
 };
 
+const bundleOptions = (externals: string[]): BuildOptions => ({
+  entryPoints: [path.join(PACKAGE_DIR, "src/index.ts")],
+  outfile: path.join(OUT_DIR, "index.js"),
+  bundle: true,
+  platform: "node",
+  format: "esm",
+  target: `node${DEPLOY_NODE_MAJOR}`,
+  sourcemap: true,
+  external: externals.flatMap((name) => [name, `${name}/*`]),
+  logLevel: "warning",
+});
+
 const bundle = async (externals: string[]): Promise<void> => {
-  await build({
-    entryPoints: [path.join(PACKAGE_DIR, "src/index.ts")],
-    outfile: path.join(OUT_DIR, "index.js"),
-    bundle: true,
-    platform: "node",
-    format: "esm",
-    target: `node${DEPLOY_NODE_MAJOR}`,
-    sourcemap: true,
-    external: externals.flatMap((name) => [name, `${name}/*`]),
-    logLevel: "warning",
-  });
+  await build(bundleOptions(externals));
+};
+
+/** Rebuilds `lib/index.js` on every source change; runs until the process is stopped. */
+const watchBundle = async (externals: string[]): Promise<void> => {
+  const ctx = await context({ ...bundleOptions(externals), logLevel: "info" });
+  await ctx.watch();
 };
 
 const writeDeployManifest = async (source: Manifest, dependencies: Record<string, string>): Promise<void> => {
@@ -67,6 +78,10 @@ const writeDeployManifest = async (source: Manifest, dependencies: Record<string
 const main = async (): Promise<void> => {
   const source = await readManifest(path.join(PACKAGE_DIR, "package.json"));
   const externals = Object.keys(source.dependencies ?? {});
+  if (process.argv.includes("--watch")) {
+    await watchBundle(externals);
+    return;
+  }
   const versions = await resolveInstalledVersions(externals);
   // Unlink first so the recursive delete can never walk into the linked node_modules.
   await unlink(path.join(OUT_DIR, "node_modules")).catch(() => undefined);

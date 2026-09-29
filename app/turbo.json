@@ -42,12 +42,11 @@
     // Catalog tasks write and read app/docs, outside any package, so they are never cached.
     "contracts:catalog": { "cache": false },
     "contracts:check": { "cache": false },
-    "seed:local": {
-      "cache": false
-    },
+    // Started by scripts/dev.ts (root `pnpm dev`), which also runs compose and the emulators.
     "dev": {
       "cache": false,
-      "persistent": true
+      "persistent": true,
+      "passThroughEnv": ["WEB_PORT"]
     }
   }
 }

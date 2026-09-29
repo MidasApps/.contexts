@@ -2,6 +2,8 @@ packages:
   - apps/*
   - packages/*
   - modules/*
+  # Workspace tooling: `pnpm dev` orchestration and `pnpm seed:local` (package @core/scripts).
+  - scripts
 
 # Exact pins so every package resolves the same version (ADR 0004: latest stable,
 # measured with `npm view` on 2026-09-29; exceptions E2/E3 noted inline).
