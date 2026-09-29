@@ -1,5 +1,7 @@
 {
   "$schema": "https://turborepo.com/schema.json",
+  // Agent guidance lives in ../.contexts; stop turbo from maintaining a root AGENTS.md.
+  "agentGuidance": false,
   "tasks": {
     "build": {
       "dependsOn": ["^build"],

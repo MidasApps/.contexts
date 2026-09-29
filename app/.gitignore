@@ -5,10 +5,23 @@ dist/
 .turbo/
 .tscache/
 .mastra/
+*.tsbuildinfo
 
-# Local-only data and secrets (.env.example is versioned)
-.env.local
+# Local-only data and secrets (only .env.example is versioned)
+.env
+.env.*
+!.env.example
 .firebase-data/
+
+# Test and coverage output
+coverage/
+playwright-report/
+test-results/
+
+# Tool logs
+*-debug.log
+firebase-debug.log
+ui-debug.log
 
 # Tauri/Rust build output
 src-tauri/target/
