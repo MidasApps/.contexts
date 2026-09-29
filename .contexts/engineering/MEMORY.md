@@ -9,7 +9,7 @@
 > [`stacks/VERSIONS.md`](stacks/VERSIONS.md). Um projeto consumidor compara o
 > `package.json` dele com essa tabela antes de tratar a linha como fato local.
 
-**ADRs:** [0001](decisions/0001-ddc-engineering-baseline-and-harness-enforcement.md) (harness, IDs, secrets), [0002](decisions/0002-baseline-2026-09-version-and-naming-alignment.md) (pins e nomes entre camadas), [0003](decisions/0003-cross-doc-convention-conflicts-resolved.md) (qual documento vence em cada conflito), [0004](decisions/0004-latest-stable-baseline-and-documented-exceptions.md) (política de última estável + exceções E1–E5), [0005](decisions/0005-firestore-document-ids-use-automatic-ids.md) (ID automático no Firestore; ULID só em `eventId`, `Idempotency-Key`, `X-Request-Id`) e [0006](decisions/0006-monorepo-layout-and-package-boundaries.md) (monorepo pnpm + Turborepo; doutrina `src/` distribuída em pacotes).
+**ADRs:** [0001](decisions/0001-ddc-engineering-baseline-and-harness-enforcement.md) (harness, IDs, secrets), [0002](decisions/0002-baseline-2026-09-version-and-naming-alignment.md) (pins e nomes entre camadas), [0003](decisions/0003-cross-doc-convention-conflicts-resolved.md) (qual documento vence em cada conflito), [0004](decisions/0004-latest-stable-baseline-and-documented-exceptions.md) (política de última estável + exceções E1–E5), [0005](decisions/0005-firestore-document-ids-use-automatic-ids.md) (ID automático no Firestore; ULID só em `eventId`, `Idempotency-Key`, `X-Request-Id`), [0006](decisions/0006-monorepo-layout-and-package-boundaries.md) (monorepo pnpm + Turborepo; doutrina `src/` distribuída em pacotes) e [0007](decisions/0007-desktop-and-mobile-shell-with-tauri-2.md) (Tauri 2 desde a v1 para desktop e mobile; `/admin` só web).
 
 ## Matriz de compatibilidade (baseline de produção)
 
@@ -32,7 +32,7 @@ Stack pinado para ser **mutuamente compatível**. Não subir uma major isolada s
 | E2E | **Playwright 1.63.0** | E5: `@playwright/experimental-ct-react` (1.62.1) não é adotado; componente roda no Vitest. |
 | AI default | **`ai@7.0.122`** | Providers nas majors medidas em `VERSIONS.md` (não a mesma major do `ai`). `@mastra/core@1.71.0` aceita `LanguageModelV4`. E4: `@mastra/evals` fora (peer `vitest <5`). |
 | Monorepo | **pnpm 12.6.0** + **turbo 2.11.5** | `packageManager: pnpm@12.6.0` na raiz; turbo orquestra build/lint/test por pacote. `engines.node` `>=26.0.0 <27` em todo pacote, exceto o de functions (`>=24.0.0 <25`, E1). |
-| Desktop | **Tauri 2.12.0** (`@tauri-apps/cli` + `@tauri-apps/api`) + **Vite 8.3.1** + **TanStack Router 1.170.40** | CLI e API na mesma versão. Vite 8.3.1 é o mesmo medido como peer do Vitest 5. TanStack Router: peer React `>=18 \|\| >=19` (React 19.3 ok), engines Node `>=20.19`. |
+| Desktop | **Tauri 2.12.0** (`@tauri-apps/cli` + `@tauri-apps/api`) + **Vite 8.3.1** + **TanStack Router 1.170.40** | CLI e API na mesma versão. Rust pelo canal `stable` do rustup (1.98.1 em 2026-09-01; MSRV do crate `tauri` 2.12.0: 1.90). ADR 0007. Vite 8.3.1 é o mesmo medido como peer do Vitest 5. TanStack Router: peer React `>=18 \|\| >=19` (React 19.3 ok), engines Node `>=20.19`. |
 | i18n | **next-intl 4.14.8** / **use-intl 4.14.8** | `next-intl` no Next (peer `next ^16`); `use-intl` fora do Next (desktop). Mesma versão nos dois. |
 | Firebase client | **firebase 12.19.0** + **firebase-tools 15.32.0** (dev) | `@firebase/rules-unit-testing@5.0.2` (peer `firebase ^12`) testa Security Rules no emulator. firebase-tools não vai para o runtime. |
 
@@ -89,7 +89,7 @@ Stack pinado para ser **mutuamente compatível**. Não subir uma major isolada s
 - [clean-code](practices/clean-code.md) — Princípios canônicos tensionados (Ousterhout, Metz, Beck)
 - [ai-friendly-code](practices/ai-friendly-code.md) — Código otimizado para LLMs (token economy, localidade)
 
-## Stacks — 25 tecnologias
+## Stacks — 28 tecnologias
 
 ### runtime/
 - [node@26](stacks/runtime/node@26.md) — Node.js 26 (Current, LTS 2026-10-28), Temporal, strip-types, Permission Model; Functions ficam em `nodejs24` (ADR 0004 E1)
@@ -103,6 +103,11 @@ Stack pinado para ser **mutuamente compatível**. Não subir uma major isolada s
 - [tailwind@4](stacks/frontend/tailwind@4.md) — Tailwind 4, Oxide engine, CSS-first config
 - [shadcn-ui](stacks/frontend/shadcn-ui.md) — Copy-not-install sobre Radix + Tailwind 4 + cva
 - [radix-ui](stacks/frontend/radix-ui.md) — Primitives headless, `asChild`, data-attributes
+- [vite](stacks/frontend/vite.md) — Vite 8 (Rolldown/Oxc) como bundler do shell desktop; Tailwind via `@tailwindcss/vite`, aliases do tsconfig
+- [tanstack-router](stacks/frontend/tanstack-router.md) — Router file-based do desktop; adapter do port `shared/lib/router`
+
+### desktop/
+- [tauri@2](stacks/desktop/tauri@2.md) — Tauri 2.12: capabilities, IPC, CSP, updater assinado, Android (`10.0.2.2`), plugins como ports (ADR 0007)
 
 ### validation/
 - [zod@4](stacks/validation/zod@4.md) — Zod 4.6 com `z.email`, `z.iso`, `z.toJSONSchema`
@@ -156,7 +161,7 @@ Stack pinado para ser **mutuamente compatível**. Não subir uma major isolada s
 - [monitoring](processes/monitoring.md) — Stack OTel, SLOs com error budget, on-call rotation
 - [rollback](processes/rollback.md) — Flag flip > deploy revert > forward fix; expand-and-contract enable
 
-## Decisions — 6 ADRs + índice
+## Decisions — 7 ADRs + índice
 
 - [README](decisions/README.md) — formato e numeração dos ADRs
 - [0001 — Baseline 2026-07 + harness DDC](decisions/0001-ddc-engineering-baseline-and-harness-enforcement.md) — uuidv7 no Postgres, using-ddc, plans, verification, hooks, remoção guard-secrets
@@ -165,6 +170,7 @@ Stack pinado para ser **mutuamente compatível**. Não subir uma major isolada s
 - [0004 — Última estável + exceções](decisions/0004-latest-stable-baseline-and-documented-exceptions.md) — Node 26 como baseline; E1 Functions `nodejs24`, E2 typescript-eslint, E3 ESLint 9, E4 `@mastra/evals`, E5 Playwright CT
 - [0005 — IDs do Firestore](decisions/0005-firestore-document-ids-use-automatic-ids.md) — ID automático no Firestore (ULID é monotônico e gera hotspot); ULID só em `eventId`, `Idempotency-Key`, `X-Request-Id`
 - [0006 — Monorepo](decisions/0006-monorepo-layout-and-package-boundaries.md) — pnpm + Turborepo; `apps/` só compõem, `packages/` recebem o `src/` da doutrina, fronteiras por `eslint-plugin-boundaries`
+- [0007 — Desktop e mobile com Tauri 2](decisions/0007-desktop-and-mobile-shell-with-tauri-2.md) — Tauri 2 + Vite + TanStack Router desde a v1, reusando `packages/client`; rejeitados PWA-first e Expo; `/admin` só web
 
 ---
 
