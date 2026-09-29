@@ -118,7 +118,7 @@ function pruneSchema(node: unknown, droppedRefs: ReadonlySet<string>): unknown {
   return result;
 }
 
-/** A contract goes out only if something non-sensitive remains (spec §16.4: field pii is authoritative). */
+/** A contract goes out only if something non-sensitive remains (see decision 0005: field pii is authoritative). */
 const isExcluded = (entry: CatalogEntry): boolean =>
   entry.pii === "sensitive" && entry.fields.every((field) => field.pii === "sensitive");
 
