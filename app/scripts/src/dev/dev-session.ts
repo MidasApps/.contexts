@@ -8,10 +8,12 @@ import {
   buildFunctionsProbeUrl,
   buildReadinessChecks,
   buildTurboDevArgs,
+  describePortConflicts,
   readDevPorts,
 } from "./dev-plan.ts";
 import { resolvePackageBin } from "./package-bin.ts";
-import { collectDescendants, killSurvivors, listProcesses, type ProcessEntry } from "./process-tree.ts";
+import { findBusyPorts } from "./port-check.ts";
+import { collectDescendants, killSurvivors, listProcesses, mergeSnapshots, type ProcessEntry } from "./process-tree.ts";
 import { createSupervisor, type Supervisor } from "./supervisor.ts";
 import { fetchHttpStatus, waitForHttp } from "./wait-for-http.ts";
 
@@ -57,12 +59,24 @@ const waitUntilReady = async (name: string, url: string, signal: AbortSignal): P
 type Stopper = { stop: (reason: string, code: number, interactive?: boolean) => Promise<void>; stopped: Promise<number>; signal: AbortSignal };
 
 /**
+ * Emulator processes to check after the stop: descendants of the firebase CLI
+ * seen when everything came up, plus the ones seen when the stop begins (a
+ * Pub/Sub java process can start late, or the stop can come during startup).
+ * Survivors are matched by pid, name and start time (process-tree.ts).
+ */
+type EmulatorTracker = { rootPid?: number; startup: readonly ProcessEntry[] };
+
+const snapshotEmulators = (tracker: EmulatorTracker): readonly ProcessEntry[] =>
+  tracker.rootPid === undefined ? [] : collectDescendants(listProcesses(), tracker.rootPid);
+
+/**
  * One shutdown path for Ctrl+C, other signals and crashed children. A console
  * Ctrl+C already reached every child (Windows console / POSIX group signal
  * below), so they get a grace period to exit and export emulator data. Any other
  * stop on Windows cannot signal gracefully: it exports explicitly, then kills.
  */
-const createStopper = (supervisor: Supervisor, exportEmulatorData: () => void, emulatorTree: () => readonly ProcessEntry[]): Stopper => {
+const createStopper = (args: { supervisor: Supervisor; exportEmulatorData: () => void; tracker: EmulatorTracker }): Stopper => {
+  const { supervisor, exportEmulatorData, tracker } = args;
   const controller = new AbortController();
   let resolveStopped: (code: number) => void = () => undefined;
   const stopped = new Promise<number>((resolve) => { resolveStopped = resolve; });
@@ -76,10 +90,11 @@ const createStopper = (supervisor: Supervisor, exportEmulatorData: () => void, e
     stopping = true;
     controller.abort();
     log(`stopping (${reason}); press Ctrl+C again to force`);
+    const emulatorTree = mergeSnapshots(tracker.startup, snapshotEmulators(tracker));
     const graceful = interactive || !IS_WINDOWS;
     if (!graceful) exportEmulatorData();
     await supervisor.stopAll({ graceMs: graceful ? SHUTDOWN_GRACE_MS : 0, signal: "SIGINT" });
-    for (const orphan of killSurvivors(emulatorTree())) log(`killed orphaned emulator process ${orphan.name} (pid ${String(orphan.pid)})`);
+    for (const orphan of killSurvivors(emulatorTree)) log(`killed orphaned emulator process ${orphan.name} (pid ${String(orphan.pid)})`);
     log("all dev processes stopped");
     resolveStopped(code);
   };
@@ -88,22 +103,40 @@ const createStopper = (supervisor: Supervisor, exportEmulatorData: () => void, e
 
 type Bins = { firebase: string; turbo: string };
 
-const startLongRunning = async (supervisor: Supervisor, stopper: Stopper, config: DevSessionConfig, bins: Bins, onEmulatorsUp: (pid: number) => void): Promise<void> => {
+type StartArgs = { supervisor: Supervisor; stopper: Stopper; config: DevSessionConfig; bins: Bins; tracker: EmulatorTracker };
+
+/** Each start is skipped once a stop has begun (Ctrl+C during startup). */
+const startLongRunning = async ({ supervisor, stopper, config, bins, tracker }: StartArgs): Promise<void> => {
   const hasSavedData = existsSync(path.join(config.appRoot, config.dataDir));
+  const aborted = (): boolean => stopper.signal.aborted;
   supervisor.start({ name: "functions-watch", command: process.execPath, args: [path.join("apps", "functions", "build.ts"), "--watch"], cwd: config.appRoot });
   const emulators = supervisor.start({ name: "emulators", command: process.execPath, args: [bins.firebase, ...buildEmulatorStartArgs({ ...config, hasSavedData })], cwd: config.appRoot });
+  tracker.rootPid = emulators.pid;
   if (!(await waitUntilReady("emulator ui", config.emulatorUiUrl, stopper.signal))) {
-    await stopper.stop("emulators did not start", 1);
+    if (!aborted()) await stopper.stop("emulators did not start", 1);
     return;
   }
   // A load failure is fixable by editing code (the watcher rebuilds), so it only warns.
   await waitUntilReady("functions", buildFunctionsProbeUrl({ projectId: config.projectId, region: config.functionsRegion }), stopper.signal);
-  if (stopper.signal.aborted) return;
-  onEmulatorsUp(emulators.pid);
+  if (aborted()) return;
+  tracker.startup = snapshotEmulators(tracker);
   supervisor.start({ name: "turbo", command: process.execPath, args: [bins.turbo, ...buildTurboDevArgs()], cwd: config.appRoot });
   const checks = buildReadinessChecks(readDevPorts(process.env));
   await Promise.all(checks.map((check) => waitUntilReady(check.name, check.url, stopper.signal)));
-  if (!stopper.signal.aborted) log("everything is up; Ctrl+C stops it (desktop: `pnpm dev:desktop` in another terminal)");
+  if (!aborted()) log("everything is up; Ctrl+C stops it (desktop: `pnpm dev:desktop` in another terminal)");
+};
+
+/**
+ * Fails before anything starts when the web or Mastra port is taken: a stranger
+ * on the port would answer the readiness probe and pass for our server.
+ */
+const assertDevPortsFree = async (): Promise<void> => {
+  const { webPort, mastraPort } = readDevPorts(process.env);
+  const busy = await findBusyPorts([
+    { name: "web", port: webPort, variable: "WEB_PORT" },
+    { name: "mastra", port: mastraPort, variable: "PORT" },
+  ]);
+  if (busy.length > 0) throw new Error(describePortConflicts(busy));
 };
 
 /**
@@ -116,7 +149,7 @@ const startLongRunning = async (supervisor: Supervisor, stopper: Stopper, config
  * @returns the process exit code.
  */
 export const runDevSession = async (config: DevSessionConfig): Promise<number> => {
-  readDevPorts(process.env); // fail before starting anything on an invalid port
+  await assertDevPortsFree();
   const bins = {
     firebase: resolvePackageBin({ fromDir: config.appRoot, packageName: "firebase-tools", binName: "firebase" }),
     turbo: resolvePackageBin({ fromDir: config.appRoot, packageName: "turbo", binName: "turbo" }),
@@ -130,21 +163,19 @@ export const runDevSession = async (config: DevSessionConfig): Promise<number> =
     log,
     onUnexpectedExit: (name, code) => void stopperRef.current?.stop(`${name} exited with code ${String(code)}`, 1),
   });
-  // Emulator processes seen once everything is up; checked again after the stop.
-  let emulatorTree: readonly ProcessEntry[] = [];
-  const active = createStopper(supervisor, () => {
+  const tracker: EmulatorTracker = { startup: [] };
+  const exportEmulatorData = (): void => {
     if (!supervisor.isRunning("emulators")) return;
     log("emulators: exporting data before stopping");
     spawnSync(process.execPath, [bins.firebase, ...buildEmulatorExportArgs(config)], {
       cwd: config.appRoot, stdio: "inherit", timeout: EXPORT_TIMEOUT_MS, windowsHide: true,
     });
-  }, () => emulatorTree);
-  stopperRef.current = active;
-  process.on("SIGINT", () => void active.stop("Ctrl+C", 0, true));
-  for (const signal of ["SIGTERM", "SIGHUP", "SIGBREAK"] as const) process.on(signal, () => void active.stop(signal, 0));
+  };
+  const stopper = createStopper({ supervisor, exportEmulatorData, tracker });
+  stopperRef.current = stopper;
+  process.on("SIGINT", () => void stopper.stop("Ctrl+C", 0, true));
+  for (const signal of ["SIGTERM", "SIGHUP", "SIGBREAK"] as const) process.on(signal, () => void stopper.stop(signal, 0));
 
-  await startLongRunning(supervisor, active, config, bins, (pid) => {
-    emulatorTree = collectDescendants(listProcesses(), pid);
-  });
-  return active.stopped;
+  await startLongRunning({ supervisor, stopper, config, bins, tracker });
+  return stopper.stopped;
 };

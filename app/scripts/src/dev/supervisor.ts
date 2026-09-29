@@ -75,6 +75,8 @@ export const createSupervisor = (options: {
   let stopping = false;
 
   const start = (args: StartArgs): SupervisedChild => {
+    // A child started after stopAll would never be stopped.
+    if (stopping) throw new Error(`supervisor is stopping; not starting ${args.name}`);
     const child = spawn(args.command, args.args, {
       cwd: args.cwd,
       env: args.env ?? process.env,

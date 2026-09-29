@@ -71,5 +71,10 @@ describe("createSupervisor", () => {
     await supervisor.stopAll({ graceMs: 0 });
     expect(exits).toEqual([]);
   });
-});
 
+  it("refuses to start a child once a stop has begun", async () => {
+    supervisor = createSupervisor({ log: () => undefined });
+    await supervisor.stopAll({ graceMs: 0 });
+    expect(() => supervisor?.start({ name: "late", command: process.execPath, args: ["-e", "setInterval(() => {}, 1000)"] })).toThrow(/stopping/);
+  });
+});

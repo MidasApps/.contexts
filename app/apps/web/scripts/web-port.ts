@@ -1,6 +1,7 @@
 /** `next dev` port when WEB_PORT is unset (processes/environments.md §9: localhost:3000). */
 export const DEFAULT_WEB_PORT = 3000;
 
+// scripts/src/dev/dev-plan.ts (readDevPorts) repeats this rule for its readiness probe.
 const PORT_PATTERN = /^\d{1,5}$/;
 
 /**

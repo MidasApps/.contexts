@@ -7,6 +7,7 @@ import {
   buildKillTreeCommand,
   buildReadinessChecks,
   buildTurboDevArgs,
+  describePortConflicts,
   readDevPorts,
 } from "./dev-plan.ts";
 
@@ -91,5 +92,13 @@ describe("readDevPorts", () => {
   it("rejects a port that is not an integer in range, naming the variable", () => {
     expect(() => readDevPorts({ WEB_PORT: "abc" })).toThrow(/WEB_PORT/);
     expect(() => readDevPorts({ PORT: "70000" })).toThrow(/PORT/);
+  });
+});
+
+describe("describePortConflicts", () => {
+  it("names each busy port and the variable that moves it", () => {
+    expect(describePortConflicts([{ name: "web", port: 3000, variable: "WEB_PORT" }])).toBe(
+      "port 3000 (web) is already in use; stop what holds it or set WEB_PORT to a free port",
+    );
   });
 });

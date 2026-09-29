@@ -80,6 +80,9 @@ export const buildReadinessChecks = (args: { webPort: number; mastraPort: number
   { name: "mastra", url: `http://localhost:${args.mastraPort}/health` },
 ];
 
+// Same rule as apps/web/scripts/web-port.ts (resolveWebPort), kept twice on purpose:
+// sharing it needs a package both import, and the only candidates (@core/services,
+// @core/contracts) are runtime code that a dev-tooling helper does not belong in.
 const parsePort = (name: string, raw: string | undefined, fallback: number): number => {
   if (raw === undefined || raw === "") return fallback;
   const port = /^\d{1,5}$/.test(raw) ? Number(raw) : Number.NaN;
@@ -99,3 +102,11 @@ export const readDevPorts = (env: Readonly<Record<string, string | undefined>>):
   webPort: parsePort("WEB_PORT", env["WEB_PORT"], 3000),
   mastraPort: parsePort("PORT", env["PORT"], 4111),
 });
+
+/**
+ * One line per busy port, naming the variable that moves it. `pnpm dev` stops on
+ * this before starting anything: a stranger on the port would otherwise answer
+ * the readiness probe and look like our server.
+ */
+export const describePortConflicts = (busy: readonly { name: string; port: number; variable: string }[]): string =>
+  busy.map((check) => `port ${String(check.port)} (${check.name}) is already in use; stop what holds it or set ${check.variable} to a free port`).join("\n");
