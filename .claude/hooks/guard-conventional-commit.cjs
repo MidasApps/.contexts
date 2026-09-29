@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// PreToolUse(Bash) — bloqueia git commit sem prefixo conventional commit.
+// PreToolUse(Bash|PowerShell) — bloqueia git commit sem prefixo conventional commit.
 const fs = require('fs');
 
 try {

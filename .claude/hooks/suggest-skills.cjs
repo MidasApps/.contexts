@@ -1,322 +1,161 @@
 #!/usr/bin/env node
 /**
- * Dual-mode (não-bloqueante via systemMessage):
+ * Dual-mode, não-bloqueante:
  *  - PostToolUse(Edit|Write): path → skills + @.contexts sugeridos
  *  - UserPromptSubmit: keywords → skills + @.contexts
+ *
+ * Saída: `systemMessage` (visível ao usuário) + `hookSpecificOutput.additionalContext`
+ * (o campo que chega ao Claude). Toda skill citada aqui tem que existir como
+ * `name:` em `.claude/skills/**\/SKILL.md`; todo `@.contexts/...` tem que existir em disco.
  */
 const fs = require('fs');
 
-function emit(message) {
-  process.stdout.write(JSON.stringify({ systemMessage: message }));
-  process.exit(0);
-}
+const E = '@.contexts/engineering';
+const ADR_0004 = `${E}/decisions/0004-latest-stable-baseline-and-documented-exceptions.md`;
 
-function uniq(arr) {
-  return [...new Set(arr.filter(Boolean))];
-}
+// [regex sobre o path normalizado com "/", skills, contexts]
+const PATH_RULES = [
+  [/\.(tsx|jsx)$/, ['react-19', 'next-16'], [`${E}/stacks/frontend/react@19.md`, `${E}/stacks/frontend/next@16.md`]],
+  [/\.tsx?$/, ['typescript-7'], [`${E}/stacks/language/typescript@7.md`]],
+  [/(^|\/)(package\.json|\.nvmrc|\.node-version|Dockerfile[^/]*)$/, ['node-26'], [`${E}/stacks/runtime/node@26.md`, `${E}/MEMORY.md`]],
+  [/(^|\/)functions\/|(^|\/)firebase\.json$/, ['firebase-functions', 'node-26'], [`${E}/stacks/backend/firebase-functions.md`, `${ADR_0004} (E1: Functions em nodejs24)`]],
+  [/firestore/i, ['database-firebase-firestore', 'contracts-firebase-firestore'], [`${E}/contracts/firebase-firestore.md`, `${E}/stacks/database/firebase-firestore.md`]],
+  [/\/migrations?\/|\.sql$/, ['database-postgres', 'contracts-postgres'], [`${E}/contracts/postgres.md`, `${E}/rules/migration.md`, `${E}/stacks/database/postgres.md`]],
+  [/bigquery|\.bq\./i, ['database-bigquery', 'contracts-bigquery'], [`${E}/contracts/bigquery.md`, `${E}/stacks/database/bigquery.md`]],
+  [/pgvector|embedding/i, ['database-pgvector', 'contracts-pgvector'], [`${E}/contracts/pgvector.md`, `${E}/stacks/database/pgvector.md`]],
+  [/tailwind|\.css$/, ['tailwind-4'], [`${E}/stacks/frontend/tailwind@4.md`]],
+  [/(^|\/)(components\/ui|shared\/ui)\//, ['shadcn-ui', 'radix-ui', 'atomic-design'], [`${E}/stacks/frontend/shadcn-ui.md`, `${E}/stacks/frontend/radix-ui.md`, `${E}/architecture/atomic-design.md`]],
+  [/(^|\/)src\/(views|widgets|features|entities|shared)\//, ['fsd'], [`${E}/architecture/fsd.md`]],
+  [/(^|\/)src\/services\//, ['feature-based', 'hexagonal'], [`${E}/architecture/feature-based.md`, `${E}/architecture/hexagonal.md`]],
+  [/(^|\/)use-[a-z0-9-]+-store\.tsx?$/, ['zustand-5'], [`${E}/stacks/state/zustand@5.md`, `${E}/rules/state-management.md`]],
+  [/\.test\.tsx?$/, ['vitest', 'tdd'], [`${E}/rules/testing.md`, `${E}/stacks/testing/vitest.md`]],
+  [/(^|\/)e2e\/|\.spec\.ts$|playwright/i, ['playwright'], [`${E}/stacks/testing/playwright.md`]],
+  [/\.schema\.ts$|(^|\/)contracts\/|zod/i, ['zod-4'], [`${E}/stacks/validation/zod@4.md`, `${E}/contracts/schemas.md`, `${E}/rules/validation.md`]],
+  [/\/api\/|(^|\/)route\.ts$|(^|\/)actions?\.ts$/, ['api', 'zod-4'], [`${E}/rules/api-design.md`, `${E}/contracts/api.md`]],
+  [/(^|\/)events?\/|outbox/i, ['events'], [`${E}/contracts/events.md`]],
+  [/(^|\/)\.env(\.[a-z]+)?$|secret/i, ['secrets'], [`${E}/contracts/secrets.md`, `${E}/processes/environments.md`]],
+  [/mastra/i, ['mastra-sdk'], [`${E}/stacks/ai/mastra-sdk.md`]],
+  [/(^|\/)(ai|llm|prompts?)\//, ['vercel-ai-sdk', 'harness-engineering'], [`${E}/stacks/ai/vercel-ai-sdk.md`, `${E}/stacks/ai/harness-engineering.md`]],
+  [/(^|\/)\.github\/workflows\//, ['deploy', 'node-26'], [`${E}/processes/deploy.md`, `${E}/stacks/runtime/node@26.md`]],
+];
+
+// [regex sobre o prompt em minúsculas, skills, contexts]
+const PROMPT_RULES = [
+  [/\bpostgres|\bpsql\b/, ['database-postgres', 'contracts-postgres'], [`${E}/stacks/database/postgres.md`, `${E}/contracts/postgres.md`]],
+  [/\bfirestore\b/, ['database-firebase-firestore', 'contracts-firebase-firestore'], [`${E}/contracts/firebase-firestore.md`, `${E}/stacks/database/firebase-firestore.md`]],
+  [/\bfirebase\b|\bcloud functions?\b/, ['firebase-functions'], [`${E}/stacks/backend/firebase-functions.md`, `${ADR_0004} (E1: Functions em nodejs24)`]],
+  [/\bnode(\.?js)?\b|\bnodejs\b|\bdockerfile\b|\bnvmrc\b/, ['node-26'], [`${E}/stacks/runtime/node@26.md`, ADR_0004]],
+  [/\bbigquery\b/, ['database-bigquery', 'contracts-bigquery'], [`${E}/contracts/bigquery.md`, `${E}/stacks/database/bigquery.md`]],
+  [/\bpgvector\b|\bembeddings?\b/, ['database-pgvector', 'contracts-pgvector'], [`${E}/contracts/pgvector.md`, `${E}/stacks/database/pgvector.md`]],
+  [/\b(endpoint|api|pagina(c|ç)(a|ã)o|rest|route handler)\b/, ['api', 'zod-4', 'using-ddc'], [`${E}/rules/api-design.md`, `${E}/contracts/api.md`, `${E}/MEMORY.md`]],
+  [/\b(schema|migra(c|ç)(a|ã)o|migration)\b/, ['contracts-postgres', 'zod-4', 'using-ddc'], [`${E}/rules/migration.md`, `${E}/rules/data-modeling.md`, `${E}/contracts/schemas.md`]],
+  [/\bzod\b|\bvalida(c|ç)(a|ã)o\b/, ['zod-4'], [`${E}/stacks/validation/zod@4.md`, `${E}/rules/validation.md`]],
+  [/\bzustand\b|\bstore\b/, ['zustand-5'], [`${E}/stacks/state/zustand@5.md`, `${E}/rules/state-management.md`]],
+  [/\btailwind\b/, ['tailwind-4'], [`${E}/stacks/frontend/tailwind@4.md`]],
+  [/\bshadcn\b/, ['shadcn-ui'], [`${E}/stacks/frontend/shadcn-ui.md`]],
+  [/\bradix\b/, ['radix-ui'], [`${E}/stacks/frontend/radix-ui.md`]],
+  [/\b(ai sdk|vercel ai|streamtext|generatetext|usechat)\b/, ['vercel-ai-sdk'], [`${E}/stacks/ai/vercel-ai-sdk.md`]],
+  [/\bmastra\b/, ['mastra-sdk'], [`${E}/stacks/ai/mastra-sdk.md`]],
+  [/\b(claude|anthropic)\b/, ['anthropic', 'anthropic-sdk'], [`${E}/stacks/ai/anthropic.md`, `${E}/stacks/ai/anthropic-sdk.md`]],
+  [/\b(openai|gpt)\b/, ['openai', 'openai-sdk'], [`${E}/stacks/ai/openai.md`, `${E}/stacks/ai/openai-sdk.md`]],
+  [/\b(gemini|genai|vertex)\b/, ['gemini', 'google-genai-sdk'], [`${E}/stacks/ai/gemini.md`, `${E}/stacks/ai/google-genai-sdk.md`]],
+  [/\b(llm|rag|harness|evals?)\b/, ['harness-engineering'], [`${E}/stacks/ai/harness-engineering.md`]],
+  [/\bvitest\b|\bunit test/, ['vitest'], [`${E}/stacks/testing/vitest.md`, `${E}/rules/testing.md`]],
+  [/\bplaywright\b|\be2e\b/, ['playwright'], [`${E}/stacks/testing/playwright.md`]],
+  [/\b(eventos?|events?|outbox|pub\/?sub)\b/, ['events'], [`${E}/contracts/events.md`]],
+  [/\b(secrets?|segredos?|api key)\b/, ['secrets'], [`${E}/contracts/secrets.md`]],
+  [/\brollback\b/, ['rollback'], [`${E}/processes/rollback.md`]],
+  [/\bdeploy\b/, ['deploy'], [`${E}/processes/deploy.md`]],
+  [/\bprodu(ç|c)(ã|a)o caiu|\bincidente\b|\boutage\b/, ['monitoring', 'rollback'], [`${E}/processes/monitoring.md`, `${E}/processes/rollback.md`]],
+  [/\brelease\b/, ['release'], [`${E}/processes/release.md`]],
+  [/\bpull request|\babrir pr\b/, ['pull-requests'], [`${E}/processes/pull-requests.md`]],
+  [/\bcommits?\b/, [], [`${E}/processes/commits.md`]],
+  [/\bbranch\b/, [], [`${E}/processes/git.md`]],
+  [/\b(next\.?js|next 16|app router)\b/, ['next-16', 'using-ddc'], [`${E}/stacks/frontend/next@16.md`]],
+  [/\breact\b/, ['react-19'], [`${E}/stacks/frontend/react@19.md`]],
+  [/\b(typescript|ts 7)\b/, ['typescript-7'], [`${E}/stacks/language/typescript@7.md`]],
+  [/\btdd\b/, ['tdd', 'vitest'], [`${E}/practices/tdd.md`, `${E}/rules/testing.md`]],
+  [/\bbdd\b/, ['bdd'], [`${E}/practices/bdd.md`]],
+  [/\bsdd\b|\bspec[- ]driven\b/, ['sdd', 'using-ddc'], [`${E}/practices/sdd.md`]],
+  [/\badr\b|\bdecis(ã|a)o arquitetural\b/, ['decisions'], [`${E}/decisions/README.md`]],
+  [/\bddd\b|\bdomain[- ]driven\b/, ['ddd'], [`${E}/architecture/ddd.md`]],
+  [/\bhexagonal\b|\bports?[- ]and[- ]adapters?\b/, ['hexagonal'], [`${E}/architecture/hexagonal.md`]],
+  [/\bfsd\b|\bfeature[- ]sliced\b/, ['fsd'], [`${E}/architecture/fsd.md`]],
+  [/\bclean architecture\b/, ['clean-architecture'], [`${E}/architecture/clean-architecture.md`]],
+  [/\batomic design\b/, ['atomic-design'], [`${E}/architecture/atomic-design.md`]],
+  [/\b(feature|tela|p(á|a)gina|componente|endpoint|implement|crie|cria)\b/, ['using-ddc'], [`${E}/MEMORY.md`, 'using-ddc: classifique e leia SSOT antes de codar']],
+  [/\b(plano|plan|implementation plan|escreva o plano|multi[- ]step)\b/, ['writing-plans-ddc', 'using-ddc', 'sdd'], [`${E}/MEMORY.md`, 'docs/plans/ — planos efêmeros com Global Constraints']],
+  [/\b(pronto|done|completo|testes passam|verif(ique|icar)|ship)\b/, ['verification-before-completion', 'using-ddc'], ['Evidência fresca obrigatória antes de claim']],
+];
+
+const uniq = (arr) => [...new Set(arr.filter(Boolean))];
+
+const emit = (eventName, message) => {
+  process.stdout.write(
+    JSON.stringify({
+      systemMessage: message,
+      hookSpecificOutput: { hookEventName: eventName, additionalContext: message },
+    })
+  );
+  process.exit(0);
+};
+
+const collect = (rules, subject) => {
+  const skills = [];
+  const contexts = [];
+  for (const [re, s, c] of rules) {
+    if (re.test(subject)) {
+      skills.push(...s);
+      contexts.push(...c);
+    }
+  }
+  return { skills: uniq(skills), contexts: uniq(contexts) };
+};
+
+const format = ({ skills, contexts }) => {
+  const parts = [];
+  if (skills.length) parts.push(`Skills: ${skills.join(', ')}`);
+  if (contexts.length) parts.push(`Contexts: ${contexts.join(', ')}`);
+  return parts.join(' · ');
+};
+
+// Edição no próprio SSOT/harness: só lembra a doutrina de não duplicar.
+const suggestForHarness = (fp) => {
+  if (/(^|\/)\.contexts\//.test(fp)) {
+    return { skills: ['using-ddc', 'decisions'], contexts: [`${E}/MEMORY.md`, `${E}/rules/governance.md`] };
+  }
+  if (/(^|\/)\.claude\/(rules|skills|agents|hooks)\//.test(fp) || /(^|\/)(CLAUDE\.md|\.claude\/settings\.json)$/.test(fp)) {
+    return {
+      skills: ['using-ddc'],
+      contexts: ['Agent claude-engineering / ddc-engineering — não duplicar doutrina de .contexts'],
+    };
+  }
+  return null;
+};
+
+const handlePath = (filePath) => {
+  const fp = String(filePath).replace(/\\/g, '/');
+  const found = suggestForHarness(fp) || collect(PATH_RULES, fp);
+  if (!found.skills.length && !found.contexts.length) process.exit(0);
+  if (!found.skills.includes('using-ddc')) found.skills.push('using-ddc');
+  emit('PostToolUse', `${format(found)} (path: ${fp}). Respeite using-ddc: leia SSOT antes de mais edits.`);
+};
+
+const handlePrompt = (rawPrompt) => {
+  const prompt = String(rawPrompt || '').toLowerCase();
+  if (!prompt) process.exit(0);
+  const found = collect(PROMPT_RULES, prompt);
+  if (!found.skills.length && !found.contexts.length) process.exit(0);
+  emit('UserPromptSubmit', `${format(found)}. Aplique using-ddc: Read nos paths @.contexts antes de Write em app.`);
+};
 
 try {
   const input = JSON.parse(fs.readFileSync(0, 'utf8'));
-  const event = input.hook_event_name || input.event || '';
+  const event = input.hook_event_name || '';
+  const filePath = (input.tool_input && (input.tool_input.file_path || input.tool_input.path)) || '';
 
-  // --- PostToolUse: path -> skill + contexts ---
-  const filePath =
-    (input.tool_input && (input.tool_input.file_path || input.tool_input.path)) ||
-    '';
-  const isPostPath =
-    event === 'PostToolUse' ||
-    (filePath && event !== 'UserPromptSubmit');
-
-  if (isPostPath && filePath) {
-    const fp = String(filePath).replace(/\\/g, '/');
-    const skills = [];
-    const contexts = [];
-
-    if (/\.(tsx|jsx)$/.test(fp)) {
-      skills.push('react-19', 'next-16', 'using-ddc');
-      contexts.push(
-        '@.contexts/engineering/stacks/frontend/react@19.md',
-        '@.contexts/engineering/stacks/frontend/next@16.md'
-      );
-    }
-    if (/\.ts$/.test(fp) && !/\.(test|spec)\.ts$/.test(fp)) {
-      skills.push('typescript-7', 'using-ddc');
-      contexts.push('@.contexts/engineering/stacks/language/typescript@7.md');
-    }
-    if (/\/migrations?\//.test(fp) || /\.sql$/.test(fp)) {
-      skills.push('database-postgres', 'contracts-postgres');
-      contexts.push(
-        '@.contexts/engineering/contracts/postgres.md',
-        '@.contexts/engineering/rules/migration.md',
-        '@.contexts/engineering/stacks/database/postgres.md'
-      );
-    }
-    if (/firestore|firebase/i.test(fp)) {
-      skills.push('database-firebase-firestore', 'firebase-functions');
-      contexts.push(
-        '@.contexts/engineering/contracts/firebase-firestore.md',
-        '@.contexts/engineering/stacks/database/firebase-firestore.md'
-      );
-    }
-    if (/bigquery|\.bq\./i.test(fp)) {
-      skills.push('database-bigquery', 'contracts-bigquery');
-      contexts.push('@.contexts/engineering/contracts/bigquery.md');
-    }
-    if (/pgvector|embedding/i.test(fp)) {
-      skills.push('database-pgvector', 'contracts-pgvector');
-      contexts.push('@.contexts/engineering/contracts/pgvector.md');
-    }
-    if (/tailwind|\.css$/.test(fp)) {
-      skills.push('tailwind-4');
-      contexts.push('@.contexts/engineering/stacks/frontend/tailwind@4.md');
-    }
-    if (/\.test\.|\.spec\./.test(fp)) {
-      skills.push('vitest', 'tdd');
-      contexts.push(
-        '@.contexts/engineering/rules/testing.md',
-        '@.contexts/engineering/stacks/testing/vitest.md'
-      );
-    }
-    if (/e2e|playwright/i.test(fp)) {
-      skills.push('playwright');
-      contexts.push('@.contexts/engineering/stacks/testing/playwright.md');
-    }
-    if (/zod|schema/i.test(fp)) {
-      skills.push('zod-4');
-      contexts.push(
-        '@.contexts/engineering/stacks/validation/zod@4.md',
-        '@.contexts/engineering/contracts/schemas.md',
-        '@.contexts/engineering/rules/validation.md'
-      );
-    }
-    if (/\/api\/|route\.ts$|actions?\.ts$/.test(fp)) {
-      skills.push('api', 'zod-4');
-      contexts.push(
-        '@.contexts/engineering/rules/api-design.md',
-        '@.contexts/engineering/contracts/api.md'
-      );
-    }
-
-    // Edições no SSOT / harness
-    if (/\.contexts\//.test(fp) || /\/contexts\//.test(fp)) {
-      skills.push('using-ddc', 'decisions');
-      contexts.push('@.contexts/engineering/MEMORY.md', '@.contexts/engineering/rules/governance.md');
-    }
-    if (/\.claude\/(rules|skills|agents|hooks)\//.test(fp)) {
-      skills.push('using-ddc');
-      contexts.push(
-        'Agent claude-engineering / ddc-engineering — não duplicar doutrina de .contexts'
-      );
-    }
-
-    if (skills.length || contexts.length) {
-      const parts = [];
-      if (skills.length) parts.push(`Skills: ${uniq(skills).join(', ')}`);
-      if (contexts.length) parts.push(`Contexts: ${uniq(contexts).join(', ')}`);
-      emit(`${parts.join(' · ')} (path: ${fp}). Respeite using-ddc: leia SSOT antes de mais edits.`);
-    }
-    process.exit(0);
-  }
-
-  // --- UserPromptSubmit: keyword scan ---
-  const prompt = String(input.prompt || input.user_prompt || '').toLowerCase();
-  if (!prompt) process.exit(0);
-
-  const map = [
-    [
-      /\bpostgres|psql\b/,
-      {
-        skills: ['database-postgres', 'contracts-postgres', 'using-ddc'],
-        contexts: [
-          '@.contexts/engineering/stacks/database/postgres.md',
-          '@.contexts/engineering/contracts/postgres.md',
-        ],
-      },
-    ],
-    [
-      /\bfirestore|firebase\b/,
-      {
-        skills: ['database-firebase-firestore', 'firebase-functions', 'using-ddc'],
-        contexts: [
-          '@.contexts/engineering/contracts/firebase-firestore.md',
-          '@.contexts/engineering/stacks/backend/firebase-functions.md',
-        ],
-      },
-    ],
-    [
-      /\bbigquery\b/,
-      {
-        skills: ['database-bigquery', 'contracts-bigquery'],
-        contexts: ['@.contexts/engineering/contracts/bigquery.md'],
-      },
-    ],
-    [
-      /\bpgvector|embeddings?\b/,
-      {
-        skills: ['database-pgvector', 'contracts-pgvector'],
-        contexts: ['@.contexts/engineering/contracts/pgvector.md'],
-      },
-    ],
-    [
-      /\b(endpoint|api|pagina(c|ç)(a|ã)o|rest|route handler)\b/,
-      {
-        skills: ['api', 'zod-4', 'using-ddc'],
-        contexts: [
-          '@.contexts/engineering/rules/api-design.md',
-          '@.contexts/engineering/contracts/api.md',
-          '@.contexts/engineering/MEMORY.md',
-        ],
-      },
-    ],
-    [
-      /\b(schema|migra(c|ç)(a|ã)o|migration)\b/,
-      {
-        skills: ['contracts-postgres', 'zod-4', 'using-ddc'],
-        contexts: [
-          '@.contexts/engineering/rules/migration.md',
-          '@.contexts/engineering/rules/data-modeling.md',
-          '@.contexts/engineering/contracts/schemas.md',
-        ],
-      },
-    ],
-    [
-      /\brollback\b/,
-      { skills: ['rollback'], contexts: ['@.contexts/engineering/processes/rollback.md'] },
-    ],
-    [
-      /\bdeploy\b/,
-      { skills: ['deploy'], contexts: ['@.contexts/engineering/processes/deploy.md'] },
-    ],
-    [
-      /\bprodu(ç|c)(ã|a)o caiu|incidente|outage\b/,
-      {
-        skills: ['monitoring', 'rollback'],
-        contexts: [
-          '@.contexts/engineering/processes/monitoring.md',
-          '@.contexts/engineering/processes/rollback.md',
-        ],
-      },
-    ],
-    [
-      /\brelease\b/,
-      { skills: ['release'], contexts: ['@.contexts/engineering/processes/release.md'] },
-    ],
-    [
-      /\bpull request|abrir pr\b/,
-      {
-        skills: ['pull-requests'],
-        contexts: ['@.contexts/engineering/processes/pull-requests.md'],
-      },
-    ],
-    [
-      /\b(next\.?js|next 16|app router)\b/,
-      {
-        skills: ['next-16', 'using-ddc'],
-        contexts: ['@.contexts/engineering/stacks/frontend/next@16.md'],
-      },
-    ],
-    [
-      /\breact\b/,
-      {
-        skills: ['react-19'],
-        contexts: ['@.contexts/engineering/stacks/frontend/react@19.md'],
-      },
-    ],
-    [
-      /\b(typescript|ts 7)\b/,
-      {
-        skills: ['typescript-7'],
-        contexts: ['@.contexts/engineering/stacks/language/typescript@7.md'],
-      },
-    ],
-    [
-      /\btdd\b/,
-      {
-        skills: ['tdd', 'vitest'],
-        contexts: ['@.contexts/engineering/practices/tdd.md', '@.contexts/engineering/rules/testing.md'],
-      },
-    ],
-    [
-      /\bbdd\b/,
-      { skills: ['bdd'], contexts: ['@.contexts/engineering/practices/bdd.md'] },
-    ],
-    [
-      /\bsdd|spec[- ]driven\b/,
-      { skills: ['sdd', 'using-ddc'], contexts: ['@.contexts/engineering/practices/sdd.md'] },
-    ],
-    [
-      /\badr|decis(ã|a)o arquitetural\b/,
-      {
-        skills: ['decisions'],
-        contexts: ['@.contexts/engineering/decisions/README.md'],
-      },
-    ],
-    [
-      /\bddd|domain[- ]driven\b/,
-      { skills: ['ddd'], contexts: ['@.contexts/engineering/architecture/ddd.md'] },
-    ],
-    [
-      /\bhexagonal|ports?[- ]and[- ]adapters?\b/,
-      {
-        skills: ['hexagonal'],
-        contexts: ['@.contexts/engineering/architecture/hexagonal.md'],
-      },
-    ],
-    [
-      /\b(feature|tela|p(á|a)gina|componente|endpoint|implement|crie|cria)\b/,
-      {
-        skills: ['using-ddc'],
-        contexts: [
-          '@.contexts/engineering/MEMORY.md',
-          'using-ddc: classifique e leia SSOT antes de codar',
-        ],
-      },
-    ],
-    [
-      /\b(plano|plan|implementation plan|escreva o plano|multi[- ]step)\b/,
-      {
-        skills: ['writing-plans-ddc', 'using-ddc', 'sdd'],
-        contexts: [
-          '@.contexts/engineering/MEMORY.md',
-          'docs/plans/ — planos efêmeros com Global Constraints',
-        ],
-      },
-    ],
-    [
-      /\b(pronto|done|completo|testes passam|verif(ique|icar)|ship)\b/,
-      {
-        skills: ['verification-before-completion', 'using-ddc'],
-        contexts: ['Evidência fresca obrigatória antes de claim'],
-      },
-    ],
-  ];
-
-  const skills = new Set();
-  const contexts = new Set();
-  for (const [re, pack] of map) {
-    if (re.test(prompt)) {
-      pack.skills.forEach((s) => skills.add(s));
-      pack.contexts.forEach((c) => contexts.add(c));
-    }
-  }
-
-  if (skills.size || contexts.size) {
-    const parts = [];
-    if (skills.size) parts.push(`Skills: ${[...skills].join(', ')}`);
-    if (contexts.size) parts.push(`Contexts: ${[...contexts].join(', ')}`);
-    const message = `${parts.join(' · ')}. Aplique using-ddc: Read nos paths @.contexts antes de Write em app.`;
-    // UserPromptSubmit é síncrono: systemMessage só aparece para o usuário.
-    // additionalContext é o campo documentado para chegar ao Claude.
-    process.stdout.write(
-      JSON.stringify({
-        systemMessage: message,
-        hookSpecificOutput: {
-          hookEventName: 'UserPromptSubmit',
-          additionalContext: message,
-        },
-      })
-    );
-  }
+  if (event === 'UserPromptSubmit' || (!event && input.prompt)) handlePrompt(input.prompt);
+  if (filePath) handlePath(filePath);
   process.exit(0);
 } catch {
   process.exit(0);
