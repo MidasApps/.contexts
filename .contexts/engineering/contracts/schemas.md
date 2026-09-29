@@ -256,6 +256,10 @@ const { output } = await generateText({
 
 Schemas usados em prompts de IA devem ter `.describe()` em **todos** os campos — o describe vira parte do prompt que o modelo lê.
 
+### 16.1 Metadados de catálogo
+
+Todo schema exportado de `src/contracts/` (no monorepo, `packages/contracts`) é registrado com `defineContract()` e leva, por campo, `.meta({ description, pii })`: `id` estável `<context>.<Name>`, `kind`, `description`, `examples`, `pii`, `tenancyScope`, `relations` e `ui`. Isso vale para todo contrato, não só para os usados em prompt. O metadado gera OpenAPI, JSON Schema, `docs/catalog/**` e as views semânticas, e o `contracts:check` barra o que faltar. Doutrina completa: `@.contexts/engineering/contracts/data-catalog.md` (ADR 0011).
+
 ## 17. Drizzle integration
 
 Ver `@stacks/database/postgres`. Schemas de DB são derivados, não escritos à mão:

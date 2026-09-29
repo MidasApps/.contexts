@@ -9,7 +9,7 @@
 > [`stacks/VERSIONS.md`](stacks/VERSIONS.md). Um projeto consumidor compara o
 > `package.json` dele com essa tabela antes de tratar a linha como fato local.
 
-**ADRs:** [0001](decisions/0001-ddc-engineering-baseline-and-harness-enforcement.md) (harness, IDs, secrets), [0002](decisions/0002-baseline-2026-09-version-and-naming-alignment.md) (pins e nomes entre camadas), [0003](decisions/0003-cross-doc-convention-conflicts-resolved.md) (qual documento vence em cada conflito), [0004](decisions/0004-latest-stable-baseline-and-documented-exceptions.md) (política de última estável + exceções E1–E6), [0005](decisions/0005-firestore-document-ids-use-automatic-ids.md) (ID automático no Firestore; ULID só em `eventId`, `Idempotency-Key`, `X-Request-Id`), [0006](decisions/0006-monorepo-layout-and-package-boundaries.md) (monorepo pnpm + Turborepo; doutrina `src/` distribuída em pacotes) e [0007](decisions/0007-desktop-and-mobile-shell-with-tauri-2.md) (Tauri 2 desde a v1 para desktop e mobile; `/admin` só web), [0008](decisions/0008-data-stores-split-firestore-postgres-storage-bigquery.md) (Firestore para a aplicação, Postgres + pgvector para Mastra e knowledge base, Storage para arquivos, BigQuery analítico; Data Connect fora) e [0009](decisions/0009-runtime-topology-next-v1-functions-events-mastra-cloud-run.md) (`/v1` no Next em App Hosting, Functions só para eventos, jobs e webhooks, Mastra no Cloud Run) e [0010](decisions/0010-tenancy-organization-project-units-and-rbac.md) (tenancy Organização → Projeto → Unidades, RBAC por nó sem deny, claims como projeção, upload por Signed URL, audit em `audit-logs`, auth do Mastra sem `@mastra/auth-firebase`).
+**ADRs:** [0001](decisions/0001-ddc-engineering-baseline-and-harness-enforcement.md) (harness, IDs, secrets), [0002](decisions/0002-baseline-2026-09-version-and-naming-alignment.md) (pins e nomes entre camadas), [0003](decisions/0003-cross-doc-convention-conflicts-resolved.md) (qual documento vence em cada conflito), [0004](decisions/0004-latest-stable-baseline-and-documented-exceptions.md) (política de última estável + exceções E1–E6), [0005](decisions/0005-firestore-document-ids-use-automatic-ids.md) (ID automático no Firestore; ULID só em `eventId`, `Idempotency-Key`, `X-Request-Id`), [0006](decisions/0006-monorepo-layout-and-package-boundaries.md) (monorepo pnpm + Turborepo; doutrina `src/` distribuída em pacotes) e [0007](decisions/0007-desktop-and-mobile-shell-with-tauri-2.md) (Tauri 2 desde a v1 para desktop e mobile; `/admin` só web), [0008](decisions/0008-data-stores-split-firestore-postgres-storage-bigquery.md) (Firestore para a aplicação, Postgres + pgvector para Mastra e knowledge base, Storage para arquivos, BigQuery analítico; Data Connect fora) e [0009](decisions/0009-runtime-topology-next-v1-functions-events-mastra-cloud-run.md) (`/v1` no Next em App Hosting, Functions só para eventos, jobs e webhooks, Mastra no Cloud Run), [0010](decisions/0010-tenancy-organization-project-units-and-rbac.md) (tenancy Organização → Projeto → Unidades, RBAC por nó sem deny, claims como projeção, upload por Signed URL, audit em `audit-logs`, auth do Mastra sem `@mastra/auth-firebase`) e [0011](decisions/0011-contracts-as-machine-readable-data-catalog.md) (contratos Zod + registry de metadados tipado geram OpenAPI, JSON Schema, catálogo e views semânticas; quatro usos pela IA com guard-rails).
 
 ## Matriz de compatibilidade (baseline de produção)
 
@@ -142,7 +142,7 @@ Stack pinado para ser **mutuamente compatível**. Não subir uma major isolada s
 - [vitest](stacks/testing/vitest.md) — Vitest 5.0, projects, browser-playwright, `clearMocks` ligado
 - [playwright](stacks/testing/playwright.md) — E2E 1.63 + a11y, locators role-first; component testing fica no Vitest (ADR 0004 E5)
 
-## Contracts — 8 doutrinas de modelagem
+## Contracts — 9 doutrinas de modelagem
 
 - [api](contracts/api.md) — Naming kebab/camel, envelopes RFC 9457, status codes, paginação cursor
 - [firebase-firestore](contracts/firebase-firestore.md) — Coleções, audit fields, soft-delete, tenant isolation (default `tenantId`; o core adota o modelo por nó de `rules/tenancy.md`, que prevalece sobre o §7)
@@ -152,6 +152,7 @@ Stack pinado para ser **mutuamente compatível**. Não subir uma major isolada s
 - [schemas](contracts/schemas.md) — Zod compartilhado em `src/contracts/<context>/`, branded IDs, versioning
 - [events](contracts/events.md) — Envelope CloudEvents-like; **eventId = ULID** (wire); `aggregateId` = id do store; outbox TEXT
 - [secrets](contracts/secrets.md) — Secret Manager, rotação 90d, validação Zod no boot
+- [data-catalog](contracts/data-catalog.md) — Metadados obrigatórios (`defineContract`, `.meta()`: id, pii, tenancyScope, relations, ui), `contracts:catalog`/`check`, paridade Drizzle ↔ Zod, views semânticas, uso pela IA (ADR 0011)
 
 ## Processes — 8 fluxos operacionais
 
@@ -164,7 +165,7 @@ Stack pinado para ser **mutuamente compatível**. Não subir uma major isolada s
 - [monitoring](processes/monitoring.md) — Stack OTel, SLOs com error budget, on-call rotation
 - [rollback](processes/rollback.md) — Flag flip > deploy revert > forward fix; expand-and-contract enable
 
-## Decisions — 10 ADRs + índice
+## Decisions — 11 ADRs + índice
 
 - [README](decisions/README.md) — formato e numeração dos ADRs
 - [0001 — Baseline 2026-07 + harness DDC](decisions/0001-ddc-engineering-baseline-and-harness-enforcement.md) — uuidv7 no Postgres, using-ddc, plans, verification, hooks, remoção guard-secrets
@@ -177,6 +178,7 @@ Stack pinado para ser **mutuamente compatível**. Não subir uma major isolada s
 - [0008 — Divisão de dados](decisions/0008-data-stores-split-firestore-postgres-storage-bigquery.md) — Firestore (app, tempo real), Postgres 18 + pgvector (schemas `mastra` e `ai`), Cloud Storage, BigQuery; rejeitados Firestore-only, Postgres-only e Spanner; Data Connect fora da v1 (emulator PGlite)
 - [0009 — Topologia de runtime](decisions/0009-runtime-topology-next-v1-functions-events-mastra-cloud-run.md) — `/v1` em Route Handlers no App Hosting; Functions só eventos/jobs/webhooks; Mastra privado no Cloud Run; rejeitados `/v1` em Functions e Mastra como backend único
 - [0010 — Tenancy e acesso](decisions/0010-tenancy-organization-project-units-and-rbac.md) — Organização → Projeto → Unidades; `memberships`/`roles` como fonte, projeção `access/{tenantId}_{uid}` para as Rules, claims ≤ 1000 bytes; principals user/device/service/staff; Signed URL para upload; `audit-logs`; provider próprio no Mastra (rejeitados claims como fonte, motor ReBAC externo, E7 e `pnpm.overrides`)
+- [0011 — Contratos como catálogo de dados](decisions/0011-contracts-as-machine-readable-data-catalog.md) — Zod + `contractRegistry`/`defineContract` gera OpenAPI, JSON Schema, `docs/catalog/**` e views semânticas; gate `contracts:check`; `drizzle-zod` 0.8.3; rejeitados docs ad hoc e JSON Schema/OpenAPI-first
 
 ---
 

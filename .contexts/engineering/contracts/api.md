@@ -464,9 +464,9 @@ Servidor retorna apenas campos solicitados. Suporte é opcional por endpoint; qu
 - **Bearer tokens** via `Authorization: Bearer <token>`. OAuth 2.0 ou Firebase ID Token.
 - **Nunca** autenticação por session cookie em APIs públicas. Cookies (httpOnly, SameSite=Strict) apenas para sessões de UI Next.js no mesmo domínio, e nesse caso CSRF token explícito em mutations.
 - Tokens nunca em query string (vaza em logs).
-- Refresh tokens em endpoint dedicado: `POST /v1/auth/refresh`.
+- Sem endpoint de refresh na API: a renovação do ID token é do SDK do Firebase Auth no cliente (ADR 0010). Provedor OAuth externo renova no próprio token endpoint dele, nunca por rota `/v1`.
 
-> **Core (ADR 0003, vence o mais específico):** o core refina esta seção. `/v1` aceita só `Authorization: Bearer` (nunca cookie), não há `POST /v1/auth/refresh` (a renovação é do SDK do Firebase Auth), e o cookie de sessão do web é `HttpOnly` + `Secure` + `SameSite=Lax`, só para RSC e Server Actions, com a checagem de origem do Next. Ver `@.contexts/engineering/decisions/0010-tenancy-organization-project-units-and-rbac.md` ("Web: cookie de sessão e CSRF") e `@.contexts/engineering/rules/tenancy.md` §8.1.
+> **Core (ADR 0003, vence o mais específico):** o core refina esta seção. `/v1` aceita só `Authorization: Bearer` (nunca cookie), e o cookie de sessão do web é `HttpOnly` + `Secure` + `SameSite=Lax`, só para RSC e Server Actions, com a checagem de origem do Next. Ver `@.contexts/engineering/decisions/0010-tenancy-organization-project-units-and-rbac.md` ("Web: cookie de sessão e CSRF") e `@.contexts/engineering/rules/tenancy.md` §8.1.
 
 Ver `@rules/security`.
 
