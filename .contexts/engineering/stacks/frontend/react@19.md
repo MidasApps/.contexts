@@ -3,7 +3,7 @@ title: React
 type: stacks
 category: frontend
 version: 19.3.0
-last_updated: 2026-09-28
+last_updated: 2026-09-29
 status: current
 upstream: https://react.dev
 release_notes: https://react.dev/blog/2024/12/05/react-19
@@ -21,7 +21,7 @@ Biblioteca de UI do projeto. Opera como camada de componentes dentro de @stacks/
 
 - **Linha:** React 19.x estável (lançada em dezembro de 2024).
 - **Status:** padrão para todos os apps web do projeto.
-- **Dependência de Next:** Next 16.3.6 aceita React `^19`. O pin do projeto é **19.3.0**, que também satisfaz `@ai-sdk/react@4` (`^19.2.1`). Ver @stacks/frontend/next@16.
+- **Dependência de Next:** Next 16.3.7 aceita React `^19`. O pin do projeto é **19.3.0**, que também satisfaz `@ai-sdk/react@4` (`^19.2.1`). Ver @stacks/frontend/next@16.
 - **Pinagem:** `react` e `react-dom` em versão exata no `package.json`. `@types/react` e `@types/react-dom` na linha 19.
 - **Strict Mode:** **ligado** em dev. Detecta side effects em render, double-invocation de effects, problemas de cleanup. Não desligar.
 - **React Compiler:** estável (1.0+); continua opt-in no projeto. No Next 16: `reactCompiler: true` (top-level em `next.config.ts`) + `babel-plugin-react-compiler`. Tratado em seção própria; não obrigatório.

@@ -45,7 +45,7 @@ Stack pinado para ser **mutuamente compatível**. Não subir uma major isolada s
 5. Postgres 18.6 + pgvector 0.8.6 no mesmo cluster; imagens de dev/CI `postgres:18` / `pgvector/pgvector:0.8.6-pg18`.
 6. Firebase Functions Gen 2 em **nodejs24**, com `engines.node` `>=24.0.0 <25` no pacote de functions; **todo o resto do monorepo** (raiz, apps e packages) declara `>=26.0.0 <27`.
 7. Vitest 5 e Playwright 1.63 compartilham o browser quando o browser mode está ativo. Component testing do Playwright não é usado (E5).
-8. Monorepo em **pnpm 12.6.0** (workspaces) + **turbo 2.11.5**; uma única versão de cada dependência compartilhada no workspace (sem duas majors de React, Zod ou `ai`).
+8. Monorepo em **pnpm 12.6.0** (workspaces) + **turbo 2.11.5**; uma única versão de cada dependência compartilhada no workspace (sem duas majors de React, Zod ou `ai`). **Pendência conhecida:** `@mastra/auth-firebase@1.1.2` traz `firebase-admin ^13.7.0` como dependência direta, ao lado do baseline 14.5.0; a decisão (exceção no ADR 0004, `pnpm.overrides` validado por teste ou não adotar o pacote) fica para o ADR de tenancy (SP0a Task 5) e o spike do SP0b.
 9. **Política (ADR 0004):** o baseline é sempre a última estável. Pré-release (canary, beta, rc) não é versão. Pacote atrás do `latest` só com linha de exceção no ADR 0004.
 
 ---

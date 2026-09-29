@@ -1,7 +1,7 @@
 ---
 title: Vercel AI SDK
-version: ai@7.0.120
-last_updated: 2026-09-28
+version: ai@7.0.122
+last_updated: 2026-09-29
 status: current
 upstream: https://ai-sdk.dev
 repository: https://github.com/vercel/ai
@@ -17,12 +17,12 @@ Pins medidos em 2026-09-28. A major de `@ai-sdk/*` **não** é a major de `ai`. 
 
 | Pacote | Versão |
 |---|---|
-| `ai` | 7.0.120 |
-| `@ai-sdk/react` | 4.0.123 |
-| `@ai-sdk/openai` | 4.0.79 |
-| `@ai-sdk/anthropic` | 4.0.67 |
-| `@ai-sdk/google` | 4.0.84 |
-| `@ai-sdk/google-vertex` | 5.0.97 |
+| `ai` | 7.0.122 |
+| `@ai-sdk/react` | 4.0.125 |
+| `@ai-sdk/openai` | 4.0.81 |
+| `@ai-sdk/anthropic` | 4.0.68 |
+| `@ai-sdk/google` | 4.0.85 |
+| `@ai-sdk/google-vertex` | 5.0.98 |
 
 Exige Node >= 22. O projeto está no Node 26.10. Peer de Zod: `^3.25.76 || ^4.1.8`. O bundle usa só Zod 4.6.5. ESM obrigatório.
 
@@ -34,7 +34,7 @@ Codemod da v6 para a v7: `npx @ai-sdk/codemod v7`. A referência de API é https
 
 - `toDataStreamResponse()` e `result.toUIMessageStreamResponse()` (este ainda existe no `ai@7`, mas está `@deprecated` em favor dos helpers `createUIMessageStreamResponse` + `toUIMessageStream`).
 - `generateObject` / `streamObject` como API atual. Saída estruturada é `generateText` / `streamText` com `Output`.
-- `system:`. O campo é `instructions:` (`system` segue no `ai@7.0.120` só como alias `@deprecated`).
+- `system:`. O campo é `instructions:` (`system` segue no `ai@7.0.122` só como alias `@deprecated`).
 - `tool({ parameters })`. O campo é `inputSchema`.
 - `maxSteps`. O limite do loop é `stopWhen: isStepCount(n)`.
 - `useChat` devolvendo `input` e `handleInputChange`. Esse formato é da linha 4.

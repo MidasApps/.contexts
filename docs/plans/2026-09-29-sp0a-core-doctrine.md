@@ -137,6 +137,7 @@ Expected: só `done`.
 - Modify: `.contexts/business/glossary.md` (Organização, Projeto, Unidade, Membro, Papel, Permissão, Principal, Dispositivo, Módulo, Agente, Tool, Skill, Conector, Thread, Knowledge base — com sinônimos proibidos; remover banner de template só da tabela preenchida)
 - Modify: `MEMORY.md` (Rules: 19)
 
+- [ ] Decidir `firebase-admin` 13.x trazido por `@mastra/auth-firebase@1.1.2` (ver MEMORY invariante 8): exceção E6 no ADR 0004, `pnpm.overrides` validado por teste, ou não adotar o pacote — registrar no ADR 0010
 - [ ] Steps: read → ADR → rule → glossário → verify → ledger → commit `docs(contexts): add tenancy adr, rule and core glossary`
 
 **Verify:** comum + `grep -c "^| " .contexts/business/glossary.md` ≥ 17.
