@@ -1,0 +1,15 @@
+{
+  "extends": "@core/config/tsconfig/nodenext.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "declaration": false,
+    "declarationMap": false,
+    "allowImportingTsExtensions": true,
+    "allowJs": true,
+    "checkJs": true,
+    "incremental": true,
+    "tsBuildInfoFile": ".tscache/tsbuildinfo"
+  },
+  "include": ["src/**/*.ts", "*.ts", "*.js"],
+  "exclude": ["node_modules", ".mastra"]
+}

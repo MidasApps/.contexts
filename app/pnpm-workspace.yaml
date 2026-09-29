@@ -8,6 +8,10 @@ packages:
 catalog:
   "@eslint/js": 9.39.5
   "@firebase/rules-unit-testing": 5.0.2
+  "@mastra/core": 1.71.0
+  "@mastra/loggers": 1.3.2
+  "@mastra/observability": 1.18.1
+  "@mastra/pg": 1.27.1
   "@next/eslint-plugin-next": 16.3.7
   "@types/node": 26.6.3
   "@types/react": 19.3.0
@@ -18,6 +22,7 @@ catalog:
   eslint-plugin-boundaries: 7.2.0
   firebase: 12.19.0
   firebase-tools: 15.32.0
+  mastra: 1.31.3 # CLI; same release train as @mastra/core
   next: 16.3.7
   postgres: 3.4.9
   react: 19.3.0
@@ -40,14 +45,16 @@ engineStrict: true
 savePrefix: ""
 
 # Build scripts stay off unless something here needs them:
-# - unrs-resolver only downloads a native binary when the optional platform
-#   package is missing, and pnpm already installs it;
+# - unrs-resolver and esbuild (used by the mastra bundler) only fetch a native
+#   binary when the optional platform package is missing, and pnpm already
+#   installs it;
 # - @firebase/util only bakes FIREBASE_WEBAPP_CONFIG defaults (unused);
 # - protobufjs only checks its CLI's dependencies;
 # - re2 is superstatic's optional native regex (Hosting emulator, unused here),
 #   which falls back to RegExp.
 allowBuilds:
   "@firebase/util": false
+  esbuild: false
   protobufjs: false
   re2: false
   unrs-resolver: false

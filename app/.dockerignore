@@ -1,0 +1,24 @@
+# Build context is the workspace root (app/): images copy only what they build.
+# Dependencies and build output are recreated inside the image.
+**/node_modules
+**/.next
+**/.mastra
+**/.turbo
+**/.tscache
+**/dist
+**/coverage
+**/*.tsbuildinfo
+**/src-tauri/target
+
+# Local-only data, logs and secrets (never baked into an image).
+**/.env
+**/.env.*
+!.env.example
+.firebase-data
+**/*.log
+
+# Not needed to build any image.
+.git
+docs
+infra
+**/*.test.ts
