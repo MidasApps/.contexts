@@ -218,3 +218,60 @@ $ git diff --quiet main -- .contexts .claude && echo framework-ok -> framework-o
 2. **CI was validated statically** (actionlint) and by running every command locally on Windows. It has not run on GitHub yet: no push was made. The Linux-specific parts (service container, `psql` on the runner, Java download of the emulator jars) are unexercised.
 3. **Only `WEB_PORT` moves web.** `NEXT_PUBLIC_APP_URL`, `MASTRA_CORS_ORIGINS` and the desktop `VITE_API_URL` keep port 3000 (follow-up #11).
 4. **No `desktop-check` job** (follow-up #6).
+
+## Review fixes (Spec PASS / Quality APPROVED, minors)
+
+Commits: `6fef895` fix(workspace): harden dev shutdown and fail fast on busy ports; `0dacc41` ci(workspace): compare the framework guard against the event base; plus the docs commit that adds this section.
+
+1. **Process identity.**
+   - `ProcessEntry` gains `startedAt`:
+     - Windows: `Win32_Process.CreationDate`, as UTC ISO;
+     - POSIX: `ps -o lstart=` with `LC_ALL=C`.
+   - `findSurvivors` requires pid, name and start time to match, and never reports an entry whose start time is unknown.
+   - Tests cover a reused pid of a same-name process, the lstart parse and the CIM JSON parse. They were red first, 4 failing.
+2. **Snapshots at shutdown.**
+   - The firebase CLI pid is recorded as soon as it is spawned.
+   - The stopper re-snapshots its descendants when a stop begins and unions that with the startup snapshot through `mergeSnapshots` (tested). Ancestry comes from `collectDescendants`, and survivors are still filtered by start time.
+   - Stopping during startup is handled in three places:
+     - every wait aborts;
+     - `startLongRunning` returns before any further start;
+     - `supervisor.start` throws once a stop has begun (test red, then green).
+3. **Busy ports.** Before anything starts, `pnpm dev` checks `WEB_PORT` and the Mastra `PORT`.
+   - `port-check.ts` tries a wildcard bind first, then connects to `127.0.0.1` and `::1`. The order matters: the first version ran them in parallel and connected to its own bind probe.
+   - `describePortConflicts` in `dev-plan.ts` builds the message.
+   - Tests use real listeners on loopback and on all interfaces, plus a free port.
+   - Verified: with the unrelated server on :3000, `node scripts/dev.ts` prints `failed: port 3000 (web) is already in use; stop what holds it or set WEB_PORT to a free port` and exits 1 before compose.
+4. **CI guard.** The step compares against a base chosen by event, passed through `env`, not interpolated into the script:
+   - `pull_request`: `github.event.pull_request.base.sha`;
+   - `push`: `github.event.before`, and the step exits 0 with a notice when that is the all-zero SHA;
+   - otherwise: `origin/main`.
+
+   It fails with `::error::` and a `--stat`. The script was exercised locally: push base `main` gave exit 0, an all-zero base skipped, and the root commit as base failed. actionlint 1.7.12 exits 0.
+5. **`startLongRunning`** takes one named object: `{ supervisor, stopper, config, bins, tracker }`. `createStopper` does too.
+   - `parsePort` stays duplicated, with a note at both sites (`scripts/src/dev/dev-plan.ts`, `apps/web/scripts/web-port.ts`). Sharing it would need a package both import, and the only candidates, `@core/services` and `@core/contracts`, are runtime code.
+
+Verify:
+
+```
+$ pnpm -F @core/scripts test          -> Tests 43 passed (43)
+$ pnpm turbo run lint typecheck test --filter=@core/scripts --filter=@core/web -> Tasks: 6 successful, 6 total
+$ actionlint (docker, 1.7.12)         -> exit 0
+# pnpm dev, WEB_PORT=3100, dedicated console:
+#  - run 4 hit "Another next dev server is already running" (a next dev in apps/web on :5102,
+#    pid 72040, not started by me and gone moments later). The crash path worked: turbo exited
+#    1 -> "emulators: exporting data before stopping" -> "Export complete" -> trees killed.
+#  - run 5, all green:
+[dev] functions ready: http://127.0.0.1:5001/demo-core/southamerica-east1/healthz
+[dev] web ready: http://localhost:3100/v1/health
+[dev] mastra ready: http://localhost:4111/health
+[dev] everything is up; ...
+curl: web 200 {"data":{"status":"ok"}}, mastra 200 {"success":true}, emulator ui 200
+# Ctrl+C (CTRL_C_EVENT on that console):
+[dev] stopping (Ctrl+C); press Ctrl+C again to force
++  emulators: Export complete.
+[dev] killed orphaned emulator process java.exe (pid 38756)
+[dev] killed orphaned emulator process conhost.exe (pid 80976)
+[dev] all dev processes stopped
+netstat: no listener on 3100/4000/4111/4400/4500/5001/8080/8085/9099/9199/9299/9150; no app processes left
+$ git diff --quiet main -- .contexts .claude && echo framework-ok -> framework-ok
+```
