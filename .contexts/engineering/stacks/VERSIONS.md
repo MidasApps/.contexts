@@ -55,7 +55,7 @@ Reavalie antes de subir um pin. A coluna "por que não o mais novo" é parte do 
 | @mastra/pg | 1.27.1 | **1.27.1** | Peer core `>=1.68 <2`. |
 | @mastra/ai-sdk | 1.10.5 | **1.10.5** | Ponte para `useChat`. |
 | @mastra/observability | 1.18.1 | **1.18.1** | Tracing via `new Mastra({ observability })`. Peer core `>=1.16 <2`. |
-| @mastra/auth-firebase | 1.1.2 | **1.1.2** | Engines Node `>=22.13`. Declara `firebase-admin ^13.7.0` como **dependency** (não peer): o workspace instala uma cópia 13.x ao lado do baseline 14.5.0. Não passar instâncias de `firebase-admin` entre as duas cópias. |
+| @mastra/auth-firebase | 1.1.2 | **não adotado** | Declara `firebase-admin ^13.7.0` como **dependency** (não peer) e usa a API de namespace (`admin.auth()`, `admin.credential`) que a 14.0.0 removeu: `pnpm.overrides` para 14.5.0 quebra o pacote. O servidor Mastra usa provider próprio `extends MastraAuthProvider` com o `firebase-admin` 14.5.0 do workspace (ADR 0010). |
 | @mastra/loggers | 1.3.2 | **1.3.2** | Peer core `>=1 <2`. |
 | @mastra/google-cloud-pubsub | 1.1.3 | **1.1.3** | Peer core `>=1.13.2 <2`. |
 | @mastra/deployer-vercel | 1.2.30 | **1.2.30** | Deployer preferido (Vercel). Peer core `>=1.58 <2`. |

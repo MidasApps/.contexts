@@ -32,8 +32,8 @@ Papel: identidade de usuário de web e desktop. O `/v1` e o servidor Mastra vali
 
 - Web: login pelo client SDK no `apps/web`. O token segue em `Authorization: Bearer` para o `/v1` (a mesma forma que o desktop usa, 0007).
 - Desktop: o fluxo de login dentro da webview do Tauri (origem customizada, domínios autorizados) é spike do SP0b (0007).
-- **Identity Platform** é o upgrade do Firebase Auth que habilita blocking functions (`beforeUserCreated`, `beforeUserSignedIn`), multi-tenancy de identidade e SAML/OIDC corporativo. O tenant do core (Organização, D4) **não** é um tenant do Identity Platform: o modelo de tenancy e o uso de custom claims ficam no ADR de tenancy (SP0a Task 5).
-- Custom claims viajam no ID token: projeção pequena, nunca fonte de verdade de permissão (Task 5).
+- **Identity Platform** é o upgrade do Firebase Auth que habilita blocking functions (`beforeUserCreated`, `beforeUserSignedIn`), multi-tenancy de identidade e SAML/OIDC corporativo. O tenant do core (Organização, D4) **não** é um tenant do Identity Platform: o modelo de tenancy e o uso de custom claims estão em `@.contexts/engineering/decisions/0010-tenancy-organization-project-units-and-rbac.md` e `@.contexts/engineering/rules/tenancy.md`.
+- Custom claims viajam no ID token: projeção pequena, nunca fonte de verdade de permissão: só `tenantId` ativo, `platformRole` e `accessVersion` (ADR 0010).
 
 ## App Hosting
 
@@ -75,7 +75,7 @@ env:
 Papel: bytes de upload e fontes de ingestão da knowledge base (0008).
 
 - Path com prefixo de tenant: `tenants/{tenantId}/...`. Metadados do arquivo no Firestore.
-- Escrita do cliente negada por padrão (D8). Como o upload é autorizado (URL assinada emitida pelo `/v1` ou Storage Rules com escopo mínimo) fica no ADR de tenancy (SP0a Task 5).
+- Escrita do cliente negada por padrão (D8). Upload e download por Signed URL V4 emitida pelo `/v1` depois do `authorize()`; Storage Rules em `allow read, write: if false` (ADR 0010, `rules/tenancy.md` §11).
 - Reação a upload: `onObjectFinalized` nas Functions dispara a ingestão (`stacks/backend/firebase-functions.md`). A ingestão em si é workflow do Mastra (spec §7).
 - Storage Rules versionadas no repo e deployadas com `firebase deploy --only storage` (`processes/deploy.md` §4).
 

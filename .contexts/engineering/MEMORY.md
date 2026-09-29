@@ -9,7 +9,7 @@
 > [`stacks/VERSIONS.md`](stacks/VERSIONS.md). Um projeto consumidor compara o
 > `package.json` dele com essa tabela antes de tratar a linha como fato local.
 
-**ADRs:** [0001](decisions/0001-ddc-engineering-baseline-and-harness-enforcement.md) (harness, IDs, secrets), [0002](decisions/0002-baseline-2026-09-version-and-naming-alignment.md) (pins e nomes entre camadas), [0003](decisions/0003-cross-doc-convention-conflicts-resolved.md) (qual documento vence em cada conflito), [0004](decisions/0004-latest-stable-baseline-and-documented-exceptions.md) (política de última estável + exceções E1–E6), [0005](decisions/0005-firestore-document-ids-use-automatic-ids.md) (ID automático no Firestore; ULID só em `eventId`, `Idempotency-Key`, `X-Request-Id`), [0006](decisions/0006-monorepo-layout-and-package-boundaries.md) (monorepo pnpm + Turborepo; doutrina `src/` distribuída em pacotes) e [0007](decisions/0007-desktop-and-mobile-shell-with-tauri-2.md) (Tauri 2 desde a v1 para desktop e mobile; `/admin` só web), [0008](decisions/0008-data-stores-split-firestore-postgres-storage-bigquery.md) (Firestore para a aplicação, Postgres + pgvector para Mastra e knowledge base, Storage para arquivos, BigQuery analítico; Data Connect fora) e [0009](decisions/0009-runtime-topology-next-v1-functions-events-mastra-cloud-run.md) (`/v1` no Next em App Hosting, Functions só para eventos, jobs e webhooks, Mastra no Cloud Run).
+**ADRs:** [0001](decisions/0001-ddc-engineering-baseline-and-harness-enforcement.md) (harness, IDs, secrets), [0002](decisions/0002-baseline-2026-09-version-and-naming-alignment.md) (pins e nomes entre camadas), [0003](decisions/0003-cross-doc-convention-conflicts-resolved.md) (qual documento vence em cada conflito), [0004](decisions/0004-latest-stable-baseline-and-documented-exceptions.md) (política de última estável + exceções E1–E6), [0005](decisions/0005-firestore-document-ids-use-automatic-ids.md) (ID automático no Firestore; ULID só em `eventId`, `Idempotency-Key`, `X-Request-Id`), [0006](decisions/0006-monorepo-layout-and-package-boundaries.md) (monorepo pnpm + Turborepo; doutrina `src/` distribuída em pacotes) e [0007](decisions/0007-desktop-and-mobile-shell-with-tauri-2.md) (Tauri 2 desde a v1 para desktop e mobile; `/admin` só web), [0008](decisions/0008-data-stores-split-firestore-postgres-storage-bigquery.md) (Firestore para a aplicação, Postgres + pgvector para Mastra e knowledge base, Storage para arquivos, BigQuery analítico; Data Connect fora) e [0009](decisions/0009-runtime-topology-next-v1-functions-events-mastra-cloud-run.md) (`/v1` no Next em App Hosting, Functions só para eventos, jobs e webhooks, Mastra no Cloud Run) e [0010](decisions/0010-tenancy-organization-project-units-and-rbac.md) (tenancy Organização → Projeto → Unidades, RBAC por nó sem deny, claims como projeção, upload por Signed URL, audit em `audit-logs`, auth do Mastra sem `@mastra/auth-firebase`).
 
 ## Matriz de compatibilidade (baseline de produção)
 
@@ -45,12 +45,12 @@ Stack pinado para ser **mutuamente compatível**. Não subir uma major isolada s
 5. Postgres 18.6 + pgvector 0.8.6 no mesmo cluster; imagens de dev/CI `postgres:18` / `pgvector/pgvector:0.8.6-pg18`.
 6. Firebase Functions Gen 2 em **nodejs24**, com `engines.node` `>=24.0.0 <25` no pacote de functions (E1); o `apps/web` declara `>=24.0.0 <27` com `@types/node@24` como guarda (E6 provisória: local e CI em 26, App Hosting escolhe `nodejs24`); **todo o resto do monorepo** (raiz, demais apps e packages) declara `>=26.0.0 <27`. Código de `packages/*` usado pelo web ou pelas functions roda em Node 24.
 7. Vitest 5 e Playwright 1.63 compartilham o browser quando o browser mode está ativo. Component testing do Playwright não é usado (E5).
-8. Monorepo em **pnpm 12.6.0** (workspaces) + **turbo 2.11.5**; uma única versão de cada dependência compartilhada no workspace (sem duas majors de React, Zod ou `ai`). **Pendência conhecida:** `@mastra/auth-firebase@1.1.2` traz `firebase-admin ^13.7.0` como dependência direta, ao lado do baseline 14.5.0; a decisão (exceção no ADR 0004, `pnpm.overrides` validado por teste ou não adotar o pacote) fica para o ADR de tenancy (SP0a Task 5) e o spike do SP0b.
+8. Monorepo em **pnpm 12.6.0** (workspaces) + **turbo 2.11.5**; uma única versão de cada dependência compartilhada no workspace (sem duas majors de React, Zod ou `ai`). **`firebase-admin` único (14.5.0):** `@mastra/auth-firebase@1.1.2` (que traria uma cópia `^13.7.0` e usa a API de namespace removida na 14) **não é adotado**; o servidor Mastra usa provider próprio `extends MastraAuthProvider` (ADR 0010). Sem exceção na 0004.
 9. **Política (ADR 0004):** o baseline é sempre a última estável. Pré-release (canary, beta, rc) não é versão. Pacote atrás do `latest` só com linha de exceção no ADR 0004.
 
 ---
 
-## Rules — 18 contextos imperativos
+## Rules — 19 contextos imperativos
 
 - [development](rules/development.md) — Regras gerais de código (TS strict, ESM, naming, control flow)
 - [security](rules/security.md) — OWASP, secrets, auth, prompt injection, supply chain
@@ -70,6 +70,7 @@ Stack pinado para ser **mutuamente compatível**. Não subir uma major isolada s
 - [governance](rules/governance.md) — ADRs, ownership, gates, exceções, evals AI, custo (teto × aprovação), compliance
 - [accessibility](rules/accessibility.md) — WCAG 2.2 AA, semântica primeiro, ARIA como último recurso
 - [grounding](rules/grounding.md) — Anti-alucinação: verificar paths/símbolos/versões no repo
+- [tenancy](rules/tenancy.md) — Tenant server-bound, claims como projeção, fail-closed, herança por nó sem deny, principals, audit (ADR 0010)
 
 ## Architecture — 7 modelos estruturais
 
@@ -144,7 +145,7 @@ Stack pinado para ser **mutuamente compatível**. Não subir uma major isolada s
 ## Contracts — 8 doutrinas de modelagem
 
 - [api](contracts/api.md) — Naming kebab/camel, envelopes RFC 9457, status codes, paginação cursor
-- [firebase-firestore](contracts/firebase-firestore.md) — Coleções, audit fields, soft-delete, tenant isolation (default `tenantId`; modelo por conjunto → `rules/tenancy.md`, criado pelo projeto ao adotá-lo)
+- [firebase-firestore](contracts/firebase-firestore.md) — Coleções, audit fields, soft-delete, tenant isolation (default `tenantId`; o core adota o modelo por nó de `rules/tenancy.md`, que prevalece sobre o §7)
 - [bigquery](contracts/bigquery.md) — Star schema, STRUCT/ARRAY, partitioning, policy tags
 - [postgres](contracts/postgres.md) — snake_case, **uuidv7() PKs** (default), audit+soft-delete, TIMESTAMPTZ, outbox
 - [pgvector](contracts/pgvector.md) — Schema `ai`, `chunks_v1`, PKs uuidv7, versionamento de embeddings
@@ -163,7 +164,7 @@ Stack pinado para ser **mutuamente compatível**. Não subir uma major isolada s
 - [monitoring](processes/monitoring.md) — Stack OTel, SLOs com error budget, on-call rotation
 - [rollback](processes/rollback.md) — Flag flip > deploy revert > forward fix; expand-and-contract enable
 
-## Decisions — 9 ADRs + índice
+## Decisions — 10 ADRs + índice
 
 - [README](decisions/README.md) — formato e numeração dos ADRs
 - [0001 — Baseline 2026-07 + harness DDC](decisions/0001-ddc-engineering-baseline-and-harness-enforcement.md) — uuidv7 no Postgres, using-ddc, plans, verification, hooks, remoção guard-secrets
@@ -175,6 +176,7 @@ Stack pinado para ser **mutuamente compatível**. Não subir uma major isolada s
 - [0007 — Desktop e mobile com Tauri 2](decisions/0007-desktop-and-mobile-shell-with-tauri-2.md) — Tauri 2 + Vite + TanStack Router desde a v1, reusando `packages/client`; rejeitados PWA-first e Expo; `/admin` só web
 - [0008 — Divisão de dados](decisions/0008-data-stores-split-firestore-postgres-storage-bigquery.md) — Firestore (app, tempo real), Postgres 18 + pgvector (schemas `mastra` e `ai`), Cloud Storage, BigQuery; rejeitados Firestore-only, Postgres-only e Spanner; Data Connect fora da v1 (emulator PGlite)
 - [0009 — Topologia de runtime](decisions/0009-runtime-topology-next-v1-functions-events-mastra-cloud-run.md) — `/v1` em Route Handlers no App Hosting; Functions só eventos/jobs/webhooks; Mastra privado no Cloud Run; rejeitados `/v1` em Functions e Mastra como backend único
+- [0010 — Tenancy e acesso](decisions/0010-tenancy-organization-project-units-and-rbac.md) — Organização → Projeto → Unidades; `memberships`/`roles` como fonte, projeção `access/{tenantId}_{uid}` para as Rules, claims ≤ 1000 bytes; principals user/device/service/staff; Signed URL para upload; `audit-logs`; provider próprio no Mastra (rejeitados claims como fonte, motor ReBAC externo, E7 e `pnpm.overrides`)
 
 ---
 

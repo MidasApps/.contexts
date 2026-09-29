@@ -99,7 +99,7 @@ O Route Handler do `apps/web` chama o Mastra com duas credenciais (0009):
 | Header | Conteúdo | Quem valida |
 |---|---|---|
 | `X-Serverless-Authorization: Bearer <ID token Google>` | token do service account do App Hosting, audiência = URL do serviço | Cloud Run IAM. Quando o header existe, só ele é checado, e a assinatura é removida antes de chegar ao container |
-| `Authorization: Bearer <ID token Firebase>` | token do usuário, repassado sem alteração | `@mastra/auth-firebase` + `authorizeUser` (ADR de tenancy, SP0a Task 5) |
+| `Authorization: Bearer <ID token Firebase>` | token do usuário, repassado sem alteração | provider próprio `extends MastraAuthProvider` (`verifyIdToken` do `firebase-admin` 14.5.0) + `authorizeUser` checando a membership; `@mastra/auth-firebase` não é adotado (ADR 0010) |
 | `traceparent` | contexto OTel | `@mastra/observability` (`rules/observability.md`) |
 
 CORS: nenhum browser chama o Mastra. Configure `server.cors: false` (o default é `origin: '*'`).

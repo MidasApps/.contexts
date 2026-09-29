@@ -136,11 +136,11 @@ O frontend só alcança o que uma capability concede. Arquivos em `src-tauri/cap
 
 ## Rede até o `/v1`
 
-- O desktop fala só com o `/v1` (ADR 0007) sobre HTTPS, com `Authorization: Bearer <Firebase ID token>`. Cookie de sessão é mecanismo do web. O fluxo completo de autenticação fica no ADR de tenancy e acesso (SP0a Task 5).
+- O desktop fala só com o `/v1` (ADR 0007) sobre HTTPS, com `Authorization: Bearer <Firebase ID token>`. Cookie de sessão é mecanismo do web. Fluxo de autenticação: `@.contexts/engineering/decisions/0010-tenancy-organization-project-units-and-rbac.md` ("Autenticação do desktop").
 - **Origem da webview empacotada:** `http://tauri.localhost` no Windows e no Android (default de `useHttpsScheme: false`), `tauri://localhost` no macOS e no Linux. Origem no iOS: não confirmada. O `/v1` lista essas origens explicitamente no CORS (rule `security` §6: nunca `*`, nunca ecoar `Origin`).
 - **`useHttpsScheme`:** trocar o valor entre releases move IndexedDB, cookies e localStorage para outra origem, e o dado anterior fica inacessível. Escolha uma vez antes do primeiro release.
 - `fetch` da webview (sujeito a CORS) é o caminho default, porque `packages/client` usa o mesmo cliente HTTP no web e no desktop. O plugin `http` (fetch executado no Rust, com escopo de URL) só entra por motivo registrado, e o escopo lista hosts exatos.
-- Token no desktop: use armazenamento do sistema quando houver adapter para isso. Não use `localStorage` para refresh token (rule `security` §2). O adapter concreto é spike do SP0b.
+- Token no desktop: o ID token fica em memória; a sessão persistente vai para o armazenamento seguro do SO pelo port `shared/lib/secure-store` (ADR 0010). Não use `localStorage` para refresh token (rule `security` §2). O adapter concreto é spike do SP0b.
 
 ## Android
 

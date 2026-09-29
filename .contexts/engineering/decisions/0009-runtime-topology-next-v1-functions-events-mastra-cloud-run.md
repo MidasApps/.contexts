@@ -5,6 +5,7 @@
 - **Deciders:** projeto DDC / spec do core agêntico (`docs/superpowers/specs/2026-09-29-agentic-app-core-design.md`, D5, D8, D10)
 - **Tags:** `engineering`, `runtime`, `topology`, `app-hosting`, `cloud-run`, `functions`, `mastra`
 - **Complements:** [0006](0006-monorepo-layout-and-package-boundaries.md) (`apps/web`, `apps/mastra` e `apps/functions` são os alvos de deploy), [0007](0007-desktop-and-mobile-shell-with-tauri-2.md) (o desktop só fala com o `/v1`), [0008](0008-data-stores-split-firestore-postgres-storage-bigquery.md) (quem acessa cada store) e [0004](0004-latest-stable-baseline-and-documented-exceptions.md) (acrescenta a exceção E6: runtime do App Hosting).
+- **Superseded in part by:** [0010](0010-tenancy-organization-project-units-and-rbac.md) (o Mastra valida o token do usuário com provider próprio `extends MastraAuthProvider`; `@mastra/auth-firebase` não é adotado).
 
 ## Context
 
