@@ -15,3 +15,4 @@ Plan: docs/plans/2026-09-29-sp0-app-foundation.md
 - 2026-09-29 | Task 8 complete | commits: f3ba6b3, c51d5f3, ce7fea7 | review: pending
 - 2026-09-29 | Task 9 complete | commits: 4d25e1b (services exports landed in d5a78ee) | review: pending
 - 2026-09-29 | Task 10 complete | commits: 636f766, fc07bfb | review: pending
+- 2026-09-29 | Task 11 complete (+ cleanup items 1-4) | commits: 83c8df5, 30ab2ad, 0bb5791, cc1710b, 8488a12, 8dfb31b, 297acd2, 4215de3 | review: pending
