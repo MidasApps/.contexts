@@ -25,7 +25,7 @@ Stack pinado para ser **mutuamente compatível**. Não subir uma major isolada s
 | Validação | **Zod 4.6.5** | Schema-first; `z.infer` único source de tipos. Sem Zod 3 no bundle. |
 | State client | **Zustand 5.0.15** | Só client components; server state fora. |
 | Backend serverless | **firebase-functions@7.4.0** + **firebase-admin@14.5.0**, runtime **nodejs24** | Gen 2 only. `nodejs24` é o mais novo que o Google oferece (E1). |
-| OLTP | **PostgreSQL 18.6** + Drizzle 0.45.3 | `uuidv7()` nativo. 18.5 não foi publicado. Postgres 19 segue em beta. |
+| OLTP | **PostgreSQL 18.6** + Drizzle 0.45.3 + **drizzle-zod 0.8.3** | `uuidv7()` nativo. Schema de DB derivado com `drizzle-zod` (`drizzle-orm/zod` só na 1.0 rc; ADR 0011). 18.5 não foi publicado. Postgres 19 segue em beta. |
 | Vectors | **pgvector 0.8.6** em Postgres 18 | Imagem `pgvector/pgvector:0.8.6-pg18`. HNSW default. |
 | OLAP | **BigQuery** | Inalterado em major; ver stack. |
 | Unit/integration | **Vitest 5.0.2** | Vite ^6.4, ^7 ou ^8 como peer (medido: 8.3.1). Pacotes `@vitest/*` na mesma versão. |
@@ -178,7 +178,7 @@ Stack pinado para ser **mutuamente compatível**. Não subir uma major isolada s
 - [0008 — Divisão de dados](decisions/0008-data-stores-split-firestore-postgres-storage-bigquery.md) — Firestore (app, tempo real), Postgres 18 + pgvector (schemas `mastra` e `ai`), Cloud Storage, BigQuery; rejeitados Firestore-only, Postgres-only e Spanner; Data Connect fora da v1 (emulator PGlite)
 - [0009 — Topologia de runtime](decisions/0009-runtime-topology-next-v1-functions-events-mastra-cloud-run.md) — `/v1` em Route Handlers no App Hosting; Functions só eventos/jobs/webhooks; Mastra privado no Cloud Run; rejeitados `/v1` em Functions e Mastra como backend único
 - [0010 — Tenancy e acesso](decisions/0010-tenancy-organization-project-units-and-rbac.md) — Organização → Projeto → Unidades; `memberships`/`roles` como fonte, projeção `access/{tenantId}_{uid}` para as Rules, claims ≤ 1000 bytes; principals user/device/service/staff; Signed URL para upload; `audit-logs`; provider próprio no Mastra (rejeitados claims como fonte, motor ReBAC externo, E7 e `pnpm.overrides`)
-- [0011 — Contratos como catálogo de dados](decisions/0011-contracts-as-machine-readable-data-catalog.md) — Zod + `contractRegistry`/`defineContract` gera OpenAPI, JSON Schema, `docs/catalog/**` e views semânticas; gate `contracts:check`; `drizzle-zod` 0.8.3; rejeitados docs ad hoc e JSON Schema/OpenAPI-first
+- [0011 — Contratos como catálogo de dados](decisions/0011-contracts-as-machine-readable-data-catalog.md) — Zod + `contractRegistry`/`defineContract` gera OpenAPI, JSON Schema, `docs/catalog/**` e views semânticas; gate `contracts:check`; `drizzle-zod` 0.8.3; supersede em parte a 0008 (BigQuery na tool SQL do agente, desligado até o SP3); rejeitados docs ad hoc e JSON Schema/OpenAPI-first
 
 ---
 

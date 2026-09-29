@@ -71,9 +71,10 @@ Enquanto `@.contexts/business/compliance.md` for template, todo dado de usuário
 | `personal` | identifica ou se refere a pessoa | nome, e-mail, telefone, IP, `userId`/`uid`, `createdBy`, texto livre escrito por usuário |
 | `sensitive` | dado pessoal sensível (LGPD art. 5º II), documento de identificação, dado financeiro de pessoa, credencial | saúde, biometria, religião, CPF/RG, número de cartão, token, hash de API key |
 
-- O `pii` do schema é **o maior** dos seus campos; o gate falha se for menor.
+- O `pii` do **campo** é o autoritativo: é por ele que o gerador, as views e os filtros decidem. O `pii` do schema é só resumo (o maior dos campos) e sinal fraco; o gate falha se for menor.
 - `sensitive` **nunca** entra em contexto de modelo, em view semântica, em catálogo para IA, em log nem em `examples` (§5, rule `security` §13, §14).
-- `personal` entra em contexto de modelo só dentro do tenant do principal, pelos caminhos da §9, e nunca em log.
+- `personal` entra em contexto de modelo **só** dentro do tenant do principal **e** só quando o chamador tem a `readPermission` do campo (ou a `permission` do contrato) no nó, conferida por `authorize()`. Esse é o "isolamento explícito" da rule `security` §14. Nunca em log.
+- Enviar `personal` a provedor de LLM externo exige sign-off de compliance quando `@.contexts/business/compliance.md` for preenchido (ADR 0011).
 
 ### 3.2 `tenancyScope`
 
@@ -120,7 +121,7 @@ Dois mecanismos do Zod 4.6, com semânticas diferentes (medido no `zod@4.6.5`):
 - `.register(registry, meta)` registra **a própria instância** e a devolve.
 - `z.toJSONSchema` copia **todos** os campos de metadado do registry de `metadata` (default `z.globalRegistry`) para o JSON Schema.
 
-Por isso: **campo** usa `.meta()` (clone, seguro para primitivo reutilizado); **schema** usa `defineContract()`, que grava no `globalRegistry` (para o JSON Schema) e no `contractRegistry` tipado (para a enumeração e o tipo obrigatório).
+Por isso: **campo** usa `.meta()` (clone, seguro para primitivo reutilizado); **schema** usa `defineContract()`, que grava no `globalRegistry` (para o JSON Schema) e no `contractRegistry` tipado (para a enumeração). O enforcement em compilação é o tipo do parâmetro `meta: CatalogMeta`; em runtime, `CatalogMetaSchema.parse`.
 
 ```ts
 // packages/contracts/src/contracts/primitives/catalog-meta.schema.ts
@@ -197,6 +198,7 @@ export type Note = z.infer<typeof NoteSchema>;
 
 - Todo schema **exportado** de `packages/contracts` passa por `defineContract`, exceto primitivos (`primitives/`) e sub-objetos só usados dentro de outro contrato (estes levam `.meta()` por campo).
 - `.describe()` continua válido para campo, mas não carrega `pii`: prefira `.meta({ description, pii })`.
+- Qualquer método que clona (`.refine`, `.check`, `.extend`, `.optional`…) aplicado **depois** de `defineContract` gera um schema novo que herda o metadado (o registry resolve pelo pai) mas **não** está em `listContracts()`. Exporte só o valor devolvido por `defineContract`; refinement vai antes.
 - `@core/contracts` não importa outro pacote do workspace (ADR 0006); o registry é só Zod.
 
 ## 5. Artefatos gerados (`pnpm contracts:catalog`)
@@ -208,16 +210,17 @@ O gerador (`packages/contracts/scripts/build-catalog.ts`) percorre `listContract
 | `docs/catalog/catalog.json` | índice: `id`, `kind`, `context`, `description`, `pii`, `tenancyScope`, `relations`, `permission`, `deprecated`, caminho do JSON Schema | tooling, `/admin`, testes |
 | `docs/catalog/<context>/<Name>.schema.json` | JSON Schema 2020-12 do contrato | validadores externos, MCP |
 | `docs/catalog/<context>/<Name>.md` | página humana: descrição, campos, PII, relações, exemplos | pessoas, revisão de PR |
-| `docs/catalog/catalog.ai.json` | projeção **sem campos `sensitive`** e sem `examples` de campos `personal` | knowledge base, `describeEntity`, resources MCP (§9.1) |
+| `docs/catalog/catalog.ai.json` | projeção **sem campos `sensitive`**, com valores de campos `personal` e `sensitive` removidos também dos `examples` de schema (inclusive em sub-objetos e `$defs`) | knowledge base, `describeEntity`, resources MCP (§9.1) |
 | `docs/openapi/v1.yaml` | OpenAPI 3.1 das rotas `/v1` (`@.contexts/engineering/contracts/api.md` §15) | integradores |
 | `docs/catalog/sql/{postgres,bigquery}/<view>.sql` | DDL das views semânticas (§8) | migration que cria/atualiza a view |
 
 Regras do gerador:
 
 - `z.toJSONSchema(schema, { io, target: "draft-2020-12", unrepresentable: "throw" })`. **Input** de comando/query com `io: "input"`; entidade, output e evento com `io: "output"`. `unrepresentable: "throw"` é obrigatório: `z.date()`, `bigint`, `transform` sem `pipe` e `custom` num contrato são erro, não `{}` silencioso.
-- As chaves de catálogo saem como extensões `x-` via `override`: `x-pii`, `x-tenancy-scope`, `x-relations`, `x-ui`, `x-permission`, `x-kind`. `description`, `examples` e `deprecated` ficam com o nome padrão do JSON Schema.
+- As chaves de catálogo saem como extensões `x-` via `override`, que **apaga** a chave crua copiada pelo Zod e escreve a `x-`: `pii` → `x-pii`, `tenancyScope` → `x-tenancy-scope`, `relations` → `x-relations`, `ui` → `x-ui`, `permission` → `x-permission`, `kind` → `x-kind`. Nenhuma chave crua de catálogo sobra no artefato. `description`, `examples` e `deprecated` ficam com o nome padrão do JSON Schema.
+- **Contrato dentro de contrato:** o `id` no `globalRegistry` faz o Zod extrair o contrato aninhado para `$defs` com `$ref`. O gerador reescreve esse `$ref` para o arquivo do contrato (`uri` → `./<context>/<Name>.schema.json`) em vez de duplicar a definição, e o `catalog.ai.json` aplica a redação de PII também dentro dos `$defs`.
 - Com `io: "input"`, o Zod descarta `examples` de schemas com transform; o gerador valida os exemplos contra o schema antes, então o exemplo continua testado.
-- Como a lib de OpenAPI lê o metadado do `globalRegistry` sem `.openapi()`: medir na instalação (SP0b Task 4). Não confirmado.
+- O OpenAPI é montado a partir desse JSON Schema; `.openapi()` e `@asteasolutions/zod-to-openapi` não são prescritos. A lib que monta paths e components é escolhida e medida na instalação (SP0b Task 4). Não confirmado.
 
 ## 6. Gate de CI (`pnpm contracts:check`)
 
@@ -229,7 +232,9 @@ Regenera tudo em memória e **falha** quando:
 4. `tenancyScope` sem os campos exigidos (§3.2) ou `relations.target` desconhecido;
 5. `command`/`query` sem `permission`, ou `command`/`settings` sem `ui` de schema;
 6. **breaking change** em `id` existente, comparando com o JSON Schema commitado: campo removido, tipo mudado, opcional → obrigatório, valor de enum removido, `pii` rebaixado. Saída: id novo (§2) e expand → migrate → contract (rule `migration`, `@.contexts/engineering/contracts/schemas.md` §11);
-7. id duplicado ou fora do formato da §2.
+7. id duplicado ou fora do formato da §2;
+8. schema exportado de `packages/contracts` que carrega metadado de catálogo herdado (clone de `.refine`, `.check` etc. feito depois de `defineContract`) mas não está em `listContracts()`;
+9. chave crua de catálogo (`pii`, `ui`, `kind`…) presente em artefato gerado (a `override` falhou).
 
 Roda como task Turbo (`@.contexts/engineering/architecture/monorepo.md`, "Pipelines Turbo") em todo PR que toca `packages/contracts/**` ou `modules/**`.
 
@@ -250,11 +255,17 @@ A superfície SQL que a IA enxerga (§9.3). Uma view por contrato marcado para c
 
 | Engine | Local | Naming | Isolamento |
 |---|---|---|---|
-| Postgres 18 | schema `semantic` | `v_<entity>` (`@.contexts/engineering/contracts/postgres.md`, "Views") | `WITH (security_invoker = true, security_barrier = true)` sobre tabelas com RLS por `tenant_id` e nós concedidos |
-| BigQuery | dataset `<context>_semantic` | `<entity>` singular (`@.contexts/engineering/contracts/bigquery.md` §3) | tenant e nós como parâmetros obrigatórios ligados pelo servidor; mecanismo (table function parametrizada ou equivalente) definido no SP3. Não confirmado |
+| Postgres 18 | schema `semantic` | `v_<entity>` (`@.contexts/engineering/contracts/postgres.md`, "Views") | view com direitos do dono (sem `security_invoker`), `WITH (security_barrier = true)`, cujo dono é um role sem login sujeito a RLS, com `FORCE ROW LEVEL SECURITY` nas tabelas base |
+| BigQuery | dataset `<context>_semantic` | table function `<entity>` singular (`@.contexts/engineering/contracts/bigquery.md` §3) | **só table functions parametrizadas** (`tenant_id`, nós concedidos); nenhuma view ou tabela consultável direto. **Desligado (fail-closed)** até o SP3 definir e testar o isolamento (ADR 0011) |
+
+Modelo de privilégios no Postgres:
+
+- **Dono das views:** role `semantic_owner`, `NOLOGIN`, sem `BYPASSRLS`, que não é dono das tabelas base; tem só `SELECT` nas tabelas base de `ai` que as views leem. As tabelas base têm `ENABLE` + `FORCE ROW LEVEL SECURITY`, com política por `tenant_id = current_setting('app.tenant_id', true)` e, em escopo `project`/`unit`, por `node_path && string_to_array(current_setting('app.node_ids', true), ',')` (`@.contexts/engineering/contracts/postgres.md`, "Tenant isolation"). Setting ausente → nenhuma linha (fail-closed).
+- **Role de leitura da IA:** `semantic_reader`, com `USAGE` em `semantic` e `SELECT` nas views, e nada mais: sem grant em tabela base, sem `BYPASSRLS`, não é dono de nada, sem `CREATE` em schema algum.
+- Por que direitos do dono e não `security_invoker`: com `security_invoker` o `semantic_reader` precisaria de `SELECT` nas tabelas base e poderia contornar a view.
 
 - Colunas = campos do contrato em snake_case, com `description` como comentário da coluna. Campos `sensitive` **nunca** viram coluna.
-- Só contratos com `tenancyScope` diferente de `platform` e com fonte em Postgres `ai` ou BigQuery. Dados de aplicação do Firestore chegam à IA por SQL só depois do export para o BigQuery (0008, SP5).
+- Só contratos com `tenancyScope` diferente de `platform` e com fonte em Postgres `ai` ou BigQuery. Dados de aplicação do Firestore chegam à IA por SQL só depois do export para o BigQuery (0008, SP5) e com o caminho BigQuery ligado (SP3).
 - A view é a interface: tabela base nunca é referenciada pelo SQL da IA. Mudança de view segue rule `migration` e `@.contexts/engineering/contracts/bigquery.md` §11.
 
 ## 9. Uso pela IA
@@ -277,14 +288,14 @@ Toda chamada roda com o principal do usuário (ou device) no `RequestContext`, n
 
 ### 9.3 Consulta: SQL somente leitura
 
-A tool de consulta recebe SQL do modelo e só executa se passar por todas as camadas:
+A tool de consulta recebe SQL do modelo e só executa se passar por todas as camadas. Até o SP3 ligar o caminho BigQuery (§8), ela só consulta o Postgres `semantic`; pedido que precisaria de BigQuery recebe erro explícito, nunca fallback.
 
 1. **Parser real** de SQL (lib escolhida no SP3, pin em `stacks/VERSIONS.md`); nada de regex. Uma única instrução `SELECT` (CTE permitido); qualquer DML, DDL, `SET`, `COPY`, `CALL`, transação ou múltiplas instruções → rejeita.
-2. **Allowlist no AST:** relações só das views semânticas da §8 às quais o usuário tem `permission` de leitura; funções só de uma allowlist (agregação, data, texto). `pg_*`, `dblink`, `set_config`, `lo_*`, funções de sistema e UDFs fora da lista → rejeita.
+2. **Allowlist no AST:** relações só das views (Postgres) ou table functions (BigQuery) da §8 às quais o usuário tem `permission` de leitura; funções só de uma allowlist (agregação, data, texto). `pg_*`, `dblink`, `set_config`, `current_setting`, `lo_*`, funções de sistema e UDFs fora da lista → rejeita. Literal de tenant ou de nó escrito pelo modelo (comparado com `tenant_id` ou `node_path`, ou passado como argumento de table function) → rejeita. No BigQuery, o servidor **reescreve** cada referência de relação para a chamada da table function com os parâmetros ligados por ele.
 3. **`LIMIT` forçado:** o servidor envolve a consulta e aplica `LIMIT` ≤ 1000 (default 100), mesmo que o SQL traga outro.
-4. **Role somente leitura:** Postgres com role dedicado só com `USAGE` em `semantic` e `SELECT` nas views, transação `READ ONLY`; BigQuery com service account que tem `roles/bigquery.dataViewer` só nos datasets `*_semantic` e `roles/bigquery.jobUser` no projeto.
-5. **Tenant e nós pelo servidor:** `SET LOCAL app.tenant_id` (e nós concedidos por `authorize()`) antes da consulta no Postgres, com RLS (`@.contexts/engineering/contracts/postgres.md`, "Tenant isolation"); parâmetros ligados no BigQuery. Nunca vindos do modelo.
-6. **Timeout e custo:** `SET LOCAL statement_timeout` (≤ 5 s) no Postgres; `jobTimeoutMs`, `dryRun` e `maximumBytesBilled` no BigQuery (`@.contexts/engineering/contracts/bigquery.md` §18). Estourou → erro para o modelo, sem retry automático.
+4. **Role somente leitura:** no Postgres, a conexão usa `semantic_reader` (§8), em transação `READ ONLY`; no BigQuery, uma service account com `roles/bigquery.dataViewer` só nos datasets `*_semantic` e `roles/bigquery.jobUser` no projeto.
+5. **Tenant e nós pelo servidor:** `SET LOCAL app.tenant_id` e `SET LOCAL app.node_ids` (nós concedidos por `authorize()`) antes da consulta no Postgres, avaliados pela RLS das tabelas base (§8); parâmetros das table functions no BigQuery. Nunca vindos do modelo.
+6. **Timeout e custo** (ratificados em 2026-09-29): `SET LOCAL statement_timeout` (≤ 5 s) no Postgres; `jobTimeoutMs`, `dryRun` e `maximumBytesBilled` no BigQuery (`@.contexts/engineering/contracts/bigquery.md` §18). Estourou → erro para o modelo, sem retry automático.
 7. **Resultado:** conta no orçamento de tokens do tenant; logado só com `requestId`, hash da consulta, views usadas, linhas e `durationMs` (nunca o resultado; rule `observability`).
 
 Mutação por SQL não existe. Mudança de dado é comando (§9.4).
@@ -294,9 +305,10 @@ Mutação por SQL não existe. Mudança de dado é comando (§9.4).
 - Cada contrato `kind: "command"` pode virar tool com **o mesmo `inputSchema`** (JSON Schema `io: "input"` para o modelo; Zod para validar no `execute`). Nada de schema de tool escrito à mão para um comando que já existe.
 - O `execute` chama o **mesmo use case** exposto pelo `exports` de `@core/services` que o `/v1` chama (fronteira da ADR 0006). Sem caminho paralelo.
 - `authorize(principal, permission, nodeId)` com a identidade do usuário, e permissão efetiva = interseção entre o usuário e o teto do agente (ADR 0010).
-- **Toda tool de mutação exige aprovação humana** antes do `execute` (rule `security` §14), com antes/depois na part `data-approval`; permissão `requiresApproval` ainda passa pelo fluxo de aprovação de `services/access` (outro principal). Aprovação e decisão vão para `audit-logs`.
+- **Toda tool de mutação exige confirmação do usuário** antes do `execute` (rule `security` §14), com antes/depois na part `data-approval`: o próprio usuário confirma o que o agente vai fazer em nome dele.
+- Isso é diferente de **`requiresApproval`** (ADR 0010): permissão marcada assim vira pedido de aprovação no fluxo de `services/access`, e quem aprova é **outro principal** com a mesma permissão no nó. A confirmação do usuário não substitui essa aprovação. Confirmação, pedido e decisão vão para `audit-logs`.
 - `kind: "query"` vira tool de leitura sem aprovação, com o mesmo `authorize()`.
-- Output da tool passa pelo schema de output e pelo filtro de PII da §3.1 antes de voltar ao modelo.
+- Output da tool passa pelo schema de output e pelo filtro de PII da §3.1 (campo `personal` só com a `readPermission` do chamador) antes de voltar ao modelo.
 
 ## 10. UI gerativa
 
@@ -314,6 +326,9 @@ Mutação por SQL não existe. Mudança de dado é comando (§9.4).
 - ❌ Prompt com lista de entidades escrita à mão → ✅ `describeEntity` sobre `catalog.ai.json`.
 - ❌ Schema de tool duplicando `CreateNoteInputSchema` → ✅ tool gerada do contrato.
 - ❌ SQL do modelo direto em tabela `ai.*` ou `mastra.*` → ✅ view de `semantic`.
+- ❌ View com `security_invoker = true` + `GRANT SELECT` na tabela base para o role da IA → ✅ view com direitos do dono `semantic_owner` + `FORCE ROW LEVEL SECURITY`.
+- ❌ `WHERE tenant_id = 't1'` escrito pelo modelo → ✅ tenant ligado pelo servidor.
+- ❌ `export const NoteSchema = defineContract(...).refine(...)` → ✅ refinement antes do `defineContract`.
 - ❌ `unrepresentable: "any"` para o gate passar → ✅ contrato de wire com `IsoDateTimeSchema`.
 - ❌ `labelKey: "Título"` → ✅ `labelKey: "example.note.title"`.
 - ❌ Esconder campo no `SchemaForm` como controle de acesso → ✅ `authorize()` no use case.

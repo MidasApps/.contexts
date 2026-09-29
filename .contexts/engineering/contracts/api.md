@@ -546,7 +546,7 @@ data: {"requestId":"..."}
 
 ## 15. OpenAPI
 
-- Spec OpenAPI 3.1 gerada a partir dos schemas Zod via `zod-to-openapi`.
+- Spec OpenAPI 3.1 gerada a partir dos schemas Zod (`z.toJSONSchema` + metadado de catálogo) pelo `pnpm contracts:catalog`; ver `@.contexts/engineering/contracts/data-catalog.md` §5 (ADR 0011).
 - Commitada no repo em `docs/openapi/v1.yaml` (e v2, quando existir).
 - Cada endpoint documenta: parâmetros, request schema, response schema (sucesso e erros possíveis), exemplos.
 - **Examples obrigatórios** por endpoint, cobrindo: caso sucesso típico, caso erro de validação, caso erro de autorização quando aplicável.

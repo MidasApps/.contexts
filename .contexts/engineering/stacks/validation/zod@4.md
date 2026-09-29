@@ -3,7 +3,7 @@ title: Zod
 type: stacks
 category: validation
 version: 4.6.5
-last_updated: 2026-09-28
+last_updated: 2026-09-29
 status: current
 upstream: https://zod.dev
 supersedes: zod@3.23
@@ -245,7 +245,7 @@ No AI SDK 7, `generateText({ output: Output.object({ schema }) })` recebe o sche
 
 ### OpenAPI / JSON Schema
 
-Zod 4 expõe `z.toJSONSchema(schema)` nativamente. Use-o para gerar specs OpenAPI a partir dos schemas de contrato. Para metadata adicional (descriptions, examples, security schemes) o ecosystem `@asteasolutions/zod-to-openapi` continua útil. Ver `@practices/sdd`.
+Zod 4 expõe `z.toJSONSchema(schema)` nativamente. Use-o para gerar specs OpenAPI a partir dos schemas de contrato. Metadado (description, examples, PII, UI) vai por `.meta()` e `defineContract()`, e o OpenAPI do core sai do JSON Schema gerado: `@.contexts/engineering/contracts/data-catalog.md` (ADR 0011). `.openapi()` e `@asteasolutions/zod-to-openapi` não são prescritos. Ver `@practices/sdd`.
 
 ## Performance
 

@@ -23,7 +23,7 @@ Cada ADR é **imutável** após accepted. Decisão superada gera ADR nova com `-
 | [0005](0005-firestore-document-ids-use-automatic-ids.md) | IDs de documento do Firestore usam o ID automático | accepted | 2026-09-28 |
 | [0006](0006-monorepo-layout-and-package-boundaries.md) | Monorepo pnpm + Turborepo e mapeamento da doutrina `src/` para pacotes | accepted | 2026-09-29 |
 | [0007](0007-desktop-and-mobile-shell-with-tauri-2.md) | Desktop e mobile com Tauri 2 desde a v1 | accepted | 2026-09-29 |
-| [0008](0008-data-stores-split-firestore-postgres-storage-bigquery.md) | Divisão de dados: Firestore, Postgres + pgvector, Cloud Storage e BigQuery | accepted | 2026-09-29 |
+| [0008](0008-data-stores-split-firestore-postgres-storage-bigquery.md) | Divisão de dados: Firestore, Postgres + pgvector, Cloud Storage e BigQuery | accepted; leitura analítica do BigQuery pela tool SQL do agente pela 0011 | 2026-09-29 |
 | [0009](0009-runtime-topology-next-v1-functions-events-mastra-cloud-run.md) | Topologia de runtime: `/v1` no Next (App Hosting), Functions para eventos, Mastra no Cloud Run | accepted; auth do Mastra pela 0010 | 2026-09-29 |
 | [0010](0010-tenancy-organization-project-units-and-rbac.md) | Tenancy e acesso: Organização → Projeto → Unidades, RBAC por nó sem deny | accepted | 2026-09-29 |
 | [0011](0011-contracts-as-machine-readable-data-catalog.md) | Contratos como catálogo de dados legível por humanos, compilador e IA | accepted | 2026-09-29 |

@@ -5,6 +5,8 @@
 - **Deciders:** projeto DDC / spec do core agêntico (`docs/superpowers/specs/2026-09-29-agentic-app-core-design.md`, D3, D10, D11)
 - **Tags:** `engineering`, `data`, `firestore`, `postgres`, `pgvector`, `storage`, `bigquery`, `mastra`
 - **Complements:** [0005](0005-firestore-document-ids-use-automatic-ids.md) (IDs do Firestore e do Postgres seguem valendo em cada store), [0006](0006-monorepo-layout-and-package-boundaries.md) (os adapters de cada store moram em `packages/services` e `packages/agents`) e [0004](0004-latest-stable-baseline-and-documented-exceptions.md) (Postgres 18.6 e pgvector 0.8.6 entram pelo baseline).
+- **Superseded in part by:** [0011](0011-contracts-as-machine-readable-data-catalog.md) (só a regra "BigQuery nunca lido no caminho do request", para a leitura analítica da tool SQL do agente durante o chat, desligada até o SP3 definir o isolamento por tenant).
+- **Complemented by:** [0011](0011-contracts-as-machine-readable-data-catalog.md) (schema Postgres `semantic` e datasets BigQuery `<context>_semantic` para as views semânticas).
 
 ## Context
 

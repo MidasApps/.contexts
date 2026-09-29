@@ -36,6 +36,7 @@ Reavalie antes de subir um pin. A coluna "por que não o mais novo" é parte do 
 | @apphosting/adapter-nextjs | 14.0.21 | usado pelo build do App Hosting | Peer `next: *` não prova suporte ao Next 16; a tabela do App Hosting vai até 15.2.x Critérios de saída do spike na ADR 0009. |
 | @google-cloud/cloud-sql-connector | 1.12.0 | **1.12.0** (opcional) | Só se o `apps/mastra` usar IAM database auth sem o socket embutido do Cloud Run (`stacks/backend/cloud-run.md`). |
 | drizzle-orm | 0.45.3 | **0.45.3** | Ainda 0.x. drizzle-kit 0.31.11. |
+| drizzle-zod | 0.8.3 | **0.8.3** | Latest. Peers `drizzle-orm >=0.36.0`, `zod ^3.25.0 \|\| ^4.0.0` (importa `zod/v4`). `drizzle-orm/zod` só existe na linha `1.0.0-rc` (pré-release, não usado; ADR 0011). |
 | PostgreSQL | 18.6 (2026-08-13). 18.5 não foi publicado. 19 beta 4 em 2026-09-24 | **18.6** | 19 não teve GA. pgvector 0.8.6 publica imagem `0.8.6-pg18`, não `pg19`. |
 | pgvector | 0.8.6 (2026-07-29) | **0.8.6** | Imagem `pgvector/pgvector:0.8.6-pg18`. |
 | vitest | 5.0.2 | **5.0.2** | Exige Node `^22.12 \|\| ^24 \|\| >=26` e Vite `^6.4 \|\| ^7 \|\| ^8` como peer. Vite medido: 8.3.1. Linha 4.1 recebe só correção. |

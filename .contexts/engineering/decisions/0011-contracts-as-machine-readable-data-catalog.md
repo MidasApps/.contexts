@@ -4,7 +4,8 @@
 - **Date:** 2026-09-29
 - **Deciders:** projeto DDC / spec do core agêntico (`docs/superpowers/specs/2026-09-29-agentic-app-core-design.md`, D6, D7, §5, §7, §8)
 - **Tags:** `engineering`, `contracts`, `schemas`, `zod`, `catalog`, `ai`, `openapi`
-- **Complements:** [0003](0003-cross-doc-convention-conflicts-resolved.md) (localização de schemas e envelope de erro seguem valendo), [0006](0006-monorepo-layout-and-package-boundaries.md) (`packages/contracts` = `@core/contracts`, sem dependência de outro pacote do workspace), [0008](0008-data-stores-split-firestore-postgres-storage-bigquery.md) (quais stores têm views semânticas) e [0010](0010-tenancy-organization-project-units-and-rbac.md) (`authorize()`, `requiresApproval`, teto do agente e audit).
+- **Supersedes:** em parte a [0008](0008-data-stores-split-firestore-postgres-storage-bigquery.md): só a regra "BigQuery nunca lido no caminho do request", e só para a leitura analítica da tool SQL do agente durante o chat (seção "Leitura analítica da IA no BigQuery"). Tela de aplicação e mutação continuam sem ler BigQuery.
+- **Complements:** [0003](0003-cross-doc-convention-conflicts-resolved.md) (localização de schemas e envelope de erro seguem valendo), [0006](0006-monorepo-layout-and-package-boundaries.md) (`packages/contracts` = `@core/contracts`, sem dependência de outro pacote do workspace), [0008](0008-data-stores-split-firestore-postgres-storage-bigquery.md) (schema Postgres `semantic` e datasets BigQuery `<context>_semantic` para as views semânticas) e [0010](0010-tenancy-organization-project-units-and-rbac.md) (`authorize()`, `requiresApproval`, teto do agente e audit).
 
 ## Context
 
@@ -33,7 +34,7 @@ Fatos medidos em 2026-09-29 (`npm pack zod@4.6.5`, leitura de `v4/core/registrie
 - **Uma fonte por forma de dado.** Tipo, validação, OpenAPI, formulário, tool e descrição para a IA vêm do mesmo schema.
 - **Legível pela IA sem vazar dado.** A IA conhece a estrutura; campos `sensitive` nunca entram em contexto de modelo (rule `security` §13, §14).
 - **Verificável no CI.** Catálogo desatualizado, campo sem descrição ou sem PII e breaking change sem versão nova quebram o build.
-- **Guard-rails fortes para ação da IA.** SQL só leitura sobre superfície controlada; mutação passa por `authorize()` e aprovação humana (0010).
+- **Guard-rails fortes para ação da IA.** SQL só leitura sobre superfície controlada; mutação passa por `authorize()`, confirmação do usuário e, quando a permissão é `requiresApproval`, aprovação de outro principal (0010).
 - **Contratos sem dependência interna.** `@core/contracts` não depende de outro pacote do workspace (0006) e usa só o Zod do baseline.
 - **Genérico.** O catálogo descreve contratos do core e de módulos, sem conhecer domínio.
 
@@ -60,7 +61,7 @@ Fatos medidos em 2026-09-29 (`npm pack zod@4.6.5`, leitura de `v4/core/registrie
 **3. Zod + registry tipado + catálogo gerado**
 - \+ A forma continua onde já está; o metadado fica no mesmo arquivo do campo e muda no mesmo diff.
 - \+ `z.toJSONSchema` já copia o metadado para JSON Schema: o catálogo sai do mesmo objeto que valida.
-- \+ `contractRegistry` tipado dá erro de compilação para metadado de schema incompleto; o `contracts:check` cobre o que o tipo não cobre (campo sem `description`/`pii`).
+- \+ O parâmetro `meta: CatalogMeta` de `defineContract()` dá erro de compilação para metadado de schema incompleto (e `CatalogMetaSchema` valida em runtime); o `contracts:check` cobre o que o tipo não cobre (campo sem `description`/`pii`).
 - − Mais verboso: todo campo de contrato exportado leva `.meta()`.
 - − O gerador e o gate são código nosso a manter (SP0b Tasks 3–4).
 - − `.meta()` clona: quem esquece de usar o valor devolvido perde o metadado (o gate detecta).
@@ -70,14 +71,25 @@ Fatos medidos em 2026-09-29 (`npm pack zod@4.6.5`, leitura de `v4/core/registrie
 **Opção 3.** A doutrina fica em `@.contexts/engineering/contracts/data-catalog.md`:
 
 - **Fonte única por tipo de contrato** (tabela da spec §5): Zod em `packages/contracts` para entidade/documento, comando/query, settings e componente de UI gerativa; Zod com o envelope de `contracts/events.md` para evento; Drizzle → Zod (`drizzle-zod`) com teste de paridade para tabela Postgres; Zod no `model/` do slice para estado de UI local (fora do catálogo).
-- **Metadados obrigatórios:** schema-level via `defineContract(schema, meta)` num `contractRegistry = z.registry<CatalogMeta>()` (`id` estável `<context>.<Name>`, `kind`, `description`, `examples`, `pii`, `tenancyScope`, `relations`, `ui`), que valida o metadado com `CatalogMetaSchema` e também o registra no `globalRegistry` para que `z.toJSONSchema` o copie; field-level via `.meta()` com `GlobalMeta` aumentado (`description`, `pii`, `examples`, `ui`).
+- **Metadados obrigatórios:** schema-level via `defineContract(schema, meta: CatalogMeta)` (o tipo do parâmetro é o enforcement em compilação), que registra num `contractRegistry = z.registry<CatalogMeta>()` (`id` estável `<context>.<Name>`, `kind`, `description`, `examples`, `pii`, `tenancyScope`, `relations`, `ui`), que valida o metadado com `CatalogMetaSchema` e também o registra no `globalRegistry` para que `z.toJSONSchema` o copie; field-level via `.meta()` com `GlobalMeta` aumentado (`description`, `pii`, `examples`, `ui`). O `pii` do campo é o autoritativo; o do schema é só resumo (o maior dos campos) e sinal fraco.
 - **Artefatos** gerados por `pnpm contracts:catalog` e verificados por `pnpm contracts:check`: `docs/openapi/v1.yaml`, JSON Schema por contrato, `docs/catalog/**` (`catalog.json`, projeção para IA sem `sensitive`, páginas Markdown) e SQL das views semânticas.
-- **Quatro usos pela IA**, cada um com guard-rails no documento: conhecer (catálogo na knowledge base, tools `listEntities`/`describeEntity`, resources MCP), formulário (`renderForm` → `SchemaForm`), consulta (SQL só leitura sobre views semânticas) e ação (comando → tool com o mesmo `inputSchema`, `authorize()` e aprovação).
+- **Quatro usos pela IA**, cada um com guard-rails no documento: conhecer (catálogo na knowledge base, tools `listEntities`/`describeEntity`, resources MCP), formulário (`renderForm` → `SchemaForm`), consulta (SQL só leitura sobre views semânticas) e ação (comando → tool com o mesmo `inputSchema`, `authorize()`, confirmação do usuário e, para permissão `requiresApproval`, aprovação de outro principal pela 0010).
 - **UI gerativa:** cada componente é um contrato `kind: "ui-component"` em `packages/contracts`, emitido como part `data-<name>` e validado com o mesmo schema no servidor e no cliente (`dataPartSchemas`).
 
-**Leitura analítica da IA e a 0008.** A 0008 diz que o BigQuery "nunca [é] lido no caminho do request". A consulta SQL da IA é uma leitura analítica explícita (tool chamada pelo usuário via agente, com `maximumBytesBilled`, timeout e cap de linhas), não fonte de tela nem de mutação. Esta ADR entende que ela não viola a 0008; tela de aplicação continua sem ler BigQuery.
+**Leitura analítica da IA no BigQuery (supersede em parte a 0008).** Decisão humana de 2026-09-29: a tool SQL do agente pode ler BigQuery durante o chat. Isso substitui, só para essa tool, a regra da 0008 "nunca lido no caminho do request". Condições:
 
-**Versões:** `drizzle-zod@0.8.3` entra no baseline (linha em `stacks/VERSIONS.md` quando for instalado, SP0b); `drizzle-orm/zod` não é usado enquanto só existir em `1.0.0-rc`. A lib de OpenAPI segue a de `contracts/schemas.md` §15 e é medida na instalação (0004). Nenhuma linha nova na tabela de exceções da 0004.
+- **Fail-closed:** o caminho BigQuery fica **desligado** até o SP3 definir e testar o isolamento por tenant. Até lá a tool só consulta Postgres `semantic`.
+- Os datasets `<context>_semantic` contêm **só table functions parametrizadas**, nunca view ou tabela consultável direto. O servidor liga `tenantId` e os nós concedidos por `authorize()` como parâmetros e reescreve as referências de relação do SQL do modelo para a chamada da função.
+- O AST rejeita literal de tenant ou de nó fornecido pelo modelo.
+- Teto de custo (`maximumBytesBilled`, `dryRun` antes), timeout e limite de linhas iguais aos da §9.3 do contrato.
+
+Tela de aplicação e mutação continuam sem ler BigQuery.
+
+**PII em contexto de modelo** (decisão humana de 2026-09-29, o "isolamento explícito" da rule `security` §14): `sensitive` nunca entra; `personal` entra só dentro do tenant do principal **e** só quando o chamador tem a `readPermission` do campo (ou a permissão do contrato) no nó, conferida por `authorize()`. Mandar `personal` a provedor de LLM externo exige sign-off de compliance quando `business/compliance.md` for preenchido.
+
+**Ratificado (2026-09-29):** `LIMIT` default 100 e máximo 1000; `statement_timeout` ≤ 5 s no Postgres; breaking change gera id `<context>.<Name>V2`; schema Postgres `semantic` e datasets `<context>_semantic` são desta ADR.
+
+**Versões:** `drizzle-zod@0.8.3` entra no baseline (linha em `stacks/VERSIONS.md` e `MEMORY.md`); `drizzle-orm/zod` não é usado enquanto só existir em `1.0.0-rc`. A lib que monta o OpenAPI a partir do JSON Schema gerado é escolhida e medida na instalação (SP0b Task 4, 0004); `.openapi()` e `@asteasolutions/zod-to-openapi` deixam de ser prescritos (`contracts/schemas.md` §15). Nenhuma linha nova na tabela de exceções da 0004.
 
 Por que não a 1: metadado fora do schema deriva e PII não se verifica, exatamente o que o uso pela IA não tolera. Por que não a 2: inverte a doutrina de schema-first em Zod e perde refinements e branded types na volta.
 
@@ -91,17 +103,19 @@ Por que não a 1: metadado fora do schema deriva e PII não se verifica, exatame
 **Piora:**
 - Todo contrato exportado ganha metadado obrigatório por campo; contratos existentes (quando houver código) migram de uma vez no pacote.
 - Gerador, gate, teste de paridade Drizzle ↔ Zod e parser de SQL são código a manter.
-- Views semânticas são uma superfície nova de schema com migração própria (rule `migration`): schema Postgres `semantic` (ao lado de `mastra` e `ai` da 0008, com role próprio somente leitura) e datasets BigQuery `<context>_semantic`.
+- Views semânticas são uma superfície nova de schema com migração própria (rule `migration`): schema Postgres `semantic` (ao lado de `mastra` e `ai` da 0008; views com direitos do dono, um role dono sem login sujeito a `FORCE ROW LEVEL SECURITY` e um role de leitura da IA só com `USAGE` + `SELECT` nas views) e datasets BigQuery `<context>_semantic` só com table functions.
+- O caminho BigQuery da tool SQL fica desligado até o SP3.
 - `.meta()` clona e `.register()` não: a diferença precisa estar no helper, não na cabeça de quem escreve o contrato.
 
 **Pontos em aberto:**
-- Lib de parser SQL e mecanismo de isolamento por tenant no BigQuery (table functions parametrizadas ou equivalente): SP que implementa o conector de banco (SP3), com pin em `stacks/VERSIONS.md`.
-- Como a lib de OpenAPI escolhida lê metadado do `globalRegistry` sem `.openapi()`: medir na instalação (SP0b Task 4). Não confirmado.
+- Lib de parser SQL e teste do isolamento por tenant das table functions do BigQuery (condição para ligar esse caminho): SP3, com pin em `stacks/VERSIONS.md`.
+- Lib que monta o OpenAPI a partir do JSON Schema gerado (e as chaves `x-`): medir na instalação (SP0b Task 4). Não confirmado.
 - Nomes finais das tools (`listEntities`, `describeEntity`, `renderForm`, consulta SQL) e o gerador comando → tool: contrato de agentes (SP0a Task 7, `contracts/agents.md`).
 
 **Arquivos que passam a mudar:**
 - Novo `contracts/data-catalog.md`.
-- `contracts/schemas.md` ganha a seção "Metadados de catálogo" (link).
+- `contracts/schemas.md` ganha a seção "Metadados de catálogo" (§5.1, link), e §15, §16, §20 e anti-patterns passam a apontar para `.meta()` + `data-catalog.md`; `contracts/api.md` §15 e `stacks/validation/zod@4.md` deixam de prescrever `zod-to-openapi`.
+- `decisions/0008-...md` recebe as linhas `Superseded in part by:` e `Complemented by:`; `stacks/VERSIONS.md` e `MEMORY.md` ganham `drizzle-zod` 0.8.3.
 - `contracts/api.md` §12: a linha de `POST /v1/auth/refresh` sai (conflito registrado na 0010).
 - `MEMORY.md` (Contracts) e o índice de `decisions/README.md`.
 - `.claude/`: skill `data-catalog` e rule path-scoped para `packages/contracts/**` (SP0a Task 10).
