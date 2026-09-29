@@ -15,9 +15,11 @@
     "test:e2e": "turbo run test:e2e",
     "contracts:catalog": "turbo run contracts:catalog",
     "contracts:check": "turbo run contracts:check",
-    "seed:local": "turbo run seed:local"
+    "seed:local": "turbo run seed:local",
+    "test:emulators": "firebase emulators:exec --only auth,firestore,storage \"turbo run test:emulators\""
   },
   "devDependencies": {
+    "firebase-tools": "catalog:",
     "turbo": "catalog:",
     "typescript": "catalog:"
   }

@@ -16,6 +16,19 @@
     "test": {
       "dependsOn": ["^build"]
     },
+    // Needs the Emulator Suite (root `pnpm test:emulators` wraps it in
+    // `firebase emulators:exec`); the emulator hosts must reach the test process.
+    "test:emulators": {
+      "dependsOn": ["^build"],
+      "cache": false,
+      "passThroughEnv": [
+        "FIREBASE_*",
+        "FIRESTORE_EMULATOR_HOST",
+        "GCLOUD_PROJECT",
+        "PUBSUB_EMULATOR_HOST",
+        "STORAGE_EMULATOR_HOST"
+      ]
+    },
     "test:e2e": {
       "dependsOn": ["build"],
       "cache": false

@@ -7,11 +7,14 @@ packages:
 # measured with `npm view` on 2026-09-29; exceptions E2/E3 noted inline).
 catalog:
   "@eslint/js": 9.39.5
+  "@firebase/rules-unit-testing": 5.0.2
   "@types/node": 26.6.3
   "@typescript/typescript6": 6.0.2
   eslint: 9.39.5 # E3: eslint-plugin-react only accepts ^9.7
   eslint-import-resolver-typescript: 4.4.5
   eslint-plugin-boundaries: 7.2.0
+  firebase: 12.19.0
+  firebase-tools: 15.32.0
   turbo: 2.11.5
   typescript: 7.0.2
   typescript-eslint: 8.71.0 # E2: runs on the TS 6 API via .pnpmfile.cjs
@@ -22,7 +25,15 @@ catalog:
 engineStrict: true
 savePrefix: ""
 
-# unrs-resolver's postinstall only downloads a native binary when the optional
-# platform package is missing; pnpm already installs it, so the script stays off.
+# Build scripts stay off unless something here needs them:
+# - unrs-resolver only downloads a native binary when the optional platform
+#   package is missing, and pnpm already installs it;
+# - @firebase/util only bakes FIREBASE_WEBAPP_CONFIG defaults (unused);
+# - protobufjs only checks its CLI's dependencies;
+# - re2 is superstatic's optional native regex (Hosting emulator, unused here),
+#   which falls back to RegExp.
 allowBuilds:
+  "@firebase/util": false
+  protobufjs: false
+  re2: false
   unrs-resolver: false

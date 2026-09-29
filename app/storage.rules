@@ -1,0 +1,11 @@
+rules_version = '2';
+
+// Deny all direct client access: uploads go through `POST /v1/files` with a
+// server-issued Signed URL V4, and reads are served by the backend (spec §16.2).
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}
