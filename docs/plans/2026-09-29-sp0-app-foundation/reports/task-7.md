@@ -145,3 +145,55 @@ framework-ok
 2. **Header `x-request-id` versus doctrine:** observability.md says not to use `X-Request-ID` as a substitute for trace context. Here it is only the correlation id, which api.md and the brief ask for. W3C `traceparent` remains the job of OTel (not done).
 3. `next typegen` in `typecheck` writes `.next/types` and `next-env.d.ts`. Turbo declares no outputs for `typecheck`, which is fine because the files are regenerated on every run.
 4. The `minimumReleaseAgeExclude` entries for Next 16.3.7 should be removed once the release is older than pnpm's window.
+
+## Review fixes (Spec PASS / Quality CHANGES_REQUIRED)
+
+1. **Security headers** (`rules/security.md`):
+   - `app/apps/web/src/config/security-headers.ts` provides `buildSecurityHeaders({ isDevelopment })` and `buildContentSecurityPolicy`. `next.config.ts` `headers()` applies them to `/:path*`.
+   - Headers set: HSTS `max-age=63072000; includeSubDomains; preload`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin` and `X-Frame-Options: DENY`.
+   - Baseline CSP: `default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'`.
+   - Development only adds `'unsafe-eval'` to `script-src` and `ws:` to `connect-src` (HMR).
+   - `'unsafe-inline'` for scripts is needed without a nonce, because Next.js injects inline RSC hydration scripts. **A nonce-based CSP set in `src/proxy.ts` comes with the SP2 UI** and will remove it.
+   - `upgrade-insecure-requests` was left out so plain-http localhost keeps working; HSTS covers deployed hosts.
+   - Unit test `security-headers.test.ts` (4 tests), red first with `Cannot find module './security-headers'`.
+   - Browser check with Playwright:
+     - `next start`: the page loads, and the only console error is a `favicon.ico` 404. There are no CSP violations.
+     - `next dev`: the page loads, `[HMR] connected`, and there are 0 errors.
+2. **Decisions:**
+   - `app/docs/decisions/0002-process-log-context-on-globalthis.md` and `app/docs/decisions/0003-public-liveness-endpoint.md`.
+   - `configureProcessLogger` now stores `Object.freeze({ ...context })`.
+   - The health handler JSDoc has an `@see` pointing to 0003, and `process-logger.ts` cites 0002.
+   - Verified on the real server: `POST /v1/health` returns 405.
+3. **Order-independent tests:**
+   - `process-logger.test.ts` snapshots the global holder, deletes it in `beforeEach` and restores it in `afterEach`.
+   - `logger.test.ts` runs `vi.restoreAllMocks()` in `afterEach`.
+   - `vitest --sequence.shuffle` passes.
+4. **Minor fixes:**
+   - `withRouteBoundary` copies the response when its headers are immutable. The new test uses `Response.redirect`; it was red (500) first and is now green.
+   - `createProcessLogger({ sink })` writes one `process_logger_unconfigured` warn before the first record if the boot hook never ran. There are 2 tests for this.
+   - **Not done:** the removal-date note for `minimumReleaseAgeExclude`. It lives in `pnpm-workspace.yaml`, which the coordinator reserved for the concurrent Task 8 edit. Suggested wording for the owner of that file: "remove after 2026-10-07 (7 days after the 2026-09-29 publish)", or once pnpm's window has passed.
+
+**Found during verify:** when `next dev` 16.3.7 detects an AI agent, it writes `apps/web/AGENTS.md` and `apps/web/CLAUDE.md` (`next/dist/server/lib/generate-agent-files.js`). There is no config opt-out. I deleted the generated files and did not commit them. The owner should choose between gitignoring them and committing them; turbo's equivalent was opted out in Tasks 1–2.
+
+### Verify (review fixes)
+
+```
+$ pnpm -F @core/services test|typecheck|lint   -> ok (Tests 38 passed: 35 from this task + 3 from Task 8's load-services-env-with)
+$ pnpm -F web test|typecheck|lint              -> ok (Tests 9 passed)
+$ pnpm -F web build                            -> exit 0, 0 warnings; ƒ /v1/health, ƒ Proxy
+$ curl -si localhost:3100/v1/health            (next start, port 3100)
+HTTP/1.1 200 OK
+Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+X-Content-Type-Options: nosniff
+Referrer-Policy: strict-origin-when-cross-origin
+X-Frame-Options: DENY
+Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'
+x-request-id: 01M3QFK10CJCVTJT7TSMXTVEW8
+cache-control: no-store
+{"data":{"status":"ok"}}
+$ curl -X POST localhost:3100/v1/health        -> 405
+next dev CSP: ... script-src 'self' 'unsafe-inline' 'unsafe-eval'; ... connect-src 'self' ws: ...
+(servers stopped; port 3100 free)
+$ git diff --quiet main -- .contexts .claude && echo framework-ok
+framework-ok
+```
