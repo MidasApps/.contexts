@@ -332,6 +332,8 @@ Sem schema explícito, todo documento é `any` — proibido.
 
 ## 19. Security Rules
 
+> **Core (ADR 0003, vence o mais específico):** nos contextos do core o cliente não escreve (D8). Leia o exemplo abaixo com `allow write: if false` e a leitura pela projeção `access`: `@.contexts/engineering/rules/tenancy.md` §6 e `@.contexts/engineering/decisions/0010-tenancy-organization-project-units-and-rbac.md`.
+
 - `firestore.rules` é **versionado no repo** e revisado em PR.
 - DEVE conter validação **básica de schema** como defense-in-depth: tipos esperados, campos required, `tenantId` matching token. Não substitui Zod no app — complementa.
 - Princípios gerais de segurança em `@rules/security`.
@@ -367,6 +369,8 @@ Para eventos de domínio que cruzam bounded contexts, use **Pub/Sub explícito**
 ---
 
 ## 22. Exemplos canônicos de paths
+
+> **Core (ADR 0003):** grants ficam em `memberships` top-level, e projetos e unidades em coleções top-level com `tenantId` e `nodePath`; não use `organizations/{orgId}/members/{uid}` nem projetos como subcoleção. Ver `@.contexts/engineering/rules/tenancy.md` §5 e ADR 0010.
 
 | Path | Propósito |
 |---|---|

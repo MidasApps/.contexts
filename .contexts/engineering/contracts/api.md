@@ -3,7 +3,7 @@ title: Convenções de modelagem para APIs
 type: contracts
 scope: api
 status: active
-last_updated: 2026-09-28
+last_updated: 2026-09-29
 related:
   - "@rules/api-design"
   - "@rules/data-modeling"
@@ -465,6 +465,8 @@ Servidor retorna apenas campos solicitados. Suporte é opcional por endpoint; qu
 - **Nunca** autenticação por session cookie em APIs públicas. Cookies (httpOnly, SameSite=Strict) apenas para sessões de UI Next.js no mesmo domínio, e nesse caso CSRF token explícito em mutations.
 - Tokens nunca em query string (vaza em logs).
 - Refresh tokens em endpoint dedicado: `POST /v1/auth/refresh`.
+
+> **Core (ADR 0003, vence o mais específico):** o core refina esta seção. `/v1` aceita só `Authorization: Bearer` (nunca cookie), não há `POST /v1/auth/refresh` (a renovação é do SDK do Firebase Auth), e o cookie de sessão do web é `HttpOnly` + `Secure` + `SameSite=Lax`, só para RSC e Server Actions, com a checagem de origem do Next. Ver `@.contexts/engineering/decisions/0010-tenancy-organization-project-units-and-rbac.md` ("Web: cookie de sessão e CSRF") e `@.contexts/engineering/rules/tenancy.md` §8.1.
 
 Ver `@rules/security`.
 

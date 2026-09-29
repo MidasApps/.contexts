@@ -25,11 +25,11 @@ crases quando difere do termo.
 | Organização | O tenant: fronteira de isolamento de dados e de cobrança. Raiz da árvore de nós. Em código e dados, o ID é `tenantId`. | empresa, conta, workspace, cliente, tenant (na UI) |
 | Projeto | Nó filho de uma Organização que agrupa trabalho e dados dentro dela. | espaço, pasta, board |
 | Unidade | Nó opcional abaixo de um Projeto, com tipo (`unitType`) definido pela aplicação; forma uma árvore via `parentId`. | setor, departamento, filial, grupo (como termo genérico) |
-| Nó | Qualquer ponto da árvore de acesso: Organização, Projeto ou Unidade. Grants são dados por nó e herdados para baixo. | escopo, nível, container |
-| Membro | Principal `user` com pelo menos um grant ativo numa Organização (documento em `memberships`). | participante, colaborador, associado |
-| Papel | Conjunto nomeado de Permissões atribuído a um Membro num Nó. De sistema (`owner`, `admin`, `member`, `viewer`) ou custom do tenant. | perfil, cargo, grupo de acesso |
-| Permissão | Direito atômico no formato `<module>.<resource>.<action>` (ex.: `core.members.invite`), declarado no manifesto do Módulo. | privilégio, direito, scope (em UI) |
-| Principal | Quem age num request: `user`, `device`, `service` ou `platform staff`. É sempre derivado da credencial autenticada. | ator (em código), requester, caller |
+| Nó | Qualquer ponto da árvore de acesso: Organização, Projeto ou Unidade. Grants são dados por nó e herdados para baixo. | nível, container, pasta |
+| Membro | Principal `user` com pelo menos um grant ativo numa Organização (documento em `memberships`). `memberships` também guarda o grant de um Dispositivo, mas Dispositivo não é Membro. | participante, colaborador, associado |
+| Papel | Conjunto nomeado de Permissões atribuído a um principal (Membro ou Dispositivo) num Nó. De sistema (`owner`, `admin`, `member`, `viewer`; `device` só para Dispositivo) ou custom do tenant. | perfil, cargo, grupo de acesso |
+| Permissão | Ação autorizável, no formato `<module>.<resource>.<action>` (ex.: `core.members.invite`), declarada no manifesto do Módulo. | privilégio, direito de acesso, capability |
+| Principal | Quem age num request: `user`, `device`, `service` ou `platform staff`. É sempre derivado da credencial autenticada. | requester, caller, usuário (quando pode ser device ou service) |
 | Dispositivo | Principal `device`: aparelho ativado por código de uso único, com escopo de um Nó. | terminal, máquina, client |
 | Chave de API | Credencial do principal `service` (integrações e clientes MCP), com escopo de um Nó e lista explícita de Permissões. Guardada só como hash. | token de integração, secret key, app key |
 | Staff da plataforma | Principal `platform staff`: opera o `/admin`, sem acesso a dados de tenant fora de impersonação auditada. | superadmin, root, suporte (como papel) |

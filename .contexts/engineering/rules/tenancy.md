@@ -38,6 +38,7 @@ Autenticação em geral, secrets e uploads: `@.contexts/engineering/rules/securi
 - **Nunca** conceda acesso no servidor com base em claim. `authorize()` lê a fonte (`memberships`, `roles`, `devices`, `api-keys`).
 - **Sempre** mantenha o payload de claims abaixo de 1000 bytes. Teste que falha acima disso.
 - **Sempre** incremente `accessVersion` quando qualquer grant do principal no tenant muda, e regrave as claims quando o tenant alterado é o ativo.
+- **Sempre** regrave claims por read-modify-write: leia `getUser(uid).customClaims`, troque só o campo que mudou e preserve os demais (`tenantId`, `platformRole`, claims de device). `setCustomUserClaims` substitui o objeto inteiro.
 - **Nunca** escreva claims fora de `services/access` (use case) ou do trigger de projeção.
 
 ## 3. Fail-closed
@@ -62,12 +63,15 @@ Autenticação em geral, secrets e uploads: `@.contexts/engineering/rules/securi
 - **Sempre** grave `nodePath` (IDs da organização até o próprio nó) em todo nó e em todo recurso protegido.
 - **Sempre** calcule a permissão efetiva como a **união** dos grants no nó e em todos os ancestrais.
 - **Nunca** modele deny, exceção negativa ou "remover herança" na v1 (D9). Precisou restringir? Conceda num nó mais baixo em vez de no pai.
-- **Sempre** guarde grants em `memberships` top-level (`tenantId`, principal, nó, `roleIds`, `status`). Não use `organizations/{orgId}/members/{uid}` nos contextos do core.
-- **Sempre** use papéis de sistema (`owner`, `admin`, `member`, `viewer`) antes de criar papel custom. Papel custom só combina permissões declaradas.
+- **Sempre** guarde grants de `user` e `device` em `memberships` top-level (`tenantId`, `principalType`, `principalId`, nó, `roleIds`, `status`). Não use `organizations/{orgId}/members/{uid}` nos contextos do core.
+- **Sempre** dê ao Dispositivo exatamente um grant, no nó de ativação, com o papel de sistema `device`. API key não tem `memberships`: o escopo fica no documento de `api-keys`.
+- **Sempre** use papéis de sistema (`owner`, `admin`, `member`, `viewer`; `device` só para Dispositivo) antes de criar papel custom. Papel custom só combina permissões declaradas.
 - **Sempre** mova um nó por backfill idempotente do `nodePath` dos descendentes (`@.contexts/engineering/rules/migration.md`).
 
 ## 6. Projeção `access` e Security Rules
 
+- **Sempre** mantenha a projeção `access/{tenantId}_{uid}` para todo principal `user` e `device` (o `uid` do device é o do custom token).
+- **Nunca** leia a projeção `access` nem compare `accessVersion` no servidor (`/v1`, Functions, Mastra): o servidor lê a fonte. A projeção é só das Rules.
 - **Sempre** leia a projeção `access/{tenantId}_{uid}` nas Rules. Ela tem `tenantId`, `uid`, `accessVersion` e `readNodeIds` (`<module>.<resource>` → IDs de nós com `.read` por grant direto).
 - **Nunca** escreva em `access` fora do trigger de projeção. O trigger é idempotente e roda em `apps/functions`.
 - **Sempre** exija nas Rules: tenant do recurso = claim `tenantId`, `accessVersion` do token = da projeção, e `nodePath` do recurso com interseção nos nós concedidos.
@@ -106,17 +110,34 @@ match /access/{accessId} {
 ## 8. Principals
 
 - **Sempre** identifique o ator pelo principal autenticado: `user` (ID token), `device` (custom token com `principalType: "device"`), `service` (API key) ou `platform staff`. Nunca por ID vindo do cliente.
-- **Sempre** envie credencial em `Authorization: Bearer`. Web e desktop enviam o ID token Firebase. O web usa cookie de sessão `HttpOnly` só para RSC e Server Actions.
+- **Sempre** envie credencial ao `/v1` em `Authorization: Bearer`. Web e desktop enviam o ID token Firebase.
 - **Nunca** guarde refresh token no `localStorage`. No desktop, a sessão persistente vai para o armazenamento seguro do SO pelo port `shared/lib/secure-store` (adapter: spike do SP0b).
-- **Device:** ative só por código de uso único, guardado como hash e com expiração curta. Escopo = um nó. Revogue com `devices.status = revoked` + `revokeRefreshTokens`.
-- **Service (API key):** gere o segredo no servidor com `crypto.randomBytes`, mostre uma vez, guarde só o hash SHA-256 e compare com `timingSafeEqual`. `expiresAt` é obrigatório. Escopo = um nó + lista explícita de permissões contida nas do criador no momento da criação.
-- **Platform staff:** acessa só `/admin`, com MFA obrigatório e `verifyIdToken(token, true)`. Staff não tem acesso a dados de tenant fora da impersonação.
+- **Device:** ative só por código de uso único com ≥ 40 bits de entropia, guardado como hash, TTL de 10 min. Escopo = um nó. Revogue com `devices.status = revoked` + grant removido + `revokeRefreshTokens`.
+- **Service (API key):** gere o segredo no servidor com `crypto.randomBytes`, mostre uma vez, guarde só o hash SHA-256 e compare com `timingSafeEqual`. `expiresAt` é obrigatório. Escopo = um nó + lista explícita de permissões.
+- **Sempre** calcule a permissão de API key **a cada uso** como a interseção entre o escopo da chave e os grants **atuais** do criador no nó. Remover a membership do criador revoga as chaves dele (trigger).
+- **Platform staff:** acessa só `/admin`, com `verifyIdToken(token, true)` e MFA conferido no servidor pela presença de `firebase.sign_in_second_factor` no token decodificado (ausente → `403`). Staff não tem acesso a dados de tenant fora da impersonação.
 - **Impersonação:** exija motivo, limite a 60 min, só leitura na v1, banner visível na UI, audit no tenant e na plataforma. Negue toda mutação durante a impersonação.
 - **Nunca** trate `platformRole: "staff"` como membro de organização.
 
+## 8.1 Verificação de token e sessão web
+
+- **Sempre** use `verifyIdToken(token, true)` (`checkRevoked`) em mutação do `/v1` (`POST`, `PUT`, `PATCH`, `DELETE`), em toda chamada ao servidor Mastra e no `/admin`. Leitura do `/v1` usa `verifyIdToken(token)`; a revogação de acesso vale porque `authorize()` lê a fonte.
+- **Nunca** leia cookie no `/v1`. O `/v1` aceita só `Authorization: Bearer`, e por isso não é alvo de CSRF.
+- **Sempre** use o cookie de sessão Firebase só em RSC e Server Actions: `HttpOnly`, `Secure`, `SameSite=Lax`, verificado com `verifySessionCookie(cookie, true)`. O CSRF das Server Actions é coberto pela checagem de origem do Next; nunca a desligue. Isto refina `@.contexts/engineering/contracts/api.md` §12 (ADR 0003).
+- **Nunca** crie endpoint `/v1/auth/refresh`: a renovação do ID token é do SDK do Firebase Auth.
+
+## 8.2 Rate limits
+
+Aplicam `@.contexts/engineering/rules/security.md` §8 (`429` + `Retry-After`).
+
+- **Sempre** limite `POST /v1/devices/activations` por IP e bloqueie o código após 5 falhas. Audite cada falha.
+- **Sempre** limite falhas de verificação de API key por IP e por prefixo da chave. Acima do limite, responda `429` sem consultar o hash.
+- **Sempre** limite `PUT /v1/me/active-organization` por `uid`.
+
 ## 9. Audit
 
-- **Sempre** grave em `audit-logs` (top-level, com `tenantId`), só pelo servidor, append-only: nenhum update, nenhum delete, Rules negando tudo ao cliente.
+- **Sempre** grave em `audit-logs` (top-level, com `tenantId`), só pelo servidor, append-only: nenhum update, nenhum delete, Rules negando tudo ao cliente. No Firestore isso é convenção (o Admin SDK ignora Rules); a cópia imutável é o export para o BigQuery.
+- **Sempre** grave eventos de plataforma (grant de staff, impersonação) em `platform-audit-logs`, sem `tenantId` e com `targetTenantId` quando houver. Impersonação grava também em `audit-logs` com `tenantId` = tenant impersonado, `actor.principalType = "platform_staff"` e `onBehalfOf` = usuário impersonado.
 - **Sempre** registre `actor` (`principalType`, `id`), `onBehalfOf`, `action` (a permissão), `resource`, `nodeId`, `outcome`, `requestId`, `traceId`, `occurredAt`.
 - **Sempre** audite: mudança de grant, papel, API key e device; troca de organização; impersonação; decisão de `requiresApproval`; negação em mutação.
 - **Nunca** grave PII além de IDs no audit (`@.contexts/engineering/rules/security.md` §13).
@@ -128,10 +149,11 @@ match /access/{accessId} {
 - **Sempre** calcule a permissão de uma tool de agente como a **interseção** entre as permissões do usuário no nó e as declaradas pelo agente.
 - **Sempre** derive `resourceId` da memória do agente no servidor, como `` `${tenantId}:${uid}` `` (`mapUserToResourceId`). Nunca aceite `resourceId` do cliente.
 - **Sempre** cruze projeto, nó e escopo do `RequestContext` com `authorize()` antes de o agente rodar.
+- **Sempre** faça o `authorizeUser` do provider do Mastra ler a fonte (`memberships`), como o `/v1`.
 
 ## 11. Arquivos
 
-- **Sempre** emita upload e download por Signed URL V4 do `/v1`, depois do `authorize()`, com validade curta (upload: 15 min), `Content-Type` fixado e `x-goog-content-length-range`.
+- **Sempre** trate o arquivo como recurso: `POST /v1/files` responde `201` + `Location: /v1/files/{fileId}` com a Signed URL V4 de upload (15 min, `Content-Type` fixado, `x-goog-content-length-range`). O download é por `GET /v1/files/{fileId}/download-url`, com validade curta. Os dois passam antes pelo `authorize()`.
 - **Sempre** gere o path no servidor: `tenants/{tenantId}/files/{fileId}`. Nunca use nome enviado pelo cliente.
 - **Sempre** mantenha `storage.rules` em `allow read, write: if false`.
 - **Sempre** confirme magic bytes e tamanho em `onObjectFinalized` antes de marcar o arquivo como `ready`.
