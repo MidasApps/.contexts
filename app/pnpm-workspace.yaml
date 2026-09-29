@@ -19,6 +19,7 @@ catalog:
   turbo: 2.11.5
   typescript: 7.0.2
   typescript-eslint: 8.71.0 # E2: runs on the TS 6 API via .pnpmfile.cjs
+  ulid: 3.0.2
   vitest: 5.0.2
   yaml: 2.9.1
   zod: 4.6.5

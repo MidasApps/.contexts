@@ -200,6 +200,9 @@ catalogs:
     typescript-eslint:
       specifier: 8.71.0
       version: 8.71.0
+    ulid:
+      specifier: 3.0.2
+      version: 3.0.2
     vitest:
       specifier: 5.0.2
       version: 5.0.2
@@ -281,6 +284,12 @@ importers:
 
   packages/services:
     dependencies:
+      '@core/contracts':
+        specifier: workspace:*
+        version: link:../contracts
+      ulid:
+        specifier: 'catalog:'
+        version: 3.0.2
       zod:
         specifier: 'catalog:'
         version: 4.6.5
@@ -3756,6 +3765,10 @@ packages:
   uglify-js@3.19.3:
     resolution: {integrity: sha512-v3Xu+yuwBXisp6QYTcH4UbH+xYJXqnq2m/LtQVWKWzYc1iehYnLixoQDN9FH6/j9/oybfd6W9Ghwkl8+UMKTKQ==}
     engines: {node: '>=0.8.0'}
+    hasBin: true
+
+  ulid@3.0.2:
+    resolution: {integrity: sha512-yu26mwteFYzBAot7KVMqFGCVpsF6g8wXfJzQUHvu1no3+rRRSFcSV2nKeYvNPLD2J4b08jYBDhHUjeH0ygIl9w==}
     hasBin: true
 
   undici-types@8.9.0:
@@ -7822,6 +7835,8 @@ snapshots:
 
   uglify-js@3.19.3:
     optional: true
+
+  ulid@3.0.2: {}
 
   undici-types@8.9.0: {}
 
