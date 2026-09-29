@@ -12,3 +12,4 @@ Plan: docs/plans/2026-09-29-sp0-app-foundation.md
 - 2026-09-29 | Task 6 complete | commits: 682c809 | review: pending
 - 2026-09-29 | Task 7 complete | commits: 85489c7, 2e64cb0, 0158bd1 | review: pending
 - 2026-09-29 | Task 7 review fixes | commits: see report | review: pending
+- 2026-09-29 | Task 8 complete | commits: f3ba6b3, c51d5f3, ce7fea7 | review: pending
