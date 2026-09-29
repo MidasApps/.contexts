@@ -215,10 +215,12 @@ Nunca `process.env.OPENAI_API_KEY` direto em Cloud Functions — o binding decla
 Em Server Components, Route Handlers e Server Actions:
 
 ```ts
-const apiKey = process.env.OPENAI_API_KEY;
+import { env } from '@/env'; // src/env.ts, server-only
+
+const apiKey = env.OPENAI_API_KEY;
 ```
 
-Tipado e validado via `src/env.ts` (ver §5.4).
+Tipado e validado via `src/env.ts` (ver §5.4) — nunca `process.env.X` direto fora dele.
 
 ### 5.3 Next.js — client-side
 
@@ -391,7 +393,7 @@ Defense-in-depth obrigatório:
 2. **GitHub Secret Scanning** habilitado no repo (free para repos públicos, Advanced Security para privados).
 3. **CI scan** completo do diff de PR.
 4. **Log redaction em produção** (ver `@rules/observability`):
-   - Pino logger config: `redact: ['*.password', '*.token', '*.apiKey', '*.authorization', 'req.headers.authorization']`
+   - O logger do projeto (assinatura `logger.info(message, fields)`, ADR 0003) é configurado com redaction por chave **antes** do primeiro log: `password`, `token`, `apiKey`, `authorization`, `cookie`, `secret` em qualquer nível de `fields`, além de `headers.authorization`
    - Stack traces sanitizadas antes de enviar a Sentry/Datadog
    - Headers logados com `Authorization` mascarado
 
@@ -430,7 +432,8 @@ Merge é **bloqueado** se reviewer identifica introdução de secret hardcoded.
 
 ```ts
 // src/app/v1/chat/route.ts (server)
-const apiKey = process.env.OPENAI_API_KEY;           // certo
+import { env } from '@/env';                         // src/env.ts valida process.env no boot
+const apiKey = env.OPENAI_API_KEY;                   // certo
 
 // src/features/chat/ui/ChatPanel.tsx (client component "use client")
 const apiKey = process.env.OPENAI_API_KEY;           // undefined em runtime

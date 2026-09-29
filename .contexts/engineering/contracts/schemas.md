@@ -208,7 +208,7 @@ Refinements reusáveis ficam em `src/contracts/primitives/refinements.ts` como f
 
 ```ts
 export const refineNonEmpty = <T extends z.ZodTypeAny>(schema: T) =>
-  schema.refine((v) => Array.isArray(v) ? v.length > 0 : !!v, { message: 'must not be empty' });
+  schema.refine((v) => Array.isArray(v) ? v.length > 0 : !!v, { error: 'must not be empty' });
 
 export const refineUniqueArray = <T>(getKey: (item: T) => string) =>
   (arr: T[]) => new Set(arr.map(getKey)).size === arr.length;
@@ -271,16 +271,22 @@ Mapper converte `UserDb` → `User` (forma canônica de domínio). Nunca retorne
 
 ## 18. Firestore integration
 
-Ver `@contracts/firebase-firestore`. O converter aplica a forma persistida (`<Entity>DocSchema`, §3) nas duas direções:
+Ver `@contracts/firebase-firestore`. O converter valida a forma persistida (`<Entity>DocSchema`, §3) **na leitura**. Na escrita não há `parse`: os audit fields são sentinelas `FieldValue.serverTimestamp()` (`@contracts/firebase-firestore` §5, §13), que o `DocSchema` (com `Timestamp`) rejeitaria. O que se valida na escrita é o input do use case, já parseado na boundary:
 
 ```ts
-import { FirestoreDataConverter } from 'firebase-admin/firestore';
+import { FieldValue, type FirestoreDataConverter } from 'firebase-admin/firestore';
 import { UserDocSchema, type UserDoc } from '@/contracts/users/user-doc.schema';
 
 export const userConverter: FirestoreDataConverter<UserDoc> = {
-  toFirestore: (u) => UserDocSchema.parse(u),
+  toFirestore: (u) => u, // WithFieldValue<UserDoc>: aceita sentinelas; input já validado na boundary
   fromFirestore: (snap) => UserDocSchema.parse(snap.data()),
 };
+
+// write: input validado (CreateUserInputSchema) + timestamps pelo servidor
+await db.collection('users').withConverter(userConverter).doc().set({
+  ...input, tenantId, createdBy: actorUid, updatedBy: actorUid,
+  createdAt: FieldValue.serverTimestamp(), updatedAt: FieldValue.serverTimestamp(),
+});
 ```
 
 ## 19. Schema-as-API

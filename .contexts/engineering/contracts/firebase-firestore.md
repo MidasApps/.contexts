@@ -159,7 +159,7 @@ audit-logs/{logId}
 - `tenantId` participa de **toda query** relevante e de **todo composite index**.
 - Security Rules DEVEM validar `resource.data.tenantId == request.auth.token.tenantId` (complementa `@rules/security`).
 - Subcoleções sob `organizations/{orgId}/...` herdam isolamento pelo path e podem omitir o campo redundante.
-- O modelo acima (um `tenantId` por documento = um claim no token) é o **default**. Produto com autorização por **conjunto** (usuário acessa vários tenants, claim `tenantIds[]`) ou com eixos adicionais (rota, papel) DEVE documentar o modelo em `rules/tenancy.md` do projeto, que prevalece sobre esta seção. Invariantes que não mudam: tenant efetivo é **server-bound** (do token/doc do usuário; `tenantId` vindo do corpo só é aceito após cross-check contra o conjunto autorizado), claim é **projeção** da fonte de verdade (nunca origem de concessão), e recurso sem mapeamento de tenant é **negado** (fail-closed).
+- O modelo acima (um `tenantId` por documento = um claim no token) é o **default**. Produto com autorização por **conjunto** (usuário acessa vários tenants, claim `tenantIds[]`) ou com eixos adicionais (rota, papel) DEVE documentar o modelo em `.contexts/engineering/rules/tenancy.md` (criado ao adotar esse modelo; não existe no template), que prevalece sobre esta seção. Invariantes que não mudam: tenant efetivo é **server-bound** (do token/doc do usuário; `tenantId` vindo do corpo só é aceito após cross-check contra o conjunto autorizado), claim é **projeção** da fonte de verdade (nunca origem de concessão), e recurso sem mapeamento de tenant é **negado** (fail-closed).
 
 ---
 

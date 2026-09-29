@@ -20,33 +20,15 @@ TypeScript 6 permanece o baseline de **API programática** (eslint, Volar, etc.)
 - **Versão alvo do projeto**: TypeScript **7.x** (`typescript@7.0.2`, pin exato conforme `stacks/VERSIONS.md`).
 - **Compatibilidade de tipos**: idêntica a TypeScript 6.0 estável (código limpo em TS 6 compila em TS 7).
 - **Node para rodar `tsc`**: baseline do projeto é **Node 26** (Node 20 está em EOL) (ver `@stacks/runtime/node@26`).
-- **`lib` baseline**: `ES2024` + `DOM` (apps web) ou `ES2024` puro (Node).
+- **`target`/`lib` baseline**: `ES2025` + `ESNext.Disposable` (`using`/`await using`) + `DOM`/`DOM.Iterable` (apps web), ou sem `DOM` (Node). `ES2025` cobre iterator helpers e métodos de `Set`.
 - **Browser baseline implícito**: navegadores com suporte a ES2023+.
 - **Pacote**: `typescript@7.0.2` em devDependencies; nunca em dependencies.
 
 ### Side-by-side com TypeScript 6 (tooling)
 
-TS 7 **ainda não expõe API programática estável** (prevista em 7.1+). Ferramentas que importam `typescript` (typescript-eslint, Volar) precisam de TS 6 ao lado:
+TS 7 **ainda não expõe API programática estável** (prevista em 7.1+). Ferramentas que importam `typescript` (typescript-eslint, Volar) precisam da API 6 ao lado.
 
-```json
-{
-  "devDependencies": {
-    "@typescript/native": "npm:typescript@7.0.2",
-    "typescript": "npm:@typescript/typescript6@6.0.2"
-  }
-}
-```
-
-- `npx tsc` / `@typescript/native` → compilador 7.
-- `typescript` (peer de eslint) → API 6 via `@typescript/typescript6` (binário `tsc6`).
-
-Projetos **sem** Vue/Svelte/MDX/Astro/Angular language plugins podem instalar só `typescript@7.0.2`.
-
-**Com Next.js 16.3+, o alias acima quebra o build.** O Next 16.3 usa
-`experimental.useTypeScriptCli: true` por padrão e exige que o pacote `typescript`
-tenha `bin/tsc`; com o alias ele só tem `bin/tsc6`, e o `next build` falha com
-"do not have the required package(s) installed" (verificado em projeto DDC em
-2026-09-25). Nesse caso:
+**Canônico do projeto (Next.js 16.3+, ADR 0004 E2):**
 
 - a raiz mantém `typescript@7.0.2` (`tsc` e `next build` no 7);
 - só quem precisa da API 6 a recebe, via hook `readPackage` em `.pnpmfile.cjs`,
@@ -71,6 +53,28 @@ const readPackage = (pkg) => {
 };
 module.exports = { hooks: { readPackage } };
 ```
+
+**Alternativa só para repositórios sem Next.js** (alias do pacote `typescript`):
+
+```json
+{
+  "devDependencies": {
+    "@typescript/native": "npm:typescript@7.0.2",
+    "typescript": "npm:@typescript/typescript6@6.0.2"
+  }
+}
+```
+
+- `npx tsc` / `@typescript/native` → compilador 7.
+- `typescript` (peer de eslint) → API 6 via `@typescript/typescript6` (binário `tsc6`).
+
+**Não use este alias com Next.js 16.3+: ele quebra o build.** O Next 16.3 usa
+`experimental.useTypeScriptCli: true` por padrão e exige que o pacote `typescript`
+tenha `bin/tsc`; com o alias ele só tem `bin/tsc6`, e o `next build` falha com
+"do not have the required package(s) installed" (verificado em projeto DDC em
+2026-09-25).
+
+Projetos **sem** typescript-eslint nem Vue/Svelte/MDX/Astro/Angular language plugins podem instalar só `typescript@7.0.2`.
 
 Reavaliar quando o typescript-eslint aceitar TS 7 ou o TS 7.1 expuser a API. Motivo medido: `typescript-eslint@8.71.0` declara peer `typescript >=4.8.4 <6.1.0` (ADR 0004, E2).
 Ao migrar: `baseUrl` foi removido (TS5102) — seguro quando as `paths` já são relativas.
@@ -205,7 +209,7 @@ function logged<This, Args extends any[], Return>(
   ctx: ClassMethodDecoratorContext<This, (this: This, ...args: Args) => Return>,
 ) {
   return function (this: This, ...args: Args): Return {
-    console.log(`${String(ctx.name)} called`);
+    logger.debug("method_called", { method: String(ctx.name) }); // logger do projeto, nunca console
     return target.call(this, ...args);
   };
 }
@@ -220,8 +224,8 @@ Base para apps do projeto:
 ```jsonc
 {
   "compilerOptions": {
-    "target": "ES2024",
-    "lib": ["ES2024", "DOM", "DOM.Iterable"],
+    "target": "ES2025",
+    "lib": ["ES2025", "ESNext.Disposable", "DOM", "DOM.Iterable"],
     "module": "preserve",
     "moduleResolution": "bundler",
     "jsx": "preserve",
@@ -239,8 +243,11 @@ Base para apps do projeto:
 
     "esModuleInterop": true,
     "resolveJsonModule": true,
-    "allowImportingTsExtensions": true,
+    "allowImportingTsExtensions": true, // só válido com noEmit/emitDeclarationOnly
     "noEmit": true,
+
+    // alias absoluto; sem baseUrl (removido no TS 7, TS5102) — paths relativos ao tsconfig
+    "paths": { "@/*": ["./src/*"] },
 
     // TS 6+/7: não puxar todos os @types/* automaticamente
     "types": ["node"],
@@ -256,7 +263,8 @@ Base para apps do projeto:
 
 ### Variações por contexto
 
-- **Libs publicadas em npm** e **Firebase Functions** (ver `@stacks/backend/firebase-functions`): trocar `"module": "preserve"` → `"nodenext"`, `"moduleResolution": "bundler"` → `"nodenext"`, `"noEmit": false`, adicionar `"outDir": "dist"`, `"declaration": true`, `"declarationMap": true`, `"sourceMap": true`.
+- **Libs publicadas em npm**: trocar `"module": "preserve"` → `"nodenext"`, `"moduleResolution": "bundler"` → `"nodenext"`, `"noEmit": false`, **remover `allowImportingTsExtensions`** (inválido com emit; use `rewriteRelativeImportExtensions` se o source importa `.ts`), adicionar `"outDir": "dist"`, `"declaration": true`, `"declarationMap": true`, `"sourceMap": true`.
+- **Firebase Functions** (ver `@stacks/backend/firebase-functions`): estratégia de build/bundling **a definir pelo projeto**. `tsc` puro com `nodenext` não reescreve o alias `@/` nem aceita imports sem extensão no output; ou se usa um bundler (que resolve `paths`), ou imports relativos com extensão + `rewriteRelativeImportExtensions`. Em qualquer caso, emit habilitado exclui `allowImportingTsExtensions`.
 - **Apps Next.js 16** (ver `@stacks/frontend/next@16`): manter `"module": "preserve"` + `"moduleResolution": "bundler"`; deixar Next gerar o `tsconfig.json` inicial.
 - **Monorepos**: ative `composite: true` + `references` em cada pacote; raiz com `"files": []` e apenas `references`.
 
@@ -405,7 +413,7 @@ Esta é a verificação de build do projeto. Roda em CI; nunca confie no editor 
 
 - **Apps Next/Vite**: bundler cuida do emit; `tsc --noEmit` apenas para typecheck.
 - **Libs**: `tsc -b` (com project references) ou `tsup`/`unbuild` para bundles dual ESM+CJS.
-- **Firebase Functions** (ver `@stacks/backend/firebase-functions`): `tsc` emite para `lib/`; entrada do package aponta para `lib/index.js`.
+- **Firebase Functions** (ver `@stacks/backend/firebase-functions`): saída em `lib/`, entrada do package aponta para `lib/index.js`; ferramenta de build (bundler ou `tsc` com imports relativos) **a definir pelo projeto** (ver "Variações por contexto").
 
 ## Integração com o stack
 
@@ -413,7 +421,7 @@ Esta é a verificação de build do projeto. Roda em CI; nunca confie no editor 
 - **Next.js 16** (ver `@stacks/frontend/next@16`): `tsconfig.json` gerado pelo Next; mantenha `verbatimModuleSyntax` e `erasableSyntaxOnly`.
 - **React 19** (ver `@stacks/frontend/react@19`): `@types/react@19` + `@types/react-dom@19`; sem `FC` — anote props diretamente.
 - **Postgres / Drizzle** (ver `@stacks/database/postgres`): tipos derivados do schema Drizzle; nunca escreva interface paralela à tabela.
-- **Firebase Functions** (ver `@stacks/backend/firebase-functions`): `module: "nodenext"`, emit habilitado, target ES2024.
+- **Firebase Functions** (ver `@stacks/backend/firebase-functions`): emit habilitado, target ES2025 (runtime `nodejs24`, ADR 0004 E1); `module`/bundling a definir pelo projeto (ver "Variações por contexto").
 
 ## Performance
 

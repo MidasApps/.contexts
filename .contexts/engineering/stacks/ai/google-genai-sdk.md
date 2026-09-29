@@ -67,9 +67,10 @@ Requer Node 26 (referencie `@stacks/runtime/node@26`) e TypeScript 7.0.2 (refere
 
 ```ts
 import { GoogleGenAI } from '@google/genai';
+import { env } from '@/env'; // src/env.ts validado por Zod (@contracts/secrets §5.4)
 
 const ai = new GoogleGenAI({
-  apiKey: process.env.GEMINI_API_KEY!,
+  apiKey: env.GEMINI_API_KEY,
 });
 ```
 
@@ -80,7 +81,7 @@ O SDK também aceita `GOOGLE_API_KEY` como fallback. **Nunca** instanciar com AP
 ```ts
 const ai = new GoogleGenAI({
   vertexai: true,
-  project: process.env.GOOGLE_CLOUD_PROJECT!,
+  project: env.GOOGLE_CLOUD_PROJECT, // `env` de '@/env'
   location: 'us-central1',
 });
 ```
@@ -212,7 +213,7 @@ Live API: sessão WebSocket bidirecional com áudio/vídeo de entrada e áudio/t
 
 ```ts
 const session = await ai.live.connect({
-  model: process.env.GEMINI_LIVE_MODEL!, // id do modelo Live vigente: confira na ficha de modelos antes de fixar
+  model: env.GEMINI_LIVE_MODEL, // id do modelo Live vigente: confira na ficha de modelos antes de fixar
   config: { responseModalities: ['AUDIO'] },
   callbacks: {
     onmessage: (msg) => { /* LiveServerMessage */ },
@@ -231,7 +232,7 @@ await session.sendClientContent({ turns: '...' });
 Polling/wait para long-running operations (Veo, Imagen async, tuning jobs).
 
 ```ts
-let op = await ai.models.generateVideos({ model: process.env.VEO_MODEL!, prompt: '...' }); // id vigente na ficha de modelos
+let op = await ai.models.generateVideos({ model: env.VEO_MODEL, prompt: '...' }); // id vigente na ficha de modelos
 while (!op.done) {
   await new Promise((r) => setTimeout(r, 5000));
   op = await ai.operations.getVideosOperation({ operation: op });

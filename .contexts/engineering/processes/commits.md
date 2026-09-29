@@ -169,7 +169,7 @@ Esta política se conjuga com `@processes/git` e `@processes/pull-requests`.
 - Commits intermediários da branch da feature podem ser informais (`wip`, `fix lint`, `address review`) **se e somente se** forem locais e serão squashed antes do PR. `wip` nunca entra em PR nem em `main`.
 - O **título do PR deve seguir Conventional Commits**, pois é usado como mensagem do squash commit.
 - O **corpo do PR** é usado como corpo do squash commit — escreva-o com o cuidado de uma mensagem de commit, não como rascunho.
-- Branches de longa duração (ex.: release branches) **não usam squash**; commits são preservados e devem ser bem formados desde a origem.
+- Não há release branches (`@processes/git` §1); hotfix também entra em `main` por squash (backfill).
 
 Ver `@rules/code-review` para o que deve aparecer no corpo do PR antes do squash.
 
@@ -189,7 +189,8 @@ export default {
   extends: ['@commitlint/config-conventional'],
   rules: {
     'header-max-length': [2, 'always', 72],
-    'subject-case': [2, 'always', 'lower-case'],
+    // só barra inicial maiúscula; identificadores camelCase no meio do subject são válidos
+    'subject-case': [2, 'never', ['sentence-case', 'start-case', 'pascal-case', 'upper-case']],
     'subject-full-stop': [2, 'never', '.'],
   },
 };

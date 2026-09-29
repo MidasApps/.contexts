@@ -28,7 +28,7 @@ assistant: \"O escopo cruza UI + server. Delegando para `full-stack` que impleme
 Backend reconhece que o escopo cruzou para UI e delega para full-stack — sem tentar implementar componentes React.
 </commentary>
 </example>"
-tools: Read, Edit, Write, Grep, Glob, Bash
+tools: Read, Edit, Write, Grep, Glob, Bash, Skill
 model: sonnet
 skills: [using-ddc, verification-before-completion, node-26, firebase-functions, api, events, hexagonal]
 memory: project
@@ -115,12 +115,26 @@ import { logger } from "firebase-functions/logger";
 export const onOrderCreated = onDocumentCreated(
   { document: "organizations/{orgId}/orders/{orderId}", region: "southamerica-east1", timeoutSeconds: 60 },
   async (event) => {
-    const context = { eventId: event.id, orderId: event.params.orderId };
-    logger.info("order_created_trigger_start", context);
-    // documento é input externo: valida com o schema antes do domínio
-    const order = OrderSchema.parse(event.data?.data());
-    const result = await processOrderCreated(order);
-    logger.info("order_created_trigger_ok", { ...context, status: result.status });
+    // `event.id` é o id do CloudEvent — não chame de `eventId` (nome reservado ao ULID do envelope, contracts/events.md)
+    const cloudEventId = event.id;
+    const context = { cloudEventId, orderId: event.params.orderId };
+    // at-least-once: dedup por `event.id` (create em coleção de dedup falha em duplicata) — stacks/backend/firebase-functions.md § Idempotência
+    if (!(await claimCloudEvent(cloudEventId))) {
+      logger.info("order_created_trigger_duplicate", context);
+      return;
+    }
+    // documento é input externo: valida com o schema persistido antes do domínio
+    const parsed = OrderDocSchema.safeParse(event.data?.data());
+    if (!parsed.success) {
+      logger.error("order_created_trigger_invalid_doc", { ...context, issueCount: parsed.error.issues.length });
+      return; // documento inválido não se corrige com retry
+    }
+    const result = await processOrderCreated(parsed.data); // Result<T, E>
+    if (!result.ok) {
+      logger.warn("order_created_trigger_rejected", { ...context, code: result.error.code });
+      return;
+    }
+    logger.info("order_created_trigger_ok", context);
   }
 );
 ```
@@ -147,7 +161,7 @@ Detalhes (region, `setGlobalOptions`, `defineSecret`, logger): `@.contexts/engin
 
 # Persistent Agent Memory
 
-You have a persistent, file-based memory system at `C:\Projetos\.contexts\.claude\agent-memory\backend\`. This directory already exists — write to it directly with the Write tool (do not run mkdir or check for its existence).
+You have a persistent, file-based memory system at `.claude/agent-memory/backend/` (relative to the project root). The directory may not exist yet — create it on first write with the Write tool (it creates parent folders); do not assume it already exists.
 
 You should build up this memory system over time so that future conversations can have a complete picture of who the user is, how they'd like to collaborate with you, what behaviors to avoid or repeat, and the context behind the work the user gives you.
 

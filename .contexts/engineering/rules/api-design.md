@@ -54,7 +54,7 @@ Regras imperativas que governam **como** desenhamos superfícies de API. Este do
 ## 4. Idempotência
 
 - **Toda** rota `PUT`, `DELETE`, `GET` é idempotente por contrato. Implemente para que seja verdade.
-- **Para `POST` que cria recurso**, aceite header `Idempotency-Key` (chave opaca gerada pelo cliente, ULID por convenção — `@contracts/api` seção 11.1) quando a operação custar dinheiro, gerar efeito colateral externo (email, webhook, pagamento) ou for crítica. A chave é válida por no mínimo 24h.
+- **Para `POST` que cria recurso**, aceite header `Idempotency-Key` (chave opaca gerada pelo cliente, ULID por convenção — `@contracts/api` seção 11.1) quando a operação custar dinheiro, gerar efeito colateral externo (email, webhook, pagamento) ou for crítica. Em `/orders`, `/payments` e `/refunds` o header é **obrigatório** (`@contracts/api` §4.2, §11.1): ausente ou fora do formato → `400 VALIDATION_FAILED`. A chave é válida por no mínimo 24h.
 - **Armazene** o resultado da primeira execução indexado pela `Idempotency-Key` e retorne-o em chamadas subsequentes com a mesma chave, mesmo status code.
 - **Não** confunda idempotência com cache. Idempotência é sobre efeito; cache é sobre resposta.
 

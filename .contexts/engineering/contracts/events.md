@@ -202,7 +202,7 @@ export const ActorSchema = z.object({
 });
 
 export const EventEnvelopeSchema = z.object({
-  eventId: z.string().regex(/^[0-9A-HJKMNP-TV-Z]{26}$/), // ULID
+  eventId: z.ulid(), // ULID (ADR 0005)
   eventName: z.string(),
   eventVersion: z.number().int().positive(),
   occurredAt: z.iso.datetime({ offset: false }),
@@ -319,6 +319,7 @@ CREATE INDEX outbox_events_unpublished_idx
 - Worker lê: `SELECT ... FROM outbox_events WHERE published_at IS NULL ORDER BY created_at FOR UPDATE SKIP LOCKED LIMIT N`.
 - Publica no Pub/Sub e marca `published_at = NOW()`.
 - **NUNCA** publicar diretamente do código de aplicação quando atomicidade for requisito — use sempre outbox. Ver `@contracts/postgres`.
+- Este outbox é só para contextos em Postgres. Contexto cuja escrita transacional mora no Firestore precisa de um ADR que defina seu outbox antes de publicar eventos de integração com atomicidade write+publish (trigger do Firestore não serve de event bus, §9.4).
 
 ### 9.3 Sink para warehouse
 

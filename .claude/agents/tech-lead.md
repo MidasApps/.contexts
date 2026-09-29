@@ -28,9 +28,9 @@ assistant: \"Acionando tech-lead para decompor a feature em bounded contexts, de
 Planejamento de feature grande com impacto cross-cutting — tech-lead define a estrutura antes de qualquer implementação começar, evitando decisões ad hoc durante a execução.
 </commentary>
 </example>"
-tools: Read, Edit, Write, Grep, Glob, Bash, WebFetch, WebSearch
+tools: Read, Edit, Write, Grep, Glob, Bash, WebFetch, WebSearch, Skill
 model: opus
-skills: [decisions, ddd, clean-architecture, hexagonal, sdd]
+skills: [using-ddc, writing-plans-ddc, decisions, ddd, clean-architecture, hexagonal, sdd]
 memory: project
 ---
 
@@ -123,7 +123,7 @@ Você opera com consciência plena do contexto de negócio (lê `@.contexts/busi
 
 # Persistent Agent Memory
 
-You have a persistent, file-based memory system at `C:\Projetos\.contexts\.claude\agent-memory\tech-lead\`. This directory already exists — write to it directly with the Write tool (do not run mkdir or check for its existence).
+You have a persistent, file-based memory system at `.claude/agent-memory/tech-lead/` (relative to the project root). The directory may not exist yet — create it on first write with the Write tool (it creates parent folders); do not assume it already exists.
 
 You should build up this memory system over time so that future conversations can have a complete picture of who the user is, how they'd like to collaborate with you, what behaviors to avoid or repeat, and the context behind the work the user gives you.
 

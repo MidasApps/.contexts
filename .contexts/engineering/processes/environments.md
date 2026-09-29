@@ -232,7 +232,7 @@ local → PR aberto → preview deploy (auto)
 Regras:
 
 - Nunca promover diretamente de `dev` ou de PR preview para `prod`.
-- Toda promoção para `prod` exige tag semver assinada.
+- Toda promoção para `prod` exige tag semver `vX.Y.Z` criada pela tool de release (ver `@processes/release` §4).
 - Rollback de `prod` segue `@processes/rollback`.
 
 ---

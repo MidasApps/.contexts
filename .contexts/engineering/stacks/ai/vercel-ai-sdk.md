@@ -47,8 +47,9 @@ A chave fica no servidor. O id do modelo vem de config validada, não de literal
 
 ```ts
 import { createOpenAI } from "@ai-sdk/openai";
+import { env } from "@/env"; // src/env.ts validado por Zod (@contracts/secrets §5.4)
 
-export const openai = createOpenAI({ apiKey: process.env.OPENAI_API_KEY });
+export const openai = createOpenAI({ apiKey: env.OPENAI_API_KEY });
 ```
 
 ## Texto e saída estruturada

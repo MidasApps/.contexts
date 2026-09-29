@@ -131,7 +131,7 @@ Stack pinado para ser **mutuamente compatível**. Não subir uma major isolada s
 ## Contracts — 8 doutrinas de modelagem
 
 - [api](contracts/api.md) — Naming kebab/camel, envelopes RFC 9457, status codes, paginação cursor
-- [firebase-firestore](contracts/firebase-firestore.md) — Coleções, audit fields, soft-delete, tenant isolation (default `tenantId`; modelo por conjunto → `rules/tenancy.md` do projeto)
+- [firebase-firestore](contracts/firebase-firestore.md) — Coleções, audit fields, soft-delete, tenant isolation (default `tenantId`; modelo por conjunto → `rules/tenancy.md`, criado pelo projeto ao adotá-lo)
 - [bigquery](contracts/bigquery.md) — Star schema, STRUCT/ARRAY, partitioning, policy tags
 - [postgres](contracts/postgres.md) — snake_case, **uuidv7() PKs** (default), audit+soft-delete, TIMESTAMPTZ, outbox
 - [pgvector](contracts/pgvector.md) — Schema `ai`, `chunks_v1`, PKs uuidv7, versionamento de embeddings

@@ -95,7 +95,7 @@ Use **`uuidv7()`** nativo do Postgres 18 como padrão de PK. UUIDv7 é ordenáve
 
 ```sql
 -- ULID gerado na aplicação (TEXT), quando o bounded context já padronizou ULID
--- ou precisa de geração client-side idêntica a Firestore/event IDs
+-- ou precisa de ID gerado no client no formato do eventId (Firestore não usa ULID: ADR 0005)
 id text PRIMARY KEY  -- ULID
 
 -- UUID v4 apenas se ordenação temporal for indesejada (tokens públicos, etc.)

@@ -61,6 +61,14 @@ Completam a tabela acima. A linha "Server Action" refina a linha "Entry points" 
 | Server Action | `src/app/<rota>/actions.ts` com `"use server"` e wrapper async de uma linha que chama o adapter em `src/services/<context>/adapters/driving/`; nada de lógica nem acesso a banco no arquivo. Erro de validação volta como `{ ok: false, error }` com `details: [{ field, issue }]` do §6; `z.flattenError()` não sai da action | Action com `db.insert` direto em `app/**/actions.ts`; `z.flattenError(err).fieldErrors` como retorno |
 | Caminho do backend | `application/use-cases/<uc>.ts`, `adapters/driving/…`, `adapters/driven/…` (árvore de `architecture/feature-based.md`) | `application/<uc>.ts`, `adapters/<x>.ts`, `src/modules/…` |
 
+### 2026-09-29: `requestId` no erro de `Result` e de Server Action
+
+Refina a linha "`Result` e retorno de Server Action" da tabela principal, que omitia `requestId` enquanto o vencedor nomeado (`contracts/api.md` §6.1) o declara sempre presente.
+
+| Assunto | Vence | Antes (divergia) |
+|---|---|---|
+| `requestId` no erro | `Result` de domínio devolvido por use case: `error` é `{ code, message, details? }`, sem `requestId`. A boundary (route handler, Server Action, callable) acrescenta `requestId` ao montar o envelope HTTP `{ error: { code, message, details?, requestId } }` e o `{ ok: false, error }` da Server Action (`contracts/api.md` §6 e §16.2) | Linha da tabela principal lida como se o erro da Server Action não levasse `requestId` |
+
 ## References
 
 - [0002](0002-baseline-2026-09-version-and-naming-alignment.md)

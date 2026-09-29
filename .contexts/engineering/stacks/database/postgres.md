@@ -166,8 +166,9 @@ Driver moderno, TS-first, tagged template literals com escape automático, strea
 
 ```typescript
 import postgres from 'postgres';
+import { env } from '@/env'; // env validado por Zod (ver @contracts/secrets §5.4)
 
-const sql = postgres(process.env.DATABASE_URL!, {
+const sql = postgres(env.DATABASE_URL, {
   max: 10,
   idle_timeout: 20,
   connect_timeout: 10,
@@ -209,6 +210,7 @@ export const users = pgTable('users', {
   id: uuid('id').primaryKey().default(sql`uuidv7()`),
   email: text('email').notNull().unique(),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
   deletedAt: timestamp('deleted_at', { withTimezone: true }),
 });
 
@@ -319,7 +321,7 @@ Sem prescrição rígida; opções validadas:
 
 ## Local dev
 
-- **Docker Compose** com imagem `postgres:18-alpine` + extensions instaladas via `init.sql`.
+- **Docker Compose** com imagem `pgvector/pgvector:0.8.6-pg18` (Postgres 18 + pgvector; a imagem oficial `postgres:18` não traz `vector`) + extensions instaladas via `init.sql`.
 - Reset via script (`db:reset`); seed via SQL fixtures.
 - **testcontainers** para integration tests — banco real efêmero por suíte. Ver `@rules/testing`.
 
@@ -328,7 +330,7 @@ Exemplo mínimo:
 ```yaml
 services:
   postgres:
-    image: postgres:18-alpine
+    image: pgvector/pgvector:0.8.6-pg18
     environment:
       POSTGRES_PASSWORD: dev
     ports: ['5432:5432']

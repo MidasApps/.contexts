@@ -141,7 +141,7 @@ Toda mudança de modelo de embedding ou de dimensionalidade **exige** uma nova t
 
 ## 5. Dimensões padrão por modelo
 
-Matriz de referência. Documente no projeto qual é o **default ativo** e mantenha no frontmatter de `@stacks/ai/*` do modelo escolhido.
+Matriz de referência. Documente no projeto qual é o **default ativo** e mantenha no stack doc do provider escolhido (`@stacks/ai/openai`, `@stacks/ai/gemini`).
 
 | Modelo | Dimensão nativa | Truncável? |
 |---|---|---|

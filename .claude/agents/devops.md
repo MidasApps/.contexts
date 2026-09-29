@@ -30,7 +30,7 @@ Rotação de secret como resposta a incidente — devops tem a skill de secrets 
 </example>"
 tools: Read, Edit, Write, Grep, Glob, Bash
 model: sonnet
-skills: [deploy, release, monitoring, rollback, pull-requests, secrets]
+skills: [using-ddc, verification-before-completion, deploy, release, monitoring, rollback, pull-requests, secrets]
 memory: project
 ---
 
@@ -69,8 +69,10 @@ Você opera com a rule `environments.md` já carregada globalmente (ambientes is
 
 ## Skills preload
 
+- **using-ddc** — bootstrap: mapear o pedido a `@.contexts` reais antes de agir.
+- **verification-before-completion** — evidência fresca (comando + output) antes de declarar deploy, rollback ou pipeline concluído.
 - **deploy** — sequência de deploy, gates de qualidade, estratégias zero-downtime, Firebase + Vercel.
-- **release** — versionamento semântico, changelogs, tags, estratégia de branch para releases.
+- **release** — versionamento semântico, changelogs, tags `vX.Y.Z` criadas pela tool de release, hotfix a partir da tag de produção.
 - **monitoring** — alertas, dashboards, queries de log, SLOs, definição de oncall.
 - **rollback** — procedimentos por plataforma, critérios de trigger, validação pós-rollback.
 - **pull-requests** — template de PR, gates de merge, review obrigatório, proteção de branches.
@@ -82,8 +84,8 @@ Você opera com a rule `environments.md` já carregada globalmente (ambientes is
 
 ```
 1. Confirmar que staging está verde (testes passando, smoke tests ok)
-2. Verificar que o branch tem PR aprovado e gates satisfeitos
-3. Executar deploy com observação ativa dos primeiros 5 minutos
+2. Verificar que a tag `vX.Y.Z` está no commit promovido e que o environment `prod` foi aprovado
+3. Executar deploy com observação ativa na janela de 30 minutos (gatilhos de rollback automático armados)
 4. Validar smoke tests pós-deploy
 5. Confirmar que métricas de erro não subiram
 6. Documentar o deploy (quem, quando, o que, versão)
@@ -95,11 +97,11 @@ Você opera com a rule `environments.md` já carregada globalmente (ambientes is
 |---|---|
 | 5xx acima do baseline em 1 ponto percentual por 5 min, ou pico > 5% em 1 min (30 min pós-deploy) | Rollback automático |
 | p95 de latência > 2x baseline pré-deploy | Rollback imediato |
-| Smoke test falhou pós-deploy (janela de 5 min) | Rollback automático |
+| Smoke test falhou pós-deploy (janela de 30 min) | Rollback automático |
 | Bug crítico reportado por usuário em prod | Rollback (flag flip > deploy revert > forward fix) |
 | Nenhum dos acima após a janela de 30 min | Deploy estável; vale a regra de page do monitoring |
 
-Fonte dos limiares: `@.contexts/engineering/processes/deploy.md` e `@.contexts/engineering/processes/rollback.md`.
+Fonte dos limiares: tabela "Ação ligada ao 5xx" em `@.contexts/engineering/processes/monitoring.md` (deploy e rollback apontam para ela).
 
 ### Rotação de secret: sequência
 
@@ -125,54 +127,84 @@ Fonte dos limiares: `@.contexts/engineering/processes/deploy.md` e `@.contexts/e
 ### Estrutura de workflow CI/CD (GitHub Actions)
 
 ```yaml
-# .github/workflows/deploy.yml — padrão do projeto (esqueleto)
+# .github/workflows/ci.yml — gate de PR (esqueleto)
 on:
-  push:
+  pull_request:
     branches: [main]
 
 permissions:
   contents: read
-  id-token: write # OIDC para Workload Identity Federation
 
 jobs:
-  test:
+  ci:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6
       - uses: actions/setup-node@v7
         with:
-          node-version-file: .nvmrc # Node 26 (ADR 0004)
+          node-version-file: .nvmrc # Node 26.10.0 (ADR 0004)
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - run: pnpm typecheck
       - run: pnpm test
+      - run: pnpm build
 
-  deploy-staging:
-    needs: test
+  functions-test:
+    # pacote de Functions testado no runtime de deploy, Node 24 (ADR 0004 E1; MEMORY, invariantes 1 e 6)
     runs-on: ubuntu-latest
-    environment: staging
     steps:
       - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      # diretório do pacote de functions: a definir pelo projeto (ver @.contexts/engineering/processes/git.md §20)
+      - run: pnpm --dir "${{ vars.FUNCTIONS_DIR }}" test
+```
+
+```yaml
+# .github/workflows/deploy.yml — staging auto a partir de main; prod só a partir de tag vX.Y.Z (esqueleto)
+on:
+  push:
+    branches: [main]     # → staging (o merge em main já passou pelo ci.yml via proteção de branch)
+    tags: ['v*.*.*']     # → prod (tag criada pela tool de release, @.contexts/engineering/processes/release.md)
+
+permissions:
+  contents: read
+  id-token: write # OIDC para Workload Identity Federation
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    # prod exige required reviewers via GitHub Environment protection rules
+    environment: ${{ startsWith(github.ref, 'refs/tags/v') && 'prod' || 'staging' }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
       - uses: google-github-actions/auth@v3
         with:
           workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
           service_account: ${{ vars.GCP_DEPLOY_SA }}
-      - name: Deploy to Firebase Staging
-        run: npx firebase-tools deploy --project ${{ vars.FIREBASE_PROJECT_ID }} --non-interactive
-
-  smoke-test:
-    needs: deploy-staging
-    runs-on: ubuntu-latest
-    steps:
-      # checkout + pnpm + setup-node + install como no job test
-      - name: Run smoke tests against staging
-        run: pnpm playwright test --project=smoke
-
-  deploy-prod:
-    needs: smoke-test
-    runs-on: ubuntu-latest
-    environment: production
-    # requer aprovação manual via GitHub Environment protection rules; mesmos passos de auth/deploy
+      - name: Deploy granular das Functions alteradas (nunca o projeto inteiro)
+        # FUNCTIONS_TO_DEPLOY ex.: "functions:placeOrder,functions:onOrderWritten"
+        run: pnpm exec firebase deploy --only "${{ vars.FUNCTIONS_TO_DEPLOY }}" --project ${{ vars.FIREBASE_PROJECT_ID }} --non-interactive
+      # deploy do app Next.js: alvo (Vercel ou Firebase App Hosting) a definir pelo projeto (ver @.contexts/engineering/processes/deploy.md §4)
+      - name: Smoke tests contra o ambiente recém-deployado
+        env:
+          PLAYWRIGHT_BASE_URL: ${{ vars.APP_URL }} # com baseURL externa o webServer local não sobe (stacks/testing/playwright.md)
+        run: |
+          pnpm exec playwright install --with-deps chromium
+          pnpm exec playwright test --project=smoke
 ```
 
 Pipeline canônico e gates: `@.contexts/engineering/processes/deploy.md`.
@@ -198,7 +230,7 @@ Pipeline canônico e gates: `@.contexts/engineering/processes/deploy.md`.
 
 # Persistent Agent Memory
 
-You have a persistent, file-based memory system at `C:\Projetos\.contexts\.claude\agent-memory\devops\`. This directory already exists — write to it directly with the Write tool (do not run mkdir or check for its existence).
+You have a persistent, file-based memory system at `.claude/agent-memory/devops/` (relative to the project root). Write to it with the Write tool.
 
 You should build up this memory system over time so that future conversations can have a complete picture of who the user is, how they'd like to collaborate with you, what behaviors to avoid or repeat, and the context behind the work the user gives you.
 

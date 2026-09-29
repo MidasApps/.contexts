@@ -10,7 +10,7 @@ APIs HTTP/RPC seguem contrato previsível: recursos REST, status codes corretos,
 - Sucesso: `{ data, meta? }`; nunca array no root. Erro: `{ error: { code, message, details?, requestId } }`. Shapes em `@.contexts/engineering/contracts/api.md` (§5, §6).
 - Paginação cursor: `?cursor=...&limit=20` (máx. 100), resposta `meta.page: { cursor, hasMore, limit }`. Ordenação `?sort=-createdAt,name`. Filtros `createdAfter/createdBefore`, `amountMinorMin/Max`, lista por vírgula (§9–10).
 - Versão só no path (`/v1/...`), nunca em header. Breaking = nova major; aditivo = mesma versão. Deprecação: `Deprecation` + `Sunset` + `Link rel="successor-version"`, janela ≥ 6 meses (§17).
-- `Idempotency-Key` em POST com efeito custoso (pagamento, e-mail, webhook); resultado guardado ≥ 24h.
+- `Idempotency-Key` (ULID) em POST com efeito custoso (pagamento, e-mail, webhook); **obrigatório** em `/orders`, `/payments`, `/refunds` (`contracts/api.md` §11.1) — ausente/inválido → 400. Resultado guardado ≥ 24h.
 - Paths aninhados até 2 níveis (`/orders/:orderId/items`). IDs opacos, sem prefixo de tipo.
 
 ## Checklist (aplicar a todo turn)
@@ -31,11 +31,13 @@ APIs HTTP/RPC seguem contrato previsível: recursos REST, status codes corretos,
 // src/services/orders/adapters/driving/place-order-route-handler.ts
 // (src/app/v1/orders/route.ts só faz: export { POST } from "@/services/orders/adapters/driving/place-order-route-handler")
 export async function POST(req: Request) {
+  const requestId = getRequestId(req);                                   // x-request-id ou ULID novo
   const user = await requireAuth(req);                                   // 401
+  const key = IdempotencyKeySchema.safeParse(req.headers.get("idempotency-key")); // z.ulid(); obrigatório aqui
   const parsed = PlaceOrderInputSchema.safeParse(await req.json());      // 400 (rule validation)
-  if (!parsed.success) return validationError(parsed.error, requestId);
+  if (!key.success || !parsed.success) return validationError({ key, parsed }, requestId); // 400, todos os campos
   await assertCanPlaceOrder(user, parsed.data.tenantId);                 // 403
-  const order = await placeOrder(parsed.data, { idempotencyKey: req.headers.get("idempotency-key") });
+  const order = await placeOrder(parsed.data, { idempotencyKey: key.data });
   return Response.json({ data: order }, { status: 201, headers: { Location: `/v1/orders/${order.id}` } });
 }
 ```

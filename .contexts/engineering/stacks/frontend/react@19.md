@@ -340,8 +340,9 @@ export const createPost = async (formData: FormData) => createPostAction(formDat
 ```
 
 ```ts
-// src/services/posts/adapters/driving/create-post-action.ts
-import { CreatePostInputSchema } from '@/contracts/posts/create-post-input.schema'; // client + server: z.strictObject({ title: z.string().min(1).max(200) })
+// src/services/posts/adapters/driving/create-post-action.ts (mesmo adapter de @stacks/frontend/next@16)
+import { updateTag } from 'next/cache';
+import { CreatePostInputSchema } from '@/contracts/posts/create-post-input.schema'; // client + server: z.strictObject({ title: z.string().min(1).max(120) })
 import { createPost } from '@/services/posts/composition'; // use case application/use-cases/create-post.ts
 import { getRequestId } from '@/services/shared/request-id'; // async: lê x-request-id (setado pelo proxy.ts) via await headers()
 
@@ -361,6 +362,7 @@ export const createPostAction = async (formData: FormData) => {
     } as const;
   }
   const post = await createPost({ ...parsed.data, authorId: user.id });
+  updateTag('posts'); // read-your-writes (@stacks/frontend/next@16)
   return { ok: true, data: { postId: post.id } } as const;
 };
 ```

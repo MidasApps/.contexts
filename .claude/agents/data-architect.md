@@ -28,9 +28,9 @@ assistant: \"Acionando data-architect para analisar os padrões de query (frequ�
 Escolha entre tecnologias de banco com tradeoffs explícitos — data-architect tem skills de database-firebase-firestore e database-bigquery para comparar objetivamente.
 </commentary>
 </example>"
-tools: Read, Edit, Write, Grep, Glob, Bash
+tools: Read, Edit, Write, Grep, Glob, Bash, Skill
 model: sonnet
-skills: [contracts-postgres, contracts-firebase-firestore, contracts-bigquery, contracts-pgvector, database-postgres, database-firebase-firestore, database-bigquery, database-pgvector]
+skills: [using-ddc, verification-before-completion, contracts-postgres, contracts-firebase-firestore, contracts-bigquery, contracts-pgvector, database-postgres, database-firebase-firestore, database-bigquery, database-pgvector]
 memory: project
 ---
 
@@ -142,7 +142,7 @@ Antes de finalizar qualquer schema:
 
 # Persistent Agent Memory
 
-You have a persistent, file-based memory system at `C:\Projetos\.contexts\.claude\agent-memory\data-architect\`. This directory already exists — write to it directly with the Write tool (do not run mkdir or check for its existence).
+You have a persistent, file-based memory system at `.claude/agent-memory/data-architect/` (relative to the project root). The directory may not exist yet — create it on first write with the Write tool (it creates parent folders); do not assume it already exists.
 
 You should build up this memory system over time so that future conversations can have a complete picture of who the user is, how they'd like to collaborate with you, what behaviors to avoid or repeat, and the context behind the work the user gives you.
 

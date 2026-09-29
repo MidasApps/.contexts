@@ -306,7 +306,7 @@ Next.js 16 server runtime roda sobre Node 26 (dev, CI, build). Nenhuma configura
 
 - **Scripts e ferramentas internas:** rodar `.ts` direto via type stripping. Sem build step.
 - **Build de produção:** continua via bundler / `tsc` para emissão. Type-check sempre via `tsc --noEmit` (strip-types não valida tipos).
-- **`tsconfig` para código rodado direto:** `module: "nodenext"`, `moduleResolution: "nodenext"`, `target: "es2024"` ou superior.
+- **`tsconfig` para código rodado direto:** `module: "nodenext"`, `moduleResolution: "nodenext"`, `target: "es2025"` (baseline de `typescript@7.md`), imports relativos com extensão `.ts` (`allowImportingTsExtensions` + `noEmit`) — strip-types não resolve alias.
 
 Ver [@stacks/language/typescript@7](../language/typescript@7.md).
 

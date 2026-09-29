@@ -271,7 +271,7 @@ Ver `@rules/error-handling`.
 
 ## Migração 15 → 16
 
-1. Atualizar Node para 22+ (baseline do projeto: 26 — `@stacks/runtime/node@26`).
+1. Atualizar Node para `>=20.9` (requisito do Next 16, ADR 0004; baseline do projeto: 26 — `@stacks/runtime/node@26`).
 2. Atualizar React: `npm i react@19 react-dom@19`.
 3. Rodar codemod oficial: `npx @next/codemod@canary upgrade latest`.
 4. Revisar `next.config.ts`: remover flags que viraram default ou foram removidas (`experimental.ppr` -> `cacheComponents`, `after`), mover `experimental.typedRoutes` para `typedRoutes: true` no topo (saiu de experimental), trocar `export const revalidate`/`dynamic`/`fetchCache` por `'use cache'` + `cacheLife()` e remover `runtime = "edge"` (Cache Components exige Node.js), renomear `middleware.ts` para `proxy.ts`, confirmar `remotePatterns` para imagens.

@@ -76,7 +76,9 @@ Veja `@processes/commits` para a especificação completa de Conventional Commit
 
 ### 4.1. Release Please (recomendado para apps)
 
-Google's [Release Please](https://github.com/googleapis/release-please) — GitHub Action que monitora `main`, mantém um PR de release aberto com changelog e bump calculado, e ao merge cria tag + GitHub Release.
+Google's [Release Please](https://github.com/googleapis/release-please) — GitHub Action que monitora `main`, mantém um PR de release aberto com changelog e bump calculado, e ao merge cria a tag `vX.Y.Z` + GitHub Release. É a única origem de tag de release (`@processes/git` §10).
+
+Configure `"include-component-in-tag": false` em `release-please-config.json` para a tag sair `vX.Y.Z` sem prefixo de componente (formato exigido por `@processes/git` e pelo trigger de prod em `@processes/deploy`). Em monorepo com vários componentes versionados pela tool, só um componente pode gerar tag `vX.Y.Z`; os demais seguem changesets (§4.2).
 
 Use em:
 - Apps Next.js
@@ -107,7 +109,7 @@ Use em:
 
 Toda release válida produz:
 
-1. **Git tag anotada** no formato `vMAJOR.MINOR.PATCH`.
+1. **Git tag** no formato `vMAJOR.MINOR.PATCH`, criada pela tool de release (§4).
    - Exemplo: `v1.4.2`, `v2.0.0-beta.1`.
    - Tag é **imutável**. Nunca rode `git tag -f`.
 2. **GitHub Release** publicada com changelog auto-gerado.
@@ -165,18 +167,11 @@ Patch incrementado para corrigir bug crítico em produção. Ver seção 11.
 
 ---
 
-## 8. Release Branches (opcional)
+## 8. Release Branches (não usadas)
 
-Use apenas quando o projeto suporta múltiplas versões majors simultaneamente (LTS).
+O projeto é trunk-based (`@processes/git` §1): **não há release branches** (`release/*`, `release-vX.x`). Releases são tags `vX.Y.Z` sobre `main`; correção urgente usa branch `hotfix/<issue-id>-<slug>` criada da tag de produção (§11), com backfill em `main`.
 
-- Nome: `release-vX.x` (ex.: `release-v1.x`).
-- Criada a partir da última tag da major.
-- Hotfixes em LTS:
-  1. PR na release branch.
-  2. Cherry-pick para `main` quando aplicável.
-- **Cleanup obrigatório quando a major atinge EOL.** Branches LTS abandonadas geram confusão e violam disciplina de inventário.
-
-Para projetos sem LTS, **não crie release branches**. Trabalhe apenas com tags.
+Suportar várias majors em paralelo (LTS) exige ADR antes de qualquer branch de manutenção.
 
 ---
 
@@ -237,9 +232,9 @@ Sequência operacional:
 1. **Branch:** `hotfix/<issue-id>-<slug>` criada da tag de produção (não de `main`).
 2. **Fix + tests:** correção mínima, testes regressivos cobrindo o bug.
 3. **PR + fast-track review:** processo de PR conforme `@processes/pull-requests` com label `hotfix` e revisor on-call.
-4. **Tag PATCH:** no commit aprovado do hotfix (ou da release branch, se existir — seção 8); a tool de release incrementa o patch.
+4. **Tag PATCH:** a tool de release incrementa o patch e cria a tag `vX.Y.Z+1` no commit aprovado do hotfix.
 5. **Deploy:** seguindo `@processes/deploy`.
-6. **Backfill em `main`:** cherry-pick ou merge garantindo que o fix não regride na próxima release.
+6. **Backfill em `main`:** PR com cherry-pick do fix, squash merge (`@processes/git` §9), garantindo que o fix não regride na próxima release.
 7. **Postmortem:** obrigatório para hotfix em produção. Ver `@rules/governance`.
 
 ---
@@ -248,12 +243,11 @@ Sequência operacional:
 
 Sequência operacional:
 
-1. **Branch `release-vX.0`** (opcional, conforme seção 8).
-2. **RC builds** distribuídos para beta testers via canal dedicado.
-3. **Final QA** com checklist de breaking changes e migration validada.
-4. **Tag final** `vX.0.0` criada pela tool ao merge do PR de release.
-5. **Comunicação ampla:** email, blog, Slack, atualização de docs.
-6. **Monitoramento pós-release** com SLOs definidos. Ver `@rules/observability`.
+1. **RC builds** (tags `vX.0.0-rc.N` sobre `main`, §9) distribuídos para beta testers via canal dedicado.
+2. **Final QA** com checklist de breaking changes e migration validada.
+3. **Tag final** `vX.0.0` criada pela tool ao merge do PR de release.
+4. **Comunicação ampla:** email, blog, Slack, atualização de docs.
+5. **Monitoramento pós-release** com SLOs definidos. Ver `@rules/observability`.
 
 > Toda major release tem aprovador nomeado e auditável. Ver seção 17.
 
@@ -374,7 +368,7 @@ Nenhum dos itens abaixo é permitido. Cada um é violação direta do framework 
 - PR description copiada diretamente como release notes sem edição.
 - Versionamento manual quando Conventional Commits poderia automatizar.
 - Breaking change externa sem comunicação prévia aos stakeholders.
-- Release branch LTS mantida indefinidamente sem cleanup pós-EOL.
+- Release branch criada fora do trunk (sem ADR de LTS).
 - Major release sem audit trail de aprovador.
 - Release acoplada a deploy sem feature flag intermediária.
 - "Hotfix" usado como atalho para evitar processo normal de PR.

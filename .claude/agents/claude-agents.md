@@ -92,7 +92,7 @@ Não recriar. Apenas atualizar quando o usuário pedir explicitamente.
 5. Defina always-reads: apenas o que não carrega globalmente.
 6. Escreva protocolo de execução se o agent tem fluxo claro (passos numerados, tabelas de decisão).
 7. Adicione anti-patterns e restrições universais.
-8. Inclua o bloco Persistent Agent Memory completo com o path da pasta `agent-memory/<name>/`.
+8. Inclua o bloco Persistent Agent Memory completo com o path project-relative `.claude/agent-memory/<name>/` (sem path absoluto de máquina; a pasta é criada no primeiro Write — não afirme que já existe).
 9. Persista em `.claude/agents/<name>.md`.
 
 ## Template de referência
@@ -131,7 +131,7 @@ memory: project
 <bullets>
 
 # Persistent Agent Memory
-<bloco completo copiado com path ajustado para agent-memory/<name>/>
+<bloco completo copiado com path ajustado para `.claude/agent-memory/<name>/` (project-relative, criada no primeiro Write)>
 ```
 
 ## Anti-patterns
@@ -152,7 +152,7 @@ memory: project
 
 # Persistent Agent Memory
 
-You have a persistent, file-based memory system at `C:\Projetos\.contexts\.claude\agent-memory\claude-agents\`. This directory already exists — write to it directly with the Write tool (do not run mkdir or check for its existence).
+You have a persistent, file-based memory system at `.claude/agent-memory/claude-agents/` (relative to the project root). The directory may not exist yet — create it on first write with the Write tool (it creates parent folders); do not assume it already exists.
 
 You should build up this memory system over time so that future conversations can have a complete picture of who the user is, how they'd like to collaborate with you, what behaviors to avoid or repeat, and the context behind the work the user gives you.
 

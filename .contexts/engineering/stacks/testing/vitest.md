@@ -102,7 +102,6 @@ Resolva paths via `vite-tsconfig-paths` lendo o `tsconfig.json` do pacote. Não 
 | `node` (default) | Lógica pura, server actions, route handlers, integration com DB/Firestore. | Mínimo. |
 | `happy-dom` | Component tests com React Testing Library. | Leve, ~2x mais rápido que jsdom na inicialização. |
 | `jsdom` | Quando algum lib exige APIs DOM que `happy-dom` ainda não implementa (ex: certos polyfills de `Range`). | Maior, mas mais completo. |
-| `edge-runtime` | Testar route handlers ou middleware que rodam em Next.js Edge runtime. | Médio. |
 
 Default do projeto: `node`. Sobrescreva por arquivo com pragma:
 
@@ -261,12 +260,14 @@ export default defineConfig({
 Use `testcontainers` para subir Postgres real (não mock). Ver `@stacks/database/postgres`.
 
 ```ts
-import { PostgreSqlContainer } from '@testcontainers/postgresql'
+import { PostgreSqlContainer, type StartedPostgreSqlContainer } from '@testcontainers/postgresql'
+import { afterAll, beforeAll } from 'vitest' // globals: false
 
 let container: StartedPostgreSqlContainer
 
 beforeAll(async () => {
-  container = await new PostgreSqlContainer('postgres:18').start()
+  // mesma imagem do compose local: as migrations criam `vector` (pgvector no mesmo cluster, MEMORY)
+  container = await new PostgreSqlContainer('pgvector/pgvector:0.8.6-pg18').start()
   process.env.DATABASE_URL = container.getConnectionUri()
   await runMigrations()
 }, 60_000)
@@ -308,16 +309,31 @@ Ver `@stacks/frontend/react@19`. Princípio: testar o componente como o usuário
 
 Server Actions e Route Handlers são funções TS comuns — importe e teste diretamente. Não tente subir o servidor Next dentro do Vitest.
 
-```ts
-import { POST } from '@/app/v1/users/route' // re-export de services/users/adapters/driving/register-user-route-handler
+O handler faz auth → validate → authorize → act: sem credencial a resposta é 401 antes de olhar o body. Para testar validação, autentique a request.
 
-it('returns 400 on invalid body', async () => {
-  const req = new Request('http://localhost/v1/users', {
+```ts
+import { describe, expect, it } from 'vitest'
+import { POST } from '@/app/v1/orders/route' // re-export de services/orders/adapters/driving/place-order-route-handler
+
+// signInTestUser: helper do projeto que obtém um ID token no Auth Emulator (nome ilustrativo)
+const postOrder = (body: unknown, headers: Record<string, string> = {}) =>
+  POST(new Request('http://localhost/v1/orders', {
     method: 'POST',
-    body: JSON.stringify({}),
+    headers: { 'content-type': 'application/json', 'idempotency-key': '01J9Z3K8Q4W6X2Y7N5M1B0C3D4', ...headers },
+    body: JSON.stringify(body),
+  }))
+
+describe('POST /v1/orders', () => {
+  it('returns 401 without credentials', async () => {
+    const res = await postOrder({})
+    expect(res.status).toBe(401)
   })
-  const res = await POST(req)
-  expect(res.status).toBe(400)
+
+  it('returns 400 VALIDATION_FAILED on invalid body when authenticated', async () => {
+    const res = await postOrder({}, { authorization: `Bearer ${await signInTestUser()}` })
+    expect(res.status).toBe(400)
+    expect(await res.json()).toMatchObject({ error: { code: 'VALIDATION_FAILED' } })
+  })
 })
 ```
 

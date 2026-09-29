@@ -126,10 +126,11 @@ Camada de persistência conversacional. Três modos coexistentes:
 ```ts
 import { Memory } from '@mastra/memory';
 import { PostgresStore, PgVector } from '@mastra/pg';
+import { env } from '@/env'; // src/env.ts validado por Zod (@contracts/secrets §5.4)
 
 export const memory = new Memory({
-  storage: new PostgresStore({ connectionString: process.env.DATABASE_URL! }),
-  vector: new PgVector({ connectionString: process.env.DATABASE_URL! }),
+  storage: new PostgresStore({ connectionString: env.DATABASE_URL }),
+  vector: new PgVector({ connectionString: env.DATABASE_URL }),
   options: {
     lastMessages: 20,
     semanticRecall: { topK: 5, messageRange: 2 },

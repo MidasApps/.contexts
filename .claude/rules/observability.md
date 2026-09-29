@@ -15,7 +15,7 @@ Todo evento relevante (request, job, erro, side effect caro) produz log estrutur
 - [ ] Todo handler termina com log estruturado incluindo `requestId`/`traceId` e `durationMs`.
 - [ ] Erros logados com `err: { name, message, stack }` (lib serializa).
 - [ ] Nenhum `console.log` em produção — usar logger configurado.
-- [ ] Métricas de negócio relevantes incrementadas (ex.: `orders.created`).
+- [ ] Métricas de negócio relevantes incrementadas (ex.: `orders_created_total`; nome `<dominio>_<medida>_<unidade>`).
 - [ ] Spans em chamadas externas (DB query, fetch, queue publish).
 - [ ] PII redacted ou hasheado antes de logar.
 

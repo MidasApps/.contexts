@@ -19,7 +19,7 @@ Toda regra abaixo é enforce: vira gate de PR, item de checklist obrigatório ou
 - **Sempre** registre como ADR qualquer decisão que: (a) tenha alternativa legítima, (b) tenha consequência de longo prazo, (c) seja custosa de reverter, (d) afete múltiplos times ou consumidores externos.
 - **Nunca** tome decisão que se encaixe nos critérios acima fora de ADR. Mesmo que já tenha sido "conversada" em chat ou call.
 - **Sempre** crie o ADR **antes** do PR de implementação. PR que implementa decisão sem ADR aprovado é bloqueado.
-- **Nunca** edite o conteúdo histórico de um ADR `accepted`. Mudou de ideia? Crie novo ADR com status `supersedes 000X` e marque o anterior como `superseded`.
+- **Nunca** edite o conteúdo histórico de um ADR `accepted`, exceto para acrescentar linhas datadas em `## Amendments` (correção de conformidade que não muda a decisão — ver `decisions/README.md`). Mudou de ideia? Crie novo ADR com status `supersedes 000X` e marque o anterior como `superseded`.
 - **Sempre** numere ADRs sequencialmente com prefixo de 4 dígitos (`0001-`, `0002-`). Não pule números.
 - **Nunca** abra ADR para decisão trivial (escolha de nome de variável, formatação, biblioteca utilitária sem tradeoff). Overhead documental aqui é ruído.
 - **Sempre** documente o **rejeitado e por quê**, não apenas o escolhido. ADR sem alternativas consideradas é incompleto.
@@ -225,7 +225,7 @@ Antes de adicionar dependência nova, **sempre** avalie e registre no PR:
 Cada um dos itens abaixo é **bloqueio** de PR ou **incidente de governança** quando detectado em produção:
 
 - Decisão crítica implementada sem ADR.
-- ADR `accepted` editado em vez de superseded.
+- ADR `accepted` editado fora de `## Amendments` em vez de superseded.
 - Dependência adicionada em PR sem nota de licença, manutenção ou justificativa.
 - Segredo sem rotação configurada.
 - Prompt de produção alterado sem evidência de eval.

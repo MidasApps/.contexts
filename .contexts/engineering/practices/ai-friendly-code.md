@@ -164,16 +164,17 @@ src/features/place-order/
   ui/
     PlaceOrderForm.tsx       // componente React (PascalCase)
   model/
-    place-order.schema.ts    // Zod schemas do slice; z.infer fica aqui
     types.ts                 // tipos que não derivam de schema
     use-place-order.ts       // hook React
   api/
     place-order.ts           // chamada de boundary (Server Action / fetch)
     place-order.test.ts      // testes colocados ao lado do código, sem __tests__/
   index.ts                   // public API mínima
+src/contracts/orders/
+  place-order-input.schema.ts  // PlaceOrderInputSchema; z.infer fica aqui
 ```
 
-Schema que cruza client ↔ server não fica no slice: mora em `src/contracts/<context>/` (`@contracts/schemas` §2).
+O input de place-order cruza client ↔ server, então não fica no slice: mora em `src/contracts/<context>/` (`@contracts/schemas` §2). Só schema usado apenas pelo slice fica em `model/<name>.schema.ts`.
 
 Ver `@architecture/feature-based` e `@architecture/fsd`.
 
@@ -257,7 +258,6 @@ src/
     place-order/
       ui/
       model/
-        place-order.schema.ts
       api/
         place-order.ts
         place-order.test.ts   // testes colocados ao lado do código
@@ -267,6 +267,7 @@ src/
       ...
   contracts/
     orders/                # schemas compartilhados client ↔ server
+      place-order-input.schema.ts
   services/
     orders/                # backend do contexto (@architecture/feature-based)
   shared/                  # primitivas reutilizáveis (FSD-style)

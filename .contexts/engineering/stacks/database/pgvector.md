@@ -154,18 +154,29 @@ Referencie `@stacks/language/typescript@7` e `@stacks/database/postgres`.
 **Drizzle** (pgvector adapter):
 ```ts
 import { sql } from 'drizzle-orm';
-import { pgTable, uuid, vector } from 'drizzle-orm/pg-core';
+import { integer, pgSchema, text, timestamp, unique, uuid, vector } from 'drizzle-orm/pg-core';
 
-export const chunks = pgTable('chunks', {
+// schema `ai`, tabela versionada `chunks_v1` (@contracts/pgvector §3; demais colunas lá)
+export const ai = pgSchema('ai');
+
+export const chunksV1 = ai.table('chunks_v1', {
   id: uuid('id').primaryKey().default(sql`uuidv7()`), // uuidv7() nativo do Postgres 18
-  embedding: vector('embedding', { dimensions: 1536 }),
-});
+  documentId: uuid('document_id').notNull(), // FK ai.documents(id) ON DELETE CASCADE
+  tenantId: uuid('tenant_id').notNull(),
+  chunkIndex: integer('chunk_index').notNull(),
+  text: text('text').notNull(),
+  embedding: vector('embedding', { dimensions: 1536 }).notNull(),
+  embeddingModel: text('embedding_model').notNull(),
+  embeddingVersion: text('embedding_version').notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+}, (t) => [unique().on(t.documentId, t.chunkIndex)]);
 ```
 
 **Postgres.js**:
 ```ts
 const v = [0.1, 0.2, /* ... */];
-await sql`INSERT INTO chunks (embedding) VALUES (${JSON.stringify(v)}::vector)`;
+// demais colunas NOT NULL de ai.chunks_v1 omitidas por brevidade
+await sql`INSERT INTO ai.chunks_v1 (embedding) VALUES (${JSON.stringify(v)}::vector)`;
 ```
 
 **Prisma**: usar `previewFeatures = ["postgresqlExtensions"]` + extension `vector`. Tipo no client é `Unsupported`; queries vetoriais via `$queryRaw`.

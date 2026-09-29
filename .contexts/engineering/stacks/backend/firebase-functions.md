@@ -36,7 +36,7 @@ import { onTaskDispatched } from 'firebase-functions/v2/tasks';
 import { beforeUserCreated, beforeUserSignedIn } from 'firebase-functions/v2/identity';
 import { defineSecret, defineString, defineInt } from 'firebase-functions/params';
 import { setGlobalOptions } from 'firebase-functions/v2';
-import { logger } from 'firebase-functions';
+import { logger } from 'firebase-functions/logger';
 ```
 
 Não importar de `firebase-functions/v1/*` em código novo.
@@ -136,7 +136,11 @@ export const chat = onCall(
 Toda entrada externa (`onRequest` body/query/headers, `onCall` data, payload de webhook) passa por `safeParse` Zod antes de qualquer lógica. Ver `@rules/validation` e `@stacks/validation/zod@4`.
 
 ```ts
-const AskInputSchema = z.object({ sessionId: z.uuid(), prompt: z.string().min(1) });
+// input externo: strictObject; sessionId = ID automático do Firestore (ADR 0005), não uuid
+const AskInputSchema = z.strictObject({
+  sessionId: z.string().min(1).brand<'ChatSessionId'>(),
+  prompt: z.string().min(1),
+});
 
 export const ask = onCall(async (request) => {
   if (!request.auth) throw new HttpsError('unauthenticated', 'Authentication required.');
@@ -238,7 +242,7 @@ Ver `@rules/migration` para idempotência de jobs longos.
 
 ## Retry policy
 
-- Event triggers: `{ retry: true }` ativa retry exponencial automático até 7 dias. Sem ele, evento perdido em falha.
+- Event triggers: `{ retry: true }` ativa retry com backoff exponencial via Eventarc por até **24 horas** em gen2 (os 7 dias eram do gen1). Sem ele, evento perdido em falha.
 - HTTPS: client é responsável por retry. Implementar backoff no caller, e expor `Retry-After` quando lançar `resource-exhausted` ou `unavailable`.
 
 ## Integrações do projeto

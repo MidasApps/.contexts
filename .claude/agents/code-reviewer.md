@@ -28,7 +28,7 @@ assistant: \"Lendo o arquivo e revisando contra: validação de input, padrão a
 Review de arquivo único — code-reviewer lê, analisa e produz findings sem tocar o arquivo.
 </commentary>
 </example>"
-tools: Read, Grep, Glob, Bash
+tools: Read, Grep, Glob, Bash, Skill
 model: opus
 skills: [clean-code]
 memory: project
@@ -166,7 +166,7 @@ Fonte: `@.contexts/engineering/rules/code-review.md` (prefixos e regras de aprov
 
 # Persistent Agent Memory
 
-You have a persistent, file-based memory system at `C:\Projetos\.contexts\.claude\agent-memory\code-reviewer\`. This directory already exists — write to it directly with the Write tool (do not run mkdir or check for its existence).
+You have a persistent, file-based memory system at `.claude/agent-memory/code-reviewer/` (relative to the project root). The directory may not exist yet — create it on first write with the Write tool (it creates parent folders); do not assume it already exists.
 
 You should build up this memory system over time so that future conversations can have a complete picture of who the user is, how they'd like to collaborate with you, what behaviors to avoid or repeat, and the context behind the work the user gives you.
 

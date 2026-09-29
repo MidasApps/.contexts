@@ -91,13 +91,23 @@ export default defineConfig({
       use: { ...devices['Pixel 7'], storageState: 'e2e/.auth/user.json' },
       dependencies: ['setup'],
     },
+    {
+      // smoke pós-deploy (`@processes/deploy`): só testes com tag @smoke, contra PLAYWRIGHT_BASE_URL
+      name: 'smoke',
+      grep: /@smoke/,
+      use: { ...devices['Desktop Chrome'], storageState: 'e2e/.auth/user.json' },
+      dependencies: ['setup'],
+    },
   ],
-  webServer: {
-    command: process.env.CI ? 'pnpm start' : 'pnpm dev',
-    url: 'http://localhost:3000',
-    reuseExistingServer: !process.env.CI,
-    timeout: 120_000,
-  },
+  // com PLAYWRIGHT_BASE_URL (staging/prod) não sobe servidor local
+  webServer: process.env.PLAYWRIGHT_BASE_URL
+    ? undefined
+    : {
+        command: process.env.CI ? 'pnpm start' : 'pnpm dev',
+        url: 'http://localhost:3000',
+        reuseExistingServer: !process.env.CI,
+        timeout: 120_000,
+      },
 })
 ```
 
@@ -105,6 +115,7 @@ Pontos não-óbvios:
 
 - `webServer` lida com o ciclo de vida do servidor Next.js — não suba manualmente em CI.
 - `dependencies: ['setup']` garante que o projeto `setup` rode antes e produza o `storageState`.
+- Smoke test é marcado com tag: `test('login funciona', { tag: '@smoke' }, async ({ page }) => { ... })`. O pipeline de deploy roda `pnpm exec playwright test --project=smoke` com `PLAYWRIGHT_BASE_URL` apontando para o ambiente recém-deployado.
 - `trace: 'on-first-retry'` é o sweet spot: zero overhead em testes verdes, trace completo no retry que precede o failure final.
 
 ## Browsers e emulação de dispositivos
@@ -404,17 +415,29 @@ Codegen produz rascunho — sempre revise locators (substitua CSS por roles) ant
 Esqueleto:
 
 ```yaml
-- uses: actions/setup-node@v7
-  with: { node-version: '26' }
-- run: pnpm install --frozen-lockfile
-- run: pnpm exec playwright install --with-deps
-- run: pnpm exec playwright test --shard=${{ matrix.shard }}/4
-- uses: actions/upload-artifact@v7
-  if: always()
-  with:
-    name: playwright-report-${{ matrix.shard }}
-    path: playwright-report/
-    retention-days: 14
+e2e:
+  runs-on: ubuntu-latest
+  strategy:
+    fail-fast: false
+    matrix:
+      shard: [1, 2, 3, 4]
+  steps:
+    - uses: actions/checkout@v7
+    - uses: pnpm/action-setup@v6
+    - uses: actions/setup-node@v7
+      with:
+        node-version-file: .nvmrc # Node 26.10.0 (ADR 0004)
+        cache: pnpm
+    - run: pnpm install --frozen-lockfile
+    - run: pnpm exec playwright install --with-deps
+    - run: pnpm build # webServer roda `pnpm start` em CI, que exige build prévio
+    - run: pnpm exec playwright test --shard=${{ matrix.shard }}/4
+    - uses: actions/upload-artifact@v7
+      if: always()
+      with:
+        name: playwright-report-${{ matrix.shard }}
+        path: playwright-report/
+        retention-days: 14
 ```
 
 Sharding (`--shard=1/4` ... `4/4`) paraleliza por máquinas. `retries: 2` em CI mascara flake leve mas não substitui locators corretos — investigue toda flake que retry resolve.

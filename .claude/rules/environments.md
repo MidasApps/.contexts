@@ -27,7 +27,7 @@ Ambientes (`local`, `dev`, `staging`, `prod`) são paridade lógica com isolamen
 
 ## Mini-exemplo
 ```ts
-// src/shared/config/env.ts — resto do código importa `env`, nunca lê process.env
+// src/env.ts (server-only; contracts/secrets.md §5.4) — resto do código importa `env` de `@/env`, nunca lê process.env
 const EnvSchema = z.object({
   API_URL: z.url(),
   APP_ENV: z.enum(["local", "dev", "staging", "prod"]),

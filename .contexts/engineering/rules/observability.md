@@ -24,7 +24,7 @@ Erros e exceções estruturadas são governados por `@.contexts/engineering/rule
 - **Sempre emita logs como JSON estruturado**. Nunca use `console.log` com string concatenation ou template literals como formato principal de log em produção.
 - **Use um logger central** (`logger.info`, `logger.warn`, `logger.error`) que sempre serializa para JSON. Nunca importe `console` diretamente em código de runtime.
 - **Mantenha schema estável de log**. Campos com mesmo nome carregam mesmo tipo em toda a aplicação (`userId` é sempre string, `durationMs` é sempre number).
-- **Use snake_case ou camelCase consistentemente em todos os campos de log**. Não misture os dois estilos.
+- **Campos de log em camelCase** (`requestId`, `durationMs`, `tenantId`), nunca snake_case (`duration_ms`) nem abreviação (`ts`, `msg`) (ADR 0003).
 - **Sempre inclua `timestamp`, `level`, `message`, `service`, `env`** em todo log emitido. Adicione `requestId` ou `traceId` quando disponível no contexto.
 - **Mensagem do log é uma string estável em snake_case** (`<entidade>_<evento>` no passado ou `<operação>_start|ok|failed`), nunca frase livre nem interpolada. Use `logger.info("user_signed_in", { userId })` ao invés de `logger.info("user signed in", { userId })` ou `logger.info(`user ${userId} signed in`)`. Dados variáveis vão em campos. A mensagem precisa ser agrupável e buscável por igualdade (ADR 0003, Amendments).
 - **Não logue objetos grandes inteiros**. Extraia campos relevantes; arrays e payloads completos vão para storage separado, não para o stream de logs.

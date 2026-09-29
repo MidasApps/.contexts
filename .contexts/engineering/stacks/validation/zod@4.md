@@ -85,7 +85,7 @@ z.lazy(() => Node);                          // opcional em Zod 4; necessário a
 ## Refinements e transforms
 
 ```ts
-schema.refine((v) => v.length > 0, { message: "vazio" });
+schema.refine((v) => v.length > 0, { error: "vazio" }); // Zod 4: `error`, não `message`
 schema.superRefine((v, ctx) => {
   if (cond) ctx.addIssue({ code: "custom", message: "..." });
 }); // multi-issue

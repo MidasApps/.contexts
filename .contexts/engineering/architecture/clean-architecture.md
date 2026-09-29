@@ -174,7 +174,7 @@ Para features que não satisfazem nenhum desses critérios, @architecture/hexago
 
 ### Localização no projeto
 
-Quando Clean Architecture se aplica, ela vive **dentro do recorte de uma feature**, mantendo a organização por contexto promovida por @architecture/feature-based. A árvore de referência é a de @architecture/feature-based. A estrutura abaixo é um SUPERSET opcional dela: troca `ports/{driving,driven}` por `ports/{input,output}`, acrescenta `dto/` (schemas Zod de request e response) e divide `adapters/` em `controllers/`, `presenters/` e `gateways/`. A feature escolhe UM layout, hexagonal ou clean, nunca os dois. Estrutura:
+Quando Clean Architecture se aplica, ela vive **dentro do recorte de uma feature**, mantendo a organização por contexto promovida por @architecture/feature-based. A árvore de referência é a de @architecture/feature-based. A estrutura abaixo usa os mesmos caminhos (ADR 0003, Amendments: `application/use-cases/`, `adapters/driving/`, `adapters/driven/`) e só nomeia os papéis de Clean dentro deles: Input Boundaries em `application/ports/driving/`, Output Boundaries/Gateways em `application/ports/driven/`, controllers e presenters em `adapters/driving/`, gateways em `adapters/driven/`, e os schemas Zod de request/response ao lado do use case (`application/use-cases/<uc>.schema.ts`). Estrutura:
 
 ```
 services/<context>/
@@ -193,25 +193,23 @@ services/<context>/
       order-placed.ts                   # domain events (quando aplicável)
   application/                         # Anel 2 — Use Cases (Application Business Rules)
     ports/
-      input/                           # Input Boundaries
+      driving/                         # Input Boundaries
         place-order.ts                  # type do use case
         cancel-order.ts
-      output/                          # Output Boundaries / Gateways
+      driven/                          # Output Boundaries / Gateways
         order-repository.ts             # type de persistência
         email-sender.ts                 # type de gateway externo
         payment-gateway.ts
     use-cases/
       place-order.ts                    # Interactor — implementa Input Boundary
-      cancel-order.ts
-    dto/
       place-order.schema.ts             # PlaceOrderInputSchema e PlaceOrderOutputSchema (Zod); tipos via z.infer
+      cancel-order.ts
   adapters/                            # Anel 3 — Interface Adapters
-    controllers/
+    driving/                           # controllers e presenters
       place-order-route-handler.ts       # handler Next.js; app/**/route.ts só o re-exporta
       place-order-function-handler.ts     # invocado por Firebase Function
-    presenters/
       place-order-json-presenter.ts       # formata Response → JSON
-    gateways/
+    driven/                            # gateways
       postgres-order-repository.ts       # implementa OrderRepository
       firestore-order-repository.ts      # alternativa
       resend-email-sender.ts             # implementa EmailSender
@@ -222,13 +220,13 @@ services/<context>/
   index.ts                             # public API
 ```
 
-O leitor atento perceberá que os anéis 1 e 2 são essencialmente o **núcleo do hexágono** descrito em @architecture/hexagonal, agora **explicitamente fatiados** em dois anéis. O anel 3 corresponde aos adapters de @architecture/hexagonal, separados em controllers (driving), presenters (saída formatada) e gateways (driven). O anel 4 corresponde aos drivers concretos das tecnologias.
+O leitor atento perceberá que os anéis 1 e 2 são essencialmente o **núcleo do hexágono** descrito em @architecture/hexagonal, agora **explicitamente fatiados** em dois anéis. O anel 3 corresponde aos adapters de @architecture/hexagonal, com controllers e presenters (saída formatada) em `adapters/driving/` e gateways em `adapters/driven/`. O anel 4 corresponde aos drivers concretos das tecnologias.
 
 ### Naming adotado
 
 - **Entities**: nomeadas pelo conceito de negócio: `Order`, `Customer`, `Invoice`. Métodos descrevem operações de negócio: `order.approve()`, `order.cancel(reason)`, `invoice.markAsPaid(payment)`.
 - **Use Cases**: nomeados como verbo + objeto no padrão `<Action><Entity>`: `PlaceOrder`, `CancelOrder`, `RegisterUser`, `GenerateMonthlyReport`. O arquivo é kebab-case: `place-order.ts`. O port é o tipo `PlaceOrder`, o Interactor é a factory `makePlaceOrder` e a instância composta é `placeOrder`.
-- **Input/Output DTOs** (Request/Response Models do livro): `<Verb><Entity>Input` e `<Verb><Entity>Output`. Ex.: `PlaceOrderInput`, `PlaceOrderOutput`. São schemas Zod (`PlaceOrderInputSchema`, naming de `@contracts/schemas` §3) com tipo `z.infer`, em `dto/place-order.schema.ts`, nunca tipos escritos à mão.
+- **Input/Output DTOs** (Request/Response Models do livro): `<Verb><Entity>Input` e `<Verb><Entity>Output`. Ex.: `PlaceOrderInput`, `PlaceOrderOutput`. São schemas Zod (`PlaceOrderInputSchema`, naming de `@contracts/schemas` §3) com tipo `z.infer`, em `application/use-cases/place-order.schema.ts`, nunca tipos escritos à mão.
 - **Controllers**: arquivo nomeado pelo canal, em kebab-case: `place-order-route-handler.ts` (Next.js), `place-order-function-handler.ts` (Firebase Function), `place-order-action.ts` (Server Action).
 - **Presenters**: `<UseCase><Format>Presenter` como arquivo kebab-case; o export é camelCase: `placeOrderJsonPresenter`, `placeOrderHtmlPresenter`.
 - **Gateways** (repositórios e gateways de serviço): constantes ou factories em camelCase, `<technology><Concept>Repository` ou `<technology><Concept>Gateway`. Ex.: `postgresOrderRepository`, `resendEmailSender`, `openAICompletionGateway`. O nome do **port** (`type`) que esses adapters satisfazem **não** contém tecnologia — vive no anel de Use Cases: `OrderRepository`, `EmailSender`, `CompletionGateway`.
@@ -242,7 +240,7 @@ A forma canônica do livro envolve Input Boundary, Interactor, Output Boundary e
 DTOs de request e response (schemas Zod; os tipos vêm de `z.infer`):
 
 ```typescript
-// application/dto/place-order.schema.ts
+// application/use-cases/place-order.schema.ts
 import { z } from 'zod';
 
 export const PlaceOrderInputSchema = z.strictObject({
@@ -264,8 +262,8 @@ export type PlaceOrderOutput = z.infer<typeof PlaceOrderOutputSchema>;
 Input Boundary (port no anel de Use Cases):
 
 ```typescript
-// application/ports/input/place-order.ts
-import type { PlaceOrderInput, PlaceOrderOutput } from '@/services/orders/application/dto/place-order.schema';
+// application/ports/driving/place-order.ts
+import type { PlaceOrderInput, PlaceOrderOutput } from '@/services/orders/application/use-cases/place-order.schema';
 
 export type PlaceOrder = (input: PlaceOrderInput) => Promise<PlaceOrderOutput>;
 ```
@@ -273,7 +271,7 @@ export type PlaceOrder = (input: PlaceOrderInput) => Promise<PlaceOrderOutput>;
 Output ports (gateways no anel de Use Cases):
 
 ```typescript
-// application/ports/output/order-repository.ts
+// application/ports/driven/order-repository.ts
 import type { Order, OrderId } from '@/services/orders/domain/entities/order';
 
 export type OrderRepository = {
@@ -286,9 +284,9 @@ Interactor (use case no anel de Use Cases):
 
 ```typescript
 // application/use-cases/place-order.ts
-import type { PlaceOrder } from '@/services/orders/application/ports/input/place-order';
-import type { OrderRepository } from '@/services/orders/application/ports/output/order-repository';
-import type { EmailSender } from '@/services/orders/application/ports/output/email-sender';
+import type { PlaceOrder } from '@/services/orders/application/ports/driving/place-order';
+import type { OrderRepository } from '@/services/orders/application/ports/driven/order-repository';
+import type { EmailSender } from '@/services/orders/application/ports/driven/email-sender';
 import { Order } from '@/services/orders/domain/entities/order';
 
 export const makePlaceOrder = (deps: {
@@ -308,10 +306,10 @@ export const makePlaceOrder = (deps: {
 Controller (anel de Interface Adapters, lado de entrada). Valida na borda com `safeParse` e responde com os envelopes de `@.contexts/engineering/contracts/api.md` §5 (sucesso) e §6 (erro). O `requestId` vem do header `X-Request-Id` (ULID) que o proxy do Next (`src/proxy.ts`) garante em todo request; autenticação fica fora do exemplo:
 
 ```typescript
-// adapters/controllers/place-order-route-handler.ts
+// adapters/driving/place-order-route-handler.ts
 import { NextResponse } from 'next/server';
 import { placeOrder } from '@/services/orders/composition';
-import { PlaceOrderInputSchema } from '@/services/orders/application/dto/place-order.schema';
+import { PlaceOrderInputSchema } from '@/services/orders/application/use-cases/place-order.schema';
 
 export async function POST(req: Request) {
   // X-Request-Id (ULID) é injetado pelo proxy quando o cliente não envia.
@@ -345,14 +343,14 @@ O arquivo de rota do App Router é só um re-export e atende `POST /v1/orders` (
 
 ```typescript
 // src/app/v1/orders/route.ts
-export { POST } from '@/services/orders/adapters/controllers/place-order-route-handler';
+export { POST } from '@/services/orders/adapters/driving/place-order-route-handler';
 ```
 
 Gateway (anel de Interface Adapters, lado de saída):
 
 ```typescript
-// adapters/gateways/postgres-order-repository.ts
-import type { OrderRepository } from '@/services/orders/application/ports/output/order-repository';
+// adapters/driven/postgres-order-repository.ts
+import type { OrderRepository } from '@/services/orders/application/ports/driven/order-repository';
 import type { Order, OrderId } from '@/services/orders/domain/entities/order';
 import { db } from '@/services/shared/postgres';
 
@@ -366,8 +364,8 @@ Composition root local (`composition.ts`):
 
 ```typescript
 import { makePlaceOrder } from '@/services/orders/application/use-cases/place-order';
-import { postgresOrderRepository } from '@/services/orders/adapters/gateways/postgres-order-repository';
-import { resendEmailSender } from '@/services/orders/adapters/gateways/resend-email-sender';
+import { postgresOrderRepository } from '@/services/orders/adapters/driven/postgres-order-repository';
+import { resendEmailSender } from '@/services/orders/adapters/driven/resend-email-sender';
 
 export const placeOrder = makePlaceOrder({
   orders: postgresOrderRepository,
@@ -381,7 +379,7 @@ A separação **Input Boundary explícita como tipo de função** + **Interactor
 
 A superfície de entrada do Next.js é inteiramente **anel 3 (Interface Adapters) + anel 4 (Frameworks & Drivers)**:
 
-- **Controllers** vivem em `services/<context>/adapters/controllers/`; `app/**/route.ts` re-exporta o controller (driving adapter); `actions.ts` é wrapper `"use server"` de uma linha que chama o adapter. Route handlers e **Server Actions** extraem input, validam com @stacks/validation/zod@4, invocam o use case, formatam a resposta.
+- **Controllers** vivem em `services/<context>/adapters/driving/`; `app/**/route.ts` re-exporta o controller (driving adapter); `actions.ts` é wrapper `"use server"` de uma linha que chama o adapter. Route handlers e **Server Actions** extraem input, validam com @stacks/validation/zod@4, invocam o use case, formatam a resposta.
 - **Server Components** que renderizam dados consomem use cases de leitura e passam o resultado pronto para a UI. O componente em si não conhece o use case — recebe ViewModel.
 - **Client Components** que disparam mutações invocam Server Actions, que invocam controllers, que invocam use cases.
 - O **runtime do Next.js** (request handling, file-based routing, streaming, edge runtime) é puro anel 4 — detalhe substituível.

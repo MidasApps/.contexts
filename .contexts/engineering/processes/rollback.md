@@ -57,7 +57,7 @@ Desligar o flag reverte o comportamento sem deploy. Zero risco de regressão em 
 
 **Tempo:** segundos a minutos. **Risco:** baixo se versão anterior é conhecida boa.
 
-Promover deploy anterior conhecido bom via mecanismo nativo da plataforma (Vercel rollback, Cloud Run traffic split, Firebase Functions versioning). Atômico, sem warmup, sem reboot manual.
+Promover deploy anterior conhecido bom via mecanismo nativo da plataforma (Vercel rollback, Cloud Run traffic split; Functions: redeploy da tag anterior ou revisão anterior do Cloud Run). Atômico, sem warmup, sem reboot manual.
 
 ### 3. Forward fix com hotfix deploy
 
@@ -90,7 +90,8 @@ Ver `@stacks/frontend/next@16` para detalhes específicos da versão.
 
 ### Firebase Functions (Gen 2)
 
-- **CLI:** `firebase functions:rollback` ou redeploy da versão anterior via git checkout + `firebase deploy --only functions:<name>`.
+- **Redeploy da tag anterior (caminho sancionado):** `git checkout vX.Y.(Z-1)` + `pnpm install --frozen-lockfile` + build + `firebase deploy --only functions:<name>`.
+- **Revisão anterior (gen2 roda em Cloud Run):** `gcloud run services update-traffic <service> --to-revisions=PREV_REVISION=100 --region=<region>` — mais rápido, mas o próximo `firebase deploy` volta a mandar tráfego para a revisão nova.
 - **Granularidade:** por function (`--only functions:<name>`), nunca rolar back o projeto inteiro se só uma function regrediu.
 - **Comportamento:** Cloud Run revisions por baixo — mesma mecânica de traffic split aplicável.
 
@@ -268,7 +269,7 @@ Métricas tracked por release; revisitadas em retros.
 
 ## Anti-patterns
 
-- **Rollback via "redeploy da versão anterior" sem mecanismo atomic.** Lento, propenso a erro, sujeito a regressão se o build mudou. Use o mecanismo nativo.
+- **Rollback via redeploy de commit arbitrário sem tag.** Sem ponto conhecido bom, sujeito a regressão. Use o mecanismo nativo do provider ou redeploy da tag de release anterior (`vX.Y.Z`).
 - **Sem tag em prod = sem ponto de rollback identificável.** "Qual era a versão anterior?" é pergunta que não pode existir durante incidente.
 - **Migration destrutiva sem expand-and-contract.** Rollback impossível. Dados perdidos não voltam.
 - **Sem feature flags.** Todo bug requer deploy revert. Cara, lento, blast radius alto.

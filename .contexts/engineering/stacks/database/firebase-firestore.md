@@ -261,16 +261,21 @@ Pontos críticos:
 Use `Converter` para tipar leituras e escritas:
 
 ```ts
-// UserDocSchema / type UserDoc: forma persistida, em src/contracts/<context>/user-doc.schema.ts (@contracts/schemas §3)
+// UserDocSchema / type UserDoc: forma persistida, em src/contracts/<context>/user-doc.schema.ts (@contracts/schemas §3, §18)
 const userConverter: FirestoreDataConverter<UserDoc> = {
-  toFirestore: (u) => UserDocSchema.parse(u),
+  toFirestore: (u) => u, // sem parse: createdAt/updatedAt chegam como FieldValue.serverTimestamp()
   fromFirestore: (snap) => UserDocSchema.parse(snap.data()),
 }
 
 const ref = db.collection('users').withConverter(userConverter)
+await ref.doc().set({
+  ...input, // já validado pelo schema de input na boundary
+  createdAt: FieldValue.serverTimestamp(),
+  updatedAt: FieldValue.serverTimestamp(),
+})
 ```
 
-- Combinar com Zod (`@stacks/validation/zod@4`) no `fromFirestore` para validar contra schema na leitura — protege contra drift entre código e dados antigos.
+- Zod (`@stacks/validation/zod@4`) no `fromFirestore` valida contra o schema na leitura — protege contra drift entre código e dados antigos. Na escrita, valide o input do use case e deixe os timestamps para `FieldValue.serverTimestamp()` (`@contracts/firebase-firestore` §13); `DocSchema.parse` no `toFirestore` rejeitaria a sentinela.
 - `Timestamp.fromDate(date)` / `timestamp.toDate()` para conversões. Nunca armazene `Date` direto via Admin SDK (vira `Timestamp`, mas o tipo TS perde precisão).
 - TS 7 + Admin SDK: imports nomeados de `firebase-admin/firestore`, não do namespace default (`@stacks/language/typescript@7`).
 

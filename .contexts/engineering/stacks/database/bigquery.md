@@ -41,9 +41,10 @@ BigQuery é o **data warehouse analítico serverless** do GCP. Storage colunar, 
 
 ```ts
 import { BigQuery } from '@google-cloud/bigquery';
+import { env } from '@/env'; // src/env.ts validado por Zod (@contracts/secrets §5.4)
 
 const bq = new BigQuery({
-  projectId: process.env.GCP_PROJECT_ID,
+  projectId: env.GCP_PROJECT_ID,
   // Em GCP: omitir keyFilename — usa metadata server / ADC
   // Local dev: GOOGLE_APPLICATION_CREDENTIALS aponta para JSON
   // CI/CD: Workload Identity Federation (sem JSON)
