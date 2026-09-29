@@ -1,4 +1,4 @@
-import { loadDesktopEnv } from "./desktop-env.schema.ts";
+import { loadDesktopEnv } from "@/config/desktop-env.schema.ts";
 
 /**
  * Validated client env, parsed once at startup (fail-fast). The only reader of

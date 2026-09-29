@@ -2,12 +2,17 @@ import path from "node:path";
 import { tanstackRouter } from "@tanstack/router-plugin/vite";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
+import { loadDesktopBuildEnv } from "./scripts/load-desktop-build-env.ts";
 
 /** Fixed dev port: `src-tauri/tauri.conf.json` `build.devUrl` points here. */
 const DEV_PORT = 1420;
 
 // Vite's config loader requires a default export.
-export default defineConfig({
+export default defineConfig(({ mode }) => {
+  // Fail closed: dev and build refuse to start with a missing or invalid
+  // VITE_API_URL instead of bundling an app that cannot reach its API.
+  loadDesktopBuildEnv({ mode, envDir: import.meta.dirname });
+  return {
   // The router plugin must run before the React plugin (TanStack Router docs).
   plugins: [tanstackRouter({ target: "react", autoCodeSplitting: true }), react()],
   // Same alias as tsconfig `paths` (rule development: no ../../ imports).
@@ -21,4 +26,5 @@ export default defineConfig({
     strictPort: true,
     watch: { ignored: ["**/src-tauri/**"] },
   },
+  };
 });

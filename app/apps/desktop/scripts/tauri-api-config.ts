@@ -1,5 +1,5 @@
 /** Sources every webview may reach besides the API: itself and Tauri IPC (Windows uses http://ipc.localhost). */
-const BASE_CONNECT_SRC = "'self' ipc: http://ipc.localhost";
+export const BASE_CONNECT_SRC = "'self' ipc: http://ipc.localhost";
 /** Vite HMR socket; dev only. Must match the port in vite.config.ts and `build.devUrl`. */
 const DEV_HMR_SOCKET = "ws://localhost:1420";
 

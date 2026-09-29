@@ -4,15 +4,14 @@
 // Vite resolves it for that mode (shell env > .env.[mode].local > .env.[mode] > .env).
 import { writeFileSync } from "node:fs";
 import path from "node:path";
-import { loadEnv } from "vite";
-import { loadDesktopEnv } from "../src/config/desktop-env.schema.ts";
+import { loadDesktopBuildEnv } from "./load-desktop-build-env.ts";
 import { buildTauriApiConfigPatch } from "./tauri-api-config.ts";
 
 const APP_DIR = path.resolve(import.meta.dirname, "..");
 const OUTPUT_FILE = path.join(APP_DIR, "src-tauri", "tauri.api.conf.json");
 
 const mode = process.argv[2] ?? "production";
-const env = loadDesktopEnv(loadEnv(mode, APP_DIR, "VITE_"));
+const env = loadDesktopBuildEnv({ mode, envDir: APP_DIR });
 const patch = buildTauriApiConfigPatch(env.VITE_API_URL);
 
 writeFileSync(OUTPUT_FILE, `${JSON.stringify(patch, null, 2)}\n`);

@@ -1,5 +1,10 @@
+import { readFileSync } from "node:fs";
+import path from "node:path";
 import { describe, expect, it } from "vitest";
-import { buildTauriApiConfigPatch } from "./tauri-api-config.ts";
+import { BASE_CONNECT_SRC, buildTauriApiConfigPatch } from "./tauri-api-config.ts";
+
+type TauriConf = { app: { security: { csp: Record<string, string> } } };
+const TAURI_CONF = path.resolve(import.meta.dirname, "../src-tauri/tauri.conf.json");
 
 describe("buildTauriApiConfigPatch", () => {
   it("allows the webview to connect only to itself, Tauri IPC and the API origin", () => {
@@ -18,5 +23,11 @@ describe("buildTauriApiConfigPatch", () => {
     const patch = buildTauriApiConfigPatch("http://localhost:3100/");
 
     expect(patch.app.security.csp["connect-src"]).toBe("'self' ipc: http://ipc.localhost http://localhost:3100");
+  });
+
+  it("keeps the base release CSP closed: no API origin until the patch adds one", () => {
+    const conf = JSON.parse(readFileSync(TAURI_CONF, "utf8")) as TauriConf;
+
+    expect(conf.app.security.csp["connect-src"]).toBe(BASE_CONNECT_SRC);
   });
 });
