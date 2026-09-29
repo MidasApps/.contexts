@@ -28,13 +28,13 @@ Você é acionado pelo `ddc-architect` para materializar a camada `.claude/` do 
 2. **Um conceito = um arquivo.** Rules, skills, agents são **segregados**. Sem agrupamento.
 3. **Nome preservado = basename do arquivo.** Sem prefixos artificiais.
    - Rule: `engineering/rules/security.md` → `.claude/rules/security.md` (basename).
-   - Skill: estrutura **aninhada pela categoria-folha** do `.contexts/`. A pasta `engineering/` é achatada — só a categoria final entra no path. Front-matter `name` = basename do arquivo (`@` vira `-`).
+   - Skill: layout **plano** `.claude/skills/<name>/SKILL.md` (pasta = `name`) — Claude Code só descobre `.claude/skills/<skill-name>/SKILL.md`; pastas de categoria aninhadas nunca são descobertas. A categoria-folha do `.contexts/` é só agrupamento lógico (catálogo do CLAUDE.md). Front-matter `name` = basename do arquivo (`@` vira `-`).
      - Origem: `business/*`, `product/*`, `engineering/<categoria>/*` (onde `<categoria>` ∈ `architecture`, `practices`, `stacks/<subcat>`, `contracts`, `processes`, `decisions`).
-     - Destino: `.claude/skills/<categoria-folha>/<basename>/SKILL.md` (skip `engineering/`).
-     - `engineering/stacks/frontend/next@16.md` → `.claude/skills/frontend/next-16/SKILL.md`, `name: next-16`.
-     - `engineering/architecture/ddd.md` → `.claude/skills/architecture/ddd/SKILL.md`, `name: ddd`.
-     - `engineering/practices/tdd.md` → `.claude/skills/practices/tdd/SKILL.md`, `name: tdd`.
-   - **4 colisões** (mesmo basename em `stacks/database/` e `contracts/`): `name` recebe a categoria como disambiguador.
+     - Destino: `.claude/skills/<name>/SKILL.md` (sem pasta de categoria).
+     - `engineering/stacks/frontend/next@16.md` → `.claude/skills/next-16/SKILL.md`, `name: next-16`.
+     - `engineering/architecture/ddd.md` → `.claude/skills/ddd/SKILL.md`, `name: ddd`.
+     - `engineering/practices/tdd.md` → `.claude/skills/tdd/SKILL.md`, `name: tdd`.
+   - **4 colisões** (mesmo basename em `stacks/database/` e `contracts/`): `name` (e a pasta) recebe a categoria como prefixo disambiguador.
      - `stacks/database/postgres.md` → `name: database-postgres`
      - `contracts/postgres.md` → `name: contracts-postgres`
      - Mesmo padrão para `firebase-firestore`, `pgvector`, `bigquery`.
@@ -59,7 +59,8 @@ Você é acionado pelo `ddc-architect` para materializar a camada `.claude/` do 
 ### 1.2 Skills — `.claude/skills/<skill-name>/SKILL.md`
 - Front-matter mínimo: `name`, `description`.
 - `description` é o **que decide auto-discovery** — escreva como um "quando usar isto" denso, com palavras-chave que aparecem em prompts reais (nome da tech, do método, do problema).
-- Opcionais úteis: `allowed-tools`, `model`, `paths` (carrega skill só quando trabalhando em arquivos batendo o glob).
+- Opcionais úteis: `model`, `paths` (carrega skill só quando trabalhando em arquivos batendo o glob). `allowed-tools` fica fora por default — pré-aprova ferramentas enquanto a skill está ativa; nunca conceda `Bash`/`Write` a skill de conhecimento.
+- `description` sempre entre aspas (YAML estrito).
 - Conteúdo da skill referencia `@.contexts/.../<arquivo>.md`.
 - **Convenção do DDC**: SKILL.md = "quando usar + procedimento curto + apontador @". Detalhe técnico fica no contexto.
 
@@ -97,12 +98,12 @@ Você é acionado pelo `ddc-architect` para materializar a camada `.claude/` do 
 
 **BUSINESS** (6 arquivos) → **3 no CLAUDE.md, 3 viram skill**.
 - CLAUDE.md (`@`, sempre-ativo): `vision.md`, `glossary.md`, `compliance.md` — ancoragem estratégica, anti-alucinação de domínio, e constraints legais.
-- Skill (em `.claude/skills/business/<basename>/`): `business-model`, `metrics`, `icp` — só carregam quando o turn envolve decisão de produto/feature, não em CRUD/UI.
+- Skill (em `.claude/skills/<name>/`): `business-model`, `metrics`, `icp` — só carregam quando o turn envolve decisão de produto/feature, não em CRUD/UI.
 
 **PRODUCT** (5 tipos) → **4 no CLAUDE.md, 1 vira skill**.
 - CLAUDE.md (`@`, sempre-ativo): `vision.md`, `tone-of-voice.md`, `design-system.md`, `persona.md`.
 - **Por quê design-system + persona sobem:** toda UI inventa tokens/variantes sem o design-system carregado; decisões silenciosas modal-vs-page dependem de persona. Auto-discovery por keyword é frágil para os dois.
-- Skill (em `.claude/skills/product/policies/`): `policies` — carrega em features que tocam dados de usuário, formulários, onboarding.
+- Skill (em `.claude/skills/policies/`): `policies` — carrega em features que tocam dados de usuário, formulários, onboarding.
 
 **ENGINEERING / decisions** → **skill única em `.claude/skills/decisions/SKILL.md`, `name: decisions`** com procedimento de criação de ADR. Os ADRs em si nascem em `.contexts/engineering/decisions/NNNN-*.md`.
 
@@ -129,25 +130,25 @@ Você é acionado pelo `ddc-architect` para materializar a camada `.claude/` do 
 | `caching.md` | path-scoped | `["app/**","src/server/**","**/*.action.ts"]` |
 | `internationalization.md` | path-scoped | `["**/messages/**","**/i18n/**","**/*.intl.ts"]` |
 
-**ENGINEERING / architecture (6)** → **skills** em `.claude/skills/architecture/<basename>/SKILL.md` (descritivo-contextual, situacional).
+**ENGINEERING / architecture (6)** → **skills** em `.claude/skills/<name>/SKILL.md` (descritivo-contextual, situacional).
 - Names: `fsd`, `feature-based`, `atomic-design`, `hexagonal`, `ddd`, `clean-architecture`.
 
 **ENGINEERING / practices (5)** → **4 skills + 1 rule sempre-ativa**.
-- Skills em `.claude/skills/practices/<basename>/SKILL.md` → names: `tdd`, `bdd`, `sdd`, `clean-code` (método disparado por intenção).
+- Skills em `.claude/skills/<name>/SKILL.md` → names: `tdd`, `bdd`, `sdd`, `clean-code` (método disparado por intenção).
 - **`ai-friendly-code.md` → `.claude/rules/ai-friendly-code.md` sempre-ativa** *(resolve a duplicação CLAUDE.md+skill da v1.0; é função de produção de todo turn que emite código — single source of truth)*.
 
 **ENGINEERING / stacks (25)** → **uma skill por tecnologia** (técnico-referencial, ativa por nome da tech no prompt OU `paths`). *(briefing original diz "26"; enumeração real = 25)*
-- Estrutura: `.claude/skills/<categoria>/<basename>/SKILL.md`. Ex.: `.claude/skills/frontend/next-16/SKILL.md` (`name: next-16`), `.claude/skills/ai/anthropic-sdk/SKILL.md` (`name: anthropic-sdk`).
+- Estrutura: `.claude/skills/<name>/SKILL.md` (plana). Ex.: `.claude/skills/next-16/SKILL.md` (`name: next-16`), `.claude/skills/anthropic-sdk/SKILL.md` (`name: anthropic-sdk`).
 - **Database collision:** names = `database-firebase-firestore`, `database-postgres`, `database-pgvector`, `database-bigquery` (disambigua dos `contracts/`).
 - `paths` quando aplicável (ex.: `next-16` com `paths: ["next.config.*","app/**"]`).
 
 **ENGINEERING / contracts (8)** → **1 rule sempre-ativa + 7 skills**.
 - **`schemas.md` → `.claude/rules/schemas.md` sempre-ativa** *(promovido — meta-doutrina agnóstica de lib que governa naming, branded types, nullability dos outros contracts)*.
-- Skills em `.claude/skills/contracts/<basename>/SKILL.md`. Names sem colisão: `api`, `events`, `secrets`. Names com colisão (disambiguados): `contracts-firebase-firestore`, `contracts-postgres`, `contracts-pgvector`, `contracts-bigquery`.
+- Skills em `.claude/skills/<name>/SKILL.md`. Names sem colisão: `api`, `events`, `secrets`. Names com colisão (disambiguados): `contracts-firebase-firestore`, `contracts-postgres`, `contracts-pgvector`, `contracts-bigquery`.
 **ENGINEERING / processes (8)** → **mix**:
 - `git.md`, `commits.md` → **rule sempre-ativa**. `commits.md` reforçado por **hook** `guard-conventional-commit` em `PreToolUse Bash(git commit*)`.
 - **`environments.md` → `.claude/rules/environments.md` sempre-ativa** *(promovido — URLs/regions/project IDs precisam ser conhecimento ambiente; LLM cola hostname antes de discovery rodar)*.
-- Skills em `.claude/skills/processes/<basename>/SKILL.md` → names: `pull-requests`, `release` (situacionais), `deploy`, `monitoring`, `rollback` (invocadas pelo agent `devops`).
+- Skills em `.claude/skills/<name>/SKILL.md` → names: `pull-requests`, `release` (situacionais), `deploy`, `monitoring`, `rollback` (invocadas pelo agent `devops`).
 
 ---
 
@@ -304,15 +305,15 @@ Rules path-scoped (development, documentation, governance, performance,
 accessibility, state-management, caching, internationalization) carregam quando
 o arquivo trabalhado bate o glob.
 
-## Skills (descoberta por demanda — names = basename do arquivo)
-- **Architecture** (`.claude/skills/architecture/`): fsd, feature-based, atomic-design, hexagonal, ddd, clean-architecture
-- **Practices** (`.claude/skills/practices/`): tdd, bdd, sdd, clean-code  *(ai-friendly-code virou rule)*
-- **Stacks** (`.claude/skills/<categoria>/`): node-24, typescript-7, next-16, react-19, tailwind-4, shadcn-ui, radix-ui, zod-4, zustand-5, openai, anthropic, gemini, openai-sdk, anthropic-sdk, google-genai-sdk, vercel-ai-sdk, mastra-sdk, harness-engineering, firebase-functions, vitest, playwright, **database-firebase-firestore, database-postgres, database-pgvector, database-bigquery** *(prefixo por colisão com contracts)*
-- **Contracts** (`.claude/skills/contracts/`): api, events, secrets, **contracts-firebase-firestore, contracts-postgres, contracts-pgvector, contracts-bigquery** *(schemas virou rule)*
-- **Processes** (`.claude/skills/processes/`): **using-ddc** (bootstrap), deploy, release, monitoring, rollback, pull-requests  *(environments, git, commits viraram rule)*
-- **Business** (`.claude/skills/business/`): business-model, metrics, icp  *(rebaixados do CLAUDE.md)*
-- **Product** (`.claude/skills/product/`): policies  *(design-system e persona subiram para CLAUDE.md)*
-- **Decisions** (`.claude/skills/decisions/`): decisions
+## Skills (descoberta por demanda — `.claude/skills/<name>/SKILL.md`, layout plano; categorias abaixo são só agrupamento lógico)
+- **Architecture**: fsd, feature-based, atomic-design, hexagonal, ddd, clean-architecture
+- **Practices**: tdd, bdd, sdd, clean-code  *(ai-friendly-code virou rule)*
+- **Stacks**: node-24, typescript-7, next-16, react-19, tailwind-4, shadcn-ui, radix-ui, zod-4, zustand-5, openai, anthropic, gemini, openai-sdk, anthropic-sdk, google-genai-sdk, vercel-ai-sdk, mastra-sdk, harness-engineering, firebase-functions, vitest, playwright, **database-firebase-firestore, database-postgres, database-pgvector, database-bigquery** *(prefixo por colisão com contracts)*
+- **Contracts**: api, events, secrets, **contracts-firebase-firestore, contracts-postgres, contracts-pgvector, contracts-bigquery** *(schemas virou rule)*
+- **Processes**: **using-ddc** (bootstrap), deploy, release, monitoring, rollback, pull-requests  *(environments, git, commits viraram rule)*
+- **Business**: business-model, metrics, icp  *(rebaixados do CLAUDE.md)*
+- **Product**: policies  *(design-system e persona subiram para CLAUDE.md)*
+- **Decisions**: decisions
 
 ## Agents
 tech-lead, full-stack, backend, frontend, data-architect, qa, code-reviewer, devops.
@@ -355,12 +356,11 @@ paths: ["**/*.tsx","**/*.jsx","app/**/*"]
 @.contexts/engineering/rules/accessibility.md
 ```
 
-### 6.3 Skill — exemplo `.claude/skills/database/postgres/SKILL.md`
+### 6.3 Skill — exemplo `.claude/skills/database-postgres/SKILL.md`
 ```markdown
 ---
 name: database-postgres
-description: Use ao trabalhar com PostgreSQL — queries, migrações, índices, tabelas, performance, JSON operators, transações. Keywords: postgres, psql, tabela, migração, FK.
-allowed-tools: Read, Edit, Write, Grep, Glob, Bash
+description: "Use ao trabalhar com PostgreSQL — queries, migrações, índices, tabelas, performance, JSON operators, transações. Keywords: postgres, psql, tabela, migração, FK."
 ---
 # Postgres — manual da stack
 
@@ -408,15 +408,15 @@ dados consulta `data-architect`.
 3. Criar as **22 rules** em `.claude/rules/` (`code-review.md` NÃO é criada como rule — vira always-read só do agent `code-reviewer`):
    - **Sempre-ativas (14):** security, validation, error-handling, observability, migration, data-modeling, testing, api-design, grounding, schemas, ai-friendly-code, git, commits, environments.
    - **Path-scoped (8):** development, documentation, governance, performance, accessibility, state-management, caching, internationalization.
-4. Criar **as skills** sob `.claude/skills/<categoria>/<basename>/SKILL.md` (nomes preservam basename do arquivo; 4 colisões usam prefixo de categoria):
+4. Criar **as skills** sob `.claude/skills/<name>/SKILL.md` (layout plano; nomes preservam basename do arquivo; 4 colisões usam prefixo de categoria; categorias abaixo são só agrupamento lógico):
    - **1 decisions** → `.claude/skills/decisions/SKILL.md` (`name: decisions`)
-   - **6 architecture** → `architecture/{fsd,feature-based,atomic-design,hexagonal,ddd,clean-architecture}/SKILL.md`
-   - **4 practices** → `practices/{tdd,bdd,sdd,clean-code}/SKILL.md` (`ai-friendly-code` virou rule)
-   - **25 stacks** → `{runtime,language,frontend,validation,state,ai,backend,database,testing}/<basename>/SKILL.md`. **4 colisões em `database/`** usam `name: database-<basename>`.
-   - **7 contracts** → `contracts/<basename>/SKILL.md`. 3 sem colisão (`api`, `events`, `secrets`); 4 com colisão usam `name: contracts-<basename>` (`schemas` virou rule)
-   - **5 processes** → `processes/{deploy,release,monitoring,rollback,pull-requests}/SKILL.md` (`git`, `commits`, `environments` viraram rule)
-   - **3 business** → `business/{business-model,metrics,icp}/SKILL.md` (rebaixados do CLAUDE.md)
-   - **1 product** → `product/policies/SKILL.md` (`design-system` e `persona` subiram para CLAUDE.md)
+   - **6 architecture** → `{fsd,feature-based,atomic-design,hexagonal,ddd,clean-architecture}/SKILL.md`
+   - **4 practices** → `{tdd,bdd,sdd,clean-code}/SKILL.md` (`ai-friendly-code` virou rule)
+   - **25 stacks** → `<name>/SKILL.md` (categorias lógicas runtime, language, frontend, validation, state, ai, backend, database, testing). **4 colisões database** usam `database-<basename>/` e `name: database-<basename>`.
+   - **7 contracts** → `<name>/SKILL.md`. 3 sem colisão (`api`, `events`, `secrets`); 4 com colisão usam `contracts-<basename>/` e `name: contracts-<basename>` (`schemas` virou rule)
+   - **5 processes** → `{deploy,release,monitoring,rollback,pull-requests}/SKILL.md` (`git`, `commits`, `environments` viraram rule)
+   - **3 business** → `{business-model,metrics,icp}/SKILL.md` (rebaixados do CLAUDE.md)
+   - **1 product** → `policies/SKILL.md` (`design-system` e `persona` subiram para CLAUDE.md)
    - **Total: 52 skills** (1 + 6 + 4 + 25 + 7 + 5 + 3 + 1)
 5. Criar os **8 agents** em `.claude/agents/`.
 6. Criar `CLAUDE.md` com o esqueleto da seção 5 (7 imports `@`: 3 business + 4 product).

@@ -1,7 +1,6 @@
 ---
 name: decisions
-description: Use para criar ou atualizar ADRs (Architecture Decision Records). Keywords: ADR, decisão arquitetural, registrar decisão, trade-off, supersede, exceção de versão, pin atrás do latest.
-allowed-tools: Read, Edit, Write, Grep, Glob, Bash
+description: "Use para criar ou atualizar ADRs (Architecture Decision Records). Keywords: ADR, decisão arquitetural, registrar decisão, trade-off, supersede, exceção de versão, pin atrás do latest."
 ---
 # Architecture Decision Records (ADR)
 
