@@ -24,3 +24,4 @@ read the **tail** of this file.
 - 2026-09-29 | SP0a Task 2 complete | plan: docs/plans/2026-09-29-sp0a-core-doctrine.md | commits: 86563a6..c141338 | review: Spec PASS; Quality fixes verified by controller
 - 2026-09-29 | SP0a Task 3 complete | plan: docs/plans/2026-09-29-sp0a-core-doctrine.md | commits: 96b20dd..3f97811 | review: Spec PASS; Quality fixes verified by controller
 - 2026-09-29 | SP0a Task 4 complete | plan: docs/plans/2026-09-29-sp0a-core-doctrine.md | commits: da878f1..3c5216c | review: Spec PASS; Quality fixes verified by controller; human ratified E6 provisional + App Hosting spike as SP0b Task 0
+- 2026-09-29 | SP0a Task 5 complete | plan: docs/plans/2026-09-29-sp0a-core-doctrine.md | commits: 098d1fd..32d7966 | review: Spec PASS; security fixes verified by controller; human decided API-key re-intersection, Bearer-only /v1, checkRevoked on mutations+Mastra
