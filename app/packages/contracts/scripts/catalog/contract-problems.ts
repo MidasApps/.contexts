@@ -1,27 +1,30 @@
 import { parse as parseYaml } from "yaml";
-import { z } from "zod";
-import { listTopLevelFields, readFieldMeta } from "../../src/contracts/field-meta.ts";
+import { inspectSchema, isPiiBelow } from "../../src/contracts/field-meta-rules.ts";
 import type { RegisteredContract } from "../../src/contracts/registry.ts";
 import type { CatalogArtifact } from "./artifacts.ts";
 import { findRawMetaKeys } from "./json-schema.ts";
 
-const findMissingFieldMeta = (contract: RegisteredContract): string[] =>
-  listTopLevelFields(contract.schema)
-    .filter(([, field]) => readFieldMeta(field, z.globalRegistry) === undefined)
-    .map(([name]) => `missing field meta (description + pii): ${contract.id}.${name}`);
+const ISSUE_LABELS = {
+  MISSING_FIELD_META: "missing field meta (description + pii)",
+  PII_BELOW_FIELDS: "pii below nested fields",
+} as const;
+
+const findFieldMetaProblems = (contract: RegisteredContract): string[] => {
+  const { problems, maxPii } = inspectSchema(contract.schema);
+  const lines = problems.map((problem) => `${ISSUE_LABELS[problem.issue]}: ${contract.id}.${problem.path}`);
+  if (isPiiBelow(contract.meta.pii, maxPii)) lines.push(`${ISSUE_LABELS.PII_BELOW_FIELDS}: ${contract.id}`);
+  return lines;
+};
 
 const findDanglingRelations = (contract: RegisteredContract, knownIds: ReadonlySet<string>): string[] =>
   contract.meta.relations
     .filter((relation) => !knownIds.has(relation.target))
     .map((relation) => `unknown relation target: ${contract.id} -> ${relation.target}`);
 
-/** Defense in depth for contracts that bypassed defineContract's checks. */
+/** Defense in depth: re-checks what defineContract enforces, plus cross-contract relations. */
 export const findContractProblems = (contracts: readonly RegisteredContract[]): string[] => {
   const knownIds = new Set(contracts.map((contract) => contract.id));
-  return contracts.flatMap((contract) => [
-    ...findMissingFieldMeta(contract),
-    ...findDanglingRelations(contract, knownIds),
-  ]);
+  return contracts.flatMap((contract) => [...findFieldMetaProblems(contract), ...findDanglingRelations(contract, knownIds)]);
 };
 
 type CatalogFileShape = { contracts?: { id?: string; jsonSchema?: unknown }[] };

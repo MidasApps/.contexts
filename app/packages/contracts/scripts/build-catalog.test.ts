@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { parse as parseYaml } from "yaml";
 import { z } from "zod";
+import { defineContract } from "../src/contracts/contract.ts";
 import { createContractRegistry } from "../src/contracts/registry.ts";
 import { buildCatalogArtifacts, type CatalogArtifact } from "./catalog/artifacts.ts";
 import { findContractProblems, findRawMetaInArtifacts } from "./catalog/contract-problems.ts";
@@ -8,8 +9,7 @@ import { findCatalogDrift } from "./catalog/drift.ts";
 import { findRawMetaKeys } from "./catalog/json-schema.ts";
 
 const buildContracts = () => {
-  const registry = createContractRegistry();
-  registry.defineContract(
+  const contact = defineContract(
     z.object({
       id: z.string().min(1).meta({ description: "Automatic id.", pii: "none", ui: { widget: "hidden" } }),
       email: z.email().meta({ description: "Contact e-mail.", pii: "personal", examples: ["ana@example.com"] }),
@@ -20,12 +20,12 @@ const buildContracts = () => {
       kind: "entity",
       description: "A person the tenant talks to.",
       examples: [{ id: "a1", email: "ana@example.com", taxId: "123" }],
-      pii: "personal",
+      pii: "sensitive",
       tenancyScope: "organization",
       relations: [],
     },
   );
-  registry.defineContract(z.object({ label: z.string().meta({ description: "Label.", pii: "none" }) }), {
+  const tag = defineContract(z.object({ label: z.string().meta({ description: "Label.", pii: "none" }) }), {
     id: "alpha.Tag",
     kind: "settings",
     description: "A tag.",
@@ -34,7 +34,7 @@ const buildContracts = () => {
     tenancyScope: "project",
     relations: [{ target: "people.Contact", type: "references", field: "label" }],
   });
-  return registry.listContracts();
+  return createContractRegistry([contact, tag]).listContracts();
 };
 
 const findArtifact = (artifacts: CatalogArtifact[], path: string): string => {
@@ -78,7 +78,7 @@ describe("buildCatalogArtifacts", () => {
   it("writes meta keys as x-* in JSON Schema and leaves no raw meta key", () => {
     const artifacts = buildCatalogArtifacts(buildContracts());
     const schema = JSON.parse(findArtifact(artifacts, "docs/catalog/people/Contact.schema.json")) as Record<string, unknown>;
-    expect(schema).toMatchObject({ "x-pii": "personal", "x-kind": "entity", "x-tenancyScope": "organization" });
+    expect(schema).toMatchObject({ "x-pii": "sensitive", "x-kind": "entity", "x-tenancyScope": "organization" });
     expect(schema).toMatchObject({ properties: { email: { "x-pii": "personal" } } });
     expect(findRawMetaKeys(schema)).toEqual([]);
   });

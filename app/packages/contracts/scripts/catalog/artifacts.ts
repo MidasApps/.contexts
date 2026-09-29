@@ -1,5 +1,5 @@
 import type { RegisteredContract } from "../../src/contracts/registry.ts";
-import { toAiCatalogEntry } from "./ai-catalog.ts";
+import { buildAiCatalog } from "./ai-catalog.ts";
 import { buildCatalogEntry, type CatalogEntry } from "./catalog-entry.ts";
 import { buildJsonSchemas } from "./json-schema.ts";
 import { renderContractMarkdown } from "./render-markdown.ts";
@@ -27,7 +27,7 @@ const comparePaths = (left: CatalogArtifact, right: CatalogArtifact): number =>
 export const buildCatalogArtifacts = (contracts: readonly RegisteredContract[]): CatalogArtifact[] => {
   const schemas = buildJsonSchemas(contracts);
   const entries = contracts.map((contract) => buildCatalogEntry(contract, schemas.get(contract.id) ?? {}));
-  const aiEntries = entries.flatMap((entry) => toAiCatalogEntry(entry) ?? []);
+  const aiEntries = buildAiCatalog(entries);
   return [
     ...entries.flatMap(perContractArtifacts),
     { path: `${CATALOG_DIR}/catalog.json`, content: stableStringify({ catalogVersion: CATALOG_VERSION, contracts: entries }) },

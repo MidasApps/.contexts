@@ -1,14 +1,14 @@
 // `pnpm contracts:check` (CI gate): regenerates the catalog in memory and fails on
 // drift, missing field meta, dangling relations or raw (non `x-*`) meta keys.
 import { stdout } from "node:process";
-import { listContracts } from "../src/index.ts";
+import { composeCoreContracts } from "../src/composition.ts";
 import { readGeneratedFiles } from "./catalog/artifact-files.ts";
 import { buildCatalogArtifacts } from "./catalog/artifacts.ts";
 import { findContractProblems, findRawMetaInArtifacts } from "./catalog/contract-problems.ts";
 import { findCatalogDrift } from "./catalog/drift.ts";
 
 const main = async (): Promise<number> => {
-  const contracts = listContracts();
+  const contracts = composeCoreContracts().listContracts();
   const expected = buildCatalogArtifacts(contracts);
   const onDisk = await readGeneratedFiles();
   const problems = [

@@ -10,14 +10,10 @@ export {
   readRawFieldMeta,
   type ZodMetaRegistry,
 } from "./contracts/field-meta.ts";
-export {
-  createContractRegistry,
-  defaultContractRegistry,
-  defineContract,
-  listContracts,
-  type ContractRegistry,
-  type RegisteredContract,
-} from "./contracts/registry.ts";
+export { CORE_CONTRACTS, composeCoreContracts } from "./composition.ts";
+export { defineContract, type ContractDefinition } from "./contracts/contract.ts";
+export { inspectSchema, isPiiBelow, maxPii, type FieldMetaInspection, type FieldMetaProblem } from "./contracts/field-meta-rules.ts";
+export { createContractRegistry, type ContractRegistry, type RegisteredContract } from "./contracts/registry.ts";
 export {
   CatalogMetaSchema,
   ContractIdSchema,
@@ -57,4 +53,4 @@ export { LocaleSchema, type Locale } from "./contracts/primitives/locale.schema.
 export { CurrencySchema, MoneySchema, type Currency, type Money } from "./contracts/primitives/money.schema.ts";
 export { TimeZoneSchema, type TimeZone } from "./contracts/primitives/time-zone.schema.ts";
 // Removable sample contract (keeps the catalog non-empty).
-export { NoteIdSchema, NoteSchema, type Note, type NoteId } from "./contracts/example/note.schema.ts";
+export { NoteContract, NoteIdSchema, NoteSchema, type Note, type NoteId } from "./contracts/example/note.schema.ts";

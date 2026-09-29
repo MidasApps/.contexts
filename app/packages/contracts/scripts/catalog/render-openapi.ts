@@ -3,7 +3,8 @@ import { sortKeysDeep, type JsonRecord } from "./stable-json.ts";
 
 /**
  * Minimal OpenAPI 3.1 document: contracts as `components.schemas`. Paths stay
- * empty until `/v1` endpoints exist (they will declare their own operations).
+ * empty until `/v1` endpoints exist. Native z.toJSONSchema instead of
+ * zod-to-openapi: see app/docs/decisions/0001-openapi-generation.md.
  */
 export const renderOpenApi = (schemas: ReadonlyMap<string, JsonRecord>): string => {
   const document = {

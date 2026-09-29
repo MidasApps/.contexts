@@ -1,4 +1,9 @@
-export type ContractDefinitionErrorCode = "INVALID_CONTRACT_META" | "DUPLICATE_CONTRACT_ID" | "MISSING_FIELD_META";
+export type ContractDefinitionErrorCode =
+  | "INVALID_CONTRACT_META"
+  | "MISSING_FIELD_META"
+  | "PII_BELOW_FIELDS"
+  | "DUPLICATE_CONTRACT_ID"
+  | "DUPLICATE_CONTRACT_SCHEMA";
 
 /** A contract declared wrong is a bug: it fails at import time, never at request time. */
 export class ContractDefinitionError extends Error {
