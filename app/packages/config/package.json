@@ -1,0 +1,38 @@
+{
+  "name": "@core/config",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=26.0.0 <27"
+  },
+  "exports": {
+    "./tsconfig/base.json": "./tsconfig/base.json",
+    "./tsconfig/bundler.json": "./tsconfig/bundler.json",
+    "./tsconfig/nodenext.json": "./tsconfig/nodenext.json",
+    "./eslint": "./eslint/index.js",
+    "./vitest": "./vitest/preset.ts"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@eslint/js": "catalog:",
+    "eslint-import-resolver-typescript": "catalog:",
+    "eslint-plugin-boundaries": "catalog:",
+    "typescript-eslint": "catalog:"
+  },
+  "peerDependencies": {
+    "eslint": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "eslint": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

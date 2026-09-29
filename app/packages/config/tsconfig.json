@@ -1,0 +1,15 @@
+{
+  "extends": "./tsconfig/nodenext.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "declaration": false,
+    "declarationMap": false,
+    "allowJs": true,
+    "checkJs": true,
+    "allowImportingTsExtensions": true,
+    "incremental": true,
+    "tsBuildInfoFile": ".tscache/tsbuildinfo"
+  },
+  "include": ["eslint/**/*.js", "eslint/**/*.ts", "vitest/**/*.ts", "*.ts", "*.js"],
+  "exclude": ["node_modules", "eslint/fixtures"]
+}

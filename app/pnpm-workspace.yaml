@@ -20,3 +20,8 @@ catalog:
 
 engineStrict: true
 savePrefix: ""
+
+# unrs-resolver's postinstall only downloads a native binary when the optional
+# platform package is missing; pnpm already installs it, so the script stays off.
+allowBuilds:
+  unrs-resolver: false

@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "//": "Canonical flags of .contexts/engineering/stacks/language/typescript@7.md. Paths, include and tsBuildInfoFile resolve relative to the file that declares them, so consumers set those.",
+  "compilerOptions": {
+    "target": "ES2025",
+    "lib": ["ES2025", "ESNext.Disposable"],
+
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "exactOptionalPropertyTypes": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitReturns": true,
+
+    "verbatimModuleSyntax": true,
+    "erasableSyntaxOnly": true,
+    "isolatedModules": true,
+
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+
+    "types": ["node"],
+
+    "skipLibCheck": true
+  }
+}
