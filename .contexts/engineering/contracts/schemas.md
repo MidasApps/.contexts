@@ -3,7 +3,7 @@ title: Convenções de modelagem para schemas
 type: contracts
 scope: schemas zod compartilhados (boundaries, naming, organização, versionamento, sharing client/server)
 status: active
-last_updated: 2026-05-20
+last_updated: 2026-09-28
 ---
 
 # Convenções de modelagem para schemas
@@ -21,13 +21,14 @@ Este documento prescreve **como modelar schemas Zod** que atravessam fronteiras 
 
 | Natureza do schema | Localização |
 |---|---|
-| Compartilhado entre client e server | `src/contracts/<context>/` |
-| Interno de uma feature (não cruza fronteira) | `src/features/<feature>/schemas.ts` |
+| Compartilhado entre client e server | `src/contracts/<context>/<nome>.schema.ts` |
+| Interno de um slice do FSD (não cruza fronteira) | `src/<layer>/<slice>/model/<nome>.schema.ts` |
+| Input de use case que só o server usa | `src/services/<context>/application/use-cases/<use-case>.schema.ts` (`application/dto/` no superset Clean, ver `@architecture/clean-architecture`) |
 | Derivado de tabela Drizzle | Próximo da definição da tabela, via `drizzle-zod` |
 | Evento de domínio | `src/contracts/events/` |
 | Primitivos compartilhados | `src/contracts/primitives/` |
 
-Regra de bolso: **se mais de uma feature, package ou camada importa o schema, ele pertence a `src/contracts/`.** Schemas internos jamais devem ser importados por outra feature — se for necessário, **promova** para contracts.
+Regra de bolso: **se o schema cruza client ↔ server ou mais de um package/camada, pertence a `src/contracts/`; reuso entre slices só no client desce para `src/entities/<entity>/model/` (`@architecture/fsd`).** Schema interno de slice não é importado por outro slice: desça para `entities` ou promova para `contracts` conforme essa regra. Esta tabela é a fonte da localização (ADR 0003, Amendments).
 
 ## 3. Naming
 
@@ -41,15 +42,16 @@ Regra de bolso: **se mais de uma feature, package ou camada importa o schema, el
 | Variante | Uso |
 |---|---|
 | `<Entity>Schema` | Forma canônica de domínio |
-| `Create<Entity>InputSchema` | Input de criação (vindo de API/form) |
+| `<Verb><Entity>InputSchema` | Input de um comando/use case (vindo de API/form): `CreateOrderInputSchema`, `PlaceOrderInputSchema`, `CreatePostInputSchema` |
 | `Update<Entity>InputSchema` | Input de atualização (campos opcionais) |
 | `<Entity>OutputSchema` | Forma estável que o cliente vê |
 | `<Entity>ListItemSchema` | Forma reduzida em listagens |
 | `<Entity>DbSchema` | Forma derivada da DB (Drizzle) |
+| `<Entity>DocSchema` | Forma persistida no Firestore, usada pelo converter. Arquivo `<entity>-doc.schema.ts` em `src/contracts/<context>/` (ADR 0003, Amendments) |
 | `<Event>Schema` | Forma de evento de domínio |
 
 Exemplos válidos: `CreateOrderInputSchema`, `UserListItemSchema`, `OrderPlacedEventSchema`.
-Exemplos inválidos: `userSchema` (camelCase), `IUser` (notação húngara), `OrderType` (sem sufixo `Schema`), `OrderDTO` (vocabulário fora da convenção).
+Exemplos inválidos: `PlaceOrderSchema` (input sem sufixo `Input`), `userSchema` (camelCase), `IUser` (notação húngara), `OrderType` (sem sufixo `Schema`), `OrderDTO` (vocabulário fora da convenção).
 
 ## 4. Organização por bounded context
 
@@ -67,25 +69,25 @@ src/contracts/
 ## 5. Estrutura típica de arquivo
 
 ```ts
-// src/contracts/orders/order.ts
+// src/contracts/orders/order.schema.ts
 import { z } from 'zod';
-import { UserIdSchema } from '../users';
+import { UserIdSchema } from '@/contracts/users';
 
-export const OrderIdSchema = z.string().min(26).brand<'OrderId'>();
+export const OrderIdSchema = z.string().min(1).brand<'OrderId'>();
 export type OrderId = z.infer<typeof OrderIdSchema>;
 
-export const OrderStatusSchema = z.enum(['PENDING', 'PAID', 'CANCELLED']);
+export const OrderStatusSchema = z.enum(['pending', 'paid', 'cancelled']);
 export type OrderStatus = z.infer<typeof OrderStatusSchema>;
 
 export const OrderSchema = z.object({
   id: OrderIdSchema,
   userId: UserIdSchema,
   status: OrderStatusSchema,
-  totalCents: z.number().int().nonnegative(),
+  amountMinor: z.number().int().nonnegative(),
   currency: z.string().length(3),
-  placedAt: z.string().datetime({ offset: false }),
-  createdAt: z.string().datetime({ offset: false }),
-  updatedAt: z.string().datetime({ offset: false }),
+  placedAt: z.iso.datetime({ offset: false }),
+  createdAt: z.iso.datetime({ offset: false }),
+  updatedAt: z.iso.datetime({ offset: false }),
 });
 export type Order = z.infer<typeof OrderSchema>;
 ```
@@ -101,10 +103,10 @@ Regras estruturais:
 Todo identificador de entidade é um branded type. Isso impede troca acidental entre `UserId` e `OrderId` em chamadas, mesmo que ambos sejam strings em runtime. Ver `@rules/data-modeling`.
 
 ```ts
-export const UserIdSchema = z.string().min(26).brand<'UserId'>();
+export const UserIdSchema = z.string().min(1).brand<'UserId'>();
 export type UserId = z.infer<typeof UserIdSchema>;
 
-export const OrderIdSchema = z.string().min(26).brand<'OrderId'>();
+export const OrderIdSchema = z.string().min(1).brand<'OrderId'>();
 export type OrderId = z.infer<typeof OrderIdSchema>;
 ```
 
@@ -116,12 +118,12 @@ export type OrderId = z.infer<typeof OrderIdSchema>;
 Em `src/contracts/primitives/`:
 
 ```ts
-export const EmailSchema = z.string().email().toLowerCase().trim();
-export const UrlSchema = z.string().url();
-export const IsoDateTimeSchema = z.string().datetime({ offset: false });
-export const CurrencySchema = z.string().length(3).toUpperCase();
+export const EmailSchema = z.email().toLowerCase().trim();
+export const UrlSchema = z.url();
+export const IsoDateTimeSchema = z.iso.datetime({ offset: false });
+export const CurrencySchema = z.string().regex(/^[A-Z]{3}$/); // ISO 4217, mesmo CHECK do Postgres
 export const MoneySchema = z.object({
-  amountCents: z.number().int().nonnegative(),
+  amountMinor: z.number().int().nonnegative(),
   currency: CurrencySchema,
 });
 ```
@@ -170,16 +172,17 @@ Para wire formats persistentes (eventos, APIs públicas, dados serializados em D
 
 ```ts
 export const OrderPlacedEventV1Schema = z.object({
-  schemaVersion: z.literal(1),
+  eventVersion: z.literal(1),
   // ...
 });
 
 export const OrderPlacedEventV2Schema = z.object({
-  schemaVersion: z.literal(2),
+  eventVersion: z.literal(2),
   // ...
 });
 
-export const OrderPlacedEventSchema = z.discriminatedUnion('schemaVersion', [
+// eventos: o discriminador é `eventVersion` do envelope (`@contracts/events` §2)
+export const OrderPlacedEventSchema = z.discriminatedUnion('eventVersion', [
   OrderPlacedEventV1Schema,
   OrderPlacedEventV2Schema,
 ]);
@@ -191,13 +194,13 @@ Tipos polimórficos usam `z.discriminatedUnion`, nunca `z.union` simples — per
 
 ```ts
 export const ShapeSchema = z.discriminatedUnion('kind', [
-  z.object({ kind: z.literal('CIRCLE'), radius: z.number().positive() }),
-  z.object({ kind: z.literal('SQUARE'), side: z.number().positive() }),
-  z.object({ kind: z.literal('RECT'), width: z.number().positive(), height: z.number().positive() }),
+  z.object({ kind: z.literal('circle'), radius: z.number().positive() }),
+  z.object({ kind: z.literal('square'), side: z.number().positive() }),
+  z.object({ kind: z.literal('rect'), width: z.number().positive(), height: z.number().positive() }),
 ]);
 ```
 
-O campo discriminador é sempre uma string literal em SCREAMING_SNAKE_CASE quando representa estado/tipo de domínio.
+O campo discriminador é uma string literal em snake_case minúsculo, como todo enum persistido (`@rules/data-modeling`). SCREAMING_SNAKE_CASE fica só para `eventName` e `error.code`.
 
 ## 13. Refinements compartilhados
 
@@ -205,7 +208,7 @@ Refinements reusáveis ficam em `src/contracts/primitives/refinements.ts` como f
 
 ```ts
 export const refineNonEmpty = <T extends z.ZodTypeAny>(schema: T) =>
-  schema.refine((v) => Array.isArray(v) ? v.length > 0 : !!v, { message: 'must not be empty' });
+  schema.refine((v) => Array.isArray(v) ? v.length > 0 : !!v, { error: 'must not be empty' });
 
 export const refineUniqueArray = <T>(getKey: (item: T) => string) =>
   (arr: T[]) => new Set(arr.map(getKey)).size === arr.length;
@@ -216,7 +219,7 @@ Anti-pattern: `.refine(...)` inline duplicado em vários schemas.
 ## 14. Mensagens de erro
 
 - Mensagens user-facing usam chaves i18n, não strings literais — ver `@rules/internationalization`.
-- Definir `errorMap` global no bootstrap para mensagens default consistentes.
+- Definir a opção `error` (Zod 4, `z.config({ customError })`) global no bootstrap para mensagens default consistentes.
 - Mensagens de schema em contratos internos (não user-facing) podem ser strings em inglês curtas e factuais.
 
 ## 15. OpenAPI export
@@ -236,15 +239,15 @@ export const OrderSchema = z.object({
 
 ## 16. JSON Schema export para IA
 
-Para structured outputs e tool params consumidos por LLMs (ver `@stacks/ai/vercel-ai-sdk`), exporte JSON Schema via `zod-to-json-schema`:
+Para structured outputs e tool params consumidos por LLMs (ver `@stacks/ai/vercel-ai-sdk`), exporte JSON Schema com `z.toJSONSchema`. No AI SDK 7 o schema Zod entra direto:
 
 ```ts
-import { generateObject } from 'ai';
+import { generateText, Output } from 'ai';
 import { OrderSummarySchema } from '@/contracts/orders';
 
-const { object } = await generateObject({
+const { output } = await generateText({
   model,
-  schema: OrderSummarySchema,
+  output: Output.object({ schema: OrderSummarySchema }),
   prompt: '...',
 });
 ```
@@ -268,38 +271,71 @@ Mapper converte `UserDb` → `User` (forma canônica de domínio). Nunca retorne
 
 ## 18. Firestore integration
 
-Ver `@contracts/firebase-firestore`. Schema canônico é aplicado nas duas direções via converter:
+Ver `@contracts/firebase-firestore`. O converter valida a forma persistida (`<Entity>DocSchema`, §3) **na leitura**. Na escrita não há `parse`: os audit fields são sentinelas `FieldValue.serverTimestamp()` (`@contracts/firebase-firestore` §5, §13), que o `DocSchema` (com `Timestamp`) rejeitaria. O que se valida na escrita é o input do use case, já parseado na boundary:
 
 ```ts
-import { FirestoreDataConverter } from 'firebase-admin/firestore';
-import { UserSchema, type User } from '@/contracts/users';
+import { FieldValue, type FirestoreDataConverter } from 'firebase-admin/firestore';
+import { UserDocSchema, type UserDoc } from '@/contracts/users/user-doc.schema';
 
-export const userConverter: FirestoreDataConverter<User> = {
-  toFirestore: (u) => UserSchema.parse(u),
-  fromFirestore: (snap) => UserSchema.parse(snap.data()),
+export const userConverter: FirestoreDataConverter<UserDoc> = {
+  toFirestore: (u) => u, // WithFieldValue<UserDoc>: aceita sentinelas; input já validado na boundary
+  fromFirestore: (snap) => UserDocSchema.parse(snap.data()),
 };
+
+// write: input validado (CreateUserInputSchema) + timestamps pelo servidor
+await db.collection('users').withConverter(userConverter).doc().set({
+  ...input, tenantId, createdBy: actorUid, updatedBy: actorUid,
+  createdAt: FieldValue.serverTimestamp(), updatedAt: FieldValue.serverTimestamp(),
+});
 ```
 
 ## 19. Schema-as-API
 
-tRPC, Server Actions (Next.js) e Route Handlers consomem schemas **diretamente** para input validation. Não há "tipo de input" separado do schema:
+tRPC, Server Actions (Next.js) e Route Handlers consomem schemas **diretamente** para input validation. Não há "tipo de input" separado do schema. A validação fica no driving adapter; o `actions.ts` é só um wrapper `"use server"` de uma linha (ADR 0003, Amendments):
 
 ```ts
+// src/services/orders/adapters/driving/create-order-action.ts
+import { headers } from 'next/headers';
+import { CreateOrderInputSchema } from '@/contracts/orders';
+import { createOrder } from '@/services/orders/composition';
+
+export const createOrderAction = async (raw: unknown) => {
+  const user = await requireUser(); // auth → validate → authorize → act
+  const requestId = (await headers()).get('x-request-id');
+  const parsed = CreateOrderInputSchema.safeParse(raw);
+  if (!parsed.success) {
+    return {
+      ok: false as const,
+      error: {
+        code: 'VALIDATION_FAILED',
+        message: 'One or more fields are invalid.',
+        details: parsed.error.issues.map((i) => ({
+          field: i.path.map(String).join('.'),
+          issue: i.code.toUpperCase(),
+        })),
+        requestId,
+      },
+    };
+  }
+  await assertCanCreateOrder(user, parsed.data); // authorize: 403 se IDOR
+  return { ok: true as const, data: await createOrder(parsed.data) }; // parsed.data validado e tipado
+};
+```
+
+```ts
+// src/app/orders/new/actions.ts
 'use server';
 
-import { CreateOrderInputSchema } from '@/contracts/orders';
+import { createOrderAction } from '@/services/orders/adapters/driving/create-order-action';
 
-export async function createOrder(raw: unknown) {
-  const input = CreateOrderInputSchema.parse(raw);
-  // input está validado e tipado
-}
+export const createOrder = async (raw: unknown) => createOrderAction(raw);
 ```
 
 ## 20. Eval / AI schemas
 
 Ver `@stacks/ai/vercel-ai-sdk`. Schemas para structured output de LLM:
 
-- Vivem em `src/contracts/<context>/` se reutilizados; em `src/features/<feature>/schemas.ts` se efêmeros.
+- Vivem em `src/contracts/<context>/` se reutilizados; se efêmeros, junto do use case server-only que chama o modelo (`src/services/<context>/application/use-cases/<use-case>.schema.ts`), conforme a tabela da seção 2.
 - Sempre com `.describe()` em todos os campos.
 - Preferir tipos primitivos a complex unions — modelos LLMs lidam pior com unions profundas.
 - Para evals, fixar schema da resposta esperada e usar diff estrutural.
@@ -310,7 +346,7 @@ Ver `@rules/testing`.
 
 - Cada schema em contract tem teste com pelo menos um fixture válido e dois inválidos (caso de borda + caso óbvio).
 - Invariantes de schemas com regras numéricas, formatos ou refinements são cobertos por property-based testing via `fast-check`.
-- Fixtures válidos de schemas em contracts ficam em `src/contracts/<context>/__fixtures__/` para reuso entre testes.
+- Dados válidos de schemas em contracts ficam em factories (`makeOrder()`) ao lado do schema (`order.factory.ts`), para reuso entre testes.
 
 ## 22. Performance
 
@@ -343,7 +379,7 @@ Aplicação errada — evite:
 - Schema em OpenAPI export sem `.describe()`.
 - Mesmo schema cobrindo forma de domínio e forma de wire.
 - `z.union([...])` quando existe campo discriminador — use `z.discriminatedUnion`.
-- Versionamento ad hoc sem `schemaVersion` em wire formats persistentes.
+- Versionamento ad hoc sem discriminador de versão (`eventVersion` em eventos, `schemaVersion` em outros wire formats persistentes).
 - Schema interno de feature consumido por outra feature sem promoção a `src/contracts/`.
 - `z.any()` por preguiça. Use `unknown` + narrowing — ver `@rules/validation`.
 - Lançar `ZodError` diretamente ao cliente externo. Envelope de erro padronizado em `@contracts/api`.

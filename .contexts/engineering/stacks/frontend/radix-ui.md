@@ -1,11 +1,13 @@
 ---
 title: Radix UI
+type: stacks
+version: 1.6.7
 category: frontend
 packages:
-  - "@radix-ui/react-* (SemVer individual por pacote)"
-  - "radix-ui (meta-package, opcional)"
+  - "radix-ui (pacote unificado, recomendado)"
+  - "@radix-ui/react-* (pacotes individuais, alternativa legada)"
   - "@radix-ui/colors (opcional)"
-last_updated: 2026-07-13
+last_updated: 2026-09-28
 status: current
 upstream:
   - https://www.radix-ui.com/primitives
@@ -72,28 +74,26 @@ Visão geral — instale apenas via shadcn CLI conforme necessidade.
 | Grupo | Primitives |
 |---|---|
 | **Overlays** | `Dialog`, `AlertDialog`, `Popover`, `HoverCard`, `Tooltip`, `ContextMenu`, `DropdownMenu`, `NavigationMenu`, `Menubar` |
-| **Form** | `Checkbox`, `RadioGroup`, `Switch`, `Slider`, `Select`, `Form`, `Label`, `Toggle`, `ToggleGroup`, `OneTimePasswordField` |
+| **Form** | `Checkbox`, `RadioGroup`, `Switch`, `Slider`, `Select`, `Form`, `Label`, `Toggle`, `ToggleGroup`, `OneTimePasswordField`, `PasswordToggleField` |
 | **Disclosure** | `Accordion`, `Collapsible`, `Tabs` |
-| **Feedback** | `Progress`, ~~`Toast`~~ (descontinuado — usar Sonner ou implementação custom) |
+| **Feedback** | `Progress`, `Toast` (primitive Radix documentado e publicado, `@radix-ui/react-toast@1.2.23` dentro de `radix-ui@1.6.7`; quem foi deprecated é o componente `toast` do **shadcn**, em favor de `sonner`, que é o toaster do projeto) |
 | **Layout** | `AspectRatio`, `Separator`, `ScrollArea` |
 | **Utilities** | `Avatar`, `Slot`, `Portal`, `VisuallyHidden`, `Direction`, `AccessibleIcon` |
 
 ## 5. Pacotes e imports
 
-Cada primitive em pacote próprio com versão própria:
+O pacote unificado `radix-ui` (**1.6.7**, 2026-09-28) é o recomendado pela documentação oficial e o adotado pelo projeto (ver `stacks/VERSIONS.md`); `@radix-ui/react-slot` mede 1.3.3.
 
 ```ts
-import * as Dialog from "@radix-ui/react-dialog";
-import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
+import { Dialog, DropdownMenu } from "radix-ui";
 ```
 
-Existe um meta-package `radix-ui` consolidando todos, mas:
+**Convenção do projeto:** instalar e importar do pacote único `radix-ui`.
 
-**Convenção do projeto:** importar **dos pacotes individuais** (`@radix-ui/react-*`), nunca do meta-package.
-
-- Tree-shaking explícito.
-- `package.json` reflete dependências reais.
-- Alinhado com o que o `shadcn` CLI instala via `components.json`.
+- Uma única dependência e versão para todos os primitives; sem drift entre `@radix-ui/react-*`.
+- Tree-shaking continua funcionando por named imports.
+- Alinhado com o que o `shadcn` CLI instala com `init -b radix` (base do projeto, style `new-york`). Sem `-b radix`, o `-d` da CLI escolhe Base UI (ver `@stacks/frontend/shadcn-ui`).
+- Pacotes individuais (`@radix-ui/react-*`) só em código legado que ainda não migrou; não misture os dois estilos no mesmo arquivo.
 
 ## 6. Styling via data attributes
 
@@ -216,7 +216,7 @@ Ver `@stacks/frontend/react@19` e `@stacks/frontend/next@16`.
 
 | Camada | Onde | Tecnologia |
 |---|---|---|
-| Comportamento + a11y | Radix Primitive | `@radix-ui/react-*` |
+| Comportamento + a11y | Radix Primitive | `radix-ui` |
 | Estilo + variantes | `components/ui/` | Tailwind + `cn`/`cva` (ver `@stacks/frontend/shadcn-ui` e `@stacks/frontend/tailwind@4`) |
 | Composição de domínio | `features/<feature>/components/` | React composition |
 

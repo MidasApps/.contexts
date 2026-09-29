@@ -1,0 +1,412 @@
+<meta charset="utf-8">
+<title>Onde estamos — limpeza e correções</title>
+
+<style>
+  :root {
+    color-scheme: light;
+    --paper:#FFFFFF; --ground:#F4F4F7; --sunken:#ECECF1;
+    --line:#DEDEE6; --line-soft:#E9E9EF;
+    --text:#16171D; --text-mid:#4A4C58; --text-dim:#74768A;
+    --accent:#C9531D; --accent-ink:#8F3A12; --accent-wash:#FBEDE5;
+    --ok:#2E7A5B; --ok-wash:#E6F3ED;
+    --warn:#9A6B10; --warn-wash:#FBF2DE;
+    --stop:#B93B3B; --stop-wash:#FBEAEA;
+    --shadow:0 1px 2px rgba(16,17,25,.05), 0 4px 14px rgba(16,17,25,.05);
+    --sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    --measure: 66ch;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      color-scheme: dark;
+      --paper:#15161D; --ground:#0B0C11; --sunken:#1B1D26;
+      --line:#2A2C38; --line-soft:#23252F;
+      --text:#EDEDF2; --text-mid:#B4B6C4; --text-dim:#85879A;
+      --accent:#F0803F; --accent-ink:#F5A472; --accent-wash:#2A1A11;
+      --ok:#5FBE93; --ok-wash:#12241D;
+      --warn:#E0A93F; --warn-wash:#2A2113;
+      --stop:#E8736F; --stop-wash:#2B1618;
+      --shadow:0 1px 2px rgba(0,0,0,.4), 0 4px 16px rgba(0,0,0,.3);
+    }
+  }
+  :root[data-theme="light"]{color-scheme:light;--paper:#FFFFFF;--ground:#F4F4F7;--sunken:#ECECF1;--line:#DEDEE6;--line-soft:#E9E9EF;--text:#16171D;--text-mid:#4A4C58;--text-dim:#74768A;--accent:#C9531D;--accent-ink:#8F3A12;--accent-wash:#FBEDE5;--ok:#2E7A5B;--ok-wash:#E6F3ED;--warn:#9A6B10;--warn-wash:#FBF2DE;--stop:#B93B3B;--stop-wash:#FBEAEA;--shadow:0 1px 2px rgba(16,17,25,.05),0 4px 14px rgba(16,17,25,.05);}
+  :root[data-theme="dark"]{color-scheme:dark;--paper:#15161D;--ground:#0B0C11;--sunken:#1B1D26;--line:#2A2C38;--line-soft:#23252F;--text:#EDEDF2;--text-mid:#B4B6C4;--text-dim:#85879A;--accent:#F0803F;--accent-ink:#F5A472;--accent-wash:#2A1A11;--ok:#5FBE93;--ok-wash:#12241D;--warn:#E0A93F;--warn-wash:#2A2113;--stop:#E8736F;--stop-wash:#2B1618;--shadow:0 1px 2px rgba(0,0,0,.4),0 4px 16px rgba(0,0,0,.3);}
+
+  *,*::before,*::after{box-sizing:border-box}
+  body{margin:0;background:var(--ground);color:var(--text);font-family:var(--sans);font-size:16px;line-height:1.62;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1000px;margin:0 auto;padding:0 20px 88px}
+
+  .eyebrow{font-family:var(--mono);font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--accent-ink);margin:0}
+  h1{font-size:clamp(1.8rem,4.2vw,2.6rem);line-height:1.12;letter-spacing:-.022em;font-weight:700;margin:0;text-wrap:balance;max-width:18ch}
+  h2{font-size:1.3rem;letter-spacing:-.015em;margin:0 0 6px;line-height:1.25}
+  p{max-width:var(--measure)}
+
+  header.top{padding:56px 0 30px;border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:18px}
+  .stand{margin:0;color:var(--text-mid);font-size:1.05rem}
+  .meta{display:flex;flex-wrap:wrap;gap:6px 20px;font-family:var(--mono);font-size:.73rem;color:var(--text-dim)}
+  .meta b{color:var(--text-mid);font-weight:600}
+
+  .verdict{margin-top:30px;border:1px solid var(--line);border-left:3px solid var(--ok);border-radius:10px;background:var(--paper);padding:20px 22px;box-shadow:var(--shadow)}
+  .verdict h2{color:var(--ok)}
+  .verdict p{margin:0;color:var(--text-mid)}
+  .nums{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-top:16px}
+  .num{background:var(--paper);padding:14px 16px;display:flex;flex-direction:column;gap:1px}
+  .num .n{font-size:1.6rem;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums;line-height:1.15}
+  .num .k{font-family:var(--mono);font-size:.65rem;text-transform:uppercase;letter-spacing:.1em;color:var(--text-dim)}
+
+  section{margin-top:52px}
+  .lead{color:var(--text-mid);margin:0 0 20px}
+
+  .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:12px}
+  .card{background:var(--paper);border:1px solid var(--line);border-left:3px solid var(--ok);border-radius:10px;padding:15px 17px;display:flex;flex-direction:column;gap:5px}
+  .card .code{font-family:var(--mono);font-size:.66rem;letter-spacing:.06em;color:var(--text-dim)}
+  .card .t{font-weight:600;font-size:.97rem;letter-spacing:-.005em;line-height:1.35}
+  .card .d{font-size:.88rem;color:var(--text-mid)}
+
+  .item{background:var(--paper);border:1px solid var(--line);border-left:3px solid var(--text-dim);border-radius:10px;padding:17px 19px;margin-bottom:11px;box-shadow:var(--shadow)}
+  .item.you{border-left-color:var(--stop)}
+  .item.later{border-left-color:var(--warn)}
+  .item h3{margin:0 0 4px;font-size:1rem;font-weight:600;letter-spacing:-.005em;display:flex;align-items:baseline;gap:9px;flex-wrap:wrap}
+  .item h3 .code{font-family:var(--mono);font-size:.66rem;letter-spacing:.06em;color:var(--text-dim);background:var(--sunken);padding:2px 6px;border-radius:4px}
+  .item p{margin:0;font-size:.93rem;color:var(--text-mid)}
+  .item p + p{margin-top:7px}
+  .item .why{margin-top:8px;padding-top:8px;border-top:1px dashed var(--line);font-size:.88rem;color:var(--text-dim)}
+  .item .why b{color:var(--text-mid);font-weight:600}
+
+  .todo{background:var(--accent-wash);border:1px solid color-mix(in srgb,var(--accent) 30%,transparent);border-radius:10px;padding:19px 21px;margin-bottom:12px}
+  .todo h3{margin:0 0 5px;font-size:1rem;color:var(--accent-ink)}
+  .todo p{margin:0;font-size:.93rem;color:var(--text-mid)}
+  pre{background:var(--sunken);border:1px solid var(--line);border-radius:7px;padding:11px 13px;overflow-x:auto;margin:10px 0 0;font-family:var(--mono);font-size:.79rem;line-height:1.55;color:var(--text)}
+
+  .tabela{width:100%;border-collapse:collapse;font-size:.9rem;margin-top:6px}
+  .tabela th{text-align:left;font-family:var(--mono);font-size:.64rem;text-transform:uppercase;letter-spacing:.1em;color:var(--text-dim);font-weight:600;padding:0 12px 8px 0;border-bottom:1px solid var(--line)}
+  .tabela td{padding:9px 12px 9px 0;border-bottom:1px solid var(--line-soft);color:var(--text-mid);vertical-align:top}
+  .tabela td:first-child{font-family:var(--mono);font-size:.78rem;color:var(--text);white-space:nowrap}
+  .scroll{overflow-x:auto}
+
+  footer{margin-top:56px;padding-top:20px;border-top:1px solid var(--line);color:var(--text-dim);font-size:.85rem;max-width:var(--measure)}
+  code{font-family:var(--mono);font-size:.85em;background:var(--sunken);padding:1px 5px;border-radius:4px}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div class="wrap">
+
+  <header class="top">
+    <p class="eyebrow">Épico · Consistência e segurança · Fechamento</p>
+    <h1>Onde estamos</h1>
+    <p class="stand">
+      Uma revisão apontou 20 riscos no código e 9 lacunas de documentação. Esta
+      página conta, sem jargão, o que foi resolvido, o que sobrou e o que
+      depende de você. É a continuação da
+      <a href="./2026-08-04-epico-consistencia-da-aplicacao-pendencias.html">página de pendências de 04/08</a>.
+    </p>
+    <div class="meta">
+      <span><b>Data</b> 06/08/2026</span>
+      <span><b>Branch</b> chore/limpeza-vila-rosa</span>
+      <span><b>Commits</b> 21</span>
+    </div>
+  </header>
+
+  <div class="verdict">
+    <p class="eyebrow">Resumo em uma frase</p>
+    <h2>A aplicação está íntegra e verificada.</h2>
+    <p>
+      Todos os testes passam, os tipos estão no mesmo patamar de antes, o build
+      compila e os dois bancos (produção e desenvolvimento) estão idênticos e
+      contendo só o Vila Rosa. Não há nada quebrado esperando conserto.
+    </p>
+    <div class="nums">
+      <div class="num"><span class="n">1.605</span><span class="k">testes passando</span></div>
+      <div class="num"><span class="n">0</span><span class="k">testes falhando</span></div>
+      <div class="num"><span class="n">0</span><span class="k">erros de lint</span></div>
+      <div class="num"><span class="n">1</span><span class="k">cliente nos bancos</span></div>
+    </div>
+  </div>
+
+  <!-- ─────────── O QUE MUDOU ─────────── -->
+  <section>
+    <p class="eyebrow">Parte 1 de 4</p>
+    <h2>O que mudou</h2>
+    <p class="lead">
+      Agrupado pelo problema que resolve, não pela ordem em que foi feito.
+    </p>
+
+    <h3 style="font-size:.8rem;font-family:var(--mono);text-transform:uppercase;letter-spacing:.1em;color:var(--text-dim);margin:22px 0 10px">Dinheiro e abuso</h3>
+    <div class="cards">
+      <div class="card">
+        <span class="code">R1 · R2</span>
+        <span class="t">Teto de gasto em toda consulta</span>
+        <span class="d">A IA escreve consultas ao banco de dados e podia varrer volume ilimitado. Agora o banco recusa antes de cobrar.</span>
+      </div>
+      <div class="card">
+        <span class="code">R4</span>
+        <span class="t">Freio nas operações caras</span>
+        <span class="d">Chat, geração de painel e exportação de PDF passaram a ter limite por usuário. O PDF ganhou teto de 2 simultâneos — é o que derruba o servidor.</span>
+      </div>
+      <div class="card">
+        <span class="code">R20</span>
+        <span class="t">Comparação de mercado exige 3 carteiras</span>
+        <span class="d">Com um cliente só, o produto mostrava a carteira do próprio usuário rotulada como "média do mercado".</span>
+      </div>
+    </div>
+
+    <h3 style="font-size:.8rem;font-family:var(--mono);text-transform:uppercase;letter-spacing:.1em;color:var(--text-dim);margin:26px 0 10px">Segurança e acesso</h3>
+    <div class="cards">
+      <div class="card">
+        <span class="code">SQL</span>
+        <span class="t">Guardrails do SQL que a IA gera</span>
+        <span class="d">Um comentário no meio do comando burlava o bloqueio, e o comando que copia dados para fora do Google não estava na lista de proibidos.</span>
+      </div>
+      <div class="card">
+        <span class="code">R12</span>
+        <span class="t">Conferência no que define permissão</span>
+        <span class="d">Rotas e acessos entravam sem validação. Fechou junto uma brecha de gravação em local indevido.</span>
+      </div>
+      <div class="card">
+        <span class="code">R13</span>
+        <span class="t">Oito cópias do verificador viraram uma</span>
+        <span class="d">As cópias divergiam entre si; corrigir uma não corrigia as outras. De brinde, ganharam o cache que não tinham.</span>
+      </div>
+      <div class="card">
+        <span class="code">R5</span>
+        <span class="t">Indicador novo não escapa mais da checagem</span>
+        <span class="d">Havia uma lista fixa de 64 indicadores no código; quem não estava nela perdia a checagem de página em silêncio.</span>
+      </div>
+      <div class="card">
+        <span class="code">R18</span>
+        <span class="t">Cabeçalhos de segurança — os cinco</span>
+        <span class="d">O quinto, que impede script estranho de rodar na página, fechou por último. Duas coisas quebrariam a aplicação se eu tivesse confiado no código sem abrir no navegador — ver abaixo.</span>
+      </div>
+      <div class="card">
+        <span class="code">R9 · R11</span>
+        <span class="t">Menos exposição involuntária</span>
+        <span class="d">A tela de erro mostrava detalhe técnico ao usuário; o PDF exportado ficava acessível para sempre. Agora o link vale uma vez.</span>
+      </div>
+    </div>
+
+    <h3 style="font-size:.8rem;font-family:var(--mono);text-transform:uppercase;letter-spacing:.1em;color:var(--text-dim);margin:26px 0 10px">Nada mais hardcoded</h3>
+    <div class="cards">
+      <div class="card">
+        <span class="code">Perfil</span>
+        <span class="t">O contexto do cliente saiu do código</span>
+        <span class="d">Um arquivo no código descrevia a carteira e as tabelas do Vila Rosa. Agora é cadastro na tela de administração — abrir cliente novo não pede mais deploy.</span>
+      </div>
+      <div class="card">
+        <span class="code">Rotas</span>
+        <span class="t">Endereços em inglês, sem nome de produto</span>
+        <span class="d">Havia uma tela em <code>/covenants/…</code>, contradizendo um produto que serve qualquer relatório. Removida; o resto virou inglês.</span>
+      </div>
+      <div class="card">
+        <span class="code">Purga</span>
+        <span class="t">Só Vila Rosa nos dois bancos</span>
+        <span class="d">Restos de 9 clientes antigos saíram do desenvolvimento; 16 documentos órfãos saíram da produção. Tudo com backup antes.</span>
+      </div>
+    </div>
+
+    <h3 style="font-size:.8rem;font-family:var(--mono);text-transform:uppercase;letter-spacing:.1em;color:var(--text-dim);margin:26px 0 10px">Fechado depois desta página ficar pronta</h3>
+    <div class="cards">
+      <div class="card">
+        <span class="code">R18</span>
+        <span class="t">A última trava do navegador</span>
+        <span class="d">Cada página passou a nascer com uma senha descartável que só os scripts legítimos carregam. Script injetado por terceiros não tem a senha e não roda.</span>
+      </div>
+      <div class="card">
+        <span class="code">Produto</span>
+        <span class="t">As três telas de maquete saíram</span>
+        <span class="d">Rating, PDD e Elegibilidade eram texto escrito no código. O conteúdo foi preservado inteiro em <code>docs/anexos-metodologia.md</code> — e agora cabe num relatório da admin, editável por quem entende do assunto.</span>
+      </div>
+      <div class="card">
+        <span class="code">Produto</span>
+        <span class="t">Ambiente novo não nasce mais vazio</span>
+        <span class="d">Um comando cria o primeiro usuário — conta, permissões e vínculo com o cliente. Sem copiar dado pessoal de produção, que é o motivo de ele não vir junto.</span>
+      </div>
+    </div>
+
+    <div class="item" style="margin-top:14px">
+      <h3><span class="code">Vale ler</span> A trava quase derrubou a aplicação — duas vezes</h3>
+      <p>
+        A regra parecia pronta e o código parecia certo. Só que a senha
+        descartável nasce junto com a visita à página, e algumas telas eram
+        montadas <em>antes</em>, no momento de publicar — nasciam sem senha
+        nenhuma. Resultado: 26 scripts legítimos bloqueados pela própria trava,
+        tela branca.
+      </p>
+      <p>
+        Corrigido isso, sobrou um: o script que aplica o tema escuro antes da
+        primeira pintura. Ele é nosso, não do framework, então ninguém o
+        assinava. Sem ele a tela pisca em branco a cada carregamento.
+      </p>
+      <p class="why"><b>Por que registro isto:</b> nenhum dos dois aparece lendo o código — só abrindo a aplicação num navegador de verdade. Foi o que fiz antes de dar por pronto.</p>
+    </div>
+
+    <h3 style="font-size:.8rem;font-family:var(--mono);text-transform:uppercase;letter-spacing:.1em;color:var(--text-dim);margin:26px 0 10px">Confiabilidade</h3>
+    <div class="cards">
+      <div class="card">
+        <span class="code">R15</span>
+        <span class="t">Os testes voltaram a servir de alarme</span>
+        <span class="d">Cinco testes falhavam sempre porque acessavam a rede. A suíte inteira passou a rodar limpa, e o tempo caiu de 6 para 1,5 minuto.</span>
+      </div>
+      <div class="card">
+        <span class="code">R16</span>
+        <span class="t">Dá para saber o que está no ar</span>
+        <span class="d">A imagem publicada não dizia qual versão continha, e a checagem de saúde respondia "tudo bem" com o banco fora do ar.</span>
+      </div>
+      <div class="card">
+        <span class="code">R19</span>
+        <span class="t">Registro de quem alterou o quê</span>
+        <span class="d">Nenhum dado guardava autor. Corrigiu junto um caso em que apagar todos os mapeamentos de um cliente ressuscitava os antigos.</span>
+      </div>
+      <div class="card">
+        <span class="code">R7</span>
+        <span class="t">A IA passou a ser cobrada pela citação que promete</span>
+        <span class="d">O texto que instrui a IA exige citar a fonte de todo número, e nada verificava. Agora a resposta sem fonte sai marcada.</span>
+      </div>
+      <div class="card">
+        <span class="code">R14</span>
+        <span class="t">Dá para montar o ambiente do zero</span>
+        <span class="d">Provado na prática: apaguei o banco de desenvolvimento inteiro e o recriei a partir da produção.</span>
+      </div>
+      <div class="card">
+        <span class="code">Regras</span>
+        <span class="t">Três convenções escritas, duas corrigidas</span>
+        <span class="d">As que ensinavam versões antigas de biblioteca — e faziam qualquer assistente de IA escrever código incompatível — foram atualizadas.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────── VOCÊ ─────────── -->
+  <section>
+    <p class="eyebrow">Parte 2 de 4</p>
+    <h2>O que você precisa fazer</h2>
+    <p class="lead">São duas coisas, e nenhuma leva mais que alguns minutos.</p>
+
+    <div class="todo">
+      <h3>1. Apontar o ambiente local para o banco de desenvolvimento</h3>
+      <p>
+        Seu <code>.env.local</code> ainda aponta para <strong>produção</strong>. Enquanto
+        estiver assim, testar localmente mexe nos dados reais. Copie as quatro
+        linhas de <code>.env.dev.example</code> e <strong>reinicie o servidor</strong> — parte
+        das configurações é lida só na inicialização, e trocar sem reiniciar
+        deixa o servidor num banco e o navegador em outro, o que parece
+        funcionar e não está.
+      </p>
+      <pre>FIRESTORE_DATABASE_ID=liquid-dataviz-dev
+NEXT_PUBLIC_FIRESTORE_DATABASE_ID=liquid-dataviz-dev
+DATAVIZ_DATABASE_ID=liquid-dataviz-dev
+NEXT_PUBLIC_DATAVIZ_DATABASE_ID=liquid-dataviz-dev</pre>
+    </div>
+
+    <div class="todo">
+      <h3>2. Apagar os backups quando estiver seguro</h3>
+      <p>
+        Há cerca de 2,3 MB em <code>docs/backups/</code> com dado pessoal real —
+        usuários, conversas do chat. Foram feitos antes das remoções e já
+        cumpriram o papel. Estão fora do controle de versão, mas continuam no
+        seu disco sem prazo para sair. Se a limpeza está estável, o certo é
+        apagá-los.
+      </p>
+    </div>
+  </section>
+
+  <!-- ─────────── SOBROU ─────────── -->
+  <section>
+    <p class="eyebrow">Parte 3 de 4</p>
+    <h2>O que sobrou, e por quê</h2>
+    <p class="lead">
+      Nada aqui está travando o produto. Separei pelo motivo de continuar aberto,
+      que é o que decide se vale mexer agora.
+    </p>
+
+    <div class="item you">
+      <h3><span class="code">Decidido</span> Coisas que você escolheu deixar como estão</h3>
+      <p>
+        <strong>Admin por domínio de e-mail:</strong> quem tem e-mail da casa vê tudo de todos
+        os clientes. <strong>Sem medição de custo da IA:</strong> só aparece na fatura.
+        <strong>Sem aprovação em PRs:</strong> exigiria uma segunda pessoa.
+        <strong>BigQuery intocado:</strong> confirmei que os datasets de clientes antigos
+        continuam recebendo escrita de outro sistema — não são restos.
+      </p>
+      <p class="why"><b>Por que continua aberto:</b> porque essa foi a decisão, não porque ficou para trás.</p>
+    </div>
+
+    <div class="item you">
+      <h3><span class="code">Sua decisão</span> Duas permissões mortas continuam gravadas em produção</h3>
+      <p>
+        Os dois grupos de acesso ainda listam as três telas que saíram. A
+        concessão não abre nada — a página não existe mais e responde 404 — e a
+        tela de grupos já esconde caminho fora do catálogo. Limpei em
+        desenvolvimento; produção esperei você.
+      </p>
+      <p class="why"><b>Por que não fiz sozinho:</b> é escrita em produção sem urgência nenhuma. O comando está pronto e testado em modo simulação; é só dizer.</p>
+    </div>
+
+    <div class="item later">
+      <h3><span class="code">Anterior</span> Três incômodos que já existiam antes desta revisão</h3>
+      <p>
+        Dez erros de tipagem em três arquivos <em>de teste</em> (não afetam o produto),
+        68 avisos de estilo de código, e uma instabilidade: rodar todos os testes
+        de uma vez, com a máquina ocupada, faz alguns falharem por esgotamento de
+        tempo. Rodados isolados, passam sempre.
+      </p>
+      <p class="why"><b>Por que incomoda:</b> a instabilidade obriga uma segunda rodada para distinguir problema real de ruído — precisei fazer isso três vezes nesta sessão.</p>
+    </div>
+
+    <div class="item later">
+      <h3><span class="code">L4–L9</span> Seis regras de engenharia identificadas e não escritas</h3>
+      <p>
+        Cobrem configuração da IA, memória e dados pessoais, scripts de carga,
+        SQL gerado por IA, avaliação de qualidade e visualização de dados. As
+        três mais importantes já foram escritas.
+      </p>
+      <p class="why"><b>A que eu subiria de prioridade:</b> a de dados pessoais — as coleções guardam informação de devedores sem prazo de retenção escrito.</p>
+    </div>
+  </section>
+
+  <!-- ─────────── LEGENDA ─────────── -->
+  <section>
+    <p class="eyebrow">Parte 4 de 4</p>
+    <h2>O que significam os códigos</h2>
+    <p class="lead">
+      <code>R1</code>, <code>R12</code>, <code>L4</code> são os identificadores do relatório
+      técnico. Ficam aqui para você ir de uma página à outra.
+    </p>
+    <div class="scroll">
+      <table class="tabela">
+        <thead><tr><th>Código</th><th>Assunto</th><th>Situação</th></tr></thead>
+        <tbody>
+          <tr><td>R1 · R2</td><td>Teto de gasto nas consultas ao banco de dados</td><td>Resolvido</td></tr>
+          <tr><td>R3</td><td>Administrador por domínio de e-mail</td><td>Mantido por decisão sua</td></tr>
+          <tr><td>R4</td><td>Limite de uso nas operações caras</td><td>Resolvido</td></tr>
+          <tr><td>R5</td><td>Indicador fora da lista perdia checagem de página</td><td>Resolvido</td></tr>
+          <tr><td>R6</td><td>Medição de custo e lentidão da IA</td><td>Adiado por decisão sua (MVP)</td></tr>
+          <tr><td>R7</td><td>Citação de fonte prometida e não verificada</td><td>Resolvido</td></tr>
+          <tr><td>R8</td><td>Painéis operáveis por teclado</td><td>Resolvido</td></tr>
+          <tr><td>R9</td><td>Detalhe técnico do erro exibido ao usuário</td><td>Resolvido</td></tr>
+          <tr><td>R10</td><td>Tema claro e escuro inconsistentes</td><td>Resolvido</td></tr>
+          <tr><td>R11</td><td>PDF exportado acessível indefinidamente</td><td>Resolvido</td></tr>
+          <tr><td>R12</td><td>Validação no que define permissão</td><td>Resolvido</td></tr>
+          <tr><td>R13</td><td>Oito cópias do verificador de acesso</td><td>Resolvido</td></tr>
+          <tr><td>R14</td><td>Recriar o ambiente do zero</td><td>Resolvido (inclusive o 1º usuário)</td></tr>
+          <tr><td>R15</td><td>Testes que acessavam a rede</td><td>Resolvido</td></tr>
+          <tr><td>R16</td><td>Saber qual versão está no ar</td><td>Resolvido (falta marcar versões em git)</td></tr>
+          <tr><td>R17</td><td>Aprovação humana em propostas de mudança</td><td>Não se aplica a time de uma pessoa</td></tr>
+          <tr><td>R18</td><td>Cabeçalhos de segurança</td><td>Resolvido (os 5)</td></tr>
+          <tr><td>R19</td><td>Registro de autoria nos dados</td><td>Resolvido</td></tr>
+          <tr><td>R20</td><td>Comparação de mercado com um cliente só</td><td>Resolvido</td></tr>
+          <tr><td>L1–L3</td><td>Regras de separação entre clientes, camada semântica e custo</td><td>Escritas</td></tr>
+          <tr><td>L4–L9</td><td>Outras seis regras de engenharia</td><td>Identificadas, não escritas</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <footer>
+    <p>
+      Detalhe técnico de cada item, com arquivo e linha, em
+      <code>docs/reviews/2026-08-04-revisao-modulos-e-aderencia-a-convencoes.md</code>.
+      Nada aqui foi arredondado: onde um item ficou pela metade, está dito qual
+      metade.
+    </p>
+  </footer>
+
+</div>

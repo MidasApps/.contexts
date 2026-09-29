@@ -3,7 +3,7 @@ title: Regras de Segurança
 type: rules
 scope: engineering
 status: active
-last_updated: 2026-05-20
+last_updated: 2026-09-28
 related:
   - "@.contexts/engineering/rules/development.md"
 ---
@@ -64,13 +64,13 @@ Regras imperativas e enforce sobre segurança de código. Cobrem secrets, autent
 - **Sempre** force HTTPS em produção. Redirect 301 de HTTP para HTTPS na borda.
 - **Sempre** defina `Strict-Transport-Security: max-age=63072000; includeSubDomains; preload` em respostas server-rendered.
 - **Sempre** defina `X-Content-Type-Options: nosniff` e `Referrer-Policy: strict-origin-when-cross-origin` por padrão.
-- **Sempre** configure Content Security Policy em `next.config.ts` ou middleware. `unsafe-inline` e `unsafe-eval` só com nonce e justificativa registrada.
+- **Sempre** configure Content Security Policy em `next.config.ts` (headers estáticos) ou em `proxy.ts` (CSP com nonce por request, Next.js 16). `unsafe-inline` e `unsafe-eval` só com nonce e justificativa registrada.
 - **Nunca** habilite CORS com `Access-Control-Allow-Origin: *` em rotas autenticadas. Liste origens explicitamente.
 - **Nunca** ecoe `Origin` do request direto no `Access-Control-Allow-Origin` sem allowlist.
 
 ## 7. CSRF e same-site
 
-- **Sempre** use Server Actions do Next 15 ou route handlers com verificação de origem para mutações. Server Actions já vêm com proteção CSRF embutida — não desabilite.
+- **Sempre** use Server Actions do Next 16 ou route handlers com verificação de origem para mutações. Server Actions já vêm com proteção CSRF embutida — não desabilite.
 - **Nunca** aceite mutações via `GET`. `GET` é idempotente e safe por contrato.
 - **Sempre** valide o header `Origin` (ou `Referer` como fallback) em endpoints que aceitam credenciais via cookie.
 

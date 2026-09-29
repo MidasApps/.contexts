@@ -1,4 +1,12 @@
-﻿# Regras de Internacionalização
+---
+title: Regras de Internacionalização
+type: rules
+status: active
+scope: engineering
+last_updated: 2026-09-28
+---
+
+# Regras de Internacionalização
 
 Regras imperativas para internacionalização (i18n) e localização (l10n) de aplicações. Governam strings user-facing, formatação locale-aware, direção de leitura, negociação de idioma e conteúdo gerado por LLM. Aplicam-se a todo código que produz output visível ao usuário final em web, e-mail, SMS, push ou voz.
 

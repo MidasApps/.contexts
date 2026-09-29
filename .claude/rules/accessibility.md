@@ -1,5 +1,5 @@
 ---
-paths: ["**/*.tsx","**/*.jsx","app/**/*"]
+paths: ["**/*.tsx","**/*.jsx"]
 ---
 # Accessibility — ativa em UI
 
@@ -11,7 +11,7 @@ UI atende WCAG 2.2 AA: HTML semântico, navegação por teclado, contraste, foco
 - Contraste mínimo 4.5:1 texto normal, 3:1 large text e UI components (WCAG 2.2 AA).
 - Imagens informativas têm `alt`; decorativas têm `alt=""`. SVG semântico com `<title>`.
 - Forms: `<label for>` ou `aria-label`. Erro associado via `aria-describedby` + `aria-invalid`.
-- Componentes complexos (combobox, dialog, tabs) seguem ARIA Authoring Practices (ou usam Radix/headless-ui).
+- Componentes complexos (combobox, dialog, tabs) seguem ARIA Authoring Practices (ou usam os primitives Radix via shadcn em `@/shared/ui`).
 - Movimento e animação respeitam `prefers-reduced-motion`.
 - `lang` no `<html>`. Texto em outra língua tem `lang` no elemento.
 - Não usar cor como única indicação (erro vermelho + ícone + texto).
@@ -36,7 +36,7 @@ UI atende WCAG 2.2 AA: HTML semântico, navegação por teclado, contraste, foco
   type="button"
   aria-label="Close dialog"
   onClick={onClose}
-  className="focus-visible:ring-2 focus-visible:ring-blue-500"
+  className="focus-visible:ring-2 focus-visible:ring-ring" // token do tema, não cor inventada
 >
   <XIcon aria-hidden="true" />
 </button>

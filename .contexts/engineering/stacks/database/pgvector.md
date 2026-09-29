@@ -1,7 +1,9 @@
 ---
 title: pgvector
-version: 0.8.x
-last_updated: 2026-07-13
+type: stacks
+category: database
+version: 0.8.6
+last_updated: 2026-09-28
 status: current
 upstream: https://github.com/pgvector/pgvector
 ---
@@ -14,8 +16,8 @@ Este documento cobre **a extensão como tecnologia** (versão, tipos, operadores
 
 ## Versão fixada
 
-- **0.8.x** (baseline; **0.8.5**+ em jul/2026). Requer Postgres compatível — no projeto, **Postgres 18** (`@stacks/database/postgres`).
-- `0.7` introduziu: `halfvec` (float16), `sparsevec`, binary quantization sobre `bit`, operator classes, HNSW paralelo, operador `<+>` (L1).
+- **0.8.6** (2026-07-29). Requer Postgres compatível — no projeto, **Postgres 18.6** (`@stacks/database/postgres`). Imagem de referência: `pgvector/pgvector:0.8.6-pg18`.
+- `0.6` introduziu build paralelo de índice HNSW. `0.7` introduziu: `halfvec` (float16), `sparsevec`, binary quantization sobre `bit`, indexação HNSW para distância L1 (operador `<+>`).
 - `0.8` adiciona iterative index scans (filtered ANN melhor), suporte formal a Postgres 18, e melhorias de memória em IVFFlat.
 - Providers expõem versões específicas — fixar via variável do provider (Neon, Supabase, Cloud SQL, RDS, Crunchy, Aiven, Timescale) e validar com `SELECT extversion FROM pg_extension WHERE extname = 'vector';`.
 
@@ -138,11 +140,10 @@ Referencie `@stacks/ai/vercel-ai-sdk` para geração.
 |---|---|---|---|
 | OpenAI | `text-embedding-3-small` | 1536 | Padrão custo/qualidade. |
 | OpenAI | `text-embedding-3-large` | 3072 (truncável via `dimensions`) | Suporta Matryoshka — truncar para 512/1024/1536 mantém boa qualidade. |
-| Gemini | `text-embedding-004` | 768 | Estável, barato. |
-| Gemini | `gemini-embedding-001` | até 3072 | Configurável. |
+| Gemini | `gemini-embedding-001` | 3072 (default; `outputDimensionality` de 128 a 3072, recomendados 768/1536/3072) | `text-embedding-004` saiu da Gemini API. Abaixo de 3072, normalizar manualmente (ai.google.dev/gemini-api/docs/embeddings). |
 | Cohere / Voyage / Jina | — | varia | Alternativas; Voyage forte em retrieval especializado. |
 
-- **Normalizar** vetores quando usar inner product. Cosine ignora magnitude. Alguns providers já normalizam (OpenAI sim, Gemini sim por default).
+- **Normalizar** vetores quando usar inner product. Cosine ignora magnitude. Alguns providers já normalizam (OpenAI sim; `gemini-embedding-001` só em 3072 dims, truncado exige normalização manual).
 - **Quantization no app**: Matryoshka (truncar dims), depois cast para `halfvec` ou `bit` para storage.
 - **Versionar provider + modelo + dimensão** em coluna de metadado — misturar embedding spaces é silently wrong.
 
@@ -152,18 +153,30 @@ Referencie `@stacks/language/typescript@7` e `@stacks/database/postgres`.
 
 **Drizzle** (pgvector adapter):
 ```ts
-import { pgTable, vector } from 'drizzle-orm/pg-core';
+import { sql } from 'drizzle-orm';
+import { integer, pgSchema, text, timestamp, unique, uuid, vector } from 'drizzle-orm/pg-core';
 
-export const chunks = pgTable('chunks', {
-  id: uuid().primaryKey(),
-  embedding: vector('embedding', { dimensions: 1536 }),
-});
+// schema `ai`, tabela versionada `chunks_v1` (@contracts/pgvector §3; demais colunas lá)
+export const ai = pgSchema('ai');
+
+export const chunksV1 = ai.table('chunks_v1', {
+  id: uuid('id').primaryKey().default(sql`uuidv7()`), // uuidv7() nativo do Postgres 18
+  documentId: uuid('document_id').notNull(), // FK ai.documents(id) ON DELETE CASCADE
+  tenantId: uuid('tenant_id').notNull(),
+  chunkIndex: integer('chunk_index').notNull(),
+  text: text('text').notNull(),
+  embedding: vector('embedding', { dimensions: 1536 }).notNull(),
+  embeddingModel: text('embedding_model').notNull(),
+  embeddingVersion: text('embedding_version').notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+}, (t) => [unique().on(t.documentId, t.chunkIndex)]);
 ```
 
 **Postgres.js**:
 ```ts
 const v = [0.1, 0.2, /* ... */];
-await sql`INSERT INTO chunks (embedding) VALUES (${JSON.stringify(v)}::vector)`;
+// demais colunas NOT NULL de ai.chunks_v1 omitidas por brevidade
+await sql`INSERT INTO ai.chunks_v1 (embedding) VALUES (${JSON.stringify(v)}::vector)`;
 ```
 
 **Prisma**: usar `previewFeatures = ["postgresqlExtensions"]` + extension `vector`. Tipo no client é `Unsupported`; queries vetoriais via `$queryRaw`.

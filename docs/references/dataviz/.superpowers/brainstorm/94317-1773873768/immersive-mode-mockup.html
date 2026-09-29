@@ -1,0 +1,281 @@
+<h2>Modo Imersivo — Layout da Experiencia</h2>
+<p class="subtitle">Como a tela principal do modo de analise conversacional deve ser organizada</p>
+
+<div class="cards">
+  <!-- Option A: Chat-centric -->
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding: 16px; background: #0a0a0f;">
+      <!-- Mockup A: Chat centered, blocks inline -->
+      <div style="border: 1px solid #2a2a3a; border-radius: 12px; overflow: hidden; height: 360px; display: flex; flex-direction: column; background: #0d0d14;">
+        <!-- Header with filters -->
+        <div style="padding: 10px 16px; border-bottom: 1px solid #1a1a2a; display: flex; align-items: center; gap: 8px; background: #0a0a12;">
+          <div style="color: #a78bfa; font-size: 12px; font-weight: 600;">LIQUID</div>
+          <div style="flex:1"></div>
+          <div style="background: #1a1a2e; padding: 4px 10px; border-radius: 6px; font-size: 10px; color: #888;">Jan 2025 — Mar 2025</div>
+          <div style="background: #1a1a2e; padding: 4px 10px; border-radius: 6px; font-size: 10px; color: #888;">Projeto: Todos</div>
+          <div style="width: 24px; height: 24px; border-radius: 50%; background: #1a1a2e;"></div>
+        </div>
+
+        <!-- Chat area centered -->
+        <div style="flex: 1; overflow: hidden; display: flex; flex-direction: column; align-items: center; padding: 12px 0;">
+          <div style="width: 680px; max-width: 100%; padding: 0 16px;">
+            <!-- AI message -->
+            <div style="margin-bottom: 10px;">
+              <div style="font-size: 9px; color: #666; margin-bottom: 4px;">Liquid AI</div>
+              <div style="background: #12121e; border: 1px solid #1f1f30; border-radius: 10px; padding: 10px; font-size: 10px; color: #ccc; line-height: 1.5;">
+                Analisei sua carteira para risco de repasse. Aqui esta a visao geral:
+              </div>
+            </div>
+
+            <!-- Block 1: KPIs -->
+            <div style="margin-bottom: 10px;">
+              <div style="font-size: 11px; color: #e2e2e8; font-weight: 600; margin-bottom: 2px;">Visao Geral da Carteira</div>
+              <div style="font-size: 9px; color: #777; margin-bottom: 6px;">Principais indicadores de saude da carteira</div>
+              <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px;">
+                <div style="background: #12121e; border: 1px solid #1f1f30; border-radius: 8px; padding: 8px;">
+                  <div style="font-size: 8px; color: #888;">Saldo Total</div>
+                  <div style="font-size: 14px; color: #e2e2e8; font-weight: 700;">R$ 1.2B</div>
+                  <div style="font-size: 8px; color: #4ade80;">+2.3%</div>
+                </div>
+                <div style="background: #12121e; border: 1px solid #1f1f30; border-radius: 8px; padding: 8px;">
+                  <div style="font-size: 8px; color: #888;">Contratos</div>
+                  <div style="font-size: 14px; color: #e2e2e8; font-weight: 700;">12.4K</div>
+                  <div style="font-size: 8px; color: #4ade80;">+1.1%</div>
+                </div>
+                <div style="background: #12121e; border: 1px solid #1f1f30; border-radius: 8px; padding: 8px;">
+                  <div style="font-size: 8px; color: #888;">Inadimplencia</div>
+                  <div style="font-size: 14px; color: #e2e2e8; font-weight: 700;">3.2%</div>
+                  <div style="font-size: 8px; color: #f87171;">+0.4%</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Block 2: Chart placeholder -->
+            <div style="margin-bottom: 10px;">
+              <div style="font-size: 11px; color: #e2e2e8; font-weight: 600; margin-bottom: 2px;">Elegibilidade para Repasse</div>
+              <div style="font-size: 9px; color: #777; margin-bottom: 6px;">Distribuicao por status de elegibilidade</div>
+              <div style="background: #12121e; border: 1px solid #1f1f30; border-radius: 8px; padding: 12px; height: 60px; display: flex; align-items: flex-end; gap: 4px;">
+                <div style="width: 14%; height: 80%; background: linear-gradient(to top, #7c3aed, #a78bfa); border-radius: 3px;"></div>
+                <div style="width: 14%; height: 55%; background: linear-gradient(to top, #7c3aed, #a78bfa); border-radius: 3px;"></div>
+                <div style="width: 14%; height: 90%; background: linear-gradient(to top, #7c3aed, #a78bfa); border-radius: 3px;"></div>
+                <div style="width: 14%; height: 40%; background: linear-gradient(to top, #7c3aed, #a78bfa); border-radius: 3px;"></div>
+                <div style="width: 14%; height: 70%; background: linear-gradient(to top, #7c3aed, #a78bfa); border-radius: 3px;"></div>
+                <div style="width: 14%; height: 30%; background: linear-gradient(to top, #f87171, #fca5a5); border-radius: 3px;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Input area -->
+        <div style="padding: 10px 16px; border-top: 1px solid #1a1a2a; display: flex; justify-content: center;">
+          <div style="width: 680px; max-width: 100%; display: flex; gap: 8px; align-items: center;">
+            <div style="flex:1; background: #12121e; border: 1px solid #1f1f30; border-radius: 8px; padding: 8px 12px; font-size: 10px; color: #555;">Continue perguntando sobre sua carteira...</div>
+            <div style="width: 28px; height: 28px; border-radius: 8px; background: #7c3aed; display: flex; align-items: center; justify-content: center; font-size: 12px; color: white;">&#x2191;</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A — Chat Centralizado</h3>
+      <p>Blocos renderizados inline na conversa, max-width ~700px centralizado. Scroll vertical continuo. Estilo ChatGPT canvas.</p>
+    </div>
+  </div>
+
+  <!-- Option B: Full-width blocks -->
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding: 16px; background: #0a0a0f;">
+      <!-- Mockup B: Full width blocks with side chat -->
+      <div style="border: 1px solid #2a2a3a; border-radius: 12px; overflow: hidden; height: 360px; display: flex; flex-direction: column; background: #0d0d14;">
+        <!-- Header -->
+        <div style="padding: 10px 16px; border-bottom: 1px solid #1a1a2a; display: flex; align-items: center; gap: 8px; background: #0a0a12;">
+          <div style="color: #a78bfa; font-size: 12px; font-weight: 600;">LIQUID</div>
+          <div style="flex:1"></div>
+          <div style="background: #1a1a2e; padding: 4px 10px; border-radius: 6px; font-size: 10px; color: #888;">Jan 2025 — Mar 2025</div>
+          <div style="background: #1a1a2e; padding: 4px 10px; border-radius: 6px; font-size: 10px; color: #888;">Todos</div>
+          <div style="width: 24px; height: 24px; border-radius: 50%; background: #1a1a2e;"></div>
+        </div>
+
+        <div style="flex: 1; display: flex; overflow: hidden;">
+          <!-- Main content: full-width blocks -->
+          <div style="flex: 1; padding: 12px; overflow: hidden;">
+            <!-- Block title -->
+            <div style="margin-bottom: 8px;">
+              <div style="font-size: 12px; color: #e2e2e8; font-weight: 700;">Visao Geral da Carteira</div>
+              <div style="font-size: 9px; color: #777;">Principais indicadores</div>
+            </div>
+
+            <!-- KPIs full width -->
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 10px;">
+              <div style="background: #12121e; border: 1px solid #1f1f30; border-radius: 8px; padding: 8px;">
+                <div style="font-size: 7px; color: #888;">Saldo Total</div>
+                <div style="font-size: 13px; color: #e2e2e8; font-weight: 700;">R$ 1.2B</div>
+                <div style="font-size: 7px; color: #4ade80;">+2.3%</div>
+              </div>
+              <div style="background: #12121e; border: 1px solid #1f1f30; border-radius: 8px; padding: 8px;">
+                <div style="font-size: 7px; color: #888;">Contratos</div>
+                <div style="font-size: 13px; color: #e2e2e8; font-weight: 700;">12.4K</div>
+                <div style="font-size: 7px; color: #4ade80;">+1.1%</div>
+              </div>
+              <div style="background: #12121e; border: 1px solid #1f1f30; border-radius: 8px; padding: 8px;">
+                <div style="font-size: 7px; color: #888;">Inadimplencia</div>
+                <div style="font-size: 13px; color: #e2e2e8; font-weight: 700;">3.2%</div>
+                <div style="font-size: 7px; color: #f87171;">+0.4%</div>
+              </div>
+              <div style="background: #12121e; border: 1px solid #1f1f30; border-radius: 8px; padding: 8px;">
+                <div style="font-size: 7px; color: #888;">% Elegivel</div>
+                <div style="font-size: 13px; color: #e2e2e8; font-weight: 700;">78.5%</div>
+                <div style="font-size: 7px; color: #4ade80;">+1.8%</div>
+              </div>
+            </div>
+
+            <!-- Charts side by side -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+              <div style="background: #12121e; border: 1px solid #1f1f30; border-radius: 8px; padding: 10px;">
+                <div style="font-size: 9px; color: #aaa; margin-bottom: 6px;">Distribuicao LTV</div>
+                <div style="height: 70px; display: flex; align-items: flex-end; gap: 3px;">
+                  <div style="width: 16%; height: 80%; background: linear-gradient(to top, #7c3aed, #a78bfa); border-radius: 2px;"></div>
+                  <div style="width: 16%; height: 55%; background: linear-gradient(to top, #7c3aed, #a78bfa); border-radius: 2px;"></div>
+                  <div style="width: 16%; height: 90%; background: linear-gradient(to top, #7c3aed, #a78bfa); border-radius: 2px;"></div>
+                  <div style="width: 16%; height: 40%; background: linear-gradient(to top, #7c3aed, #a78bfa); border-radius: 2px;"></div>
+                  <div style="width: 16%; height: 65%; background: linear-gradient(to top, #7c3aed, #a78bfa); border-radius: 2px;"></div>
+                </div>
+              </div>
+              <div style="background: #12121e; border: 1px solid #1f1f30; border-radius: 8px; padding: 10px;">
+                <div style="font-size: 9px; color: #aaa; margin-bottom: 6px;">Elegibilidade</div>
+                <div style="height: 70px; display: flex; align-items: flex-end; gap: 3px;">
+                  <div style="width: 16%; height: 70%; background: linear-gradient(to top, #4ade80, #86efac); border-radius: 2px;"></div>
+                  <div style="width: 16%; height: 85%; background: linear-gradient(to top, #4ade80, #86efac); border-radius: 2px;"></div>
+                  <div style="width: 16%; height: 45%; background: linear-gradient(to top, #f87171, #fca5a5); border-radius: 2px;"></div>
+                  <div style="width: 16%; height: 60%; background: linear-gradient(to top, #4ade80, #86efac); border-radius: 2px;"></div>
+                  <div style="width: 16%; height: 30%; background: linear-gradient(to top, #f87171, #fca5a5); border-radius: 2px;"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Side chat panel -->
+          <div style="width: 220px; border-left: 1px solid #1a1a2a; display: flex; flex-direction: column; background: #0a0a10;">
+            <div style="padding: 8px 10px; border-bottom: 1px solid #1a1a2a;">
+              <div style="font-size: 10px; color: #a78bfa; font-weight: 600;">Conversa</div>
+            </div>
+            <div style="flex:1; padding: 8px; overflow: hidden;">
+              <div style="font-size: 8px; color: #666; margin-bottom: 3px;">Liquid AI</div>
+              <div style="background: #12121e; border-radius: 6px; padding: 6px; font-size: 8px; color: #aaa; line-height: 1.4; margin-bottom: 8px;">
+                Analisei sua carteira. A esquerda voce encontra os indicadores principais.
+              </div>
+              <div style="font-size: 8px; color: #666; margin-bottom: 3px;">Voce</div>
+              <div style="background: #1a1a2e; border-radius: 6px; padding: 6px; font-size: 8px; color: #ccc; line-height: 1.4;">
+                Detalhe a inadimplencia por faixa de atraso
+              </div>
+            </div>
+            <div style="padding: 8px; border-top: 1px solid #1a1a2a;">
+              <div style="background: #12121e; border: 1px solid #1f1f30; border-radius: 6px; padding: 6px 8px; font-size: 8px; color: #555;">Pergunte algo...</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B — Dashboard Gerado + Chat Lateral</h3>
+      <p>Blocos ocupam toda a largura como um dashboard real. Chat fica num painel lateral direito. Mais espaco para dados, separacao clara.</p>
+    </div>
+  </div>
+
+  <!-- Option C: Hybrid -->
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding: 16px; background: #0a0a0f;">
+      <!-- Mockup C: Wide centered with inline text -->
+      <div style="border: 1px solid #2a2a3a; border-radius: 12px; overflow: hidden; height: 360px; display: flex; flex-direction: column; background: #0d0d14;">
+        <!-- Header -->
+        <div style="padding: 10px 16px; border-bottom: 1px solid #1a1a2a; display: flex; align-items: center; gap: 8px; background: #0a0a12;">
+          <div style="color: #a78bfa; font-size: 12px; font-weight: 600;">LIQUID</div>
+          <div style="flex:1"></div>
+          <div style="background: #1a1a2e; padding: 4px 10px; border-radius: 6px; font-size: 10px; color: #888;">Jan 2025 — Mar 2025</div>
+          <div style="background: #1a1a2e; padding: 4px 10px; border-radius: 6px; font-size: 10px; color: #888;">Todos</div>
+          <div style="width: 24px; height: 24px; border-radius: 50%; background: #1a1a2e;"></div>
+        </div>
+
+        <!-- Content area: wide centered -->
+        <div style="flex: 1; overflow: hidden; display: flex; flex-direction: column; align-items: center; padding: 12px 0;">
+          <div style="width: 90%; max-width: 960px;">
+            <!-- AI text -->
+            <div style="margin-bottom: 8px; display: flex; gap: 8px; align-items: flex-start;">
+              <div style="width: 22px; height: 22px; border-radius: 50%; background: #7c3aed; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 10px; color: white;">&#x2728;</div>
+              <div style="font-size: 10px; color: #ccc; line-height: 1.5;">Analisei sua carteira para risco de repasse. Veja os principais indicadores:</div>
+            </div>
+
+            <!-- Block: wide KPIs -->
+            <div style="margin-bottom: 10px; margin-left: 30px;">
+              <div style="font-size: 11px; color: #e2e2e8; font-weight: 700; margin-bottom: 2px;">Visao Geral da Carteira</div>
+              <div style="font-size: 8px; color: #777; margin-bottom: 6px;">Principais indicadores de saude</div>
+              <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 8px;">
+                <div style="background: #12121e; border: 1px solid #1f1f30; border-radius: 8px; padding: 8px;">
+                  <div style="font-size: 7px; color: #888;">Saldo Total</div>
+                  <div style="font-size: 13px; color: #e2e2e8; font-weight: 700;">R$ 1.2B</div>
+                  <div style="font-size: 7px; color: #4ade80;">+2.3%</div>
+                </div>
+                <div style="background: #12121e; border: 1px solid #1f1f30; border-radius: 8px; padding: 8px;">
+                  <div style="font-size: 7px; color: #888;">Contratos</div>
+                  <div style="font-size: 13px; color: #e2e2e8; font-weight: 700;">12.4K</div>
+                  <div style="font-size: 7px; color: #4ade80;">+1.1%</div>
+                </div>
+                <div style="background: #12121e; border: 1px solid #1f1f30; border-radius: 8px; padding: 8px;">
+                  <div style="font-size: 7px; color: #888;">Inadimplencia</div>
+                  <div style="font-size: 13px; color: #e2e2e8; font-weight: 700;">3.2%</div>
+                  <div style="font-size: 7px; color: #f87171;">+0.4%</div>
+                </div>
+                <div style="background: #12121e; border: 1px solid #1f1f30; border-radius: 8px; padding: 8px;">
+                  <div style="font-size: 7px; color: #888;">% Elegivel</div>
+                  <div style="font-size: 13px; color: #e2e2e8; font-weight: 700;">78.5%</div>
+                  <div style="font-size: 7px; color: #4ade80;">+1.8%</div>
+                </div>
+              </div>
+
+              <!-- Charts wide -->
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 8px;">
+                <div style="background: #12121e; border: 1px solid #1f1f30; border-radius: 8px; padding: 10px;">
+                  <div style="font-size: 8px; color: #aaa; margin-bottom: 4px;">Distribuicao por LTV</div>
+                  <div style="height: 50px; display: flex; align-items: flex-end; gap: 3px;">
+                    <div style="width: 16%; height: 80%; background: linear-gradient(to top, #7c3aed, #a78bfa); border-radius: 2px;"></div>
+                    <div style="width: 16%; height: 55%; background: linear-gradient(to top, #7c3aed, #a78bfa); border-radius: 2px;"></div>
+                    <div style="width: 16%; height: 90%; background: linear-gradient(to top, #7c3aed, #a78bfa); border-radius: 2px;"></div>
+                    <div style="width: 16%; height: 40%; background: linear-gradient(to top, #7c3aed, #a78bfa); border-radius: 2px;"></div>
+                    <div style="width: 16%; height: 65%; background: linear-gradient(to top, #7c3aed, #a78bfa); border-radius: 2px;"></div>
+                  </div>
+                </div>
+                <div style="background: #12121e; border: 1px solid #1f1f30; border-radius: 8px; padding: 10px;">
+                  <div style="font-size: 8px; color: #aaa; margin-bottom: 4px;">Elegibilidade por Projeto</div>
+                  <div style="height: 50px; display: flex; align-items: flex-end; gap: 3px;">
+                    <div style="width: 16%; height: 70%; background: linear-gradient(to top, #4ade80, #86efac); border-radius: 2px;"></div>
+                    <div style="width: 16%; height: 85%; background: linear-gradient(to top, #4ade80, #86efac); border-radius: 2px;"></div>
+                    <div style="width: 16%; height: 45%; background: linear-gradient(to top, #f87171, #fca5a5); border-radius: 2px;"></div>
+                    <div style="width: 16%; height: 60%; background: linear-gradient(to top, #4ade80, #86efac); border-radius: 2px;"></div>
+                    <div style="width: 16%; height: 30%; background: linear-gradient(to top, #f87171, #fca5a5); border-radius: 2px;"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- AI insight text -->
+            <div style="display: flex; gap: 8px; align-items: flex-start; margin-left: 0;">
+              <div style="width: 22px; height: 22px; border-radius: 50%; background: #7c3aed; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 10px; color: white;">&#x2728;</div>
+              <div style="font-size: 9px; color: #aaa; line-height: 1.5;">A carteira apresenta <span style="color: #e2e2e8;">78.5% de elegibilidade</span> com tendencia positiva. O principal ponto de atencao e o aumento de <span style="color: #f87171;">0.4pp na inadimplencia</span>...</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Input -->
+        <div style="padding: 10px 16px; border-top: 1px solid #1a1a2a; display: flex; justify-content: center;">
+          <div style="width: 90%; max-width: 960px; display: flex; gap: 8px; align-items: center;">
+            <div style="flex:1; background: #12121e; border: 1px solid #1f1f30; border-radius: 8px; padding: 8px 12px; font-size: 10px; color: #555;">Continue perguntando sobre sua carteira...</div>
+            <div style="width: 28px; height: 28px; border-radius: 8px; background: #7c3aed; display: flex; align-items: center; justify-content: center; font-size: 12px; color: white;">&#x2191;</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C — Hibrido Largo (recomendado)</h3>
+      <p>Conversa e blocos intercalados, mas com largura ampla (~960px). Texto da IA e visualizacoes no mesmo fluxo. Aproveita espaco sem perder a sensacao de conversa.</p>
+    </div>
+  </div>
+</div>

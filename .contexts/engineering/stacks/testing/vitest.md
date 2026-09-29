@@ -1,7 +1,9 @@
 ---
 title: Vitest
-version: 4.x
-last_updated: 2026-07-13
+type: stacks
+category: testing
+version: 5.0.2
+last_updated: 2026-09-28
 status: current
 upstream: https://vitest.dev
 repo: https://github.com/vitest-dev/vitest
@@ -9,7 +11,7 @@ repo: https://github.com/vitest-dev/vitest
 
 # Vitest
 
-Test runner Vite-native com API compatível com Jest. Adotado como runner único do projeto para unit, integration e component tests. Browser tests E2E ficam com Playwright (`@stacks/testing/playwright`).
+Test runner Vite-native com API compatível com Jest. Adotado como runner único do projeto para unit, integration e component tests (inclusive componente em browser real, via browser mode; o component testing do Playwright não é adotado, E5 do ADR 0004). Fluxos E2E ficam com Playwright (`@stacks/testing/playwright`).
 
 Regras agnósticas de teste vivem em `@rules/testing`. Disciplinas de processo vivem em `@practices/tdd` e `@practices/bdd`. Este documento cobre apenas o manual operacional da ferramenta.
 
@@ -28,14 +30,24 @@ Pin via `package.json` com versão exata ou caret restrito:
 ```json
 {
   "devDependencies": {
-    "vitest": "4.1.10",
-    "@vitest/coverage-v8": "4.1.10",
-    "@vitest/ui": "4.1.10"
+    "vitest": "5.0.2",
+    "@vitest/coverage-v8": "5.0.2",
+    "@vitest/ui": "5.0.2",
+    "@vitest/browser-playwright": "5.0.2",
+    "vite": "8.3.1"
   }
 }
 ```
 
-Manter `vitest`, `@vitest/coverage-v8`, `@vitest/ui` e provider de browser (`@vitest/browser-playwright`) sempre na mesma linha major. Vitest **4.x** é o baseline (Vite >= 6, Node >= 20; projeto usa Node 24). Coverage V8 usa remapeamento AST (mais preciso que v3). `workspace` foi renomeado para `projects`.
+Manter `vitest`, `@vitest/coverage-v8`, `@vitest/ui` e `@vitest/browser-playwright` na **mesma versão**. Vitest 5.0.2 exige Node `^22.12 || ^24 || >=26` (o projeto está no 26.10.0; o pacote de Functions testa em 24, E1) e Vite `^6.4 || ^7 || ^8` como peer — o `vite` medido é 8.3.1 e serve só ao runner, não ao build do Next. `workspace` já se chama `projects` desde a 3.2/4.
+
+Quebras que o código deste framework precisa respeitar (guia: https://vitest.dev/guide/migration):
+
+- `clearMocks` passa a ser `true`: o histórico do mock não vaza entre testes; a implementação permanece.
+- `vi.mock`, `vi.unmock` e `vi.hoisted` fora do topo do arquivo lançam erro.
+- `test.sequential`, `describe.sequential` e a opção `sequential` saíram. Para um teste ou suíte sair do modo concorrente, use `concurrent: false`.
+- Anexos vão para `.vitest/attachments/`.
+- `expect.poll` falha se a função não resolver no tempo.
 
 ## Setup
 
@@ -58,14 +70,14 @@ export default defineConfig({
   test: {
     environment: 'node',
     globals: false,
-    include: ['src/**/*.{test,spec}.ts'],
+    include: ['src/**/*.test.{ts,tsx}'],
     exclude: ['**/node_modules/**', '**/dist/**', '**/.next/**'],
-    setupFiles: ['./test/setup.ts'],
+    setupFiles: ['./vitest.setup.ts'],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'html', 'lcov'],
-      include: ['src/**/*.ts'],
-      exclude: ['src/**/*.{test,spec}.ts', 'src/**/types.ts'],
+      include: ['src/**/*.{ts,tsx}'],
+      exclude: ['src/**/*.test.{ts,tsx}', 'src/**/types.ts'],
       thresholds: {
         lines: 80,
         functions: 80,
@@ -90,7 +102,6 @@ Resolva paths via `vite-tsconfig-paths` lendo o `tsconfig.json` do pacote. Não 
 | `node` (default) | Lógica pura, server actions, route handlers, integration com DB/Firestore. | Mínimo. |
 | `happy-dom` | Component tests com React Testing Library. | Leve, ~2x mais rápido que jsdom na inicialização. |
 | `jsdom` | Quando algum lib exige APIs DOM que `happy-dom` ainda não implementa (ex: certos polyfills de `Range`). | Maior, mas mais completo. |
-| `edge-runtime` | Testar route handlers ou middleware que rodam em Next.js Edge runtime. | Médio. |
 
 Default do projeto: `node`. Sobrescreva por arquivo com pragma:
 
@@ -107,12 +118,12 @@ Suítes e casos:
 ```ts
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from 'vitest'
 
-describe('userService', () => {
+describe('getUser', () => {
   beforeEach(() => { /* reset state */ })
 
   it('returns the user when id exists', async () => {
-    const user = await getUser('u_1')
-    expect(user).toMatchObject({ id: 'u_1' })
+    const user = await getUser(userId)
+    expect(user).toMatchObject({ id: userId })
   })
 })
 ```
@@ -124,7 +135,7 @@ Modificadores:
 - `it.todo('descreve o teste futuro')` — placeholder reportado no output.
 - `it.each([...])` — table-driven tests. Preferir sobre loops manuais.
 - `it.concurrent` — paralelizar dentro de um `describe`. Cuidado com estado compartilhado.
-- `it.sequential` — forçar ordem dentro de um `describe.concurrent`.
+- `it('...', { concurrent: false }, fn)` — tirar um teste de um `describe.concurrent` (`it.sequential` foi removido no Vitest 5).
 
 ## Matchers
 
@@ -136,15 +147,19 @@ Built-in cobre a maioria dos casos. Atalhos mais usados:
 - `toBeCloseTo` para floats — nunca `toBe` em float.
 - `toMatchInlineSnapshot` para snapshots curtos. Use `toMatchFileSnapshot` quando o output for grande e estável.
 
-Extensões via `expect.extend` ficam em `test/setup.ts`. `@testing-library/jest-dom/vitest` já registra matchers como `toBeInTheDocument` quando importado no setup.
+Extensões via `expect.extend` ficam em `vitest.setup.ts` (raiz do pacote). `@testing-library/jest-dom/vitest` já registra matchers como `toBeInTheDocument` quando importado no setup.
 
 ## Mocks
 
 ```ts
 import { vi } from 'vitest'
 
-// Spy em método existente
-const spy = vi.spyOn(repo, 'findById').mockResolvedValue({ id: 'u_1' })
+// Ports driven: fake em memória, não spy. Assert no resultado, não em chamadas.
+const repo = makeInMemoryUserRepository([{ id: userId, name: 'Ada' }])
+await expect(getUser({ repo, id: userId })).resolves.toMatchObject({ name: 'Ada' })
+
+// vi.fn() só para boundary externa sem resultado observável (ex.: publisher de fila)
+const publish = vi.fn().mockResolvedValue(undefined)
 
 // Mock de módulo (hoisted automaticamente para o topo do arquivo)
 vi.mock('./gateway', () => ({
@@ -167,7 +182,7 @@ Regras operacionais:
 - `vi.mock` é hoisted. Nunca coloque no meio do arquivo achando que executa naquela linha — sempre é movido para antes dos imports. Se precisar de referências externas no factory, use `vi.hoisted`.
 - `vi.importActual` quando precisa mockar apenas uma parte do módulo mantendo o resto real.
 - Sempre `vi.useRealTimers()` em `afterEach` quando usar fake timers. Timer leakage entre testes é um bug clássico.
-- Reset de mocks: defina `clearMocks: true` (ou `mockReset: true`) no `test` da config para limpar entre testes. Decida por pacote e mantenha consistente.
+- Reset de mocks: no Vitest 5 `clearMocks` já é `true` por padrão (histórico limpo antes de cada teste; a implementação fica). Ligue `mockReset: true` só se o pacote precisar zerar também as implementações, e mantenha a decisão consistente.
 
 Princípio: mock no limite do sistema (HTTP, FS, clock, IO externo), não no meio da lógica. Ver `@rules/testing`.
 
@@ -245,12 +260,14 @@ export default defineConfig({
 Use `testcontainers` para subir Postgres real (não mock). Ver `@stacks/database/postgres`.
 
 ```ts
-import { PostgreSqlContainer } from '@testcontainers/postgresql'
+import { PostgreSqlContainer, type StartedPostgreSqlContainer } from '@testcontainers/postgresql'
+import { afterAll, beforeAll } from 'vitest' // globals: false
 
 let container: StartedPostgreSqlContainer
 
 beforeAll(async () => {
-  container = await new PostgreSqlContainer('postgres:18').start()
+  // mesma imagem do compose local: as migrations criam `vector` (pgvector no mesmo cluster, MEMORY)
+  container = await new PostgreSqlContainer('pgvector/pgvector:0.8.6-pg18').start()
   process.env.DATABASE_URL = container.getConnectionUri()
   await runMigrations()
 }, 60_000)
@@ -269,7 +286,7 @@ Firestore e Functions são testados contra o Firebase Emulator Suite, nunca cont
 ## React Testing Library
 
 ```ts
-// test/setup.ts
+// vitest.setup.ts
 import '@testing-library/jest-dom/vitest'
 import { cleanup } from '@testing-library/react'
 import { afterEach } from 'vitest'
@@ -282,7 +299,7 @@ Config do pacote frontend:
 ```ts
 test: {
   environment: 'happy-dom',
-  setupFiles: ['./test/setup.ts'],
+  setupFiles: ['./vitest.setup.ts'],
 }
 ```
 
@@ -292,16 +309,31 @@ Ver `@stacks/frontend/react@19`. Princípio: testar o componente como o usuário
 
 Server Actions e Route Handlers são funções TS comuns — importe e teste diretamente. Não tente subir o servidor Next dentro do Vitest.
 
-```ts
-import { POST } from '@/app/api/users/route'
+O handler faz auth → validate → authorize → act: sem credencial a resposta é 401 antes de olhar o body. Para testar validação, autentique a request.
 
-it('returns 400 on invalid body', async () => {
-  const req = new Request('http://localhost/api/users', {
+```ts
+import { describe, expect, it } from 'vitest'
+import { POST } from '@/app/v1/orders/route' // re-export de services/orders/adapters/driving/place-order-route-handler
+
+// signInTestUser: helper do projeto que obtém um ID token no Auth Emulator (nome ilustrativo)
+const postOrder = (body: unknown, headers: Record<string, string> = {}) =>
+  POST(new Request('http://localhost/v1/orders', {
     method: 'POST',
-    body: JSON.stringify({}),
+    headers: { 'content-type': 'application/json', 'idempotency-key': '01J9Z3K8Q4W6X2Y7N5M1B0C3D4', ...headers },
+    body: JSON.stringify(body),
+  }))
+
+describe('POST /v1/orders', () => {
+  it('returns 401 without credentials', async () => {
+    const res = await postOrder({})
+    expect(res.status).toBe(401)
   })
-  const res = await POST(req)
-  expect(res.status).toBe(400)
+
+  it('returns 400 VALIDATION_FAILED on invalid body when authenticated', async () => {
+    const res = await postOrder({}, { authorization: `Bearer ${await signInTestUser()}` })
+    expect(res.status).toBe(400)
+    expect(await res.json()).toMatchObject({ error: { code: 'VALIDATION_FAILED' } })
+  })
 })
 ```
 
@@ -309,8 +341,8 @@ Mocks frequentes de Next:
 
 ```ts
 vi.mock('next/headers', () => ({
-  cookies: () => ({ get: vi.fn().mockReturnValue({ value: 'token' }) }),
-  headers: () => new Headers(),
+  cookies: async () => ({ get: vi.fn().mockReturnValue({ value: 'token' }) }), // Async Request APIs: Promise no Next 16
+  headers: async () => new Headers(),
 }))
 
 vi.mock('next/navigation', () => ({
@@ -326,7 +358,7 @@ Ver `@stacks/frontend/next@16`.
 Schemas são testados com `safeParse`, não `parse`. Asserções no `success: false` devem checar `error.issues[0].path` e `code`, não a mensagem (mensagens mudam entre versões do Zod).
 
 ```ts
-import { UserSchema } from './schemas'
+import { UserSchema } from './user.schema'
 
 it('rejects email vazio', () => {
   const r = UserSchema.safeParse({ email: '' })
@@ -353,16 +385,20 @@ Ver `@stacks/validation/zod@4`.
 
 ## Vercel AI SDK e agents
 
-Testes de agents nunca chamam o modelo real. Use o `MockLanguageModelV1` exposto pelo `ai/test`:
+Testes de agents nunca chamam o modelo real. Use o `MockLanguageModelV4` exposto pelo `ai/test` (AI SDK 7, spec `LanguageModelV4`; shape conforme ai-sdk.dev/docs/ai-sdk-core/testing):
 
 ```ts
-import { MockLanguageModelV1 } from 'ai/test'
+import { MockLanguageModelV4 } from 'ai/test'
 
-const model = new MockLanguageModelV1({
+const model = new MockLanguageModelV4({
   doGenerate: async () => ({
-    text: 'mocked',
-    finishReason: 'stop',
-    usage: { promptTokens: 1, completionTokens: 1 },
+    content: [{ type: 'text', text: 'mocked' }],
+    finishReason: { unified: 'stop', raw: undefined },
+    usage: {
+      inputTokens: { total: 1, noCache: 1, cacheRead: undefined, cacheWrite: undefined },
+      outputTokens: { total: 1, text: 1, reasoning: undefined },
+    },
+    warnings: [],
   }),
 })
 ```
@@ -403,15 +439,16 @@ Em CI sempre `--run`. Watch em CI trava o pipeline.
 
 ```ts
 test: {
-  pool: 'threads',          // default; bom para a maioria
-  poolOptions: {
-    threads: { singleThread: false, isolate: true },
-  },
+  pool: 'threads',   // opt-in; o default é 'forks'
+  maxWorkers: 4,     // substitui maxThreads/maxForks
+  isolate: true,     // top-level desde o Vitest 4 (poolOptions foi removido)
 }
 ```
 
-- `threads` — worker threads. Default. Mais rápido. Compatível com a maioria do código.
-- `forks` — child processes. Necessário quando código usa APIs incompatíveis com worker threads (alguns native modules).
+`poolOptions` foi removido no Vitest 4: as opções viraram top-level (`isolate`, `execArgv`, `maxWorkers`). O antigo `singleThread`/`singleFork` equivale a `maxWorkers: 1, isolate: false`.
+
+- `forks` — child processes. **Default** (vitest.dev/config/pool). Compatível com native modules e APIs incompatíveis com worker threads.
+- `threads` — worker threads. Opt-in; pode ser mais rápido, mas não é o default.
 - `vmThreads` — isolamento via VM. Mais lento, raramente necessário.
 
 `isolate: false` acelera bastante, mas só é seguro se nenhum teste polui estado global. Confirme antes de habilitar.
@@ -424,7 +461,7 @@ test: {
 - `jest.config.js` é descartado; o equivalente é `vitest.config.ts`.
 - Snapshots gerados pelo Jest geralmente são compatíveis, mas serializers customizados precisam ser portados.
 
-## Matchers e schemas (Vitest 4)
+## Matchers e schemas (Vitest 5)
 
 - `expect.schemaMatching(schema)` — asymmetric matcher para Standard Schema (Zod 4, Valibot, ArkType). Ideal com `toEqual`/`toMatchObject` em payloads validados por `@stacks/validation/zod@4`.
 - `expect.assert(cond)` — narrow de tipo no teste (Chai assert em `expect`).
@@ -446,13 +483,13 @@ test: {
 
 - `@rules/testing` — regras agnósticas de qualidade de teste.
 - `@practices/tdd`, `@practices/bdd` — disciplinas temporais.
-- `@stacks/language/typescript@7`, `@stacks/runtime/node@24`.
+- `@stacks/language/typescript@7`, `@stacks/runtime/node@26`.
 - `@stacks/frontend/react@19`, `@stacks/frontend/next@16`.
 - `@stacks/validation/zod@4`.
 - `@stacks/ai/vercel-ai-sdk`.
 - `@stacks/backend/firebase-functions`.
 - `@stacks/database/postgres`.
-- `@stacks/testing/playwright` — E2E e component-in-browser pesado.
+- `@stacks/testing/playwright` — E2E (component testing do Playwright não adotado, E5).
 
 ## Upstream
 

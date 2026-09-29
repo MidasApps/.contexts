@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * SessionStart + PreCompact bootstrap DDC (inspirado em obra/superpowers).
+ * SessionStart bootstrap DDC (matcher inclui `compact`: reinjeta após compactação) (inspirado em obra/superpowers).
  * Injeta o skill using-ddc completo + catálogo curto de rules/agents.
  *
  * Formato de saída: Claude Code prefere hookSpecificOutput.additionalContext;
@@ -25,7 +25,6 @@ const skillPath = path.join(
   projectDir,
   '.claude',
   'skills',
-  'processes',
   'using-ddc',
   'SKILL.md'
 );
@@ -90,9 +89,9 @@ let payload;
 if (useClaudeNested) {
   payload = {
     hookSpecificOutput: {
-      // Ecoa o evento real (SessionStart ou PreCompact) — hookEventName deve
-      // bater com o evento que disparou o hook.
-      hookEventName: input.hook_event_name || 'SessionStart',
+      // Só SessionStart aceita additionalContext aqui. PreCompact não injeta
+      // contexto (a reinjeção pós-compact vem do matcher `compact`).
+      hookEventName: 'SessionStart',
       additionalContext,
     },
   };

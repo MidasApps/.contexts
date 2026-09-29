@@ -1,0 +1,40 @@
+# Dependencies (installed during build)
+node_modules
+.pnpm-store/
+
+# Build output (rebuilt during build)
+.next/
+out/
+
+# Version control
+.git/
+.gitignore
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+
+# Environment (secrets from Secret Manager)
+.env
+.env.local
+.env*.local
+
+# Documentation (root-level only, not app/docs/)
+/docs/
+/adrs/
+/design-system/
+*.md
+
+# Claude Code
+.claude/
+
+# TypeScript build info
+*.tsbuildinfo
+
+# Tests
+__tests__/
+coverage/
+
+# Docker files (not needed for gcloud builds)
+.dockerignore

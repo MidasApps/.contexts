@@ -1,0 +1,13 @@
+{
+  "id": "backoffice-cartorario",
+  "name": "Backoffice Cartorário",
+  "layer": "operacional",
+  "language": "operacional",
+  "horizon": "curto",
+  "priorityKpis": ["registro_pendente", "prazo_medio_registro", "sla_cartorio"],
+  "preferredGranularity": "contrato",
+  "preferredVisuals": ["kpi", "table"],
+  "jargonAnchor": ["registro", "matrícula", "SLA cartório"],
+  "forbidden": [],
+  "_meta": { "refinedBySme": false, "sourceDoc": "docs/benchmarking/6.1" }
+}

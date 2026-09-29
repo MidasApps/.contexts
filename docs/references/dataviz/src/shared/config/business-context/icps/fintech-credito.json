@@ -1,0 +1,8 @@
+{
+  "id": "fintech-credito",
+  "segment": "Fintech de crédito imobiliário",
+  "examples": ["Creditas", "CashMe", "Pontte"],
+  "primaryKpis": ["pipeline", "conversao", "ltv", "ticket_medio"],
+  "decisionJourney": "sprints quinzenais + OKRs trimestrais",
+  "_meta": { "refinedBySme": false }
+}

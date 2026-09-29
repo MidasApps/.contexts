@@ -1,18 +1,18 @@
 ---
 title: Anthropic TypeScript SDK
 package: "@anthropic-ai/sdk"
-version: 0.30+ / 1.x
-last_updated: 2026-07-13
-status: stable
+version: 0.129.0
+last_updated: 2026-09-28
+status: current
 upstream: https://github.com/anthropics/anthropic-sdk-typescript
 runtime: node | edge (parcial)
-type: stack
+type: stacks
 category: ai
 ---
 
 # Anthropic TypeScript SDK (`@anthropic-ai/sdk`)
 
-SDK oficial TypeScript da Anthropic com cobertura completa da Messages API, Batches, Files, Token Counting e features beta (computer use, extended thinking avançado). Tipos first-class, helpers de streaming e retry automático com exponential backoff.
+SDK oficial TypeScript da Anthropic com cobertura completa da Messages API, Batches, Files, Token Counting, structured outputs e features beta (`client.beta.*`). Tipos first-class, helpers de streaming e retry automático com exponential backoff.
 
 > Este documento descreve o **client TypeScript**. Para capacidades da API em si (modelos, message format, parameters, content blocks, tool use protocol), consulte `@stacks/ai/anthropic`.
 
@@ -24,10 +24,10 @@ SDK oficial TypeScript da Anthropic com cobertura completa da Messages API, Batc
 |---|---|
 | Fluxo padrão de geração no produto (chat, tools, structured output) | `@stacks/ai/vercel-ai-sdk` |
 | Prompt caching com 4 breakpoints e controle granular | `@anthropic-ai/sdk` direto |
-| Computer use (beta) | `@anthropic-ai/sdk` direto |
+| Computer use (`computer_toolset_20260801`) | `@anthropic-ai/sdk` direto |
 | Batches API (50% desconto, latência relaxada) | `@anthropic-ai/sdk` direto |
 | Files API (upload de PDFs/imagens persistentes) | `@anthropic-ai/sdk` direto |
-| Extended thinking com `budget_tokens` customizado e `thinking` blocks | `@anthropic-ai/sdk` direto |
+| Extended thinking (`thinking` adaptativo, `effort`) e `thinking` blocks | `@anthropic-ai/sdk` direto |
 | Bedrock | `@anthropic-ai/bedrock-sdk` |
 | Vertex AI | `@anthropic-ai/vertex-sdk` |
 | Cross-provider (OpenAI + Anthropic + Gemini no mesmo código) | `@stacks/ai/vercel-ai-sdk` |
@@ -45,17 +45,17 @@ pnpm add @anthropic-ai/bedrock-sdk
 pnpm add @anthropic-ai/vertex-sdk
 ```
 
-Pinning recomendado no `package.json` (versões 0.x/1.x ainda podem ter breaking changes em minor):
+Pin exato. Em 2026-09-28 o latest é `0.129.0` e **não existe** linha 1.x no npm. Minor de 0.x ainda pode quebrar.
 
 ```json
 {
   "dependencies": {
-    "@anthropic-ai/sdk": "1.2.3"
+    "@anthropic-ai/sdk": "0.129.0"
   }
 }
 ```
 
-Não use `^` em produção até a linha estabilizar plenamente em 1.x. Prefira pin exato em `dependencies` (ver `@rules/development` e `@rules/security` para supply chain).
+Prefira pin exato em `dependencies` (ver `@rules/development` e `@rules/security` para supply chain).
 
 ---
 
@@ -76,22 +76,23 @@ const client = new Anthropic({
 ### Bedrock
 
 ```ts
-import AnthropicBedrock from "@anthropic-ai/bedrock-sdk";
+import { AnthropicBedrockMantle } from "@anthropic-ai/bedrock-sdk";
 
-const client = new AnthropicBedrock({
+const client = new AnthropicBedrockMantle({
   awsRegion: "us-east-1",
   // credenciais via AWS default chain (env, profile, role IRSA, etc.)
 });
+// `AnthropicBedrock` (sem Mantle) é o caminho legado InvokeModel; não use em código novo.
 ```
 
 ### Vertex AI
 
 ```ts
-import AnthropicVertex from "@anthropic-ai/vertex-sdk";
+import { AnthropicVertex } from "@anthropic-ai/vertex-sdk";
 
 const client = new AnthropicVertex({
   projectId: process.env.GCP_PROJECT_ID,
-  region: "us-east5",
+  region: "global", // recomendado; multi-região ("us"/"eu") ou região específica se houver residência
   // ADC via google-auth-library (env GOOGLE_APPLICATION_CREDENTIALS ou metadata server)
 });
 ```
@@ -106,13 +107,14 @@ const client = new AnthropicVertex({
 
 ```ts
 const message = await client.messages.create({
-  model: "claude-opus-4-7",
+  model: "claude-sonnet-5-5",
   max_tokens: 1024,                     // OBRIGATÓRIO; não há default
   system: "You are a helpful assistant",
   messages: [{ role: "user", content: "Hi" }],
   tools: [...],
-  tool_choice: { type: "auto" },
-  temperature: 1,
+  tool_choice: { type: "auto" },       // "any"/"tool" devolvem 400 nos modelos 5.x
+  thinking: { type: "adaptive" },
+  output_config: { effort: "medium" }, // declare sempre; no Opus 5.5 o default é "medium"
   stop_sequences: [],
   metadata: { user_id: "..." },
 });
@@ -125,7 +127,7 @@ Wrapper acima de SSE com event emitter + AsyncIterable. **Use sempre que houver 
 ```ts
 const stream = client.messages
   .stream({
-    model: "claude-opus-4-7",
+    model: "claude-sonnet-5-5",
     max_tokens: 4096,
     messages,
   })
@@ -157,7 +159,7 @@ Pré-validação de tamanho antes de pagar pela request:
 
 ```ts
 const { input_tokens } = await client.messages.countTokens({
-  model: "claude-opus-4-7",
+  model: "claude-sonnet-5-5",
   messages,
   system,
   tools,
@@ -174,7 +176,7 @@ const batch = await client.messages.batches.create({
   requests: items.map((it, i) => ({
     custom_id: `req-${i}`,
     params: {
-      model: "claude-opus-4-7",
+      model: "claude-sonnet-5-5",
       max_tokens: 1024,
       messages: [{ role: "user", content: it.prompt }],
     },
@@ -191,17 +193,19 @@ for await (const result of await client.messages.batches.results(batch.id)) {
 }
 ```
 
-### `client.files.*` / `client.beta.files.*`
+### `client.files.*`
 
-Upload persistente (PDFs, imagens) reutilizável entre requests, reduz repagamento de bytes:
+Upload persistente (PDFs, imagens) reutilizável entre requests, reduz repagamento de bytes. A Files API saiu de beta: use `client.files`, sem header `files-api-2025-04-14`. Não existe no Bedrock nem no Vertex.
 
 ```ts
-const file = await client.beta.files.upload({
-  file: fs.createReadStream("./contract.pdf"),
+import { toFile } from "@anthropic-ai/sdk";
+
+const file = await client.files.upload({
+  file: await toFile(fs.createReadStream("./contract.pdf"), undefined, { type: "application/pdf" }),
 });
 
 await client.messages.create({
-  model: "claude-opus-4-7",
+  model: "claude-sonnet-5-5",
   max_tokens: 1024,
   messages: [{
     role: "user",
@@ -215,17 +219,22 @@ await client.messages.create({
 
 ### `client.beta.*`
 
-Features ainda em beta (computer use, novos tipos de content). Equivalente a passar `anthropic-beta` em header, mas com tipos atualizados.
+Features ainda em beta (compaction, task budgets, fast mode). Equivalente a passar `anthropic-beta` em header, mas com tipos atualizados.
 
 ```ts
-const message = await client.beta.messages.create({
-  model: "claude-opus-4-7",
-  max_tokens: 1024,
-  betas: ["computer-use-2024-10-22"],
-  tools: [{ type: "computer_20241022", name: "computer", display_width_px: 1024, display_height_px: 768 }],
-  messages: [...],
-});
+// max_tokens alto: use stream para não estourar timeout HTTP
+const message = await client.beta.messages
+  .stream({
+    model: "claude-opus-5-5",
+    max_tokens: 64_000,
+    betas: ["task-budgets-2026-03-13"],
+    output_config: { effort: "high", task_budget: { type: "tokens", total: 64_000 } },
+    messages: [...],
+  })
+  .finalMessage();
 ```
+
+**Computer use** nos modelos 5.x (API direta e Google Cloud) não é beta: um único item `{ type: "computer_toolset_20260801" }` em `tools`, sem `name` nem dimensões de tela, via `client.messages.create`. `computer_20251124` (beta `computer-use-2025-11-24`) devolve 400 no `claude-sonnet-5-5` e no `claude-opus-5-5` fora do Bedrock. O loop muda: cada `tool_use` tem `name` = ação do membro e `toolset_name: "computer"`, que o `tool_result` ecoa.
 
 ---
 
@@ -262,7 +271,7 @@ Coloque blocks estáveis e grandes antes dos voláteis. Marque o último com `ca
 
 ```ts
 await client.messages.create({
-  model: "claude-opus-4-7",
+  model: "claude-sonnet-5-5",
   max_tokens: 1024,
   system: [
     { type: "text", text: SYSTEM_PROMPT_LONGO },
@@ -296,22 +305,24 @@ const tools: Tool[] = [{
 
 Nunca declare `input_schema` com `any` ou hardcoded fora do source-of-truth do Zod schema.
 
-### 3. Structured output forçado via `tool_choice`
+### 3. Structured output com `messages.parse`
 
 ```ts
-const Result = z.object({ sentiment: z.enum(["pos", "neg", "neu"]), score: z.number() });
+import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 
-const message = await client.messages.create({
-  model: "claude-opus-4-7",
-  max_tokens: 256,
-  tools: [{ name: "emit_result", description: "Emit the result", input_schema: toJSONSchema(Result) }],
-  tool_choice: { type: "tool", name: "emit_result" },
+const SentimentSchema = z.object({ sentiment: z.enum(["pos", "neg", "neu"]), score: z.number() });
+
+const response = await client.messages.parse({
+  model: "claude-sonnet-5-5",
+  max_tokens: 1024,
   messages,
+  output_config: { format: zodOutputFormat(SentimentSchema) },
 });
 
-const block = message.content.find((b): b is ToolUseBlock => b.type === "tool_use");
-const parsed = Result.parse(block?.input);
+const parsed = response.parsed_output; // null se o parse falhou: trate antes de usar
 ```
+
+Forçar uma tool dummy com `tool_choice: { type: "tool", name }` devolve 400 nos modelos 5.x. Para argumentos de tool conformes ao schema, use `strict: true` na definição da tool.
 
 ### 4. Cancelamento via `AbortSignal`
 
@@ -351,6 +362,9 @@ if (message.stop_reason === "max_tokens") {
 if (message.stop_reason === "tool_use") {
   // executar tool, devolver tool_result e continuar
 }
+if (message.stop_reason === "refusal") {
+  // classificador de segurança recusou; `message.stop_details.category` diz o motivo
+}
 ```
 
 ---
@@ -369,7 +383,7 @@ Configurável:
 ```ts
 new Anthropic({
   maxRetries: 4,         // default 2
-  timeout: 120_000,      // default 10 min em stream, 60s em sync
+  timeout: 120_000,      // ms; default 10 min (o SDK aumenta para max_tokens grande sem stream)
 });
 ```
 
@@ -401,7 +415,7 @@ try {
 }
 ```
 
-Não confunda `APIError` (resposta HTTP da API) com `APIConnectionError` (rede, DNS, TLS). O primeiro tem `status`; o segundo é wrap de erro de transporte.
+Não confunda resposta HTTP da API (`status`, `err.type` como `"overloaded_error"`) com `APIConnectionError` (rede, DNS, TLS). No SDK TS `APIConnectionError` é subclasse de `APIError`: teste-o **antes** de `APIError`. 529 não tem classe própria; classifique por `err.status === 529` ou `err.type`.
 
 ---
 
@@ -424,20 +438,20 @@ Para gerenciamento e rotação de secrets, veja `@rules/security`.
 Veja `@stacks/frontend/next@16`. Pattern padrão de streaming em Route Handler:
 
 ```ts
-// app/api/chat/route.ts
+// src/services/chat/adapters/driving/chat-route-handler.ts
+// (src/app/v1/chat/route.ts só faz `export { POST } from "@/services/chat/adapters/driving/chat-route-handler"`;
+// runtime é `nodejs`, o default e o único compatível com `cacheComponents: true`)
 import Anthropic from "@anthropic-ai/sdk";
-
-export const runtime = "nodejs"; // algumas features (files, retries) preferem node runtime
 
 const client = new Anthropic();
 
 export async function POST(req: Request) {
-  const { messages } = await req.json();
+  const { messages } = await req.json(); // validar com Zod na borda (@rules/validation)
   const controller = new AbortController();
   req.signal.addEventListener("abort", () => controller.abort());
 
   const stream = client.messages.stream(
-    { model: "claude-opus-4-7", max_tokens: 4096, messages },
+    { model: "claude-sonnet-5-5", max_tokens: 4096, messages },
     { signal: controller.signal },
   );
 
@@ -483,9 +497,9 @@ Nunca logue `messages[].content` cru em produção — risco de PII. Veja `@rule
 ## Pitfalls específicos da versão atual
 
 - **`max_tokens` é obrigatório.** Não há default. Esquecer = `400`.
-- **`thinking` content blocks** chegam antes do `text` quando extended thinking está habilitado — seu loop de eventos precisa tratá-los explicitamente ou ignorá-los, nunca renderizar como resposta final.
+- **`thinking` content blocks** chegam antes do `text` — seu loop de eventos precisa tratá-los explicitamente ou ignorá-los, nunca renderizar como resposta final. Nos 5.x o texto vem vazio por padrão (`display: "omitted"`); devolva os blocks inalterados no histórico.
 - **`cache_control` é por block**, não por request. Você marca o último block que deve ser cacheado e tudo antes dele entra no cache. Limite atual: 4 breakpoints.
-- **Bedrock e Vertex usam IDs de modelo diferentes** do direct API (`anthropic.claude-opus-4-7-v1:0` vs `claude-opus-4-7`). Não compartilhe constantes entre variantes.
+- **Bedrock e Vertex usam IDs de modelo diferentes** do direct API (`anthropic.claude-sonnet-5-5` vs `claude-sonnet-5-5`). Não compartilhe constantes entre variantes.
 - **`countTokens` cobra tokens?** Não — endpoint gratuito, mas faz roundtrip; cacheie resultado se o input for estável.
 - **Stream `error` event** não rejeita a Promise automaticamente em todos os caminhos. Sempre adicione `.on("error", ...)` explicitamente.
 - **`finalMessage()` joga** se houve erro durante o stream — envolva em try/catch.
@@ -506,7 +520,7 @@ Nunca logue `messages[].content` cru em produção — risco de PII. Veja `@rule
 - Não checar `stop_reason` (truncamento silencioso).
 - Declarar tipos paralelos aos do SDK (`MyMessage`, `MyContentBlock`) em vez de importar.
 - Retry manual em loop por cima do retry interno do SDK (duplica tentativas, amplifica 429).
-- `temperature` e `top_p` juntos (use um ou outro).
+- Mandar `temperature`/`top_p`/`top_k` para os modelos 5.x (400). Ajuste por `effort`.
 - `client` instanciado dentro do handler em hot path (sem reuso de keep-alive HTTP). Crie no module scope.
 
 ---

@@ -1,4 +1,12 @@
-﻿# Test-Driven Development (TDD)
+---
+title: Test-Driven Development (TDD)
+type: practices
+status: active
+scope: engineering
+last_updated: 2026-09-28
+---
+
+# Test-Driven Development (TDD)
 
 > Disciplina de desenvolvimento em que cada linha de código de produção nasce em resposta a um teste que falhou. O teste vem antes; o código segue para fazer o teste passar; o refactor consolida o resultado mantendo a barra verde.
 
@@ -86,11 +94,11 @@ TDD bifurcou-se historicamente em duas escolas com diferenças relevantes de est
 |---|---|
 | Lógica de domínio pura (cálculos, regras, transformações) | Classical |
 | Componentes React e UI | Classical (testar comportamento, não chamadas) |
-| Use cases de aplicação coordenando ports | Mockist (verifica orquestração) |
+| Use cases de aplicação coordenando ports | Classical com fakes em memória para os ports driven (assertar o resultado, não chamadas) |
 | Adapters (repositórios, gateways) integrados | Classical com fakes/testcontainers |
 | Fluxo end-to-end outside-in | Mockist no top, classical no fundo |
 
-A regra prática: **classical para código com comportamento observável; mockist para código cujo trabalho é coordenar**.
+A regra prática: **classical para código com comportamento observável, inclusive use cases, com fakes em memória nos ports driven; mockist só quando a interação é o próprio resultado e não há estado observável para assertar**.
 
 ---
 
@@ -142,28 +150,33 @@ Vitest + classical. Sem mocks, sem fakes — funções e classes de domínio rec
 ```ts
 // domain/pricing/calculate-discount.test.ts
 describe("calculateDiscount", () => {
-  test.todo("returns zero when subtotal below threshold");
+  test.todo("returns zero when subtotalMinor below threshold");
   test.todo("applies 10% above threshold");
   test.todo("caps discount at maxDiscount");
 
-  test("returns zero when subtotal below threshold", () => {
-    expect(calculateDiscount({ subtotal: 50, threshold: 100 })).toBe(0);
+  test("returns zero when subtotalMinor below threshold", () => {
+    expect(calculateDiscount({ subtotalMinor: 5000, thresholdMinor: 10000 })).toBe(0);
   });
 });
 ```
 
 ### Use cases (application layer)
 
-Mockist quando a função do use case é orquestrar ports. Mocks dos ports definidos pela arquitetura hexagonal.
+Classical com fakes em memória para os ports driven. O teste assere o resultado observável (estado persistido, eventos publicados), não chamadas.
 
 ```ts
-// application/orders/place-order.test.ts
-test("persists order and emits OrderPlaced event", async () => {
-  const orderRepo = { save: vi.fn() };
-  const eventBus = { publish: vi.fn() };
-  await placeOrder({ orderRepo, eventBus }, validInput);
-  expect(orderRepo.save).toHaveBeenCalledWith(expect.objectContaining({ status: "placed" }));
-  expect(eventBus.publish).toHaveBeenCalledWith(expect.objectContaining({ type: "OrderPlaced" }));
+// src/services/orders/application/use-cases/place-order.test.ts
+test("persists order and emits ORDER_PLACED event", async () => {
+  const orders = makeInMemoryOrderRepository();
+  const events = makeInMemoryEventBus();
+  const placeOrder = makePlaceOrder({ orders, events });
+
+  const result = await placeOrder(validInput);
+
+  // Estreita o Result ({ ok: true, data } | { ok: false, error }) antes de ler data.
+  if (!result.ok) throw new Error("expected ok result");
+  expect(await orders.findById(result.data.id)).toMatchObject({ status: "pending" });
+  expect(events.published).toEqual([expect.objectContaining({ eventName: "ORDER_PLACED" })]);
 });
 ```
 
@@ -177,13 +190,13 @@ Classical via React Testing Library. **Testar comportamento observável pelo usu
 
 ### E2E
 
-Playwright (@stacks/testing/playwright) raramente é dirigido por TDD puro — costuma seguir o modelo de acceptance tests da escola London no topo da pirâmide, com TDD clássico nas camadas inferiores.
+Playwright (@stacks/testing/playwright) raramente é dirigido por TDD puro — costuma seguir o modelo de acceptance tests da escola London no topo do troféu, com TDD clássico na integração e nas unidades.
 
 ---
 
 ## Relação com a arquitetura
 
-TDD floresce em sistemas com ports e adapters bem definidos (@architecture/hexagonal). A razão é estrutural: ports são exatamente os pontos onde fakes ou mocks substituem o mundo real. Em arquitetura sem ports explícitos, TDD obriga a inventá-los — daí a expressão de Freeman & Pryce de que "TDD é uma ferramenta de descoberta de arquitetura".
+TDD floresce em sistemas com ports e adapters bem definidos (@architecture/hexagonal). A razão é estrutural: ports são exatamente os pontos onde fakes substituem o mundo real. Em arquitetura sem ports explícitos, TDD obriga a inventá-los — daí a expressão de Freeman & Pryce de que "TDD é uma ferramenta de descoberta de arquitetura".
 
 Em Clean Architecture (@architecture/clean-architecture), as camadas internas (entities, use cases) são candidatas naturais a TDD; camadas externas (frameworks, drivers) podem usar TDD com fakes ou ficar fora do ciclo, testadas por integração.
 

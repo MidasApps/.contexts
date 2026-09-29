@@ -1,8 +1,9 @@
 ---
 title: Harness Engineering
+type: stacks
 category: ai
 version: n/a (disciplina, não produto)
-last_updated: 2026-07-13
+last_updated: 2026-09-28
 status: active
 upstream:
   - https://www.anthropic.com/research/building-effective-agents
@@ -27,7 +28,7 @@ Um harness completo tem oito camadas. Nem todo produto precisa de todas — a co
 
 ### 1. Prompt layer
 
-- System prompts versionados em git, nunca em string literal solta no código.
+- System prompts versionados — em git por default, ou em store com histórico de versões e rollback quando o produto exige edição em runtime (ver `@rules/governance`, "Governança de IA generativa"). Nunca em string literal solta no código.
 - Prompt templates com composição explícita: `instructions` + `context` + `examples` + `user_input`.
 - Few-shot examples gerenciados como dataset, não inline em prosa.
 - Separação clara de papéis: `system`, `user`, `assistant`, `tool` — sem misturar instruções do desenvolvedor dentro do turno do usuário.
@@ -35,7 +36,7 @@ Um harness completo tem oito camadas. Nem todo produto precisa de todas — a co
 
 ### 2. Context layer
 
-- Retrieval (RAG) via embeddings em vector store. No projeto: `pgvector` — ver `@stacks/database/pgvector` (pendente).
+- Retrieval (RAG) via embeddings em vector store. Default do framework: `pgvector` — ver `@stacks/database/pgvector`. Projeto que usar outro vector store registra em ADR.
 - Summarization de threads longas para caber na janela.
 - Context window management: truncation strategies, prioridade por recência e relevância, pruning de turnos antigos.
 - Memory tiers:
@@ -55,13 +56,13 @@ Um harness completo tem oito camadas. Nem todo produto precisa de todas — a co
 
 ### 4. Decision layer
 
-- Agent loop com `maxSteps` obrigatório — sem cap, custo e latência divergem.
+- Agent loop com cap obrigatório — sem cap, custo e latência divergem. No AI SDK 7 é `stopWhen: isStepCount(n)` (`maxSteps` não existe mais lá); no Mastra, `maxSteps` ou `stopWhen` nas opções de `generate`/`stream`.
 - Padrões reconhecidos:
   - **ReAct** — reasoning + acting intercalados.
   - **Plan-Execute** — planejamento explícito antes de execução.
   - **Reflexion** — agente revisita próprio output dado feedback.
 - Fallback strategies: retry com backoff, escalação para humano, graceful degradation para resposta sem tools.
-- Determinismo vs criatividade: `temperature` baixo (0–0.3) para tarefas de extração/classificação; mais alto apenas para geração criativa.
+- Determinismo vs criatividade: controle pelo parâmetro que o modelo aceita. Nos Claude 5.x `temperature`/`top_p` devolvem 400; use `effort` e schema de saída. Onde `temperature` é aceito, baixo (0–0.3) para extração/classificação.
 
 ### 5. Guardrail layer
 
@@ -91,6 +92,7 @@ Tool gating:
 - **Drift detection**: monitorar distribuição de outputs ao longo do tempo.
 - Specs com evals como critério de aceitação — ver `@practices/sdd`.
 - Evals como gate de deploy — ver `@rules/governance` e `@rules/testing`.
+- Runner: o harness do projeto roda no Vitest 5 (`@stacks/testing/vitest`). `@mastra/evals` está fora do baseline (peer `vitest <5`, ADR 0004 E4).
 
 ### 7. Observability layer
 
@@ -108,14 +110,14 @@ Tool gating:
 - Exponential backoff com jitter em retries.
 - Fallback model: Pro → Flash → cache → erro tipado.
 - Circuit breakers por provider.
-- Cost budgets por feature/user com kill-switch automático — ver `@rules/governance`.
+- Cost budgets por feature/user com kill-switch automático — ver `@rules/governance`, "Custo de IA e de consultas".
 - Audit log de mudanças de prompt, modelo e configuração.
 
 ## Princípios
 
 ### Modelo é commodity, harness é produto
 
-Trocas de modelo (gpt-4o → claude-3.7-sonnet → gemini-2.5-pro) devem ser **configuração**, não rewrite. Adote abstrações cross-provider — ver `@stacks/ai/vercel-ai-sdk`. Use APIs vendor-specific apenas quando a feature exige (ex: Gemini context caching, OpenAI Realtime).
+Trocas de modelo devem ser **configuração**, não rewrite. O id vive na config e segue `stacks/VERSIONS.md` mais a ficha do provedor. Adote abstrações cross-provider — ver `@stacks/ai/vercel-ai-sdk`. Use APIs vendor-specific apenas quando a feature exige (ex: Gemini context caching, OpenAI Realtime).
 
 ### Determinismo por construção
 
@@ -146,13 +148,14 @@ Tools com `dry_run` flag. Mudanças destrutivas com confirmação. Audit log de 
 | Camada | Ferramenta | Referência |
 |---|---|---|
 | Modelo (cross-provider) | Vercel AI SDK | `@stacks/ai/vercel-ai-sdk` |
-| Agents / workflows / memory / RAG / evals | Mastra | `@stacks/ai/mastra-sdk` |
+| Agents / workflows / memory / RAG | Mastra | `@stacks/ai/mastra-sdk` |
+| Evals | harness próprio no Vitest 5 (`@mastra/evals` fora, E4) | `@stacks/testing/vitest` |
 | Provider direto (features vendor-specific) | OpenAI / Gemini SDK | `@stacks/ai/openai`, `@stacks/ai/gemini`, `@stacks/ai/google-genai-sdk` |
-| Vector store | pgvector | `@stacks/database/pgvector` (pendente) |
+| Vector store | pgvector (default) | `@stacks/database/pgvector` |
 | Schemas (params + outputs) | Zod 4 | `@stacks/validation/zod@4` |
 | Observability | OpenTelemetry → Langfuse / Braintrust / SigNoz / Grafana | `@rules/observability` |
 | Tools cross-agent | MCP | — |
-| Runtime / linguagem | Node 24 / TypeScript 7 | `@stacks/runtime/node@24`, `@stacks/language/typescript@7` |
+| Runtime / linguagem | Node 26 / TypeScript 7 | `@stacks/runtime/node@26`, `@stacks/language/typescript@7` |
 | Frontend (chat UIs, streaming) | Next.js 16 | `@stacks/frontend/next@16` |
 
 ## Padrões de harness comuns
@@ -160,7 +163,7 @@ Tools com `dry_run` flag. Mudanças destrutivas com confirmação. Audit log de 
 - **Router agent** — classifica intent e despacha para sub-agent especializado. Use quando há mais de ~10 tools ou domínios distintos.
 - **Critic/Reviewer** — segundo modelo (geralmente mais barato) valida output do primeiro. Use em fluxos críticos.
 - **Reflexion** — agente revisita próprio output dado feedback (humano ou automatizado). Use em geração de código, redação longa.
-- **Tool-use loop com cap** — `maxSteps` + budget de tokens/custo. Padrão default para qualquer agente com tools.
+- **Tool-use loop com cap** — `stopWhen: isStepCount(n)` (AI SDK 7) ou `maxSteps` (Mastra) + budget de tokens/custo. Padrão default para qualquer agente com tools.
 - **Retrieval-then-generate** — RAG clássico com re-ranking. Use quando a resposta deve ser fundamentada em corpus específico.
 - **Plan-then-execute** — planejamento explícito antes de execução. Use em tarefas multi-passo com side effects.
 
@@ -189,7 +192,7 @@ Overhead injustificado em produto early-stage gera fricção sem retorno. Cresç
 - **Logar prompts/responses inteiros com PII** — vazamento de dados sensíveis. Redaction obrigatória (`@rules/security`, `@rules/observability`).
 - **Confiar em texto livre quando structured output resolve** — parsing frágil, regressões silenciosas.
 - **Eval só manual ou pós-hoc** — regressões silenciosas em mudanças de prompt. Eval em CI (`@rules/testing`, `@practices/sdd`).
-- **Agent loop sem `maxSteps`** — loop infinito; custo descontrolado.
+- **Agent loop sem cap** (`stopWhen` / `maxSteps`) — loop infinito; custo descontrolado.
 - **Sem fallback** — provider down = feature down. Sempre ter modelo/path alternativo.
 - **Cost monitoring ausente** — surpresa de fatura; sem capacidade de detectar abuso (`@rules/governance`).
 - **Misturar contexto de tenants/usuários sem isolamento** — vazamento via memory/cache. Memory keys sempre escopadas por tenant.
@@ -206,12 +209,12 @@ Overhead injustificado em produto early-stage gera fricção sem retorno. Cresç
 ## Referências cruzadas no projeto
 
 - `@stacks/ai/vercel-ai-sdk` — camada de modelo cross-provider
-- `@stacks/ai/mastra-sdk` — agents, workflows, memory, evals
+- `@stacks/ai/mastra-sdk` — agents, workflows, memory
 - `@stacks/ai/openai` — features vendor-specific OpenAI
 - `@stacks/ai/gemini` — features vendor-specific Gemini
 - `@stacks/ai/google-genai-sdk` — SDK oficial Google GenAI
 - `@stacks/validation/zod@4` — schemas de tools e outputs
-- `@stacks/database/pgvector` — vector store (pendente)
+- `@stacks/database/pgvector` — vector store (default)
 - `@rules/security` — PII, prompt injection, redaction
 - `@rules/observability` — spans `gen_ai.*`, redaction
 - `@rules/error-handling` — timeouts, retries, fallback

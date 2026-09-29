@@ -1,0 +1,30 @@
+{"type":"server-started","port":65118,"host":"127.0.0.1","url_host":"localhost","url":"http://localhost:65118","screen_dir":"/Users/giullianosoares/Documents/GCP/liquid-play-dataviz/.superpowers/brainstorm/64661-1774045357"}
+{"type":"screen-added","file":"/Users/giullianosoares/Documents/GCP/liquid-play-dataviz/.superpowers/brainstorm/64661-1774045357/layout-drag-model.html"}
+{"type":"screen-updated","file":"/Users/giullianosoares/Documents/GCP/liquid-play-dataviz/.superpowers/brainstorm/64661-1774045357/layout-drag-model.html"}
+{"type":"screen-updated","file":"/Users/giullianosoares/Documents/GCP/liquid-play-dataviz/.superpowers/brainstorm/64661-1774045357/layout-drag-model.html"}
+{"type":"screen-updated","file":"/Users/giullianosoares/Documents/GCP/liquid-play-dataviz/.superpowers/brainstorm/64661-1774045357/layout-drag-model.html"}
+{"type":"screen-updated","file":"/Users/giullianosoares/Documents/GCP/liquid-play-dataviz/.superpowers/brainstorm/64661-1774045357/layout-drag-model.html"}
+{"source":"user-event","type":"click","text":"A\n      \n        Indicador de posição (linha azul)\n        Ao arrastar, aparece uma linha azul indicando onde o bloco vai cair — à esquerda, à direita, ou abaixo. Similar ao Notion.","choice":"a","id":null,"timestamp":1774045934215}
+{"source":"user-event","type":"click","text":"A\n      \n        Indicador de posição (linha azul)\n        Ao arrastar, aparece uma linha azul indicando onde o bloco vai cair — à esquerda, à direita, ou abaixo. Similar ao Notion.","choice":"a","id":null,"timestamp":1774045943645}
+{"type":"screen-added","file":"/Users/giullianosoares/Documents/GCP/liquid-play-dataviz/.superpowers/brainstorm/64661-1774045357/block-selection-model.html"}
+{"type":"screen-updated","file":"/Users/giullianosoares/Documents/GCP/liquid-play-dataviz/.superpowers/brainstorm/64661-1774045357/block-selection-model.html"}
+{"type":"screen-updated","file":"/Users/giullianosoares/Documents/GCP/liquid-play-dataviz/.superpowers/brainstorm/64661-1774045357/block-selection-model.html"}
+{"type":"screen-updated","file":"/Users/giullianosoares/Documents/GCP/liquid-play-dataviz/.superpowers/brainstorm/64661-1774045357/block-selection-model.html"}
+{"source":"user-event","type":"click","text":"C\n      \n        Botão \"Selecionar\" na toolbar do bloco\n        A toolbar de hover (que já terá o botão X de deletar) ganha um botão de seleção. Tudo agrupado no mesmo lugar.","choice":"c","id":null,"timestamp":1774046182914}
+{"type":"screen-updated","file":"/Users/giullianosoares/Documents/GCP/liquid-play-dataviz/.superpowers/brainstorm/64661-1774045357/block-selection-model.html"}
+{"type":"screen-added","file":"/Users/giullianosoares/Documents/GCP/liquid-play-dataviz/.superpowers/brainstorm/64661-1774045357/final-design-overview.html"}
+{"type":"screen-updated","file":"/Users/giullianosoares/Documents/GCP/liquid-play-dataviz/.superpowers/brainstorm/64661-1774045357/final-design-overview.html"}
+{"type":"screen-updated","file":"/Users/giullianosoares/Documents/GCP/liquid-play-dataviz/.superpowers/brainstorm/64661-1774045357/final-design-overview.html"}
+{"type":"screen-updated","file":"/Users/giullianosoares/Documents/GCP/liquid-play-dataviz/.superpowers/brainstorm/64661-1774045357/final-design-overview.html"}
+{"type":"screen-updated","file":"/Users/giullianosoares/Documents/GCP/liquid-play-dataviz/.superpowers/brainstorm/64661-1774045357/final-design-overview.html"}
+{"type":"screen-added","file":"/Users/giullianosoares/Documents/GCP/liquid-play-dataviz/.superpowers/brainstorm/64661-1774045357/final-design-overview-v2.html"}
+{"type":"screen-updated","file":"/Users/giullianosoares/Documents/GCP/liquid-play-dataviz/.superpowers/brainstorm/64661-1774045357/final-design-overview-v2.html"}
+{"type":"screen-updated","file":"/Users/giullianosoares/Documents/GCP/liquid-play-dataviz/.superpowers/brainstorm/64661-1774045357/final-design-overview-v2.html"}
+{"type":"screen-updated","file":"/Users/giullianosoares/Documents/GCP/liquid-play-dataviz/.superpowers/brainstorm/64661-1774045357/final-design-overview-v2.html"}
+{"type":"screen-updated","file":"/Users/giullianosoares/Documents/GCP/liquid-play-dataviz/.superpowers/brainstorm/64661-1774045357/final-design-overview-v2.html"}
+{"type":"screen-added","file":"/Users/giullianosoares/Documents/GCP/liquid-play-dataviz/.superpowers/brainstorm/64661-1774045357/waiting.html"}
+{"type":"screen-updated","file":"/Users/giullianosoares/Documents/GCP/liquid-play-dataviz/.superpowers/brainstorm/64661-1774045357/waiting.html"}
+{"type":"screen-updated","file":"/Users/giullianosoares/Documents/GCP/liquid-play-dataviz/.superpowers/brainstorm/64661-1774045357/waiting.html"}
+{"type":"screen-updated","file":"/Users/giullianosoares/Documents/GCP/liquid-play-dataviz/.superpowers/brainstorm/64661-1774045357/waiting.html"}
+{"type":"screen-updated","file":"/Users/giullianosoares/Documents/GCP/liquid-play-dataviz/.superpowers/brainstorm/64661-1774045357/waiting.html"}
+{"type":"server-stopped","reason":"idle timeout"}

@@ -1,0 +1,108 @@
+<h2>Modelo de Layout por Composição</h2>
+<p class="subtitle">Como os blocos se organizam quando arrastados — confirme se o comportamento está correto</p>
+
+<div class="section">
+  <h3>Estado 1 — Blocos empilhados (padrão atual)</h3>
+  <div class="mockup">
+    <div class="mockup-header">Canvas — Layout inicial</div>
+    <div class="mockup-body" style="padding: 16px; display: flex; flex-direction: column; gap: 12px;">
+      <div style="background: #2a1f3d; border: 1px solid rgba(168,85,247,0.3); border-radius: 8px; padding: 16px; text-align: center; color: #c4b5fd; font-size: 13px;">
+        📊 KPIs — Saldo Vencido, Contratos, Taxa
+      </div>
+      <div style="background: #1f2a3d; border: 1px solid rgba(59,130,246,0.3); border-radius: 8px; padding: 16px; text-align: center; color: #93c5fd; font-size: 13px;">
+        📈 Gráfico — Evolução Mensal
+      </div>
+      <div style="background: #1f3d2a; border: 1px solid rgba(34,197,94,0.3); border-radius: 8px; padding: 16px; text-align: center; color: #86efac; font-size: 13px;">
+        📋 Tabela — Top Contratos
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Estado 2 — Arrasto o Gráfico para o lado dos KPIs</h3>
+  <div class="mockup">
+    <div class="mockup-header">Canvas — 2 colunas na linha 1</div>
+    <div class="mockup-body" style="padding: 16px; display: flex; flex-direction: column; gap: 12px;">
+      <div style="display: flex; gap: 12px;">
+        <div style="flex: 1; background: #2a1f3d; border: 1px solid rgba(168,85,247,0.3); border-radius: 8px; padding: 16px; text-align: center; color: #c4b5fd; font-size: 13px;">
+          📊 KPIs
+        </div>
+        <div style="flex: 1; background: #1f2a3d; border: 1px solid rgba(59,130,246,0.3); border-radius: 8px; padding: 16px; text-align: center; color: #93c5fd; font-size: 13px;">
+          📈 Gráfico
+        </div>
+      </div>
+      <div style="background: #1f3d2a; border: 1px solid rgba(34,197,94,0.3); border-radius: 8px; padding: 16px; text-align: center; color: #86efac; font-size: 13px;">
+        📋 Tabela — ocupa largura total
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Estado 3 — Arrasto a Tabela para o lado também</h3>
+  <div class="mockup">
+    <div class="mockup-header">Canvas — 3 colunas na linha 1</div>
+    <div class="mockup-body" style="padding: 16px; display: flex; flex-direction: column; gap: 12px;">
+      <div style="display: flex; gap: 12px;">
+        <div style="flex: 1; background: #2a1f3d; border: 1px solid rgba(168,85,247,0.3); border-radius: 8px; padding: 16px; text-align: center; color: #c4b5fd; font-size: 13px;">
+          📊 KPIs
+        </div>
+        <div style="flex: 1; background: #1f2a3d; border: 1px solid rgba(59,130,246,0.3); border-radius: 8px; padding: 16px; text-align: center; color: #93c5fd; font-size: 13px;">
+          📈 Gráfico
+        </div>
+        <div style="flex: 1; background: #1f3d2a; border: 1px solid rgba(34,197,94,0.3); border-radius: 8px; padding: 16px; text-align: center; color: #86efac; font-size: 13px;">
+          📋 Tabela
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Estado 4 — Arrasto a Tabela para baixo novamente</h3>
+  <div class="mockup">
+    <div class="mockup-header">Canvas — 2 colunas em cima, 1 embaixo</div>
+    <div class="mockup-body" style="padding: 16px; display: flex; flex-direction: column; gap: 12px;">
+      <div style="display: flex; gap: 12px;">
+        <div style="flex: 1; background: #2a1f3d; border: 1px solid rgba(168,85,247,0.3); border-radius: 8px; padding: 16px; text-align: center; color: #c4b5fd; font-size: 13px;">
+          📊 KPIs
+        </div>
+        <div style="flex: 1; background: #1f2a3d; border: 1px solid rgba(59,130,246,0.3); border-radius: 8px; padding: 16px; text-align: center; color: #93c5fd; font-size: 13px;">
+          📈 Gráfico
+        </div>
+      </div>
+      <div style="background: #1f3d2a; border: 1px solid rgba(34,197,94,0.3); border-radius: 8px; padding: 16px; text-align: center; color: #86efac; font-size: 13px;">
+        📋 Tabela — volta a ocupar largura total
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section" style="margin-top: 24px;">
+  <h3>Drop zones — Como o usuário sabe onde soltar?</h3>
+  <div class="options">
+    <div class="option" data-choice="a" onclick="toggleSelect(this)">
+      <div class="letter">A</div>
+      <div class="content">
+        <h3>Indicador de posição (linha azul)</h3>
+        <p>Ao arrastar, aparece uma linha azul indicando onde o bloco vai cair — à esquerda, à direita, ou abaixo. Similar ao Notion.</p>
+      </div>
+    </div>
+    <div class="option" data-choice="b" onclick="toggleSelect(this)">
+      <div class="letter">B</div>
+      <div class="content">
+        <h3>Zona de drop com highlight</h3>
+        <p>Ao arrastar sobre uma linha, a área inteira se destaca mostrando as posições possíveis (esquerda/direita/abaixo) com zonas coloridas.</p>
+      </div>
+    </div>
+    <div class="option" data-choice="c" onclick="toggleSelect(this)">
+      <div class="letter">C</div>
+      <div class="content">
+        <h3>Ghost preview</h3>
+        <p>Uma sombra do bloco aparece na posição onde será solto, mostrando como o layout ficará antes de confirmar. Preview em tempo real.</p>
+      </div>
+    </div>
+  </div>
+</div>
+</div>

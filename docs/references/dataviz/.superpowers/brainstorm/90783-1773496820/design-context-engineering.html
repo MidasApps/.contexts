@@ -1,0 +1,249 @@
+<h2>Design: Engenharia de Contexto</h2>
+<p class="subtitle">Secao 3 de 5 — Como cada agente recebe seu contexto especializado</p>
+
+<!-- SQL AGENT CONTEXT -->
+<div class="section">
+  <h3 style="color:#dc2626;">SQL Agent — Dicionario de Dados Completo</h3>
+  <p style="color:#94a3b8;font-size:13px;">O system prompt do SQL Agent e o mais critico. Ele precisa conhecer profundamente o schema para gerar SQL correto.</p>
+
+  <div class="mockup">
+    <div class="mockup-header">System Prompt Structure — SQL Agent</div>
+    <div class="mockup-body" style="font-size:12px;line-height:1.8;padding:16px;">
+      <div style="color:#f59e0b;font-weight:bold;">BLOCO 1: Instrucoes de comportamento</div>
+      <div style="color:#94a3b8;margin-bottom:12px;padding-left:12px;border-left:2px solid #334155;">
+        - Gere apenas SELECT (nunca INSERT/UPDATE/DELETE)<br/>
+        - Sempre use LIMIT (default 100, max 1000)<br/>
+        - Use SAFE_DIVIDE para divisoes<br/>
+        - Formate moeda como BRL, datas como pt-BR<br/>
+        - Sempre inclua a query SQL na resposta<br/>
+        - Se a pergunta for ambigua, faca a query mais provavel e explique as premissas
+      </div>
+
+      <div style="color:#f59e0b;font-weight:bold;">BLOCO 2: Tabela CONTRATOS (~35 campos)</div>
+      <div style="color:#e2e8f0;margin-bottom:12px;padding:10px;background:#0f172a;border-radius:6px;font-family:monospace;font-size:11px;">
+        <span style="color:#22c55e;">-- Tabela principal: dados de contratos por data-base</span><br/>
+        <span style="color:#22c55e;">-- Chave: id_contrato + data_base_report</span><br/>
+        <span style="color:#22c55e;">-- Granularidade: 1 row = 1 contrato em 1 data_base</span><br/><br/>
+        id_contrato &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;STRING &nbsp;&nbsp;-- Identificador unico do contrato<br/>
+        data_base_report &nbsp;&nbsp;DATE &nbsp;&nbsp;&nbsp;&nbsp;-- Data-base do relatorio (ultimo dia do mes)<br/>
+        projeto &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;STRING &nbsp;&nbsp;-- Empreendimento (ex: "VIVA PARK")<br/>
+        documento &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;STRING &nbsp;&nbsp;-- CPF/CNPJ do devedor<br/>
+        nome_cliente &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;STRING &nbsp;&nbsp;-- Nome do devedor<br/>
+        proponent_type &nbsp;&nbsp;&nbsp;&nbsp;STRING &nbsp;&nbsp;-- "PF" ou "PJ"<br/>
+        saldo_devedor &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;FLOAT64 &nbsp;-- Saldo devedor atualizado (R$)<br/>
+        saldo_nominal &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;FLOAT64 &nbsp;-- Saldo nominal contratado (R$)<br/>
+        valor_imovel &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;FLOAT64 &nbsp;-- Valor do imovel (R$)<br/>
+        ltv &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;FLOAT64 &nbsp;-- saldo_devedor / valor_imovel<br/>
+        faixa_ltv &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;STRING &nbsp;&nbsp;-- "0-30%","30-50%",...,">100%"<br/>
+        rating_liquid &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;STRING &nbsp;&nbsp;-- A(baixo risco) a H(default certo)<br/>
+        elegibilidade &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;STRING &nbsp;&nbsp;-- "Elegivel" ou "Nao Elegivel"<br/>
+        dias_atraso &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;INTEGER &nbsp;-- Dias em atraso (0=adimplente)<br/>
+        faixa_atraso &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;STRING &nbsp;&nbsp;-- "Adimplente","1 a 30",...,"> 180"<br/>
+        valor_atraso &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;FLOAT64 &nbsp;-- Valor em atraso (R$)<br/>
+        valor_over_90 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;FLOAT64 &nbsp;-- Valor com atraso > 90 dias (R$)<br/>
+        pdd_minimo_bacen &nbsp;&nbsp;FLOAT64 &nbsp;-- PDD minimo Bacen (Res. 2682)<br/>
+        pdd_liquid &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;FLOAT64 &nbsp;-- PDD modelo Liquid<br/>
+        delta_pdd &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;FLOAT64 &nbsp;-- pdd_liquid - pdd_minimo_bacen<br/>
+        pricing &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;FLOAT64 &nbsp;-- Valor de mercado do contrato<br/>
+        prazo_decorrido &nbsp;&nbsp;&nbsp;FLOAT64 &nbsp;-- Meses desde emissao<br/>
+        prazo_remanescente FLOAT64 &nbsp;-- Meses ate vencimento<br/>
+        restricoes &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;INTEGER &nbsp;-- Qtd restricoes (PEFIN/REFIN)<br/>
+        grupos_repasse &nbsp;&nbsp;&nbsp;&nbsp;STRING &nbsp;&nbsp;-- "Grupo 1" a "Grupo 4"<br/>
+        renda_suficiente &nbsp;&nbsp;FLOAT64 &nbsp;-- Indicador de renda suficiente<br/>
+        limite_simulacao &nbsp;&nbsp;FLOAT64 &nbsp;-- Limite para simulacao repasse<br/>
+        private_area &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;FLOAT64 &nbsp;-- Area privativa (m2)<br/>
+        safra &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;STRING &nbsp;&nbsp;-- Periodo de originacao (YYYY-MM)<br/>
+        data_emissao &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DATE &nbsp;&nbsp;&nbsp;&nbsp;-- Data de emissao do contrato<br/>
+        correcao_monetaria FLOAT64 &nbsp;-- Indice de correcao
+      </div>
+
+      <div style="color:#f59e0b;font-weight:bold;">BLOCO 3: Tabela PAGAMENTOS</div>
+      <div style="color:#e2e8f0;margin-bottom:12px;padding:10px;background:#0f172a;border-radius:6px;font-family:monospace;font-size:11px;">
+        <span style="color:#22c55e;">-- Pagamentos recebidos por tipo e periodo</span><br/>
+        data_base_report &nbsp;&nbsp;DATE &nbsp;&nbsp;&nbsp;&nbsp;-- Data-base<br/>
+        projeto &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;STRING &nbsp;&nbsp;-- Empreendimento<br/>
+        tipo_recebimento &nbsp;&nbsp;STRING &nbsp;&nbsp;-- Tipo (ver valores abaixo)<br/>
+        valor_pago &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;FLOAT64 &nbsp;-- Valor recebido (R$)<br/><br/>
+        <span style="color:#22c55e;">-- tipo_recebimento IN:</span><br/>
+        &nbsp;&nbsp;"Pagamento antecipado" &nbsp;&nbsp;-- Pago antes do vencimento<br/>
+        &nbsp;&nbsp;"Vencimento na referencia" -- Pago no mes de vencimento<br/>
+        &nbsp;&nbsp;"Recuperacao mes anterior" -- Recuperado do mes anterior<br/>
+        &nbsp;&nbsp;"Recuperacao anterior" &nbsp;&nbsp;&nbsp;-- Recuperado de periodos anteriores
+      </div>
+
+      <div style="color:#f59e0b;font-weight:bold;">BLOCO 4: Tabela FLUXO_CAIXA</div>
+      <div style="color:#e2e8f0;margin-bottom:12px;padding:10px;background:#0f172a;border-radius:6px;font-family:monospace;font-size:11px;">
+        <span style="color:#22c55e;">-- Projecoes de fluxo de caixa futuro</span><br/>
+        data_base_fluxo &nbsp;&nbsp;&nbsp;DATE &nbsp;&nbsp;&nbsp;&nbsp;-- Data do fluxo projetado<br/>
+        data_base_report &nbsp;&nbsp;DATE &nbsp;&nbsp;&nbsp;&nbsp;-- Data-base de referencia<br/>
+        projeto &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;STRING &nbsp;&nbsp;-- Empreendimento<br/>
+        fluxo_esperado &nbsp;&nbsp;&nbsp;&nbsp;FLOAT64 &nbsp;-- Fluxo ajustado por risco (R$)<br/>
+        fluxo_contratado &nbsp;&nbsp;FLOAT64 &nbsp;-- Fluxo total contratado (R$)
+      </div>
+
+      <div style="color:#f59e0b;font-weight:bold;">BLOCO 5: Formulas derivadas comuns</div>
+      <div style="color:#e2e8f0;margin-bottom:12px;padding:10px;background:#0f172a;border-radius:6px;font-family:monospace;font-size:11px;">
+        <span style="color:#22c55e;">-- Use estas formulas para metricas calculadas:</span><br/>
+        inadimplencia_pct = SAFE_DIVIDE(SUM(valor_atraso), SUM(saldo_devedor)) * 100<br/>
+        ltv_medio = AVG(ltv)<br/>
+        over_90_pct = SAFE_DIVIDE(COUNTIF(dias_atraso > 90), COUNT(DISTINCT id_contrato))<br/>
+        desagio = SAFE_DIVIDE(SUM(pricing)-SUM(saldo_nominal), SUM(saldo_nominal)) * 100<br/>
+        pct_contratos = SAFE_DIVIDE(COUNT(*), SUM(COUNT(*)) OVER()) * 100
+      </div>
+
+      <div style="color:#f59e0b;font-weight:bold;">BLOCO 6: Contexto dinamico (injetado por request)</div>
+      <div style="color:#e2e8f0;padding:10px;background:#0f172a;border-radius:6px;font-family:monospace;font-size:11px;">
+        <span style="color:#22c55e;">-- Injetado pelo orchestrator a cada chamada:</span><br/>
+        Dataset ativo: <span style="color:#fbbf24;">{dataset}</span> &nbsp;&nbsp;-- ex: "om_monitor"<br/>
+        Periodo: <span style="color:#fbbf24;">{dateRange.start}</span> a <span style="color:#fbbf24;">{dateRange.end}</span><br/>
+        Projetos filtrados: <span style="color:#fbbf24;">{projetos[]}</span><br/>
+        Filtros avancados ativos: <span style="color:#fbbf24;">{advancedFilters}</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CONTEXT STRATEGY -->
+<div class="section" style="margin-top:24px;">
+  <h3>Estrategia de Contexto por Agente</h3>
+  <p style="color:#94a3b8;font-size:13px;">Cada agente recebe apenas o contexto que precisa — nao o contexto completo do sistema.</p>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px;">
+
+    <div style="background:#1e293b;border:1px solid #334155;border-radius:8px;padding:14px;">
+      <div style="color:#dc2626;font-weight:bold;font-size:13px;margin-bottom:6px;">SQL Agent</div>
+      <div style="font-size:11px;color:#e2e8f0;line-height:1.6;">
+        <strong style="color:#f59e0b;">Estatico:</strong> Schema completo (3 tabelas, ~40 campos), formulas, regras SQL, valores categoricos<br/>
+        <strong style="color:#f59e0b;">Dinamico:</strong> dataset, dateRange, projetos, advancedFilters<br/>
+        <strong style="color:#f59e0b;">Tamanho estimado:</strong> ~3.000 tokens
+      </div>
+    </div>
+
+    <div style="background:#1e293b;border:1px solid #334155;border-radius:8px;padding:14px;">
+      <div style="color:#f59e0b;font-weight:bold;font-size:13px;margin-bottom:6px;">Business Agent</div>
+      <div style="font-size:11px;color:#e2e8f0;line-height:1.6;">
+        <strong style="color:#f59e0b;">Estatico:</strong> Glossario completo (~30 termos), escala ratings, regras Bacen, formulas de calculo<br/>
+        <strong style="color:#f59e0b;">Dinamico:</strong> Nenhum (puro knowledge base)<br/>
+        <strong style="color:#f59e0b;">Tamanho estimado:</strong> ~2.000 tokens
+      </div>
+    </div>
+
+    <div style="background:#1e293b;border:1px solid #334155;border-radius:8px;padding:14px;">
+      <div style="color:#3b82f6;font-weight:bold;font-size:13px;margin-bottom:6px;">Dashboard Agent</div>
+      <div style="font-size:11px;color:#e2e8f0;line-height:1.6;">
+        <strong style="color:#f59e0b;">Estatico:</strong> Instrucoes de interpretacao de KPIs, tendencias, alertas<br/>
+        <strong style="color:#f59e0b;">Dinamico:</strong> buildAIContext() completo (indicadores, charts, filtros, pagina atual)<br/>
+        <strong style="color:#f59e0b;">Tamanho estimado:</strong> ~4.000-8.000 tokens (varia com pagina)
+      </div>
+    </div>
+
+    <div style="background:#1e293b;border:1px solid #334155;border-radius:8px;padding:14px;">
+      <div style="color:#8b5cf6;font-weight:bold;font-size:13px;margin-bottom:6px;">Comparison Agent</div>
+      <div style="font-size:11px;color:#e2e8f0;line-height:1.6;">
+        <strong style="color:#f59e0b;">Estatico:</strong> Metodologia de comparacao, polaridades de metricas, benchmarks<br/>
+        <strong style="color:#f59e0b;">Dinamico:</strong> dataset, dateRange, comparePeriod<br/>
+        <strong style="color:#f59e0b;">Tamanho estimado:</strong> ~1.500 tokens
+      </div>
+    </div>
+
+    <div style="background:#1e293b;border:1px solid #334155;border-radius:8px;padding:14px;">
+      <div style="color:#06b6d4;font-weight:bold;font-size:13px;margin-bottom:6px;">External Agent</div>
+      <div style="font-size:11px;color:#e2e8f0;line-height:1.6;">
+        <strong style="color:#f59e0b;">Estatico:</strong> Indicadores economicos relevantes, fontes confiaveis, correlacoes<br/>
+        <strong style="color:#f59e0b;">Dinamico:</strong> Nenhum<br/>
+        <strong style="color:#f59e0b;">Tamanho estimado:</strong> ~1.000 tokens
+      </div>
+    </div>
+
+    <div style="background:#1e293b;border:1px solid #334155;border-radius:8px;padding:14px;">
+      <div style="color:#22c55e;font-weight:bold;font-size:13px;margin-bottom:6px;">Export Agent</div>
+      <div style="font-size:11px;color:#e2e8f0;line-height:1.6;">
+        <strong style="color:#f59e0b;">Estatico:</strong> Templates, regras de formatacao BRL/pt-BR<br/>
+        <strong style="color:#f59e0b;">Dinamico:</strong> buildAIContext() (dados para exportar)<br/>
+        <strong style="color:#f59e0b;">Tamanho estimado:</strong> ~1.500 tokens
+      </div>
+    </div>
+
+    <div style="background:#1e293b;border:1px solid #334155;border-radius:8px;padding:14px;grid-column:span 2;">
+      <div style="color:#ec4899;font-weight:bold;font-size:13px;margin-bottom:6px;">Simulation Agent</div>
+      <div style="font-size:11px;color:#e2e8f0;line-height:1.6;">
+        <strong style="color:#f59e0b;">Estatico:</strong> Modelos de simulacao (pricing, PDD, elegibilidade, LTV stress), formulas, parametros default, ranges aceitaveis<br/>
+        <strong style="color:#f59e0b;">Dinamico:</strong> dataset, dateRange, projetos (para buscar baseline via execute_sql)<br/>
+        <strong style="color:#f59e0b;">Tamanho estimado:</strong> ~2.500 tokens
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- CONTEXT INJECTION PATTERN -->
+<div class="section" style="margin-top:24px;">
+  <h3>Padrao de Injecao de Contexto</h3>
+
+  <div class="mockup">
+    <div class="mockup-header">Como o contexto chega em cada agente</div>
+    <div class="mockup-body" style="font-size:12px;padding:16px;line-height:1.8;">
+
+      <div style="display:grid;grid-template-columns:auto 1fr;gap:8px 16px;align-items:start;">
+
+        <span style="color:#f59e0b;font-weight:bold;">1. Arquivos estaticos</span>
+        <span style="color:#e2e8f0;">
+          Cada agente tem um arquivo de contexto em <code style="background:#0f172a;padding:2px 6px;border-radius:3px;">src/shared/config/agents/</code><br/>
+          Ex: <code style="background:#0f172a;padding:2px 6px;border-radius:3px;">sql-agent-context.ts</code> exporta o schema como string template
+        </span>
+
+        <span style="color:#f59e0b;font-weight:bold;">2. Funcao factory</span>
+        <span style="color:#e2e8f0;">
+          <code style="background:#0f172a;padding:2px 6px;border-radius:3px;">buildAgentPrompt(agentId, dynamicContext)</code><br/>
+          Combina contexto estatico + dados dinamicos do request (dataset, filters, dashboard state)
+        </span>
+
+        <span style="color:#f59e0b;font-weight:bold;">3. Tool execute</span>
+        <span style="color:#e2e8f0;">
+          O orquestrador passa <code style="background:#0f172a;padding:2px 6px;border-radius:3px;">experimental_context</code> com dataset/filters.<br/>
+          O async generator do sub-agente recebe via <code style="background:#0f172a;padding:2px 6px;border-radius:3px;">options.experimental_context</code>
+        </span>
+
+        <span style="color:#f59e0b;font-weight:bold;">4. generateText</span>
+        <span style="color:#e2e8f0;">
+          Sub-agente chama <code style="background:#0f172a;padding:2px 6px;border-radius:3px;">generateText({ system: buildAgentPrompt(...), tools: agentTools })</code><br/>
+          Com modelo especifico e contexto isolado
+        </span>
+
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- GUARDRAILS -->
+<div class="section" style="margin-top:24px;">
+  <h3>Guardrails do SQL Agent</h3>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
+    <div style="background:#0f172a;border:1px solid #dc2626;border-radius:8px;padding:14px;">
+      <div style="color:#dc2626;font-weight:bold;font-size:12px;margin-bottom:6px;">Validacao Pre-Execucao</div>
+      <div style="color:#e2e8f0;font-size:11px;line-height:1.6;">
+        - Rejeita qualquer statement que nao seja SELECT<br/>
+        - Injeta LIMIT 1000 se ausente<br/>
+        - Valida que tabela existe no dataset<br/>
+        - Timeout de 30 segundos
+      </div>
+    </div>
+    <div style="background:#0f172a;border:1px solid #f59e0b;border-radius:8px;padding:14px;">
+      <div style="color:#f59e0b;font-weight:bold;font-size:12px;margin-bottom:6px;">Permissoes</div>
+      <div style="color:#e2e8f0;font-size:11px;line-height:1.6;">
+        - Service account com role BigQuery Data Viewer<br/>
+        - Sem acesso a escrita (nao pode criar/alterar tabelas)<br/>
+        - Dataset scoped pelo cliente autenticado
+      </div>
+    </div>
+    <div style="background:#0f172a;border:1px solid #22c55e;border-radius:8px;padding:14px;">
+      <div style="color:#22c55e;font-weight:bold;font-size:12px;margin-bottom:6px;">Error Recovery</div>
+      <div style="color:#e2e8f0;font-size:11px;line-height:1.6;">
+        - Se SQL falha, sub-agente pode usar get_table_schema + retry<br/>
+        - Multi-step interno (stopWhen: stepCountIs(3))<br/>
+        - Erro legivel retornado ao orquestrador
+      </div>
+    </div>
+  </div>
+</div>

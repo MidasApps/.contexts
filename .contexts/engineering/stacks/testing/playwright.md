@@ -1,18 +1,19 @@
 ---
 title: Playwright
-version: 1.61.x
-last_updated: 2026-07-13
+type: stacks
+version: 1.63.0
+last_updated: 2026-09-28
 status: current
 upstream: https://playwright.dev
 repository: https://github.com/microsoft/playwright
 category: testing
 ---
 
-# Playwright 1.61.x
+# Playwright 1.63.0
 
-Playwright é o framework de testes end-to-end e component testing cross-browser mantido pela Microsoft. Executa Chromium, Firefox e WebKit a partir de uma única API, com auto-waiting embutido, tracing nativo e tooling de debug de primeira classe (UI mode, codegen, trace viewer).
+Playwright é o framework de testes end-to-end cross-browser mantido pela Microsoft (também oferece component testing, que este projeto não adota: E5). Executa Chromium, Firefox e WebKit a partir de uma única API, com auto-waiting embutido, tracing nativo e tooling de debug de primeira classe (UI mode, codegen, trace viewer).
 
-Neste projeto, Playwright é o runner exclusivo para E2E, smoke e a11y de fluxos críticos. Vitest cobre unit e integração in-process — ver `@stacks/testing/vitest`. As duas stacks não competem; complementam-se em níveis distintos da pirâmide.
+Neste projeto, Playwright é o runner exclusivo para E2E, smoke e a11y de fluxos críticos. Vitest cobre unit e integração in-process — ver `@stacks/testing/vitest`. As duas stacks não competem; complementam-se em níveis distintos do troféu de testes (integração primeiro, poucos E2E; ver `@rules/testing`).
 
 ## Quando usar Playwright (e quando não)
 
@@ -21,18 +22,20 @@ Use Playwright para:
 - Fluxos E2E do app Next.js 16 contra servidor real (`next start` ou `next dev`).
 - Visual regression de páginas e componentes críticos.
 - A11y checks automatizados sobre o DOM final renderizado pelo browser.
-- Component testing quando a precisão de layout, CSS real ou APIs nativas do browser (geolocation, clipboard, media queries reais) importa mais que velocidade.
+
+Componente isolado, mesmo quando layout, CSS real ou APIs nativas do browser importam, vai para o Vitest browser mode (`@stacks/testing/vitest`), não para o CT do Playwright (E5).
 
 Não use Playwright para:
 
 - Lógica pura, utilitários, hooks isolados, schemas Zod. Use Vitest — `@stacks/testing/vitest`.
-- Cobertura quantitativa de funções. Vitest com `c8` cobre mais barato e rápido.
+- Cobertura quantitativa de funções. Vitest com `@vitest/coverage-v8` cobre mais barato e rápido.
 - Testes de Route Handlers que não envolvem browser. Use Vitest com `fetch` direto ou supertest-like.
 
-## Destaques recentes (1.60–1.61)
+## Destaques recentes (1.60–1.63)
 
-- **WebAuthn / passkeys** via `browserContext.credentials` (1.61).
-- **Ubuntu 26.04** suportado; Node 22/24/26.
+- **WebAuthn / passkeys** via `browserContext.credentials` (desde 1.61).
+- **Ubuntu 26.04** suportado; Node 22/24/26. O CI do projeto usa Node 26.
+- `@playwright/test` e `playwright` em **1.63.0**. `@playwright/experimental-ct-react` está em **1.62.1** e depende de `experimental-ct-core` exato 1.62.1, uma versão atrás do `@playwright/test`. **Não é adotado** (ADR 0004, E5): teste de componente roda no Vitest em browser mode.
 - Integração Next 16.3: helper `instant()` de `@next/playwright` para assert de Instant Navigations (ver `@stacks/frontend/next@16`).
 
 ## Setup
@@ -50,7 +53,7 @@ pnpm exec playwright install --with-deps chromium firefox webkit
 import { defineConfig, devices } from '@playwright/test'
 
 export default defineConfig({
-  testDir: './tests/e2e',
+  testDir: './e2e',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
@@ -70,31 +73,41 @@ export default defineConfig({
     { name: 'setup', testMatch: /global\.setup\.ts/ },
     {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome'], storageState: 'tests/.auth/user.json' },
+      use: { ...devices['Desktop Chrome'], storageState: 'e2e/.auth/user.json' },
       dependencies: ['setup'],
     },
     {
       name: 'firefox',
-      use: { ...devices['Desktop Firefox'], storageState: 'tests/.auth/user.json' },
+      use: { ...devices['Desktop Firefox'], storageState: 'e2e/.auth/user.json' },
       dependencies: ['setup'],
     },
     {
       name: 'webkit',
-      use: { ...devices['Desktop Safari'], storageState: 'tests/.auth/user.json' },
+      use: { ...devices['Desktop Safari'], storageState: 'e2e/.auth/user.json' },
       dependencies: ['setup'],
     },
     {
       name: 'mobile-chrome',
-      use: { ...devices['Pixel 7'], storageState: 'tests/.auth/user.json' },
+      use: { ...devices['Pixel 7'], storageState: 'e2e/.auth/user.json' },
+      dependencies: ['setup'],
+    },
+    {
+      // smoke pós-deploy (`@processes/deploy`): só testes com tag @smoke, contra PLAYWRIGHT_BASE_URL
+      name: 'smoke',
+      grep: /@smoke/,
+      use: { ...devices['Desktop Chrome'], storageState: 'e2e/.auth/user.json' },
       dependencies: ['setup'],
     },
   ],
-  webServer: {
-    command: process.env.CI ? 'pnpm start' : 'pnpm dev',
-    url: 'http://localhost:3000',
-    reuseExistingServer: !process.env.CI,
-    timeout: 120_000,
-  },
+  // com PLAYWRIGHT_BASE_URL (staging/prod) não sobe servidor local
+  webServer: process.env.PLAYWRIGHT_BASE_URL
+    ? undefined
+    : {
+        command: process.env.CI ? 'pnpm start' : 'pnpm dev',
+        url: 'http://localhost:3000',
+        reuseExistingServer: !process.env.CI,
+        timeout: 120_000,
+      },
 })
 ```
 
@@ -102,6 +115,7 @@ Pontos não-óbvios:
 
 - `webServer` lida com o ciclo de vida do servidor Next.js — não suba manualmente em CI.
 - `dependencies: ['setup']` garante que o projeto `setup` rode antes e produza o `storageState`.
+- Smoke test é marcado com tag: `test('login funciona', { tag: '@smoke' }, async ({ page }) => { ... })`. O pipeline de deploy roda `pnpm exec playwright test --project=smoke` com `PLAYWRIGHT_BASE_URL` apontando para o ambiente recém-deployado.
 - `trace: 'on-first-retry'` é o sweet spot: zero overhead em testes verdes, trace completo no retry que precede o failure final.
 
 ## Browsers e emulação de dispositivos
@@ -223,7 +237,7 @@ await page.route('**/api/payments', async (route) => {
   await route.fulfill({
     status: 200,
     contentType: 'application/json',
-    body: JSON.stringify({ status: 'approved', id: 'pay_123' }),
+    body: JSON.stringify({ status: 'approved', id: '01926f3a-8c1e-7b2a-9f4d-3e5b6c7d8e9f' }),
   })
 })
 ```
@@ -232,7 +246,7 @@ Aguardar resposta antes de asserção:
 
 ```ts
 const [response] = await Promise.all([
-  page.waitForResponse((r) => r.url().includes('/api/orders') && r.status() === 201),
+  page.waitForResponse((r) => r.url().includes('/v1/orders') && r.status() === 201),
   page.getByRole('button', { name: 'Confirmar' }).click(),
 ])
 expect(await response.json()).toMatchObject({ status: 'pending' })
@@ -241,15 +255,15 @@ expect(await response.json()).toMatchObject({ status: 'pending' })
 Para Route Handlers Next.js, use o `request` fixture (sem browser):
 
 ```ts
-test('POST /api/orders', async ({ request }) => {
-  const res = await request.post('/api/orders', { data: { itemId: '123' } })
+test('POST /v1/orders', async ({ request }) => {
+  const res = await request.post('/v1/orders', { data: { items: [{ sku: 'A1', quantity: 1 }], currency: 'BRL' } })
   expect(res.status()).toBe(201)
 })
 ```
 
 ## Storage state: login uma vez
 
-Em `tests/global.setup.ts`:
+Em `e2e/global.setup.ts`:
 
 ```ts
 import { test as setup } from '@playwright/test'
@@ -260,7 +274,7 @@ setup('authenticate', async ({ page }) => {
   await page.getByLabel('Senha').fill(process.env.E2E_PASSWORD!)
   await page.getByRole('button', { name: 'Entrar' }).click()
   await page.waitForURL('/dashboard')
-  await page.context().storageState({ path: 'tests/.auth/user.json' })
+  await page.context().storageState({ path: 'e2e/.auth/user.json' })
 })
 ```
 
@@ -268,14 +282,18 @@ Alternativa via API (mais rápida, sem renderizar tela de login):
 
 ```ts
 setup('authenticate via API', async ({ request }) => {
-  const res = await request.post('/api/login', {
+  const res = await request.post('/v1/sessions', {
     data: { email: process.env.E2E_USER, password: process.env.E2E_PASSWORD },
   })
-  await request.storageState({ path: 'tests/.auth/user.json' })
+  await request.storageState({ path: 'e2e/.auth/user.json' })
 })
 ```
 
-Adicione `tests/.auth/` ao `.gitignore`.
+Adicione `e2e/.auth/` ao `.gitignore`:
+
+```gitignore
+e2e/.auth/
+```
 
 ## Fixtures custom
 
@@ -307,6 +325,8 @@ Cada fixture roda isolada por teste — sem state vazando.
 
 ## Component testing
 
+> **Não adotado neste baseline (ADR 0004, E5).** O pacote está uma versão atrás do `@playwright/test` e depende de `experimental-ct-core` exato. Use Vitest browser mode para componentes; volte a esta seção quando o pacote acompanhar o `@playwright/test`.
+
 `@playwright/experimental-ct-react` testa componentes React 19 em browser real:
 
 ```bash
@@ -315,10 +335,10 @@ pnpm add -D @playwright/experimental-ct-react
 
 ```ts
 import { test, expect } from '@playwright/experimental-ct-react'
-import { PriceTag } from '@/components/price-tag'
+import { PriceTag } from '@/entities/order/ui/PriceTag'
 
 test('formata BRL', async ({ mount }) => {
-  const component = await mount(<PriceTag value={1234.5} />)
+  const component = await mount(<PriceTag amountMinor={123450} currency="BRL" />)
   await expect(component).toHaveText('R$ 1.234,50')
 })
 ```
@@ -395,17 +415,29 @@ Codegen produz rascunho — sempre revise locators (substitua CSS por roles) ant
 Esqueleto:
 
 ```yaml
-- uses: actions/setup-node@v4
-  with: { node-version: '20' }
-- run: pnpm install --frozen-lockfile
-- run: pnpm exec playwright install --with-deps
-- run: pnpm exec playwright test --shard=${{ matrix.shard }}/4
-- uses: actions/upload-artifact@v4
-  if: always()
-  with:
-    name: playwright-report-${{ matrix.shard }}
-    path: playwright-report/
-    retention-days: 14
+e2e:
+  runs-on: ubuntu-latest
+  strategy:
+    fail-fast: false
+    matrix:
+      shard: [1, 2, 3, 4]
+  steps:
+    - uses: actions/checkout@v7
+    - uses: pnpm/action-setup@v6
+    - uses: actions/setup-node@v7
+      with:
+        node-version-file: .nvmrc # Node 26.10.0 (ADR 0004)
+        cache: pnpm
+    - run: pnpm install --frozen-lockfile
+    - run: pnpm exec playwright install --with-deps
+    - run: pnpm build # webServer roda `pnpm start` em CI, que exige build prévio
+    - run: pnpm exec playwright test --shard=${{ matrix.shard }}/4
+    - uses: actions/upload-artifact@v7
+      if: always()
+      with:
+        name: playwright-report-${{ matrix.shard }}
+        path: playwright-report/
+        retention-days: 14
 ```
 
 Sharding (`--shard=1/4` ... `4/4`) paraleliza por máquinas. `retries: 2` em CI mascara flake leve mas não substitui locators corretos — investigue toda flake que retry resolve.
@@ -453,7 +485,7 @@ Se o time exige Gherkin, use `playwright-bdd` (gera testes Playwright a partir d
 - `@practices/bdd` — critério para Gherkin vs Playwright nativo.
 - `@stacks/testing/vitest` — runner unit/integration paralelo; divisão de responsabilidades.
 - `@stacks/frontend/next@16` — `webServer`, dev vs start, App Router.
-- `@stacks/frontend/react@19` — component testing target.
+- `@stacks/frontend/react@19` — componentes testados no E2E (teste de componente isolado fica no Vitest, E5).
 - `@stacks/language/typescript@7` — tipagem do config e de fixtures custom.
 
 ## Upstream

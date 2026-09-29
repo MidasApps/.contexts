@@ -1,0 +1,146 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "conversations",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "userId", "order": "ASCENDING" },
+        { "fieldPath": "updatedAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "embeddingsSql",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "clientId", "order": "ASCENDING" },
+        { "fieldPath": "personaId", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "embeddingsBlocks",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "clientId", "order": "ASCENDING" },
+        { "fieldPath": "blockType", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "embeddingsDocs",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "sourceDocId", "order": "ASCENDING" },
+        { "fieldPath": "chunkIndex", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "sqlCatalog",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "clientId", "order": "ASCENDING" },
+        { "fieldPath": "updatedAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "sqlCatalog",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "clientId", "order": "ASCENDING" },
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "updatedAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "sqlCatalog",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "clientId", "order": "ASCENDING" },
+        { "fieldPath": "personaId", "order": "ASCENDING" },
+        { "fieldPath": "updatedAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "sqlCatalog",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "clientId", "order": "ASCENDING" },
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "personaId", "order": "ASCENDING" },
+        { "fieldPath": "updatedAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "sqlCatalog",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "sqlHash", "order": "ASCENDING" },
+        { "fieldPath": "clientId", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "sqlCatalog",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "glossaryVersion", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "sqlCatalog",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "regulatoryPackVersion", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "sqlCatalogEvents",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "clientId", "order": "ASCENDING" },
+        { "fieldPath": "ts", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "evalRuns",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "suite", "order": "ASCENDING" },
+        { "fieldPath": "startedAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "evalRuns",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "suite", "order": "ASCENDING" },
+        { "fieldPath": "scorerName", "order": "ASCENDING" },
+        { "fieldPath": "startedAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "evalRuns",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "judgeModelVersion", "order": "ASCENDING" },
+        { "fieldPath": "startedAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "judgeDrift",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "scorerName", "order": "ASCENDING" },
+        { "fieldPath": "detectedAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "judgeDrift",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "alert", "order": "ASCENDING" },
+        { "fieldPath": "detectedAt", "order": "DESCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}

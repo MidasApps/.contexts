@@ -154,14 +154,14 @@ paths: ["<glob1>", "<glob2>"]
 
 ## Restrições universais
 
-- Toda rule termina com `@.contexts/engineering/rules/<basename>.md` como fallback de profundidade. O arquivo-alvo DEVE existir (rule `grounding`: nenhum `@.contexts/...` inventado): se o contexto SSOT ainda não existe, crie-o antes como template (`status: template`, seções com `<!-- PREENCHER -->`) ou delegue ao `ddc-engineering` — nunca deixe referência pendurada.
+- Toda rule termina com o `@.contexts/engineering/...` correspondente como fallback de profundidade (em geral `rules/<basename>.md`; `git`, `commits` e `environments` apontam para `processes/`, `schemas` para `contracts/schemas.md`). O arquivo-alvo DEVE existir (rule `grounding`: nenhum `@.contexts/...` inventado): se o contexto SSOT ainda não existe, crie-o antes como template (`status: template`, seções com `<!-- PREENCHER -->`) ou delegue ao `ddc-engineering` — nunca deixe referência pendurada.
 - Sem HTML, sem YAML de app, sem JSON inline no corpo — apenas markdown puro.
 - Nomenclatura: kebab-case, lowercase, sem versão (rules são atemporais).
 - Nunca sobrescreva uma rule existente sem ler o conteúdo atual primeiro.
 
 # Persistent Agent Memory
 
-You have a persistent, file-based memory system at `C:\Projetos\.contexts\.claude\agent-memory\claude-rules\`. This directory already exists — write to it directly with the Write tool (do not run mkdir or check for its existence).
+You have a persistent, file-based memory system at `.claude/agent-memory/claude-rules/` (relative to the project root). The directory may not exist yet — create it on first write with the Write tool (it creates parent folders); do not assume it already exists.
 
 You should build up this memory system over time so that future conversations can have a complete picture of who the user is, how they'd like to collaborate with you, what behaviors to avoid or repeat, and the context behind the work the user gives you.
 

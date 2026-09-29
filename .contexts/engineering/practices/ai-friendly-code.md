@@ -1,8 +1,8 @@
 ---
 title: AI-Friendly Code
-type: practice
+type: practices
 status: active
-last_updated: 2026-05-20
+last_updated: 2026-09-28
 ---
 
 # AI-Friendly Code
@@ -72,9 +72,9 @@ Quando o agente edita o schema, ele encontra o teste correspondente a 1 hop de l
 
 ### 6. Navegabilidade programática
 
-- **Imports explícitos**: `import { createOrder } from '@/features/orders/api'` — não `import * as orders from '@/features/orders'`.
+- **Imports explícitos**: `import { createOrder } from '@/features/orders'` — não `import * as orders from '@/features/orders'`.
 - **Exports nomeados > default exports**: nome estável, agent resolve símbolo deterministicamente.
-- **`index.ts` minimal** (re-exporta no máximo o que é API pública da feature; não barrel gigante).
+- **`index.ts` minimal** (re-exporta no máximo o que é API pública da feature; não barrel gigante; sem `export *`). Dentro do slice/feature importe o módulo direto.
 - **Path aliases consistentes**: `@/features/orders/...` em vez de `../../../features/orders/...`.
 - **Types co-localizados** com o código que os usa, ou em pasta `types/` clara da feature.
 
@@ -150,7 +150,7 @@ O agente **não duplica acidentalmente** porque há um lugar canônico. Convenç
 
 ```ts
 // Bom
-import { createOrder, cancelOrder } from '@/features/orders/api';
+import { createOrder, cancelOrder } from '@/features/orders';
 
 // Ruim
 import orders from '@/features/orders';
@@ -160,25 +160,32 @@ orders.createOrder(...);
 ### Co-location
 
 ```
-features/orders/
-  schema.ts      // Zod schemas
-  types.ts       // tipos derivados
-  api.ts         // funções de boundary
-  hooks.ts       // hooks React
-  components/
-  __tests__/
+src/features/place-order/
+  ui/
+    PlaceOrderForm.tsx       // componente React (PascalCase)
+  model/
+    types.ts                 // tipos que não derivam de schema
+    use-place-order.ts       // hook React
+  api/
+    place-order.ts           // chamada de boundary (Server Action / fetch)
+    place-order.test.ts      // testes colocados ao lado do código, sem __tests__/
+  index.ts                   // public API mínima
+src/contracts/orders/
+  place-order-input.schema.ts  // PlaceOrderInputSchema; z.infer fica aqui
 ```
+
+O input de place-order cruza client ↔ server, então não fica no slice: mora em `src/contracts/<context>/` (`@contracts/schemas` §2). Só schema usado apenas pelo slice fica em `model/<name>.schema.ts`.
 
 Ver `@architecture/feature-based` e `@architecture/fsd`.
 
 ### Inline types em funções complexas
 
 ```ts
-function reserveStock(input: {
+const reserveStock = (input: {
   sku: string;
   quantity: number;
   warehouseId: WarehouseId;
-}): Result<Reservation, StockError> { ... }
+}): Result<Reservation, StockError> => { ... };
 ```
 
 O agente "vê" o contrato sem abrir outro arquivo.
@@ -203,7 +210,7 @@ Onde houver invariantes, efeitos colaterais ou preconditions não expressáveis 
  * @throws {StockUnavailableError} se quantity > available
  * @precondition warehouseId deve existir em warehouses ativos
  */
-function reserveStock(...) { ... }
+const reserveStock = (...) => { ... };
 ```
 
 ### Schemas Zod nomeados em inputs/outputs públicos
@@ -248,16 +255,21 @@ Testes como especificação executável — ver `@practices/tdd` e `@practices/b
 ```
 src/
   features/
-    orders/
-      schema.ts
-      types.ts
-      api.ts
-      hooks.ts
-      components/
-      __tests__/
+    place-order/
+      ui/
+      model/
+      api/
+        place-order.ts
+        place-order.test.ts   // testes colocados ao lado do código
+      index.ts
       README.md
     checkout/
       ...
+  contracts/
+    orders/                # schemas compartilhados client ↔ server
+      place-order-input.schema.ts
+  services/
+    orders/                # backend do contexto (@architecture/feature-based)
   shared/                  # primitivas reutilizáveis (FSD-style)
     ui/
     lib/

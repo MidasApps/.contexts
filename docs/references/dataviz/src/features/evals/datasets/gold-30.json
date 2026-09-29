@@ -1,0 +1,881 @@
+[
+  {
+    "id": "gold-001",
+    "templateId": 1,
+    "personaId": "cfo-securitizadora",
+    "clientId": "vila-rosa",
+    "briefing": "Quero ver a evolucao da inadimplencia 90+ por safra dos ultimos 24 meses, segmentada por LTV original (faixas: <50%, 50-70%, 70-90%, >90%).",
+    "expectedKpis": [
+      "inadimplencia_90",
+      "ltv_original",
+      "safra"
+    ],
+    "expectedVisuals": [
+      "line_chart",
+      "stacked_bar"
+    ],
+    "expectedTopics": [
+      "inadimplencia",
+      "safra",
+      "LTV"
+    ],
+    "expectedRegulatory": [
+      "CMN_2682"
+    ],
+    "goldScores": {
+      "sql_correctness": 0.77,
+      "layout_coherence": 0.7,
+      "persona_fit": 0.39,
+      "business_correctness": 0.36,
+      "citation_grounding": 0.49
+    }
+  },
+  {
+    "id": "gold-002",
+    "templateId": 1,
+    "personaId": "controller",
+    "clientId": "vila-rosa",
+    "briefing": "Preciso do PDD por bucket de atraso (15-30, 31-60, 61-90, 90+) comparando T-1 vs T-0, com variacao percentual.",
+    "expectedKpis": [
+      "pdd",
+      "buckets_atraso",
+      "delta_pct"
+    ],
+    "expectedVisuals": [
+      "table",
+      "bar_chart"
+    ],
+    "expectedTopics": [
+      "PDD",
+      "buckets",
+      "comparativo"
+    ],
+    "expectedRegulatory": [
+      "CMN_2682",
+      "IFRS_9"
+    ],
+    "goldScores": {
+      "sql_correctness": 0.76,
+      "layout_coherence": 0.68,
+      "persona_fit": 0.72,
+      "business_correctness": 0.79,
+      "citation_grounding": 0.69
+    }
+  },
+  {
+    "id": "gold-003",
+    "templateId": 1,
+    "personaId": "diretor-fii-cri",
+    "clientId": "vila-rosa",
+    "briefing": "Quero o DSCR consolidado dos CRIs ativos no fundo, com flag de covenants quebrados nos ultimos 6 meses.",
+    "expectedKpis": [
+      "dscr",
+      "covenants_status"
+    ],
+    "expectedVisuals": [
+      "kpi_card",
+      "table"
+    ],
+    "expectedTopics": [
+      "DSCR",
+      "covenants",
+      "CRI"
+    ],
+    "expectedRegulatory": [
+      "CVM_60"
+    ],
+    "goldScores": {
+      "sql_correctness": 0.84,
+      "layout_coherence": 0.86,
+      "persona_fit": 0.98,
+      "business_correctness": 0.89,
+      "citation_grounding": 0.87
+    }
+  },
+  {
+    "id": "gold-004",
+    "templateId": 1,
+    "personaId": "gestor-carteira-securitizadora",
+    "clientId": "vila-rosa",
+    "briefing": "Mostre carteira ativa por produto (MCMV, SBPE, livre) com saldo devedor, prazo medio, taxa media e WAL.",
+    "expectedKpis": [
+      "saldo_devedor",
+      "prazo_medio",
+      "taxa_media",
+      "wal"
+    ],
+    "expectedVisuals": [
+      "table",
+      "donut_chart"
+    ],
+    "expectedTopics": [
+      "MCMV",
+      "SBPE",
+      "carteira"
+    ],
+    "goldScores": {
+      "sql_correctness": 0.91,
+      "layout_coherence": 0.63,
+      "persona_fit": 0.9,
+      "business_correctness": 0.59,
+      "citation_grounding": 0.63
+    }
+  },
+  {
+    "id": "gold-005",
+    "templateId": 1,
+    "personaId": "analista-credito",
+    "clientId": "vila-rosa",
+    "briefing": "Distribuicao de score interno na originacao dos ultimos 12 meses, com taxa de aprovacao por faixa.",
+    "expectedKpis": [
+      "score_interno",
+      "taxa_aprovacao"
+    ],
+    "expectedVisuals": [
+      "histogram",
+      "line_chart"
+    ],
+    "expectedTopics": [
+      "score",
+      "originacao",
+      "aprovacao"
+    ],
+    "goldScores": {
+      "sql_correctness": 0.95,
+      "layout_coherence": 0.74,
+      "persona_fit": 0.87,
+      "business_correctness": 0.61,
+      "citation_grounding": 0.9
+    }
+  },
+  {
+    "id": "gold-006",
+    "templateId": 2,
+    "personaId": "gestor-credito-obra",
+    "clientId": "vila-rosa",
+    "briefing": "Acompanhamento de obras em andamento: avanco fisico vs avanco financeiro, alertas de descasamento >10%.",
+    "expectedKpis": [
+      "avanco_fisico",
+      "avanco_financeiro",
+      "descasamento_pct"
+    ],
+    "expectedVisuals": [
+      "scatter",
+      "alert_table"
+    ],
+    "expectedTopics": [
+      "obra",
+      "avanco",
+      "descasamento"
+    ],
+    "goldScores": {
+      "sql_correctness": 0.69,
+      "layout_coherence": 0.81,
+      "persona_fit": 0.99,
+      "business_correctness": 0.91,
+      "citation_grounding": 0.91
+    }
+  },
+  {
+    "id": "gold-007",
+    "templateId": 2,
+    "personaId": "gestor-repasse",
+    "clientId": "vila-rosa",
+    "briefing": "Funil de repasse: aptos, em diligencia, formalizados, pagos. Tempo medio em cada etapa nos ultimos 90 dias.",
+    "expectedKpis": [
+      "funil_repasse",
+      "tempo_medio_etapa"
+    ],
+    "expectedVisuals": [
+      "funnel",
+      "bar_chart"
+    ],
+    "expectedTopics": [
+      "repasse",
+      "funil",
+      "diligencia"
+    ],
+    "goldScores": {
+      "sql_correctness": 0.44,
+      "layout_coherence": 0.66,
+      "persona_fit": 0.65,
+      "business_correctness": 0.38,
+      "citation_grounding": 0.44
+    }
+  },
+  {
+    "id": "gold-008",
+    "templateId": 2,
+    "personaId": "backoffice-cartorario",
+    "clientId": "vila-rosa",
+    "briefing": "Status de registros em cartorio: aguardando prenotacao, prenotados, registrados. SLA medio por cartorio.",
+    "expectedKpis": [
+      "status_registro",
+      "sla_cartorio"
+    ],
+    "expectedVisuals": [
+      "table",
+      "bar_chart"
+    ],
+    "expectedTopics": [
+      "cartorio",
+      "registro",
+      "SLA"
+    ],
+    "goldScores": {
+      "sql_correctness": 0.84,
+      "layout_coherence": 0.57,
+      "persona_fit": 0.74,
+      "business_correctness": 0.74,
+      "citation_grounding": 0.61
+    }
+  },
+  {
+    "id": "gold-009",
+    "templateId": 2,
+    "personaId": "analista-cobranca",
+    "clientId": "vila-rosa",
+    "briefing": "Cohort de recuperacao de inadimplentes 30-60 dias: % que volta a adimplencia em 30/60/90 dias por canal de cobranca.",
+    "expectedKpis": [
+      "taxa_recuperacao",
+      "canal_cobranca"
+    ],
+    "expectedVisuals": [
+      "cohort_table",
+      "line_chart"
+    ],
+    "expectedTopics": [
+      "cobranca",
+      "recuperacao",
+      "cohort"
+    ],
+    "goldScores": {
+      "sql_correctness": 0.68,
+      "layout_coherence": 0.93,
+      "persona_fit": 0.59,
+      "business_correctness": 0.56,
+      "citation_grounding": 0.64
+    }
+  },
+  {
+    "id": "gold-010",
+    "templateId": 2,
+    "personaId": "corretor",
+    "clientId": "vila-rosa",
+    "briefing": "Producao por corretor nos ultimos 6 meses: VGV originado, ticket medio, taxa de conversao proposta-contrato.",
+    "expectedKpis": [
+      "vgv",
+      "ticket_medio",
+      "taxa_conversao"
+    ],
+    "expectedVisuals": [
+      "table",
+      "bar_chart"
+    ],
+    "expectedTopics": [
+      "corretor",
+      "VGV",
+      "conversao"
+    ],
+    "goldScores": {
+      "sql_correctness": 0.86,
+      "layout_coherence": 0.91,
+      "persona_fit": 0.97,
+      "business_correctness": 0.78,
+      "citation_grounding": 0.82
+    }
+  },
+  {
+    "id": "gold-011",
+    "templateId": 3,
+    "personaId": "ceo-incorporadora",
+    "clientId": "vila-rosa",
+    "briefing": "Painel executivo: VGV vendido, distratos, recebiveis em aberto, top 5 empreendimentos por margem bruta.",
+    "expectedKpis": [
+      "vgv_vendido",
+      "distratos",
+      "recebiveis",
+      "margem_bruta"
+    ],
+    "expectedVisuals": [
+      "kpi_card",
+      "table"
+    ],
+    "expectedTopics": [
+      "executivo",
+      "VGV",
+      "distrato",
+      "margem"
+    ],
+    "expectedRegulatory": [
+      "Lei_13786"
+    ],
+    "goldScores": {
+      "sql_correctness": 0.8,
+      "layout_coherence": 0.85,
+      "persona_fit": 0.79,
+      "business_correctness": 0.69,
+      "citation_grounding": 0.79
+    }
+  },
+  {
+    "id": "gold-012",
+    "templateId": 3,
+    "personaId": "diretor-credito-banco",
+    "clientId": "vila-rosa",
+    "briefing": "Visao consolidada da carteira imobiliaria: saldo, inadimplencia, PDD, ROE estimado por produto.",
+    "expectedKpis": [
+      "saldo",
+      "inadimplencia",
+      "pdd",
+      "roe"
+    ],
+    "expectedVisuals": [
+      "kpi_card",
+      "stacked_bar"
+    ],
+    "expectedTopics": [
+      "carteira",
+      "ROE",
+      "PDD"
+    ],
+    "expectedRegulatory": [
+      "CMN_2682",
+      "IFRS_9"
+    ],
+    "goldScores": {
+      "sql_correctness": 0.97,
+      "layout_coherence": 0.68,
+      "persona_fit": 0.89,
+      "business_correctness": 0.95,
+      "citation_grounding": 0.84
+    }
+  },
+  {
+    "id": "gold-013",
+    "templateId": 3,
+    "personaId": "cfo-securitizadora",
+    "clientId": "vila-rosa",
+    "briefing": "Resultado dos CRIs do trimestre: receita de juros, amortizacoes, fluxo de caixa projetado vs realizado.",
+    "expectedKpis": [
+      "receita_juros",
+      "amortizacoes",
+      "fluxo_caixa"
+    ],
+    "expectedVisuals": [
+      "waterfall",
+      "line_chart"
+    ],
+    "expectedTopics": [
+      "CRI",
+      "fluxo_caixa",
+      "trimestre"
+    ],
+    "expectedRegulatory": [
+      "CVM_60"
+    ],
+    "goldScores": {
+      "sql_correctness": 0.64,
+      "layout_coherence": 0.76,
+      "persona_fit": 0.4,
+      "business_correctness": 0.45,
+      "citation_grounding": 0.38
+    }
+  },
+  {
+    "id": "gold-014",
+    "templateId": 3,
+    "personaId": "controller",
+    "clientId": "vila-rosa",
+    "briefing": "DRE gerencial mensal dos ultimos 6 meses, com decomposicao de receita por produto e despesas operacionais.",
+    "expectedKpis": [
+      "receita",
+      "despesas",
+      "ebitda"
+    ],
+    "expectedVisuals": [
+      "table",
+      "stacked_bar"
+    ],
+    "expectedTopics": [
+      "DRE",
+      "receita",
+      "EBITDA"
+    ],
+    "goldScores": {
+      "sql_correctness": 0.9,
+      "layout_coherence": 0.59,
+      "persona_fit": 0.72,
+      "business_correctness": 0.75,
+      "citation_grounding": 0.77
+    }
+  },
+  {
+    "id": "gold-015",
+    "templateId": 3,
+    "personaId": "diretor-fii-cri",
+    "clientId": "vila-rosa",
+    "briefing": "Performance dos FIIs sob gestao: dividend yield 12m, P/VP, ocupacao media, vacancia financeira.",
+    "expectedKpis": [
+      "dy",
+      "pvp",
+      "vacancia"
+    ],
+    "expectedVisuals": [
+      "kpi_card",
+      "table"
+    ],
+    "expectedTopics": [
+      "FII",
+      "DY",
+      "vacancia"
+    ],
+    "expectedRegulatory": [
+      "CVM_60"
+    ],
+    "goldScores": {
+      "sql_correctness": 0.78,
+      "layout_coherence": 0.86,
+      "persona_fit": 0.55,
+      "business_correctness": 0.57,
+      "citation_grounding": 0.78
+    }
+  },
+  {
+    "id": "gold-016",
+    "templateId": 4,
+    "personaId": "analista-credito",
+    "clientId": "vila-rosa",
+    "briefing": "Compare originacao 2024 vs 2025 YTD: volume, ticket medio, LTV, score medio, taxa de aprovacao.",
+    "expectedKpis": [
+      "volume_originacao",
+      "ticket_medio",
+      "ltv",
+      "score_medio"
+    ],
+    "expectedVisuals": [
+      "table_compare",
+      "bar_chart"
+    ],
+    "expectedTopics": [
+      "originacao",
+      "comparativo",
+      "YoY"
+    ],
+    "goldScores": {
+      "sql_correctness": 0.74,
+      "layout_coherence": 0.87,
+      "persona_fit": 0.84,
+      "business_correctness": 0.7,
+      "citation_grounding": 0.69
+    }
+  },
+  {
+    "id": "gold-017",
+    "templateId": 4,
+    "personaId": "gestor-carteira-securitizadora",
+    "clientId": "vila-rosa",
+    "briefing": "Inadimplencia 90+ por safra: compare safras 2022, 2023 e 2024 nos mesmos meses-on-book (MOB).",
+    "expectedKpis": [
+      "inadimplencia_90",
+      "mob",
+      "safra"
+    ],
+    "expectedVisuals": [
+      "line_chart",
+      "table"
+    ],
+    "expectedTopics": [
+      "safra",
+      "MOB",
+      "inadimplencia"
+    ],
+    "expectedRegulatory": [
+      "CMN_2682"
+    ],
+    "goldScores": {
+      "sql_correctness": 0.98,
+      "layout_coherence": 0.56,
+      "persona_fit": 0.85,
+      "business_correctness": 0.76,
+      "citation_grounding": 0.62
+    }
+  },
+  {
+    "id": "gold-018",
+    "templateId": 4,
+    "personaId": "ceo-incorporadora",
+    "clientId": "vila-rosa",
+    "briefing": "Distratos 2025 vs 2024 por empreendimento, com motivo de distrato segmentado e impacto financeiro.",
+    "expectedKpis": [
+      "distratos",
+      "motivo",
+      "impacto_financeiro"
+    ],
+    "expectedVisuals": [
+      "table",
+      "stacked_bar"
+    ],
+    "expectedTopics": [
+      "distrato",
+      "comparativo",
+      "motivo"
+    ],
+    "expectedRegulatory": [
+      "Lei_13786"
+    ],
+    "goldScores": {
+      "sql_correctness": 0.98,
+      "layout_coherence": 0.57,
+      "persona_fit": 0.62,
+      "business_correctness": 0.9,
+      "citation_grounding": 0.63
+    }
+  },
+  {
+    "id": "gold-019",
+    "templateId": 4,
+    "personaId": "diretor-credito-banco",
+    "clientId": "vila-rosa",
+    "briefing": "Carteira MCMV vs SBPE: saldo, inadimplencia, prazo medio e LTV. Compare evolucao 12m.",
+    "expectedKpis": [
+      "saldo",
+      "inadimplencia",
+      "ltv",
+      "prazo_medio"
+    ],
+    "expectedVisuals": [
+      "table_compare",
+      "line_chart"
+    ],
+    "expectedTopics": [
+      "MCMV",
+      "SBPE",
+      "comparativo"
+    ],
+    "goldScores": {
+      "sql_correctness": 0.46,
+      "layout_coherence": 0.71,
+      "persona_fit": 0.63,
+      "business_correctness": 0.64,
+      "citation_grounding": 0.62
+    }
+  },
+  {
+    "id": "gold-020",
+    "templateId": 4,
+    "personaId": "gestor-repasse",
+    "clientId": "vila-rosa",
+    "briefing": "Compare tempo de repasse Q1 vs Q2 2025 por banco repassador, identifique outliers >P95.",
+    "expectedKpis": [
+      "tempo_repasse",
+      "p95"
+    ],
+    "expectedVisuals": [
+      "box_plot",
+      "table"
+    ],
+    "expectedTopics": [
+      "repasse",
+      "comparativo",
+      "outlier"
+    ],
+    "goldScores": {
+      "sql_correctness": 0.56,
+      "layout_coherence": 0.68,
+      "persona_fit": 0.84,
+      "business_correctness": 0.83,
+      "citation_grounding": 0.59
+    }
+  },
+  {
+    "id": "gold-021",
+    "templateId": 5,
+    "personaId": "cfo-securitizadora",
+    "clientId": "vila-rosa",
+    "briefing": "Quais CRIs estao em risco de quebra de covenant nos proximos 90 dias? Liste com DSCR projetado.",
+    "expectedKpis": [
+      "dscr_projetado",
+      "covenant_risk"
+    ],
+    "expectedVisuals": [
+      "table",
+      "alert_list"
+    ],
+    "expectedTopics": [
+      "covenant",
+      "risco",
+      "CRI"
+    ],
+    "expectedRegulatory": [
+      "CVM_60",
+      "CMN_4676"
+    ],
+    "goldScores": {
+      "sql_correctness": 0.87,
+      "layout_coherence": 0.74,
+      "persona_fit": 0.87,
+      "business_correctness": 0.73,
+      "citation_grounding": 0.99
+    }
+  },
+  {
+    "id": "gold-022",
+    "templateId": 5,
+    "personaId": "analista-cobranca",
+    "clientId": "vila-rosa",
+    "briefing": "Top 50 contratos com maior probabilidade de default nos proximos 30 dias, com score de propensao.",
+    "expectedKpis": [
+      "pd_30d",
+      "saldo_em_risco"
+    ],
+    "expectedVisuals": [
+      "table",
+      "histogram"
+    ],
+    "expectedTopics": [
+      "default",
+      "propensao",
+      "risco"
+    ],
+    "expectedRegulatory": [
+      "IFRS_9"
+    ],
+    "goldScores": {
+      "sql_correctness": 0.97,
+      "layout_coherence": 0.84,
+      "persona_fit": 0.64,
+      "business_correctness": 0.93,
+      "citation_grounding": 0.91
+    }
+  },
+  {
+    "id": "gold-023",
+    "templateId": 5,
+    "personaId": "gestor-credito-obra",
+    "clientId": "vila-rosa",
+    "briefing": "Empreendimentos com risco de atraso na obra >60 dias: avanco fisico, financeiro e medidas mitigatorias.",
+    "expectedKpis": [
+      "risco_atraso",
+      "avanco_fisico",
+      "avanco_financeiro"
+    ],
+    "expectedVisuals": [
+      "table",
+      "gauge"
+    ],
+    "expectedTopics": [
+      "obra",
+      "atraso",
+      "risco"
+    ],
+    "goldScores": {
+      "sql_correctness": 0.93,
+      "layout_coherence": 0.77,
+      "persona_fit": 0.84,
+      "business_correctness": 0.92,
+      "citation_grounding": 0.71
+    }
+  },
+  {
+    "id": "gold-024",
+    "templateId": 5,
+    "personaId": "diretor-fii-cri",
+    "clientId": "vila-rosa",
+    "briefing": "Stress test do FII: cenario base, otimista, pessimista. Impacto em DY e P/VP em cada cenario.",
+    "expectedKpis": [
+      "dy",
+      "pvp",
+      "cenario"
+    ],
+    "expectedVisuals": [
+      "table_compare",
+      "tornado"
+    ],
+    "expectedTopics": [
+      "stress_test",
+      "cenario",
+      "FII"
+    ],
+    "expectedRegulatory": [
+      "CVM_60"
+    ],
+    "goldScores": {
+      "sql_correctness": 0.82,
+      "layout_coherence": 0.88,
+      "persona_fit": 0.97,
+      "business_correctness": 0.84,
+      "citation_grounding": 0.87
+    }
+  },
+  {
+    "id": "gold-025",
+    "templateId": 5,
+    "personaId": "controller",
+    "clientId": "vila-rosa",
+    "briefing": "PDD esperada IFRS 9 por estagio (1, 2, 3) com migracao entre estagios nos ultimos 6 meses.",
+    "expectedKpis": [
+      "pdd_estagio",
+      "migracao"
+    ],
+    "expectedVisuals": [
+      "sankey",
+      "table"
+    ],
+    "expectedTopics": [
+      "IFRS_9",
+      "PDD",
+      "migracao"
+    ],
+    "expectedRegulatory": [
+      "IFRS_9",
+      "CMN_2682"
+    ],
+    "goldScores": {
+      "sql_correctness": 0.65,
+      "layout_coherence": 0.62,
+      "persona_fit": 0.56,
+      "business_correctness": 0.36,
+      "citation_grounding": 0.75
+    }
+  },
+  {
+    "id": "gold-026",
+    "templateId": 6,
+    "personaId": "ceo-incorporadora",
+    "clientId": "vila-rosa",
+    "briefing": "Como esta a venda do empreendimento Jardim Atlantico? VGV vendido, unidades vendidas, ritmo mensal.",
+    "expectedKpis": [
+      "vgv_vendido",
+      "unidades_vendidas",
+      "ritmo_venda"
+    ],
+    "expectedVisuals": [
+      "kpi_card",
+      "line_chart"
+    ],
+    "expectedTopics": [
+      "empreendimento",
+      "VGV",
+      "venda"
+    ],
+    "goldScores": {
+      "sql_correctness": 0.62,
+      "layout_coherence": 0.83,
+      "persona_fit": 0.89,
+      "business_correctness": 0.8,
+      "citation_grounding": 0.99
+    }
+  },
+  {
+    "id": "gold-027",
+    "templateId": 6,
+    "personaId": "corretor",
+    "clientId": "vila-rosa",
+    "briefing": "Minha producao do mes: contratos, comissao apurada, propostas em andamento.",
+    "expectedKpis": [
+      "contratos_mes",
+      "comissao",
+      "propostas_pendentes"
+    ],
+    "expectedVisuals": [
+      "kpi_card",
+      "table"
+    ],
+    "expectedTopics": [
+      "corretor",
+      "comissao",
+      "producao"
+    ],
+    "goldScores": {
+      "sql_correctness": 0.6,
+      "layout_coherence": 0.7,
+      "persona_fit": 0.56,
+      "business_correctness": 0.72,
+      "citation_grounding": 0.56
+    }
+  },
+  {
+    "id": "gold-028",
+    "templateId": 6,
+    "personaId": "backoffice-cartorario",
+    "clientId": "vila-rosa",
+    "briefing": "Quais contratos estao parados no cartorio ha mais de 30 dias? Liste com data de envio e status.",
+    "expectedKpis": [
+      "dias_parado",
+      "status"
+    ],
+    "expectedVisuals": [
+      "table"
+    ],
+    "expectedTopics": [
+      "cartorio",
+      "atraso",
+      "registro"
+    ],
+    "goldScores": {
+      "sql_correctness": 0.87,
+      "layout_coherence": 0.68,
+      "persona_fit": 0.65,
+      "business_correctness": 0.8,
+      "citation_grounding": 0.83
+    }
+  },
+  {
+    "id": "gold-029",
+    "templateId": 6,
+    "personaId": "analista-credito",
+    "clientId": "vila-rosa",
+    "briefing": "Quantas propostas estao na minha fila de analise hoje? Por faixa de ticket e score.",
+    "expectedKpis": [
+      "propostas_fila",
+      "ticket",
+      "score"
+    ],
+    "expectedVisuals": [
+      "kpi_card",
+      "histogram"
+    ],
+    "expectedTopics": [
+      "analise",
+      "fila",
+      "credito"
+    ],
+    "goldScores": {
+      "sql_correctness": 0.86,
+      "layout_coherence": 0.86,
+      "persona_fit": 0.81,
+      "business_correctness": 0.88,
+      "citation_grounding": 0.79
+    }
+  },
+  {
+    "id": "gold-030",
+    "templateId": 6,
+    "personaId": "gestor-repasse",
+    "clientId": "vila-rosa",
+    "briefing": "Lista de contratos prontos para repasse esta semana, com banco repassador e valor.",
+    "expectedKpis": [
+      "contratos_aptos",
+      "valor_repasse"
+    ],
+    "expectedVisuals": [
+      "table"
+    ],
+    "expectedTopics": [
+      "repasse",
+      "semana",
+      "banco"
+    ],
+    "expectedRegulatory": [
+      "CMN_4676"
+    ],
+    "goldScores": {
+      "sql_correctness": 0.64,
+      "layout_coherence": 0.9,
+      "persona_fit": 0.6,
+      "business_correctness": 0.89,
+      "citation_grounding": 0.86
+    }
+  }
+]

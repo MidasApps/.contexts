@@ -14,7 +14,7 @@ related:
 > **TEMPLATE — ainda não preenchido.** Estrutura boilerplate do DDC (carregada sob
 > demanda pela skill `metrics`). Não invente valores, metas ou nomes de métricas.
 
-## North Star Metric
+## Métrica North Star
 <!-- PREENCHER: a métrica única que melhor captura valor entregue + definição exata de cálculo. -->
 
 ## KPIs por estágio do funil
@@ -24,7 +24,7 @@ related:
 |---|---|---|---|
 | <!-- PREENCHER --> | | | |
 
-## Guardrail metrics
+## Métricas de proteção
 <!-- PREENCHER: métricas que não podem degradar ao otimizar as demais (ex.: churn, NPS, custo por request). -->
 
 ## Instrumentação

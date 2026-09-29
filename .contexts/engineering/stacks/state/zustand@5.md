@@ -1,7 +1,8 @@
 ---
 title: Zustand
-version: 5.x
-last_updated: 2026-07-13
+type: stacks
+version: 5.0.15
+last_updated: 2026-09-28
 status: current
 upstream: https://zustand.docs.pmnd.rs
 repository: https://github.com/pmndrs/zustand
@@ -38,31 +39,31 @@ Regras imperativas detalhadas em `@rules/state-management`.
 - **`useSyncExternalStore` exclusivo**: shim com `useEffect` foi removido. Integração nativa com React 18/19, sem tearing em modo concurrent, melhor comportamento em SSR.
 - **TypeScript-first com double-call signature**: `create<State>()(creator)` é o padrão. Necessário para inferência correta com middleware encadeado.
 - **Default selectors**: `useStore()` sem selector ainda funciona mas é fortemente desencorajado. Preferir selector explícito + `useShallow` para objetos.
-- **`use-sync-external-store` removido das peer deps**: agora built-in via React. Peer dep mínima é React >=18.
+- **`use-sync-external-store` fora do caminho padrão**: `create`/`useStore` usam `React.useSyncExternalStore` nativo (React >=18). O pacote continua sendo peer opcional apenas para `zustand/traditional` (`createWithEqualityFn`).
 - **`createStore` vs `create`**: separação clara entre store vanilla (uso fora do React) e hook React.
-- **Middleware**: bumps em `persist`, `subscribeWithSelector`, `devtools`, `immer`, `combine`, `redux`. Imports a partir de `zustand/middleware/...`.
+- **Middleware**: bumps em `persist`, `subscribeWithSelector`, `devtools`, `immer`, `combine`, `redux`. Imports a partir de `zustand/middleware` (exceção: `immer`, em `zustand/middleware/immer`).
 
 ## API essencial
 
 ```ts
-import { create } from 'zustand'
+import { create } from 'zustand';
 
 type CounterState = {
-  count: number
-  inc: () => void
-  reset: () => void
-}
+  count: number;
+  inc: () => void;
+  reset: () => void;
+};
 
 export const useCounterStore = create<CounterState>()((set, get) => ({
   count: 0,
   inc: () => set((s) => ({ count: s.count + 1 })),
   reset: () => set({ count: 0 }),
-}))
+}));
 ```
 
 - `set(partial | (state) => partial)` — merge superficial por default. `set(partial, true)` substitui o state inteiro.
 - `get()` — leitura síncrona do estado atual. Usar com parcimônia; preferir derivar do state via selector.
-- `useStore(selector, equalityFn?)` — em 5, equality default é `Object.is`. Usar `useShallow(selector)` para objetos retornados.
+- `useStore(selector)` — em 5 o segundo argumento `equalityFn` foi removido; equality é `Object.is`. Usar `useShallow(selector)` para objetos retornados, ou `createWithEqualityFn` de `zustand/traditional` quando precisar de equality customizada.
 - `subscribe((state, prev) => ...)` — reação fora do React. Combinar com `subscribeWithSelector` para fatia específica.
 
 ## Patterns de definição
@@ -70,25 +71,21 @@ export const useCounterStore = create<CounterState>()((set, get) => ({
 ### Selectors granulares (preferido)
 
 ```ts
-// Sempre selector explícito
-const count = useCounterStore((s) => s.count)
-const inc = useCounterStore((s) => s.inc)
-
-// Múltiplos valores: preferir múltiplas chamadas (reatividade ótima)
-const count = useCounterStore((s) => s.count)
-const inc = useCounterStore((s) => s.inc)
+// Sempre selector explícito. Múltiplos valores: preferir múltiplas chamadas (reatividade ótima)
+const count = useCounterStore((s) => s.count);
+const inc = useCounterStore((s) => s.inc);
 
 // Quando precisar agrupar objeto, use useShallow
-import { useShallow } from 'zustand/react/shallow'
-const { a, b } = useCounterStore(useShallow((s) => ({ a: s.a, b: s.b })))
+import { useShallow } from 'zustand/react/shallow';
+const { a, b } = useCounterStore(useShallow((s) => ({ a: s.a, b: s.b })));
 ```
 
 ### Hooks dedicados (recomendado em stores médios)
 
 ```ts
-export const useCount = () => useCounterStore((s) => s.count)
+export const useCount = () => useCounterStore((s) => s.count);
 export const useCounterActions = () =>
-  useCounterStore(useShallow((s) => ({ inc: s.inc, reset: s.reset })))
+  useCounterStore(useShallow((s) => ({ inc: s.inc, reset: s.reset })));
 ```
 
 Mantém call sites limpos, centraliza memoization e facilita refactor.
@@ -96,44 +93,44 @@ Mantém call sites limpos, centraliza memoization e facilita refactor.
 ### Slices pattern (stores grandes)
 
 ```ts
-import { StateCreator, create } from 'zustand'
+import { StateCreator, create } from 'zustand';
 
-type UiSlice = { sidebarOpen: boolean; toggleSidebar: () => void }
-type AuthSlice = { user: User | null; setUser: (u: User | null) => void }
+type UiSlice = { sidebarOpen: boolean; toggleSidebar: () => void };
+type AuthSlice = { user: User | null; setUser: (u: User | null) => void };
 
 const createUiSlice: StateCreator<UiSlice & AuthSlice, [], [], UiSlice> = (set) => ({
   sidebarOpen: false,
   toggleSidebar: () => set((s) => ({ sidebarOpen: !s.sidebarOpen })),
-})
+});
 
 const createAuthSlice: StateCreator<UiSlice & AuthSlice, [], [], AuthSlice> = (set) => ({
   user: null,
   setUser: (user) => set({ user }),
-})
+});
 
 export const useAppStore = create<UiSlice & AuthSlice>()((...a) => ({
   ...createUiSlice(...a),
   ...createAuthSlice(...a),
-}))
+}));
 ```
 
-Slices escalam quando um store cresce; antes disso, preferir múltiplos stores atômicos pequenos.
+Sob FSD o arquivo do store fica em `model/use-<name>-store.ts` do slice (ex. `features/auth/model/use-auth-store.ts`). Slices escalam quando um store cresce; antes disso, preferir múltiplos stores atômicos pequenos.
 
 ### Vanilla store
 
 ```ts
-import { createStore } from 'zustand/vanilla'
+import { createStore } from 'zustand/vanilla';
 
 export const counterStore = createStore<CounterState>()((set) => ({
   count: 0,
   inc: () => set((s) => ({ count: s.count + 1 })),
   reset: () => set({ count: 0 }),
-}))
+}));
 
 // Em React, criar hook a partir do vanilla store
-import { useStore } from 'zustand'
+import { useStore } from 'zustand';
 export const useCounterStore = <T>(selector: (s: CounterState) => T) =>
-  useStore(counterStore, selector)
+  useStore(counterStore, selector);
 ```
 
 Útil para compartilhar lógica entre React, Workers e bibliotecas.
@@ -145,7 +142,7 @@ Todos importados de `zustand/middleware`. Encadear via composição funcional; p
 ### `persist`
 
 ```ts
-import { persist, createJSONStorage } from 'zustand/middleware'
+import { persist, createJSONStorage } from 'zustand/middleware';
 
 export const usePrefsStore = create<PrefsState>()(
   persist(
@@ -163,12 +160,12 @@ export const usePrefsStore = create<PrefsState>()(
         if (version < 2) {
           // transformação do schema legado
         }
-        return persisted as PrefsState
+        return persisted as PrefsState;
       },
       skipHydration: true, // hidratação manual no Next.js
     }
   )
-)
+);
 ```
 
 Cuidados com Next.js 16: SSR não tem `localStorage`, então `skipHydration: true` + chamada manual de `usePrefsStore.persist.rehydrate()` dentro de `useEffect` evita mismatches. Alternativa: gate de leitura com `useHydrated()` hook customizado.
@@ -178,7 +175,7 @@ Regras de segurança sobre o que persistir em `@rules/security`. Resumo: nunca t
 ### `devtools`
 
 ```ts
-import { devtools } from 'zustand/middleware'
+import { devtools } from 'zustand/middleware';
 
 export const useCounterStore = create<CounterState>()(
   devtools(
@@ -189,7 +186,7 @@ export const useCounterStore = create<CounterState>()(
     }),
     { name: 'counter', enabled: process.env.NODE_ENV !== 'production' }
   )
-)
+);
 ```
 
 Nomear actions via terceiro arg de `set` (segundo arg é o replace flag). Desabilitar em produção.
@@ -197,17 +194,17 @@ Nomear actions via terceiro arg de `set` (segundo arg é o replace flag). Desabi
 ### `immer`
 
 ```ts
-import { immer } from 'zustand/middleware/immer'
+import { immer } from 'zustand/middleware/immer';
 
 export const useNestedStore = create<State>()(
   immer((set) => ({
     nested: { deeply: { value: 0 } },
     bump: () =>
       set((s) => {
-        s.nested.deeply.value += 1
+        s.nested.deeply.value += 1;
       }),
   }))
-)
+);
 ```
 
 Útil quando o estado é profundamente aninhado. Trade-off: bundle maior; só adotar quando o ganho de legibilidade compensa.
@@ -215,20 +212,20 @@ export const useNestedStore = create<State>()(
 ### `subscribeWithSelector`
 
 ```ts
-import { subscribeWithSelector } from 'zustand/middleware'
+import { subscribeWithSelector } from 'zustand/middleware';
 
 const useStore = create<State>()(
   subscribeWithSelector((set) => ({
     /* ... */
   }))
-)
+);
 
 useStore.subscribe(
   (s) => s.user?.id,
   (id, prev) => {
-    if (id !== prev) analytics.identify(id)
+    if (id !== prev) analytics.identify(id);
   }
-)
+);
 ```
 
 Para reagir a uma fatia específica fora do React.
@@ -236,13 +233,13 @@ Para reagir a uma fatia específica fora do React.
 ### `combine`
 
 ```ts
-import { combine } from 'zustand/middleware'
+import { combine } from 'zustand/middleware';
 
 export const useCounterStore = create(
   combine({ count: 0 }, (set) => ({
     inc: () => set((s) => ({ count: s.count + 1 })),
   }))
-)
+);
 ```
 
 Inferência automática a partir do initial state. Bom para stores triviais; em stores com actions complexas, preferir `create<State>()(...)` explícito.
@@ -261,23 +258,23 @@ Ver `@stacks/frontend/next@16`.
 - Estado por-request (multi-tenant): usar pattern Context + per-request store factory:
 
 ```tsx
-'use client'
-import { createContext, useContext, useRef } from 'react'
-import { createStore, useStore } from 'zustand'
+'use client';
+import { createContext, useContext, useRef } from 'react';
+import { createStore, useStore } from 'zustand';
 
-type Store = ReturnType<typeof createAppStore>
-const StoreContext = createContext<Store | null>(null)
+type Store = ReturnType<typeof createAppStore>;
+const StoreContext = createContext<Store | null>(null);
 
 export function AppStoreProvider({ initial, children }: Props) {
-  const ref = useRef<Store>()
-  if (!ref.current) ref.current = createAppStore(initial)
-  return <StoreContext.Provider value={ref.current}>{children}</StoreContext.Provider>
+  const ref = useRef<Store | null>(null);
+  if (!ref.current) ref.current = createAppStore(initial);
+  return <StoreContext.Provider value={ref.current}>{children}</StoreContext.Provider>;
 }
 
-export function useAppStore<T>(selector: (s: AppState) => T) {
+export function useAppStoreContext<T>(selector: (s: AppState) => T) {
   const store = useContext(StoreContext)
-  if (!store) throw new Error('AppStoreProvider missing')
-  return useStore(store, selector)
+  if (!store) throw new Error('AppStoreProvider missing');
+  return useStore(store, selector);
 }
 ```
 
@@ -336,7 +333,7 @@ Ver `@rules/testing`.
   ```ts
   export const useStore = create<State>()((set) => ({
     ...initial,
-    _reset: () => set(initial, true),
+    _reset: () => set(initial), // merge: volta os campos e mantém as actions; set(initial, true) apagaria _reset e as actions
   }))
 
   // beforeEach

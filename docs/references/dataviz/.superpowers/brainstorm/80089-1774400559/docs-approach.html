@@ -1,0 +1,96 @@
+<h2>Docs Page: Qual abordagem?</h2>
+<p class="subtitle">Essa pagina sera a referencia tecnica para entender e melhorar os agentes. Qual estilo funciona melhor?</p>
+
+<div class="cards">
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#111; padding:24px; border-radius:8px 8px 0 0;">
+      <div style="display:flex; gap:12px; margin-bottom:16px;">
+        <div style="padding:8px 16px; background:#F3A169; color:#000; border-radius:8px; font-size:12px; font-weight:600;">Canvas Orchestrator</div>
+        <div style="padding:8px 16px; background:#333; color:#888; border-radius:8px; font-size:12px;">Descriptive</div>
+        <div style="padding:8px 16px; background:#333; color:#888; border-radius:8px; font-size:12px;">Diagnostic</div>
+        <div style="padding:8px 16px; background:#333; color:#888; border-radius:8px; font-size:12px;">Predictive</div>
+      </div>
+      <div style="background:#0a0b10; border:1px solid #222; border-radius:12px; padding:20px;">
+        <div style="color:#F3A169; font-size:13px; font-weight:600; margin-bottom:8px;">System Prompt</div>
+        <div style="color:#666; font-size:11px; font-family:monospace; line-height:1.6;">
+          Voce e o Canvas Orchestrator...<br>
+          SEMPRE comece com plan_analysis...<br>
+          <span style="color:#888;">// prompt completo expandivel</span>
+        </div>
+      </div>
+      <div style="display:flex; gap:8px; margin-top:12px;">
+        <div style="flex:1; background:#0a0b10; border:1px solid #222; border-radius:8px; padding:12px;">
+          <div style="color:#6ECB8A; font-size:10px;">18 Tools</div>
+        </div>
+        <div style="flex:1; background:#0a0b10; border:1px solid #222; border-radius:8px; padding:12px;">
+          <div style="color:#7AA2F7; font-size:10px;">30 Max Steps</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A. Tab Navigation por Agente</h3>
+      <p>Tabs no topo para cada agente. Ao selecionar, mostra: system prompt, tools, parametros, modelo, e fluxo visual. Clean e direto.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#111; padding:24px; border-radius:8px 8px 0 0;">
+      <div style="display:flex; gap:16px;">
+        <div style="width:200px; border-right:1px solid #222; padding-right:16px;">
+          <div style="color:#F3A169; font-size:11px; margin-bottom:12px; font-weight:600;">AGENTES</div>
+          <div style="color:#fff; font-size:12px; padding:6px 8px; background:#F3A169/20; border-radius:6px; margin-bottom:4px;">Canvas Orchestrator</div>
+          <div style="color:#888; font-size:12px; padding:6px 8px; margin-bottom:4px;">Descriptive Agent</div>
+          <div style="color:#888; font-size:12px; padding:6px 8px; margin-bottom:4px;">Diagnostic Agent</div>
+          <div style="color:#666; font-size:10px; margin-top:12px; font-weight:600;">CONTEXTO</div>
+          <div style="color:#888; font-size:12px; padding:6px 8px; margin-bottom:4px;">Business Rules</div>
+          <div style="color:#888; font-size:12px; padding:6px 8px; margin-bottom:4px;">Schema</div>
+        </div>
+        <div style="flex:1;">
+          <div style="color:#fff; font-size:14px; font-weight:600; margin-bottom:8px;">Canvas Orchestrator</div>
+          <div style="display:flex; gap:6px; margin-bottom:12px;">
+            <span style="font-size:10px; background:#F3A169/20; color:#F3A169; padding:3px 8px; border-radius:4px;">reasoning</span>
+            <span style="font-size:10px; background:#333; color:#888; padding:3px 8px; border-radius:4px;">30 steps</span>
+          </div>
+          <div style="color:#888; font-size:11px; line-height:1.5;">System prompt, tools, diagrama de fluxo...</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B. Sidebar Navigation (estilo docs)</h3>
+      <p>Sidebar esquerda com arvore de navegacao (agentes, contexto compartilhado, schema). Conteudo detalhado a direita. Mais espaco para conteudo longo.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#111; padding:24px; border-radius:8px 8px 0 0;">
+      <div style="text-align:center; margin-bottom:16px;">
+        <div style="display:inline-block; background:#F3A169; color:#000; padding:12px 20px; border-radius:12px; font-weight:700; font-size:13px;">Canvas Orchestrator</div>
+      </div>
+      <div style="display:flex; justify-content:center; gap:4px; margin-bottom:8px;">
+        <div style="width:2px; height:20px; background:#F3A169;"></div>
+      </div>
+      <div style="display:flex; justify-content:center; gap:24px; flex-wrap:wrap;">
+        <div style="background:#0a0b10; border:1px solid #333; border-radius:8px; padding:10px 14px; font-size:11px; color:#7AA2F7;">plan_analysis</div>
+        <div style="background:#0a0b10; border:1px solid #333; border-radius:8px; padding:10px 14px; font-size:11px; color:#6ECB8A;">query_data</div>
+        <div style="background:#0a0b10; border:1px solid #333; border-radius:8px; padding:10px 14px; font-size:11px; color:#F27C7C;">analyze</div>
+      </div>
+      <div style="display:flex; justify-content:center; gap:4px; margin:8px 0;">
+        <div style="width:2px; height:20px; background:#F27C7C;"></div>
+      </div>
+      <div style="display:flex; justify-content:center; gap:12px;">
+        <div style="background:#1a1a2e; border:1px solid #F27C7C/30; border-radius:8px; padding:8px 12px; font-size:10px; color:#F27C7C;">Descriptive</div>
+        <div style="background:#1a1a2e; border:1px solid #F27C7C/30; border-radius:8px; padding:8px 12px; font-size:10px; color:#F27C7C;">Predictive</div>
+        <div style="background:#1a1a2e; border:1px solid #F27C7C/30; border-radius:8px; padding:8px 12px; font-size:10px; color:#F27C7C;">Simulation</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C. Visual-First (diagrama interativo)</h3>
+      <p>Diagrama central mostrando a arquitetura. Clicar em cada no expande os detalhes (prompt, tools, parametros). Mais visual, como um mapa de sistema.</p>
+    </div>
+  </div>
+</div>
+
+<div style="margin-top:24px; padding:16px; background:#111; border:1px solid #222; border-radius:12px;">
+  <h3 style="margin:0 0 8px;">Minha recomendacao: B + C combinado</h3>
+  <p style="color:#888; font-size:13px; margin:0;">Sidebar para navegacao rapida (B) com um diagrama de arquitetura interativo como pagina inicial (C). Ao clicar em um agente na sidebar ou no diagrama, abre o detalhe completo com prompt, tools, e fluxo. Melhor dos dois mundos.</p>
+</div>

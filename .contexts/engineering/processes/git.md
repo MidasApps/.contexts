@@ -1,4 +1,12 @@
-﻿# Git Workflow
+---
+title: Git Workflow
+type: processes
+status: active
+scope: engineering
+last_updated: 2026-09-28
+---
+
+# Git Workflow
 
 Convenção operacional de versionamento, colaboração e integração para o repositório. Define o modelo de branching, sincronização, merge, hotfix, release e higiene. Tom prescritivo: o que está aqui é o fluxo oficial; desvios exigem justificativa em PR ou ADR.
 
@@ -10,8 +18,7 @@ Convenção operacional de versionamento, colaboração e integração para o re
 
 - `main` é o trunk único — sempre deployable, sempre verde.
 - Feature branches vivem **horas a poucos dias**, no máximo uma semana antes de rebase ou merge.
-- **GitHub Flow leve** é aceitável quando o time precisar de uma alternativa mais simples (sem release branches), mantendo as mesmas garantias de proteção e PR.
-- **Git Flow é rejeitado**: overhead de `develop`, `release/*` e `hotfix/*` paralelos não compensa em projetos com CI/CD contínuo e deploy direto de `main`.
+- **Git Flow é rejeitado**: overhead de `develop` e de `release/*`/`hotfix/*` de longa duração não compensa em projetos com CI/CD contínuo e deploy direto de `main`.
 
 Long-lived feature branches são proibidas — use feature flags para entregar código incompleto em produção (ver `@rules/governance`).
 
@@ -37,7 +44,7 @@ Types alinhados com Conventional Commits (ver `@processes/commits`):
 **Válido:**
 - `feat/order-checkout`
 - `fix/auth-redirect-loop`
-- `chore/upgrade-next-15`
+- `chore/upgrade-next-16`
 - `refactor/extract-payment-gateway`
 
 **Inválido:**
@@ -98,8 +105,7 @@ Se a rebase ficar inviável por volume de conflitos, **fechar o PR, abrir nova b
 | Cenário | Estratégia |
 |---|---|
 | Feature branch → main | **Squash merge** (1 commit por feature, mensagem Conventional) |
-| Release branch → main | Merge commit (preservar histórico granular do release) |
-| Hotfix → main | Squash merge ou fast-forward |
+| Hotfix → `main` (backfill) | PR com cherry-pick do fix, squash merge (seção 9) |
 | Branch já rebaseada e linear | Fast-forward quando viável |
 
 Squash é o default porque `main` carrega 1 commit semântico por unidade entregue, e o histórico granular fica preservado no PR.
@@ -112,14 +118,14 @@ Squash é o default porque `main` carrega 1 commit semântico por unidade entreg
 
 - Mensagens seguem **Conventional Commits** (ver `@processes/commits`).
 - Cada commit deve **buildar e passar testes localmente** — `git bisect` precisa funcionar.
-- Commits "WIP" são aceitáveis durante o trabalho, mas **devem ser squashed** antes do merge.
+- Commits `wip` são aceitáveis só em branch local e **devem ser squashed** antes do push/PR (ver `@processes/commits`, Squash policy).
 - Commits atômicos: uma mudança lógica por commit.
 
 ---
 
 ## 8. Pull Requests
 
-- **Tamanho ideal: <400 LOC** (incluindo testes). Acima de 1000 LOC, dividir.
+- **Tamanho ideal: <400 LOC reais** (sem lockfile/gerado). Acima de 800 LOC, dividir (limite em `@processes/pull-requests`).
 - **Um propósito por PR.** Refactor + feature na mesma PR é anti-pattern.
 - Template e checklist em `@processes/pull-requests`.
 - Critérios de review em `@rules/code-review`.
@@ -131,24 +137,24 @@ Squash é o default porque `main` carrega 1 commit semântico por unidade entreg
 Para correções urgentes em produção:
 
 ```
-1. git switch -c hotfix/<issue> origin/main
-2. fix + teste
-3. PR fast-track (review obrigatório, CI obrigatório, mas prioridade alta)
-4. squash merge em main
-5. deploy imediato
-6. tag de patch release (vX.Y.Z+1)
+1. git switch -c hotfix/<issue-id>-<slug> <tag-de-producao>   # ex.: v1.4.2, não main
+2. fix + teste de regressão
+3. PR fast-track com label `hotfix` (review e CI obrigatórios, prioridade alta)
+4. tag de patch (vX.Y.Z+1, ex.: v1.4.3) criada pela tool de release no commit aprovado do hotfix (`@processes/release` §11)
+5. deploy imediato a partir da tag
+6. backfill em main: PR com cherry-pick do fix, squash merge
+7. postmortem
 ```
 
-Backfill em main acontece automaticamente — não há `develop` para sincronizar.
+Sequência idêntica a `@processes/release` seção 11. O backfill em `main` é obrigatório para o fix não regredir na próxima release. Não há `develop` para sincronizar.
 
 ---
 
 ## 10. Release
 
-- Releases marcadas com **tags anotadas semver**: `git tag -a v1.2.3 -m "release: <resumo>"`.
-- Push explícito: `git push origin v1.2.3` (ou `git push --tags`).
-- Formato obrigatório: `vMAJOR.MINOR.PATCH` (ver `@processes/release`).
-- Tags lightweight (`git tag v1.2.3` sem `-a`) são proibidas — perdem metadados de autor, data e mensagem.
+- Tags de release são criadas pela **tool de release** (Release Please) no merge do PR de release — processo canônico em `@processes/release` §4–5. Não criar tag de release à mão.
+- Formato obrigatório: `vMAJOR.MINOR.PATCH`, sem prefixo de componente (ver `@processes/release`).
+- Tag criada manualmente (fora da tool, exceção registrada no PR/incidente) é sempre anotada: `git tag -a vX.Y.Z -m "<mensagem>"` + `git push origin vX.Y.Z`.
 
 ---
 
@@ -258,9 +264,8 @@ Exceção única para reescrita em `main`: vazamento de secret. Procedimento exi
 
 ## 18. Tags
 
-- Sempre **anotadas**: `git tag -a vX.Y.Z -m "<mensagem>"`.
+- Criadas pela tool de release (§10, `@processes/release`); tag manual de exceção é **anotada** (`git tag -a`).
 - Sempre **semver**: `vMAJOR.MINOR.PATCH`, prefixo `v` obrigatório.
-- Push explícito: `git push origin vX.Y.Z` ou `git push --tags`.
 - Tags são imutáveis — para corrigir, criar nova versão patch.
 
 ---
@@ -278,7 +283,7 @@ Submodules são justificáveis apenas para integrar repositórios externos que n
 
 ## 20. Monorepo
 
-Estrutura padrão com pnpm workspaces:
+Layout do repositório (monorepo com workspaces vs `src/` único): **a definir pelo projeto** (ver `@architecture/fsd` e `@.contexts/engineering/MEMORY.md`). Se o projeto adotar monorepo, estrutura sugerida com pnpm workspaces:
 
 ```
 .
@@ -306,7 +311,7 @@ Estrutura padrão com pnpm workspaces:
 | Branch stale | >30 dias sem atividade → alerta automático ou cleanup |
 | PR stale | >7 dias sem update → escalar ao autor ou fechar |
 | Branches merged | Deletar remoto automaticamente após merge |
-| Histórico de releases | Preservado via tags anotadas, nunca via branches |
+| Histórico de releases | Preservado via tags `vX.Y.Z`, nunca via branches |
 
 Auditoria mensal: listar branches remotas, identificar stale, agir.
 
@@ -326,14 +331,14 @@ Lista enforce — qualquer item abaixo é motivo legítimo para bloqueio em revi
 
 - Branches de longa duração (>1 semana sem rebase em `main`).
 - `git merge main` dentro de feature branch (use rebase).
-- PR gigante (>1000 LOC) sem justificativa.
+- PR gigante (>800 LOC reais) sem justificativa.
 - Commits "WIP" mergeados sem squash.
 - `git push --force` puro (use `--force-with-lease`).
 - `git push --force` em branch compartilhada sem aviso.
 - Commitar `node_modules`, `.env`, secrets, binários voláteis.
 - Branch sem prefixo type (`minha-branch` em vez de `feat/minha-branch`).
 - Direct push em `main`.
-- Tag sem anotação (`git tag v1.2.3` em vez de `git tag -a`).
+- Tag de release criada à mão fora da tool de release (ou tag manual sem anotação).
 - Tag fora do formato semver.
 - Submodules quando workspaces resolvem.
 - Reescrita de histórico após push compartilhado.

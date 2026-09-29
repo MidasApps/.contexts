@@ -3,7 +3,7 @@ title: Convenções de modelagem para APIs
 type: contracts
 scope: api
 status: active
-last_updated: 2026-05-20
+last_updated: 2026-09-28
 related:
   - "@rules/api-design"
   - "@rules/data-modeling"
@@ -26,7 +26,7 @@ Este documento governa **como desenhamos fronteiras HTTP/RPC** no projeto. Não 
 
 Aplica-se a:
 
-- Route Handlers do Next.js 16 (`app/api/**/route.ts`) — ver `@stacks/frontend/next@16`
+- Route Handlers do Next.js 16 em `src/app/v1/<resource>/route.ts`, que atende a URL `/v1/<resource>` da seção 2.1 — ver `@stacks/frontend/next@16`
 - Firebase Functions `onRequest` HTTP públicas — ver `@stacks/backend/firebase-functions`
 - Server Actions e Callable Functions (RPC interno — convenções específicas na seção *Internal vs Public APIs*)
 - Webhooks emitidos pelo sistema
@@ -53,9 +53,9 @@ Toda nova API consulta este documento **antes** de definir schema ou path.
 
 ### 1.3 IDs
 
-- **ULIDs** opacos em paths e payloads: `01HZX7K2P5N9V8M3Q4R6T7Y8U0`. Ver `@rules/data-modeling`.
-- **Nunca expor** IDs sequenciais internos de banco (PK auto-increment, Firestore auto-IDs internos não-ULID).
-- IDs são strings em JSON, sempre — mesmo que numéricos por baixo.
+- String opaca, sem prefixo de tipo. Postgres emite `uuidv7()`; Firestore usa o ID automático do documento (ADR 0005). Os dois são string no JSON. ULID fica para `eventId`, `Idempotency-Key` e `X-Request-Id`. Ver `@rules/data-modeling`.
+- **Nunca expor** IDs sequenciais internos de banco (PK auto-increment, contador).
+- IDs são strings em JSON, sempre.
 
 ### 1.4 Operações RPC (Server Actions, Callable Functions)
 
@@ -102,7 +102,7 @@ Não criar endpoints estilo `/v1/cancelOrder` no path REST público.
 Reservadas para filtros, paginação, ordenação e seleção de campos:
 
 ```
-GET /v1/orders?status=ACTIVE&createdAfter=2025-01-01&limit=20&cursor=eyJ...&sort=-createdAt
+GET /v1/orders?status=active&createdAfter=2025-01-01&limit=20&cursor=eyJ...&sort=-createdAt
 ```
 
 ---
@@ -157,9 +157,9 @@ JSON com camelCase. Nunca formulário `application/x-www-form-urlencoded` em API
 ```json
 POST /v1/orders
 {
-  "customerId": "01HZX...",
+  "customerId": "01932a7c-...",
   "items": [
-    { "productId": "01HZY...", "quantity": 2 }
+    { "productId": "01932a7d-...", "quantity": 2 }
   ],
   "shippingAddress": {
     "street": "...",
@@ -181,13 +181,13 @@ Todo input passa por schema Zod antes de qualquer lógica. Falha → 400 com err
 ```json
 {
   "data": {
-    "id": "01HZX...",
+    "id": "01932a7c-...",
     "createdAt": "2025-05-20T14:30:00.000Z",
     "...": "..."
   },
   "meta": {
     "requestId": "01HZX...",
-    "timestamp": "2025-05-20T14:30:00.123Z"
+    "respondedAt": "2025-05-20T14:30:00.123Z"
   }
 }
 ```
@@ -197,12 +197,12 @@ Todo input passa por schema Zod antes de qualquer lógica. Falha → 400 com err
 ```json
 {
   "data": [
-    { "id": "01HZX...", "...": "..." },
-    { "id": "01HZY...", "...": "..." }
+    { "id": "01932a7c-...", "...": "..." },
+    { "id": "01932a7d-...", "...": "..." }
   ],
   "meta": {
     "requestId": "01HZZ...",
-    "timestamp": "2025-05-20T14:30:00.123Z",
+    "respondedAt": "2025-05-20T14:30:00.123Z",
     "page": {
       "cursor": "eyJpZCI6IjAxSFpZLi4uIn0",
       "hasMore": true,
@@ -305,12 +305,12 @@ Não usar 403 para "não autenticado" nem 401 para "sem permissão". Distinguir 
 ### 8.2 Money
 
 ```json
-{ "amount": "1234.56", "currency": "BRL" }
+{ "amountMinor": 12345, "currency": "BRL" }
 ```
 
-- `amount`: **string decimal** (preserva precisão arbitrária).
-- `currency`: ISO 4217 maiúsculo (`BRL`, `USD`, `EUR`).
-- **Proibido**: `amount` como número (`1234.56` float), centavos como inteiro sem documentação explícita em escopo restrito.
+- `amountMinor`: inteiro na menor unidade da moeda. BRL 123,45 é `12345`. JPY não tem subdivisão: o inteiro é o yen.
+- `currency`: ISO 4217 maiúsculo (`BRL`, `USD`, `JPY`).
+- **Proibido**: float (`123.45`), string decimal (`"123.45"`) e string formatada (`"R$ 123,45"`).
 
 ### 8.3 Booleans
 
@@ -321,12 +321,13 @@ Não usar 403 para "não autenticado" nem 401 para "sem permissão". Distinguir 
 ### 8.4 Enums
 
 ```json
-{ "status": "PENDING_REVIEW" }
+{ "status": "pending_review" }
 ```
 
-- **SCREAMING_SNAKE_CASE** strings.
-- Evoluir aditivamente: adicionar valores novos é seguro **se** clientes tratam desconhecidos como passthrough (fallback `UNKNOWN`).
-- **Proibido**: enums como inteiros (`status: 1`), enums com case misto (`PendingReview`, `pending_review`).
+- **lowercase snake_case**, o mesmo literal em JSON, Firestore, Postgres e na união TypeScript.
+- Evoluir aditivamente: valor novo é seguro **se** o cliente trata desconhecido como passthrough (fallback `unknown`).
+- **Proibido**: enum como inteiro (`status: 1`), `PENDING_REVIEW`, `PendingReview`.
+- `eventName` não segue esta caixa. O nome do evento é `SCREAMING_SNAKE_CASE` (`@contracts/events`).
 
 ### 8.5 Strings
 
@@ -393,17 +394,17 @@ GET /v1/countries?offset=0&limit=50
 Query params nomeados pelo campo:
 
 ```
-?status=ACTIVE
-?status=ACTIVE,PENDING_REVIEW       # múltiplos valores separados por vírgula
+?status=active
+?status=active,pending_review       # múltiplos valores separados por vírgula
 ?createdAfter=2025-01-01T00:00:00Z
 ?createdBefore=2025-12-31T23:59:59Z
-?customerId=01HZX...
+?customerId=01932a7c-...
 ```
 
 Convenções:
 
-- Igualdade: `status=ACTIVE`.
-- Range em timestamp/número: sufixos `After`/`Before` ou `Min`/`Max` (`amountMin=100&amountMax=500`).
+- Igualdade: `status=active`.
+- Range em timestamp/número: sufixos `After`/`Before` ou `Min`/`Max` (`amountMinorMin=100&amountMinorMax=500`).
 - Busca textual livre: `q=...` (reservar `q` para isso, não usar como filtro estruturado).
 
 ### 10.2 Ordenação
@@ -454,7 +455,7 @@ Servidor retorna apenas campos solicitados. Suporte é opcional por endpoint; qu
 | `Vary` | Quando resposta varia por header (`Accept-Language`, `Authorization`) |
 | `Location` | 201 Created, apontando para o novo recurso |
 | `Sunset` | Endpoints deprecated — RFC 8594 |
-| `Deprecation` | Endpoints deprecated — `true` ou data |
+| `Deprecation` | Endpoints deprecated — RFC 9745, Structured Field Date (`@<epoch-segundos>`) |
 
 ---
 
@@ -482,13 +483,13 @@ Headers:
   X-Signature: sha256=<hex>
   X-Signature-Timestamp: 1716210600
   X-Event-Id: 01HZX...
-  X-Event-Type: order.created
+  X-Event-Type: ORDER_PLACED
   X-Delivery-Attempt: 1
 
 Body:
 {
   "eventId": "01HZX...",
-  "eventType": "order.created",
+  "eventName": "ORDER_PLACED",
   "occurredAt": "2025-05-20T14:30:00.000Z",
   "data": { ... }
 }
@@ -504,7 +505,7 @@ Body:
 
 ### 13.3 Naming de event types
 
-`<resource>.<verbo-passado>`: `order.created`, `order.cancelled`, `payment.refunded`, `user.email-verified`.
+`eventName` em `SCREAMING_SNAKE_CASE`, o mesmo literal de `@contracts/events`: `ORDER_PLACED`, `ORDER_CANCELLED`, `PAYMENT_REFUNDED`, `USER_EMAIL_VERIFIED`.
 
 Schema do payload de eventos vive em `@contracts/events`.
 
@@ -580,13 +581,14 @@ Quando um endpoint ou versão entra em fim de vida:
 
 ```
 HTTP/1.1 200 OK
-Deprecation: true
+Deprecation: @1782863999
 Sunset: Sat, 31 Dec 2026 23:59:59 GMT
-Link: </v2/orders>; rel="successor-version"
+Link: </v2/orders>; rel="successor-version", <https://developer.example.com/deprecations/orders-v1>; rel="deprecation"; type="text/html"
 ```
 
-- `Deprecation`: `true` ou data ISO de quando ficou deprecated.
-- `Sunset`: RFC 8594, data prevista de desligamento.
+- `Deprecation`: RFC 9745. Valor é Structured Field Date, `@` + epoch em segundos (`@1782863999` = 2026-06-30T23:59:59Z), a partir de quando o recurso é deprecated. `Deprecation: true` e data ISO não são válidos.
+- `Link rel="deprecation"` (RFC 9745): aponta para a documentação humana da deprecation.
+- `Sunset`: RFC 8594, HTTP-date da data prevista de desligamento.
 - `Link rel="successor-version"`: aponta para o substituto quando aplicável.
 - Janela mínima de 6 meses entre anúncio (`Deprecation`) e remoção (`Sunset`).
 - Comunicação fora-de-banda (changelog, e-mail) **complementa**, não substitui, os headers.
@@ -601,10 +603,10 @@ Lista de padrões que **violam** este contrato. Code review rejeita.
 |---|---|
 | `200 OK` com `{ "error": ... }` no body | Status code correto (4xx/5xx) com error envelope |
 | `user_id` em uma rota, `userId` em outra | camelCase em todo JSON |
-| IDs sequenciais de banco em path/payload | ULIDs opacos |
-| `status: 1` (enum como inteiro) | `"status": "ACTIVE"` |
+| IDs sequenciais de banco em path/payload | string opaca do id do store (`uuidv7` no Postgres, ID automático no Firestore) |
+| `status: 1` (enum como inteiro) | `"status": "active"` |
 | `createdAt: "2025-05-20 14:30:00"` (sem timezone) | ISO 8601 UTC com `Z` |
-| `amount: 1234.56` (money como float) | `{ "amount": "1234.56", "currency": "BRL" }` |
+| `amount: 1234.56` (money como float ou string decimal) | `{ "amountMinor": 123456, "currency": "BRL" }` |
 | `?page=2&pageSize=20` em lista dinâmica | Cursor-based |
 | Error response sem `requestId` | `requestId` sempre presente |
 | `message: "FirebaseError: ... at /path/to/file.ts:42"` | Mensagem user-facing, sem stack/SQL/path |
@@ -628,9 +630,9 @@ Antes de mergear uma rota nova, confirmar:
 - [ ] Status codes corretos por cenário (incluindo 401 vs 403).
 - [ ] `X-Request-Id` propagado em response.
 - [ ] Timestamps ISO 8601 UTC.
-- [ ] IDs são ULIDs opacos.
-- [ ] Enums em SCREAMING_SNAKE_CASE.
-- [ ] Money como `{ amount: string, currency: string }`.
+- [ ] IDs são string opaca do domínio, sem prefixo (`uuidv7` no Postgres, ID automático no Firestore).
+- [ ] Enums persistidos em lowercase snake_case.
+- [ ] Money como `{ amountMinor: number, currency: string }`.
 - [ ] Paginação cursor-based quando aplicável.
 - [ ] Erros nunca vazam stack/SQL/path.
 - [ ] OpenAPI atualizado e exemplos incluídos.

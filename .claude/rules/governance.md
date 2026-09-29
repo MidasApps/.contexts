@@ -1,5 +1,5 @@
 ---
-paths: [".claude/rules/**",".contexts/**"]
+paths: [".claude/**",".contexts/**","CLAUDE.md"]
 ---
 # Governance — ativa ao editar governança
 
@@ -12,7 +12,8 @@ Mudanças em rules/contexts seguem processo: ADR para decisão arquitetural, own
 - Mudança em rule sempre-ativa afeta todo turn → custo alto, revisão obrigatória.
 - Revisão periódica (trimestral) para deprecar rule que não reflete mais a prática.
 - Versionamento: mudança breaking em rule (ex.: invertendo recomendação) destaca na PR.
-- `.contexts/...` é fonte de verdade do projeto; `.claude/...` é a interface compilada para LLM.
+- `.contexts/...` é fonte de verdade do projeto; `.claude/...` é a interface compilada para LLM e só resume + aponta `@.contexts/...` que existe.
+- Versão/pacote atrás do `latest` só com linha de exceção no ADR 0004; ADR aceito não se edita, exceto por linhas em `## Amendments` (ver `decisions/README.md`); mudança de decisão = novo ADR que supersede. Em conflito entre documentos, vence o mais específico (ADR 0003).
 
 ## Checklist (aplicar a todo turn)
 - [ ] Mudança não-trivial em rule tem ADR associado ou referência.

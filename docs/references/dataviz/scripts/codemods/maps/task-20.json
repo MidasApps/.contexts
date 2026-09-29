@@ -1,0 +1,945 @@
+[
+  {
+    "file": "scripts/lib/provisioning-manifest.ts",
+    "line": 15,
+    "from": "nome",
+    "to": "name",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false
+  },
+  {
+    "file": "scripts/lib/__tests__/bootstrap-user-args.test.ts",
+    "line": 14,
+    "from": "ligadas",
+    "to": "enabled",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "scripts/lib/__tests__/bootstrap-user-args.test.ts",
+    "line": 17,
+    "from": "desligadas",
+    "to": "disabled",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "scripts/lib/__tests__/bootstrap-user-args.test.ts",
+    "line": 61,
+    "from": "faltando",
+    "to": "missing",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 7
+  },
+  {
+    "file": "scripts/lib/__tests__/bootstrap-user-args.test.ts",
+    "line": 67,
+    "from": "faltando",
+    "to": "missing",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 7
+  },
+  {
+    "file": "scripts/lib/__tests__/bootstrap-user-args.test.ts",
+    "line": 71,
+    "from": "faltando",
+    "to": "missing",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 7
+  },
+  {
+    "file": "scripts/lib/__tests__/manifest-cobre-o-banco.test.ts",
+    "line": 20,
+    "from": "conhecidas",
+    "to": "known",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "scripts/lib/__tests__/manifest-cobre-o-banco.test.ts",
+    "line": 28,
+    "from": "indexadas",
+    "to": "indexed",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "scripts/lib/__tests__/manifest-cobre-o-banco.test.ts",
+    "line": 30,
+    "from": "colecao",
+    "to": "collection",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "scripts/lib/__tests__/provisioning-manifest.test.ts",
+    "line": 14,
+    "from": "exportadas",
+    "to": "exported",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "scripts/lib/__tests__/provisioning-manifest.test.ts",
+    "line": 15,
+    "from": "proibida",
+    "to": "forbidden",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "scripts/lib/__tests__/provisioning-manifest.test.ts",
+    "line": 28,
+    "from": "nome",
+    "to": "name",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "scripts/lib/__tests__/provisioning-manifest.test.ts",
+    "line": 40,
+    "from": "exportadas",
+    "to": "exported",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "scripts/lib/__tests__/provisioning-manifest.test.ts",
+    "line": 66,
+    "from": "nomes",
+    "to": "names",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "scripts/lib/aux-tables-parse.ts",
+    "line": 38,
+    "from": "BancoRow",
+    "to": "BankRow",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2,
+    "note": "mixed-language"
+  },
+  {
+    "file": "scripts/lib/aux-tables-parse.ts",
+    "line": 49,
+    "from": "mapBancoRow",
+    "to": "mapBankRow",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4,
+    "note": "mixed-language"
+  },
+  {
+    "file": "scripts/lib/aux-tables-parse.ts",
+    "line": 61,
+    "from": "PluggyCategoriaRow",
+    "to": "PluggyCategoryRow",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2,
+    "note": "mixed-language"
+  },
+  {
+    "file": "scripts/lib/aux-tables-parse.ts",
+    "line": 77,
+    "from": "mapPluggyCategoriaRow",
+    "to": "mapPluggyCategoryRow",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5,
+    "note": "mixed-language"
+  },
+  {
+    "file": "scripts/lib/bootstrap-user-args.ts",
+    "line": 24,
+    "from": "valor",
+    "to": "value",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 8
+  },
+  {
+    "file": "scripts/lib/bootstrap-user-args.ts",
+    "line": 25,
+    "from": "lista",
+    "to": "list",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "scripts/lib/bootstrap-user-args.ts",
+    "line": 26,
+    "from": "bruto",
+    "to": "raw",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 13
+  },
+  {
+    "file": "scripts/lib/bootstrap-user-args.ts",
+    "line": 46,
+    "from": "ResolucaoIds",
+    "to": "IdResolution",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2,
+    "note": "mixed-language"
+  },
+  {
+    "file": "scripts/lib/bootstrap-user-args.ts",
+    "line": 48,
+    "from": "faltando",
+    "to": "missing",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 7
+  },
+  {
+    "file": "scripts/lib/bootstrap-user-args.ts",
+    "line": 61,
+    "from": "pedidos",
+    "to": "requested",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "scripts/lib/bootstrap-user-args.ts",
+    "line": 62,
+    "from": "existentes",
+    "to": "existing",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "scripts/lib/bootstrap-user-args.ts",
+    "line": 65,
+    "from": "faltando",
+    "to": "missing",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 7
+  },
+  {
+    "file": "scripts/lib/bootstrap-user-args.ts",
+    "line": 66,
+    "from": "faltando",
+    "to": "missing",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 7
+  },
+  {
+    "file": "scripts/lib/firestore-conexao.ts",
+    "line": 22,
+    "from": "resolverProjeto",
+    "to": "resolveProject",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 1,
+    "note": "mixed-language"
+  },
+  {
+    "file": "scripts/lib/firestore-conexao.ts",
+    "line": 22,
+    "from": "explicito",
+    "to": "explicit",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "scripts/lib/firestore-conexao.ts",
+    "line": 23,
+    "from": "projeto",
+    "to": "project",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "scripts/lib/firestore-conexao.ts",
+    "line": 37,
+    "from": "conectarFirestore",
+    "to": "connectFirestore",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 1,
+    "note": "mixed-language"
+  },
+  {
+    "file": "scripts/lib/firestore-conexao.ts",
+    "line": 61,
+    "from": "carregarClientesAtivos",
+    "to": "loadActiveClients",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 1
+  },
+  {
+    "file": "scripts/lib/modo-de-migracao.ts",
+    "line": 10,
+    "from": "vaiGravar",
+    "to": "willWrite",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 7
+  },
+  {
+    "file": "scripts/lib/numero-do-resultado.ts",
+    "line": 15,
+    "from": "numeroDoResultado",
+    "to": "resultNumber",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 12
+  },
+  {
+    "file": "scripts/lib/numero-do-resultado.ts",
+    "line": 15,
+    "from": "bruto",
+    "to": "raw",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 13
+  },
+  {
+    "file": "scripts/lib/numero-do-resultado.ts",
+    "line": 21,
+    "from": "embrulhado",
+    "to": "wrapped",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "scripts/lib/numero-do-resultado.ts",
+    "line": 22,
+    "from": "cru",
+    "to": "rawValue",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "scripts/lib/numero-do-resultado.ts",
+    "line": 36,
+    "from": "mesmoValor",
+    "to": "sameValue",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 9
+  },
+  {
+    "file": "scripts/lib/numero-do-resultado.ts",
+    "line": 36,
+    "from": "esperado",
+    "to": "expected",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "scripts/lib/numero-do-resultado.ts",
+    "line": 36,
+    "from": "obtido",
+    "to": "actual",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "scripts/lib/provisioning-manifest.ts",
+    "line": 13,
+    "from": "ColecaoProvisionada",
+    "to": "ProvisionedCollection",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "scripts/lib/provisioning-manifest.ts",
+    "line": 20,
+    "from": "subcolecoes",
+    "to": "subcollections",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "scripts/lib/provisioning-manifest.ts",
+    "line": 22,
+    "from": "porque",
+    "to": "reason",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 14
+  },
+  {
+    "file": "scripts/lib/provisioning-manifest.ts",
+    "line": 29,
+    "from": "COLECOES_DE_CONFIG",
+    "to": "CONFIG_COLLECTIONS",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10,
+    "note": "mixed-language"
+  },
+  {
+    "file": "scripts/lib/provisioning-manifest.ts",
+    "line": 32,
+    "from": "subcolecoes",
+    "to": "subcollections",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "scripts/lib/provisioning-manifest.ts",
+    "line": 33,
+    "from": "porque",
+    "to": "reason",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 14
+  },
+  {
+    "file": "scripts/lib/provisioning-manifest.ts",
+    "line": 37,
+    "from": "subcolecoes",
+    "to": "subcollections",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "scripts/lib/provisioning-manifest.ts",
+    "line": 38,
+    "from": "porque",
+    "to": "reason",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 14
+  },
+  {
+    "file": "scripts/lib/provisioning-manifest.ts",
+    "line": 40,
+    "from": "porque",
+    "to": "reason",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 14
+  },
+  {
+    "file": "scripts/lib/provisioning-manifest.ts",
+    "line": 41,
+    "from": "porque",
+    "to": "reason",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 14
+  },
+  {
+    "file": "scripts/lib/provisioning-manifest.ts",
+    "line": 42,
+    "from": "porque",
+    "to": "reason",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 14
+  },
+  {
+    "file": "scripts/lib/provisioning-manifest.ts",
+    "line": 43,
+    "from": "porque",
+    "to": "reason",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 14
+  },
+  {
+    "file": "scripts/lib/provisioning-manifest.ts",
+    "line": 44,
+    "from": "porque",
+    "to": "reason",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 14
+  },
+  {
+    "file": "scripts/lib/provisioning-manifest.ts",
+    "line": 45,
+    "from": "porque",
+    "to": "reason",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 14
+  },
+  {
+    "file": "scripts/lib/provisioning-manifest.ts",
+    "line": 46,
+    "from": "porque",
+    "to": "reason",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 14
+  },
+  {
+    "file": "scripts/lib/provisioning-manifest.ts",
+    "line": 47,
+    "from": "porque",
+    "to": "reason",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 14
+  },
+  {
+    "file": "scripts/lib/provisioning-manifest.ts",
+    "line": 48,
+    "from": "porque",
+    "to": "reason",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 14
+  },
+  {
+    "file": "scripts/lib/provisioning-manifest.ts",
+    "line": 49,
+    "from": "porque",
+    "to": "reason",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 14
+  },
+  {
+    "file": "scripts/lib/provisioning-manifest.ts",
+    "line": 65,
+    "from": "COLECOES_PROIBIDAS",
+    "to": "FORBIDDEN_COLLECTIONS",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 9
+  },
+  {
+    "file": "scripts/lib/provisioning-manifest.ts",
+    "line": 88,
+    "from": "COLECOES_SO_BACKUP",
+    "to": "BACKUP_ONLY_COLLECTIONS",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 1,
+    "note": "mixed-language"
+  },
+  {
+    "file": "scripts/lib/provisioning-manifest.ts",
+    "line": 91,
+    "from": "COLECOES_GLOBAIS",
+    "to": "GLOBAL_COLLECTIONS",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "scripts/lib/provisioning-manifest.ts",
+    "line": 103,
+    "from": "DATABASE_PRODUCAO",
+    "to": "PRODUCTION_DATABASE",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5,
+    "note": "mixed-language"
+  },
+  {
+    "file": "scripts/metrics/__tests__/covenants-v2-shapes.test.ts",
+    "line": 18,
+    "from": "MetricaDoCatalogo",
+    "to": "CatalogMetric",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "scripts/metrics/__tests__/covenants-v2-shapes.test.ts",
+    "line": 32,
+    "from": "TODAS_AS_FORMAS",
+    "to": "ALL_SHAPES",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "scripts/metrics/__tests__/covenants-v2-shapes.test.ts",
+    "line": 48,
+    "from": "posicaoDoAlias",
+    "to": "aliasPosition",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3,
+    "note": "mixed-language"
+  },
+  {
+    "file": "scripts/metrics/__tests__/covenants-v2-shapes.test.ts",
+    "line": 48,
+    "from": "coluna",
+    "to": "column",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "scripts/metrics/__tests__/covenants-v2-shapes.test.ts",
+    "line": 58,
+    "from": "forma",
+    "to": "shape",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "scripts/metrics/__tests__/covenants-v2-shapes.test.ts",
+    "line": 71,
+    "from": "semShape",
+    "to": "withoutShape",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2,
+    "note": "mixed-language"
+  },
+  {
+    "file": "scripts/metrics/__tests__/covenants-v2-shapes.test.ts",
+    "line": 72,
+    "from": "semColunas",
+    "to": "withoutColumns",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "scripts/metrics/__tests__/covenants-v2-shapes.test.ts",
+    "line": 78,
+    "from": "invalidas",
+    "to": "invalid",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "scripts/metrics/__tests__/covenants-v2-shapes.test.ts",
+    "line": 83,
+    "from": "repetidas",
+    "to": "repeated",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "scripts/metrics/__tests__/covenants-v2-shapes.test.ts",
+    "line": 90,
+    "from": "orfas",
+    "to": "orphans",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "scripts/metrics/__tests__/covenants-v2-shapes.test.ts",
+    "line": 92,
+    "from": "coluna",
+    "to": "column",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "scripts/metrics/__tests__/covenants-v2-shapes.test.ts",
+    "line": 100,
+    "from": "foraDeOrdem",
+    "to": "outOfOrder",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "scripts/metrics/__tests__/covenants-v2-shapes.test.ts",
+    "line": 102,
+    "from": "posicoes",
+    "to": "positions",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "scripts/metrics/__tests__/covenants-v2-shapes.test.ts",
+    "line": 103,
+    "from": "crescente",
+    "to": "ascending",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "scripts/metrics/__tests__/covenants-v2-shapes.test.ts",
+    "line": 111,
+    "from": "por",
+    "to": "byShape",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 7
+  },
+  {
+    "file": "scripts/metrics/__tests__/covenants-v2-shapes.test.ts",
+    "line": 111,
+    "from": "forma",
+    "to": "shape",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "scripts/metrics/__tests__/covenants-v2-shapes.test.ts",
+    "line": 114,
+    "from": "fora",
+    "to": "outside",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 12
+  },
+  {
+    "file": "scripts/metrics/__tests__/covenants-v2-shapes.test.ts",
+    "line": 119,
+    "from": "fora",
+    "to": "outside",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 12
+  },
+  {
+    "file": "scripts/metrics/__tests__/covenants-v2-shapes.test.ts",
+    "line": 124,
+    "from": "fora",
+    "to": "outside",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 12
+  },
+  {
+    "file": "scripts/metrics/__tests__/covenants-v2-shapes.test.ts",
+    "line": 135,
+    "from": "EIXO_CATEGORICO",
+    "to": "CATEGORICAL_AXIS",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "scripts/metrics/__tests__/covenants-v2-shapes.test.ts",
+    "line": 136,
+    "from": "fora",
+    "to": "outside",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 12
+  },
+  {
+    "file": "scripts/metrics/__tests__/covenants-v2-shapes.test.ts",
+    "line": 143,
+    "from": "fora",
+    "to": "outside",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 12
+  },
+  {
+    "file": "scripts/metrics/__tests__/covenants-v2-shapes.test.ts",
+    "line": 148,
+    "from": "fora",
+    "to": "outside",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 12
+  },
+  {
+    "file": "scripts/templates/covenants-v2-fluxo-caixa.template.mjs",
+    "line": 32,
+    "from": "FAIXA1_KEYS",
+    "to": "BAND1_KEYS",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2,
+    "note": "mixed-language"
+  },
+  {
+    "file": "scripts/templates/covenants-v2-inadimplencia.template.mjs",
+    "line": 45,
+    "from": "FAIXA2_KEYS",
+    "to": "BAND2_KEYS",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4,
+    "note": "mixed-language"
+  },
+  {
+    "file": "scripts/lib/__tests__/manifest-cobre-o-banco.test.ts",
+    "line": 0,
+    "from": "scripts/lib/__tests__/manifest-cobre-o-banco.test.ts",
+    "to": "scripts/lib/__tests__/manifest-covers-the-database.test.ts",
+    "kind": "file",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 1
+  },
+  {
+    "file": "scripts/lib/firestore-conexao.ts",
+    "line": 0,
+    "from": "scripts/lib/firestore-conexao.ts",
+    "to": "scripts/lib/firestore-connection.ts",
+    "kind": "file",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 1
+  },
+  {
+    "file": "scripts/lib/modo-de-migracao.test.ts",
+    "line": 0,
+    "from": "scripts/lib/modo-de-migracao.test.ts",
+    "to": "scripts/lib/migration-mode.test.ts",
+    "kind": "file",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 1
+  },
+  {
+    "file": "scripts/lib/modo-de-migracao.ts",
+    "line": 0,
+    "from": "scripts/lib/modo-de-migracao.ts",
+    "to": "scripts/lib/migration-mode.ts",
+    "kind": "file",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 1
+  },
+  {
+    "file": "scripts/lib/numero-do-resultado.test.ts",
+    "line": 0,
+    "from": "scripts/lib/numero-do-resultado.test.ts",
+    "to": "scripts/lib/result-number.test.ts",
+    "kind": "file",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 1
+  },
+  {
+    "file": "scripts/lib/numero-do-resultado.ts",
+    "line": 0,
+    "from": "scripts/lib/numero-do-resultado.ts",
+    "to": "scripts/lib/result-number.ts",
+    "kind": "file",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 1
+  }
+]

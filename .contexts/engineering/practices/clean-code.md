@@ -1,3 +1,11 @@
+---
+title: Clean Code
+type: practices
+status: active
+scope: engineering
+last_updated: 2026-09-28
+---
+
 # Clean Code
 
 > Disciplina de craft em que o desenvolvedor trata legibilidade, expressividade e manutenibilidade do código como responsabilidades de primeira ordem, não como subproduto opcional do trabalho de fazer a feature funcionar. Código que funciona é o piso; código que comunica intenção a outro humano (ou agente) meses depois é o teto.
@@ -183,8 +191,8 @@ A heurística: aplique se o código sobreviverá amanhã e será lido por algué
 
 TypeScript amplifica retorno de Clean Code porque o sistema de tipos absorve parte do trabalho que comentários e nomes faziam em linguagens dinâmicas.
 
-- **Branded types** para identificadores e valores semânticos: `UserId`, `Email`, `Cents` em vez de `string` e `number` genéricos. Reduz disinformation no chamador.
-- **Discriminated unions** para Result e estados: `type Result<T, E> = { ok: true; value: T } | { ok: false; error: E }` torna fluxo de erro inspeção exhaustiva pelo compilador.
+- **Branded types** para identificadores e valores semânticos: `UserId`, `Email`, `Money` (`amountMinor` + `currency`) em vez de `string` e `number` genéricos. Reduz disinformation no chamador.
+- **Discriminated unions** para Result e estados: `type Result<T, E> = { ok: true; data: T } | { ok: false; error: E }` (mesmo shape do retorno de Server Action, ADR 0003) torna fluxo de erro inspeção exhaustiva pelo compilador.
 - **Funções puras preferenciais.** Em lógica de domínio, recebem dados e retornam dados; side effects empurrados para fronteiras.
 - **Módulos pequenos coesos** preferíveis a arquivos com múltiplas classes não-relacionadas.
 - **`readonly` por padrão** em estruturas de dados de domínio; mutação explícita quando necessária.
@@ -193,7 +201,7 @@ Veja `@stacks/language/typescript@7` para convenções específicas da versão.
 
 ### React 19 com Server Components
 
-A separação server/client introduzida em Next.js 16 (@stacks/frontend/next@16) e React 19 (@stacks/frontend/react@19) é uma oportunidade natural de aplicar Clean Code estrutural:
+A separação server/client do App Router, no Next.js 16 (@stacks/frontend/next@16) com React 19 (@stacks/frontend/react@19), é uma oportunidade natural de aplicar Clean Code estrutural:
 
 - **Server Components** concentram fetch e composição de UI puramente apresentacional. Funções de servidor ficam pequenas, focadas em data shaping.
 - **Client Components** ficam restritos a comportamento interativo. Lógica de estado em hooks coesos com nomes que descrevem o que o estado representa, não a forma técnica (`useFormState` é genérico; `useCheckoutWizardState` comunica).

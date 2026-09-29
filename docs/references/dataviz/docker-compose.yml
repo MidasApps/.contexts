@@ -1,0 +1,59 @@
+# Sobe o dataviz local em produção, reusando o Dockerfile de deploy.
+#
+#   docker compose --env-file .env.local up --build -d      → http://localhost:4400
+#
+# O --env-file .env.local é NECESSÁRIO: as NEXT_PUBLIC_* são interpoladas nos
+# build.args a partir dele (o compose só lê `.env` por padrão) e também viram o
+# env de runtime do container via `env_file`.
+#
+# Porta host 4400 (>4000, fora das em uso) → 8080 no container (default do
+# Dockerfile). Override: APP_PORT no .env.local.
+
+services:
+  dataviz:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      # Espelha os ARG do Dockerfile (NEXT_PUBLIC_* são inlined em build-time).
+      #
+      # `NEXT_PUBLIC_DATAVIZ_DATABASE_ID` PRECISA entrar. Ficava de fora com a
+      # justificativa de que "o default já é o correto" — o default é
+      # `dataviz`, que é o banco canônico. Enquanto o `.env.local` também
+      # apontava para produção isso passava despercebido; apontando para o banco
+      # de desenvolvimento, o servidor (que lê `env_file` em runtime) ia para o
+      # dev e o navegador (que lê o valor inlined no build) continuava indo para
+      # produção. Mesma tela, dois bancos, sem nenhum aviso.
+      args:
+        NEXT_PUBLIC_FIREBASE_API_KEY: ${NEXT_PUBLIC_FIREBASE_API_KEY:-}
+        NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: ${NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN:-}
+        NEXT_PUBLIC_FIREBASE_PROJECT_ID: ${NEXT_PUBLIC_FIREBASE_PROJECT_ID:-}
+        NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: ${NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET:-}
+        NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: ${NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID:-}
+        NEXT_PUBLIC_FIREBASE_APP_ID: ${NEXT_PUBLIC_FIREBASE_APP_ID:-}
+        NEXT_PUBLIC_DATAVIZ_DATABASE_ID: ${NEXT_PUBLIC_DATAVIZ_DATABASE_ID:-}
+        NEXT_PUBLIC_ADMIN_EMAIL_DOMAIN: ${NEXT_PUBLIC_ADMIN_EMAIL_DOMAIN:-}
+        # Sem isto o CSP nasce com `frame-ancestors 'none'` (fail-closed), e o
+        # modo embutido não funciona no container.
+        NEXT_PUBLIC_EMBED_ALLOWED_ORIGINS: ${NEXT_PUBLIC_EMBED_ALLOWED_ORIGINS:-}
+    image: dataviz:local
+    container_name: dataviz
+    ports:
+      - "${APP_PORT:-4400}:8080"
+    env_file:
+      - .env.local
+    environment:
+      # Overrides que vencem o .env.local (precedência: environment > env_file).
+      NODE_ENV: production
+      PORT: "8080"
+      HOSTNAME: 0.0.0.0
+      # Credenciais nos caminhos DO CONTAINER (o que houver no .env.local
+      # apontando p/ paths de Windows/ADC é ignorado aqui de propósito).
+      GOOGLE_APPLICATION_CREDENTIALS: /secrets/app-sa.json   # Firestore + Vertex
+      BIGQUERY_CREDENTIALS: /secrets/dataviz-sa.json         # BigQuery
+    volumes:
+      # Chaves montadas read-only. Caminho no HOST override via APP_SA_KEY /
+      # DATAVIZ_SA_KEY (ex.: apontar p/ ~/.gcloud) — default: ./secrets/*.json.
+      - ${APP_SA_KEY:-./secrets/app-sa.json}:/secrets/app-sa.json:ro
+      - ${DATAVIZ_SA_KEY:-./secrets/dataviz-sa.json}:/secrets/dataviz-sa.json:ro
+    restart: unless-stopped
+    # Healthcheck: o próprio Dockerfile já define um (wget em :8080/).

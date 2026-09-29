@@ -1,0 +1,150 @@
+rules_version = '2';
+// ─────────────────────────────────────────────────────────────────────────────
+// Firestore security rules — dataviz
+//
+// Modelo de acesso (ver ADR-0006 multi-tenancy + ADR-0013 storage Firestore):
+//   - Coleções de produto (clients/products/users/conversations…) seguem as
+//     regras existentes (auth de usuário + claim `role: 'admin'`).
+//   - As coleções server-managed introduzidas pela migração Firestore
+//     (Sprint 1.A → 3.D) são gravadas exclusivamente pelo Admin SDK no
+//     backend, que **bypassa** estas regras. Para essas coleções:
+//       • leitura por client SDK: exige clientId no token (custom claim) que
+//         bata com `resource.data.clientId`. Admin (claim role=admin) lê tudo.
+//       • escrita por client SDK: bloqueada (`allow write: if false`).
+// ADRs relacionadas: ADR-0006, ADR-0009, ADR-0010, ADR-0011, ADR-0013.
+// O domínio de e-mail de admin NÃO entra nestas regras — vive em
+// ADMIN_EMAIL_DOMAIN no backend. No client SDK, admin = custom claim.
+// ─────────────────────────────────────────────────────────────────────────────
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ─── Helpers ─────────────────────────────────────────────
+    function isAdminEmail() {
+      return request.auth != null
+        && request.auth.token.role == 'admin';
+    }
+    // tenantAllowed(cid): true se o principal pertence ao tenant `cid`.
+    // Aceita o claim conjunto `clientIds` (novo, ADR-0018) OU o `clientId`
+    // singular legado. A guarda `is list` mantém fail-closed: sem o claim
+    // novo, a condição do lado direito é falsa e cai no singular; sem nenhum,
+    // nega (ADR-0006 §8). Nenhum caminho AMPLIA acesso.
+    function tenantAllowed(cid) {
+      return request.auth != null && cid is string && (
+        request.auth.token.clientId == cid
+        || (request.auth.token.clientIds is list
+            && cid in request.auth.token.clientIds)
+      );
+    }
+
+    // ─── Clientes ────────────────────────────────────────────
+    match /clients/{clientId} {
+      allow read: if request.auth != null;
+      allow write: if isAdminEmail();
+
+      // Subcoleções de grupos/reports — leitura por tenant/admin; escrita
+      // apenas admin ou dono do tenant (fecha IDOR cross-tenant, a4-11).
+      // Escritas do app passam pelo Admin SDK (bypassa estas rules).
+      match /groups/{groupId} {
+        allow read: if request.auth != null
+          && (isAdminEmail() || tenantAllowed(clientId));
+        allow write: if isAdminEmail() || tenantAllowed(clientId);
+
+        match /reports/{reportId} {
+          allow read: if request.auth != null
+            && (isAdminEmail() || tenantAllowed(clientId));
+          allow write: if isAdminEmail() || tenantAllowed(clientId);
+        }
+      }
+    }
+
+    // ─── Grupos ──────────────────────────────────────────────
+    match /groups/{doc} {
+      allow read: if request.auth != null;
+      allow write: if isAdminEmail();
+    }
+
+    // ─── Produtos (multi-produto) ────────────────────────────
+    // Leitura: qualquer usuário autenticado (necessário para o ProductSwitcher).
+    // Escrita: apenas admin (claim role=admin).
+    match /products/{doc} {
+      allow read: if request.auth != null;
+      allow write: if isAdminEmail();
+    }
+
+    // ─── DataSources (projetos GCP) ──────────────────────────
+    // Leitura: qualquer usuário autenticado.
+    // Escrita: apenas admin.
+    match /dataSources/{doc} {
+      allow read: if request.auth != null;
+      allow write: if isAdminEmail();
+    }
+
+    // ─── Conversations (chat AI) ─────────────────────────────
+    match /conversations/{docId} {
+      // Users can only access their own conversations
+      allow read, update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+    }
+
+    // ─── Usuários ────────────────────────────────────────────
+    match /users/{docId} {
+      // Any authenticated user can read their own doc (by UID or by email-based ID)
+      // Admin can read/write all user docs
+      allow read: if request.auth != null && (
+        request.auth.uid == docId
+        || resource.data.email == request.auth.token.email
+        || isAdminEmail()
+      );
+      allow write: if isAdminEmail();
+    }
+
+    // ─── Server-managed: working memory (ADR-0006/0011/0013) ─
+    match /workingMemory/{threadId} {
+      allow read: if isAdminEmail() || tenantAllowed(resource.data.clientId);
+      allow write: if false;
+
+      match /messages/{msgId} {
+        allow read: if isAdminEmail() || tenantAllowed(resource.data.clientId);
+        allow write: if false;
+      }
+    }
+
+    // ─── Server-managed: embeddings (ADR-0005/0006/0013) ─────
+    match /embeddingsDocs/{docId} {
+      allow read: if isAdminEmail() || tenantAllowed(resource.data.clientId);
+      allow write: if false;
+    }
+    match /embeddingsSql/{id} {
+      allow read: if isAdminEmail() || tenantAllowed(resource.data.clientId);
+      allow write: if false;
+    }
+    match /embeddingsBlocks/{id} {
+      allow read: if isAdminEmail() || tenantAllowed(resource.data.clientId);
+      allow write: if false;
+    }
+
+    // ─── Server-managed: SQL catalog (ADR-0009/0013) ─────────
+    // Curado por admin; consumido por sub-agentes via Admin SDK no backend.
+    // Client SDK só lê quando o catálogo pertencer ao seu tenant.
+    match /sqlCatalog/{id} {
+      allow read: if isAdminEmail() || tenantAllowed(resource.data.clientId);
+      allow write: if false;
+    }
+    match /sqlCatalogEvents/{eventId} {
+      allow read: if isAdminEmail() || tenantAllowed(resource.data.clientId);
+      allow write: if false;
+    }
+
+    // ─── Server-managed: evals (ADR-0010/0013) ───────────────
+    // Eval runs e judge drift são telemetria interna (não tenant-bound).
+    // Apenas admin lê pelo client SDK; backend Admin SDK escreve.
+    match /evalRuns/{runId} {
+      allow read: if isAdminEmail();
+      allow write: if false;
+    }
+    match /judgeDrift/{rowId} {
+      allow read: if isAdminEmail();
+      allow write: if false;
+    }
+  }
+}

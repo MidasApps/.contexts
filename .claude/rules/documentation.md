@@ -3,20 +3,20 @@ paths: ["**/*.ts","**/*.tsx"]
 ---
 # Documentation — ativa em TypeScript
 
-Documenta exports públicos (API surface) com JSDoc, mantém README de feature/módulo, exemplos executáveis. Não documenta o óbvio.
+Documenta o PORQUÊ: TSDoc em exports consumidos por outros módulos, README em pacote publicável/app executável, ADR para decisão com alternativas. Não documenta o óbvio.
 
 ## Princípios
-- JSDoc obrigatório em export público (função, classe, tipo) que cruza módulo/pacote.
+- TSDoc em export (função, classe, tipo) consumido por outro módulo/pacote; nunca em função privada de módulo.
 - `@param`, `@returns`, `@throws`, `@example` quando aplicável. Não duplicar tipo já no TS.
-- README por feature/módulo quando tem mais de 3-4 arquivos: propósito, entrypoints, exemplos.
-- Exemplos em JSDoc/README devem compilar e refletir API atual.
+- README na raiz de cada pacote publicável e app executável (propósito, pré-requisitos, comandos runnable); nunca em pasta que só agrupa arquivos (`utils/`, `helpers/`).
+- Exemplos em TSDoc/README devem compilar e refletir API atual; `@example` em utilitário genérico reutilizado.
 - Comentários inline explicam **por quê**, não **o quê**.
 - Sem comentário "zumbi" (comentado-out, TODO antigo, ASCII art).
-- Doc de decisão (trade-off, alternativa rejeitada) vai em ADR (skill `decisions`), não em comentário longo.
+- Doc de decisão (trade-off, alternativa rejeitada) vai em ADR (`.contexts/engineering/decisions/`, skill `decisions`); o código referencia `// see ADR NNNN`. ADR aceito não é editado: novo ADR supersede.
 
 ## Checklist (aplicar a todo turn)
-- [ ] Export público novo tem JSDoc com 1-line summary + `@param`/`@returns` quando útil.
-- [ ] README de feature atualizado se entrypoint mudou.
+- [ ] Export público novo tem TSDoc com 1-line summary + `@param`/`@returns`/`@throws` quando útil.
+- [ ] README do pacote/app atualizado se comando ou entrypoint mudou.
 - [ ] Sem comentários `// foo` redundantes com nome de função.
 - [ ] Exemplos no doc batem com a API atual.
 - [ ] Decisão importante referencia ADR.
@@ -34,9 +34,9 @@ Documenta exports públicos (API surface) com JSDoc, mantém README de feature/m
  *
  * @throws {InsufficientFundsError} when the card is declined for funds.
  * @example
- *   await chargeCustomer({ customerId, amountCents: 1990, idempotencyKey: "ord_123" });
+ *   await chargeCustomer({ customerId, amountMinor: 1990, currency: "BRL", idempotencyKey: "01J8Z3K4M5N6P7Q8R9S0T1V2W3" });
  */
-export async function chargeCustomer(args: ChargeArgs): Promise<Charge> { ... }
+export const chargeCustomer = async (args: ChargeArgs): Promise<Charge> => { ... };
 ```
 
 ---

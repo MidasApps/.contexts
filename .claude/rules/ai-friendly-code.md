@@ -28,13 +28,14 @@ Código organizado para ser navegável e modificável por humanos E LLMs: arquiv
 
 ## Mini-exemplo
 ```ts
-export async function chargeCustomer(args: {
+export const chargeCustomer = async (args: {
   customerId: CustomerId;
-  amountCents: number;
+  amountMinor: number;
+  currency: string;
   idempotencyKey: string;
-}) {
+}) => {
   // ...
-}
+};
 ```
 
 ---

@@ -1,3 +1,11 @@
+---
+title: Deploy
+type: processes
+status: active
+scope: engineering
+last_updated: 2026-09-28
+---
+
 # Deploy
 
 Convenções operacionais para entregar mudanças aos ambientes `dev`, `staging` e `prod` de forma frequente, pequena, automatizada, observável e reversível. Este documento governa o fluxo de deploy ponta-a-ponta — desde merge em `main` até health check pós-rollout — e define as regras para componentes Next.js, Firebase Functions, Firestore, Postgres e prompts de IA.
@@ -22,11 +30,11 @@ Deploy é decoupled de release. O artefato chega em produção atrás de feature
 
 | Ambiente | Trigger | Projeto GCP | Domínio | Aprovação |
 |---|---|---|---|---|
-| `dev` | local + opcional shared dev env | `app-dev` | `dev.<app>.internal` | nenhuma |
-| `staging` | auto-deploy de `main` | `app-staging` | `staging.<app>.com` | nenhuma |
-| `prod` | tag `vX.Y.Z` + aprovação manual | `app-prod` | `<app>.com` | required reviewers |
+| `dev` | preview automático por PR (descartável) | `<projeto>-dev` | `<branch>-<project>.vercel.app` (ou `dev.<domain>.com`, se exposto) | nenhuma |
+| `staging` | auto-deploy de `main` | `<projeto>-staging` | `staging.<domain>.com` | nenhuma |
+| `prod` | tag `vX.Y.Z` + aprovação manual | `<projeto>-prod` | `app.<domain>.com` | required reviewers |
 
-Cada ambiente vive em **projeto GCP separado** (isolamento de dados, IAM, billing, secrets). Secrets nunca cruzam ambientes — consulte `@contracts/secrets` para naming e separação por projeto.
+Definição canônica dos ambientes, naming de projetos e domínios: `@processes/environments` (este quadro a resume). Cada ambiente vive em **projeto GCP separado** (isolamento de dados, IAM, billing, secrets). Secrets nunca cruzam ambientes — consulte `@contracts/secrets` para naming e separação por projeto.
 
 ---
 
@@ -37,9 +45,9 @@ Cada ambiente vive em **projeto GCP separado** (isolamento de dados, IAM, billin
 2. CI verde (lint, typecheck, tests, build — gates deste processo)
 3. Deploy automático para staging
 4. Smoke tests automáticos + QA manual quando flag de risco
-5. Promote para prod via tag (vX.Y.Z) ou aprovação manual
+5. Promote para prod via tag (vX.Y.Z) + aprovação manual do environment `prod`
 6. Health checks pós-deploy (liveness + readiness + smoke)
-7. Rollback automático se health falha em janela de 5 min
+7. Rollback automático se health/smoke falha na janela de 30 min pós-deploy (`@processes/monitoring`, "Ação ligada ao 5xx")
 ```
 
 Cada passo é gate: falha em qualquer etapa impede progresso. Nunca pule etapas via override manual sem justificativa documentada no PR.
@@ -50,13 +58,13 @@ Cada passo é gate: falha em qualquer etapa impede progresso. Nunca pule etapas 
 
 | Componente | Comando canônico | Granularidade |
 |---|---|---|
-| Next.js app | Vercel (auto) ou Firebase App Hosting via Cloud Build | atômico (deploy completo) |
+| Next.js app | Vercel ou Firebase App Hosting via Cloud Build (alvo a definir pelo projeto) | atômico (deploy completo) |
 | Firebase Functions | `firebase deploy --only functions:<name>` | granular por function |
 | Firestore rules + indexes | `firebase deploy --only firestore` | atômico |
 | Storage rules | `firebase deploy --only storage` | atômico |
 | Postgres migrations | `pnpm db:migrate` em job dedicado | sequencial pré-deploy do app |
 | pgvector indexes | `CREATE INDEX CONCURRENTLY` dentro de migration | não bloqueante |
-| Edge configs / Static assets | Vercel CDN | atômico via deploy do app |
+| Edge configs / Static assets | CDN do alvo do app (Vercel ou App Hosting) | atômico via deploy do app |
 
 **Granularidade é obrigatória em Functions**: deploy de todas as functions quando apenas uma mudou propaga risco desnecessariamente. Veja `@stacks/backend/firebase-functions`.
 
@@ -89,7 +97,7 @@ Breaking schema **nunca** compartilha deploy com código que depende dele. O rol
 - Toda release de prod recebe tag `vMAJOR.MINOR.PATCH` no commit promovido. Detalhes do esquema em `@processes/release`.
 - Build embute `GIT_SHA` + `RELEASE_TAG` em variáveis de ambiente de runtime.
 - Endpoint `/health` expõe `{ version, commit, builtAt }` para inspeção rápida.
-- Logs estruturados incluem atributos `version` e `commit_sha` em todo registro (veja `@rules/observability`).
+- Logs estruturados incluem atributos `version` e `commitSha` em todo registro (veja `@rules/observability`).
 
 ---
 
@@ -102,7 +110,7 @@ Todo serviço deployável expõe:
 | `/health/liveness` | processo vivo, event loop respondendo | aborta rollout |
 | `/health/readiness` | dependências OK (Postgres, Firestore, AI providers, Firebase Admin) | aborta rollout |
 
-Pós-deploy, pipeline dispara **smoke tests automáticos** que hitam endpoints críticos (login, criação de recurso principal, leitura paginada). Falha de smoke em janela de 5 minutos dispara rollback automático.
+Pós-deploy, pipeline dispara **smoke tests automáticos** que hitam endpoints críticos (login, criação de recurso principal, leitura paginada). Falha de smoke na janela de 30 minutos pós-deploy dispara rollback automático (`@processes/monitoring`).
 
 ---
 
@@ -111,7 +119,7 @@ Pós-deploy, pipeline dispara **smoke tests automáticos** que hitam endpoints c
 | Componente | Mecanismo |
 |---|---|
 | Vercel | `vercel rollback <deployment-url>` ou rollback instantâneo via dashboard |
-| Firebase Functions | `firebase functions:rollback` (versões anteriores retidas) |
+| Firebase Functions | redeploy da tag anterior: `git checkout vX.Y.(Z-1)` + build + `firebase deploy --only functions:<name>`; ou Cloud Run (gen2) `gcloud run services update-traffic` para a revisão anterior |
 | Firestore rules | redeploy do commit anterior via `firebase deploy --only firestore:rules` |
 | Postgres migrations | forward-only por default; reverse migration documentada apenas quando viável e idempotente |
 | Feature flags | flip da flag para `off` — rollback de comportamento sem deploy |
@@ -131,7 +139,7 @@ Expand-and-contract garante que rollback de **código** nunca exige rollback de 
 
 ## 11. Aprovação manual para prod
 
-- GitHub Environment `production` configurado com **required reviewers**.
+- GitHub Environment `prod` configurado com **required reviewers**.
 - Mudanças padrão: 1 approval de eng owner.
 - Mudanças sensíveis (auth, billing, migrations destrutivas, mudança em IAM, edição de secret): **2 approvals**, sendo 1 owner do domínio.
 - Bypass de aprovação é proibido — se necessário em incidente, registrar postmortem.
@@ -171,7 +179,7 @@ Nunca bloquear deploy em backfill síncrono. Regras detalhadas em `@rules/migrat
 
 ## 15. Next.js specifics
 
-- **Vercel** (padrão): preview deployment automático por PR; production deployment automático em merge para `main` (configurável para promote manual).
+- **Vercel** (se for o alvo escolhido pelo projeto): preview deployment automático por PR (`dev`); merge em `main` vai para `staging`; production só a partir da tag `vX.Y.Z` + aprovação (§2) — desligar o auto-deploy de production em merge na `main`.
 - **Firebase App Hosting**: rollout via Cloud Build, com rollback por revisão.
 - **ISR / Edge cache**: pós-deploy, dispare `revalidateTag` / `revalidatePath` para conteúdo afetado. Não confie em TTL natural quando a mudança é semântica.
 - Configurações de runtime, env vars e edge config em `@stacks/frontend/next@16`.
@@ -180,17 +188,17 @@ Nunca bloquear deploy em backfill síncrono. Regras detalhadas em `@rules/migrat
 
 ## 16. Observabilidade pós-deploy
 
-Pós-deploy, monitore em janela de 15 minutos (regras completas em `@rules/observability`):
+Pós-deploy, monitore na janela de 30 minutos (regras completas em `@rules/observability`):
 
-| Métrica | Limiar de alerta |
+| Métrica | Limiar |
 |---|---|
-| Error rate | > baseline + 1% absoluto |
+| Error rate (5xx) | o da tabela "Ação ligada ao 5xx" em `@processes/monitoring` |
 | p95 latency | > baseline + 20% |
 | Throughput | drop > 15% |
 
 - Sentry / Datadog: **tag releases** com `version` para correlação automática de erros à release.
-- Logs estruturados com `version`, `commit_sha`, `deploy_id`.
-- Alerta de spike em error rate dentro de 5 min após deploy dispara **rollback automático**.
+- Logs estruturados com `version`, `commitSha`, `deployId`.
+- Nos 30 minutos depois do deploy, 5xx acima do baseline em 1 ponto percentual por 5 min, pico acima de 5% em 1 min, ou falha de smoke disparam rollback automático. Fora dessa janela vale a regra de page do monitoring, não um segundo limiar.
 
 ---
 
@@ -238,7 +246,7 @@ Reprovar em review qualquer PR que apresente:
 - Deploy em sex-feira 17h sem motivo registrado.
 - Bypass de approval em prod.
 - Deploy de todas as functions quando só uma mudou.
-- Rollback descrito como "redeployar versão anterior" sem mecanismo claro de revisão.
+- Rollback por redeploy de commit arbitrário sem tag — o caminho sancionado é redeployar a tag de release anterior (`vX.Y.Z`) ou reverter para a revisão anterior no provider.
 - Sem rollback plan documentado em PR que contém migration.
 - Edição manual de prompt no painel sem deploy versionado.
 - Ausência de release tag (perde rastreabilidade).

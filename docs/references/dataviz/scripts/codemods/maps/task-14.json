@@ -1,0 +1,3438 @@
+[
+  {
+    "file": "src/pages/explore/ui/BlockInspector.tsx",
+    "line": 52,
+    "from": "inteira",
+    "to": "fullWidth",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/pages/explore/ui/BlockInspector.tsx",
+    "line": 57,
+    "from": "inteira",
+    "to": "fullWidth",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/pages/explore/ui/BlockInspector.tsx",
+    "line": 71,
+    "from": "bloqueado",
+    "to": "isLocked",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 8
+  },
+  {
+    "file": "src/pages/explore/ui/BlockInspector.tsx",
+    "line": 72,
+    "from": "dicaAmarracao",
+    "to": "bindingHint",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/pages/explore/ui/BlockInspector.tsx",
+    "line": 77,
+    "from": "campoDeMetrica",
+    "to": "metricField",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 15
+  },
+  {
+    "file": "src/pages/explore/ui/BlockInspector.tsx",
+    "line": 84,
+    "from": "campoDeFormato",
+    "to": "formatField",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 12
+  },
+  {
+    "file": "src/pages/explore/ui/BlockInspector.tsx",
+    "line": 84,
+    "from": "valor",
+    "to": "value",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/pages/explore/ui/BlockInspector.tsx",
+    "line": 93,
+    "from": "campoDeTitulo",
+    "to": "titleField",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 11
+  },
+  {
+    "file": "src/pages/explore/ui/BlockInspector.tsx",
+    "line": 93,
+    "from": "valor",
+    "to": "value",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/pages/explore/ui/BlockInspector.tsx",
+    "line": 108,
+    "from": "faixa",
+    "to": "range",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 57
+  },
+  {
+    "file": "src/pages/explore/ui/BlockInspector.tsx",
+    "line": 109,
+    "from": "largurasValidas",
+    "to": "validWidths",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/pages/explore/ui/BlockInspector.tsx",
+    "line": 237,
+    "from": "chaves",
+    "to": "keys",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/pages/explore/ui/BlockInspector.tsx",
+    "line": 367,
+    "from": "itens",
+    "to": "items",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "src/pages/explore/ui/BlockPalette.tsx",
+    "line": 14,
+    "from": "ItemDaPaleta",
+    "to": "PaletteItem",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/pages/explore/ui/BlockPalette.tsx",
+    "line": 19,
+    "from": "dica",
+    "to": "hint",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 20
+  },
+  {
+    "file": "src/pages/explore/ui/BlockPalette.tsx",
+    "line": 27,
+    "from": "GRUPOS",
+    "to": "GROUPS",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/pages/explore/ui/BlockPalette.tsx",
+    "line": 27,
+    "from": "titulo",
+    "to": "title",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "src/pages/explore/ui/BlockPalette.tsx",
+    "line": 27,
+    "from": "itens",
+    "to": "items",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "src/pages/explore/ui/BlockPalette.tsx",
+    "line": 29,
+    "from": "titulo",
+    "to": "title",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "src/pages/explore/ui/BlockPalette.tsx",
+    "line": 30,
+    "from": "itens",
+    "to": "items",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "src/pages/explore/ui/BlockPalette.tsx",
+    "line": 31,
+    "from": "dica",
+    "to": "hint",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 20
+  },
+  {
+    "file": "src/pages/explore/ui/BlockPalette.tsx",
+    "line": 32,
+    "from": "dica",
+    "to": "hint",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 20
+  },
+  {
+    "file": "src/pages/explore/ui/BlockPalette.tsx",
+    "line": 33,
+    "from": "dica",
+    "to": "hint",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 20
+  },
+  {
+    "file": "src/pages/explore/ui/BlockPalette.tsx",
+    "line": 34,
+    "from": "dica",
+    "to": "hint",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 20
+  },
+  {
+    "file": "src/pages/explore/ui/BlockPalette.tsx",
+    "line": 38,
+    "from": "titulo",
+    "to": "title",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "src/pages/explore/ui/BlockPalette.tsx",
+    "line": 39,
+    "from": "itens",
+    "to": "items",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "src/pages/explore/ui/BlockPalette.tsx",
+    "line": 40,
+    "from": "dica",
+    "to": "hint",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 20
+  },
+  {
+    "file": "src/pages/explore/ui/BlockPalette.tsx",
+    "line": 41,
+    "from": "dica",
+    "to": "hint",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 20
+  },
+  {
+    "file": "src/pages/explore/ui/BlockPalette.tsx",
+    "line": 42,
+    "from": "dica",
+    "to": "hint",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 20
+  },
+  {
+    "file": "src/pages/explore/ui/BlockPalette.tsx",
+    "line": 43,
+    "from": "dica",
+    "to": "hint",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 20
+  },
+  {
+    "file": "src/pages/explore/ui/BlockPalette.tsx",
+    "line": 44,
+    "from": "dica",
+    "to": "hint",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 20
+  },
+  {
+    "file": "src/pages/explore/ui/BlockPalette.tsx",
+    "line": 45,
+    "from": "dica",
+    "to": "hint",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 20
+  },
+  {
+    "file": "src/pages/explore/ui/BlockPalette.tsx",
+    "line": 49,
+    "from": "titulo",
+    "to": "title",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "src/pages/explore/ui/BlockPalette.tsx",
+    "line": 50,
+    "from": "itens",
+    "to": "items",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "src/pages/explore/ui/BlockPalette.tsx",
+    "line": 51,
+    "from": "dica",
+    "to": "hint",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 20
+  },
+  {
+    "file": "src/pages/explore/ui/BlockPalette.tsx",
+    "line": 52,
+    "from": "dica",
+    "to": "hint",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 20
+  },
+  {
+    "file": "src/pages/explore/ui/BlockPalette.tsx",
+    "line": 56,
+    "from": "titulo",
+    "to": "title",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "src/pages/explore/ui/BlockPalette.tsx",
+    "line": 57,
+    "from": "itens",
+    "to": "items",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "src/pages/explore/ui/BlockPalette.tsx",
+    "line": 58,
+    "from": "dica",
+    "to": "hint",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 20
+  },
+  {
+    "file": "src/pages/explore/ui/BlockPalette.tsx",
+    "line": 59,
+    "from": "dica",
+    "to": "hint",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 20
+  },
+  {
+    "file": "src/pages/explore/ui/BlockPalette.tsx",
+    "line": 63,
+    "from": "titulo",
+    "to": "title",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "src/pages/explore/ui/BlockPalette.tsx",
+    "line": 64,
+    "from": "itens",
+    "to": "items",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "src/pages/explore/ui/BlockPalette.tsx",
+    "line": 65,
+    "from": "dica",
+    "to": "hint",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 20
+  },
+  {
+    "file": "src/pages/explore/ui/BlockPalette.tsx",
+    "line": 66,
+    "from": "dica",
+    "to": "hint",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 20
+  },
+  {
+    "file": "src/pages/explore/ui/BlockPalette.tsx",
+    "line": 82,
+    "from": "dica",
+    "to": "hint",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 20
+  },
+  {
+    "file": "src/pages/explore/ui/CanvasBlockRenderer.tsx",
+    "line": 68,
+    "from": "erro",
+    "to": "error",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "src/pages/explore/ui/CanvasBlockRenderer.tsx",
+    "line": 80,
+    "from": "nomeDoBloco",
+    "to": "blockName",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/pages/explore/ui/CanvasBlockRenderer.tsx",
+    "line": 81,
+    "from": "comNome",
+    "to": "withName",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/pages/explore/ui/CanvasBlockRenderer.tsx",
+    "line": 96,
+    "from": "ComPisoDaFamilia",
+    "to": "WithFamilyFloor",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/pages/explore/ui/CanvasBlockRenderer.tsx",
+    "line": 97,
+    "from": "familia",
+    "to": "family",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/pages/explore/ui/CanvasBlockRenderer.tsx",
+    "line": 103,
+    "from": "erro",
+    "to": "error",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "src/pages/explore/ui/CanvasBlockRenderer.tsx",
+    "line": 117,
+    "from": "consomeMetrica",
+    "to": "consumesMetric",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/pages/explore/ui/CanvasBlockRenderer.tsx",
+    "line": 118,
+    "from": "estado",
+    "to": "state",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/pages/explore/ui/CanvasBlockRenderer.tsx",
+    "line": 121,
+    "from": "fantasma",
+    "to": "ghost",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/pages/explore/ui/CanvasBlockRenderer.tsx",
+    "line": 127,
+    "from": "titulo",
+    "to": "title",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "src/pages/explore/ui/CanvasBlockRenderer.tsx",
+    "line": 171,
+    "from": "RenderizaBloco",
+    "to": "RenderBlock",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/pages/explore/ui/CanvasBlockRenderer.tsx",
+    "line": 249,
+    "from": "safras",
+    "to": "vintages",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/pages/explore/ui/CanvasBlockRenderer.tsx",
+    "line": 250,
+    "from": "alturaDaMatriz",
+    "to": "matrixHeight",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/pages/explore/ui/CanvasBlockRenderer.tsx",
+    "line": 268,
+    "from": "Desenho",
+    "to": "Drawing",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/pages/explore/ui/CanvasBlockRenderer.tsx",
+    "line": 275,
+    "from": "Esqueleto",
+    "to": "Skeleton",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/pages/explore/ui/CanvasPanel.tsx",
+    "line": 57,
+    "from": "arrastando",
+    "to": "isDragging",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 7
+  },
+  {
+    "file": "src/pages/explore/ui/CanvasPanel.tsx",
+    "line": 64,
+    "from": "onEmpurrar",
+    "to": "onNudge",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/pages/explore/ui/CanvasPanel.tsx",
+    "line": 65,
+    "from": "onRedimensionar",
+    "to": "onResize",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/pages/explore/ui/CanvasPanel.tsx",
+    "line": 73,
+    "from": "arrastando",
+    "to": "isDragging",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 7
+  },
+  {
+    "file": "src/pages/explore/ui/CanvasPanel.tsx",
+    "line": 82,
+    "from": "onEmpurrar",
+    "to": "onNudge",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/pages/explore/ui/CanvasPanel.tsx",
+    "line": 82,
+    "from": "direcao",
+    "to": "direction",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "src/pages/explore/ui/CanvasPanel.tsx",
+    "line": 83,
+    "from": "onRedimensionar",
+    "to": "onResize",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/pages/explore/ui/CanvasPanel.tsx",
+    "line": 83,
+    "from": "redimensionando",
+    "to": "isResizing",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/pages/explore/ui/CanvasPanel.tsx",
+    "line": 87,
+    "from": "ladoDoTrilho",
+    "to": "railSide",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/pages/explore/ui/CanvasPanel.tsx",
+    "line": 87,
+    "from": "setLadoDoTrilho",
+    "to": "setRailSide",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/pages/explore/ui/CanvasPanel.tsx",
+    "line": 88,
+    "from": "celulaRef",
+    "to": "cellRef",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 11,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/pages/explore/ui/CanvasPanel.tsx",
+    "line": 99,
+    "from": "decideOLado",
+    "to": "decideSide",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/pages/explore/ui/CanvasPanel.tsx",
+    "line": 100,
+    "from": "celula",
+    "to": "cell",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 9
+  },
+  {
+    "file": "src/pages/explore/ui/CanvasPanel.tsx",
+    "line": 102,
+    "from": "rolagem",
+    "to": "scrollParent",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/pages/explore/ui/CanvasPanel.tsx",
+    "line": 103,
+    "from": "limite",
+    "to": "limit",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/pages/explore/ui/CanvasPanel.tsx",
+    "line": 104,
+    "from": "cabeAcima",
+    "to": "fitsAbove",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/pages/explore/ui/CanvasPanel.tsx",
+    "line": 114,
+    "from": "metricas",
+    "to": "metrics",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 9
+  },
+  {
+    "file": "src/pages/explore/ui/CanvasPanel.tsx",
+    "line": 121,
+    "from": "contrato",
+    "to": "contract",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/pages/explore/ui/CanvasPanel.tsx",
+    "line": 129,
+    "from": "faixa",
+    "to": "range",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 57
+  },
+  {
+    "file": "src/pages/explore/ui/CanvasPanel.tsx",
+    "line": 131,
+    "from": "aplicaLargura",
+    "to": "applyWidth",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/pages/explore/ui/CanvasPanel.tsx",
+    "line": 131,
+    "from": "colunas",
+    "to": "columns",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 9
+  },
+  {
+    "file": "src/pages/explore/ui/CanvasPanel.tsx",
+    "line": 135,
+    "from": "previa",
+    "to": "preview",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "src/pages/explore/ui/CanvasPanel.tsx",
+    "line": 135,
+    "from": "aoApontar",
+    "to": "onPointerDown",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/pages/explore/ui/CanvasPanel.tsx",
+    "line": 137,
+    "from": "celulaRef",
+    "to": "cellRef",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 11,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/pages/explore/ui/CanvasPanel.tsx",
+    "line": 138,
+    "from": "faixa",
+    "to": "range",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 57
+  },
+  {
+    "file": "src/pages/explore/ui/CanvasPanel.tsx",
+    "line": 139,
+    "from": "largura",
+    "to": "width",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 38
+  },
+  {
+    "file": "src/pages/explore/ui/CanvasPanel.tsx",
+    "line": 140,
+    "from": "aoSoltar",
+    "to": "onRelease",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/pages/explore/ui/CanvasPanel.tsx",
+    "line": 141,
+    "from": "aoMudarEstado",
+    "to": "onStateChange",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "src/pages/explore/ui/CanvasPanel.tsx",
+    "line": 146,
+    "from": "larguraVisual",
+    "to": "visualWidth",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/pages/explore/ui/CanvasPanel.tsx",
+    "line": 147,
+    "from": "mostraTrilho",
+    "to": "showsRail",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/pages/explore/ui/CanvasPanel.tsx",
+    "line": 230,
+    "from": "direcao",
+    "to": "direction",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "src/pages/explore/ui/CanvasPanel.tsx",
+    "line": 547,
+    "from": "redimensionando",
+    "to": "isResizing",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/pages/explore/ui/CanvasPanel.tsx",
+    "line": 547,
+    "from": "setRedimensionando",
+    "to": "setIsResizing",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/pages/explore/ui/CanvasPanel.tsx",
+    "line": 610,
+    "from": "empurrarBloco",
+    "to": "nudgeBlock",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/pages/explore/ui/CanvasPanel.tsx",
+    "line": 610,
+    "from": "direcao",
+    "to": "direction",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "src/pages/explore/ui/CanvasPanel.tsx",
+    "line": 612,
+    "from": "daqui",
+    "to": "fromHere",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/pages/explore/ui/CanvasPanel.tsx",
+    "line": 613,
+    "from": "vizinho",
+    "to": "neighbor",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/pages/explore/ui/GuiasDeColuna.tsx",
+    "line": 6,
+    "from": "CALHA",
+    "to": "GUTTER",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 13
+  },
+  {
+    "file": "src/pages/explore/ui/GuiasDeColuna.tsx",
+    "line": 25,
+    "from": "GuiasDeColuna",
+    "to": "ColumnGuides",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/pages/explore/ui/GuiasDeColuna.tsx",
+    "line": 28,
+    "from": "divisa",
+    "to": "divider",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/pages/explore/ui/ReguaDeLargura.tsx",
+    "line": 47,
+    "from": "ReguaDeLargura",
+    "to": "WidthRuler",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "src/pages/explore/ui/ReguaDeLargura.tsx",
+    "line": 48,
+    "from": "largura",
+    "to": "width",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 38
+  },
+  {
+    "file": "src/pages/explore/ui/ReguaDeLargura.tsx",
+    "line": 49,
+    "from": "faixa",
+    "to": "range",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 57
+  },
+  {
+    "file": "src/pages/explore/ui/ReguaDeLargura.tsx",
+    "line": 51,
+    "from": "razaoDaLargura",
+    "to": "widthRationale",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "src/pages/explore/ui/ReguaDeLargura.tsx",
+    "line": 53,
+    "from": "lado",
+    "to": "side",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 12
+  },
+  {
+    "file": "src/pages/explore/ui/ReguaDeLargura.tsx",
+    "line": 54,
+    "from": "aoEscolher",
+    "to": "onChoose",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 23
+  },
+  {
+    "file": "src/pages/explore/ui/ReguaDeLargura.tsx",
+    "line": 55,
+    "from": "desabilitada",
+    "to": "disabled",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 9
+  },
+  {
+    "file": "src/pages/explore/ui/ReguaDeLargura.tsx",
+    "line": 57,
+    "from": "largura",
+    "to": "width",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 38
+  },
+  {
+    "file": "src/pages/explore/ui/ReguaDeLargura.tsx",
+    "line": 58,
+    "from": "faixa",
+    "to": "range",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 57
+  },
+  {
+    "file": "src/pages/explore/ui/ReguaDeLargura.tsx",
+    "line": 59,
+    "from": "razaoDaLargura",
+    "to": "widthRationale",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "src/pages/explore/ui/ReguaDeLargura.tsx",
+    "line": 60,
+    "from": "lado",
+    "to": "side",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 12
+  },
+  {
+    "file": "src/pages/explore/ui/ReguaDeLargura.tsx",
+    "line": 61,
+    "from": "aoEscolher",
+    "to": "onChoose",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 23
+  },
+  {
+    "file": "src/pages/explore/ui/ReguaDeLargura.tsx",
+    "line": 61,
+    "from": "colunas",
+    "to": "columns",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 9
+  },
+  {
+    "file": "src/pages/explore/ui/ReguaDeLargura.tsx",
+    "line": 62,
+    "from": "desabilitada",
+    "to": "disabled",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 9
+  },
+  {
+    "file": "src/pages/explore/ui/ReguaDeLargura.tsx",
+    "line": 64,
+    "from": "trilhaRef",
+    "to": "trackRef",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/pages/explore/ui/ReguaDeLargura.tsx",
+    "line": 65,
+    "from": "arrastando",
+    "to": "isDragging",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 7
+  },
+  {
+    "file": "src/pages/explore/ui/ReguaDeLargura.tsx",
+    "line": 65,
+    "from": "setArrastando",
+    "to": "setIsDragging",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/pages/explore/ui/ReguaDeLargura.tsx",
+    "line": 67,
+    "from": "mirada",
+    "to": "hovered",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/pages/explore/ui/ReguaDeLargura.tsx",
+    "line": 67,
+    "from": "setMirada",
+    "to": "setHovered",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/pages/explore/ui/ReguaDeLargura.tsx",
+    "line": 68,
+    "from": "comFoco",
+    "to": "hasFocus",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/pages/explore/ui/ReguaDeLargura.tsx",
+    "line": 68,
+    "from": "setComFoco",
+    "to": "setHasFocus",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/pages/explore/ui/ReguaDeLargura.tsx",
+    "line": 70,
+    "from": "colunaEm",
+    "to": "columnAt",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/pages/explore/ui/ReguaDeLargura.tsx",
+    "line": 71,
+    "from": "trilha",
+    "to": "track",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/pages/explore/ui/ReguaDeLargura.tsx",
+    "line": 77,
+    "from": "escolhePeloPonteiro",
+    "to": "chooseByPointer",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/pages/explore/ui/ReguaDeLargura.tsx",
+    "line": 78,
+    "from": "escolhida",
+    "to": "chosen",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 9
+  },
+  {
+    "file": "src/pages/explore/ui/ReguaDeLargura.tsx",
+    "line": 83,
+    "from": "alvo",
+    "to": "target",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "src/pages/explore/ui/ReguaDeLargura.tsx",
+    "line": 87,
+    "from": "noTeclado",
+    "to": "onKeyboard",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/pages/explore/ui/ReguaDeLargura.tsx",
+    "line": 88,
+    "from": "acoes",
+    "to": "actions",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/pages/explore/ui/ReguaDeLargura.tsx",
+    "line": 96,
+    "from": "acao",
+    "to": "action",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 7
+  },
+  {
+    "file": "src/pages/explore/ui/ReguaDeLargura.tsx",
+    "line": 104,
+    "from": "temLimite",
+    "to": "hasLimit",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/pages/explore/ui/ReguaDeLargura.tsx",
+    "line": 105,
+    "from": "alvo",
+    "to": "target",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "src/pages/explore/ui/ReguaDeLargura.tsx",
+    "line": 106,
+    "from": "etiquetaVisivel",
+    "to": "visibleTag",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/pages/explore/ui/ReguaDeLargura.tsx",
+    "line": 113,
+    "from": "descricao",
+    "to": "description",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/pages/explore/ui/ReguaDeLargura.tsx",
+    "line": 158,
+    "from": "coluna",
+    "to": "column",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 14
+  },
+  {
+    "file": "src/pages/explore/ui/ReguaDeLargura.tsx",
+    "line": 159,
+    "from": "disponivel",
+    "to": "isAvailable",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "src/pages/explore/ui/ReguaDeLargura.tsx",
+    "line": 161,
+    "from": "perderia",
+    "to": "wouldLose",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/pages/explore/ui/ReguaDeLargura.tsx",
+    "line": 162,
+    "from": "ganharia",
+    "to": "wouldGain",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/pages/explore/ui/TrilhoDoBloco.tsx",
+    "line": 24,
+    "from": "procedenciaDoBloco",
+    "to": "blockProvenance",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 7
+  },
+  {
+    "file": "src/pages/explore/ui/TrilhoDoBloco.tsx",
+    "line": 26,
+    "from": "metricas",
+    "to": "metrics",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 9
+  },
+  {
+    "file": "src/pages/explore/ui/TrilhoDoBloco.tsx",
+    "line": 27,
+    "from": "texto",
+    "to": "text",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 11
+  },
+  {
+    "file": "src/pages/explore/ui/TrilhoDoBloco.tsx",
+    "line": 27,
+    "from": "ausente",
+    "to": "missing",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 9
+  },
+  {
+    "file": "src/pages/explore/ui/TrilhoDoBloco.tsx",
+    "line": 29,
+    "from": "texto",
+    "to": "text",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 11
+  },
+  {
+    "file": "src/pages/explore/ui/TrilhoDoBloco.tsx",
+    "line": 29,
+    "from": "ausente",
+    "to": "missing",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 9
+  },
+  {
+    "file": "src/pages/explore/ui/TrilhoDoBloco.tsx",
+    "line": 30,
+    "from": "texto",
+    "to": "text",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 11
+  },
+  {
+    "file": "src/pages/explore/ui/TrilhoDoBloco.tsx",
+    "line": 30,
+    "from": "ausente",
+    "to": "missing",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 9
+  },
+  {
+    "file": "src/pages/explore/ui/TrilhoDoBloco.tsx",
+    "line": 31,
+    "from": "metrica",
+    "to": "metric",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/pages/explore/ui/TrilhoDoBloco.tsx",
+    "line": 32,
+    "from": "texto",
+    "to": "text",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 11
+  },
+  {
+    "file": "src/pages/explore/ui/TrilhoDoBloco.tsx",
+    "line": 32,
+    "from": "ausente",
+    "to": "missing",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 9
+  },
+  {
+    "file": "src/pages/explore/ui/TrilhoDoBloco.tsx",
+    "line": 42,
+    "from": "ALTURA_DO_TRILHO",
+    "to": "RAIL_HEIGHT",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/pages/explore/ui/TrilhoDoBloco.tsx",
+    "line": 72,
+    "from": "TrilhoDoBloco",
+    "to": "BlockRail",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "src/pages/explore/ui/TrilhoDoBloco.tsx",
+    "line": 74,
+    "from": "metricas",
+    "to": "metrics",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 9
+  },
+  {
+    "file": "src/pages/explore/ui/TrilhoDoBloco.tsx",
+    "line": 75,
+    "from": "lado",
+    "to": "side",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 12
+  },
+  {
+    "file": "src/pages/explore/ui/TrilhoDoBloco.tsx",
+    "line": 76,
+    "from": "visivel",
+    "to": "visible",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/pages/explore/ui/TrilhoDoBloco.tsx",
+    "line": 77,
+    "from": "selecionado",
+    "to": "selected",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "src/pages/explore/ui/TrilhoDoBloco.tsx",
+    "line": 78,
+    "from": "posicaoNaSelecao",
+    "to": "selectionPosition",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "src/pages/explore/ui/TrilhoDoBloco.tsx",
+    "line": 79,
+    "from": "largura",
+    "to": "width",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 38
+  },
+  {
+    "file": "src/pages/explore/ui/TrilhoDoBloco.tsx",
+    "line": 80,
+    "from": "faixa",
+    "to": "range",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 57
+  },
+  {
+    "file": "src/pages/explore/ui/TrilhoDoBloco.tsx",
+    "line": 81,
+    "from": "razaoDaLargura",
+    "to": "widthRationale",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "src/pages/explore/ui/TrilhoDoBloco.tsx",
+    "line": 82,
+    "from": "arrastavel",
+    "to": "draggable",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 8
+  },
+  {
+    "file": "src/pages/explore/ui/TrilhoDoBloco.tsx",
+    "line": 83,
+    "from": "aoAlternarSelecao",
+    "to": "onToggleSelection",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/pages/explore/ui/TrilhoDoBloco.tsx",
+    "line": 84,
+    "from": "aoEditarConteudo",
+    "to": "onEditContent",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/pages/explore/ui/TrilhoDoBloco.tsx",
+    "line": 85,
+    "from": "aoExcluir",
+    "to": "onDelete",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 8
+  },
+  {
+    "file": "src/pages/explore/ui/TrilhoDoBloco.tsx",
+    "line": 86,
+    "from": "aoEscolherLargura",
+    "to": "onChooseWidth",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/pages/explore/ui/TrilhoDoBloco.tsx",
+    "line": 87,
+    "from": "aoIniciarArrasto",
+    "to": "onDragStart",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/pages/explore/ui/TrilhoDoBloco.tsx",
+    "line": 88,
+    "from": "aoTerminarArrasto",
+    "to": "onDragEnd",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/pages/explore/ui/TrilhoDoBloco.tsx",
+    "line": 89,
+    "from": "aoEmpurrar",
+    "to": "onNudge",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 8
+  },
+  {
+    "file": "src/pages/explore/ui/TrilhoDoBloco.tsx",
+    "line": 92,
+    "from": "metricas",
+    "to": "metrics",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 9
+  },
+  {
+    "file": "src/pages/explore/ui/TrilhoDoBloco.tsx",
+    "line": 94,
+    "from": "lado",
+    "to": "side",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 12
+  },
+  {
+    "file": "src/pages/explore/ui/TrilhoDoBloco.tsx",
+    "line": 95,
+    "from": "visivel",
+    "to": "visible",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/pages/explore/ui/TrilhoDoBloco.tsx",
+    "line": 96,
+    "from": "selecionado",
+    "to": "selected",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "src/pages/explore/ui/TrilhoDoBloco.tsx",
+    "line": 98,
+    "from": "posicaoNaSelecao",
+    "to": "selectionPosition",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "src/pages/explore/ui/TrilhoDoBloco.tsx",
+    "line": 99,
+    "from": "largura",
+    "to": "width",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 38
+  },
+  {
+    "file": "src/pages/explore/ui/TrilhoDoBloco.tsx",
+    "line": 100,
+    "from": "faixa",
+    "to": "range",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 57
+  },
+  {
+    "file": "src/pages/explore/ui/TrilhoDoBloco.tsx",
+    "line": 101,
+    "from": "razaoDaLargura",
+    "to": "widthRationale",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "src/pages/explore/ui/TrilhoDoBloco.tsx",
+    "line": 103,
+    "from": "arrastavel",
+    "to": "draggable",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 8
+  },
+  {
+    "file": "src/pages/explore/ui/TrilhoDoBloco.tsx",
+    "line": 104,
+    "from": "aoAlternarSelecao",
+    "to": "onToggleSelection",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/pages/explore/ui/TrilhoDoBloco.tsx",
+    "line": 106,
+    "from": "aoEditarConteudo",
+    "to": "onEditContent",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/pages/explore/ui/TrilhoDoBloco.tsx",
+    "line": 107,
+    "from": "aoExcluir",
+    "to": "onDelete",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 8
+  },
+  {
+    "file": "src/pages/explore/ui/TrilhoDoBloco.tsx",
+    "line": 108,
+    "from": "aoEscolherLargura",
+    "to": "onChooseWidth",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/pages/explore/ui/TrilhoDoBloco.tsx",
+    "line": 108,
+    "from": "colunas",
+    "to": "columns",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 9
+  },
+  {
+    "file": "src/pages/explore/ui/TrilhoDoBloco.tsx",
+    "line": 109,
+    "from": "aoIniciarArrasto",
+    "to": "onDragStart",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/pages/explore/ui/TrilhoDoBloco.tsx",
+    "line": 110,
+    "from": "aoTerminarArrasto",
+    "to": "onDragEnd",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/pages/explore/ui/TrilhoDoBloco.tsx",
+    "line": 111,
+    "from": "aoEmpurrar",
+    "to": "onNudge",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 8
+  },
+  {
+    "file": "src/pages/explore/ui/TrilhoDoBloco.tsx",
+    "line": 111,
+    "from": "direcao",
+    "to": "direction",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "src/pages/explore/ui/TrilhoDoBloco.tsx",
+    "line": 113,
+    "from": "procedencia",
+    "to": "provenance",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/pages/explore/ui/TrilhoDoBloco.tsx",
+    "line": 114,
+    "from": "nome",
+    "to": "name",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "src/pages/explore/ui/TrilhoDoBloco.tsx",
+    "line": 118,
+    "from": "acao",
+    "to": "action",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 7
+  },
+  {
+    "file": "src/pages/explore/ui/TrilhoDoBloco.tsx",
+    "line": 181,
+    "from": "direcao",
+    "to": "direction",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "src/pages/explore/ui/__tests__/BlockInspector.test.tsx",
+    "line": 32,
+    "from": "chartComMetrica",
+    "to": "chartWithMetric",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/pages/explore/ui/__tests__/BlockInspector.test.tsx",
+    "line": 61,
+    "from": "solto",
+    "to": "unbound",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/pages/explore/ui/__tests__/CanvasPanel.test.tsx",
+    "line": 109,
+    "from": "DOIS_BLOCOS",
+    "to": "TWO_BLOCKS",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/pages/explore/ui/__tests__/CanvasPanel.test.tsx",
+    "line": 130,
+    "from": "linha",
+    "to": "row",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/pages/explore/ui/__tests__/CanvasPanel.test.tsx",
+    "line": 178,
+    "from": "TRES_LARGURAS",
+    "to": "THREE_WIDTHS",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/pages/explore/ui/__tests__/CanvasPanel.test.tsx",
+    "line": 197,
+    "from": "celulas",
+    "to": "cells",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/pages/explore/ui/__tests__/CanvasPanel.test.tsx",
+    "line": 206,
+    "from": "celula",
+    "to": "cell",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 9
+  },
+  {
+    "file": "src/pages/explore/ui/__tests__/ReguaDeLargura.test.tsx",
+    "line": 8,
+    "from": "LIVRE",
+    "to": "FREE",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 17
+  },
+  {
+    "file": "src/pages/explore/ui/__tests__/ReguaDeLargura.test.tsx",
+    "line": 9,
+    "from": "GRAFICO",
+    "to": "CHART",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 17
+  },
+  {
+    "file": "src/pages/explore/ui/__tests__/ReguaDeLargura.test.tsx",
+    "line": 11,
+    "from": "monta",
+    "to": "mount",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 21
+  },
+  {
+    "file": "src/pages/explore/ui/__tests__/ReguaDeLargura.test.tsx",
+    "line": 12,
+    "from": "aoEscolher",
+    "to": "onChoose",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 23
+  },
+  {
+    "file": "src/pages/explore/ui/__tests__/ReguaDeLargura.test.tsx",
+    "line": 22,
+    "from": "aoEscolher",
+    "to": "onChoose",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 23
+  },
+  {
+    "file": "src/pages/explore/ui/__tests__/ReguaDeLargura.test.tsx",
+    "line": 22,
+    "from": "regua",
+    "to": "ruler",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 40
+  },
+  {
+    "file": "src/pages/explore/ui/__tests__/ReguaDeLargura.test.tsx",
+    "line": 27,
+    "from": "regua",
+    "to": "ruler",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 40
+  },
+  {
+    "file": "src/pages/explore/ui/__tests__/ReguaDeLargura.test.tsx",
+    "line": 27,
+    "from": "largura",
+    "to": "width",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 38
+  },
+  {
+    "file": "src/pages/explore/ui/__tests__/ReguaDeLargura.test.tsx",
+    "line": 27,
+    "from": "faixa",
+    "to": "range",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 57
+  },
+  {
+    "file": "src/pages/explore/ui/__tests__/ReguaDeLargura.test.tsx",
+    "line": 36,
+    "from": "aoEscolher",
+    "to": "onChoose",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 23
+  },
+  {
+    "file": "src/pages/explore/ui/__tests__/ReguaDeLargura.test.tsx",
+    "line": 36,
+    "from": "regua",
+    "to": "ruler",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 40
+  },
+  {
+    "file": "src/pages/explore/ui/__tests__/ReguaDeLargura.test.tsx",
+    "line": 36,
+    "from": "largura",
+    "to": "width",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 38
+  },
+  {
+    "file": "src/pages/explore/ui/__tests__/ReguaDeLargura.test.tsx",
+    "line": 46,
+    "from": "aoEscolher",
+    "to": "onChoose",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 23
+  },
+  {
+    "file": "src/pages/explore/ui/__tests__/ReguaDeLargura.test.tsx",
+    "line": 46,
+    "from": "regua",
+    "to": "ruler",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 40
+  },
+  {
+    "file": "src/pages/explore/ui/__tests__/ReguaDeLargura.test.tsx",
+    "line": 46,
+    "from": "largura",
+    "to": "width",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 38
+  },
+  {
+    "file": "src/pages/explore/ui/__tests__/ReguaDeLargura.test.tsx",
+    "line": 46,
+    "from": "faixa",
+    "to": "range",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 57
+  },
+  {
+    "file": "src/pages/explore/ui/__tests__/ReguaDeLargura.test.tsx",
+    "line": 56,
+    "from": "aoEscolher",
+    "to": "onChoose",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 23
+  },
+  {
+    "file": "src/pages/explore/ui/__tests__/ReguaDeLargura.test.tsx",
+    "line": 56,
+    "from": "regua",
+    "to": "ruler",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 40
+  },
+  {
+    "file": "src/pages/explore/ui/__tests__/ReguaDeLargura.test.tsx",
+    "line": 56,
+    "from": "largura",
+    "to": "width",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 38
+  },
+  {
+    "file": "src/pages/explore/ui/__tests__/ReguaDeLargura.test.tsx",
+    "line": 56,
+    "from": "faixa",
+    "to": "range",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 57
+  },
+  {
+    "file": "src/pages/explore/ui/__tests__/ReguaDeLargura.test.tsx",
+    "line": 63,
+    "from": "regua",
+    "to": "ruler",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 40
+  },
+  {
+    "file": "src/pages/explore/ui/__tests__/ReguaDeLargura.test.tsx",
+    "line": 63,
+    "from": "largura",
+    "to": "width",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 38
+  },
+  {
+    "file": "src/pages/explore/ui/__tests__/ReguaDeLargura.test.tsx",
+    "line": 63,
+    "from": "faixa",
+    "to": "range",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 57
+  },
+  {
+    "file": "src/pages/explore/ui/__tests__/ReguaDeLargura.test.tsx",
+    "line": 70,
+    "from": "aoEscolher",
+    "to": "onChoose",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 23
+  },
+  {
+    "file": "src/pages/explore/ui/__tests__/ReguaDeLargura.test.tsx",
+    "line": 70,
+    "from": "regua",
+    "to": "ruler",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 40
+  },
+  {
+    "file": "src/pages/explore/ui/__tests__/ReguaDeLargura.test.tsx",
+    "line": 70,
+    "from": "desabilitada",
+    "to": "disabled",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 9
+  },
+  {
+    "file": "src/pages/explore/ui/__tests__/ReguaDeLargura.test.tsx",
+    "line": 88,
+    "from": "comTrilha",
+    "to": "withTrack",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "src/pages/explore/ui/__tests__/ReguaDeLargura.test.tsx",
+    "line": 88,
+    "from": "regua",
+    "to": "ruler",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 40
+  },
+  {
+    "file": "src/pages/explore/ui/__tests__/ReguaDeLargura.test.tsx",
+    "line": 88,
+    "from": "largura",
+    "to": "width",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 38
+  },
+  {
+    "file": "src/pages/explore/ui/__tests__/ReguaDeLargura.test.tsx",
+    "line": 95,
+    "from": "segmento",
+    "to": "segment",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 14
+  },
+  {
+    "file": "src/pages/explore/ui/__tests__/ReguaDeLargura.test.tsx",
+    "line": 98,
+    "from": "largura",
+    "to": "width",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 38
+  },
+  {
+    "file": "src/pages/explore/ui/__tests__/ReguaDeLargura.test.tsx",
+    "line": 98,
+    "from": "faixa",
+    "to": "range",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 57
+  },
+  {
+    "file": "src/pages/explore/ui/__tests__/ReguaDeLargura.test.tsx",
+    "line": 109,
+    "from": "aoEscolher",
+    "to": "onChoose",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 23
+  },
+  {
+    "file": "src/pages/explore/ui/__tests__/ReguaDeLargura.test.tsx",
+    "line": 109,
+    "from": "regua",
+    "to": "ruler",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 40
+  },
+  {
+    "file": "src/pages/explore/ui/__tests__/ReguaDeLargura.test.tsx",
+    "line": 109,
+    "from": "largura",
+    "to": "width",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 38
+  },
+  {
+    "file": "src/pages/explore/ui/__tests__/ReguaDeLargura.test.tsx",
+    "line": 109,
+    "from": "faixa",
+    "to": "range",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 57
+  },
+  {
+    "file": "src/pages/explore/ui/__tests__/ReguaDeLargura.test.tsx",
+    "line": 122,
+    "from": "regua",
+    "to": "ruler",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 40
+  },
+  {
+    "file": "src/pages/explore/ui/__tests__/ReguaDeLargura.test.tsx",
+    "line": 122,
+    "from": "largura",
+    "to": "width",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 38
+  },
+  {
+    "file": "src/pages/explore/ui/__tests__/ReguaDeLargura.test.tsx",
+    "line": 122,
+    "from": "faixa",
+    "to": "range",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 57
+  },
+  {
+    "file": "src/pages/explore/ui/__tests__/ReguaDeLargura.test.tsx",
+    "line": 132,
+    "from": "regua",
+    "to": "ruler",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 40
+  },
+  {
+    "file": "src/pages/explore/ui/__tests__/ReguaDeLargura.test.tsx",
+    "line": 132,
+    "from": "largura",
+    "to": "width",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 38
+  },
+  {
+    "file": "src/pages/explore/ui/__tests__/ReguaDeLargura.test.tsx",
+    "line": 132,
+    "from": "faixa",
+    "to": "range",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 57
+  },
+  {
+    "file": "src/pages/explore/ui/__tests__/ReguaDeLargura.test.tsx",
+    "line": 145,
+    "from": "regua",
+    "to": "ruler",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 40
+  },
+  {
+    "file": "src/pages/explore/ui/__tests__/ReguaDeLargura.test.tsx",
+    "line": 145,
+    "from": "largura",
+    "to": "width",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 38
+  },
+  {
+    "file": "src/pages/explore/ui/__tests__/ReguaDeLargura.test.tsx",
+    "line": 145,
+    "from": "faixa",
+    "to": "range",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 57
+  },
+  {
+    "file": "src/pages/explore/ui/__tests__/ReguaDeLargura.test.tsx",
+    "line": 159,
+    "from": "lado",
+    "to": "side",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 12
+  },
+  {
+    "file": "src/pages/explore/ui/__tests__/ReguaDeLargura.test.tsx",
+    "line": 159,
+    "from": "ancora",
+    "to": "anchor",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/pages/explore/ui/__tests__/ReguaDeLargura.test.tsx",
+    "line": 160,
+    "from": "regua",
+    "to": "ruler",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 40
+  },
+  {
+    "file": "src/pages/explore/ui/__tests__/ReguaDeLargura.test.tsx",
+    "line": 160,
+    "from": "largura",
+    "to": "width",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 38
+  },
+  {
+    "file": "src/pages/explore/ui/__tests__/ReguaDeLargura.test.tsx",
+    "line": 160,
+    "from": "faixa",
+    "to": "range",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 57
+  },
+  {
+    "file": "src/pages/explore/ui/__tests__/ReguaDeLargura.test.tsx",
+    "line": 160,
+    "from": "lado",
+    "to": "side",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 12
+  },
+  {
+    "file": "src/pages/explore/ui/__tests__/ReguaDeLargura.test.tsx",
+    "line": 167,
+    "from": "regua",
+    "to": "ruler",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 40
+  },
+  {
+    "file": "src/pages/explore/ui/__tests__/ReguaDeLargura.test.tsx",
+    "line": 167,
+    "from": "largura",
+    "to": "width",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 38
+  },
+  {
+    "file": "src/pages/explore/ui/__tests__/ReguaDeLargura.test.tsx",
+    "line": 167,
+    "from": "faixa",
+    "to": "range",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 57
+  },
+  {
+    "file": "src/pages/explore/ui/__tests__/TrilhoDoBloco.test.tsx",
+    "line": 13,
+    "from": "TEXTO",
+    "to": "TEXT",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/pages/explore/ui/__tests__/TrilhoDoBloco.test.tsx",
+    "line": 15,
+    "from": "CATALOGO",
+    "to": "CATALOG",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/pages/explore/ui/__tests__/TrilhoDoBloco.test.tsx",
+    "line": 22,
+    "from": "texto",
+    "to": "text",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 11
+  },
+  {
+    "file": "src/pages/explore/ui/__tests__/TrilhoDoBloco.test.tsx",
+    "line": 23,
+    "from": "ausente",
+    "to": "missing",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 9
+  },
+  {
+    "file": "src/pages/explore/ui/__tests__/TrilhoDoBloco.test.tsx",
+    "line": 28,
+    "from": "texto",
+    "to": "text",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 11
+  },
+  {
+    "file": "src/pages/explore/ui/__tests__/TrilhoDoBloco.test.tsx",
+    "line": 28,
+    "from": "ausente",
+    "to": "missing",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 9
+  },
+  {
+    "file": "src/pages/explore/ui/__tests__/TrilhoDoBloco.test.tsx",
+    "line": 32,
+    "from": "semMetrica",
+    "to": "withoutMetric",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/pages/explore/ui/__tests__/TrilhoDoBloco.test.tsx",
+    "line": 33,
+    "from": "texto",
+    "to": "text",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 11
+  },
+  {
+    "file": "src/pages/explore/ui/__tests__/TrilhoDoBloco.test.tsx",
+    "line": 33,
+    "from": "ausente",
+    "to": "missing",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 9
+  },
+  {
+    "file": "src/pages/explore/ui/__tests__/TrilhoDoBloco.test.tsx",
+    "line": 37,
+    "from": "texto",
+    "to": "text",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 11
+  },
+  {
+    "file": "src/pages/explore/ui/__tests__/TrilhoDoBloco.test.tsx",
+    "line": 37,
+    "from": "ausente",
+    "to": "missing",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 9
+  },
+  {
+    "file": "src/pages/explore/ui/__tests__/TrilhoDoBloco.test.tsx",
+    "line": 41,
+    "from": "monta",
+    "to": "mount",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 21
+  },
+  {
+    "file": "src/pages/explore/ui/__tests__/TrilhoDoBloco.test.tsx",
+    "line": 42,
+    "from": "espioes",
+    "to": "spies",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/pages/explore/ui/__tests__/TrilhoDoBloco.test.tsx",
+    "line": 43,
+    "from": "aoAlternarSelecao",
+    "to": "onToggleSelection",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/pages/explore/ui/__tests__/TrilhoDoBloco.test.tsx",
+    "line": 44,
+    "from": "aoExcluir",
+    "to": "onDelete",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 8
+  },
+  {
+    "file": "src/pages/explore/ui/__tests__/TrilhoDoBloco.test.tsx",
+    "line": 45,
+    "from": "aoEscolherLargura",
+    "to": "onChooseWidth",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/pages/explore/ui/__tests__/TrilhoDoBloco.test.tsx",
+    "line": 46,
+    "from": "aoIniciarArrasto",
+    "to": "onDragStart",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/pages/explore/ui/__tests__/TrilhoDoBloco.test.tsx",
+    "line": 47,
+    "from": "aoTerminarArrasto",
+    "to": "onDragEnd",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/pages/explore/ui/__tests__/TrilhoDoBloco.test.tsx",
+    "line": 48,
+    "from": "aoEmpurrar",
+    "to": "onNudge",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 8
+  },
+  {
+    "file": "src/pages/explore/ui/__tests__/TrilhoDoBloco.test.tsx",
+    "line": 79,
+    "from": "aoEmpurrar",
+    "to": "onNudge",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 8
+  },
+  {
+    "file": "src/pages/explore/ui/__tests__/TrilhoDoBloco.test.tsx",
+    "line": 89,
+    "from": "aoExcluir",
+    "to": "onDelete",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 8
+  },
+  {
+    "file": "src/pages/explore/ui/__tests__/TrilhoDoBloco.test.tsx",
+    "line": 96,
+    "from": "selecionado",
+    "to": "selected",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "src/pages/explore/ui/__tests__/TrilhoDoBloco.test.tsx",
+    "line": 96,
+    "from": "posicaoNaSelecao",
+    "to": "selectionPosition",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "src/pages/explore/ui/__tests__/TrilhoDoBloco.test.tsx",
+    "line": 97,
+    "from": "marca",
+    "to": "mark",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/pages/explore/ui/__tests__/TrilhoDoBloco.test.tsx",
+    "line": 108,
+    "from": "arrastavel",
+    "to": "draggable",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 8
+  },
+  {
+    "file": "src/pages/explore/ui/__tests__/casca-do-bloco.test.tsx",
+    "line": 30,
+    "from": "SEM_CASCA",
+    "to": "WITHOUT_SHELL",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/pages/explore/ui/__tests__/casca-do-bloco.test.tsx",
+    "line": 40,
+    "from": "semCasca",
+    "to": "withoutShell",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/pages/explore/ui/__tests__/casca-do-bloco.test.tsx",
+    "line": 41,
+    "from": "comCasca",
+    "to": "withShell",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/pages/explore/ui/__tests__/casca-do-bloco.test.tsx",
+    "line": 63,
+    "from": "COM_DADO",
+    "to": "WITH_DATA",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/pages/explore/ui/__tests__/largura-pelo-ponteiro.test.ts",
+    "line": 6,
+    "from": "LIVRE",
+    "to": "FREE",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 17
+  },
+  {
+    "file": "src/pages/explore/ui/__tests__/largura-pelo-ponteiro.test.ts",
+    "line": 8,
+    "from": "GRAFICO",
+    "to": "CHART",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 17
+  },
+  {
+    "file": "src/pages/explore/ui/__tests__/largura-pelo-ponteiro.test.ts",
+    "line": 11,
+    "from": "LARGURA",
+    "to": "WIDTH",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 11
+  },
+  {
+    "file": "src/pages/explore/ui/__tests__/largura-pelo-ponteiro.test.ts",
+    "line": 42,
+    "from": "PASSO",
+    "to": "STEP",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 9
+  },
+  {
+    "file": "src/pages/explore/ui/__tests__/largura-pelo-ponteiro.test.ts",
+    "line": 43,
+    "from": "CALHA",
+    "to": "GUTTER",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 13
+  },
+  {
+    "file": "src/pages/explore/ui/__tests__/largura-pelo-ponteiro.test.ts",
+    "line": 46,
+    "from": "larguraDe",
+    "to": "widthOf",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/__tests__/CanvasBlockRenderer.expandable.test.tsx",
+    "line": 31,
+    "from": "kpiSemHistorico",
+    "to": "kpiWithoutHistory",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/__tests__/CanvasBlockRenderer.loading.test.tsx",
+    "line": 36,
+    "from": "comDado",
+    "to": "withData",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/__tests__/CanvasBlockRenderer.loading.test.tsx",
+    "line": 66,
+    "from": "texto",
+    "to": "text",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 11
+  },
+  {
+    "file": "src/pages/explore/ui/blocks/__tests__/CanvasBlockRenderer.loading.test.tsx",
+    "line": 72,
+    "from": "tabela",
+    "to": "table",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/pages/explore/ui/grade-de-blocos.ts",
+    "line": 27,
+    "from": "CLASSE_DA_GRADE",
+    "to": "GRID_CLASS",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/pages/explore/ui/grade-de-blocos.ts",
+    "line": 37,
+    "from": "estiloDaLargura",
+    "to": "widthStyle",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "src/pages/explore/ui/grade-de-blocos.ts",
+    "line": 37,
+    "from": "colunas",
+    "to": "columns",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 9
+  },
+  {
+    "file": "src/pages/explore/ui/grade-de-blocos.ts",
+    "line": 38,
+    "from": "dentroDaGrade",
+    "to": "clampToGrid",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/pages/explore/ui/largura-pelo-ponteiro.ts",
+    "line": 18,
+    "from": "dentroDaFaixa",
+    "to": "clampToRange",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/pages/explore/ui/largura-pelo-ponteiro.ts",
+    "line": 18,
+    "from": "colunas",
+    "to": "columns",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 9
+  },
+  {
+    "file": "src/pages/explore/ui/largura-pelo-ponteiro.ts",
+    "line": 18,
+    "from": "faixa",
+    "to": "range",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 57
+  },
+  {
+    "file": "src/pages/explore/ui/largura-pelo-ponteiro.ts",
+    "line": 32,
+    "from": "colunaNaRegua",
+    "to": "columnOnRuler",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 15
+  },
+  {
+    "file": "src/pages/explore/ui/largura-pelo-ponteiro.ts",
+    "line": 33,
+    "from": "deslocamento",
+    "to": "offset",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/pages/explore/ui/largura-pelo-ponteiro.ts",
+    "line": 34,
+    "from": "larguraDaRegua",
+    "to": "rulerWidth",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/pages/explore/ui/largura-pelo-ponteiro.ts",
+    "line": 35,
+    "from": "faixa",
+    "to": "range",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 57
+  },
+  {
+    "file": "src/pages/explore/ui/largura-pelo-ponteiro.ts",
+    "line": 38,
+    "from": "segmento",
+    "to": "segment",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 14
+  },
+  {
+    "file": "src/pages/explore/ui/largura-pelo-ponteiro.ts",
+    "line": 39,
+    "from": "bruto",
+    "to": "raw",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/pages/explore/ui/largura-pelo-ponteiro.ts",
+    "line": 55,
+    "from": "colunaNoPuxador",
+    "to": "columnAtHandle",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 11
+  },
+  {
+    "file": "src/pages/explore/ui/largura-pelo-ponteiro.ts",
+    "line": 56,
+    "from": "arrasto",
+    "to": "drag",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/pages/explore/ui/largura-pelo-ponteiro.ts",
+    "line": 57,
+    "from": "passo",
+    "to": "step",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/pages/explore/ui/largura-pelo-ponteiro.ts",
+    "line": 58,
+    "from": "calha",
+    "to": "gutter",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/pages/explore/ui/largura-pelo-ponteiro.ts",
+    "line": 59,
+    "from": "faixa",
+    "to": "range",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 57
+  },
+  {
+    "file": "src/pages/explore/ui/largura-pelo-ponteiro.ts",
+    "line": 62,
+    "from": "bruto",
+    "to": "raw",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/pages/explore/ui/use-resize-handle.ts",
+    "line": 22,
+    "from": "celulaRef",
+    "to": "cellRef",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 11,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/pages/explore/ui/use-resize-handle.ts",
+    "line": 23,
+    "from": "faixa",
+    "to": "range",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 57
+  },
+  {
+    "file": "src/pages/explore/ui/use-resize-handle.ts",
+    "line": 24,
+    "from": "largura",
+    "to": "width",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 38
+  },
+  {
+    "file": "src/pages/explore/ui/use-resize-handle.ts",
+    "line": 25,
+    "from": "aoSoltar",
+    "to": "onRelease",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/pages/explore/ui/use-resize-handle.ts",
+    "line": 26,
+    "from": "aoMudarEstado",
+    "to": "onStateChange",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "src/pages/explore/ui/use-resize-handle.ts",
+    "line": 31,
+    "from": "celulaRef",
+    "to": "cellRef",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 11,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/pages/explore/ui/use-resize-handle.ts",
+    "line": 32,
+    "from": "faixa",
+    "to": "range",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 57
+  },
+  {
+    "file": "src/pages/explore/ui/use-resize-handle.ts",
+    "line": 33,
+    "from": "largura",
+    "to": "width",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 38
+  },
+  {
+    "file": "src/pages/explore/ui/use-resize-handle.ts",
+    "line": 34,
+    "from": "aoSoltar",
+    "to": "onRelease",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/pages/explore/ui/use-resize-handle.ts",
+    "line": 34,
+    "from": "colunas",
+    "to": "columns",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 9
+  },
+  {
+    "file": "src/pages/explore/ui/use-resize-handle.ts",
+    "line": 36,
+    "from": "aoMudarEstado",
+    "to": "onStateChange",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "src/pages/explore/ui/use-resize-handle.ts",
+    "line": 36,
+    "from": "redimensionando",
+    "to": "isResizing",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/pages/explore/ui/use-resize-handle.ts",
+    "line": 38,
+    "from": "previa",
+    "to": "preview",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "src/pages/explore/ui/use-resize-handle.ts",
+    "line": 39,
+    "from": "desmontar",
+    "to": "unmount",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/pages/explore/ui/use-resize-handle.ts",
+    "line": 46,
+    "from": "aoApontar",
+    "to": "onPointerDown",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/pages/explore/ui/use-resize-handle.ts",
+    "line": 48,
+    "from": "celula",
+    "to": "cell",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 9
+  },
+  {
+    "file": "src/pages/explore/ui/use-resize-handle.ts",
+    "line": 53,
+    "from": "calha",
+    "to": "gutter",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/pages/explore/ui/use-resize-handle.ts",
+    "line": 56,
+    "from": "passo",
+    "to": "step",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/pages/explore/ui/use-resize-handle.ts",
+    "line": 67,
+    "from": "escolhida",
+    "to": "chosen",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 9
+  },
+  {
+    "file": "src/pages/explore/ui/use-resize-handle.ts",
+    "line": 72,
+    "from": "mover",
+    "to": "move",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/pages/explore/ui/use-resize-handle.ts",
+    "line": 73,
+    "from": "proxima",
+    "to": "next",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/pages/explore/ui/use-resize-handle.ts",
+    "line": 79,
+    "from": "soltar",
+    "to": "release",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "src/pages/explore/ui/use-resize-handle.ts",
+    "line": 97,
+    "from": "previa",
+    "to": "preview",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "src/pages/explore/ui/use-resize-handle.ts",
+    "line": 97,
+    "from": "aoApontar",
+    "to": "onPointerDown",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/pages/explore/ui/GuiasDeColuna.tsx",
+    "line": 0,
+    "from": "src/pages/explore/ui/GuiasDeColuna.tsx",
+    "to": "src/pages/explore/ui/ColumnGuides.tsx",
+    "kind": "file",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 1
+  },
+  {
+    "file": "src/pages/explore/ui/ReguaDeLargura.tsx",
+    "line": 0,
+    "from": "src/pages/explore/ui/ReguaDeLargura.tsx",
+    "to": "src/pages/explore/ui/WidthRuler.tsx",
+    "kind": "file",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 1
+  },
+  {
+    "file": "src/pages/explore/ui/TrilhoDoBloco.tsx",
+    "line": 0,
+    "from": "src/pages/explore/ui/TrilhoDoBloco.tsx",
+    "to": "src/pages/explore/ui/BlockRail.tsx",
+    "kind": "file",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 1
+  },
+  {
+    "file": "src/pages/explore/ui/__tests__/ReguaDeLargura.test.tsx",
+    "line": 0,
+    "from": "src/pages/explore/ui/__tests__/ReguaDeLargura.test.tsx",
+    "to": "src/pages/explore/ui/__tests__/WidthRuler.test.tsx",
+    "kind": "file",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 1
+  },
+  {
+    "file": "src/pages/explore/ui/__tests__/TrilhoDoBloco.test.tsx",
+    "line": 0,
+    "from": "src/pages/explore/ui/__tests__/TrilhoDoBloco.test.tsx",
+    "to": "src/pages/explore/ui/__tests__/BlockRail.test.tsx",
+    "kind": "file",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 1
+  },
+  {
+    "file": "src/pages/explore/ui/__tests__/casca-do-bloco.test.tsx",
+    "line": 0,
+    "from": "src/pages/explore/ui/__tests__/casca-do-bloco.test.tsx",
+    "to": "src/pages/explore/ui/__tests__/block-shell-coverage.test.tsx",
+    "kind": "file",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 1
+  },
+  {
+    "file": "src/pages/explore/ui/__tests__/grade-de-blocos.test.ts",
+    "line": 0,
+    "from": "src/pages/explore/ui/__tests__/grade-de-blocos.test.ts",
+    "to": "src/pages/explore/ui/__tests__/block-grid.test.ts",
+    "kind": "file",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 1
+  },
+  {
+    "file": "src/pages/explore/ui/__tests__/largura-pelo-ponteiro.test.ts",
+    "line": 0,
+    "from": "src/pages/explore/ui/__tests__/largura-pelo-ponteiro.test.ts",
+    "to": "src/pages/explore/ui/__tests__/pointer-width.test.ts",
+    "kind": "file",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 1
+  },
+  {
+    "file": "src/pages/explore/ui/grade-de-blocos.ts",
+    "line": 0,
+    "from": "src/pages/explore/ui/grade-de-blocos.ts",
+    "to": "src/pages/explore/ui/block-grid.ts",
+    "kind": "file",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 1
+  },
+  {
+    "file": "src/pages/explore/ui/largura-pelo-ponteiro.ts",
+    "line": 0,
+    "from": "src/pages/explore/ui/largura-pelo-ponteiro.ts",
+    "to": "src/pages/explore/ui/pointer-width.ts",
+    "kind": "file",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 1
+  },
+  {
+    "file": "src/pages/explore/ui/use-resize-handle.ts",
+    "line": 38,
+    "from": "setPrevia",
+    "to": "setPreview",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false
+  }
+]

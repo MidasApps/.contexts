@@ -1,0 +1,196 @@
+<h2>Design: Estrutura de Arquivos e Implementacao</h2>
+<p class="subtitle">Secao 5 de 5 — Organizacao do codigo, code samples e fluxo tecnico</p>
+
+<!-- FILE STRUCTURE -->
+<div class="section">
+  <h3>Estrutura de Arquivos</h3>
+  <div class="mockup">
+    <div class="mockup-header">Novos arquivos e modificacoes</div>
+    <div class="mockup-body" style="font-family:monospace;font-size:11px;line-height:1.9;padding:16px;color:#e2e8f0;">
+      <span style="color:#f59e0b;">src/</span><br/>
+      <span style="color:#f59e0b;">  shared/</span><br/>
+      <span style="color:#f59e0b;">    config/</span><br/>
+      <span style="color:#f59e0b;">      agents/</span> <span style="color:#22c55e;">← NOVO: contexto estatico de cada agente</span><br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#22c55e;">index.ts</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;— re-export de todos os agentes<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#22c55e;">types.ts</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;— AgentId, AgentConfig, PreliminaryResult types<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#22c55e;">orchestrator.ts</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;— system prompt do router + routing rules<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#22c55e;">sql-agent.ts</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;— schema, formulas, regras SQL<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#22c55e;">business-agent.ts</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;— glossario, regras de negocio<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#22c55e;">dashboard-agent.ts</span> &nbsp;&nbsp;&nbsp;&nbsp;— instrucoes de interpretacao<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#22c55e;">comparison-agent.ts</span> &nbsp;&nbsp;&nbsp;— metodologia, benchmarks<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#22c55e;">external-agent.ts</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;— fontes, indicadores economicos<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#22c55e;">export-agent.ts</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;— templates, formatacao<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#22c55e;">simulation-agent.ts</span> &nbsp;&nbsp;&nbsp;— modelos, formulas, ranges<br/>
+      <br/>
+      <span style="color:#f59e0b;">  features/</span><br/>
+      <span style="color:#f59e0b;">    ai-agents/</span> <span style="color:#22c55e;">← NOVO: logica de execucao dos agentes</span><br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#22c55e;">orchestrator.ts</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;— streamText + tools de roteamento<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#22c55e;">create-agent-tool.ts</span> &nbsp;&nbsp;&nbsp;— factory: cria tool com async generator<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#22c55e;">agents/</span><br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#22c55e;">sql-agent.ts</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;— generateText + execute_sql tool<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#22c55e;">business-agent.ts</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;— generateText + glossary tools<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#22c55e;">dashboard-agent.ts</span> &nbsp;&nbsp;&nbsp;&nbsp;— context reader (sem generateText)<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#22c55e;">comparison-agent.ts</span> &nbsp;&nbsp;&nbsp;— generateText + compare tools<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#22c55e;">external-agent.ts</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;— generateText + search/bcb tools<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#22c55e;">export-agent.ts</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;— pdf/csv generation<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#22c55e;">simulation-agent.ts</span> &nbsp;&nbsp;&nbsp;— generateText + simulation tools<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#22c55e;">tools/</span><br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#22c55e;">execute-sql.ts</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;— BigQuery query execution + guardrails<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#22c55e;">get-table-schema.ts</span> &nbsp;&nbsp;&nbsp;— schema introspection<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#22c55e;">search-web.ts</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;— Firecrawl wrapper<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#22c55e;">get-bcb-indicator.ts</span> &nbsp;&nbsp;— Banco Central API<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#22c55e;">generate-pdf.ts</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;— jsPDF wrapper<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#22c55e;">generate-csv.ts</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;— CSV builder<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#22c55e;">model-registry.ts</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;— gateway config + model aliases<br/>
+      <br/>
+      <span style="color:#f59e0b;">  widgets/</span><br/>
+      <span style="color:#f59e0b;">    ai-sidebar/</span><br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#f59e0b;">ui/</span><br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#fbbf24;">AISidebar.tsx</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;— <span style="color:#fbbf24;">MODIFICADO</span>: novo rendering de parts<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#22c55e;">ToolStepIndicator.tsx</span> &nbsp;— NOVO: timeline de steps do agente<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#22c55e;">InlineDataRenderer.tsx</span> — NOVO: tabelas, KPIs, downloads inline<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#22c55e;">SqlPreview.tsx</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;— NOVO: SQL expandivel com highlight<br/>
+      <br/>
+      <span style="color:#f59e0b;">app/</span><br/>
+      <span style="color:#f59e0b;">  api/</span><br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#fbbf24;">chat/route.ts</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;— <span style="color:#fbbf24;">REESCRITO</span>: usa orchestrator<br/>
+    </div>
+  </div>
+</div>
+
+<!-- CODE SAMPLES -->
+<div class="section" style="margin-top:24px;">
+  <h3>Code Samples Chave</h3>
+
+  <!-- Model Registry -->
+  <div style="margin-bottom:16px;">
+    <div style="color:#f59e0b;font-weight:bold;font-size:13px;margin-bottom:8px;">model-registry.ts — Gateway com aliases por complexidade</div>
+    <div style="background:#0f172a;border-radius:8px;padding:14px;font-family:monospace;font-size:11px;line-height:1.8;color:#e2e8f0;overflow-x:auto;">
+      <span style="color:#7c3aed;">import</span> { customProvider, gateway } <span style="color:#7c3aed;">from</span> <span style="color:#22c55e;">'ai'</span>;<br/><br/>
+      <span style="color:#7c3aed;">export const</span> models = customProvider({<br/>
+      &nbsp;&nbsp;languageModels: {<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#22c55e;">'router'</span>: gateway(<span style="color:#22c55e;">'google-vertex/gemini-2.5-flash-lite'</span>),<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#22c55e;">'fast'</span>: gateway(<span style="color:#22c55e;">'google-vertex/gemini-2.5-flash'</span>),<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#22c55e;">'reasoning'</span>: gateway(<span style="color:#22c55e;">'google-vertex/gemini-2.5-pro'</span>),<br/>
+      &nbsp;&nbsp;},<br/>
+      &nbsp;&nbsp;fallbackProvider: gateway,<br/>
+      });<br/><br/>
+      <span style="color:#94a3b8;">// Uso: models('router'), models('fast'), models('reasoning')</span><br/>
+      <span style="color:#94a3b8;">// Futuro: trocar 'reasoning' para 'anthropic/claude-sonnet-4.5' sem mudar nada</span>
+    </div>
+  </div>
+
+  <!-- Create Agent Tool -->
+  <div style="margin-bottom:16px;">
+    <div style="color:#f59e0b;font-weight:bold;font-size:13px;margin-bottom:8px;">create-agent-tool.ts — Factory de tool com async generator</div>
+    <div style="background:#0f172a;border-radius:8px;padding:14px;font-family:monospace;font-size:11px;line-height:1.8;color:#e2e8f0;overflow-x:auto;">
+      <span style="color:#7c3aed;">import</span> { tool } <span style="color:#7c3aed;">from</span> <span style="color:#22c55e;">'ai'</span>;<br/><br/>
+      <span style="color:#7c3aed;">export function</span> <span style="color:#60a5fa;">createAgentTool</span>(config: AgentConfig) {<br/>
+      &nbsp;&nbsp;<span style="color:#7c3aed;">return</span> tool({<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;description: config.description,<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;inputSchema: config.inputSchema,<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#f59e0b;">async *</span><span style="color:#60a5fa;">execute</span>(input, options) {<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#94a3b8;">// 1. Preliminary: analyzing</span><br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#7c3aed;">yield</span> { status: <span style="color:#22c55e;">'analyzing'</span>, agent: config.id };<br/><br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#94a3b8;">// 2. Build agent-specific prompt</span><br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#7c3aed;">const</span> system = buildAgentPrompt(config.id, options.experimental_context);<br/><br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#94a3b8;">// 3. Run sub-agent with its own model + tools</span><br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#7c3aed;">const</span> result = <span style="color:#7c3aed;">await</span> generateText({<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;model: models(config.model),<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;system,<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;tools: config.tools,<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;stopWhen: stepCountIs(config.maxSteps ?? 3),<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;prompt: input.query,<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#f59e0b;">onStepFinish</span>: ({ toolCalls }) => {<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#94a3b8;">// Yield preliminary results for each internal step</span><br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#94a3b8;">// (handled via callback → shared state)</span><br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;},<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;});<br/><br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#94a3b8;">// 4. Final result</span><br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#7c3aed;">yield</span> { status: <span style="color:#22c55e;">'done'</span>, summary: result.text };<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#7c3aed;">return</span> { text: result.text, toolResults: result.toolResults };<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;},<br/>
+      &nbsp;&nbsp;});<br/>
+      }
+    </div>
+  </div>
+
+  <!-- Orchestrator -->
+  <div style="margin-bottom:16px;">
+    <div style="color:#f59e0b;font-weight:bold;font-size:13px;margin-bottom:8px;">orchestrator.ts — O router principal</div>
+    <div style="background:#0f172a;border-radius:8px;padding:14px;font-family:monospace;font-size:11px;line-height:1.8;color:#e2e8f0;overflow-x:auto;">
+      <span style="color:#7c3aed;">export function</span> <span style="color:#60a5fa;">createOrchestrator</span>(context: RequestContext) {<br/>
+      &nbsp;&nbsp;<span style="color:#7c3aed;">return</span> streamText({<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;model: models(<span style="color:#22c55e;">'router'</span>),<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;system: ORCHESTRATOR_PROMPT,<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;messages: context.messages,<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;tools: {<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sql_agent: createAgentTool(sqlAgentConfig),<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;business_agent: createAgentTool(businessAgentConfig),<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dashboard_agent: createAgentTool(dashboardAgentConfig),<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;comparison_agent: createAgentTool(comparisonAgentConfig),<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;external_agent: createAgentTool(externalAgentConfig),<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;export_agent: createAgentTool(exportAgentConfig),<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;simulation_agent: createAgentTool(simulationAgentConfig),<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;},<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;stopWhen: stepCountIs(10),<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;experimental_context: {<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dataset: context.dataset,<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;filters: context.filters,<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dashboardState: context.dashboardState,<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;},<br/>
+      &nbsp;&nbsp;});<br/>
+      }
+    </div>
+  </div>
+
+  <!-- API Route -->
+  <div>
+    <div style="color:#f59e0b;font-weight:bold;font-size:13px;margin-bottom:8px;">app/api/chat/route.ts — Simplificado</div>
+    <div style="background:#0f172a;border-radius:8px;padding:14px;font-family:monospace;font-size:11px;line-height:1.8;color:#e2e8f0;overflow-x:auto;">
+      <span style="color:#7c3aed;">export async function</span> <span style="color:#60a5fa;">POST</span>(req: Request) {<br/>
+      &nbsp;&nbsp;<span style="color:#7c3aed;">const</span> { messages, context, dataset, filters } = <span style="color:#7c3aed;">await</span> req.json();<br/>
+      &nbsp;&nbsp;<span style="color:#7c3aed;">const</span> user = <span style="color:#7c3aed;">await</span> verifyAuth(req);<br/>
+      &nbsp;&nbsp;<span style="color:#7c3aed;">await</span> checkDatasetAccess(user, dataset);<br/><br/>
+      &nbsp;&nbsp;<span style="color:#7c3aed;">const</span> result = createOrchestrator({<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;messages: convertToModelMessages(messages),<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;dataset,<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;filters,<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;dashboardState: context,<br/>
+      &nbsp;&nbsp;});<br/><br/>
+      &nbsp;&nbsp;<span style="color:#7c3aed;">return</span> result.toUIMessageStreamResponse();<br/>
+      }
+    </div>
+  </div>
+</div>
+
+<!-- SEPARATION OF CONCERNS -->
+<div class="section" style="margin-top:24px;">
+  <h3>Separacao de Responsabilidades</h3>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
+    <div style="background:#1e293b;border:1px solid #334155;border-radius:8px;padding:14px;">
+      <div style="color:#3b82f6;font-weight:bold;font-size:12px;margin-bottom:8px;">Config (shared/config/agents/)</div>
+      <div style="color:#e2e8f0;font-size:11px;line-height:1.6;">
+        <strong>O que:</strong> Contexto estatico, prompts, schemas<br/>
+        <strong>Quem edita:</strong> Product/domain experts<br/>
+        <strong>Frequencia:</strong> Quando regras de negocio mudam
+      </div>
+    </div>
+    <div style="background:#1e293b;border:1px solid #334155;border-radius:8px;padding:14px;">
+      <div style="color:#8b5cf6;font-weight:bold;font-size:12px;margin-bottom:8px;">Features (features/ai-agents/)</div>
+      <div style="color:#e2e8f0;font-size:11px;line-height:1.6;">
+        <strong>O que:</strong> Logica de execucao, orquestracao<br/>
+        <strong>Quem edita:</strong> Devs<br/>
+        <strong>Frequencia:</strong> Quando adiciona agentes ou tools
+      </div>
+    </div>
+    <div style="background:#1e293b;border:1px solid #334155;border-radius:8px;padding:14px;">
+      <div style="color:#22c55e;font-weight:bold;font-size:12px;margin-bottom:8px;">Widgets (widgets/ai-sidebar/)</div>
+      <div style="color:#e2e8f0;font-size:11px;line-height:1.6;">
+        <strong>O que:</strong> UI rendering, step indicators<br/>
+        <strong>Quem edita:</strong> Frontend devs<br/>
+        <strong>Frequencia:</strong> Quando UX muda
+      </div>
+    </div>
+  </div>
+</div>

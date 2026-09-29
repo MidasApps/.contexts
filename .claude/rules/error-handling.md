@@ -1,39 +1,49 @@
 # Error Handling — regra sempre-ativa
 
-Distingue erros operacionais (esperados, recuperáveis) de bugs (impossíveis), retorna envelope estável ao cliente, mascara internals em prod, propaga correlation ID.
+Distingue erros esperados de domínio, falhas transitórias de infraestrutura e bugs; responde com o envelope estável; mascara internals; propaga `requestId`/`traceId`.
 
 ## Princípios
-- Taxonomia: **operational** (input ruim, recurso indisponível, conflito) vs **programmer** (assert, invariante quebrada).
-- Operational → resposta tipada para o caller (4xx ou Result). Programmer → log + 500 + crash policy.
-- Error envelope estável: `{ code: "ORDER_NOT_FOUND", message, details?, traceId }`. Cliente programa contra `code`, não mensagem.
-- `Result<T, E>` ou either em boundaries internos quando o erro é parte do contrato; `throw` quando é excepcional.
-- Toda exception logged com correlation/trace ID + contexto (userId, route, params seguros).
-- Em prod: mensagem ao cliente é genérica; stack trace só no log.
-- Catch específico, não `catch (e) {}` mudo — engole bugs.
+- Taxonomia: **domínio esperado** (não encontrado, conflito, regra violada) · **infra transitória** (timeout, 429, 503) · **bug** (invariante quebrada).
+- Domínio → `Result<T, E>` narrowed pelo caller (`if (result.ok)`); `throw` só em adapter/boundary e para bug. Não misturar os dois na mesma função.
+- Erro de domínio é classe com `code` estável (SCREAMING_SNAKE) e `cause` ao re-lançar; nunca `throw new Error("...")` genérico.
+- Envelope HTTP: `{ error: { code, message, details?, requestId } }` — fonte única `@.contexts/engineering/contracts/api.md` §6. Cliente programa contra `code`. Esta rule não redefine o shape.
+- Logar cada erro UMA vez, no boundary que o trata, com `requestId`/`traceId` e contexto seguro.
+- Em prod: mensagem ao cliente é genérica; stack, SQL e mensagem crua de SDK só no log.
 
 ## Checklist (aplicar a todo turn)
-- [ ] Handler tem `try/catch` apenas no topo, com mapeamento erro→HTTP.
-- [ ] Erros conhecidos têm classe/tag (`class NotFoundError`, `kind: "conflict"`).
-- [ ] Log inclui `traceId`, `userId` (se houver), rota, code.
+- [ ] `try/catch` só no boundary (route handler, Server Action, handler de Function, worker), com mapeamento erro→status.
+- [ ] Erro conhecido tem classe com `code`; `catch (e: unknown)` + `instanceof` antes de usar.
+- [ ] Nenhuma promise solta; nenhum `catch {}` vazio.
 - [ ] Resposta de erro NÃO contém stack, query, secret, path absoluto.
-- [ ] `Promise` sem `.catch`/`await` → erro caçado por handler de topo.
-- [ ] Retry só em erro idempotente + transient (5xx, ECONNRESET).
+- [ ] Retry só em operação idempotente + erro transitório, com backoff+jitter e `maxAttempts`.
+- [ ] I/O tem timeout explícito e propaga `AbortSignal`.
 
 ## Anti-patterns
-- `catch (e) { console.log(e) }` → log estruturado + rethrow ou map.
-- Lançar `Error("falhou")` genérico → use classe com `code`.
-- Retornar 200 com `{ ok: false }` para erro → use status HTTP correto.
-- Vazar `e.message` do ORM ao cliente → traduzir para code estável.
+- `catch (e) { console.log(e) }` → logger estruturado + map ou rethrow com `cause`.
+- `return null` no catch → `Result.err` ou propagar.
+- 200 com `{ ok: false }` → status HTTP correto.
+- Vazar `e.message` do ORM/SDK → traduzir para `code` estável.
 
 ## Mini-exemplo
 ```ts
-class NotFoundError extends Error { code = "NOT_FOUND"; constructor(public resource: string){ super(resource) } }
+export class OrderNotFoundError extends Error {
+  readonly code = "ORDER_NOT_FOUND";
+  readonly orderId: OrderId;
+  constructor(orderId: OrderId, options?: ErrorOptions) {
+    super("order not found", options);
+    this.name = "OrderNotFoundError";
+    this.orderId = orderId; // sem parameter property: erasableSyntaxOnly
+  }
+}
 
-try { return await getOrder(id) }
-catch (e) {
-  if (e instanceof NotFoundError) return json({ code: e.code, message: "Order not found" }, 404);
-  logger.error({ traceId, err: e }, "unhandled");
-  return json({ code: "INTERNAL", traceId }, 500);
+try {
+  const result = await getOrder({ tenantId, orderId }); // Result<Order, OrderNotFoundError>
+  if (!result.ok)
+    return Response.json({ error: { code: "NOT_FOUND", message: "Order not found.", requestId } }, { status: 404 });
+  return Response.json({ data: result.data });
+} catch (e: unknown) { // bug ou infra: loga uma vez, 500 genérico
+  logger.error("get_order_failed", { requestId, traceId, err: e });
+  return Response.json({ error: { code: "INTERNAL_ERROR", message: "Internal error.", requestId } }, { status: 500 });
 }
 ```
 

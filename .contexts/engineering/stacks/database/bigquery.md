@@ -1,12 +1,14 @@
 ---
 title: BigQuery
+type: stacks
 category: database
 status: active
-last_updated: 2026-07-13
+version: 9.1.0
+last_updated: 2026-09-28
 upstream: https://cloud.google.com/bigquery/docs
 sdks:
-  - "@google-cloud/bigquery"
-  - "@google-cloud/bigquery-storage"
+  - "@google-cloud/bigquery@9.1.0"
+  - "@google-cloud/bigquery-storage@6.1.0"
   - googleapis (REST)
   - bq CLI
 ---
@@ -39,9 +41,10 @@ BigQuery é o **data warehouse analítico serverless** do GCP. Storage colunar, 
 
 ```ts
 import { BigQuery } from '@google-cloud/bigquery';
+import { env } from '@/env'; // src/env.ts validado por Zod (@contracts/secrets §5.4)
 
 const bq = new BigQuery({
-  projectId: process.env.GCP_PROJECT_ID,
+  projectId: env.GCP_PROJECT_ID,
   // Em GCP: omitir keyFilename — usa metadata server / ADC
   // Local dev: GOOGLE_APPLICATION_CREDENTIALS aponta para JSON
   // CI/CD: Workload Identity Federation (sem JSON)
@@ -71,8 +74,8 @@ Ver regras em `@rules/security` e convenções em `@contracts/secrets`.
 const [rows] = await bq.query({
   query: `
     SELECT user_id, COUNT(*) AS events
-    FROM \`${projectId}.events.domain_events\`
-    WHERE event_date BETWEEN @from AND @to
+    FROM \`${projectId}.orders_events.domain_event\`   -- <bc>_events.domain_event (@contracts/bigquery)
+    WHERE DATE(occurred_at) BETWEEN @from AND @to      -- filtro de partição
       AND tenant_id = @tenant
     GROUP BY user_id
   `,
@@ -119,7 +122,7 @@ Quatro caminhos, escolha por volume e latência:
 
 ```ts
 // Load job (batch, gratuito)
-await bq.dataset('events').table('domain_events').load('gs://bucket/path/*.parquet', {
+await bq.dataset('orders_events').table('domain_event').load('gs://bucket/path/*.parquet', {
   sourceFormat: 'PARQUET',
   writeDisposition: 'WRITE_APPEND',
   schemaUpdateOptions: ['ALLOW_FIELD_ADDITION'],
@@ -216,7 +219,7 @@ Ver `@rules/observability`.
 
 ## Backup e DR
 
-- **Time travel** — query no estado de até 7 dias atrás (`FOR SYSTEM_TIME AS OF`). Configurável até 90 dias via `max_time_travel_hours` no dataset.
+- **Time travel** — query no estado passado (`FOR SYSTEM_TIME AS OF`). Janela de no mínimo 2 e no máximo 7 dias (padrão 7), configurável via `max_time_travel_hours` no dataset, seguida de fail-safe fixo de 7 dias. Para retenção maior, use table snapshots. Fonte: https://docs.cloud.google.com/bigquery/docs/time-travel
 - **Snapshots** — `CREATE SNAPSHOT TABLE ... CLONE ...`. Read-only, sem custo de storage até divergir do source.
 - **Cross-region replication** — não nativa; implemente via scheduled copy jobs ou Dataform.
 - Location do dataset é **imutável** — escolha consciente para LGPD e DR (ver `@rules/governance`).

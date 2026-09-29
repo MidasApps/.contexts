@@ -1,0 +1,219 @@
+<h2>3 Abordagens de Arquitetura Multi-Agent</h2>
+<p class="subtitle">Compare as arquiteturas e clique na que preferir</p>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>prepareStep Router</h3>
+      <p><strong>Um unico streamText com prepareStep dinamico</strong></p>
+      <div class="mockup" style="margin-top:12px;font-size:13px;">
+        <div class="mockup-header">Arquitetura</div>
+        <div class="mockup-body" style="font-family:monospace;line-height:1.8;padding:16px;">
+          <div style="text-align:center;margin-bottom:8px;">
+            <span style="background:#2563eb;color:white;padding:4px 12px;border-radius:6px;">useChat (frontend)</span>
+          </div>
+          <div style="text-align:center;color:#666;">|</div>
+          <div style="text-align:center;margin:8px 0;">
+            <span style="background:#7c3aed;color:white;padding:4px 12px;border-radius:6px;">POST /api/chat</span>
+          </div>
+          <div style="text-align:center;color:#666;">|</div>
+          <div style="text-align:center;margin:8px 0;">
+            <span style="background:#dc2626;color:white;padding:6px 16px;border-radius:8px;font-weight:bold;">streamText + prepareStep()</span>
+          </div>
+          <div style="text-align:center;color:#666;">| decide activeTools + system por step</div>
+          <div style="display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-top:12px;">
+            <span style="background:#059669;color:white;padding:3px 8px;border-radius:4px;font-size:11px;">SQL Tools</span>
+            <span style="background:#059669;color:white;padding:3px 8px;border-radius:4px;font-size:11px;">Business Tools</span>
+            <span style="background:#059669;color:white;padding:3px 8px;border-radius:4px;font-size:11px;">Dashboard Tools</span>
+            <span style="background:#059669;color:white;padding:3px 8px;border-radius:4px;font-size:11px;">Compare Tools</span>
+            <span style="background:#059669;color:white;padding:3px 8px;border-radius:4px;font-size:11px;">External Tools</span>
+            <span style="background:#059669;color:white;padding:3px 8px;border-radius:4px;font-size:11px;">Export Tools</span>
+            <span style="background:#059669;color:white;padding:3px 8px;border-radius:4px;font-size:11px;">Simulation Tools</span>
+          </div>
+        </div>
+      </div>
+      <div class="pros-cons" style="margin-top:12px;">
+        <div class="pros">
+          <h4>Pros</h4>
+          <ul>
+            <li>Um unico stream — UX fluida, sem handoff</li>
+            <li>100% nativo do AI SDK v6</li>
+            <li>prepareStep troca modelo/tools/prompt por step</li>
+            <li>Simples de implementar e debugar</li>
+          </ul>
+        </div>
+        <div class="cons">
+          <h4>Cons</h4>
+          <ul>
+            <li>O modelo "orquestrador" e o "especialista" sao o mesmo LLM</li>
+            <li>System prompt pode ficar muito longo com 7 agentes</li>
+            <li>Todas as tools competem por atencao do modelo</li>
+            <li>Dificil ter engenharia de contexto especializada por agente</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Orchestrator + generateText Sub-Agents</h3>
+      <p><strong>streamText orquestra, generateText executa sub-agentes internamente</strong></p>
+      <div class="mockup" style="margin-top:12px;font-size:13px;">
+        <div class="mockup-header">Arquitetura</div>
+        <div class="mockup-body" style="font-family:monospace;line-height:1.8;padding:16px;">
+          <div style="text-align:center;margin-bottom:8px;">
+            <span style="background:#2563eb;color:white;padding:4px 12px;border-radius:6px;">useChat (frontend)</span>
+          </div>
+          <div style="text-align:center;color:#666;">|</div>
+          <div style="text-align:center;margin:8px 0;">
+            <span style="background:#7c3aed;color:white;padding:4px 12px;border-radius:6px;">POST /api/chat</span>
+          </div>
+          <div style="text-align:center;color:#666;">|</div>
+          <div style="text-align:center;margin:8px 0;">
+            <span style="background:#dc2626;color:white;padding:6px 16px;border-radius:8px;font-weight:bold;">streamText (Orchestrator)</span>
+          </div>
+          <div style="text-align:center;color:#666;font-size:11px;">tools: route_to_sql, route_to_business, route_to_dashboard...</div>
+          <div style="text-align:center;color:#666;margin:4px 0;">| tool.execute() chama generateText()</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:12px;">
+            <div style="background:#1e293b;border:1px solid #334155;border-radius:6px;padding:8px;text-align:center;">
+              <div style="color:#f59e0b;font-weight:bold;font-size:11px;">SQL Agent</div>
+              <div style="color:#94a3b8;font-size:10px;margin-top:4px;">generateText<br/>Pro model<br/>schema context<br/>sql_execute tool</div>
+            </div>
+            <div style="background:#1e293b;border:1px solid #334155;border-radius:6px;padding:8px;text-align:center;">
+              <div style="color:#f59e0b;font-weight:bold;font-size:11px;">Business Agent</div>
+              <div style="color:#94a3b8;font-size:10px;margin-top:4px;">generateText<br/>Flash model<br/>glossario context<br/>indicadores tool</div>
+            </div>
+            <div style="background:#1e293b;border:1px solid #334155;border-radius:6px;padding:8px;text-align:center;">
+              <div style="color:#f59e0b;font-weight:bold;font-size:11px;">Dashboard Agent</div>
+              <div style="color:#94a3b8;font-size:10px;margin-top:4px;">generateText<br/>Flash-Lite<br/>dashboard state<br/>filter tools</div>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px;margin-top:6px;">
+            <div style="background:#1e293b;border:1px solid #334155;border-radius:6px;padding:8px;text-align:center;">
+              <div style="color:#f59e0b;font-weight:bold;font-size:10px;">Compare</div>
+              <div style="color:#94a3b8;font-size:9px;margin-top:2px;">Pro model</div>
+            </div>
+            <div style="background:#1e293b;border:1px solid #334155;border-radius:6px;padding:8px;text-align:center;">
+              <div style="color:#f59e0b;font-weight:bold;font-size:10px;">External</div>
+              <div style="color:#94a3b8;font-size:9px;margin-top:2px;">Flash model</div>
+            </div>
+            <div style="background:#1e293b;border:1px solid #334155;border-radius:6px;padding:8px;text-align:center;">
+              <div style="color:#f59e0b;font-weight:bold;font-size:10px;">Export</div>
+              <div style="color:#94a3b8;font-size:9px;margin-top:2px;">Flash-Lite</div>
+            </div>
+            <div style="background:#1e293b;border:1px solid #334155;border-radius:6px;padding:8px;text-align:center;">
+              <div style="color:#f59e0b;font-weight:bold;font-size:10px;">Simulation</div>
+              <div style="color:#94a3b8;font-size:9px;margin-top:2px;">Pro model</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="pros-cons" style="margin-top:12px;">
+        <div class="pros">
+          <h4>Pros</h4>
+          <ul>
+            <li>Cada agente tem seu proprio modelo, system prompt e tools</li>
+            <li>Engenharia de contexto 100% especializada por agente</li>
+            <li>Orquestrador leve (Flash-Lite) roteia, especialistas (Pro) executam</li>
+            <li>Sub-agentes podem ter multi-step proprio (stopWhen interno)</li>
+            <li>100% compativel com AI SDK — tools retornam resultado do generateText</li>
+          </ul>
+        </div>
+        <div class="cons">
+          <h4>Cons</h4>
+          <ul>
+            <li>Latencia: 2+ chamadas LLM por pergunta (orquestrador + agente)</li>
+            <li>Mais complexo de implementar que A</li>
+            <li>Sub-agentes nao fazem streaming (generateText bloqueia)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Orchestrator streamText + Sub-Agent streamText (nested streaming)</h3>
+      <p><strong>streamText orquestra, tools disparam sub-streamText com resultados parciais</strong></p>
+      <div class="mockup" style="margin-top:12px;font-size:13px;">
+        <div class="mockup-header">Arquitetura</div>
+        <div class="mockup-body" style="font-family:monospace;line-height:1.8;padding:16px;">
+          <div style="text-align:center;margin-bottom:8px;">
+            <span style="background:#2563eb;color:white;padding:4px 12px;border-radius:6px;">useChat (frontend)</span>
+          </div>
+          <div style="text-align:center;color:#666;">|</div>
+          <div style="text-align:center;margin:8px 0;">
+            <span style="background:#7c3aed;color:white;padding:4px 12px;border-radius:6px;">POST /api/chat</span>
+          </div>
+          <div style="text-align:center;color:#666;">|</div>
+          <div style="text-align:center;margin:8px 0;">
+            <span style="background:#dc2626;color:white;padding:6px 16px;border-radius:8px;font-weight:bold;">streamText (Orchestrator - Flash-Lite)</span>
+          </div>
+          <div style="text-align:center;color:#666;font-size:11px;">tools com preliminary results (yield)</div>
+          <div style="text-align:center;color:#666;margin:4px 0;">| tool.execute() e um async generator</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;">
+            <div style="background:#1e293b;border:2px solid #f59e0b;border-radius:8px;padding:10px;">
+              <div style="color:#f59e0b;font-weight:bold;font-size:12px;text-align:center;">SQL Agent (Pro)</div>
+              <div style="color:#94a3b8;font-size:10px;margin-top:6px;">
+                1. yield {status: "analyzing"}<br/>
+                2. generateText → SQL<br/>
+                3. yield {status: "querying", sql}<br/>
+                4. Execute BigQuery<br/>
+                5. yield {status: "done", rows}<br/>
+                6. return final result
+              </div>
+            </div>
+            <div style="background:#1e293b;border:2px solid #f59e0b;border-radius:8px;padding:10px;">
+              <div style="color:#f59e0b;font-weight:bold;font-size:12px;text-align:center;">Simulation Agent (Pro)</div>
+              <div style="color:#94a3b8;font-size:10px;margin-top:6px;">
+                1. yield {status: "planning"}<br/>
+                2. generateText → scenario<br/>
+                3. yield {status: "computing"}<br/>
+                4. Run calculations<br/>
+                5. yield {status: "done", results}<br/>
+                6. return final result
+              </div>
+            </div>
+          </div>
+          <div style="text-align:center;margin-top:10px;color:#22c55e;font-size:11px;font-weight:bold;">
+            Frontend recebe preliminary results em tempo real via tool-result stream
+          </div>
+        </div>
+      </div>
+      <div class="pros-cons" style="margin-top:12px;">
+        <div class="pros">
+          <h4>Pros</h4>
+          <ul>
+            <li>Tudo do B + feedback em tempo real ao usuario</li>
+            <li>Preliminary tool results (yield) mostram progresso passo a passo</li>
+            <li>Cada agente e independente com seu modelo e contexto</li>
+            <li>UX premium: usuario ve "Analisando pergunta..." → "Gerando SQL..." → "Executando query..." → resultado</li>
+            <li>100% AI SDK v6 nativo (preliminary results e feature documentada)</li>
+          </ul>
+        </div>
+        <div class="cons">
+          <h4>Cons</h4>
+          <ul>
+            <li>Mais complexo de implementar (async generators)</li>
+            <li>Mesma latencia do B (2+ chamadas LLM)</li>
+            <li>Precisa de UI no frontend para renderizar cada status</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section" style="margin-top:24px;padding:16px;background:#1e293b;border-radius:8px;border:1px solid #334155;">
+  <h3 style="color:#f59e0b;margin-bottom:8px;">Minha Recomendacao: Opcao C</h3>
+  <p style="color:#e2e8f0;font-size:14px;line-height:1.6;">
+    A opcao C combina o melhor dos dois mundos: <strong>isolamento total de contexto por agente</strong> (cada um com seu modelo, prompt e tools)
+    com <strong>feedback progressivo ao usuario</strong> via preliminary tool results. O usuario ve exatamente o que esta acontecendo
+    ("Gerando SQL...", "Executando query...", "Analisando resultados...") enquanto o agente trabalha.
+    A complexidade extra dos async generators e gerenciavel e o AI SDK v6 suporta nativamente.
+  </p>
+</div>

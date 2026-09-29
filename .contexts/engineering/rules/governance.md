@@ -1,4 +1,12 @@
-﻿# Regras de Governança
+---
+title: Regras de Governança
+type: rules
+status: active
+scope: engineering
+last_updated: 2026-09-28
+---
+
+# Regras de Governança
 
 Regras imperativas sobre como decisões técnicas são tomadas, registradas, aprovadas e revisadas no projeto. Governança aqui significa **quem decide, com que rigor, com que rastro e com que reversibilidade** — não cobre estilo de código (ver @rules/development), segurança operacional (ver @rules/security), observabilidade (ver @rules/observability) ou formato de release (ver Processes/release).
 
@@ -11,7 +19,7 @@ Toda regra abaixo é enforce: vira gate de PR, item de checklist obrigatório ou
 - **Sempre** registre como ADR qualquer decisão que: (a) tenha alternativa legítima, (b) tenha consequência de longo prazo, (c) seja custosa de reverter, (d) afete múltiplos times ou consumidores externos.
 - **Nunca** tome decisão que se encaixe nos critérios acima fora de ADR. Mesmo que já tenha sido "conversada" em chat ou call.
 - **Sempre** crie o ADR **antes** do PR de implementação. PR que implementa decisão sem ADR aprovado é bloqueado.
-- **Nunca** edite o conteúdo histórico de um ADR `accepted`. Mudou de ideia? Crie novo ADR com status `supersedes 000X` e marque o anterior como `superseded`.
+- **Nunca** edite o conteúdo histórico de um ADR `accepted`, exceto para acrescentar linhas datadas em `## Amendments` (correção de conformidade que não muda a decisão — ver `decisions/README.md`). Mudou de ideia? Crie novo ADR com status `supersedes 000X` e marque o anterior como `superseded`.
 - **Sempre** numere ADRs sequencialmente com prefixo de 4 dígitos (`0001-`, `0002-`). Não pule números.
 - **Nunca** abra ADR para decisão trivial (escolha de nome de variável, formatação, biblioteca utilitária sem tradeoff). Overhead documental aqui é ruído.
 - **Sempre** documente o **rejeitado e por quê**, não apenas o escolhido. ADR sem alternativas consideradas é incompleto.
@@ -117,10 +125,22 @@ Antes de adicionar dependência nova, **sempre** avalie e registre no PR:
 - **Nunca** faça deploy de mudança em prompt de produção fora de janela em que o owner de IA esteja disponível para reverter.
 - **Sempre** mantenha **human-in-the-loop** em decisões de IA com impacto financeiro, jurídico, médico ou irreversível. Autonomia total é proibida nessas classes.
 - **Sempre** marque conteúdo gerado por IA com identificador visível ao usuário final quando o conteúdo for público ou compartilhável.
-- **Sempre** versione prompts como código. Prompt em string solta no meio de feature é dívida — extraia para módulo dedicado e versione.
+- **Sempre** versione prompts. Default: como código, em git. Prompt em string solta no meio de feature é dívida — extraia para módulo dedicado e versione.
+- **Exceção permitida por ADR:** quando o produto exige prompt editável em runtime (ex.: admin na UI), o store (DB) pode ser a fonte canônica, com código como seed/fallback. A exigência de rastreabilidade continua: **toda escrita cria nova versão** (sem `set(merge)` que sobrescreve a anterior), com autor, timestamp e rollback funcional. Sem histórico, `@processes/rollback` não tem para onde voltar.
 - **Nunca** confie em saída de LLM como autoridade para decisão de segurança, autorização ou validação de input. LLM informa, não autoriza.
 - **Sempre** documente vieses conhecidos do modelo e mitigações aplicadas para casos de uso que envolvam pessoas (avaliação, ranking, moderação).
 - **Sempre** mantenha kill-switch funcional por feature de IA. Feature de IA sem kill-switch não vai para produção.
+
+---
+
+## Custo de IA e de consultas
+
+- **Sempre** separe dois mecanismos que não se substituem: **gate de cobrança** (teto duro na chamada, ex. `maximumBytesBilled` no BigQuery, orçamento de tokens por request no LLM — o provedor recusa antes de faturar) e **gate de aprovação** (estimativa/dry-run + confirmação humana antes de submeter). Um limita o prejuízo máximo; o outro dá visibilidade antes do gasto. Nunca consolide os dois.
+- **Sempre** mantenha o limiar de aprovação **abaixo** do teto (derive-o do teto, ex. metade). Com os dois iguais, todo job que pede aprovação é recusado depois de aprovado. Aprovação nunca eleva o teto; estimativa acima do teto é recusada sem pedir aprovação.
+- **Sempre** passe o teto em **todo** caminho que executa query faturada — especialmente SQL gerado ou persistido a partir de LLM. Filtro de palavra-chave impede escrita, não impede varrer a tabela inteira. Deixe o teto explícito na chamada (não escondido em `...opts`) e trave com teste estático que varre as chamadas.
+- **Sempre** leia tetos de **fonte única** (um helper). Número copiado em vários arquivos diverge.
+- **Nunca** deixe configuração inválida (env ausente, zero, negativa, não numérica) virar "sem teto": caia no default seguro.
+- **Sempre** documente os tetos vigentes numa tabela única do projeto (ex. `rules/cost.md`) com owner e data.
 
 ---
 
@@ -205,7 +225,7 @@ Antes de adicionar dependência nova, **sempre** avalie e registre no PR:
 Cada um dos itens abaixo é **bloqueio** de PR ou **incidente de governança** quando detectado em produção:
 
 - Decisão crítica implementada sem ADR.
-- ADR `accepted` editado em vez de superseded.
+- ADR `accepted` editado fora de `## Amendments` em vez de superseded.
 - Dependência adicionada em PR sem nota de licença, manutenção ou justificativa.
 - Segredo sem rotação configurada.
 - Prompt de produção alterado sem evidência de eval.

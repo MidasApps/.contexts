@@ -3,7 +3,7 @@ title: Regras de Performance
 type: rules
 scope: engineering
 status: active
-last_updated: 2026-07-13
+last_updated: 2026-09-28
 related:
   - "@.contexts/engineering/rules/development.md"
   - "@.contexts/engineering/rules/security.md"
@@ -49,7 +49,7 @@ Regras imperativas e enforce sobre performance de código. Cobrem rendering, bun
 - **Nunca** sirva PNG/JPG quando AVIF/WebP servem. Configure `images.formats` em `next.config.ts`.
 - **Sempre** use `next/font` para fontes. Self-hosting com `next/font` evita CLS e elimina round-trip ao Google Fonts.
 - **Nunca** carregue mais de um peso/estilo de fonte por família sem necessidade comprovada de design.
-- **Sempre** declare `priority` em imagens above-the-fold (hero, LCP candidate) e nunca em imagens abaixo da dobra.
+- **Sempre** marque a imagem candidata a LCP (hero, above-the-fold) com `fetchPriority="high"` ou `loading="eager"`, e nunca imagens abaixo da dobra. No Next 16 `priority` está deprecated em favor de `preload`, que a doc só recomenda em casos específicos.
 - **Nunca** importe SDKs de IA, Firebase Admin ou bibliotecas server-only em código que pode ser bundlado para o cliente. Use `import 'server-only'` para enforce.
 
 ## 4. Data fetching — Next.js App Router
@@ -60,9 +60,9 @@ Regras imperativas e enforce sobre performance de código. Cobrem rendering, bun
 - **Nunca** desabilite o cache do `fetch` (`cache: 'no-store'`) sem motivo. Avalie `revalidate: N` antes.
 - **Sempre** declare `revalidate` explicitamente em rotas que servem dado quase-estático. Default implícito esconde decisão.
 - **Nunca** chame APIs externas do Client Component quando o servidor pode chamar e passar o dado. Cliente paga round-trip do navegador + servidor.
-- **Sempre** prefira Server Actions a route handlers `POST` para mutações disparadas do React. Menos boilerplate e integra com `revalidatePath`/`revalidateTag`.
+- **Sempre** prefira Server Actions a route handlers `POST` para mutações disparadas do React. Menos boilerplate e integra com `updateTag`/`revalidateTag(tag, "max")`/`revalidatePath`.
 - **Nunca** retorne payload gigante quando o cliente só precisa de subset. Projete apenas os campos usados.
-- Para estratégias de cache (`unstable_cache`, tags, ISR, edge cache), ver `@.contexts/engineering/rules/caching.md`.
+- Para estratégias de cache (`'use cache'` com `cacheTag`/`cacheLife`, ISR, edge cache), ver `@.contexts/engineering/rules/caching.md` e `@.contexts/engineering/stacks/frontend/next@16.md`.
 
 ## 5. Streaming — LLM e Vercel AI SDK
 
@@ -139,7 +139,7 @@ Regras imperativas e enforce sobre performance de código. Cobrem rendering, bun
 - **Sempre** mostre skeleton ou estado de loading determinístico em vez de spinner genérico. Skeleton reduz percepção de espera.
 - **Nunca** mostre layout shift após carregamento. Reserve espaço com `aspect-ratio`, `min-height` ou dimensões explícitas em imagens.
 - **Sempre** prefira optimistic UI para mutações cujo erro é raro (likes, marcações). Reverter no erro é melhor UX que esperar.
-- **Nunca** revalide o layout inteiro quando só um fragmento mudou. Use `revalidatePath` com path específico ou `revalidateTag`.
+- **Nunca** revalide o layout inteiro quando só um fragmento mudou. Use `updateTag`/`revalidateTag(tag, "max")` ou `revalidatePath` com path específico.
 - **Sempre** prefetch rotas previsíveis com `<Link prefetch>` quando o usuário provavelmente vai navegar. Não prefetch tudo — desperdiça banda.
 - **Nunca** bloqueie a interação até telemetria, analytics ou A/B test loader resolver. Carregue async, com fallback.
 
@@ -168,7 +168,7 @@ Regras imperativas e enforce sobre performance de código. Cobrem rendering, bun
 
 - Regras gerais de desenvolvimento: `@.contexts/engineering/rules/development.md`
 - Regras de segurança que afetam decisões de performance (rate limiting, validação): `@.contexts/engineering/rules/security.md`
-- Estratégias de caching (HTTP, ISR, `unstable_cache`, tags, Redis): `@.contexts/engineering/rules/caching.md`
+- Estratégias de caching (HTTP, ISR, `'use cache'`, tags, Redis): `@.contexts/engineering/rules/caching.md`
 - Métricas, traces, SLOs e dashboards: `@.contexts/engineering/rules/observability.md`
 - Stack Next.js 16: `@.contexts/engineering/stacks/frontend/next@16.md`
 - Stack React 19: `@.contexts/engineering/stacks/frontend/react@19.md`

@@ -1,21 +1,34 @@
+---
+title: Decisions
+type: decisions
+status: active
+scope: engineering
+last_updated: 2026-09-28
+---
+
 # Decisions
 
 Architecture Decision Records (ADRs) do DDC. Formato **MADR**. Numeração **4 dígitos**: `NNNN-titulo-em-kebab.md`.
 
-Cada ADR é **imutável** após accepted. Decisões superadas geram ADR nova com `status: superseded by NNNN` (ou referência explícita no outcome).
+Cada ADR é **imutável** após accepted. Decisão superada gera ADR nova com `- **Supersedes:**` (total ou parcial, dizendo qual parte); a antiga só ganha a linha `- **Superseded in part by:**` ou o status `superseded by NNNN`. Correção de conformidade que não muda a decisão vai numa seção `## Amendments` datada (ver 0001).
 
 ## Índice
 
 | # | Título | Status | Data |
 |---|---|---|---|
-| [0001](0001-ddc-engineering-baseline-and-harness-enforcement.md) | Baseline de engenharia 2026-07 e enforcement do harness DDC | accepted | 2026-07-14 |
+| [0001](0001-ddc-engineering-baseline-and-harness-enforcement.md) | Baseline de engenharia 2026-07 e enforcement do harness DDC | accepted; matriz de versões superseded pela 0002; IDs do Firestore pela 0005 | 2026-07-14 |
+| [0002](0002-baseline-2026-09-version-and-naming-alignment.md) | Baseline de setembro de 2026 e alinhamento de nomes entre camadas | accepted; linha de runtime superseded pela 0004; IDs do Firestore pela 0005 | 2026-09-28 |
+| [0003](0003-cross-doc-convention-conflicts-resolved.md) | Conflitos de convenção entre documentos: qual vence | accepted | 2026-09-28 |
+| [0004](0004-latest-stable-baseline-and-documented-exceptions.md) | Baseline na última versão estável, com exceções documentadas | accepted | 2026-09-28 |
+| [0005](0005-firestore-document-ids-use-automatic-ids.md) | IDs de documento do Firestore usam o ID automático | accepted | 2026-09-28 |
 
 ## Como criar
 
 1. Próximo número livre na tabela.
-2. Seguir skill `decisions` / template MADR (Context → Drivers → Options → Outcome → Consequences).
-3. Cross-link: rules/skills/MEMORY que aplicam a decisão referenciam `@.contexts/engineering/decisions/NNNN-...`.
-4. Não editar ADR accepted — supersede.
+2. Seguir skill `decisions`: título `# NNNN. Título`, header em bullets (`Status`, `Date`, `Deciders`, `Tags`, e `Supersedes`/`Complements` quando houver), seções Context → Decision Drivers → Considered Options → Decision Outcome → Consequences → References. ADR curto de política/desempate pode usar `## Decision` direto (0003, 0004).
+   - Pacote de versão atrás do `latest` por incompatibilidade comprovada: linha nova (`E6`…) na tabela de exceções da [0004](0004-latest-stable-baseline-and-documented-exceptions.md), com fato, data e gatilho de revisão. Mudança de política ou de baseline: ADR novo.
+3. Cross-link: rules/skills/MEMORY que aplicam a decisão referenciam `@.contexts/engineering/decisions/NNNN-...` (`NNNN-...` é placeholder: use o número e slug reais do ADR).
+4. Não editar ADR accepted — supersede. Exceções: header de status/supersede, `## Amendments` de conformidade e linha nova na tabela de exceções da 0004 (prevista pela própria decisão).
 
 ## Relação com o resto do DDC
 

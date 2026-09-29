@@ -1,4 +1,12 @@
-﻿# Spec-Driven Development (SDD)
+---
+title: Spec-Driven Development (SDD)
+type: practices
+status: active
+scope: engineering
+last_updated: 2026-09-28
+---
+
+# Spec-Driven Development (SDD)
 
 > Disciplina de desenvolvimento em que uma especificação formal precede e dirige a construção do código. A spec é o artefato primário versionado e revisado; o código é uma realização de uma spec previamente escrita, validada e aprovada — não uma descoberta paralela. Mudança de comportamento começa, sempre, pela spec.
 
@@ -183,14 +191,15 @@ SDD tem custos reais que precisam ser explicitados:
 
 ## Prática concreta no stack do projeto
 
-### APIs públicas: OpenAPI primeiro
+### APIs públicas: Zod primeiro, OpenAPI gerado
 
-Para qualquer endpoint HTTP exposto externamente ou consumido por outro serviço/frontend, escreva OpenAPI 3.x antes da rota Next.js. A spec é committada em `apis/<service>/openapi.yaml` (ou equivalente) e revisada via PR. A partir dela:
+Para qualquer endpoint HTTP exposto externamente ou consumido por outro serviço/frontend, escreva o schema Zod (`*.schema.ts`, em `src/contracts/<context>/` quando compartilhado com o cliente) antes da rota Next.js. O OpenAPI 3.x é **gerado** dos schemas Zod, committado em `docs/openapi/v1.yaml` e revisado via PR (ver `@.contexts/engineering/contracts/api.md`). A partir dele:
 
-- Tipos TypeScript são gerados para uso no servidor (ex.: `openapi-typescript` ou `orval`).
-- Clients tipados são gerados para frontends e SDKs.
+- Tipos TypeScript vêm de `z.infer` dos próprios schemas; não há codegen de tipos para specs próprias.
+- Clients tipados para SDKs e consumidores externos são gerados do OpenAPI publicado.
 - Mocks são publicados para desenvolvimento paralelo de frontend.
-- CI valida que respostas reais da rota satisfazem a spec.
+- CI valida que a spec gerada não diverge da committada e que respostas reais da rota satisfazem a spec.
+- Codegen a partir de spec (ex.: `openapi-typescript` ou `orval`) é reservado a specs de terceiros.
 
 ### Inputs / outputs internos: Zod como spec
 
@@ -258,7 +267,7 @@ O framework DDC (`.contexts/`) é uma instância recursiva de SDD: cada arquivo 
 
 Práticas que se vestem de SDD sem sê-lo:
 
-- **Code-first com OpenAPI gerado depois, chamado de "spec-first".** Se a spec deriva do código, o contrato é definido pela implementação — não pelo design. É documentação retroativa, não SDD.
+- **Code-first com OpenAPI gerado depois, chamado de "spec-first".** Se a spec deriva da implementação já escrita, o contrato é definido por ela — não pelo design. É documentação retroativa, não SDD. (Gerar o OpenAPI de schemas Zod escritos ANTES da rota é o fluxo canônico do projeto e não cai neste anti-pattern.)
 - **Spec escrita depois da implementação para satisfazer processo.** Teatro burocrático. A spec não dirigiu nada; ratificou o que já foi feito.
 - **Spec para tudo, inclusive trivialidades.** "Spec de tres parágrafos para um endpoint de health check" sinaliza disciplina mal calibrada — derruba o ROI da prática.
 - **Spec sem critério de aceitação.** Spec que descreve intent mas não diz como sabemos que está pronto convida implementação que parece atender mas não atende.

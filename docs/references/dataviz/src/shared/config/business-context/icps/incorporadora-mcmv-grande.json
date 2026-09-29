@@ -1,0 +1,8 @@
+{
+  "id": "incorporadora-mcmv-grande",
+  "segment": "Incorporadora MCMV grande",
+  "examples": ["MRV", "Tenda", "Direcional", "Cury"],
+  "primaryKpis": ["vso", "vgv", "margem"],
+  "decisionJourney": "ciclo trimestral pós-resultado",
+  "_meta": { "refinedBySme": false }
+}

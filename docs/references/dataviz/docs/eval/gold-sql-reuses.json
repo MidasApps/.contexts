@@ -1,0 +1,602 @@
+[
+  {
+    "id": "g1",
+    "clientId": "OM",
+    "personaId": "originador",
+    "seed_intent": "inadimplência mensal por safra MCMV",
+    "seed_sql": "SELECT safra, DATE_TRUNC(referencia, MONTH) AS mes, AVG(inadimplencia_pct) AS pct FROM contratos WHERE produto = 'MCMV' GROUP BY safra, mes ORDER BY mes",
+    "test_intents": [
+      "inadimplencia mensal por safra produto MCMV",
+      "default rate por safra MCMV mensal",
+      "qual a inadimplencia das safras de MCMV mes a mes"
+    ]
+  },
+  {
+    "id": "g2",
+    "clientId": "OM",
+    "personaId": "originador",
+    "seed_intent": "LTV médio por safra de originação",
+    "seed_sql": "SELECT safra, AVG(ltv) AS ltv_medio FROM contratos GROUP BY safra ORDER BY safra",
+    "test_intents": [
+      "loan to value medio por safra",
+      "ltv medio das safras",
+      "qual o ltv por safra de originação"
+    ]
+  },
+  {
+    "id": "g3",
+    "clientId": "OM",
+    "personaId": "originador",
+    "seed_intent": "volume originado por mês últimos 12 meses",
+    "seed_sql": "SELECT DATE_TRUNC(data_originacao, MONTH) AS mes, SUM(valor_principal) AS volume FROM contratos WHERE data_originacao >= DATE_SUB(CURRENT_DATE(), INTERVAL 12 MONTH) GROUP BY mes ORDER BY mes",
+    "test_intents": [
+      "originação mensal últimos 12 meses",
+      "quanto foi originado por mês no ultimo ano",
+      "volume mensal de originação ano corrente"
+    ]
+  },
+  {
+    "id": "g4",
+    "clientId": "OM",
+    "personaId": "originador",
+    "seed_intent": "ticket médio por produto",
+    "seed_sql": "SELECT produto, AVG(valor_principal) AS ticket_medio FROM contratos GROUP BY produto",
+    "test_intents": [
+      "ticket medio por produto",
+      "valor medio dos contratos por produto",
+      "qual o ticket por linha de produto"
+    ]
+  },
+  {
+    "id": "g5",
+    "clientId": "OM",
+    "personaId": "originador",
+    "seed_intent": "taxa média de juros por safra",
+    "seed_sql": "SELECT safra, AVG(taxa_juros_aa) AS taxa FROM contratos GROUP BY safra ORDER BY safra",
+    "test_intents": [
+      "taxa media de juros por safra",
+      "juros medio das safras",
+      "qual a taxa anual media por safra"
+    ]
+  },
+  {
+    "id": "g6",
+    "clientId": "OM",
+    "personaId": "originador",
+    "seed_intent": "distribuição geográfica de contratos por UF",
+    "seed_sql": "SELECT uf, COUNT(*) AS qtd, SUM(valor_principal) AS volume FROM contratos GROUP BY uf ORDER BY volume DESC",
+    "test_intents": [
+      "contratos por UF",
+      "distribuição geografica da carteira",
+      "volume e quantidade de contratos por estado"
+    ]
+  },
+  {
+    "id": "g7",
+    "clientId": "OM",
+    "personaId": "originador",
+    "seed_intent": "prazo médio remanescente da carteira",
+    "seed_sql": "SELECT AVG(prazo_remanescente_meses) AS prazo_medio FROM contratos WHERE status = 'ATIVO'",
+    "test_intents": [
+      "prazo medio remanescente",
+      "qual o prazo restante medio da carteira ativa",
+      "duration media remanescente"
+    ]
+  },
+  {
+    "id": "g8",
+    "clientId": "OM",
+    "personaId": "investidor",
+    "seed_intent": "PDD por safra",
+    "seed_sql": "SELECT safra, SUM(provisao) / SUM(saldo_devedor) AS pdd FROM contratos GROUP BY safra ORDER BY safra",
+    "test_intents": [
+      "provisão para devedores duvidosos por safra",
+      "pdd das safras",
+      "quanto de PDD por safra de originação"
+    ]
+  },
+  {
+    "id": "g9",
+    "clientId": "OM",
+    "personaId": "investidor",
+    "seed_intent": "yield realizado por mês",
+    "seed_sql": "SELECT DATE_TRUNC(data_pagamento, MONTH) AS mes, SUM(juros_recebidos) / SUM(saldo_medio) AS yield FROM pagamentos GROUP BY mes ORDER BY mes",
+    "test_intents": [
+      "yield mensal realizado",
+      "rendimento mensal da carteira",
+      "qual o yield realizado mes a mes"
+    ]
+  },
+  {
+    "id": "g10",
+    "clientId": "OM",
+    "personaId": "investidor",
+    "seed_intent": "CDI vs taxa da carteira últimos 12 meses",
+    "seed_sql": "SELECT DATE_TRUNC(referencia, MONTH) AS mes, AVG(taxa_carteira) AS taxa, AVG(cdi) AS cdi FROM indicadores WHERE referencia >= DATE_SUB(CURRENT_DATE(), INTERVAL 12 MONTH) GROUP BY mes ORDER BY mes",
+    "test_intents": [
+      "spread cdi vs carteira",
+      "comparar taxa carteira com cdi ultimos 12 meses",
+      "evolução cdi e taxa media da carteira"
+    ]
+  },
+  {
+    "id": "g11",
+    "clientId": "OM",
+    "personaId": "gestor",
+    "seed_intent": "top 10 cedentes por volume cedido",
+    "seed_sql": "SELECT cedente, SUM(valor_cedido) AS volume FROM cessoes GROUP BY cedente ORDER BY volume DESC LIMIT 10",
+    "test_intents": [
+      "maiores cedentes por volume",
+      "ranking top 10 cedentes",
+      "quem mais cede em volume"
+    ]
+  },
+  {
+    "id": "g12",
+    "clientId": "OM",
+    "personaId": "gestor",
+    "seed_intent": "concentração top 5 devedores na carteira",
+    "seed_sql": "SELECT devedor_id, SUM(saldo_devedor) AS exposicao FROM contratos WHERE status = 'ATIVO' GROUP BY devedor_id ORDER BY exposicao DESC LIMIT 5",
+    "test_intents": [
+      "top 5 devedores por exposição",
+      "concentração de devedores",
+      "maiores exposições por devedor"
+    ]
+  },
+  {
+    "id": "g13",
+    "clientId": "BRZ",
+    "personaId": "originador",
+    "seed_intent": "volume originado por canal",
+    "seed_sql": "SELECT canal_originacao, SUM(valor_principal) AS volume FROM contratos GROUP BY canal_originacao ORDER BY volume DESC",
+    "test_intents": [
+      "originação por canal",
+      "volume cedido por canal de originação",
+      "quanto cada canal originou"
+    ]
+  },
+  {
+    "id": "g14",
+    "clientId": "BRZ",
+    "personaId": "originador",
+    "seed_intent": "inadimplência por canal de originação",
+    "seed_sql": "SELECT canal_originacao, AVG(inadimplencia_pct) AS pct FROM contratos GROUP BY canal_originacao",
+    "test_intents": [
+      "default rate por canal",
+      "inadimplencia por canal de originação",
+      "qual canal tem mais inadimplencia"
+    ]
+  },
+  {
+    "id": "g15",
+    "clientId": "BRZ",
+    "personaId": "originador",
+    "seed_intent": "distrato por safra",
+    "seed_sql": "SELECT safra, COUNT(*) FILTER (WHERE status = 'DISTRATADO') / COUNT(*) AS pct_distrato FROM contratos GROUP BY safra",
+    "test_intents": [
+      "taxa de distrato por safra",
+      "percentual de distratos por safra",
+      "quanto distrata por safra"
+    ]
+  },
+  {
+    "id": "g16",
+    "clientId": "BRZ",
+    "personaId": "originador",
+    "seed_intent": "repasse mensal de recursos",
+    "seed_sql": "SELECT DATE_TRUNC(data_repasse, MONTH) AS mes, SUM(valor_repassado) AS repasse FROM repasses GROUP BY mes ORDER BY mes",
+    "test_intents": [
+      "repasse mensal",
+      "quanto foi repassado por mês",
+      "evolução mensal de repasses"
+    ]
+  },
+  {
+    "id": "g17",
+    "clientId": "BRZ",
+    "personaId": "investidor",
+    "seed_intent": "rentabilidade líquida acumulada do FIDC",
+    "seed_sql": "SELECT mes, SUM(rentabilidade_liquida) OVER (ORDER BY mes) AS acum FROM fidc_rentabilidade ORDER BY mes",
+    "test_intents": [
+      "rentabilidade acumulada do fidc",
+      "retorno liquido acumulado do fundo",
+      "performance acumulada do fidc"
+    ]
+  },
+  {
+    "id": "g18",
+    "clientId": "BRZ",
+    "personaId": "investidor",
+    "seed_intent": "PL do fundo por mês",
+    "seed_sql": "SELECT DATE_TRUNC(data, MONTH) AS mes, AVG(patrimonio_liquido) AS pl FROM fundo_diario GROUP BY mes ORDER BY mes",
+    "test_intents": [
+      "patrimônio liquido mensal",
+      "evolução do PL do fundo",
+      "patrimonio do fundo por mês"
+    ]
+  },
+  {
+    "id": "g19",
+    "clientId": "BRZ",
+    "personaId": "investidor",
+    "seed_intent": "subordinação atual do FIDC",
+    "seed_sql": "SELECT data, (cota_subordinada_pl / pl_total) AS subordinacao FROM fundo_diario ORDER BY data DESC LIMIT 1",
+    "test_intents": [
+      "subordinacao do fidc hoje",
+      "qual o nivel de subordinação atual",
+      "subordinacao corrente"
+    ]
+  },
+  {
+    "id": "g20",
+    "clientId": "BRZ",
+    "personaId": "gestor",
+    "seed_intent": "elegibilidade média dos contratos cedidos",
+    "seed_sql": "SELECT data_cessao, AVG(CASE WHEN elegivel THEN 1.0 ELSE 0.0 END) AS pct_elegivel FROM cessoes GROUP BY data_cessao ORDER BY data_cessao",
+    "test_intents": [
+      "percentual de contratos elegiveis cedidos",
+      "elegibilidade media por cessão",
+      "quanto foi elegivel a cada cessão"
+    ]
+  },
+  {
+    "id": "g21",
+    "clientId": "BRZ",
+    "personaId": "gestor",
+    "seed_intent": "recompras por motivo",
+    "seed_sql": "SELECT motivo_recompra, COUNT(*) AS qtd, SUM(valor_recompra) AS valor FROM recompras GROUP BY motivo_recompra ORDER BY valor DESC",
+    "test_intents": [
+      "recompras agrupadas por motivo",
+      "motivos de recompra",
+      "quanto foi recomprado por motivo"
+    ]
+  },
+  {
+    "id": "g22",
+    "clientId": "BRZ",
+    "personaId": "gestor",
+    "seed_intent": "covenants violados últimos 6 meses",
+    "seed_sql": "SELECT covenant, COUNT(*) AS violacoes FROM covenants_log WHERE violado AND data >= DATE_SUB(CURRENT_DATE(), INTERVAL 6 MONTH) GROUP BY covenant",
+    "test_intents": [
+      "violacao de covenants ultimos 6 meses",
+      "covenants quebrados no semestre",
+      "quais covenants violaram"
+    ]
+  },
+  {
+    "id": "g23",
+    "clientId": "CONX",
+    "personaId": "originador",
+    "seed_intent": "originação por produto consignado",
+    "seed_sql": "SELECT produto, SUM(valor_principal) AS volume FROM contratos WHERE segmento = 'CONSIGNADO' GROUP BY produto",
+    "test_intents": [
+      "volume consignado por produto",
+      "originação consignado por linha",
+      "quanto foi originado em consignado por produto"
+    ]
+  },
+  {
+    "id": "g24",
+    "clientId": "CONX",
+    "personaId": "originador",
+    "seed_intent": "convênio com maior originação no ano",
+    "seed_sql": "SELECT convenio, SUM(valor_principal) AS volume FROM contratos WHERE EXTRACT(YEAR FROM data_originacao) = EXTRACT(YEAR FROM CURRENT_DATE()) GROUP BY convenio ORDER BY volume DESC LIMIT 1",
+    "test_intents": [
+      "maior convenio do ano",
+      "convênio top do ano corrente",
+      "qual convenio mais originou neste ano"
+    ]
+  },
+  {
+    "id": "g25",
+    "clientId": "CONX",
+    "personaId": "originador",
+    "seed_intent": "taxa de aprovação por canal",
+    "seed_sql": "SELECT canal, AVG(CASE WHEN aprovado THEN 1.0 ELSE 0.0 END) AS taxa_aprovacao FROM propostas GROUP BY canal",
+    "test_intents": [
+      "aprovação por canal",
+      "percentual de aprovação por canal",
+      "qual canal aprova mais"
+    ]
+  },
+  {
+    "id": "g26",
+    "clientId": "CONX",
+    "personaId": "originador",
+    "seed_intent": "tempo médio de processamento de proposta",
+    "seed_sql": "SELECT AVG(TIMESTAMP_DIFF(data_aprovacao, data_proposta, HOUR)) AS horas FROM propostas WHERE aprovado",
+    "test_intents": [
+      "tempo medio para aprovar proposta",
+      "lead time de aprovação",
+      "quanto tempo leva para aprovar"
+    ]
+  },
+  {
+    "id": "g27",
+    "clientId": "CONX",
+    "personaId": "investidor",
+    "seed_intent": "spread médio sobre CDI",
+    "seed_sql": "SELECT AVG(taxa_aa - cdi_aa) AS spread FROM contratos JOIN indicadores USING (referencia)",
+    "test_intents": [
+      "spread medio sobre CDI",
+      "qual o spread cdi medio",
+      "diferença taxa carteira vs cdi"
+    ]
+  },
+  {
+    "id": "g28",
+    "clientId": "CONX",
+    "personaId": "investidor",
+    "seed_intent": "duração média da carteira",
+    "seed_sql": "SELECT AVG(duration_meses) AS duration FROM contratos WHERE status = 'ATIVO'",
+    "test_intents": [
+      "duration media da carteira",
+      "duração média ativa",
+      "qual a duration"
+    ]
+  },
+  {
+    "id": "g29",
+    "clientId": "CONX",
+    "personaId": "investidor",
+    "seed_intent": "perda esperada por safra",
+    "seed_sql": "SELECT safra, SUM(perda_esperada) / SUM(saldo_devedor) AS pct FROM contratos GROUP BY safra ORDER BY safra",
+    "test_intents": [
+      "expected loss por safra",
+      "perda esperada das safras",
+      "quanto de perda esperada por safra"
+    ]
+  },
+  {
+    "id": "g30",
+    "clientId": "CONX",
+    "personaId": "gestor",
+    "seed_intent": "carteira por faixa de atraso",
+    "seed_sql": "SELECT faixa_atraso, SUM(saldo_devedor) AS saldo FROM contratos GROUP BY faixa_atraso ORDER BY faixa_atraso",
+    "test_intents": [
+      "saldo por faixa de atraso",
+      "aging da carteira",
+      "carteira por bucket de atraso"
+    ]
+  },
+  {
+    "id": "g31",
+    "clientId": "CONX",
+    "personaId": "gestor",
+    "seed_intent": "recuperação de inadimplentes últimos 6 meses",
+    "seed_sql": "SELECT DATE_TRUNC(data_recuperacao, MONTH) AS mes, SUM(valor_recuperado) AS recuperado FROM recuperacoes WHERE data_recuperacao >= DATE_SUB(CURRENT_DATE(), INTERVAL 6 MONTH) GROUP BY mes ORDER BY mes",
+    "test_intents": [
+      "recuperação mensal ultimos 6 meses",
+      "valor recuperado por mês recente",
+      "quanto recuperamos no semestre"
+    ]
+  },
+  {
+    "id": "g32",
+    "clientId": "CONX",
+    "personaId": "gestor",
+    "seed_intent": "perda líquida acumulada por safra",
+    "seed_sql": "SELECT safra, SUM(perda_liquida) AS perda FROM contratos GROUP BY safra ORDER BY safra",
+    "test_intents": [
+      "perda liquida acumulada por safra",
+      "net loss por safra",
+      "quanto de perda liquida cada safra teve"
+    ]
+  },
+  {
+    "id": "g33",
+    "clientId": "IMCASA",
+    "personaId": "originador",
+    "seed_intent": "originação imobiliária por estado",
+    "seed_sql": "SELECT uf, SUM(valor_imovel) AS volume FROM contratos GROUP BY uf ORDER BY volume DESC",
+    "test_intents": [
+      "originação imobiliária por UF",
+      "volume imovel por estado",
+      "quanto foi originado em imobiliario por estado"
+    ]
+  },
+  {
+    "id": "g34",
+    "clientId": "IMCASA",
+    "personaId": "originador",
+    "seed_intent": "LTV médio por faixa de renda",
+    "seed_sql": "SELECT faixa_renda, AVG(ltv) AS ltv FROM contratos GROUP BY faixa_renda ORDER BY faixa_renda",
+    "test_intents": [
+      "ltv medio por faixa de renda",
+      "loan to value por renda",
+      "ltv segmentado por renda"
+    ]
+  },
+  {
+    "id": "g35",
+    "clientId": "IMCASA",
+    "personaId": "originador",
+    "seed_intent": "tempo médio de avaliação de imóvel",
+    "seed_sql": "SELECT AVG(TIMESTAMP_DIFF(data_avaliacao_concluida, data_avaliacao_iniciada, DAY)) AS dias FROM avaliacoes",
+    "test_intents": [
+      "tempo medio para avaliar imovel",
+      "duracao media da avaliação",
+      "quanto leva para avaliar imovel"
+    ]
+  },
+  {
+    "id": "g36",
+    "clientId": "IMCASA",
+    "personaId": "originador",
+    "seed_intent": "ticket médio por tipo de imóvel",
+    "seed_sql": "SELECT tipo_imovel, AVG(valor_imovel) AS ticket FROM contratos GROUP BY tipo_imovel",
+    "test_intents": [
+      "ticket medio por tipo imovel",
+      "valor medio dos imoveis por tipo",
+      "ticket por categoria de imovel"
+    ]
+  },
+  {
+    "id": "g37",
+    "clientId": "IMCASA",
+    "personaId": "investidor",
+    "seed_intent": "yield bruto da carteira imobiliária",
+    "seed_sql": "SELECT DATE_TRUNC(referencia, MONTH) AS mes, AVG(taxa_aa) AS yield_bruto FROM contratos GROUP BY mes ORDER BY mes",
+    "test_intents": [
+      "yield bruto mensal da carteira",
+      "rendimento bruto imobiliario por mês",
+      "yield carteira imovel mensal"
+    ]
+  },
+  {
+    "id": "g38",
+    "clientId": "IMCASA",
+    "personaId": "investidor",
+    "seed_intent": "vacância de imóveis em garantia",
+    "seed_sql": "SELECT DATE_TRUNC(referencia, MONTH) AS mes, AVG(CASE WHEN ocupado THEN 0.0 ELSE 1.0 END) AS vacancia FROM imoveis_garantia GROUP BY mes ORDER BY mes",
+    "test_intents": [
+      "vacancia mensal dos imoveis garantia",
+      "percentual de imovel vago em garantia",
+      "vacancia das garantias"
+    ]
+  },
+  {
+    "id": "g39",
+    "clientId": "IMCASA",
+    "personaId": "investidor",
+    "seed_intent": "evolução do IGPM últimos 12 meses",
+    "seed_sql": "SELECT DATE_TRUNC(referencia, MONTH) AS mes, AVG(igpm) AS igpm FROM indices WHERE referencia >= DATE_SUB(CURRENT_DATE(), INTERVAL 12 MONTH) GROUP BY mes ORDER BY mes",
+    "test_intents": [
+      "igpm mensal ultimos 12 meses",
+      "evolucao igpm ano",
+      "indice igpm ultimo ano"
+    ]
+  },
+  {
+    "id": "g40",
+    "clientId": "IMCASA",
+    "personaId": "gestor",
+    "seed_intent": "execução de garantias por mês",
+    "seed_sql": "SELECT DATE_TRUNC(data_execucao, MONTH) AS mes, COUNT(*) AS qtd, SUM(valor_garantia) AS valor FROM execucoes_garantia GROUP BY mes ORDER BY mes",
+    "test_intents": [
+      "execução de garantias mensal",
+      "quantas garantias foram executadas por mês",
+      "execucoes mensais"
+    ]
+  },
+  {
+    "id": "g41",
+    "clientId": "IMCASA",
+    "personaId": "gestor",
+    "seed_intent": "carteira por idade do imóvel",
+    "seed_sql": "SELECT idade_imovel_anos, SUM(saldo_devedor) AS saldo FROM contratos GROUP BY idade_imovel_anos ORDER BY idade_imovel_anos",
+    "test_intents": [
+      "saldo por idade do imovel",
+      "carteira por anos do imovel",
+      "distribuição por idade do imovel"
+    ]
+  },
+  {
+    "id": "g42",
+    "clientId": "IMCASA",
+    "personaId": "gestor",
+    "seed_intent": "concentração de garantias por região",
+    "seed_sql": "SELECT regiao, SUM(valor_garantia) AS valor FROM imoveis_garantia GROUP BY regiao ORDER BY valor DESC",
+    "test_intents": [
+      "garantias por região",
+      "concentração regional de garantias",
+      "qual região concentra mais garantia"
+    ]
+  },
+  {
+    "id": "g43",
+    "clientId": "OM",
+    "personaId": "gestor",
+    "seed_intent": "WAL da carteira por safra",
+    "seed_sql": "SELECT safra, AVG(wal_meses) AS wal FROM contratos GROUP BY safra ORDER BY safra",
+    "test_intents": [
+      "weighted average life por safra",
+      "wal das safras",
+      "vida media ponderada por safra"
+    ]
+  },
+  {
+    "id": "g44",
+    "clientId": "BRZ",
+    "personaId": "investidor",
+    "seed_intent": "amortização programada próximos 6 meses",
+    "seed_sql": "SELECT DATE_TRUNC(data_vencimento, MONTH) AS mes, SUM(amortizacao) AS valor FROM parcelas WHERE data_vencimento BETWEEN CURRENT_DATE() AND DATE_ADD(CURRENT_DATE(), INTERVAL 6 MONTH) GROUP BY mes ORDER BY mes",
+    "test_intents": [
+      "amortização proxima 6 meses",
+      "fluxo de amortização semestre",
+      "amortizacao programada futura"
+    ]
+  },
+  {
+    "id": "g45",
+    "clientId": "CONX",
+    "personaId": "originador",
+    "seed_intent": "originação por idade do tomador",
+    "seed_sql": "SELECT faixa_etaria, SUM(valor_principal) AS volume FROM contratos GROUP BY faixa_etaria ORDER BY faixa_etaria",
+    "test_intents": [
+      "originação por faixa etaria",
+      "volume por idade do tomador",
+      "quanto cada idade originou"
+    ]
+  },
+  {
+    "id": "g46",
+    "clientId": "OM",
+    "personaId": "investidor",
+    "seed_intent": "rating médio da carteira",
+    "seed_sql": "SELECT AVG(rating_score) AS rating FROM contratos WHERE status = 'ATIVO'",
+    "test_intents": [
+      "rating medio carteira ativa",
+      "qual o rating medio da carteira",
+      "score medio de rating"
+    ]
+  },
+  {
+    "id": "g47",
+    "clientId": "BRZ",
+    "personaId": "gestor",
+    "seed_intent": "fluxo de caixa projetado próximos 12 meses",
+    "seed_sql": "SELECT DATE_TRUNC(data_vencimento, MONTH) AS mes, SUM(amortizacao + juros) AS fluxo FROM parcelas WHERE data_vencimento BETWEEN CURRENT_DATE() AND DATE_ADD(CURRENT_DATE(), INTERVAL 12 MONTH) GROUP BY mes ORDER BY mes",
+    "test_intents": [
+      "fluxo de caixa projetado 12 meses",
+      "cash flow proximo ano",
+      "fluxo futuro da carteira"
+    ]
+  },
+  {
+    "id": "g48",
+    "clientId": "CONX",
+    "personaId": "investidor",
+    "seed_intent": "rentabilidade da subordinada",
+    "seed_sql": "SELECT mes, rentabilidade_subordinada FROM fidc_rentabilidade ORDER BY mes",
+    "test_intents": [
+      "rentabilidade da cota subordinada",
+      "retorno da subordinada mensal",
+      "performance subordinada"
+    ]
+  },
+  {
+    "id": "g49",
+    "clientId": "IMCASA",
+    "personaId": "originador",
+    "seed_intent": "percentual de financiamento Pró-Cotista",
+    "seed_sql": "SELECT DATE_TRUNC(data_originacao, MONTH) AS mes, SUM(CASE WHEN linha = 'PRO_COTISTA' THEN valor_principal ELSE 0 END) / SUM(valor_principal) AS pct FROM contratos GROUP BY mes ORDER BY mes",
+    "test_intents": [
+      "share pro cotista mensal",
+      "percentual pro cotista por mês",
+      "quanto da originação é pro cotista"
+    ]
+  },
+  {
+    "id": "g50",
+    "clientId": "OM",
+    "personaId": "originador",
+    "seed_intent": "taxa de pré-pagamento por safra",
+    "seed_sql": "SELECT safra, SUM(pre_pagamento) / SUM(saldo_devedor_inicial) AS cpr FROM contratos GROUP BY safra ORDER BY safra",
+    "test_intents": [
+      "cpr por safra",
+      "pré pagamento por safra",
+      "taxa de prepayment das safras"
+    ]
+  }
+]

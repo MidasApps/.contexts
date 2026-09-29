@@ -2,13 +2,13 @@
 title: Convenções de Modelagem para Secrets
 type: contracts
 scope: secrets, credentials, API keys, signing keys, encryption keys
-last_updated: 2026-05-20
+last_updated: 2026-09-28
 status: active
 ---
 
 # Convenções de Modelagem para Secrets
 
-Este documento define **como o time modela, nomeia, armazena e opera secrets** no stack Node 24 + TypeScript 7 + Next.js 16 + Firebase Functions + GCP. Não é manual de ferramenta nem regra de implementação isolada — é a doutrina que governa toda fronteira onde um valor confidencial entra ou sai do sistema.
+Este documento define **como o time modela, nomeia, armazena e opera secrets** no stack Node 26 + TypeScript 7 + Next.js 16 + Firebase Functions + GCP. Não é manual de ferramenta nem regra de implementação isolada — é a doutrina que governa toda fronteira onde um valor confidencial entra ou sai do sistema.
 
 Para regras imperativas de implementação, ver `@rules/security`. Para política de rotação e governança, ver `@rules/governance`. Para logging e redaction, ver `@rules/observability`. Para validação de schema no boot, ver `@rules/validation` e `@stacks/validation/zod@4`. Para uso operacional em Cloud Functions, ver `@stacks/backend/firebase-functions`. Para boundary client/server no frontend, ver `@stacks/frontend/next@16`.
 
@@ -215,10 +215,12 @@ Nunca `process.env.OPENAI_API_KEY` direto em Cloud Functions — o binding decla
 Em Server Components, Route Handlers e Server Actions:
 
 ```ts
-const apiKey = process.env.OPENAI_API_KEY;
+import { env } from '@/env'; // src/env.ts, server-only
+
+const apiKey = env.OPENAI_API_KEY;
 ```
 
-Tipado e validado via `src/env.ts` (ver §5.4).
+Tipado e validado via `src/env.ts` (ver §5.4) — nunca `process.env.X` direto fora dele.
 
 ### 5.3 Next.js — client-side
 
@@ -236,15 +238,15 @@ Todo secret consumido pelo app é declarado e validado no `src/env.ts` via Zod (
 ```ts
 import { z } from 'zod';
 
-const schema = z.object({
+const EnvSchema = z.object({
   OPENAI_API_KEY: z.string().min(1),
   ANTHROPIC_API_KEY: z.string().min(1),
-  DATABASE_URL: z.string().url(),
+  DATABASE_URL: z.url(),
   JWT_SIGNING_KEY: z.string().min(32),
   STRIPE_WEBHOOK_SECRET: z.string().startsWith('whsec_'),
 });
 
-export const env = schema.parse(process.env);
+export const env = EnvSchema.parse(process.env);
 ```
 
 Fail-fast no startup. Secret ausente derruba o boot — nunca é silent fail em runtime.
@@ -391,7 +393,7 @@ Defense-in-depth obrigatório:
 2. **GitHub Secret Scanning** habilitado no repo (free para repos públicos, Advanced Security para privados).
 3. **CI scan** completo do diff de PR.
 4. **Log redaction em produção** (ver `@rules/observability`):
-   - Pino logger config: `redact: ['*.password', '*.token', '*.apiKey', '*.authorization', 'req.headers.authorization']`
+   - O logger do projeto (assinatura `logger.info(message, fields)`, ADR 0003) é configurado com redaction por chave **antes** do primeiro log: `password`, `token`, `apiKey`, `authorization`, `cookie`, `secret` em qualquer nível de `fields`, além de `headers.authorization`
    - Stack traces sanitizadas antes de enviar a Sentry/Datadog
    - Headers logados com `Authorization` mascarado
 
@@ -429,10 +431,11 @@ Merge é **bloqueado** se reviewer identifica introdução de secret hardcoded.
 - Boundary é estático, validado em build time. Ver `@stacks/frontend/next@16`.
 
 ```ts
-// app/api/chat/route.ts (server)
-const apiKey = process.env.OPENAI_API_KEY;           // certo
+// src/app/v1/chat/route.ts (server)
+import { env } from '@/env';                         // src/env.ts valida process.env no boot
+const apiKey = env.OPENAI_API_KEY;                   // certo
 
-// app/components/chat.tsx (client component "use client")
+// src/features/chat/ui/ChatPanel.tsx (client component "use client")
 const apiKey = process.env.OPENAI_API_KEY;           // undefined em runtime
 const apiKey = process.env.NEXT_PUBLIC_OPENAI_API_KEY; // vaza no bundle — proibido
 ```

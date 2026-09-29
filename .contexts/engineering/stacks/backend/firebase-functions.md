@@ -1,24 +1,27 @@
 ---
 title: Firebase Cloud Functions
-version: firebase-functions@7 / firebase-admin@13
+type: stacks
+category: backend
+version: firebase-functions@7.4.0 / firebase-admin@14.5.0
 runtime: nodejs24
 generation: gen2
-last_updated: 2026-07-13
+last_updated: 2026-09-28
 status: current
 upstream: https://firebase.google.com/docs/functions
 ---
 
 # Firebase Cloud Functions
 
-Camada de backend serverless do projeto. Padrão obrigatório: **Cloud Functions for Firebase, Generation 2**, sobre runtime **`nodejs24`** (alinhado a `@stacks/runtime/node@24`; Cloud Run functions nodejs24 em GA desde nov/2025), escritas em TypeScript estrito (ver `@stacks/language/typescript@7`).
+Camada de backend serverless do projeto. Padrão obrigatório: **Cloud Functions for Firebase, Generation 2**, sobre runtime **`nodejs24`** (exceção E1 ao baseline Node 26 de `@stacks/runtime/node@26`, pois não existe runtime `nodejs26`; ver ADR 0004; Cloud Run functions nodejs24 em GA desde nov/2025), escritas em TypeScript estrito (ver `@stacks/language/typescript@7`).
 
 Gen 1 é **legacy**: não escrever código novo em Gen 1. Migrações Gen 1 → Gen 2 são decisões registradas em `@decisions/`.
 
 ## Pacotes e versões
 
-- `firebase-functions` **>= 7.2** (Gen 2 APIs em `firebase-functions/v2/*`; v7 é a linha atual no npm)
-- `firebase-admin` **>= 13** (Admin SDK para Firestore, Auth, Storage)
-- Runtime de deploy: `nodejs24` (preferido) ou `nodejs22` se algum provider/região ainda restringir
+- `firebase-functions` **7.4.0** (Gen 2 APIs em `firebase-functions/v2/*`)
+- `firebase-admin` **14.5.0** (o peer de functions aceita 11–14; o projeto fica na 14)
+- SDK cliente `firebase` **12.19.0** quando o app precisar do client
+- Runtime de deploy: `nodejs24` (o Cloud Functions não oferece `nodejs26`; exceção E1 do ADR 0004, revisar quando o Google publicar `nodejs26`). `engines` do pacote de functions: `">=24.0.0 <25"` e `@types/node@24`; o resto do monorepo fica em `>=26.0.0 <27`. Código compartilhado com o app não usa API removida na 26 nem API que só existe na 26. Não abrir função nova em `nodejs22`
 - `firebase-tools` (CLI) — só dev/CI, nunca dependência de runtime
 
 Imports canônicos:
@@ -33,7 +36,7 @@ import { onTaskDispatched } from 'firebase-functions/v2/tasks';
 import { beforeUserCreated, beforeUserSignedIn } from 'firebase-functions/v2/identity';
 import { defineSecret, defineString, defineInt } from 'firebase-functions/params';
 import { setGlobalOptions } from 'firebase-functions/v2';
-import { logger } from 'firebase-functions';
+import { logger } from 'firebase-functions/logger';
 ```
 
 Não importar de `firebase-functions/v1/*` em código novo.
@@ -89,7 +92,7 @@ Pinning obrigatório. Default do Firebase (`us-central1`) **não é aceitável**
 
 ### Timeout
 
-Até 60 min (3600s) em Gen 2 para todos os tipos. HTTPS streaming de LLM costuma exigir `timeoutSeconds: 540`+. Não confie no default de 60s.
+Gen 2: até 60 min (3600s) para funções HTTP (`onRequest`, `onCall`) e até 9 min (540s) para funções event-driven (Firestore, Pub/Sub, Storage, scheduler); Gen 1 era 9 min para todos (firebase.google.com/docs/functions/version-comparison). HTTPS streaming de LLM costuma exigir `timeoutSeconds: 540`+. Não confie no default de 60s.
 
 ### Concurrency
 
@@ -133,12 +136,24 @@ export const chat = onCall(
 Toda entrada externa (`onRequest` body/query/headers, `onCall` data, payload de webhook) passa por `safeParse` Zod antes de qualquer lógica. Ver `@rules/validation` e `@stacks/validation/zod@4`.
 
 ```ts
-const Input = z.object({ sessionId: z.string().uuid(), prompt: z.string().min(1) });
+// input externo: strictObject; sessionId = ID automático do Firestore (ADR 0005), não uuid
+const AskInputSchema = z.strictObject({
+  sessionId: z.string().min(1).brand<'ChatSessionId'>(),
+  prompt: z.string().min(1),
+});
 
 export const ask = onCall(async (request) => {
-  const parsed = Input.safeParse(request.data);
+  if (!request.auth) throw new HttpsError('unauthenticated', 'Authentication required.');
+  // onCall não tem headers() do Next: lê o header do request HTTP cru; ausente → ULID novo por chamada
+  const requestId = request.rawRequest.get('x-request-id') ?? newRequestId(); // newRequestId: @/services/shared/request-id
+  const parsed = AskInputSchema.safeParse(request.data);
   if (!parsed.success) {
-    throw new HttpsError('invalid-argument', 'Invalid payload', parsed.error.flatten());
+    // details no envelope de contracts/api.md §6 (Callable = RPC interno, §16.2); z.flattenError não sai da função
+    throw new HttpsError('invalid-argument', 'One or more fields are invalid.', {
+      code: 'VALIDATION_FAILED',
+      details: parsed.error.issues.map((i) => ({ field: i.path.map(String).join('.'), issue: i.code.toUpperCase() })),
+      requestId,
+    });
   }
   // parsed.data já é tipado
 });
@@ -167,6 +182,7 @@ Ver `@rules/performance`.
 
 Com `concurrency > 1`, uma instância atende N requests em paralelo no mesmo processo Node. Implicações:
 
+- Inicialização em escopo de módulo só é aceitável na composition root / entry point da função (`initializeApp()`, clients, schemas). Camadas de domínio e aplicação não têm side effect em import time.
 - Singletons read-only (Admin SDK, clients de API com auth estática, schemas Zod compilados) são **seguros e desejáveis**.
 - Caches mutáveis em escopo de módulo (`const cache = new Map()`) são **compartilhados** — só usar com chave que inclua identidade do request, e cuidado com vazamento.
 - Estado por-request vive em variáveis locais do handler ou em `AsyncLocalStorage`.
@@ -185,10 +201,10 @@ Ver `@rules/security` e `@contracts/secrets`.
 
 ## Observabilidade
 
-- **Logs**: `logger.info({ ... })`, `logger.warn`, `logger.error` de `firebase-functions/logger`. Saída estruturada já chega no Cloud Logging com severity e payload JSON. `console.log` também funciona, mas perde estrutura.
+- **Logs**: `logger.info("order_placed", { orderId, tenantId })` (mensagem estável em snake_case + campos; ADR 0003), `logger.warn`, `logger.error` de `firebase-functions/logger`. Saída estruturada já chega no Cloud Logging com severity e payload JSON. Não use `console.log` (rule `development`); o logger de `firebase-functions/logger` é o único canal.
 - **Trace**: Cloud Trace via OpenTelemetry instrumentation; propagar `traceparent` entre Functions e clients downstream.
 - **Métricas nativas**: invocations, execution time, memory utilization, active instances, errors — Cloud Monitoring sem código adicional.
-- **Correlation IDs**: propagar `x-request-id` em `onRequest`; em `onCall` usar `request.instanceIdToken` ou gerar um por chamada e logar.
+- **Correlation IDs**: propagar `x-request-id` em `onRequest`; em `onCall` ler `request.rawRequest.get('x-request-id')` ou, se ausente, gerar um ULID por chamada e logar.
 - **Nunca logar PII bruta**, tokens, secrets ou bodies de prompt sensíveis.
 
 Ver `@rules/observability`.
@@ -226,7 +242,7 @@ Ver `@rules/migration` para idempotência de jobs longos.
 
 ## Retry policy
 
-- Event triggers: `{ retry: true }` ativa retry exponencial automático até 7 dias. Sem ele, evento perdido em falha.
+- Event triggers: `{ retry: true }` ativa retry com backoff exponencial via Eventarc por até **24 horas** em gen2 (os 7 dias eram do gen1). Sem ele, evento perdido em falha.
 - HTTPS: client é responsável por retry. Implementar backoff no caller, e expor `Retry-After` quando lançar `resource-exhausted` ou `unavailable`.
 
 ## Integrações do projeto
@@ -248,7 +264,7 @@ Functions acessam Cloud SQL via VPC connector + pool de conexões cuidadosamente
 
 ### AI SDKs
 
-`onRequest` com `timeoutSeconds: 540`+ e streaming via `res.write(chunk); res.flush?.()` é o padrão para chat LLM. Ver `@stacks/ai/vercel-ai-sdk` e `@stacks/ai/mastra-sdk`. Evitar `onCall` para streaming — `onCall` não streama; usar `onRequest` com SSE ou chunked transfer.
+`onRequest` com `timeoutSeconds: 540`+ e streaming via `res.write(chunk); res.flush?.()` é o padrão para chat LLM. Ver `@stacks/ai/vercel-ai-sdk` e `@stacks/ai/mastra-sdk`. `onCall` também streama: o handler verifica `request.acceptsStreaming` e envia com `response.sendChunk(chunk)`; o cliente consome com `.stream()` (firebase.google.com/docs/functions/callable). Use `onCall` quando quiser auth/App Check integrados; `onRequest` com SSE ou chunked transfer quando o consumidor não é o SDK Firebase.
 
 ## Deploy
 

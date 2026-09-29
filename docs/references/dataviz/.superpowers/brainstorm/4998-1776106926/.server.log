@@ -1,0 +1,6 @@
+{"type":"server-started","port":51827,"host":"127.0.0.1","url_host":"localhost","url":"http://localhost:51827","screen_dir":"/Users/giullianosoares/Projects/liquid-play-dataviz/.superpowers/brainstorm/4998-1776106926"}
+{"type":"screen-added","file":"/Users/giullianosoares/Projects/liquid-play-dataviz/.superpowers/brainstorm/4998-1776106926/navigation-report-type.html"}
+{"type":"screen-added","file":"/Users/giullianosoares/Projects/liquid-play-dataviz/.superpowers/brainstorm/4998-1776106926/sidebar-scenarios.html"}
+{"type":"screen-added","file":"/Users/giullianosoares/Projects/liquid-play-dataviz/.superpowers/brainstorm/4998-1776106926/dropdown-report-type.html"}
+{"type":"screen-added","file":"/Users/giullianosoares/Projects/liquid-play-dataviz/.superpowers/brainstorm/4998-1776106926/dropdown-final.html"}
+{"type":"server-stopped","reason":"idle timeout"}

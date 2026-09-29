@@ -2,7 +2,7 @@
 title: Convenções de modelagem para PostgreSQL
 type: contracts
 status: active
-last_updated: 2026-07-13
+last_updated: 2026-09-28
 scope: Doutrina de modelagem de schemas relacionais em PostgreSQL
 related:
   - "@stacks/database/postgres"
@@ -63,7 +63,7 @@ Esta doutrina cobre:
 ### Tipos e enums
 
 - **Tipos** (DOMAIN, custom types): **singular**, snake_case → `email`, `order_status`, `currency_code`.
-- **Enum values**: `SCREAMING_SNAKE_CASE` → `'PENDING'`, `'PAID'`, `'AWAITING_REVIEW'`.
+- **Enum values**: lowercase snake_case → `'pending'`, `'paid'`, `'awaiting_review'`. `SCREAMING_SNAKE_CASE` é só `eventName`.
 
 ### Constraints e índices (sufixos canônicos)
 
@@ -95,7 +95,7 @@ Use **`uuidv7()`** nativo do Postgres 18 como padrão de PK. UUIDv7 é ordenáve
 
 ```sql
 -- ULID gerado na aplicação (TEXT), quando o bounded context já padronizou ULID
--- ou precisa de geração client-side idêntica a Firestore/event IDs
+-- ou precisa de ID gerado no client no formato do eventId (Firestore não usa ULID: ADR 0005)
 id text PRIMARY KEY  -- ULID
 
 -- UUID v4 apenas se ordenação temporal for indesejada (tokens públicos, etc.)
@@ -213,12 +213,13 @@ Aplicação consome `orders_active` por default; acessa `orders` diretamente ape
 | Timestamp            | `TIMESTAMPTZ`                        | `TIMESTAMP` (sem timezone)         |
 | Data pura            | `DATE`                               | `TEXT`                             |
 | Hora pura            | `TIME`                               | `TEXT`                             |
-| Money (alta precisão)| `NUMERIC(p,s)` ou `BIGINT` em cents  | `FLOAT`, `DOUBLE PRECISION`, `REAL`|
+| Money                | `BIGINT` `amount_minor` + `text` currency com CHECK | `FLOAT`, `NUMERIC` para o valor, string formatada |
+| Taxa, razão, quantidade fracionária | `NUMERIC(p,s)`                 | `FLOAT`, `DOUBLE PRECISION`, `REAL`|
 | Booleano             | `BOOLEAN`                            | `INTEGER` 0/1, `TEXT` 'Y'/'N'      |
 | JSON                 | `JSONB`                              | `JSON`, `TEXT`                     |
 | UUID / PK ordenável  | `UUID` com `uuidv7()` (default)      | `BIGSERIAL`; `TEXT` para UUID      |
 | ID textual ordenável | `TEXT` (ULID) — só se BC já usa ULID | `BIGSERIAL`                        |
-| Identificador moeda  | `CHAR(3)` (ISO 4217)                 | `TEXT` livre                       |
+| Identificador moeda  | `text` + `CHECK (currency ~ '^[A-Z]{3}$')` (ISO 4217) | `CHAR(3)`, `TEXT` livre sem CHECK |
 
 ### Por que TEXT > VARCHAR(n)
 
@@ -234,7 +235,7 @@ Aplicação consome `orders_active` por default; acessa `orders` diretamente ape
 CREATE DOMAIN email AS TEXT
   CHECK (VALUE ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$');
 
-CREATE DOMAIN currency_code AS CHAR(3)
+CREATE DOMAIN currency_code AS text
   CHECK (VALUE ~ '^[A-Z]{3}$');
 ```
 
@@ -247,13 +248,13 @@ Use DOMAIN quando a mesma invariante reaparece em múltiplas tabelas. Não use p
 **Opção A — TEXT + CHECK (padrão do projeto):**
 
 ```sql
-status TEXT NOT NULL CHECK (status IN ('PENDING', 'PAID', 'CANCELLED'))
+status TEXT NOT NULL CHECK (status IN ('pending', 'paid', 'cancelled'))
 ```
 
 **Opção B — ENUM nativo:**
 
 ```sql
-CREATE TYPE order_status AS ENUM ('PENDING', 'PAID', 'CANCELLED');
+CREATE TYPE order_status AS ENUM ('pending', 'paid', 'cancelled');
 status order_status NOT NULL
 ```
 
@@ -294,7 +295,7 @@ COMMENT ON COLUMN orders.cancelled_at IS 'NULL quando o pedido não foi cancelad
 ```sql
 -- Unique composto
 ALTER TABLE memberships
-  ADD CONSTRAINT memberships_user_id_org_id_key UNIQUE (user_id, org_id);
+  ADD CONSTRAINT memberships_user_id_tenant_id_key UNIQUE (user_id, tenant_id);
 
 -- Check cross-column
 ALTER TABLE events
@@ -360,7 +361,7 @@ CREATE INDEX orders_active_partial_idx
 
 -- Covering
 CREATE INDEX orders_user_id_covering_idx
-  ON orders(user_id) INCLUDE (status, total_cents);
+  ON orders(user_id) INCLUDE (status, total_minor);
 
 -- GIN em JSONB
 CREATE INDEX events_payload_gin_idx ON events USING gin (payload);
@@ -399,25 +400,14 @@ Particularidades de ferramentas (pg_partman, automação de criação de partiç
 
 ## Money pattern
 
-### Duas opções padronizadas
-
-**Cents em BIGINT (default para sistemas transacionais):**
+Valor monetário é `BIGINT` na menor unidade da moeda. O nome da coluna é `amount_minor` (ou `total_minor` quando for o agregado). `currency` é `text` ISO 4217 com CHECK `~ '^[A-Z]{3}$'` (não `CHAR(3)`).
 
 ```sql
-amount_cents BIGINT NOT NULL CHECK (amount_cents >= 0),
-currency CHAR(3) NOT NULL
+amount_minor BIGINT NOT NULL CHECK (amount_minor >= 0),
+currency text NOT NULL CHECK (currency ~ '^[A-Z]{3}$')
 ```
 
-**NUMERIC quando cálculos exigem fração decimal explícita:**
-
-```sql
-amount NUMERIC(15,2) NOT NULL CHECK (amount >= 0),
-currency CHAR(3) NOT NULL
-```
-
-Cada bounded context **documenta sua escolha** na primeira tabela monetária e mantém consistência interna. Nunca `FLOAT`/`DOUBLE PRECISION` para money — perda de precisão é certa.
-
-`currency` sempre `CHAR(3)` ISO 4217 (`'USD'`, `'BRL'`). Nunca armazenado como número.
+`NUMERIC(p,s)` fica para taxa de câmbio, percentual e quantidade fracionária. Não guarda o valor da cobrança. Nunca `FLOAT` / `DOUBLE PRECISION` / `REAL` para nenhum dos dois.
 
 ## JSONB
 
@@ -435,7 +425,7 @@ Indexe JSONB com GIN quando há queries de path:
 
 ```sql
 CREATE INDEX events_payload_gin_idx ON events USING gin (payload);
-CREATE INDEX events_payload_user_id_idx ON events ((payload->>'user_id'));
+CREATE INDEX events_payload_user_id_idx ON events ((payload->>'userId'));
 ```
 
 ## Vector columns
@@ -478,7 +468,7 @@ Use quando custo de recomputação justifica armazenamento. Documente sempre a e
 
 ```sql
 CREATE MATERIALIZED VIEW mv_daily_revenue AS
-  SELECT date_trunc('day', placed_at) AS day, SUM(total_cents) AS revenue_cents
+  SELECT date_trunc('day', placed_at) AS day, SUM(total_minor) AS revenue_minor
   FROM orders_active
   GROUP BY 1;
 
@@ -489,21 +479,7 @@ CREATE MATERIALIZED VIEW mv_daily_revenue AS
 
 `LISTEN/NOTIFY` **não é event bus crítico**. Ver `@contracts/events` para a doutrina geral. Em Postgres, o padrão sancionado é **outbox**:
 
-```sql
-CREATE TABLE outbox_events (
-  -- eventId do envelope (@contracts/events): ULID em TEXT, não uuidv7 de entidade
-  id text PRIMARY KEY,
-  aggregate_type text NOT NULL,
-  aggregate_id text NOT NULL,           -- string opaca (uuid ou ULID do aggregate)
-  event_name text NOT NULL,
-  payload jsonb NOT NULL,
-  occurred_at timestamptz NOT NULL DEFAULT now(),
-  published_at timestamptz
-);
-
-CREATE INDEX outbox_events_unpublished_partial_idx
-  ON outbox_events(occurred_at) WHERE published_at IS NULL;
-```
+A tabela `outbox_events` (colunas `event_version`, `created_at`, índice parcial `outbox_events_unpublished_idx`) é definida em `@contracts/events` seção 9.2 — fonte única do DDL. Aqui vale apenas a convenção: `payload` guarda o envelope completo em camelCase (`jsonb`), portanto paths em índices JSONB usam `payload->>'userId'`, não `user_id`.
 
 Um relay consome `published_at IS NULL`, publica em Pub/Sub/Kafka, e marca `published_at = NOW()`. Garante atomicidade entre mudança de domínio e emissão de evento.
 
@@ -522,11 +498,11 @@ Schema `migrations` é reservado ao tracking de versões. Não criar tabelas de 
 ```sql
 CREATE TABLE orders (
   id uuid PRIMARY KEY DEFAULT uuidv7(),
-  tenant_id uuid NOT NULL,
+  tenant_id uuid NOT NULL REFERENCES tenants(id) ON DELETE RESTRICT,
   user_id uuid NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
-  status text NOT NULL CHECK (status IN ('PENDING', 'PAID', 'CANCELLED')),
-  total_cents bigint NOT NULL CHECK (total_cents >= 0),
-  currency char(3) NOT NULL,
+  status text NOT NULL CHECK (status IN ('pending', 'paid', 'cancelled')),
+  total_minor bigint NOT NULL CHECK (total_minor >= 0),
+  currency text NOT NULL CHECK (currency ~ '^[A-Z]{3}$'),
   placed_at timestamptz NOT NULL,
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now(),
@@ -538,7 +514,8 @@ CREATE TABLE orders (
     CHECK ((deleted_at IS NULL) = (deleted_by IS NULL))
 );
 
-CREATE INDEX orders_tenant_id_user_id_idx ON orders(tenant_id, user_id);
+CREATE INDEX orders_tenant_id_user_id_idx ON orders(tenant_id, user_id);  -- cobre a FK de tenant_id
+CREATE INDEX orders_user_id_idx ON orders(user_id);                     -- FK de user_id
 CREATE INDEX orders_placed_at_idx ON orders(placed_at);
 CREATE INDEX orders_active_partial_idx
   ON orders(tenant_id, status) WHERE deleted_at IS NULL;
@@ -558,7 +535,7 @@ CREATE VIEW orders_active AS
 ```sql
 id uuid PRIMARY KEY DEFAULT uuidv7()                 -- PK ordenável (default PG 18)
 created_at timestamptz NOT NULL DEFAULT now()        -- TZ + default
-amount_cents bigint NOT NULL CHECK (amount_cents >= 0)  -- money em cents
+amount_minor bigint NOT NULL CHECK (amount_minor >= 0)  -- menor unidade da moeda
 status text NOT NULL CHECK (status IN (...))         -- enum flexível
 tenant_id uuid NOT NULL                              -- multi-tenant
 CREATE INDEX orders_user_id_idx ON orders(user_id);  -- FK indexada

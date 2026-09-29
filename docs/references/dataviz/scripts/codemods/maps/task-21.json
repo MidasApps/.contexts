@@ -1,0 +1,2178 @@
+[
+  {
+    "file": "scripts/_firestore-admin.ts",
+    "line": 56,
+    "from": "getDbPara",
+    "to": "getDbFor",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3,
+    "note": "mixed-language"
+  },
+  {
+    "file": "scripts/add-kpi-sparklines.ts",
+    "line": 58,
+    "from": "APLICAR",
+    "to": "APPLY",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 8
+  },
+  {
+    "file": "scripts/add-kpi-sparklines.ts",
+    "line": 61,
+    "from": "INICIO",
+    "to": "START",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "scripts/add-kpi-sparklines.ts",
+    "line": 62,
+    "from": "FIM",
+    "to": "END",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 7
+  },
+  {
+    "file": "scripts/add-kpi-sparklines.ts",
+    "line": 84,
+    "from": "entidadeDe",
+    "to": "entityOf",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "scripts/add-kpi-sparklines.ts",
+    "line": 88,
+    "from": "roda",
+    "to": "run",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "scripts/add-kpi-sparklines.ts",
+    "line": 92,
+    "from": "filtros",
+    "to": "filters",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 7
+  },
+  {
+    "file": "scripts/add-kpi-sparklines.ts",
+    "line": 108,
+    "from": "Veredito",
+    "to": "Verdict",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "scripts/add-kpi-sparklines.ts",
+    "line": 111,
+    "from": "usos",
+    "to": "uses",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 12
+  },
+  {
+    "file": "scripts/add-kpi-sparklines.ts",
+    "line": 113,
+    "from": "detalhe",
+    "to": "detail",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 11
+  },
+  {
+    "file": "scripts/add-kpi-sparklines.ts",
+    "line": 118,
+    "from": "avalia",
+    "to": "evaluate",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "scripts/add-kpi-sparklines.ts",
+    "line": 120,
+    "from": "fonte",
+    "to": "source",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 21
+  },
+  {
+    "file": "scripts/add-kpi-sparklines.ts",
+    "line": 121,
+    "from": "existentes",
+    "to": "existing",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "scripts/add-kpi-sparklines.ts",
+    "line": 123,
+    "from": "usos",
+    "to": "uses",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 12
+  },
+  {
+    "file": "scripts/add-kpi-sparklines.ts",
+    "line": 125,
+    "from": "usos",
+    "to": "uses",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 12
+  },
+  {
+    "file": "scripts/add-kpi-sparklines.ts",
+    "line": 127,
+    "from": "detalhe",
+    "to": "detail",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 11
+  },
+  {
+    "file": "scripts/add-kpi-sparklines.ts",
+    "line": 130,
+    "from": "gerada",
+    "to": "generated",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "scripts/add-kpi-sparklines.ts",
+    "line": 131,
+    "from": "detalhe",
+    "to": "detail",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 11
+  },
+  {
+    "file": "scripts/add-kpi-sparklines.ts",
+    "line": 134,
+    "from": "candidata",
+    "to": "candidate",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "scripts/add-kpi-sparklines.ts",
+    "line": 143,
+    "from": "serie",
+    "to": "series",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 7
+  },
+  {
+    "file": "scripts/add-kpi-sparklines.ts",
+    "line": 148,
+    "from": "detalhe",
+    "to": "detail",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 11
+  },
+  {
+    "file": "scripts/add-kpi-sparklines.ts",
+    "line": 154,
+    "from": "esperado",
+    "to": "expected",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "scripts/add-kpi-sparklines.ts",
+    "line": 155,
+    "from": "obtido",
+    "to": "actual",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "scripts/add-kpi-sparklines.ts",
+    "line": 157,
+    "from": "detalhe",
+    "to": "detail",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 11
+  },
+  {
+    "file": "scripts/add-kpi-sparklines.ts",
+    "line": 160,
+    "from": "reuso",
+    "to": "reuse",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "scripts/add-kpi-sparklines.ts",
+    "line": 164,
+    "from": "detalhe",
+    "to": "detail",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 11
+  },
+  {
+    "file": "scripts/add-kpi-sparklines.ts",
+    "line": 167,
+    "from": "detalhe",
+    "to": "detail",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 11
+  },
+  {
+    "file": "scripts/add-kpi-sparklines.ts",
+    "line": 171,
+    "from": "detalhe",
+    "to": "detail",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 11
+  },
+  {
+    "file": "scripts/add-kpi-sparklines.ts",
+    "line": 179,
+    "from": "metricas",
+    "to": "metrics",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 8
+  },
+  {
+    "file": "scripts/add-kpi-sparklines.ts",
+    "line": 182,
+    "from": "cliente",
+    "to": "client",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 11
+  },
+  {
+    "file": "scripts/add-kpi-sparklines.ts",
+    "line": 188,
+    "from": "usos",
+    "to": "uses",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 12
+  },
+  {
+    "file": "scripts/add-kpi-sparklines.ts",
+    "line": 188,
+    "from": "blocos",
+    "to": "blocks",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "scripts/add-kpi-sparklines.ts",
+    "line": 188,
+    "from": "bloco",
+    "to": "block",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 12
+  },
+  {
+    "file": "scripts/add-kpi-sparklines.ts",
+    "line": 192,
+    "from": "bloco",
+    "to": "block",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 12
+  },
+  {
+    "file": "scripts/add-kpi-sparklines.ts",
+    "line": 194,
+    "from": "blocos",
+    "to": "blocks",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "scripts/add-kpi-sparklines.ts",
+    "line": 196,
+    "from": "bloco",
+    "to": "block",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 12
+  },
+  {
+    "file": "scripts/add-kpi-sparklines.ts",
+    "line": 207,
+    "from": "vereditos",
+    "to": "verdicts",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 8
+  },
+  {
+    "file": "scripts/add-kpi-sparklines.ts",
+    "line": 208,
+    "from": "uso",
+    "to": "usage",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "scripts/add-kpi-sparklines.ts",
+    "line": 209,
+    "from": "fonte",
+    "to": "source",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 21
+  },
+  {
+    "file": "scripts/add-kpi-sparklines.ts",
+    "line": 211,
+    "from": "usos",
+    "to": "uses",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 12
+  },
+  {
+    "file": "scripts/add-kpi-sparklines.ts",
+    "line": 211,
+    "from": "detalhe",
+    "to": "detail",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 11
+  },
+  {
+    "file": "scripts/add-kpi-sparklines.ts",
+    "line": 216,
+    "from": "usos",
+    "to": "uses",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 12
+  },
+  {
+    "file": "scripts/add-kpi-sparklines.ts",
+    "line": 216,
+    "from": "detalhe",
+    "to": "detail",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 11
+  },
+  {
+    "file": "scripts/add-kpi-sparklines.ts",
+    "line": 222,
+    "from": "largura",
+    "to": "width",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "scripts/add-kpi-sparklines.ts",
+    "line": 228,
+    "from": "contagem",
+    "to": "count",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "scripts/add-kpi-sparklines.ts",
+    "line": 234,
+    "from": "aplicaveis",
+    "to": "applicable",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "scripts/add-kpi-sparklines.ts",
+    "line": 242,
+    "from": "metricasGravadas",
+    "to": "savedMetrics",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "scripts/add-kpi-sparklines.ts",
+    "line": 243,
+    "from": "blocosGravados",
+    "to": "savedBlocks",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "scripts/add-kpi-sparklines.ts",
+    "line": 245,
+    "from": "fonte",
+    "to": "source",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 21
+  },
+  {
+    "file": "scripts/add-kpi-sparklines.ts",
+    "line": 266,
+    "from": "alvo",
+    "to": "target",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 14
+  },
+  {
+    "file": "scripts/add-kpi-sparklines.ts",
+    "line": 270,
+    "from": "bloco",
+    "to": "block",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 12
+  },
+  {
+    "file": "scripts/audit-bigquery-leftovers.ts",
+    "line": 22,
+    "from": "PURGADOS",
+    "to": "PURGED",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "scripts/audit-bigquery-leftovers.ts",
+    "line": 27,
+    "from": "segmento",
+    "to": "segment",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "scripts/audit-bigquery-leftovers.ts",
+    "line": 46,
+    "from": "clientes",
+    "to": "clients",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 7
+  },
+  {
+    "file": "scripts/audit-bigquery-leftovers.ts",
+    "line": 47,
+    "from": "ativos",
+    "to": "active",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "scripts/audit-bigquery-leftovers.ts",
+    "line": 49,
+    "from": "purgados",
+    "to": "purged",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "scripts/audit-bigquery-leftovers.ts",
+    "line": 51,
+    "from": "classificado",
+    "to": "classified",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 11
+  },
+  {
+    "file": "scripts/audit-bigquery-leftovers.ts",
+    "line": 51,
+    "from": "purgado",
+    "to": "purged",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "scripts/audit-bigquery-leftovers.ts",
+    "line": 51,
+    "from": "outro",
+    "to": "other",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "scripts/audit-bigquery-leftovers.ts",
+    "line": 55,
+    "from": "prefixo",
+    "to": "prefix",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "scripts/bootstrap-user.ts",
+    "line": 42,
+    "from": "AUTOR",
+    "to": "AUTHOR",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "scripts/bootstrap-user.ts",
+    "line": 45,
+    "from": "colecao",
+    "to": "collection",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "scripts/bootstrap-user.ts",
+    "line": 51,
+    "from": "resolverOuSair",
+    "to": "resolveOrExit",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3,
+    "note": "mixed-language"
+  },
+  {
+    "file": "scripts/bootstrap-user.ts",
+    "line": 53,
+    "from": "colecao",
+    "to": "collection",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "scripts/bootstrap-user.ts",
+    "line": 54,
+    "from": "pedidos",
+    "to": "requested",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "scripts/bootstrap-user.ts",
+    "line": 55,
+    "from": "rotulo",
+    "to": "label",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "scripts/bootstrap-user.ts",
+    "line": 57,
+    "from": "existentes",
+    "to": "existing",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "scripts/bootstrap-user.ts",
+    "line": 69,
+    "from": "contaDeAuth",
+    "to": "authAccount",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2,
+    "note": "mixed-language"
+  },
+  {
+    "file": "scripts/bootstrap-user.ts",
+    "line": 72,
+    "from": "existente",
+    "to": "existingUser",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "scripts/bootstrap-user.ts",
+    "line": 73,
+    "from": "criada",
+    "to": "created",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "scripts/bootstrap-user.ts",
+    "line": 75,
+    "from": "criada",
+    "to": "created",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "scripts/bootstrap-user.ts",
+    "line": 78,
+    "from": "nova",
+    "to": "newUser",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "scripts/bootstrap-user.ts",
+    "line": 83,
+    "from": "criada",
+    "to": "created",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "scripts/bootstrap-user.ts",
+    "line": 112,
+    "from": "projeto",
+    "to": "project",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "scripts/bootstrap-user.ts",
+    "line": 127,
+    "from": "jaExiste",
+    "to": "alreadyExists",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "scripts/bootstrap-user.ts",
+    "line": 133,
+    "from": "criada",
+    "to": "created",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "scripts/bq-bootstrap-bqml-datasets.ts",
+    "line": 21,
+    "from": "clientesAtivos",
+    "to": "activeClients",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "scripts/bq-bootstrap-bqml-datasets.ts",
+    "line": 70,
+    "from": "segmento",
+    "to": "segment",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "scripts/bq-load-aux-tables.ts",
+    "line": 53,
+    "from": "BANCOS_CSV",
+    "to": "BANKS_CSV",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2,
+    "note": "mixed-language"
+  },
+  {
+    "file": "scripts/bq-load-aux-tables.ts",
+    "line": 78,
+    "from": "BA_BANCOS_SCHEMA",
+    "to": "BA_BANKS_SCHEMA",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2,
+    "note": "mixed-language"
+  },
+  {
+    "file": "scripts/bq-load-aux-tables.ts",
+    "line": 79,
+    "from": "BA_PLUGGY_CATEGORIAS_SCHEMA",
+    "to": "BA_PLUGGY_CATEGORIES_SCHEMA",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2,
+    "note": "mixed-language"
+  },
+  {
+    "file": "scripts/bq-load-aux-tables.ts",
+    "line": 120,
+    "from": "bancos",
+    "to": "banks",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "scripts/bq-load-aux-tables.ts",
+    "line": 121,
+    "from": "categorias",
+    "to": "categories",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "scripts/export-provisioning.ts",
+    "line": 34,
+    "from": "DocExportado",
+    "to": "ExportedDoc",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 12,
+    "note": "mixed-language"
+  },
+  {
+    "file": "scripts/export-provisioning.ts",
+    "line": 50,
+    "from": "nome",
+    "to": "name",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 19
+  },
+  {
+    "file": "scripts/export-provisioning.ts",
+    "line": 66,
+    "from": "serializar",
+    "to": "serialize",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "scripts/export-provisioning.ts",
+    "line": 66,
+    "from": "valor",
+    "to": "value",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 20
+  },
+  {
+    "file": "scripts/export-provisioning.ts",
+    "line": 85,
+    "from": "lerSubcolecoes",
+    "to": "readSubcollections",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "scripts/export-provisioning.ts",
+    "line": 87,
+    "from": "caminhoPai",
+    "to": "parentPath",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "scripts/export-provisioning.ts",
+    "line": 88,
+    "from": "caminhos",
+    "to": "paths",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "scripts/export-provisioning.ts",
+    "line": 92,
+    "from": "primeiroNivel",
+    "to": "firstLevel",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "scripts/export-provisioning.ts",
+    "line": 94,
+    "from": "nome",
+    "to": "name",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 19
+  },
+  {
+    "file": "scripts/export-provisioning.ts",
+    "line": 98,
+    "from": "filhos",
+    "to": "children",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "scripts/export-provisioning.ts",
+    "line": 106,
+    "from": "netos",
+    "to": "grandchildren",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "scripts/export-provisioning.ts",
+    "line": 115,
+    "from": "exportarColecao",
+    "to": "exportCollection",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "scripts/export-provisioning.ts",
+    "line": 145,
+    "from": "colecoes",
+    "to": "collections",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "scripts/export-provisioning.ts",
+    "line": 148,
+    "from": "nome",
+    "to": "name",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 19
+  },
+  {
+    "file": "scripts/export-provisioning.ts",
+    "line": 166,
+    "from": "nome",
+    "to": "name",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 19
+  },
+  {
+    "file": "scripts/export-provisioning.ts",
+    "line": 174,
+    "from": "resumo",
+    "to": "summary",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 14
+  },
+  {
+    "file": "scripts/export-provisioning.ts",
+    "line": 179,
+    "from": "arquivo",
+    "to": "file",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "scripts/export-provisioning.ts",
+    "line": 196,
+    "from": "marca",
+    "to": "stamp",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "scripts/patch-covenants-filter-fields.mjs",
+    "line": 61,
+    "from": "APLICAR",
+    "to": "APPLY",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 8
+  },
+  {
+    "file": "scripts/patch-covenants-filter-fields.mjs",
+    "line": 65,
+    "from": "BANCOS_DEDUP",
+    "to": "BANKS_DEDUP",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3,
+    "note": "mixed-language"
+  },
+  {
+    "file": "scripts/patch-covenants-filter-fields.mjs",
+    "line": 68,
+    "from": "CATEGORIAS_DEDUP",
+    "to": "CATEGORIES_DEDUP",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2,
+    "note": "mixed-language"
+  },
+  {
+    "file": "scripts/patch-covenants-filter-fields.mjs",
+    "line": 72,
+    "from": "EXPR_CATEGORIA",
+    "to": "CATEGORY_EXPR",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4,
+    "note": "mixed-language"
+  },
+  {
+    "file": "scripts/patch-covenants-filter-fields.mjs",
+    "line": 75,
+    "from": "EXTRATO",
+    "to": "STATEMENT",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "scripts/patch-covenants-filter-fields.mjs",
+    "line": 89,
+    "from": "porCategoria",
+    "to": "byCategory",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "scripts/patch-covenants-filter-fields.mjs",
+    "line": 112,
+    "from": "SERIE",
+    "to": "SERIES",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "scripts/patch-covenants-filter-fields.mjs",
+    "line": 133,
+    "from": "METRICAS",
+    "to": "METRICS",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "scripts/patch-covenants-filter-fields.mjs",
+    "line": 147,
+    "from": "CAMPO_POR_CHAVE",
+    "to": "FIELD_BY_KEY",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "scripts/patch-covenants-filter-fields.mjs",
+    "line": 170,
+    "from": "migraMetricas",
+    "to": "migrateMetrics",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "scripts/patch-covenants-filter-fields.mjs",
+    "line": 171,
+    "from": "resumo",
+    "to": "summary",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 14
+  },
+  {
+    "file": "scripts/patch-covenants-filter-fields.mjs",
+    "line": 171,
+    "from": "gravadas",
+    "to": "written",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "scripts/patch-covenants-filter-fields.mjs",
+    "line": 171,
+    "from": "puladas",
+    "to": "skipped",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "scripts/patch-covenants-filter-fields.mjs",
+    "line": 171,
+    "from": "ausentes",
+    "to": "missing",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 8
+  },
+  {
+    "file": "scripts/patch-covenants-filter-fields.mjs",
+    "line": 173,
+    "from": "alvo",
+    "to": "target",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 14
+  },
+  {
+    "file": "scripts/patch-covenants-filter-fields.mjs",
+    "line": 180,
+    "from": "dados",
+    "to": "data",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "scripts/patch-covenants-filter-fields.mjs",
+    "line": 181,
+    "from": "atual",
+    "to": "current",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "scripts/patch-covenants-filter-fields.mjs",
+    "line": 196,
+    "from": "novo",
+    "to": "updated",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 8
+  },
+  {
+    "file": "scripts/patch-covenants-filter-fields.mjs",
+    "line": 197,
+    "from": "aindaTemPin",
+    "to": "stillHasPin",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2,
+    "note": "mixed-language"
+  },
+  {
+    "file": "scripts/patch-covenants-filter-fields.mjs",
+    "line": 219,
+    "from": "migraFiltrosDePagina",
+    "to": "migratePageFilters",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "scripts/patch-covenants-filter-fields.mjs",
+    "line": 220,
+    "from": "resumo",
+    "to": "summary",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 14
+  },
+  {
+    "file": "scripts/patch-covenants-filter-fields.mjs",
+    "line": 220,
+    "from": "reescritos",
+    "to": "rewritten",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "scripts/patch-covenants-filter-fields.mjs",
+    "line": 220,
+    "from": "intactos",
+    "to": "untouched",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "scripts/patch-covenants-filter-fields.mjs",
+    "line": 221,
+    "from": "clientes",
+    "to": "clients",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 7
+  },
+  {
+    "file": "scripts/patch-covenants-filter-fields.mjs",
+    "line": 223,
+    "from": "cliente",
+    "to": "client",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 11
+  },
+  {
+    "file": "scripts/patch-covenants-filter-fields.mjs",
+    "line": 226,
+    "from": "relatorios",
+    "to": "reports",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "scripts/patch-covenants-filter-fields.mjs",
+    "line": 227,
+    "from": "relatorio",
+    "to": "report",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 11
+  },
+  {
+    "file": "scripts/patch-covenants-filter-fields.mjs",
+    "line": 228,
+    "from": "declarados",
+    "to": "declared",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "scripts/patch-covenants-filter-fields.mjs",
+    "line": 231,
+    "from": "chave",
+    "to": "key",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "scripts/patch-covenants-filter-fields.mjs",
+    "line": 261,
+    "from": "metricas",
+    "to": "metrics",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 8
+  },
+  {
+    "file": "scripts/patch-covenants-filter-fields.mjs",
+    "line": 262,
+    "from": "filtros",
+    "to": "filters",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 7
+  },
+  {
+    "file": "scripts/patch-metricas-cegas-ao-periodo.ts",
+    "line": 73,
+    "from": "APLICAR",
+    "to": "APPLY",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 8
+  },
+  {
+    "file": "scripts/patch-metricas-cegas-ao-periodo.ts",
+    "line": 75,
+    "from": "INICIO",
+    "to": "START",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "scripts/patch-metricas-cegas-ao-periodo.ts",
+    "line": 76,
+    "from": "FIM",
+    "to": "END",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 7
+  },
+  {
+    "file": "scripts/patch-metricas-cegas-ao-periodo.ts",
+    "line": 85,
+    "from": "entidade",
+    "to": "entity",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 8
+  },
+  {
+    "file": "scripts/patch-metricas-cegas-ao-periodo.ts",
+    "line": 86,
+    "from": "porque",
+    "to": "reason",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "scripts/patch-metricas-cegas-ao-periodo.ts",
+    "line": 87,
+    "from": "aplica",
+    "to": "apply",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "scripts/patch-metricas-cegas-ao-periodo.ts",
+    "line": 89,
+    "from": "jaTem",
+    "to": "alreadyHas",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "scripts/patch-metricas-cegas-ao-periodo.ts",
+    "line": 95,
+    "from": "entidade",
+    "to": "entity",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 8
+  },
+  {
+    "file": "scripts/patch-metricas-cegas-ao-periodo.ts",
+    "line": 96,
+    "from": "porque",
+    "to": "reason",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "scripts/patch-metricas-cegas-ao-periodo.ts",
+    "line": 97,
+    "from": "jaTem",
+    "to": "alreadyHas",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "scripts/patch-metricas-cegas-ao-periodo.ts",
+    "line": 98,
+    "from": "aplica",
+    "to": "apply",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "scripts/patch-metricas-cegas-ao-periodo.ts",
+    "line": 105,
+    "from": "entidade",
+    "to": "entity",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 8
+  },
+  {
+    "file": "scripts/patch-metricas-cegas-ao-periodo.ts",
+    "line": 106,
+    "from": "porque",
+    "to": "reason",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "scripts/patch-metricas-cegas-ao-periodo.ts",
+    "line": 107,
+    "from": "jaTem",
+    "to": "alreadyHas",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "scripts/patch-metricas-cegas-ao-periodo.ts",
+    "line": 108,
+    "from": "aplica",
+    "to": "apply",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "scripts/patch-metricas-cegas-ao-periodo.ts",
+    "line": 115,
+    "from": "entidade",
+    "to": "entity",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 8
+  },
+  {
+    "file": "scripts/patch-metricas-cegas-ao-periodo.ts",
+    "line": 116,
+    "from": "porque",
+    "to": "reason",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "scripts/patch-metricas-cegas-ao-periodo.ts",
+    "line": 117,
+    "from": "jaTem",
+    "to": "alreadyHas",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "scripts/patch-metricas-cegas-ao-periodo.ts",
+    "line": 118,
+    "from": "aplica",
+    "to": "apply",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "scripts/patch-metricas-cegas-ao-periodo.ts",
+    "line": 142,
+    "from": "roda",
+    "to": "run",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "scripts/patch-metricas-cegas-ao-periodo.ts",
+    "line": 148,
+    "from": "filtros",
+    "to": "filters",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 7
+  },
+  {
+    "file": "scripts/patch-metricas-cegas-ao-periodo.ts",
+    "line": 166,
+    "from": "cliente",
+    "to": "client",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 11
+  },
+  {
+    "file": "scripts/patch-metricas-cegas-ao-periodo.ts",
+    "line": 172,
+    "from": "gravar",
+    "to": "write",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "scripts/patch-metricas-cegas-ao-periodo.ts",
+    "line": 179,
+    "from": "atual",
+    "to": "current",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "scripts/patch-metricas-cegas-ao-periodo.ts",
+    "line": 185,
+    "from": "novo",
+    "to": "updated",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 8
+  },
+  {
+    "file": "scripts/patch-metricas-cegas-ao-periodo.ts",
+    "line": 193,
+    "from": "antes",
+    "to": "before",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "scripts/patch-metricas-cegas-ao-periodo.ts",
+    "line": 194,
+    "from": "depois",
+    "to": "after",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "scripts/purge-provisioning.ts",
+    "line": 51,
+    "from": "conectar",
+    "to": "connect",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "scripts/purge-provisioning.ts",
+    "line": 76,
+    "from": "apagarDoc",
+    "to": "deleteDoc",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4,
+    "note": "mixed-language"
+  },
+  {
+    "file": "scripts/purge-provisioning.ts",
+    "line": 78,
+    "from": "caminho",
+    "to": "path",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 9
+  },
+  {
+    "file": "scripts/purge-provisioning.ts",
+    "line": 80,
+    "from": "nivel",
+    "to": "level",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "scripts/purge-provisioning.ts",
+    "line": 83,
+    "from": "apagados",
+    "to": "deleted",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "scripts/purge-provisioning.ts",
+    "line": 126,
+    "from": "nomes",
+    "to": "names",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "scripts/purge-provisioning.ts",
+    "line": 127,
+    "from": "nome",
+    "to": "name",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 19
+  },
+  {
+    "file": "scripts/purge-provisioning.ts",
+    "line": 144,
+    "from": "existe",
+    "to": "exists",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "scripts/remove-page-dropdown-filters.mjs",
+    "line": 47,
+    "from": "DO_EIXO_DE_TEMPO",
+    "to": "TIME_AXIS",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "scripts/remove-page-dropdown-filters.mjs",
+    "line": 55,
+    "from": "clientes",
+    "to": "clients",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 7
+  },
+  {
+    "file": "scripts/remove-page-dropdown-filters.mjs",
+    "line": 56,
+    "from": "paginasComFiltro",
+    "to": "pagesWithFilter",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "scripts/remove-page-dropdown-filters.mjs",
+    "line": 57,
+    "from": "filtrosRemovidos",
+    "to": "removedFilters",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "scripts/remove-page-dropdown-filters.mjs",
+    "line": 59,
+    "from": "cliente",
+    "to": "client",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 11
+  },
+  {
+    "file": "scripts/remove-page-dropdown-filters.mjs",
+    "line": 62,
+    "from": "relatorios",
+    "to": "reports",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "scripts/remove-page-dropdown-filters.mjs",
+    "line": 63,
+    "from": "relatorio",
+    "to": "report",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 11
+  },
+  {
+    "file": "scripts/remove-page-dropdown-filters.mjs",
+    "line": 64,
+    "from": "declarados",
+    "to": "declared",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "scripts/remove-page-dropdown-filters.mjs",
+    "line": 65,
+    "from": "seletores",
+    "to": "selectors",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "scripts/remove-page-dropdown-filters.mjs",
+    "line": 66,
+    "from": "chave",
+    "to": "key",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "scripts/remove-page-dropdown-filters.mjs",
+    "line": 72,
+    "from": "caminho",
+    "to": "path",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 9
+  },
+  {
+    "file": "scripts/remove-page-dropdown-filters.mjs",
+    "line": 76,
+    "from": "apagar",
+    "to": "deleteKeys",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "scripts/remove-page-dropdown-filters.mjs",
+    "line": 77,
+    "from": "chave",
+    "to": "key",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "scripts/seed-metric-shapes.mjs",
+    "line": 62,
+    "from": "desconhecido",
+    "to": "unknown",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "scripts/seed-metric-shapes.mjs",
+    "line": 85,
+    "from": "mesmoConteudo",
+    "to": "sameContent",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "scripts/seed-metric-shapes.mjs",
+    "line": 105,
+    "from": "jaTinha",
+    "to": "alreadyHad",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "scripts/seed-metric-shapes.mjs",
+    "line": 120,
+    "from": "verbo",
+    "to": "verb",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "scripts/seed-metric-shapes.mjs",
+    "line": 135,
+    "from": "invalidas",
+    "to": "invalid",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "scripts/seed-metric-shapes.mjs",
+    "line": 152,
+    "from": "conta",
+    "to": "count",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "scripts/seed-metric-shapes.mjs",
+    "line": 158,
+    "from": "conflitos",
+    "to": "conflicts",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "scripts/seed-metric-shapes.mjs",
+    "line": 163,
+    "from": "ausentes",
+    "to": "missing",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 8
+  },
+  {
+    "file": "scripts/seed-provisioning.ts",
+    "line": 33,
+    "from": "DocExportado",
+    "to": "ExportedDoc",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 12,
+    "note": "mixed-language"
+  },
+  {
+    "file": "scripts/seed-provisioning.ts",
+    "line": 60,
+    "from": "desserializar",
+    "to": "deserialize",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "scripts/seed-provisioning.ts",
+    "line": 60,
+    "from": "valor",
+    "to": "value",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 20
+  },
+  {
+    "file": "scripts/seed-provisioning.ts",
+    "line": 78,
+    "from": "conectar",
+    "to": "connect",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "scripts/seed-provisioning.ts",
+    "line": 95,
+    "from": "Contadores",
+    "to": "Counters",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "scripts/seed-provisioning.ts",
+    "line": 95,
+    "from": "atualizados",
+    "to": "updated",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 8
+  },
+  {
+    "file": "scripts/seed-provisioning.ts",
+    "line": 95,
+    "from": "preservados",
+    "to": "preserved",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 9
+  },
+  {
+    "file": "scripts/seed-provisioning.ts",
+    "line": 97,
+    "from": "escreverDoc",
+    "to": "writeDoc",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3,
+    "note": "mixed-language"
+  },
+  {
+    "file": "scripts/seed-provisioning.ts",
+    "line": 100,
+    "from": "caminho",
+    "to": "path",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 9
+  },
+  {
+    "file": "scripts/seed-provisioning.ts",
+    "line": 106,
+    "from": "existe",
+    "to": "exists",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "scripts/seed-provisioning.ts",
+    "line": 116,
+    "from": "nomeSub",
+    "to": "subName",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2,
+    "note": "mixed-language"
+  },
+  {
+    "file": "scripts/seed-provisioning.ts",
+    "line": 116,
+    "from": "filhos",
+    "to": "children",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "scripts/seed-provisioning.ts",
+    "line": 117,
+    "from": "filho",
+    "to": "child",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "scripts/seed-provisioning.ts",
+    "line": 135,
+    "from": "ehProducao",
+    "to": "isProduction",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "scripts/seed-provisioning.ts",
+    "line": 146,
+    "from": "emulador",
+    "to": "emulator",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "scripts/seed-provisioning.ts",
+    "line": 154,
+    "from": "arquivos",
+    "to": "files",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "scripts/seed-provisioning.ts",
+    "line": 167,
+    "from": "atualizados",
+    "to": "updated",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 8
+  },
+  {
+    "file": "scripts/seed-provisioning.ts",
+    "line": 167,
+    "from": "preservados",
+    "to": "preserved",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 9
+  },
+  {
+    "file": "scripts/seed-provisioning.ts",
+    "line": 173,
+    "from": "arquivo",
+    "to": "file",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "scripts/seed-provisioning.ts",
+    "line": 179,
+    "from": "conteudo",
+    "to": "content",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "scripts/seed-provisioning.ts",
+    "line": 180,
+    "from": "atualizados",
+    "to": "updated",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 8
+  },
+  {
+    "file": "scripts/seed-provisioning.ts",
+    "line": 180,
+    "from": "preservados",
+    "to": "preserved",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 9
+  },
+  {
+    "file": "scripts/seed-provisioning.ts",
+    "line": 184,
+    "from": "naLevada",
+    "to": "inBatch",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "scripts/seed-vila-rosa-reports.mjs",
+    "line": 236,
+    "from": "entradasSaidas",
+    "to": "inflowsOutflows",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "scripts/smoke-supervisor.ts",
+    "line": 29,
+    "from": "SUB_AGENTES",
+    "to": "SUB_AGENTS",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4,
+    "note": "mixed-language"
+  },
+  {
+    "file": "scripts/smoke-supervisor.ts",
+    "line": 58,
+    "from": "construidos",
+    "to": "built",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "scripts/smoke-supervisor.ts",
+    "line": 75,
+    "from": "texto",
+    "to": "text",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "scripts/patch-metricas-cegas-ao-periodo.ts",
+    "line": 0,
+    "from": "scripts/patch-metricas-cegas-ao-periodo.ts",
+    "to": "scripts/patch-period-blind-metrics.ts",
+    "kind": "file",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 1
+  }
+]

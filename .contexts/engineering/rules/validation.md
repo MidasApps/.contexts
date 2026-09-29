@@ -3,7 +3,7 @@ title: Regras de Validação
 type: rules
 scope: engineering
 status: active
-last_updated: 2026-07-13
+last_updated: 2026-09-28
 related:
   - "@.contexts/engineering/rules/development.md"
   - "@.contexts/engineering/rules/security.md"
@@ -35,7 +35,7 @@ Aplica-se a todo ponto de entrada onde dado externo cruza a fronteira do código
 
 - **Sempre** use `.parse()` ou `.safeParse()` para transformar dado desconhecido em dado tipado. Validação que apenas checa booleano e segue com o tipo original é anti-pattern.
 - **Nunca** use `is` type guards manuais para input externo. Eles dependem do desenvolvedor lembrar de todos os campos. Use Zod.
-- **Sempre** deixe o schema gerar o tipo via `z.infer<typeof schema>`. Tipo é derivado, schema é fonte.
+- **Sempre** deixe o schema gerar o tipo via `z.infer<typeof UserSchema>`. Tipo é derivado, schema é fonte.
 - **Nunca** declare o tipo TypeScript primeiro e depois "espelhe" no schema. Os dois divergem em silêncio.
 - **Sempre** retorne o dado parsed (transformado, com defaults aplicados, com coerções resolvidas) e use ele daqui em diante. Não use mais o input bruto.
 
@@ -43,7 +43,7 @@ Aplica-se a todo ponto de entrada onde dado externo cruza a fronteira do código
 
 - **Sempre** defina o schema uma única vez e derive tudo dele: tipo do payload, tipo do domínio, validação runtime, contrato de API documentado.
 - **Nunca** duplique schema entre cliente e servidor sem compartilhar o módulo. Schemas duplicados manualmente divergem.
-- **Sempre** centralize schemas reutilizados em módulos compartilhados (`schemas/`, `contracts/`). Schemas inline são para uso único.
+- **Sempre** centralize schemas reutilizados em arquivos `*.schema.ts` (constante `UserSchema` em `user.schema.ts`): no `model/` do slice FSD ou em `src/contracts/<context>/` quando cliente e servidor compartilham. Schemas inline são para uso único. Ver `@.contexts/engineering/contracts/schemas.md`.
 - **Nunca** mantenha schema e tipo manual lado a lado para a mesma entidade. Apague o tipo manual.
 
 ## 4. Boundaries obrigatórios
@@ -55,7 +55,7 @@ Estas fronteiras **exigem** validação Zod sem exceção:
 - **Sempre** valide payloads de Firebase Functions HTTP e callable functions. Triggers do Firestore validam o snapshot esperado antes de processar.
 - **Sempre** valide mensagens de Pub/Sub, Cloud Tasks ou qualquer fila antes de processar. Mensagem entregue não é mensagem válida.
 - **Sempre** valide payload de webhooks (Stripe, OAuth callbacks, provedores) após verificar assinatura HMAC. Assinatura prova origem, schema prova shape.
-- **Sempre** valide structured output de LLMs (`generateObject`, `responseFormat: json_schema`, function calling) com o mesmo schema usado no SDK.
+- **Sempre** valide structured output de LLMs (`Output.object` no AI SDK 7, `responseFormat: json_schema`, function calling) com o mesmo schema usado no SDK.
 - **Sempre** valide variáveis de ambiente no boot do processo. Falha de env é falha de inicialização, não erro silencioso em runtime.
 - **Sempre** valide resposta de APIs externas (Stripe, Slack, OpenAI, Gemini) com schema mínimo dos campos que você consome.
 - **Sempre** valide documentos lidos do Firestore quando o shape importa para a lógica downstream. Banco evolui; código antigo encontra documento novo.
@@ -73,14 +73,14 @@ Estas fronteiras **exigem** validação Zod sem exceção:
 
 - **Sempre** use `z.coerce` ou `.transform()` explícito quando converter de string (query param, form data) para número, boolean ou date.
 - **Nunca** confie em coerção implícita do JavaScript (`+x`, `!!x`, `new Date(x)`) para input externo. Coerção implícita aceita lixo.
-- **Sempre** valide o resultado da coerção. `z.coerce.number()` aceita `"abc"` como `NaN` em algumas versões — combine com `.refine(n => Number.isFinite(n))`.
+- **Sempre** restrinja o resultado da coerção. `z.coerce.number()` aplica `Number(input)`: `""` e `null` viram `0` e `true` vira `1`. Combine com `.int()`, `.min()`/`.max()` ou prefira `z.string().regex(...).transform(Number)` quando string vazia não pode virar zero.
 - **Nunca** use `parseInt` ou `parseFloat` sem checar `isNaN` no resultado. Prefira `Number()` ou Zod coerção.
 - **Sempre** normalize antes de validar quando aplicável (trim de strings, lowercase de emails, remoção de máscaras de CPF). Use `.transform()` no schema, não no consumidor.
-- **Nunca** transforme em um lugar e valide em outro. Encadeie no schema: `z.string().trim().toLowerCase().email()`.
+- **Nunca** transforme em um lugar e valide em outro. Encadeie no schema: `z.string().trim().toLowerCase().pipe(z.email())`.
 
 ## 7. Tipos branded e invariantes de domínio
 
-- **Sempre** use branded types (`z.string().brand<'UserId'>()`) para identificadores e valores com invariantes (emails normalizados, CPF validado, slugs). Previne mistura acidental de `userId` com `tenantId`.
+- **Sempre** use branded types (`z.string().min(1).brand<"UserId">()` para ID automático do Firestore; `z.uuid().brand<"OrderId">()` só para uuidv7 do Postgres; `z.ulid().brand<"EventId">()` para ULID — ADR 0005) para identificadores e valores com invariantes (emails normalizados, CPF validado, slugs). Previne mistura acidental de `userId` com `tenantId`.
 - **Nunca** use `string` cru para representar um identificador de domínio em assinaturas de função pública. Use o brand.
 - **Sempre** crie o brand uma única vez, no boundary onde a invariante é validada. Domínio recebe o tipo branded e confia.
 - **Nunca** force cast (`as UserId`) para criar valor branded. O brand só existe legitimamente após parse.
@@ -90,7 +90,7 @@ Estas fronteiras **exigem** validação Zod sem exceção:
 - **Sempre** retorne `400 Bad Request` (HTTP) ou `INVALID_ARGUMENT` (gRPC/callable) quando validação falha. Não `500`. Erro de validação é culpa do cliente.
 - **Sempre** retorne o conjunto de erros de validação, não apenas o primeiro. Cliente conserta tudo em uma rodada.
 - **Nunca** retorne stack trace, schema interno ou nomes de campos internos no erro público. Exponha apenas o necessário para o cliente corrigir o input.
-- **Sempre** mapeie `ZodError.issues` para um formato estável de erro da API (campo, código, mensagem). Não vaze o shape interno do Zod.
+- **Sempre** mapeie `ZodError.issues` para o envelope de `@.contexts/engineering/contracts/api.md` §6: `code: "VALIDATION_FAILED"`, `details: [{ field, issue }]` (`field` = `path` unido por `.`; `issue` estável em SCREAMING_SNAKE, ex. `INVALID_FORMAT`). Não vaze o shape interno do Zod. Vale também para Server Action: ela devolve o mesmo `details`, e o form agrupa por `field` no client.
 - **Nunca** use a mensagem padrão do Zod (em inglês, técnica) como mensagem de UI direta. Traduza no boundary do cliente ou customize a mensagem no schema.
 - **Sempre** inclua o `path` do campo que falhou em erros de formulário, para que o cliente destaque o campo certo.
 
@@ -104,7 +104,7 @@ Estas fronteiras **exigem** validação Zod sem exceção:
 ## 10. Output de LLM
 
 - **Sempre** valide structured output de LLM com Zod mesmo quando o SDK aceita o schema. Modelos quebram contrato em casos limítrofes.
-- **Nunca** assuma que `generateObject` do Vercel AI SDK ou `response_format: json_schema` da OpenAI garantem o schema 100%. Trate como hint, valide depois.
+- **Nunca** assuma que `Output.object` do AI SDK 7 ou `response_format: json_schema` da OpenAI garantem o schema 100%. Trate como hint, valide depois.
 - **Sempre** trate falha de validação de output de LLM como erro de domínio: retry com prompt ajustado, fallback, ou erro explícito ao usuário. Nunca silencie.
 - **Nunca** persista output de LLM no banco antes de validar. Lixo entra, lixo permanece.
 - **Sempre** versione schemas de output de LLM quando mudarem. Histórico de chamadas anteriores pode ter shape antigo.
@@ -113,7 +113,7 @@ Estas fronteiras **exigem** validação Zod sem exceção:
 
 - **Sempre** valide o `FormData` recebido por Server Action com Zod antes de qualquer side effect. `formData.get('campo')` retorna `FormDataEntryValue | null` — não é o tipo final.
 - **Nunca** confie em validação client-side (`required`, `pattern`, validação React Hook Form) como única camada. Cliente é descartável.
-- **Sempre** retorne erros de validação no formato esperado pelo hook do cliente (`useFormState`, `useActionState`), com `path` por campo.
+- **Sempre** retorne `{ ok: false, error }` com `error` no envelope §6 (`code: "VALIDATION_FAILED"`, `details: [{ field, issue }]`) — o mesmo shape da API (`@rules/api-design`, ADR 0003). O componente com `useActionState` (React 19) destaca cada campo a partir de `details[].field`. `z.flattenError()` fica restrito a validação só no client (form sem round-trip), nunca no retorno da action.
 - **Nunca** lance exception em Server Action para sinalizar validação falha. Retorne objeto com erros estruturados.
 - **Sempre** revalide no servidor mesmo que o formulário já tenha validação Zod no cliente. Cliente e servidor compartilham o **mesmo** schema, não validações duplicadas em formatos diferentes.
 
@@ -121,15 +121,15 @@ Estas fronteiras **exigem** validação Zod sem exceção:
 
 - **Sempre** valide documentos lidos do Firestore quando vão alimentar lógica crítica (billing, autorização, ações com efeito colateral). Schema do banco evolui mais devagar que o código, mas evolui.
 - **Nunca** trate `DocumentSnapshot.data()` como já tipado. O tipo é `DocumentData`, não o seu tipo de domínio.
-- **Sempre** use schemas tolerantes a campos extras em leituras (`z.object({...}).passthrough()` quando aplicável) e estritos em escritas (`.strict()`).
+- **Sempre** use schemas tolerantes a campos extras em leituras (`z.looseObject({...})` quando aplicável) e estritos em escritas (`z.strictObject({...})`).
 - **Nunca** escreva no Firestore um objeto que não passou por schema de escrita. Validação garante invariantes antes do banco.
 
 ## 13. Strict mode e campos desconhecidos
 
-- **Sempre** decida explicitamente entre `.strict()`, `.strip()` (default) e `.passthrough()`. Não há default seguro universal.
-- **Sempre** use `.strict()` em endpoints que recebem input de cliente externo. Campo extra é sinal de cliente desatualizado ou tentativa de exploit.
-- **Sempre** use `.strip()` (default) para input interno entre serviços que evoluem juntos. Campos novos não quebram consumidores antigos.
-- **Nunca** use `.passthrough()` sem justificativa registrada em comentário. Passar dado não validado adiante é vetor de bugs e CVEs.
+- **Sempre** decida explicitamente entre `z.strictObject()`, `z.object()` (strip, default) e `z.looseObject()`. Não há default seguro universal. `.strict()`/`.passthrough()` são a forma legada do Zod 3.
+- **Sempre** use `z.strictObject()` em endpoints que recebem input de cliente externo. Campo extra é sinal de cliente desatualizado ou tentativa de exploit.
+- **Sempre** use `z.object()` (strip, default) para input interno entre serviços que evoluem juntos. Campos novos não quebram consumidores antigos.
+- **Nunca** use `z.looseObject()` sem justificativa registrada em comentário. Passar dado não validado adiante é vetor de bugs e CVEs.
 
 ## 14. Validação assíncrona
 

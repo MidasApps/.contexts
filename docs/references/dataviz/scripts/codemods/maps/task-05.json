@@ -1,0 +1,1793 @@
+[
+  {
+    "file": "src/shared/hooks/useReportData.ts",
+    "line": 325,
+    "from": "par",
+    "to": "comparisonRow",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false
+  },
+  {
+    "file": "src/shared/hooks/__tests__/admin-fetch-hooks-race.test.tsx",
+    "line": 23,
+    "from": "armadilha",
+    "to": "trap",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/shared/hooks/__tests__/admin-fetch-hooks-race.test.tsx",
+    "line": 33,
+    "from": "FILTROS",
+    "to": "FILTERS",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "src/shared/hooks/__tests__/admin-fetch-hooks-race.test.tsx",
+    "line": 34,
+    "from": "pagina",
+    "to": "page",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/shared/hooks/__tests__/celula-embrulhada.test.ts",
+    "line": 21,
+    "from": "bloco",
+    "to": "block",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 16
+  },
+  {
+    "file": "src/shared/hooks/__tests__/comparativo-no-bloco.test.ts",
+    "line": 20,
+    "from": "linhas",
+    "to": "rows",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 29
+  },
+  {
+    "file": "src/shared/hooks/__tests__/comparativo-no-bloco.test.ts",
+    "line": 95,
+    "from": "linha",
+    "to": "row",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "src/shared/hooks/__tests__/comparativo-no-bloco.test.ts",
+    "line": 106,
+    "from": "antes",
+    "to": "before",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 8
+  },
+  {
+    "file": "src/shared/hooks/__tests__/comparativo-no-bloco.test.ts",
+    "line": 123,
+    "from": "alvo",
+    "to": "target",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 7
+  },
+  {
+    "file": "src/shared/hooks/__tests__/comparativo-no-bloco.test.ts",
+    "line": 207,
+    "from": "kpiVazio",
+    "to": "emptyKpi",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/shared/hooks/__tests__/serie-comparativa.test.ts",
+    "line": 18,
+    "from": "grafico",
+    "to": "chart",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 11
+  },
+  {
+    "file": "src/shared/hooks/__tests__/serie-comparativa.test.ts",
+    "line": 31,
+    "from": "comparativas",
+    "to": "comparisonRows",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "src/shared/hooks/__tests__/serie-comparativa.test.ts",
+    "line": 102,
+    "from": "antes",
+    "to": "before",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 8
+  },
+  {
+    "file": "src/shared/hooks/__tests__/useFetchResource.test.tsx",
+    "line": 8,
+    "from": "adiada",
+    "to": "deferred",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/shared/hooks/__tests__/useFetchResource.test.tsx",
+    "line": 19,
+    "from": "servidor",
+    "to": "server",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 17
+  },
+  {
+    "file": "src/shared/hooks/__tests__/useFetchResource.test.tsx",
+    "line": 19,
+    "from": "opcoes",
+    "to": "options",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/shared/hooks/__tests__/useFetchResource.test.tsx",
+    "line": 20,
+    "from": "pedidos",
+    "to": "requests",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 53
+  },
+  {
+    "file": "src/shared/hooks/__tests__/useFetchResource.test.tsx",
+    "line": 36,
+    "from": "pedidos",
+    "to": "requests",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 53
+  },
+  {
+    "file": "src/shared/hooks/__tests__/useFetchResource.test.tsx",
+    "line": 41,
+    "from": "pedidos",
+    "to": "requests",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 53
+  },
+  {
+    "file": "src/shared/hooks/__tests__/useFetchResource.test.tsx",
+    "line": 53,
+    "from": "pedidos",
+    "to": "requests",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 53
+  },
+  {
+    "file": "src/shared/hooks/__tests__/useFetchResource.test.tsx",
+    "line": 66,
+    "from": "pedidos",
+    "to": "requests",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 53
+  },
+  {
+    "file": "src/shared/hooks/__tests__/useFetchResource.test.tsx",
+    "line": 74,
+    "from": "pedidos",
+    "to": "requests",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 53
+  },
+  {
+    "file": "src/shared/hooks/__tests__/useFetchResource.test.tsx",
+    "line": 83,
+    "from": "pedidos",
+    "to": "requests",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 53
+  },
+  {
+    "file": "src/shared/hooks/__tests__/useFetchResource.test.tsx",
+    "line": 96,
+    "from": "pedidos",
+    "to": "requests",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 53
+  },
+  {
+    "file": "src/shared/hooks/__tests__/useFetchResource.test.tsx",
+    "line": 106,
+    "from": "pedidos",
+    "to": "requests",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 53
+  },
+  {
+    "file": "src/shared/hooks/__tests__/useFetchResource.test.tsx",
+    "line": 117,
+    "from": "pedidos",
+    "to": "requests",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 53
+  },
+  {
+    "file": "src/shared/hooks/__tests__/useFetchResource.test.tsx",
+    "line": 121,
+    "from": "feito",
+    "to": "done",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "src/shared/hooks/__tests__/useFetchResource.test.tsx",
+    "line": 131,
+    "from": "pedidos",
+    "to": "requests",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 53
+  },
+  {
+    "file": "src/shared/hooks/__tests__/useFetchResource.test.tsx",
+    "line": 141,
+    "from": "pedidos",
+    "to": "requests",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 53
+  },
+  {
+    "file": "src/shared/hooks/__tests__/useFetchResource.test.tsx",
+    "line": 144,
+    "from": "feito",
+    "to": "done",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "src/shared/hooks/__tests__/useFetchResource.test.tsx",
+    "line": 151,
+    "from": "pedidos",
+    "to": "requests",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 53
+  },
+  {
+    "file": "src/shared/hooks/__tests__/useFetchResource.test.tsx",
+    "line": 162,
+    "from": "primeiro",
+    "to": "first",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/shared/hooks/__tests__/useFetchResource.test.tsx",
+    "line": 168,
+    "from": "pedidos",
+    "to": "requests",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 53
+  },
+  {
+    "file": "src/shared/hooks/__tests__/useFetchResource.test.tsx",
+    "line": 201,
+    "from": "mensagem",
+    "to": "message",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/shared/hooks/__tests__/useFetchResource.test.tsx",
+    "line": 215,
+    "from": "pedidos",
+    "to": "requests",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 53
+  },
+  {
+    "file": "src/shared/hooks/__tests__/useFetchResource.test.tsx",
+    "line": 225,
+    "from": "pedidos",
+    "to": "requests",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 53
+  },
+  {
+    "file": "src/shared/hooks/__tests__/useFetchResource.test.tsx",
+    "line": 234,
+    "from": "pedidos",
+    "to": "requests",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 53
+  },
+  {
+    "file": "src/shared/hooks/__tests__/useFetchResource.test.tsx",
+    "line": 235,
+    "from": "vistos",
+    "to": "seen",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/shared/hooks/__tests__/useFetchResource.test.tsx",
+    "line": 248,
+    "from": "pedidos",
+    "to": "requests",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 53
+  },
+  {
+    "file": "src/shared/hooks/__tests__/useGroups.test.tsx",
+    "line": 28,
+    "from": "estado",
+    "to": "state",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "src/shared/hooks/__tests__/useGroups.test.tsx",
+    "line": 36,
+    "from": "Instantaneo",
+    "to": "Snapshot",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/shared/hooks/__tests__/useGroups.test.tsx",
+    "line": 36,
+    "from": "carregando",
+    "to": "loading",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "src/shared/hooks/__tests__/useGroups.test.tsx",
+    "line": 38,
+    "from": "observar",
+    "to": "observe",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 7
+  },
+  {
+    "file": "src/shared/hooks/__tests__/useGroups.test.tsx",
+    "line": 49,
+    "from": "testeX",
+    "to": "testX",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/shared/hooks/__tests__/useGroups.test.tsx",
+    "line": 66,
+    "from": "antes",
+    "to": "before",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 8
+  },
+  {
+    "file": "src/shared/hooks/__tests__/useGroups.test.tsx",
+    "line": 75,
+    "from": "suspeitos",
+    "to": "suspects",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "src/shared/hooks/__tests__/useReportData.bloco-sem-metrica.test.ts",
+    "line": 26,
+    "from": "texto",
+    "to": "text",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "src/shared/hooks/__tests__/useReportData.bloco-sem-metrica.test.ts",
+    "line": 31,
+    "from": "populado",
+    "to": "populated",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 13
+  },
+  {
+    "file": "src/shared/hooks/__tests__/useReportData.bloco-sem-metrica.test.ts",
+    "line": 32,
+    "from": "atual",
+    "to": "current",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 17
+  },
+  {
+    "file": "src/shared/hooks/__tests__/useReportData.bloco-sem-metrica.test.ts",
+    "line": 37,
+    "from": "populado",
+    "to": "populated",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 13
+  },
+  {
+    "file": "src/shared/hooks/__tests__/useReportData.bloco-sem-metrica.test.ts",
+    "line": 38,
+    "from": "atual",
+    "to": "current",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 17
+  },
+  {
+    "file": "src/shared/hooks/__tests__/useReportData.bloco-sem-metrica.test.ts",
+    "line": 50,
+    "from": "populado",
+    "to": "populated",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 13
+  },
+  {
+    "file": "src/shared/hooks/__tests__/useReportData.bloco-sem-metrica.test.ts",
+    "line": 51,
+    "from": "outro",
+    "to": "other",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/shared/hooks/__tests__/useReportData.bloco-sem-metrica.test.ts",
+    "line": 58,
+    "from": "populado",
+    "to": "populated",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 13
+  },
+  {
+    "file": "src/shared/hooks/__tests__/useReportData.bloco-sem-metrica.test.ts",
+    "line": 59,
+    "from": "atual",
+    "to": "current",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 17
+  },
+  {
+    "file": "src/shared/hooks/__tests__/useReportData.bloco-sem-metrica.test.ts",
+    "line": 60,
+    "from": "saida",
+    "to": "output",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 9
+  },
+  {
+    "file": "src/shared/hooks/__tests__/useReportData.bloco-sem-metrica.test.ts",
+    "line": 68,
+    "from": "populado",
+    "to": "populated",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 13
+  },
+  {
+    "file": "src/shared/hooks/__tests__/useReportData.bloco-sem-metrica.test.ts",
+    "line": 69,
+    "from": "atual",
+    "to": "current",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 17
+  },
+  {
+    "file": "src/shared/hooks/__tests__/useReportData.bloco-sem-metrica.test.ts",
+    "line": 70,
+    "from": "saida",
+    "to": "output",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 9
+  },
+  {
+    "file": "src/shared/hooks/__tests__/useReportData.bloco-sem-metrica.test.ts",
+    "line": 76,
+    "from": "atual",
+    "to": "current",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 17
+  },
+  {
+    "file": "src/shared/hooks/__tests__/useReportData.periodo.test.ts",
+    "line": 70,
+    "from": "blocos",
+    "to": "blocks",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "src/shared/hooks/__tests__/useReportData.periodo.test.ts",
+    "line": 81,
+    "from": "corpos",
+    "to": "bodies",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 9
+  },
+  {
+    "file": "src/shared/hooks/__tests__/useReportData.periodo.test.ts",
+    "line": 86,
+    "from": "filtroDeData",
+    "to": "dateFilterOf",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 8,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/shared/hooks/__tests__/useReportData.periodo.test.ts",
+    "line": 86,
+    "from": "corpo",
+    "to": "body",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/shared/hooks/__tests__/useReportData.periodo.test.ts",
+    "line": 117,
+    "from": "comProjecao",
+    "to": "withProjection",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/shared/hooks/__tests__/useReportData.periodo.test.ts",
+    "line": 127,
+    "from": "daProjecao",
+    "to": "projectionBody",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/shared/hooks/__tests__/useReportData.periodo.test.ts",
+    "line": 132,
+    "from": "dasOutras",
+    "to": "otherBodies",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/shared/hooks/__tests__/useReportData.periodo.test.ts",
+    "line": 141,
+    "from": "comProjecao",
+    "to": "withProjection",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/shared/hooks/__tests__/useReportData.periodo.test.ts",
+    "line": 151,
+    "from": "comparativos",
+    "to": "comparisonBlocks",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/shared/hooks/__tests__/useReportData.periodo.test.ts",
+    "line": 177,
+    "from": "doEscalar",
+    "to": "scalarBody",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/shared/hooks/__tests__/useReportData.periodo.test.ts",
+    "line": 190,
+    "from": "daSerie",
+    "to": "seriesBody",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/shared/hooks/__tests__/useReportData.periodo.test.ts",
+    "line": 212,
+    "from": "faixas",
+    "to": "ranges",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/shared/hooks/__tests__/useReportData.periodo.test.ts",
+    "line": 236,
+    "from": "chamada",
+    "to": "call",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/shared/hooks/__tests__/useReportData.periodo.test.ts",
+    "line": 269,
+    "from": "valor",
+    "to": "value",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "src/shared/hooks/__tests__/useReportData.periodo.test.ts",
+    "line": 275,
+    "from": "comPin",
+    "to": "withPin",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/shared/hooks/__tests__/useReportData.periodo.test.ts",
+    "line": 284,
+    "from": "bloco",
+    "to": "block",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 16
+  },
+  {
+    "file": "src/shared/hooks/__tests__/useReportData.test.ts",
+    "line": 187,
+    "from": "porRender",
+    "to": "perRender",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/shared/hooks/__tests__/useReportData.test.ts",
+    "line": 205,
+    "from": "semMetrica",
+    "to": "withoutMetric",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/shared/hooks/__tests__/useReportData.test.ts",
+    "line": 220,
+    "from": "outroReport",
+    "to": "otherReport",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/shared/hooks/__tests__/useReportData.test.ts",
+    "line": 277,
+    "from": "filtersProjetos",
+    "to": "filtersWithProjects",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/shared/hooks/__tests__/useReports.test.tsx",
+    "line": 32,
+    "from": "Instantaneo",
+    "to": "Snapshot",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/shared/hooks/__tests__/useReports.test.tsx",
+    "line": 32,
+    "from": "carregando",
+    "to": "loading",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "src/shared/hooks/__tests__/useReports.test.tsx",
+    "line": 34,
+    "from": "observar",
+    "to": "observe",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 7
+  },
+  {
+    "file": "src/shared/hooks/__tests__/useReports.test.tsx",
+    "line": 34,
+    "from": "inicial",
+    "to": "initial",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/shared/hooks/__tests__/useReports.test.tsx",
+    "line": 59,
+    "from": "antes",
+    "to": "before",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 8
+  },
+  {
+    "file": "src/shared/hooks/__tests__/useReports.test.tsx",
+    "line": 65,
+    "from": "suspeitos",
+    "to": "suspects",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "src/shared/hooks/useFetchResource.ts",
+    "line": 51,
+    "from": "MAX_TROCAS_SEM_COMMIT",
+    "to": "MAX_SWAPS_WITHOUT_COMMIT",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/shared/hooks/useFetchResource.ts",
+    "line": 53,
+    "from": "vigiarFetcherInstavel",
+    "to": "watchUnstableFetcher",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/shared/hooks/useFetchResource.ts",
+    "line": 53,
+    "from": "trocasSemCommit",
+    "to": "swapsWithoutCommit",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/shared/hooks/useFetchResource.ts",
+    "line": 108,
+    "from": "fetcherVisto",
+    "to": "seenFetcher",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/shared/hooks/useFetchResource.ts",
+    "line": 108,
+    "from": "setFetcherVisto",
+    "to": "setSeenFetcher",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/shared/hooks/useFetchResource.ts",
+    "line": 110,
+    "from": "trocasSemCommitRef",
+    "to": "swapsWithoutCommitRef",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/shared/hooks/useFetchResource.ts",
+    "line": 122,
+    "from": "emVooRef",
+    "to": "inFlightRef",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 9,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/shared/hooks/useFetchResource.ts",
+    "line": 126,
+    "from": "executar",
+    "to": "run",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/shared/hooks/useGroups.ts",
+    "line": 22,
+    "from": "carregadoDe",
+    "to": "loadedFor",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/shared/hooks/useGroups.ts",
+    "line": 22,
+    "from": "setCarregadoDe",
+    "to": "setLoadedFor",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/shared/hooks/useGroups.ts",
+    "line": 24,
+    "from": "versaoCarregada",
+    "to": "loadedVersion",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/shared/hooks/useGroups.ts",
+    "line": 24,
+    "from": "setVersaoCarregada",
+    "to": "setLoadedVersion",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/shared/hooks/useGroups.ts",
+    "line": 65,
+    "from": "desatualizado",
+    "to": "isStale",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "src/shared/hooks/useReportData.ts",
+    "line": 39,
+    "from": "PERIODO_ABERTO",
+    "to": "OPEN_PERIOD",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/shared/hooks/useReportData.ts",
+    "line": 90,
+    "from": "idsComDado",
+    "to": "idsWithData",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/shared/hooks/useReportData.ts",
+    "line": 116,
+    "from": "comDado",
+    "to": "withData",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/shared/hooks/useReportData.ts",
+    "line": 129,
+    "from": "mesclaDadoNoMapa",
+    "to": "mergeDataIntoMap",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "src/shared/hooks/useReportData.ts",
+    "line": 134,
+    "from": "saida",
+    "to": "output",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 9
+  },
+  {
+    "file": "src/shared/hooks/useReportData.ts",
+    "line": 135,
+    "from": "bloco",
+    "to": "block",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 16
+  },
+  {
+    "file": "src/shared/hooks/useReportData.ts",
+    "line": 136,
+    "from": "populado",
+    "to": "populatedBlock",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 13
+  },
+  {
+    "file": "src/shared/hooks/useReportData.ts",
+    "line": 137,
+    "from": "dado",
+    "to": "data",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/shared/hooks/useReportData.ts",
+    "line": 170,
+    "from": "obtemToken",
+    "to": "getToken",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/shared/hooks/useReportData.ts",
+    "line": 226,
+    "from": "numeroDaCelula",
+    "to": "cellNumber",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 25
+  },
+  {
+    "file": "src/shared/hooks/useReportData.ts",
+    "line": 227,
+    "from": "cru",
+    "to": "raw",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 23
+  },
+  {
+    "file": "src/shared/hooks/useReportData.ts",
+    "line": 240,
+    "from": "textoDaCelula",
+    "to": "cellText",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 13
+  },
+  {
+    "file": "src/shared/hooks/useReportData.ts",
+    "line": 241,
+    "from": "cru",
+    "to": "raw",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 23
+  },
+  {
+    "file": "src/shared/hooks/useReportData.ts",
+    "line": 258,
+    "from": "textoDoIndicador",
+    "to": "indicatorText",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/shared/hooks/useReportData.ts",
+    "line": 258,
+    "from": "cru",
+    "to": "raw",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 23
+  },
+  {
+    "file": "src/shared/hooks/useReportData.ts",
+    "line": 271,
+    "from": "linhaDoGrafico",
+    "to": "chartRow",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/shared/hooks/useReportData.ts",
+    "line": 282,
+    "from": "cru",
+    "to": "raw",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 23
+  },
+  {
+    "file": "src/shared/hooks/useReportData.ts",
+    "line": 292,
+    "from": "PREFIXO_COMPARATIVO",
+    "to": "COMPARISON_PREFIX",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 12
+  },
+  {
+    "file": "src/shared/hooks/useReportData.ts",
+    "line": 294,
+    "from": "ROTULO_COMPARATIVO",
+    "to": "COMPARISON_LABEL",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "src/shared/hooks/useReportData.ts",
+    "line": 313,
+    "from": "mesclaSerieComparativa",
+    "to": "mergeComparisonSeries",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 13
+  },
+  {
+    "file": "src/shared/hooks/useReportData.ts",
+    "line": 315,
+    "from": "rowsComparativas",
+    "to": "comparisonRows",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/shared/hooks/useReportData.ts",
+    "line": 317,
+    "from": "atuais",
+    "to": "currentRows",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/shared/hooks/useReportData.ts",
+    "line": 320,
+    "from": "eixo",
+    "to": "axis",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/shared/hooks/useReportData.ts",
+    "line": 321,
+    "from": "chaves",
+    "to": "keys",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/shared/hooks/useReportData.ts",
+    "line": 322,
+    "from": "comparativas",
+    "to": "comparisonChartRows",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "src/shared/hooks/useReportData.ts",
+    "line": 324,
+    "from": "linha",
+    "to": "row",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "src/shared/hooks/useReportData.ts",
+    "line": 327,
+    "from": "mesclada",
+    "to": "merged",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/shared/hooks/useReportData.ts",
+    "line": 328,
+    "from": "chave",
+    "to": "key",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/shared/hooks/useReportData.ts",
+    "line": 329,
+    "from": "valor",
+    "to": "value",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "src/shared/hooks/useReportData.ts",
+    "line": 334,
+    "from": "rotulo",
+    "to": "label",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/shared/hooks/useReportData.ts",
+    "line": 341,
+    "from": "valorRepresentativo",
+    "to": "representativeValue",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/shared/hooks/useReportData.ts",
+    "line": 342,
+    "from": "ultima",
+    "to": "last",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/shared/hooks/useReportData.ts",
+    "line": 360,
+    "from": "aplicaComparativoAoBloco",
+    "to": "applyComparisonToBlock",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 19
+  },
+  {
+    "file": "src/shared/hooks/useReportData.ts",
+    "line": 362,
+    "from": "rowsAtuais",
+    "to": "currentRows",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/shared/hooks/useReportData.ts",
+    "line": 363,
+    "from": "rowsComparativas",
+    "to": "comparisonRows",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/shared/hooks/useReportData.ts",
+    "line": 364,
+    "from": "metricaSegueOFimDoPeriodo",
+    "to": "metricFollowsPeriodEnd",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/shared/hooks/useReportData.ts",
+    "line": 397,
+    "from": "anterior",
+    "to": "previous",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 9
+  },
+  {
+    "file": "src/shared/hooks/useReportData.ts",
+    "line": 413,
+    "from": "atual",
+    "to": "current",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 17
+  },
+  {
+    "file": "src/shared/hooks/useReportData.ts",
+    "line": 417,
+    "from": "variacao",
+    "to": "change",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/shared/hooks/useReportData.ts",
+    "line": 418,
+    "from": "alvo",
+    "to": "kpiBlock",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 7
+  },
+  {
+    "file": "src/shared/hooks/useReportData.ts",
+    "line": 469,
+    "from": "coluna",
+    "to": "column",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/shared/hooks/useReportData.ts",
+    "line": 469,
+    "from": "celula",
+    "to": "cell",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/shared/hooks/useReportData.ts",
+    "line": 529,
+    "from": "atual",
+    "to": "current",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 17
+  },
+  {
+    "file": "src/shared/hooks/useReportData.ts",
+    "line": 530,
+    "from": "anterior",
+    "to": "previous",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 9
+  },
+  {
+    "file": "src/shared/hooks/useReportData.ts",
+    "line": 537,
+    "from": "primeira",
+    "to": "first",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/shared/hooks/useReportData.ts",
+    "line": 541,
+    "from": "colunas",
+    "to": "columns",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/shared/hooks/useReportData.ts",
+    "line": 542,
+    "from": "nome",
+    "to": "columnName",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/shared/hooks/useReportData.ts",
+    "line": 645,
+    "from": "medidos",
+    "to": "measured",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 9
+  },
+  {
+    "file": "src/shared/hooks/useReportData.ts",
+    "line": 717,
+    "from": "catalogoDeMetricas",
+    "to": "metricCatalog",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/shared/hooks/useReportData.ts",
+    "line": 738,
+    "from": "metricasSemPeriodo",
+    "to": "periodlessMetrics",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/shared/hooks/useReportData.ts",
+    "line": 822,
+    "from": "filtrosDePagina",
+    "to": "pageFiltersFor",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/shared/hooks/useReportData.ts",
+    "line": 823,
+    "from": "recorte",
+    "to": "slice",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 9
+  },
+  {
+    "file": "src/shared/hooks/useReportData.ts",
+    "line": 824,
+    "from": "mesUnico",
+    "to": "singleMonth",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/shared/hooks/useReportData.ts",
+    "line": 875,
+    "from": "porId",
+    "to": "byId",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/shared/hooks/useReportData.ts",
+    "line": 889,
+    "from": "buscarRecorte",
+    "to": "fetchSlice",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/shared/hooks/useReportData.ts",
+    "line": 890,
+    "from": "recorte",
+    "to": "slice",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 9
+  },
+  {
+    "file": "src/shared/hooks/useReportData.ts",
+    "line": 891,
+    "from": "opcoes",
+    "to": "options",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/shared/hooks/useReportData.ts",
+    "line": 891,
+    "from": "incluirProjecoes",
+    "to": "includeProjections",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/shared/hooks/useReportData.ts",
+    "line": 893,
+    "from": "todos",
+    "to": "allIds",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/shared/hooks/useReportData.ts",
+    "line": 900,
+    "from": "projecoes",
+    "to": "projections",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/shared/hooks/useReportData.ts",
+    "line": 905,
+    "from": "deMesUnico",
+    "to": "singleMonthIds",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/shared/hooks/useReportData.ts",
+    "line": 908,
+    "from": "deFaixa",
+    "to": "rangeIds",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/shared/hooks/useReportData.ts",
+    "line": 925,
+    "from": "partes",
+    "to": "parts",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/shared/hooks/useReportData.ts",
+    "line": 928,
+    "from": "parte",
+    "to": "part",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/shared/hooks/useReportData.ts",
+    "line": 942,
+    "from": "comparando",
+    "to": "isComparing",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/shared/hooks/useReportData.ts",
+    "line": 948,
+    "from": "comparativo",
+    "to": "comparison",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/shared/hooks/useReportData.ts",
+    "line": 1034,
+    "from": "temDadoDesteReport",
+    "to": "hasDataForThisReport",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/shared/hooks/useReportData.ts",
+    "line": 1041,
+    "from": "mapaParaTela",
+    "to": "screenMap",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/shared/hooks/useReports.ts",
+    "line": 34,
+    "from": "carregadoDe",
+    "to": "loadedFor",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/shared/hooks/useReports.ts",
+    "line": 34,
+    "from": "setCarregadoDe",
+    "to": "setLoadedFor",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/shared/hooks/useReports.ts",
+    "line": 63,
+    "from": "desatualizado",
+    "to": "isStale",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "src/shared/hooks/useSqlCatalog.ts",
+    "line": 81,
+    "from": "carga",
+    "to": "load",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/shared/hooks/useSqlCatalog.ts",
+    "line": 82,
+    "from": "negado",
+    "to": "denied",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/shared/hooks/__tests__/celula-embrulhada.test.ts",
+    "line": 0,
+    "from": "src/shared/hooks/__tests__/celula-embrulhada.test.ts",
+    "to": "src/shared/hooks/__tests__/wrapped-cell.test.ts",
+    "kind": "file",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 1
+  },
+  {
+    "file": "src/shared/hooks/__tests__/comparativo-no-bloco.test.ts",
+    "line": 0,
+    "from": "src/shared/hooks/__tests__/comparativo-no-bloco.test.ts",
+    "to": "src/shared/hooks/__tests__/block-comparison.test.ts",
+    "kind": "file",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 1
+  },
+  {
+    "file": "src/shared/hooks/__tests__/serie-comparativa.test.ts",
+    "line": 0,
+    "from": "src/shared/hooks/__tests__/serie-comparativa.test.ts",
+    "to": "src/shared/hooks/__tests__/comparison-series.test.ts",
+    "kind": "file",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 1
+  },
+  {
+    "file": "src/shared/hooks/__tests__/useReportData.bloco-sem-metrica.test.ts",
+    "line": 0,
+    "from": "src/shared/hooks/__tests__/useReportData.bloco-sem-metrica.test.ts",
+    "to": "src/shared/hooks/__tests__/useReportData.block-without-metric.test.ts",
+    "kind": "file",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 1
+  },
+  {
+    "file": "src/shared/hooks/__tests__/useReportData.periodo.test.ts",
+    "line": 0,
+    "from": "src/shared/hooks/__tests__/useReportData.periodo.test.ts",
+    "to": "src/shared/hooks/__tests__/useReportData.period.test.ts",
+    "kind": "file",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 1
+  }
+]

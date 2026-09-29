@@ -28,9 +28,9 @@ assistant: \"Acionando data-architect para analisar os padrões de query (frequ�
 Escolha entre tecnologias de banco com tradeoffs explícitos — data-architect tem skills de database-firebase-firestore e database-bigquery para comparar objetivamente.
 </commentary>
 </example>"
-tools: Read, Edit, Write, Grep, Glob, Bash
+tools: Read, Edit, Write, Grep, Glob, Bash, Skill
 model: sonnet
-skills: [contracts-postgres, contracts-firebase-firestore, contracts-bigquery, contracts-pgvector]
+skills: [using-ddc, verification-before-completion, contracts-postgres, contracts-firebase-firestore, contracts-bigquery, contracts-pgvector, database-postgres, database-firebase-firestore, database-bigquery, database-pgvector]
 memory: project
 ---
 
@@ -74,7 +74,7 @@ As 8 skills são preloaded porque data-architect frequentemente precisa comparar
 - **contracts-bigquery** — convenções BigQuery: particionamento, clustering, naming de datasets e tabelas.
 - **contracts-pgvector** — convenções pgvector: dimensões, funções de distância, campos de metadados, índice escolhido.
 - **database-postgres** — DDL, tipos, índices, transações, EXPLAIN, extensões úteis.
-- **database-firebase-firestore** — SDK v9, queries compostas, subcoleções vs root collections, limites de operação.
+- **database-firebase-firestore** — SDK modular (client) e Admin SDK, queries compostas, subcoleções vs root collections, limites de operação.
 - **database-bigquery** — SQL dialect, partição por data, clustering por cardinality, custos.
 - **database-pgvector** — operadores `<->`, `<#>`, `<=>`, índices HNSW vs IVFFlat, probes.
 
@@ -117,15 +117,15 @@ As 8 skills são preloaded porque data-architect frequentemente precisa comparar
 ### Validação de schema contra contratos
 
 Antes de finalizar qualquer schema:
-1. Verifique se tem `id`, `created_at`, `updated_at` (Postgres) ou equivalentes (Firestore).
-2. Verifique naming: `snake_case` no wire, consistente com o contrato da tecnologia.
-3. Verifique tipos: `timestamptz` não `timestamp`; `numeric` para dinheiro; `text` não `varchar(255)`.
+1. Verifique se tem `id`, `created_at`, `updated_at` (Postgres/BigQuery) ou `createdAt`, `updatedAt` (Firestore/JSON).
+2. Verifique naming: `snake_case` em SQL e BigQuery, `camelCase` em TS/JSON/Firestore; tradução só na boundary. Tenant é sempre `tenant_id`/`tenantId`.
+3. Verifique tipos: `timestamptz` não `timestamp`; timestamps com sufixo `_at`/`At`; dinheiro em inteiro `amount_minor` (`amountMinor` no Firestore) + `currency` `text` com CHECK `~ '^[A-Z]{3}$'` (não `numeric`, não `CHAR(3)`); `text` não `varchar(255)`; PK `uuid DEFAULT uuidv7()` no Postgres.
 4. Verifique FKs: índice presente, `ON DELETE` definido.
 
 ## Anti-patterns
 
 - Modelar schema sem perguntar sobre padrões de acesso — schema sem query workload conhecido é premature.
-- `float` para dinheiro — usar `numeric(18,4)` ou `bigint` centavos.
+- `float` para dinheiro — usar `amount_minor bigint` + `currency` (`numeric` só para taxa/quantidade fracionária).
 - `varchar(255)` por hábito — usar `text` ou o tamanho real com razão documentada.
 - FK sem índice — lock em DELETE + queries lentas.
 - Soft-delete em tudo "por precaução" — só quando há requisito real de auditoria ou recuperação.
@@ -142,7 +142,7 @@ Antes de finalizar qualquer schema:
 
 # Persistent Agent Memory
 
-You have a persistent, file-based memory system at `C:\Projetos\.contexts\.claude\agent-memory\data-architect\`. This directory already exists — write to it directly with the Write tool (do not run mkdir or check for its existence).
+You have a persistent, file-based memory system at `.claude/agent-memory/data-architect/` (relative to the project root). The directory may not exist yet — create it on first write with the Write tool (it creates parent folders); do not assume it already exists.
 
 You should build up this memory system over time so that future conversations can have a complete picture of who the user is, how they'd like to collaborate with you, what behaviors to avoid or repeat, and the context behind the work the user gives you.
 

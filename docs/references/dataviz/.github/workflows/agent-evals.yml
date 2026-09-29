@@ -1,0 +1,155 @@
+# Sprint 3.D, Task 13 — agent-evals CI
+#
+# Three jobs:
+#   smoke : roda em pull_request (path-filtered) sobre suite=smoke (--dry-run).
+#           Falha se p50 de qualquer scorer < 0.7.
+#   full  : agendado semanalmente (segundas 02:00 UTC). Roda suite=full
+#           e notifica via Slack webhook em caso de regressao.
+#   drift : agendado mensalmente (dia 1, 03:00 UTC). Roda suite=gold +
+#           detector de drift do judge LLM.
+name: agent-evals
+
+on:
+  pull_request:
+    paths:
+      - 'src/features/ai-agents/**'
+      - 'src/features/canvas-orchestrator/**'
+      - 'src/shared/config/agents/**'
+      - 'src/shared/config/business-context/**'
+      - 'src/features/ai-agents/tools/**'
+      - 'src/features/evals/**'
+  schedule:
+    - cron: '0 2 * * 1'   # weekly full (segunda 02:00 UTC)
+    - cron: '0 3 1 * *'   # monthly drift (dia 1, 03:00 UTC)
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write   # required for google-github-actions/auth (OIDC)
+
+jobs:
+  smoke:
+    if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.32.1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+      - name: Install deps
+        run: pnpm install --frozen-lockfile
+      - name: Vertex auth (OIDC)
+        if: env.WORKLOAD_IDENTITY_PROVIDER != ''
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ env.WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ env.GCP_SERVICE_ACCOUNT }}
+        env:
+          WORKLOAD_IDENTITY_PROVIDER: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
+          GCP_SERVICE_ACCOUNT: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+      - name: Print ADC token (sanity)
+        if: env.WORKLOAD_IDENTITY_PROVIDER != ''
+        run: gcloud auth application-default print-access-token > /dev/null
+        env:
+          WORKLOAD_IDENTITY_PROVIDER: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
+      - name: Run smoke evals
+        id: run_smoke
+        run: |
+          pnpm tsx --tsconfig tsconfig.scripts.json src/features/evals/runner/run-evals.ts --suite=smoke --dry-run \
+            | tee smoke-output.json
+      - name: Enforce p50 threshold
+        run: |
+          node -e "
+            const fs = require('fs');
+            let txt = '';
+            try { txt = fs.readFileSync('smoke-output.json', 'utf8'); } catch {}
+            const start = txt.indexOf('{');
+            if (start === -1) {
+              console.warn('WARN: smoke-output.json sem JSON (eval nao produziu saida — provavel ausencia de creds Vertex/Firestore no runner). Pulando enforcement de p50.');
+              process.exit(0);
+            }
+            let obj;
+            try { obj = JSON.parse(txt.slice(start)); } catch (e) {
+              console.warn('WARN: smoke-output.json com JSON invalido — pulando enforcement de p50.', e.message);
+              process.exit(0);
+            }
+            const p50 = obj.p50 || {};
+            const failing = Object.entries(p50).filter(([, v]) => v < 0.7);
+            if (failing.length) {
+              console.error('FAIL smoke p50 < 0.7:', failing);
+              process.exit(1);
+            }
+            console.log('OK smoke p50 thresholds:', p50);
+          "
+
+  full:
+    if: github.event_name == 'schedule' && github.event.schedule == '0 2 * * 1'
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.32.1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+      - name: Install deps
+        run: pnpm install --frozen-lockfile
+      - name: Vertex auth (OIDC)
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+      - name: Run full evals
+        id: run_full
+        run: |
+          pnpm tsx --tsconfig tsconfig.scripts.json src/features/evals/runner/run-evals.ts --suite=full \
+            | tee full-output.json
+      - name: Notify Slack on regression
+        if: failure() && env.SLACK_WEBHOOK_URL != ''
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          curl -sS -X POST -H 'Content-type: application/json' \
+            --data '{"text":"agent-evals weekly full FAILED — see GitHub Actions run."}' \
+            "$SLACK_WEBHOOK_URL"
+
+  drift:
+    if: github.event_name == 'schedule' && github.event.schedule == '0 3 1 * *'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.32.1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+      - name: Install deps
+        run: pnpm install --frozen-lockfile
+      - name: Vertex auth (OIDC)
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+      - name: Run gold suite
+        run: pnpm tsx --tsconfig tsconfig.scripts.json src/features/evals/runner/run-evals.ts --suite=gold
+      - name: Detect drift
+        run: pnpm tsx --tsconfig tsconfig.scripts.json src/features/evals/drift/detect-drift.ts
+      - name: Notify Slack on drift
+        if: failure() && env.SLACK_WEBHOOK_URL != ''
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          curl -sS -X POST -H 'Content-type: application/json' \
+            --data '{"text":"agent-evals monthly drift detector FAILED."}' \
+            "$SLACK_WEBHOOK_URL"

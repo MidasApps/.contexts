@@ -1,3 +1,11 @@
+---
+title: Caching Rules
+type: rules
+status: active
+scope: engineering
+last_updated: 2026-09-28
+---
+
 # Caching Rules
 
 Regras imperativas para caching em todas as camadas do sistema. Para semântica específica do framework, ver `@.contexts/engineering/stacks/frontend/next@16.md`. Para impacto em latência e throughput, ver `@.contexts/engineering/rules/performance.md`. Para risco de vazamento de dados em cache, ver `@.contexts/engineering/rules/security.md`.
@@ -69,7 +77,7 @@ Aplique a regra do **menor escopo viável**: cacheie no nível mais próximo do 
 
 ## Escopo: por-usuário vs global
 
-- **Sempre** inclua o identificador do principal (userId, tenantId, orgId) na chave quando o valor depende do contexto autenticado.
+- **Sempre** inclua o identificador do principal (userId, tenantId) na chave quando o valor depende do contexto autenticado.
 - **Sempre** isole cache de tenant por namespace ou instância dedicada em sistemas multi-tenant.
 - **Nunca** compartilhe entrada de cache entre usuários quando o conteúdo é derivado de permissão, role ou dado pessoal.
 - **Nunca** cacheie respostas autenticadas em CDN sem `Cache-Control: private` ou chave que inclua o principal.

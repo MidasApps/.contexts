@@ -1,15 +1,17 @@
 ---
 title: Zod
-version: 4.4.x
-last_updated: 2026-07-13
+type: stacks
+category: validation
+version: 4.6.5
+last_updated: 2026-09-28
 status: current
 upstream: https://zod.dev
 supersedes: zod@3.23
 ---
 
-# Zod 4.4.x
+# Zod 4.6.x
 
-Pin de referência: **zod@^4.4** (ex.: 4.4.3). API estável da major 4; minors 4.3/4.4 trazem correções de soundness (podem ser mais estritas — revisar changelog ao subir).
+Pin de referência: **zod@4.6.5** (medido em 2026-09-28). A major 4 segue a API deste documento. Minors podem apertar soundness — leia o changelog ao subir. O AI SDK 7 aceita `zod ^4.1.8`; Zod 3 não entra no mesmo bundle.
 
 Zod é a biblioteca de schema-first validation adotada pelo projeto. A versão 4, lançada em 2025, é um **major rewrite** com ganhos dramáticos de performance, redução de bundle e mudanças sintáticas em validators de string. Este documento captura o uso correto da versão atual e o que difere de Zod 3.
 
@@ -28,7 +30,7 @@ Convenções transversais de modelagem vivem em `@contracts/schemas`. Imperativo
 | `z.string().url()`         | método encadeável              | `z.url()` (**breaking**)                      |
 | `z.string().datetime()`    | método encadeável              | `z.iso.datetime()` (**breaking**)             |
 | ISO 8601                   | espalhado em `z.string()`      | namespace dedicado `z.iso.*`                  |
-| Modos de objeto            | `.strict`/`.passthrough`       | `.strict()` / `.loose()` / `.strip()` (default) |
+| Modos de objeto            | `.strict()`/`.passthrough()`   | `z.strictObject()` / `z.looseObject()` / `z.object()` (strip, default); métodos antigos deprecated |
 | Recursão                   | `z.lazy` obrigatório           | autodetecção (lazy opcional)                  |
 | JSON Schema                | dependência externa            | first-class via `z.toJSONSchema(schema)`      |
 | Discriminadores múltiplos  | apenas um                      | suporte a múltiplos discriminadores           |
@@ -39,7 +41,7 @@ Não traga idioms de Zod 3 para código novo. Ver seção de migração ao final
 
 ## Filosofia
 
-Schema como **single source of truth**. O schema Zod define simultaneamente a validação em runtime e o tipo TypeScript inferido. Nunca declarar `interface User` paralelo a `userSchema` — derivar com `z.infer<typeof userSchema>`. Detalhes desta convenção em `@rules/data-modeling`.
+Schema como **single source of truth**. O schema Zod define simultaneamente a validação em runtime e o tipo TypeScript inferido. Nunca declarar `interface User` paralelo a `UserSchema` — derivar com `z.infer<typeof UserSchema>`. Convenção de nome: constante `UserSchema`, tipo `User`, arquivo `user.schema.ts`. Detalhes desta convenção em `@rules/data-modeling`.
 
 ## Schemas básicos
 
@@ -83,7 +85,7 @@ z.lazy(() => Node);                          // opcional em Zod 4; necessário a
 ## Refinements e transforms
 
 ```ts
-schema.refine((v) => v.length > 0, { message: "vazio" });
+schema.refine((v) => v.length > 0, { error: "vazio" }); // Zod 4: `error`, não `message`
 schema.superRefine((v, ctx) => {
   if (cond) ctx.addIssue({ code: "custom", message: "..." });
 }); // multi-issue
@@ -106,25 +108,24 @@ schema.brand<"UserId">();   // branded type — ver @rules/data-modeling
 schema.readonly();
 ```
 
-Branded types são obrigatórios para identificadores sensíveis (`UserId`, `OrgId`, `Email` quando usado como chave). Ver `@rules/data-modeling`.
+Branded types são obrigatórios para identificadores sensíveis (`UserId`, `TenantId`, `Email` quando usado como chave). Ver `@rules/data-modeling`.
 
 ## Object utilities
 
 ```ts
-userSchema.partial();
-userSchema.required();
-userSchema.pick({ id: true, name: true });
-userSchema.omit({ password: true });
-userSchema.extend({ role: z.string() });
-userSchema.merge(otherSchema);
+UserSchema.partial();
+UserSchema.required();
+UserSchema.pick({ id: true, name: true });
+UserSchema.omit({ password: true });
+UserSchema.extend({ role: z.string() });   // .merge() está deprecated: use .extend()
 
-userSchema.strict();    // rejeita campos extras
-userSchema.strip();     // remove campos extras (default)
-userSchema.loose();     // preserva campos extras (substitui passthrough de Zod 3)
-userSchema.catchall(z.unknown());
+z.strictObject({ id: z.uuid() });  // rejeita campos extras (substitui .strict())
+z.object({ id: z.uuid() });        // remove campos extras (default)
+z.looseObject({ id: z.uuid() });   // preserva campos extras (substitui .passthrough())
+UserSchema.catchall(z.unknown());
 ```
 
-**Nunca use `.loose()` em wire format público** — preserva campos não modelados e vaza dados. Confine `.loose()` a fronteiras internas onde a expansão de payload é intencional.
+**Nunca use `z.looseObject()` em wire format público** — preserva campos não modelados e vaza dados. Confine-o a fronteiras internas onde a expansão de payload é intencional.
 
 ## Validators de string em Zod 4
 
@@ -160,6 +161,8 @@ z.jwt();
 
 Estes retornam schemas de string com a validação aplicada. Para encadear regras adicionais use os métodos normais: `z.email().max(254)`.
 
+Ids de domínio: `z.uuid()` só para ids que são de fato UUID (o projeto usa uuidv7 no Postgres). ID automático do Firestore usa `z.string().min(1).brand<"UserId">()`. ULID (`eventId`, `Idempotency-Key`, `X-Request-Id`) usa `z.ulid().brand<"EventId">()` (ADR 0005).
+
 ## Coerção
 
 ```ts
@@ -191,23 +194,25 @@ Nunca lance um `ZodError` para o client. Mapeie para o envelope de erro definido
 ```ts
 const result = schema.safeParse(input);
 if (!result.success) {
-  console.error(z.prettifyError(result.error));
-  const flat = result.error.flatten();          // { formErrors, fieldErrors }
-  const tree = result.error.format();           // árvore aninhada
-  const issues = result.error.issues;           // raw
+  const pretty = z.prettifyError(result.error); // só para log estruturado, nunca para o client
+  const flat = z.flattenError(result.error);    // { formErrors, fieldErrors }: só validação client-only (form sem round-trip)
+  const tree = z.treeifyError(result.error);    // árvore aninhada: idem, só client
+  const issues = result.error.issues;           // raw: base do `details` do envelope
 }
 ```
 
-Para i18n de mensagens, configure `errorMap` global no boot da aplicação ou por schema. Ver `@rules/internationalization` para a estratégia de localização do projeto.
+Resposta HTTP e retorno de Server Action nunca levam `flattenError`/`treeifyError`. O erro sai no envelope de `@contracts/api` §6: `{ code: "VALIDATION_FAILED", message, details: issues.map((i) => ({ field: i.path.map(String).join("."), issue: i.code.toUpperCase() })), requestId }` (Server Action: dentro de `{ ok: false, error }`, ADR 0003). O form destaca campos por `details[].field`. `i.path` é `PropertyKey[]` (pode ter `symbol`), por isso o `map(String)`.
+
+`error.flatten()` e `error.format()` estão deprecated em Zod 4; use as funções top-level. Para i18n de mensagens, use a opção `error` (função ou string) por schema, ou `z.config({ localeError })` no boot da aplicação. Ver `@rules/internationalization` para a estratégia de localização do projeto.
 
 ## Type inference
 
 ```ts
-const userSchema = z.object({ id: z.uuid(), name: z.string() });
+const UserSchema = z.object({ id: z.uuid(), name: z.string() });
 
-type User = z.infer<typeof userSchema>;     // output (após transforms)
-type UserInput = z.input<typeof userSchema>;  // input bruto
-type UserOutput = z.output<typeof userSchema>; // alias de z.infer
+type User = z.infer<typeof UserSchema>;     // output (após transforms)
+type UserInput = z.input<typeof UserSchema>;  // input bruto
+type UserOutput = z.output<typeof UserSchema>; // alias de z.infer
 ```
 
 Quando há `transform`, `input` e `output` divergem. Use `z.input` para tipar payloads de formulário, `z.infer` para o domínio interno.
@@ -236,7 +241,7 @@ Validar na **fronteira de leitura** — todo documento Firestore ou row Postgres
 
 ### AI SDKs (`@stacks/ai/vercel-ai-sdk`)
 
-`generateObject({ schema })` recebe o schema Zod diretamente. Tool definitions usam Zod para `parameters`. O modelo é forçado a respeitar a forma; ainda assim, trate output como untrusted e re-valide se vier por canal indireto.
+No AI SDK 7, `generateText({ output: Output.object({ schema }) })` recebe o schema Zod. Tool definitions usam Zod em `inputSchema`. O modelo é forçado a respeitar a forma; ainda assim, trate output como untrusted e re-valide se vier por canal indireto.
 
 ### OpenAPI / JSON Schema
 
@@ -251,10 +256,10 @@ Zod 4 expõe `z.toJSONSchema(schema)` nativamente. Use-o para gerar specs OpenAP
 
 ## Migração 3 → 4
 
-Codemod oficial:
+Não há codemod oficial. O guia de migração (zod.dev/v4/changelog) aponta o codemod da comunidade [`zod-v3-to-v4`](https://github.com/nicoespeon/zod-v3-to-v4):
 
 ```bash
-npx zod-codemod@latest
+npx zod-v3-to-v4
 ```
 
 Principais breaks a revisar manualmente:
@@ -267,13 +272,17 @@ Principais breaks a revisar manualmente:
 | `z.string().datetime()`          | `z.iso.datetime()`             |
 | `z.string().date()`              | `z.iso.date()`                 |
 | `z.string().ip()`                | `z.ipv4()` ou `z.ipv6()`       |
-| `.passthrough()`                 | `.loose()`                     |
+| `.passthrough()`                 | `z.looseObject()`              |
+| `.strict()`                      | `z.strictObject()`             |
+| `a.merge(b)`                     | `a.extend(b.shape)`            |
+| `err.flatten()` / `err.format()` | `z.flattenError(err)` / `z.treeifyError(err)` |
+| `errorMap`                       | opção `error`                  |
 | `ZodError.format()` shape antigo | nova estrutura — re-verificar consumers |
 
 Após codemod, rode a suíte completa e revise:
 
 1. Locais que faziam introspecção em `error.format()` ou `error.issues`.
-2. `errorMap` customizados — a assinatura mudou em alguns casos.
+2. `errorMap` customizados — substituídos pela opção `error`.
 3. Recursão com `z.lazy` — pode ser simplificada.
 4. Imports — alguns paths foram reorganizados.
 
@@ -281,10 +290,10 @@ Não deixe Zod 3 e Zod 4 coexistirem no runtime do mesmo bundle. Migre a árvore
 
 ## Anti-patterns
 
-- `interface User` paralelo a `userSchema` — use `z.infer<typeof userSchema>`. Ver `@rules/data-modeling`.
+- `interface User` paralelo a `UserSchema` — use `z.infer<typeof UserSchema>`. Ver `@rules/data-modeling`.
 - `.parse` em boundary externa sem `try/catch` — use `safeParse`.
 - `z.any()` por preguiça — use `z.unknown()` e refine. Ver `@rules/validation`.
-- `.loose()` em wire format público — vaza dados não modelados.
+- `z.looseObject()` em wire format público — vaza dados não modelados.
 - IDs sensíveis tipados como `string` cru — use `.brand<"UserId">()`. Ver `@rules/data-modeling`.
 - Lançar `ZodError` para o client — sempre encapsule no envelope de `@contracts/api`. Ver `@rules/error-handling`.
 - Coerção sem refinement subsequente — `z.coerce.number()` aceita `NaN`.
@@ -298,7 +307,7 @@ Não deixe Zod 3 e Zod 4 coexistirem no runtime do mesmo bundle. Migre a árvore
 - `@rules/data-modeling` — branded types, schema-first, `z.infer`
 - `@rules/security` — segregação client/server de env vars
 - `@rules/error-handling` — mapeamento de `ZodError` para envelope público
-- `@rules/internationalization` — `errorMap` e mensagens localizadas
+- `@rules/internationalization` — opção `error` e mensagens localizadas
 - `@contracts/api` — envelope de erro, request/response shape
 - `@contracts/schemas` — convenções de modelagem de schemas
 - `@contracts/firebase-firestore` — validação na fronteira de leitura Firestore
@@ -307,5 +316,5 @@ Não deixe Zod 3 e Zod 4 coexistirem no runtime do mesmo bundle. Migre a árvore
 - `@stacks/language/typescript@7` — interação com inference
 - `@stacks/frontend/next@16` — Server Actions
 - `@stacks/frontend/shadcn-ui` — form resolver
-- `@stacks/ai/vercel-ai-sdk` — `generateObject`, tool params
+- `@stacks/ai/vercel-ai-sdk` — `Output.object`, `inputSchema` de tool
 - `@practices/sdd` — geração de OpenAPI a partir dos schemas

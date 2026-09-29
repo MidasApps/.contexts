@@ -6,15 +6,15 @@ paths: ["**/*.tsx","**/*.ts","next.config.*"]
 Performance é medida, não adivinhada. Orçamentos de bundle e Core Web Vitals (LCP, INP, CLS) definem alvo; otimização vem com profile.
 
 ## Princípios
-- **Measure first**: profile antes de otimizar (Chrome DevTools, React Profiler, `next build --analyze`).
+- **Measure first**: profile antes de otimizar (Chrome DevTools, React Profiler, `@next/bundle-analyzer`).
 - Bundle budget: JS inicial < 200 KB gzipped para landing; route-level code-split é default.
 - LCP < 2.5s, INP < 200ms, CLS < 0.1. Cada commit que regride é justificado.
-- Imagens: `next/image` com `width`/`height` definidos; `priority` em LCP image; AVIF/WebP via framework.
+- Imagens: `next/image` com `width`/`height` definidos; imagem LCP com `fetchPriority="high"` ou `loading="eager"` (`priority` está deprecated no Next 16; `preload` só em caso raro); AVIF/WebP via `images.formats`.
 - Lazy import (`dynamic()`) componentes pesados não-críticos (modais, charts, editores).
 - `React.memo`/`useMemo`/`useCallback` apenas com profile mostrando ganho — overhead em casos normais.
 - Server > Client quando possível (RSC em Next): menos JS no cliente.
 - Evite waterfalls: `Promise.all` para fetches independentes; preload no header quando aplicável.
-- Caching aplica camada anterior — ver rule `caching`.
+- Caching (`'use cache'`, `cacheTag`, `updateTag`) — ver rule `caching`.
 
 ## Checklist (aplicar a todo turn)
 - [ ] Imagem nova usa `next/image` com dimensões.
@@ -32,7 +32,8 @@ Performance é medida, não adivinhada. Orçamentos de bundle e Core Web Vitals 
 
 ## Mini-exemplo
 ```tsx
-const Editor = dynamic(() => import("./Editor"), { ssr: false, loading: () => <Skeleton /> });
+"use client"; // `ssr: false` só é permitido em client component
+const Editor = dynamic(() => import("@/widgets/editor").then((m) => m.Editor), { ssr: false, loading: () => <Skeleton /> });
 ```
 
 ---

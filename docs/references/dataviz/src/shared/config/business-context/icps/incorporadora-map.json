@@ -1,0 +1,8 @@
+{
+  "id": "incorporadora-map",
+  "segment": "Médio Alto Padrão",
+  "examples": ["Cyrela", "Even", "Helbor"],
+  "primaryKpis": ["margem", "ticket_medio", "velocidade_vendas"],
+  "decisionJourney": "comitê semanal",
+  "_meta": { "refinedBySme": false }
+}

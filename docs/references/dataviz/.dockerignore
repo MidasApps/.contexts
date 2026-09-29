@@ -1,0 +1,63 @@
+# Dependencies (installed fresh in Docker)
+node_modules/
+.pnpm-store/
+
+# Build output (rebuilt in Docker)
+.next/
+out/
+
+# Playground local do Mastra (`pnpm mastra:dev`): sem auth, nunca vai para a
+# imagem. O app não importa `src/mastra/`; isto é a segunda camada.
+.mastra/
+src/mastra/
+
+# Version control
+.git/
+.gitignore
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+*.swp
+*.swo
+
+# Environment (secrets must not be in the image)
+.env
+.env.local
+.env*.local
+
+# Documentation and design (root-level only, not app/docs/)
+/docs/
+/adrs/
+/design-system/
+*.md
+
+# Claude Code
+.claude/
+
+# TypeScript build info
+*.tsbuildinfo
+next-env.d.ts
+
+# Tests
+__tests__/
+*.test.ts
+*.test.tsx
+*.spec.ts
+*.spec.tsx
+coverage/
+
+# Docker
+Dockerfile
+docker-compose*.yml
+.dockerignore
+
+# Cloud Build / Deploy scripts
+cloudbuild.yaml
+deploy.sh
+.gcloudignore
+
+# Secrets — montados via volume em runtime, JAMAIS dentro da imagem
+secrets/
+.env.docker

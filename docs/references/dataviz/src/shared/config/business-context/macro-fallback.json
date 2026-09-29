@@ -1,0 +1,11 @@
+{
+  "asOfDate": "2026-05-01",
+  "source": "fallback",
+  "series": {
+    "selic": { "last": 14.75, "series": [{ "data": "2026-04-01", "valor": 14.75 }] },
+    "ipca12m": { "last": 4.5, "series": [{ "data": "2026-04-01", "valor": 4.5 }] },
+    "incc12m": { "last": 6.8, "series": [{ "data": "2026-04-01", "valor": 6.8 }] },
+    "igpm12m": { "last": 5.2, "series": [{ "data": "2026-04-01", "valor": 5.2 }] },
+    "tr12m": { "last": 0.5, "series": [{ "data": "2026-04-01", "valor": 0.5 }] }
+  }
+}

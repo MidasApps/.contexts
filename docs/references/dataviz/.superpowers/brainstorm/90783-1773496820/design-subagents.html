@@ -1,0 +1,282 @@
+<h2>Design: Sub-Agentes Especialistas</h2>
+<p class="subtitle">Secao 2 de 5 — Cada agente com seu modelo, contexto e tools</p>
+
+<!-- SQL AGENT -->
+<div class="section">
+  <div style="background:#1e293b;border:2px solid #dc2626;border-radius:10px;padding:20px;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+      <span style="background:#dc2626;color:white;padding:4px 12px;border-radius:6px;font-weight:bold;font-size:14px;">SQL Agent</span>
+      <span style="background:#7c3aed;color:white;padding:3px 8px;border-radius:4px;font-size:11px;">Gemini 2.5 Pro</span>
+      <span style="color:#94a3b8;font-size:12px;">— O mais poderoso. Consulta livre ao BigQuery.</span>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+      <div>
+        <div style="color:#f59e0b;font-weight:bold;font-size:12px;margin-bottom:6px;">SYSTEM PROMPT (contexto)</div>
+        <div style="color:#e2e8f0;font-size:11px;line-height:1.7;background:#0f172a;padding:10px;border-radius:6px;">
+          - Dicionario de dados completo (tabelas, campos, tipos, descricoes)<br/>
+          - Amostra de 5 rows por tabela<br/>
+          - Valores possiveis de campos categoricos (ratings A-H, faixas LTV, etc.)<br/>
+          - Convencoes: data_base_report = ultimo dia do mes, dataset = cliente ativo<br/>
+          - Regras SQL: sempre usar LIMIT, nunca DELETE/UPDATE/INSERT<br/>
+          - Formato de resposta: sempre incluir a query SQL executada
+        </div>
+      </div>
+      <div>
+        <div style="color:#f59e0b;font-weight:bold;font-size:12px;margin-bottom:6px;">TOOLS</div>
+        <div style="color:#e2e8f0;font-size:11px;line-height:1.7;background:#0f172a;padding:10px;border-radius:6px;">
+          <span style="color:#22c55e;font-weight:bold;">execute_sql</span>(query: string) → rows[]<br/>
+          <span style="color:#94a3b8;">Executa SELECT no BigQuery. Read-only, timeout 30s, LIMIT 1000.</span><br/><br/>
+          <span style="color:#22c55e;font-weight:bold;">get_table_schema</span>(table: string) → schema<br/>
+          <span style="color:#94a3b8;">Retorna schema detalhado de uma tabela (para queries complexas).</span><br/><br/>
+          <span style="color:#22c55e;font-weight:bold;">get_sample_data</span>(table: string, n: number) → rows[]<br/>
+          <span style="color:#94a3b8;">Retorna N rows de amostra para entender o formato dos dados.</span>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:12px;">
+      <div style="color:#f59e0b;font-weight:bold;font-size:12px;margin-bottom:6px;">FLUXO (async generator)</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;font-size:11px;">
+        <span style="background:#1e3a5f;color:#60a5fa;padding:4px 10px;border-radius:12px;">yield "Analisando pergunta"</span>
+        <span style="color:#475569;">→</span>
+        <span style="background:#1e3a5f;color:#60a5fa;padding:4px 10px;border-radius:12px;">generateText → SQL</span>
+        <span style="color:#475569;">→</span>
+        <span style="background:#1e3a5f;color:#60a5fa;padding:4px 10px;border-radius:12px;">yield "Executando: SELECT..."</span>
+        <span style="color:#475569;">→</span>
+        <span style="background:#1e3a5f;color:#60a5fa;padding:4px 10px;border-radius:12px;">BigQuery executa</span>
+        <span style="color:#475569;">→</span>
+        <span style="background:#064e3b;color:#34d399;padding:4px 10px;border-radius:12px;">return { sql, rows, summary }</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- BUSINESS AGENT -->
+<div class="section">
+  <div style="background:#1e293b;border:2px solid #f59e0b;border-radius:10px;padding:20px;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+      <span style="background:#f59e0b;color:black;padding:4px 12px;border-radius:6px;font-weight:bold;font-size:14px;">Business Agent</span>
+      <span style="background:#059669;color:white;padding:3px 8px;border-radius:4px;font-size:11px;">Gemini 2.5 Flash</span>
+      <span style="color:#94a3b8;font-size:12px;">— Especialista em securitizacao. Explica conceitos e regras.</span>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+      <div>
+        <div style="color:#f59e0b;font-weight:bold;font-size:12px;margin-bottom:6px;">SYSTEM PROMPT (contexto)</div>
+        <div style="color:#e2e8f0;font-size:11px;line-height:1.7;background:#0f172a;padding:10px;border-radius:6px;">
+          - Glossario completo de termos (PDD, LTV, rating, elegibilidade, etc.)<br/>
+          - Regras de negocio da securitizacao de credito imobiliario<br/>
+          - Escala de ratings Liquid (A=900-1000 ... H=0-299)<br/>
+          - Criterios de elegibilidade e grupos de repasse<br/>
+          - Formulas de calculo (PDD Liquid, PDD Bacen, pricing, desagio)<br/>
+          - Contexto regulatorio (Bacen, CVM)
+        </div>
+      </div>
+      <div>
+        <div style="color:#f59e0b;font-weight:bold;font-size:12px;margin-bottom:6px;">TOOLS</div>
+        <div style="color:#e2e8f0;font-size:11px;line-height:1.7;background:#0f172a;padding:10px;border-radius:6px;">
+          <span style="color:#22c55e;font-weight:bold;">lookup_glossary</span>(term: string) → definition<br/>
+          <span style="color:#94a3b8;">Busca termo no glossario com contexto e formula.</span><br/><br/>
+          <span style="color:#22c55e;font-weight:bold;">get_business_rule</span>(topic: string) → rule<br/>
+          <span style="color:#94a3b8;">Retorna regra de negocio detalhada sobre o topico.</span><br/><br/>
+          <span style="color:#22c55e;font-weight:bold;">get_indicator_definition</span>(kpi: string) → definition<br/>
+          <span style="color:#94a3b8;">Retorna definicao, formula e interpretacao de um KPI.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DASHBOARD AGENT -->
+<div class="section">
+  <div style="background:#1e293b;border:2px solid #3b82f6;border-radius:10px;padding:20px;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+      <span style="background:#3b82f6;color:white;padding:4px 12px;border-radius:6px;font-weight:bold;font-size:14px;">Dashboard Agent</span>
+      <span style="background:#64748b;color:white;padding:3px 8px;border-radius:4px;font-size:11px;">Gemini 2.5 Flash-Lite</span>
+      <span style="color:#94a3b8;font-size:12px;">— Le o estado atual. Rapido e barato.</span>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+      <div>
+        <div style="color:#f59e0b;font-weight:bold;font-size:12px;margin-bottom:6px;">SYSTEM PROMPT (contexto)</div>
+        <div style="color:#e2e8f0;font-size:11px;line-height:1.7;background:#0f172a;padding:10px;border-radius:6px;">
+          - Recebe o <strong>buildAIContext()</strong> completo do app-store<br/>
+          - Indicadores visiveis (KPIs, charts, tables) com valores atuais<br/>
+          - Filtros ativos (periodo, projetos, filtros avancados)<br/>
+          - Cliente ativo e dataset<br/>
+          - Pagina atual do dashboard
+        </div>
+      </div>
+      <div>
+        <div style="color:#f59e0b;font-weight:bold;font-size:12px;margin-bottom:6px;">TOOLS</div>
+        <div style="color:#e2e8f0;font-size:11px;line-height:1.7;background:#0f172a;padding:10px;border-radius:6px;">
+          <span style="color:#22c55e;font-weight:bold;">read_dashboard_state</span>() → context<br/>
+          <span style="color:#94a3b8;">Retorna snapshot completo dos indicadores visiveis.</span><br/><br/>
+          <span style="color:#22c55e;font-weight:bold;">read_active_filters</span>() → filters<br/>
+          <span style="color:#94a3b8;">Retorna filtros ativos com valores legíveis.</span><br/><br/>
+          <span style="color:#94a3b8;font-style:italic;">Nao precisa de generateText interno — contexto no prompt basta.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- COMPARISON AGENT -->
+<div class="section">
+  <div style="background:#1e293b;border:2px solid #8b5cf6;border-radius:10px;padding:20px;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+      <span style="background:#8b5cf6;color:white;padding:4px 12px;border-radius:6px;font-weight:bold;font-size:14px;">Comparison Agent</span>
+      <span style="background:#7c3aed;color:white;padding:3px 8px;border-radius:4px;font-size:11px;">Gemini 2.5 Pro</span>
+      <span style="color:#94a3b8;font-size:12px;">— Analise temporal, tendencias, anomalias.</span>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+      <div>
+        <div style="color:#f59e0b;font-weight:bold;font-size:12px;margin-bottom:6px;">SYSTEM PROMPT (contexto)</div>
+        <div style="color:#e2e8f0;font-size:11px;line-height:1.7;background:#0f172a;padding:10px;border-radius:6px;">
+          - Metodologia de comparacao (MoM, YoY, range vs range)<br/>
+          - Metricas comparaveis e suas polaridades (positiveIsGood)<br/>
+          - Benchmarks do mercado imobiliario<br/>
+          - Formato de analise: destaque variacao %, direcao, significancia
+        </div>
+      </div>
+      <div>
+        <div style="color:#f59e0b;font-weight:bold;font-size:12px;margin-bottom:6px;">TOOLS</div>
+        <div style="color:#e2e8f0;font-size:11px;line-height:1.7;background:#0f172a;padding:10px;border-radius:6px;">
+          <span style="color:#22c55e;font-weight:bold;">compare_periods</span>(table, p1, p2, metric) → variance<br/>
+          <span style="color:#94a3b8;">Compara metrica entre dois periodos.</span><br/><br/>
+          <span style="color:#22c55e;font-weight:bold;">get_kpi_history</span>(metric, months) → timeseries<br/>
+          <span style="color:#94a3b8;">Retorna serie temporal de N meses para analise de tendencia.</span><br/><br/>
+          <span style="color:#22c55e;font-weight:bold;">detect_anomalies</span>(metric, threshold) → anomalies[]<br/>
+          <span style="color:#94a3b8;">Identifica pontos fora do padrao na serie.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- EXTERNAL DATA AGENT -->
+<div class="section">
+  <div style="background:#1e293b;border:2px solid #06b6d4;border-radius:10px;padding:20px;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+      <span style="background:#06b6d4;color:black;padding:4px 12px;border-radius:6px;font-weight:bold;font-size:14px;">External Data Agent</span>
+      <span style="background:#059669;color:white;padding:3px 8px;border-radius:4px;font-size:11px;">Gemini 2.5 Flash</span>
+      <span style="color:#94a3b8;font-size:12px;">— Dados economicos, Selic, IPCA, mercado.</span>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+      <div>
+        <div style="color:#f59e0b;font-weight:bold;font-size:12px;margin-bottom:6px;">SYSTEM PROMPT (contexto)</div>
+        <div style="color:#e2e8f0;font-size:11px;line-height:1.7;background:#0f172a;padding:10px;border-radius:6px;">
+          - Indicadores economicos relevantes para securitizacao<br/>
+          - Fontes confiaveis (BCB, IBGE, B3, CVM)<br/>
+          - Formato: sempre citar fonte e data do dado<br/>
+          - Correlacoes conhecidas (Selic x inadimplencia, IPCA x correcao)
+        </div>
+      </div>
+      <div>
+        <div style="color:#f59e0b;font-weight:bold;font-size:12px;margin-bottom:6px;">TOOLS</div>
+        <div style="color:#e2e8f0;font-size:11px;line-height:1.7;background:#0f172a;padding:10px;border-radius:6px;">
+          <span style="color:#22c55e;font-weight:bold;">search_web</span>(query: string) → results[]<br/>
+          <span style="color:#94a3b8;">Busca via Firecrawl com filtro de fontes confiaveis.</span><br/><br/>
+          <span style="color:#22c55e;font-weight:bold;">get_bcb_indicator</span>(code: string, period) → series<br/>
+          <span style="color:#94a3b8;">API do Banco Central (Selic, IPCA, IGPM, cambio).</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- EXPORT AGENT -->
+<div class="section">
+  <div style="background:#1e293b;border:2px solid #22c55e;border-radius:10px;padding:20px;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+      <span style="background:#22c55e;color:black;padding:4px 12px;border-radius:6px;font-weight:bold;font-size:14px;">Export Agent</span>
+      <span style="background:#64748b;color:white;padding:3px 8px;border-radius:4px;font-size:11px;">Gemini 2.5 Flash-Lite</span>
+      <span style="color:#94a3b8;font-size:12px;">— Gera relatorios PDF e planilhas.</span>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+      <div>
+        <div style="color:#f59e0b;font-weight:bold;font-size:12px;margin-bottom:6px;">SYSTEM PROMPT (contexto)</div>
+        <div style="color:#e2e8f0;font-size:11px;line-height:1.7;background:#0f172a;padding:10px;border-radius:6px;">
+          - Templates de relatorio disponiveis<br/>
+          - Formato padrao: header com logo + filtros + tabelas + graficos<br/>
+          - Regras de formatacao (moeda BRL, datas pt-BR, decimais)
+        </div>
+      </div>
+      <div>
+        <div style="color:#f59e0b;font-weight:bold;font-size:12px;margin-bottom:6px;">TOOLS</div>
+        <div style="color:#e2e8f0;font-size:11px;line-height:1.7;background:#0f172a;padding:10px;border-radius:6px;">
+          <span style="color:#22c55e;font-weight:bold;">generate_pdf</span>(sections, filters) → url<br/>
+          <span style="color:#94a3b8;">Gera PDF com jsPDF + html2canvas. Retorna URL de download.</span><br/><br/>
+          <span style="color:#22c55e;font-weight:bold;">generate_csv</span>(query_result, columns) → url<br/>
+          <span style="color:#94a3b8;">Converte resultado de query em CSV para download.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SIMULATION AGENT -->
+<div class="section">
+  <div style="background:#1e293b;border:2px solid #ec4899;border-radius:10px;padding:20px;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+      <span style="background:#ec4899;color:white;padding:4px 12px;border-radius:6px;font-weight:bold;font-size:14px;">Simulation Agent</span>
+      <span style="background:#7c3aed;color:white;padding:3px 8px;border-radius:4px;font-size:11px;">Gemini 2.5 Pro</span>
+      <span style="color:#94a3b8;font-size:12px;">— Cenarios what-if, stress test, projecoes.</span>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+      <div>
+        <div style="color:#f59e0b;font-weight:bold;font-size:12px;margin-bottom:6px;">SYSTEM PROMPT (contexto)</div>
+        <div style="color:#e2e8f0;font-size:11px;line-height:1.7;background:#0f172a;padding:10px;border-radius:6px;">
+          - Modelos de simulacao (pricing, PDD, elegibilidade, LTV stress)<br/>
+          - Parametros default e ranges aceitaveis<br/>
+          - Formulas de calculo (desagio, spread, delta_pdd)<br/>
+          - Cenarios historicos de referencia<br/>
+          - Sempre mostrar premissas assumidas
+        </div>
+      </div>
+      <div>
+        <div style="color:#f59e0b;font-weight:bold;font-size:12px;margin-bottom:6px;">TOOLS</div>
+        <div style="color:#e2e8f0;font-size:11px;line-height:1.7;background:#0f172a;padding:10px;border-radius:6px;">
+          <span style="color:#22c55e;font-weight:bold;">run_simulation</span>(scenario, params) → results<br/>
+          <span style="color:#94a3b8;">Executa simulacao com parametros ajustados.</span><br/><br/>
+          <span style="color:#22c55e;font-weight:bold;">get_baseline</span>(metric) → current_values<br/>
+          <span style="color:#94a3b8;">Busca valores atuais como baseline para comparacao.</span><br/><br/>
+          <span style="color:#22c55e;font-weight:bold;">execute_sql</span>(query) → rows[]<br/>
+          <span style="color:#94a3b8;">Acesso ao BigQuery para buscar dados base da simulacao.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SUMMARY TABLE -->
+<div class="section" style="margin-top:24px;">
+  <h3>Resumo: Modelo por Agente</h3>
+  <div style="background:#1e293b;border:1px solid #334155;border-radius:8px;padding:16px;font-size:13px;">
+    <table style="width:100%;border-collapse:collapse;color:#e2e8f0;">
+      <thead>
+        <tr style="border-bottom:1px solid #475569;">
+          <th style="text-align:left;padding:8px;color:#f59e0b;">Agente</th>
+          <th style="text-align:left;padding:8px;color:#f59e0b;">Modelo</th>
+          <th style="text-align:left;padding:8px;color:#f59e0b;">Custo Input/1M</th>
+          <th style="text-align:left;padding:8px;color:#f59e0b;">Razao</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="border-bottom:1px solid #1e293b;"><td style="padding:8px;">Orchestrator</td><td style="padding:8px;color:#94a3b8;">Flash-Lite</td><td style="padding:8px;">$0.075</td><td style="padding:8px;color:#94a3b8;">So roteia, nao raciocina</td></tr>
+        <tr style="border-bottom:1px solid #1e293b;"><td style="padding:8px;">SQL Agent</td><td style="padding:8px;color:#dc2626;">Pro</td><td style="padding:8px;">$1.25</td><td style="padding:8px;color:#94a3b8;">SQL complexo exige raciocinio</td></tr>
+        <tr style="border-bottom:1px solid #1e293b;"><td style="padding:8px;">Business Agent</td><td style="padding:8px;color:#059669;">Flash</td><td style="padding:8px;">$0.15</td><td style="padding:8px;color:#94a3b8;">Contexto no prompt, baixa complexidade</td></tr>
+        <tr style="border-bottom:1px solid #1e293b;"><td style="padding:8px;">Dashboard Agent</td><td style="padding:8px;color:#94a3b8;">Flash-Lite</td><td style="padding:8px;">$0.075</td><td style="padding:8px;color:#94a3b8;">Le e resume, nao raciocina</td></tr>
+        <tr style="border-bottom:1px solid #1e293b;"><td style="padding:8px;">Comparison Agent</td><td style="padding:8px;color:#dc2626;">Pro</td><td style="padding:8px;">$1.25</td><td style="padding:8px;color:#94a3b8;">Analise estatistica e tendencias</td></tr>
+        <tr style="border-bottom:1px solid #1e293b;"><td style="padding:8px;">External Agent</td><td style="padding:8px;color:#059669;">Flash</td><td style="padding:8px;">$0.15</td><td style="padding:8px;color:#94a3b8;">Search + sintese, media complexidade</td></tr>
+        <tr style="border-bottom:1px solid #1e293b;"><td style="padding:8px;">Export Agent</td><td style="padding:8px;color:#94a3b8;">Flash-Lite</td><td style="padding:8px;">$0.075</td><td style="padding:8px;color:#94a3b8;">Template-based, baixa complexidade</td></tr>
+        <tr><td style="padding:8px;">Simulation Agent</td><td style="padding:8px;color:#dc2626;">Pro</td><td style="padding:8px;">$1.25</td><td style="padding:8px;color:#94a3b8;">Cenarios complexos, formulas</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>

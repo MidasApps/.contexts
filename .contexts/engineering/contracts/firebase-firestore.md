@@ -3,7 +3,7 @@ title: Convenções de Modelagem — Firebase Firestore
 type: contracts
 scope: firestore
 status: active
-last_updated: 2026-05-20
+last_updated: 2026-09-28
 ---
 
 # Convenções de Modelagem — Firebase Firestore
@@ -33,16 +33,18 @@ Toda nova coleção, campo ou hierarquia DEVE consultar este contrato antes de s
 
 ## 2. Document IDs
 
-A ordem de preferência para gerar IDs de documento é:
+Decisão: [ADR 0005](../decisions/0005-firestore-document-ids-use-automatic-ids.md). A ordem de preferência para gerar IDs de documento é:
 
-1. **ULID** (default) — ordenáveis lexicograficamente por tempo, sem hotspot inverso de auto-IDs e sem o hotspot frontal de timestamps puros. Use em entidades onde queries por recência sequencial agregam valor.
-2. **Auto-ID do Firestore** — aceitável apenas quando o ID **não tem significado** para o consumidor e nunca aparece em URLs, exports ou referências cruzadas relevantes.
-3. **UUID v4** — alternativa quando ordenação temporal é indesejada (ex: IDs que viajam para clientes não-confiáveis e cuja sequência não deve vazar volume de criação).
-4. **ID natural** (ex: `uid` do Firebase Auth para `users/{uid}`) — quando a chave externa é estável e única.
+1. **ID automático do Firestore** (default) — `collection.doc()` / `add()` no Admin SDK, `doc(collection(...))` no client SDK. String opaca de 20 caracteres, sem prefixo. O algoritmo de dispersão evita hotspot de escrita (doc oficial: "You should not encounter hotspotting on writes if you create new documents using automatic document IDs").
+2. **ID natural** (ex: `uid` do Firebase Auth para `users/{uid}`, idempotency key de um webhook) — quando a chave externa é estável e única.
+
+Ordem por tempo vem do campo `createdAt` (Timestamp) e do índice, nunca do ID. Um campo indexado com valor sequencial também tem limite de escrita (500 writes/s na coleção); coleção com escrita alta isenta `createdAt` do índice single-field quando não ordena por ele.
+
+Documentos já gravados com ULID não migram: o ID é opaco para o consumidor. ULID continua fora do ID de documento: `eventId`, `Idempotency-Key`, `X-Request-Id`.
 
 ### Anti-patterns de ID
 
-- **Nunca** use timestamp puro no início do ID (`2026-05-20T...`) — gera hotspot de escrita por concentrar writes recentes na mesma faixa do índice B-tree.
+- **Nunca** use ID monotônico como ID de documento: timestamp no início do ID (`2026-05-20T...`), ULID ou UUIDv7. Os bits iniciais são o tempo, então IDs criados em sequência caem na mesma faixa do índice e geram hotspot de escrita ("Do not use monotonically increasing document IDs").
 - **Nunca** use IDs sequenciais (`1`, `2`, `3` ou `order-0001`) — mesmo problema de hotspot e vaza volume.
 - **Nunca** use slugs livres de usuário como ID primário — use ID estável e mantenha slug como campo indexado mutável.
 
@@ -83,7 +85,7 @@ A escolha entre subcoleção e coleção top-level é doutrinal, não preferenci
 - **Plural** para arrays: `tags`, `permissions`, `memberIds`.
 - **Singular** para escalares e maps: `email`, `address`, `metadata`.
 - **Booleans positivos**: `isActive`, `isVerified`, `hasAccess` — evite `isNotDeleted`, `disabled`.
-- IDs referenciais terminam em `Id` (singular) ou `Ids` (plural): `userId`, `organizationId`, `memberIds`.
+- IDs referenciais terminam em `Id` (singular) ou `Ids` (plural): `userId`, `tenantId`, `memberIds`.
 
 ### Anti-patterns
 
@@ -122,8 +124,8 @@ Queries de leitura DEVEM filtrar `deletedAt == null` (encapsule no converter ou 
 **Sempre** armazene o ID como **string**:
 
 ```
-userId: "01HM8K..."        // correto
-organizationId: "org_abc"  // correto
+userId: "Xk3mP9qR2vT8wY1zA4bC"        // correto
+tenantId: "a7Fq2LmN9pR4sT6uV8wX"  // ID automático do Firestore, opaco, sem prefixo
 ```
 
 **Nunca** armazene `DocumentReference`:
@@ -144,19 +146,20 @@ Refs em runtime são resolvidos no repository/converter via `db.collection("user
 
 ## 7. Tenant isolation
 
-Toda coleção top-level multi-tenant DEVE conter `tenantId` (ou `organizationId`, conforme o modelo de tenancy do projeto) em todo documento.
+Toda coleção top-level multi-tenant DEVE conter `tenantId` em todo documento.
 
 ```
 audit-logs/{logId}
-  tenantId: "org_abc"
+  tenantId: "a7Fq2LmN9pR4sT6uV8wX"
   actorUid: "..."
-  action:   "USER_INVITED"
+  action:   "user_invited"
   ...
 ```
 
 - `tenantId` participa de **toda query** relevante e de **todo composite index**.
 - Security Rules DEVEM validar `resource.data.tenantId == request.auth.token.tenantId` (complementa `@rules/security`).
 - Subcoleções sob `organizations/{orgId}/...` herdam isolamento pelo path e podem omitir o campo redundante.
+- O modelo acima (um `tenantId` por documento = um claim no token) é o **default**. Produto com autorização por **conjunto** (usuário acessa vários tenants, claim `tenantIds[]`) ou com eixos adicionais (rota, papel) DEVE documentar o modelo em `.contexts/engineering/rules/tenancy.md` (criado ao adotar esse modelo; não existe no template), que prevalece sobre esta seção. Invariantes que não mudam: tenant efetivo é **server-bound** (do token/doc do usuário; `tenantId` vindo do corpo só é aceito após cross-check contra o conjunto autorizado), claim é **projeção** da fonte de verdade (nunca origem de concessão), e recurso sem mapeamento de tenant é **negado** (fail-closed).
 
 ---
 
@@ -254,11 +257,11 @@ Toda query carrega o array **inteiro**. Se você precisa paginar, filtrar ou ord
 
 ## 14. Enums
 
-Strings em **SCREAMING_SNAKE_CASE**:
+Strings em **lowercase snake_case**, o mesmo literal do JSON e da união TypeScript (`@rules/data-modeling`):
 
 ```
-status: "ACTIVE" | "PENDING" | "SUSPENDED" | "DELETED"
-role:   "OWNER" | "ADMIN" | "MEMBER" | "VIEWER"
+status: "active" | "pending" | "suspended" | "deleted"
+role:   "owner" | "admin" | "member" | "viewer"
 ```
 
 ### Evolução
@@ -271,10 +274,10 @@ role:   "OWNER" | "ADMIN" | "MEMBER" | "VIEWER"
 
 ## 15. Money
 
-Valores monetários DEVEM ser armazenados como **inteiro de centavos** (ou menor subunidade da moeda):
+Valores monetários DEVEM ser armazenados como **inteiro na menor unidade da moeda**:
 
 ```
-amountCents: 12345        // R$ 123,45
+amountMinor: 12345        // R$ 123,45
 currency:    "BRL"        // ISO 4217
 ```
 
@@ -315,8 +318,8 @@ schemaVersion: number    // inicia em 1, incrementa em mudanças breaking
 Todo documento Firestore DEVE ter **schema Zod** correspondente no app:
 
 ```
-UserDoc     -> schemas/user-doc.ts
-OrderDoc    -> schemas/order-doc.ts
+UserDocSchema   -> src/contracts/<context>/user-doc.schema.ts
+OrderDocSchema  -> src/contracts/<context>/order-doc.schema.ts
 ```
 
 - Use `withConverter<T>` para encapsular parse/serialize (`@stacks/database/firebase-firestore`).
@@ -373,7 +376,7 @@ Para eventos de domínio que cruzam bounded contexts, use **Pub/Sub explícito**
 | `organizations/{orgId}/members/{uid}` | Membership |
 | `organizations/{orgId}/projects/{projectId}` | Projeto |
 | `organizations/{orgId}/projects/{projectId}/tasks/{taskId}` | Task (3 níveis — limite) |
-| `audit-logs/{logId}` | Log top-level com `tenantId`, `actorUid`, `action`, `resource`, `at` |
+| `audit-logs/{logId}` | Log top-level com `tenantId`, `actorUid`, `action`, `resource`, `occurredAt` |
 | `chat-sessions/{sessionId}` | Sessão de chat top-level |
 | `chat-sessions/{sessionId}/messages/{msgId}` | Mensagem |
 
@@ -387,7 +390,7 @@ Para eventos de domínio que cruzam bounded contexts, use **Pub/Sub explícito**
 | Hard delete em entidade com audit | soft delete (`deletedAt`, `deletedBy`) |
 | Array crescente >~100 items | subcoleção |
 | `snake_case` ou `PascalCase` em campos | camelCase |
-| IDs sequenciais ou timestamps puros | ULID / UUID v4 / Auto-ID |
+| IDs sequenciais, timestamps, ULID ou UUIDv7 como ID de documento | ID automático do Firestore (ou ID natural estável) |
 | Counter incrementado sem shards (>1 write/s) | sharded counters |
 | Hierarquia >3 níveis | reformule em top-level + `parentId` |
 | Documento sem schema Zod (`any`) | Zod schema + `withConverter<T>` |
@@ -396,9 +399,9 @@ Para eventos de domínio que cruzam bounded contexts, use **Pub/Sub explícito**
 | `createdAt` como string ISO | `Timestamp` UTC via `serverTimestamp()` |
 | Composite index não declarado | `firestore.indexes.json` versionado |
 | Firestore listener como event bus cross-context | Pub/Sub com contract (`@contracts/events`) |
-| Money como float decimal | `amountCents: number` + `currency: "BRL"` |
+| Money como float decimal | `amountMinor: number` + `currency: "BRL"` |
 | Singular ou camelCase em nome de coleção | kebab-case plural |
-| Enum em camelCase ou rename de valor existente | SCREAMING_SNAKE_CASE + evolução aditiva |
+| Enum em SCREAMING_SNAKE ou rename de valor existente | lowercase snake_case + evolução aditiva |
 
 ---
 

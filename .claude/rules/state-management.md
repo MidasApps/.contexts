@@ -1,41 +1,45 @@
 ---
-paths: ["**/*.tsx","**/store/**"]
+paths: ["**/*.tsx","src/**/model/**","**/use-*-store.ts"]
 ---
 # State Management — ativa em UI/store
 
-Escolha de onde mora cada pedaço de estado segue árvore de decisão: server state, URL state, global client state, local component state. Cada um tem dono.
+Cada pedaço de estado tem uma categoria e um dono: server state, URL state, form state, local state, global client state. Nunca trate uma categoria como outra.
 
 ## Princípios
-- **Server state → TanStack Query / SWR / RSC.** Dados que vivem em DB: cache, refetch, stale, mutate.
-- **URL state → query params + router.** Filtros, paginação, abas, modais que precisam de share/back/forward.
-- **Global client state → Zustand (ou similar) com slices pequenas.** Auth user, theme, feature flags client-side, UI cross-page.
-- **Local state → `useState` / `useReducer`.** Inputs controlados, toggles, estado de componente.
-- **Form state → react-hook-form + Zod resolver.** Não reinventar com `useState` per-field.
-- Single source of truth: server state nunca é "copiado" para store global — query lida com cache.
-- Selectors específicos para evitar re-render: `useStore(s => s.user)` em vez de `useStore()`.
+- **Server state → RSC / fetch layer do Next** (cache + `updateTag`/`revalidateTag` após Server Action). Nunca copiado para Zustand, Context ou variável de módulo.
+- **URL state → search params + router.** Filtros, paginação, abas, modais que precisam de share/back/forward. Não duplicar em store.
+- **Form state → form uncontrolled + `FormData` + Server Action + `useActionState`**, validado com o mesmo schema Zod no servidor. Controlled só quando precisa reagir a cada tecla.
+- **Local state → `useState`/`useReducer`.** Não promova para global o que vive no componente.
+- **Global client state → Zustand 5**, stores pequenos por domínio em `model/use-<name>-store.ts` do slice FSD. Só em client components.
+- Zustand 5: `create<State>()(...)` (double call), selector explícito sempre, `useShallow` para objeto; toda store global tem `reset`.
+- Persistência (`persist`) só para o que sobrevive a reload (preferências, draft longo, carrinho), com shape versionado; nunca server state nem derivado.
 - Imutabilidade: spread/Immer; nunca `state.x = y` direto.
 
 ## Checklist (aplicar a todo turn)
-- [ ] Dado de servidor NÃO está duplicado em store global.
+- [ ] Dado de servidor NÃO está duplicado em store cliente.
 - [ ] Filtro/aba navegável tem reflexo em URL.
-- [ ] Form com mais de 2 campos usa react-hook-form.
-- [ ] Componente consome só o slice que precisa (seletor específico).
-- [ ] Mutation com optimistic update reverte em erro.
+- [ ] Form submete via Server Action; erros por campo voltam no `useActionState` como `error.details` (`VALIDATION_FAILED`, nunca `flattenError`).
+- [ ] Componente consome só o que precisa (selector específico / `useShallow`).
+- [ ] Optimistic update (`useOptimistic`) reverte em erro.
 
 ## Anti-patterns
-- `useState` para data do server → use TanStack Query.
-- `localStorage` direto em componente → wrap em store com persist middleware.
-- Store global gigante de 50 campos → quebrar em slices.
-- `useContext` para evitar prop-drilling de 1 nível → passar prop.
+- `useEffect` + `fetch` + `useState` para dado do servidor → RSC/fetch layer.
+- `localStorage` direto em componente → store com `persist` versionado.
+- Mega-store global única → dividir por domínio.
+- `useStore()` sem selector → re-render a cada mudança.
 
 ## Mini-exemplo
 ```ts
-// Zustand slice
-export const useUI = create<UIState>((set) => ({
-  sidebarOpen: false,
-  toggleSidebar: () => set(s => ({ sidebarOpen: !s.sidebarOpen })),
+// src/widgets/sidebar/model/use-sidebar-store.ts
+type SidebarState = { isOpen: boolean; toggle: () => void; reset: () => void };
+
+export const useSidebarStore = create<SidebarState>()((set) => ({
+  isOpen: false,
+  toggle: () => set((s) => ({ isOpen: !s.isOpen })),
+  reset: () => set({ isOpen: false }),
 }));
-const sidebarOpen = useUI(s => s.sidebarOpen); // seletor específico
+
+const isOpen = useSidebarStore((s) => s.isOpen); // selector específico
 ```
 
 ---

@@ -1,4 +1,12 @@
-﻿# Pull Requests
+---
+title: Pull Requests
+type: processes
+status: active
+scope: engineering
+last_updated: 2026-09-28
+---
+
+# Pull Requests
 
 Convenção operacional do ciclo de vida de Pull Requests no repositório. Governa estrutura, revisão, automação e merge. Para regras de conduta de revisão, ver `@rules/code-review`. Para fluxo de branches e merge strategy, ver `@processes/git`. Para mensagens de commit, ver `@processes/commits`. Para gates automatizados, ver `@processes/deploy`.
 
@@ -49,7 +57,7 @@ O Pull Request é a unidade de proposta de mudança no repositório. Cada PR rep
 **Exemplos válidos:**
 - `feat(auth): add passkey enrollment endpoint`
 - `fix(billing): handle stripe webhook race on subscription cancel`
-- `chore(deps): bump zod to 3.23.8`
+- `chore(deps): bump zod from 4.6.4 to 4.6.5`
 
 **Inválidos:**
 - `WIP` — abrir como Draft em vez disso
@@ -239,7 +247,7 @@ Ver `@rules/governance`.
 - Pode pular gates específicos (E2E lento, coverage threshold) com **aprovação explícita** documentada no PR.
 - Label `hotfix` obrigatória.
 - **Postmortem** abrindo no próximo dia útil.
-- Backport para branches de release ativas — ver `@processes/release`.
+- Branch `hotfix/<issue-id>-<slug>` criada da tag de produção, com backfill em `main` por PR — ver `@processes/release` §11 e `@processes/git` §9.
 
 ---
 
@@ -257,7 +265,7 @@ PRs gerados ou substancialmente assistidos por Claude Code, Copilot ou outras fe
 ## Estratégia de merge
 
 - **Squash** (padrão): 1 commit por PR em `main`, mensagem = título do PR.
-- **Merge commit**: raramente, apenas em release branches ou quando histórico granular é critico para auditoria.
+- **Merge commit**: raramente, apenas quando histórico granular é crítico para auditoria (sem release branches: `@processes/git` §1).
 - **Rebase merge**: quase nunca — perde a unidade lógica do PR.
 
 Configuração default no repositório: squash habilitado, merge commit e rebase desabilitados ou restritos.
@@ -268,7 +276,7 @@ Configuração default no repositório: squash habilitado, merge commit e rebase
 
 - **Automática pós-merge** via repo settings.
 - Branches stale (sem PR, sem commits há >30 dias) são limpas em sweep mensal.
-- Branches protegidas (`main`, `release/*`) nunca são deletadas automaticamente.
+- Branch protegida (`main`) nunca é deletada automaticamente.
 
 ---
 
@@ -297,7 +305,7 @@ Configuração default no repositório: squash habilitado, merge commit e rebase
 - `@processes/git` — branches, merge strategy, conventions de versionamento
 - `@processes/commits` — formato Conventional Commits
 - `@processes/deploy` — gates de CI, checks obrigatórios e ciclo de deploy pós-merge
-- `@processes/release` — release branches, backport, versionamento de release
+- `@processes/release` — tags, hotfix a partir da tag de produção, versionamento de release
 - `@rules/code-review` — conduta de review e taxonomia de comments
 - `@rules/governance` — CODEOWNERS e governance de áreas críticas
 - `@rules/migration` — regras para PRs de migration

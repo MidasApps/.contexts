@@ -3,7 +3,7 @@ title: Regras de Code Review
 type: rules
 scope: global
 status: active
-last_updated: 2026-07-13
+last_updated: 2026-09-28
 ---
 
 # Regras de Code Review
@@ -17,7 +17,7 @@ Aplica-se a toda revisão de mudança de código submetida via pull request, ind
 ## Escopo e tamanho do PR
 
 - Sempre mantenha o PR focado em **um** objetivo. Nunca misture refatoração, feature e bugfix no mesmo PR.
-- Nunca abra PR com mais de 400 linhas de diff efetivo (excluindo lockfiles, snapshots gerados e migrations puramente declarativas). Divida em PRs sequenciais quando ultrapassar.
+- Alvo < 400 linhas efetivas de diff (excluindo lockfiles, snapshots gerados e migrations puramente declarativas); acima de 800, dividir é obrigatório em PRs sequenciais ou stacked (`@processes/pull-requests`).
 - Sempre separe mudanças de formatação puramente automáticas (rename em massa, lint fixes globais) em PR dedicado.
 - Nunca inclua dependências novas em PR de feature. Adicione a dependência em PR separado com justificativa (ver `@.contexts/engineering/rules/development.md`).
 - Sempre descreva o "porquê" no corpo do PR. O "o quê" o diff já mostra.
@@ -140,7 +140,7 @@ Certo:
 ```
 blocker: precisamos validar `input` com schema antes de passar para `processOrder`,
 senão dado malformado chega no banco. Sugiro usar o schema já definido em
-`@/contracts/order.ts`.
+`@/contracts/orders/order.schema.ts` (`OrderSchema`).
 ```
 
 ### Suggestion block

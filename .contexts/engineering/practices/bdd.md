@@ -1,4 +1,12 @@
-﻿# Behavior-Driven Development (BDD)
+---
+title: Behavior-Driven Development (BDD)
+type: practices
+status: active
+scope: engineering
+last_updated: 2026-09-28
+---
+
+# Behavior-Driven Development (BDD)
 
 > Disciplina colaborativa de desenvolvimento em que software é construído a partir de exemplos concretos de comportamento de negócio, descobertos em conversa entre as pessoas que querem o sistema, as que vão construí-lo e as que vão testá-lo. Os exemplos são formulados em linguagem ubíqua compartilhada e, quando úteis, automatizados como testes executáveis que vivem como documentação sempre verificada.
 
@@ -221,7 +229,7 @@ BDD tem custos reais que precisam ser registrados, não escondidos:
 Para fluxos de negócio cross-feature que tocam UI real, escreva o Feature em Gherkin e automatize com `@cucumber/cucumber` + Playwright (@stacks/testing/playwright). Glue code traduz steps declarativos em interações de página via Page Objects.
 
 ```ts
-// features/order-approval.feature → step definitions
+// e2e/features/order-approval.feature → step definitions (fora de src/features, que é camada FSD)
 Given("o vendedor {string} tem limite de {money}", async (name, limit) => {
   await seedSeller({ name, limit });
 });
@@ -255,11 +263,13 @@ describe("Feature: Aprovação de pedido acima do limite", () => {
 
 Esta forma preserva a disciplina de pensar em comportamentos sem pagar o overhead de Gherkin. Reserve Cucumber para quando há audiência não-técnica lendo os cenários.
 
-### Distribuição na pirâmide de testes
+### Distribuição no troféu de testes
 
-- **Topo (poucos cenários E2E)** — fluxos críticos cross-feature, jornadas de aceitação. Gherkin + Playwright.
-- **Meio (cenários de integração)** — regras de negócio contra adapters reais (emulators, testcontainers). Gherkin ou BDD-style em Vitest.
-- **Base (unidades)** — TDD clássico/mockist sem Gherkin. Veja `@practices/tdd`.
+O formato do projeto é o troféu (`@rules/testing`): integração é a maior fatia, não a base de unidades.
+
+- **Topo (poucos cenários E2E)** — fluxos críticos cross-feature, jornadas de aceitação. Gherkin (`e2e/features/*.feature`) ou Playwright puro (`e2e/*.spec.ts`).
+- **Fatia maior (cenários de integração)** — regras de negócio contra adapters reais (emulators, testcontainers) ou fakes em memória dos ports. Gherkin ou BDD-style em Vitest, colocados em `*.test.ts`.
+- **Unidades** — lógica pura, TDD clássico sem Gherkin. Veja `@practices/tdd`.
 
 ---
 
@@ -307,7 +317,7 @@ Sinais de degradação:
 - **SDD** (@practices/sdd) — disciplina centrada em especificação executável como artefato de design upfront, com ênfase em contratos formais e geração derivada. Audiência: arquitetos e desenvolvedores; o ponto de partida é a spec, não a conversa.
 - **Clean Code** (@practices/clean-code) — princípios de qualidade aplicáveis com ou sem BDD.
 
-BDD e TDD coabitam: BDD molda os cenários de aceitação no topo da pirâmide; TDD molda as unidades que fazem cada cenário passar. BDD e SDD se sobrepõem em "specs executáveis", mas divergem na ênfase: BDD parte da conversa, SDD parte da spec formal como entregável de design.
+BDD e TDD coabitam: BDD molda os cenários de aceitação no topo do troféu; TDD molda as unidades que fazem cada cenário passar. BDD e SDD se sobrepõem em "specs executáveis", mas divergem na ênfase: BDD parte da conversa, SDD parte da spec formal como entregável de design.
 
 ---
 

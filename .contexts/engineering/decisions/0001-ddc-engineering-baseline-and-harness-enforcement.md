@@ -1,9 +1,10 @@
 # 0001. Baseline de engenharia 2026-07 e enforcement do harness DDC
 
-- **Status:** accepted
+- **Status:** accepted (matriz de versões superseded pela 0002)
 - **Date:** 2026-07-14
 - **Deciders:** projeto DDC / sessão de modernização do monorepo de contextos
 - **Tags:** `engineering`, `stacks`, `harness`, `claude-code`, `ssot`, `superpowers-inspired`
+- **Superseded in part by:** [0005](0005-firestore-document-ids-use-automatic-ids.md) (IDs de documento do Firestore).
 
 ## Context
 
@@ -120,7 +121,7 @@ Não misturar ULID e UUIDv7 como PK no **mesmo** bounded context sem ADR futuro.
 
 | Hook | Evento | Script | Comportamento |
 |---|---|---|---|
-| session-start-announce | SessionStart (`startup\|resume\|clear\|compact`) + PreCompact | `session-start-announce.cjs` | Injeta **using-ddc completo** + catálogo + tail do progress ledger |
+| session-start-announce | SessionStart (`startup\|resume\|clear\|compact\|fork`) | `session-start-announce.cjs` | Injeta **using-ddc completo** + catálogo + tail do progress ledger |
 | suggest-skills | UserPromptSubmit + PostToolUse Edit\|Write | `suggest-skills.cjs` | Sugere skills **e** paths `@.contexts` (typescript-7, api, plans, etc.) |
 | guard-conventional-commit | PreToolUse Bash `git commit*` | `guard-conventional-commit.cjs` | Mantido |
 | check-claude-md-size | Stop | `check-claude-md-size.cjs` | Aviso se CLAUDE.md > 200 linhas |
@@ -286,6 +287,15 @@ Artefatos que **implementam** esta decisão (não reabrir sem ADR superseding):
 
 Correções de conformidade que **não alteram** pins nem bootstrap — a decisão original permanece válida.
 
+- **2026-09-28 — layout plano de skills e ajustes de hooks:**
+  - Skills saíram de `.claude/skills/<categoria>/<name>/SKILL.md` para `.claude/skills/<name>/SKILL.md` (pasta = `name`): o Claude Code só descobre `.claude/skills/<skill-name>/SKILL.md`, e as pastas de categoria aninhadas nunca eram descobertas. Os paths aninhados citados acima (skill TS `.claude/skills/language/typescript-7/` em "Matriz de baseline aceita", tabela "Skills de processo" e "Compliance / implementation evidence") ficam emendados para o layout plano (`.claude/skills/typescript-7/`, `.claude/skills/using-ddc/`, `.claude/skills/writing-plans-ddc/`, `.claude/skills/verification-before-completion/`). Categoria vira só agrupamento lógico do catálogo; colisões seguem o prefixo `database-*`/`contracts-*`.
+  - Front-matter das skills: `description` entre aspas (YAML estrito) e `allowed-tools` removido (pré-aprovava ferramentas enquanto a skill estava ativa).
+  - `suggest-skills` ignora prompts de task-notification e limita a 6 skills e 6 contextos por sugestão; `grounding-warn` ignora entradas `isMeta` do transcript e respeita `stop_hook_active`; `guard-conventional-commit` exige descrição minúscula e sem ponto final e passa a rodar em qualquer comando `git *` (acha o `commit` dentro do comando).
+- **2026-09-28 — matriz de versões:** os pins da tabela "Matriz de baseline aceita" (acima) foram substituídos pela ADR 0002. O texto histórico dessa tabela não foi reescrito. IDs, harness e a decisão de secrets desta ADR continuam valendo.
+- **2026-09-28 — correções do harness (doc oficial de hooks conferida):**
+  - PreCompact removido do `settings.json`: o evento não aceita `additionalContext`; a reinjeção segue pelo SessionStart `compact`.
+  - `guard-conventional-commit`: o filtro `if` casa subcomandos, mas o script só validava comando que começava com `git commit`; agora acha o commit em comando composto, lê `-F -`/`-F <arquivo>` e barra header acima de 72 caracteres ou com escopo `a/b`.
+  - `grounding-warn` e `suggest-skills`: paths passam a ser relativos ao projeto (o diretório pode se chamar `.contexts`, o que fazia todo path parecer SSOT). `grounding-warn` avisa o Claude por `additionalContext` uma vez por turn; `suggest-skills` deixou o `systemMessage`, que só o usuário via.
 - **2026-07-22 — auditoria de conformidade (pente fino):**
   - `guard-conventional-commit`: extração do subject corrigida para mensagens multi-linha (heredoc Bash `-m "$(cat <<'EOF'…)"` bloqueava commits válidos; here-string PowerShell `-m @'…'@` passava sem validação) e cobertura estendida à tool PowerShell em `settings.json` — a tabela de harness acima ("PreToolUse Bash") fica emendada para **Bash/PowerShell**. Regex também passou a aceitar `!` de breaking change (`feat!:` / `feat(scope)!:`), que a rule `commits` declara válido e o guard rejeitava.
   - `.contexts/business/` (6 arquivos) e `.contexts/product/` (5) criados como **boilerplate `status: template`** — os imports do CLAUDE.md e as skills business/product agora resolvem; nenhum conteúdo de negócio/produto foi inventado (preenchimento segue com os times).

@@ -1,0 +1,8 @@
+{
+  "id": "fundo-cri-listado",
+  "segment": "FII de CRI listado",
+  "examples": ["KNCR11", "CPTS11", "HGCR11", "MXRF11", "RPRI11", "IRDM11"],
+  "primaryKpis": ["dy", "duration", "p_vp", "razao_pmt", "oc", "es"],
+  "decisionJourney": "rebalance mensal + relatório trimestral",
+  "_meta": { "refinedBySme": false }
+}

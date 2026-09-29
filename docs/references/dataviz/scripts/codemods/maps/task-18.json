@@ -1,0 +1,2022 @@
+[
+  {
+    "file": "src/widgets/app-header/ui/AppHeader.tsx",
+    "line": 28,
+    "from": "relatorio",
+    "to": "reportName",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/widgets/app-header/ui/AppHeader.tsx",
+    "line": 29,
+    "from": "pagina",
+    "to": "pageTitle",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "src/widgets/app-header/ui/AppHeader.tsx",
+    "line": 30,
+    "from": "navColapsada",
+    "to": "isNavCollapsed",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/widgets/app-header/ui/AppHeader.tsx",
+    "line": 31,
+    "from": "toggleNavColapsada",
+    "to": "toggleNavCollapsed",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/widgets/app-header/ui/UserMenu.tsx",
+    "line": 35,
+    "from": "nome",
+    "to": "name",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 23
+  },
+  {
+    "file": "src/widgets/app-header/ui/__tests__/AppHeader.test.tsx",
+    "line": 64,
+    "from": "botao",
+    "to": "button",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 8
+  },
+  {
+    "file": "src/widgets/chart-widget/ui/ChartSizer.tsx",
+    "line": 14,
+    "from": "alturaDeReserva",
+    "to": "reservedHeight",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 7
+  },
+  {
+    "file": "src/widgets/chart-widget/ui/ChartSizer.tsx",
+    "line": 42,
+    "from": "ALTURA_DE_RESERVA",
+    "to": "RESERVED_HEIGHT",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/widgets/chart-widget/ui/ChartSizer.tsx",
+    "line": 44,
+    "from": "alturaDeReserva",
+    "to": "reservedHeight",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 7
+  },
+  {
+    "file": "src/widgets/chart-widget/ui/ChartSizer.tsx",
+    "line": 47,
+    "from": "noFluxo",
+    "to": "inFlow",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/widgets/chart-widget/ui/ChartSizer.tsx",
+    "line": 47,
+    "from": "setNoFluxo",
+    "to": "setInFlow",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/widgets/chart-widget/ui/ChartSizer.tsx",
+    "line": 49,
+    "from": "naoVoltaAoFluxoRef",
+    "to": "stayOutOfFlowRef",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/widgets/chart-widget/ui/ChartSizer.tsx",
+    "line": 77,
+    "from": "atual",
+    "to": "current",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 9
+  },
+  {
+    "file": "src/widgets/chart-widget/ui/ChartSizer.tsx",
+    "line": 97,
+    "from": "atual",
+    "to": "current",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 9
+  },
+  {
+    "file": "src/widgets/chart-widget/ui/ChartSizer.tsx",
+    "line": 99,
+    "from": "altura",
+    "to": "heightPx",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/widgets/chart-widget/ui/ChartWidget.test.tsx",
+    "line": 19,
+    "from": "areaDeConteudo",
+    "to": "contentArea",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/widgets/chart-widget/ui/ChartWidget.tsx",
+    "line": 24,
+    "from": "selo",
+    "to": "badge",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/widgets/chart-widget/ui/ChartWidget.tsx",
+    "line": 38,
+    "from": "selo",
+    "to": "badge",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/widgets/chart-widget/ui/__tests__/ChartSizer.test.tsx",
+    "line": 38,
+    "from": "medicoes",
+    "to": "measurements",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/widgets/chart-widget/ui/__tests__/ChartSizer.test.tsx",
+    "line": 39,
+    "from": "dispara",
+    "to": "fire",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/widgets/chart-widget/ui/__tests__/ChartSizer.test.tsx",
+    "line": 41,
+    "from": "ObserverFalso",
+    "to": "FakeObserver",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/widgets/chart-widget/ui/__tests__/ChartSizer.test.tsx",
+    "line": 58,
+    "from": "interno",
+    "to": "inner",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "src/widgets/chart-widget/ui/__tests__/ChartSizer.test.tsx",
+    "line": 75,
+    "from": "medido",
+    "to": "measured",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "src/widgets/chart-widget/ui/__tests__/ChartSizer.test.tsx",
+    "line": 76,
+    "from": "interno",
+    "to": "inner",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "src/widgets/chart-widget/ui/__tests__/ChartSizer.test.tsx",
+    "line": 87,
+    "from": "medido",
+    "to": "measured",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "src/widgets/chart-widget/ui/__tests__/ChartSizer.test.tsx",
+    "line": 105,
+    "from": "recebidas",
+    "to": "received",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/widgets/client-switcher/ui/TopbarClientSwitcher.tsx",
+    "line": 21,
+    "from": "variante",
+    "to": "variant",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/widgets/client-switcher/ui/TopbarClientSwitcher.tsx",
+    "line": 21,
+    "from": "variante",
+    "to": "variant",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/widgets/client-switcher/ui/TopbarClientSwitcher.tsx",
+    "line": 22,
+    "from": "bloco",
+    "to": "block",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 8
+  },
+  {
+    "file": "src/widgets/data-table-widget/ui/CorpoDaTabela.tsx",
+    "line": 26,
+    "from": "COLUNA_FIXA",
+    "to": "FIXED_COLUMN",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/widgets/data-table-widget/ui/CorpoDaTabela.tsx",
+    "line": 28,
+    "from": "CorpoDaTabela",
+    "to": "DataTableBody",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/widgets/data-table-widget/ui/CorpoDaTabela.tsx",
+    "line": 30,
+    "from": "linhas",
+    "to": "rows",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "src/widgets/data-table-widget/ui/CorpoDaTabela.tsx",
+    "line": 37,
+    "from": "linhas",
+    "to": "rows",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "src/widgets/data-table-widget/ui/CorpoDaTabela.tsx",
+    "line": 42,
+    "from": "colunasVisiveis",
+    "to": "visibleColumns",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/widgets/data-table-widget/ui/CorpoDaTabela.tsx",
+    "line": 94,
+    "from": "linha",
+    "to": "row",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/widgets/data-table-widget/ui/CorpoDaTabela.tsx",
+    "line": 99,
+    "from": "celula",
+    "to": "cell",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/widgets/data-table-widget/ui/CorpoDaTabela.tsx",
+    "line": 116,
+    "from": "coluna",
+    "to": "column",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "src/widgets/data-table-widget/ui/CorpoDaTabela.tsx",
+    "line": 117,
+    "from": "chave",
+    "to": "key",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/widgets/data-table-widget/ui/CorpoDaTabela.tsx",
+    "line": 143,
+    "from": "AcoesDaTabela",
+    "to": "TableActions",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/widgets/data-table-widget/ui/CorpoDaTabela.tsx",
+    "line": 183,
+    "from": "coluna",
+    "to": "column",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "src/widgets/data-table-widget/ui/__tests__/DataTableWidget.expandido.test.tsx",
+    "line": 22,
+    "from": "Linha",
+    "to": "Row",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/widgets/data-table-widget/ui/__tests__/DataTableWidget.expandido.test.tsx",
+    "line": 27,
+    "from": "COLUNAS",
+    "to": "COLUMNS",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/widgets/data-table-widget/ui/__tests__/DataTableWidget.expandido.test.tsx",
+    "line": 38,
+    "from": "DADOS",
+    "to": "DATA",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/widgets/data-table-widget/ui/__tests__/DataTableWidget.expandido.test.tsx",
+    "line": 46,
+    "from": "abreODialogo",
+    "to": "openDialog",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "src/widgets/data-table-widget/ui/__tests__/DataTableWidget.expandido.test.tsx",
+    "line": 62,
+    "from": "dialogo",
+    "to": "dialog",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 12
+  },
+  {
+    "file": "src/widgets/data-table-widget/ui/__tests__/DataTableWidget.expandido.test.tsx",
+    "line": 63,
+    "from": "cabecalho",
+    "to": "header",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/widgets/data-table-widget/ui/__tests__/DataTableWidget.expandido.test.tsx",
+    "line": 68,
+    "from": "dialogo",
+    "to": "dialog",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 12
+  },
+  {
+    "file": "src/widgets/data-table-widget/ui/__tests__/DataTableWidget.expandido.test.tsx",
+    "line": 73,
+    "from": "dialogo",
+    "to": "dialog",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 12
+  },
+  {
+    "file": "src/widgets/data-table-widget/ui/__tests__/DataTableWidget.expandido.test.tsx",
+    "line": 80,
+    "from": "dialogo",
+    "to": "dialog",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 12
+  },
+  {
+    "file": "src/widgets/data-table-widget/ui/__tests__/DataTableWidget.expandido.test.tsx",
+    "line": 86,
+    "from": "dialogo",
+    "to": "dialog",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 12
+  },
+  {
+    "file": "src/widgets/data-table-widget/ui/__tests__/DataTableWidget.expandido.test.tsx",
+    "line": 87,
+    "from": "soDados",
+    "to": "dataOnly",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/widgets/filter-panel/ui/__tests__/FilterPanel.test.tsx",
+    "line": 101,
+    "from": "rotulo",
+    "to": "label",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 13
+  },
+  {
+    "file": "src/widgets/filter-panel/ui/__tests__/FilterPanel.test.tsx",
+    "line": 116,
+    "from": "rotulo",
+    "to": "label",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 13
+  },
+  {
+    "file": "src/widgets/filter-panel/ui/__tests__/FilterPanel.test.tsx",
+    "line": 124,
+    "from": "rotulo",
+    "to": "label",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 13
+  },
+  {
+    "file": "src/widgets/filter-panel/ui/__tests__/FilterPanel.test.tsx",
+    "line": 137,
+    "from": "antigo",
+    "to": "old",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "src/widgets/filter-panel/ui/__tests__/FilterPanel.test.tsx",
+    "line": 138,
+    "from": "novo",
+    "to": "newValue",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "src/widgets/filter-panel/ui/__tests__/FilterPanel.test.tsx",
+    "line": 149,
+    "from": "antigo",
+    "to": "old",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "src/widgets/filter-panel/ui/__tests__/FilterPanel.test.tsx",
+    "line": 150,
+    "from": "novo",
+    "to": "newValue",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "src/widgets/kpi-grid/ui/KpiCard.tsx",
+    "line": 57,
+    "from": "formataValor",
+    "to": "formatValue",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/widgets/kpi-grid/ui/KpiCard.tsx",
+    "line": 197,
+    "from": "formataValor",
+    "to": "formatValue",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/widgets/kpi-grid/ui/KpiCard.tsx",
+    "line": 245,
+    "from": "idDaInstancia",
+    "to": "instanceId",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/widgets/kpi-grid/ui/KpiCard.tsx",
+    "line": 470,
+    "from": "numero",
+    "to": "numberValue",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/widgets/kpi-grid/ui/KpiCard.tsx",
+    "line": 553,
+    "from": "bom",
+    "to": "isGood",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "src/widgets/kpi-grid/ui/KpiCard.tsx",
+    "line": 554,
+    "from": "ruim",
+    "to": "isBad",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "src/widgets/kpi-grid/ui/KpiCard.tsx",
+    "line": 555,
+    "from": "sinal",
+    "to": "sign",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/widgets/kpi-grid/ui/KpiExpandedModal.tsx",
+    "line": 73,
+    "from": "idDaInstancia",
+    "to": "instanceId",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/widgets/kpi-grid/ui/KpiExpandedModal.tsx",
+    "line": 95,
+    "from": "temHistorico",
+    "to": "hasHistory",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/widgets/kpi-grid/ui/KpiExpandedModal.tsx",
+    "line": 176,
+    "from": "bom",
+    "to": "isGood",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "src/widgets/kpi-grid/ui/KpiExpandedModal.tsx",
+    "line": 177,
+    "from": "ruim",
+    "to": "isBad",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "src/widgets/kpi-grid/ui/KpiExpandedModal.tsx",
+    "line": 178,
+    "from": "sinal",
+    "to": "sign",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/widgets/kpi-grid/ui/__tests__/KpiCard.comparativo.test.tsx",
+    "line": 15,
+    "from": "cartao",
+    "to": "card",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "src/widgets/kpi-grid/ui/__tests__/KpiCard.comparativo.test.tsx",
+    "line": 108,
+    "from": "selos",
+    "to": "badges",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/widgets/kpi-grid/ui/__tests__/KpiCard.gradiente.test.tsx",
+    "line": 21,
+    "from": "SERIE",
+    "to": "SERIES",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 9
+  },
+  {
+    "file": "src/widgets/kpi-grid/ui/__tests__/KpiCard.gradiente.test.tsx",
+    "line": 23,
+    "from": "idsDoGradiente",
+    "to": "gradientIds",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/widgets/kpi-grid/ui/__tests__/KpiCard.gradiente.test.tsx",
+    "line": 27,
+    "from": "referencias",
+    "to": "references",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/widgets/kpi-grid/ui/__tests__/KpiCard.gradiente.test.tsx",
+    "line": 59,
+    "from": "alvo",
+    "to": "target",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/widgets/kpi-grid/ui/__tests__/KpiCard.gradiente.test.tsx",
+    "line": 90,
+    "from": "abrir",
+    "to": "open",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/widgets/kpi-grid/ui/__tests__/KpiExpandedModal.theme.test.tsx",
+    "line": 26,
+    "from": "SERIE",
+    "to": "SERIES",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 9
+  },
+  {
+    "file": "src/widgets/kpi-grid/ui/__tests__/KpiExpandedModal.theme.test.tsx",
+    "line": 27,
+    "from": "MESES",
+    "to": "MONTHS",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/widgets/kpi-grid/ui/__tests__/KpiExpandedModal.theme.test.tsx",
+    "line": 29,
+    "from": "abre",
+    "to": "open",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 9
+  },
+  {
+    "file": "src/widgets/kpi-grid/ui/__tests__/KpiExpandedModal.theme.test.tsx",
+    "line": 49,
+    "from": "grafico",
+    "to": "chart",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/widgets/kpi-grid/ui/__tests__/KpiExpandedModal.visual.test.tsx",
+    "line": 30,
+    "from": "abre",
+    "to": "open",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 9
+  },
+  {
+    "file": "src/widgets/page-filter-bar/ui/PageFilterBar.test.tsx",
+    "line": 119,
+    "from": "FILTRO_POR_CAMPO",
+    "to": "FILTER_BY_FIELD",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/widgets/page-filter-bar/ui/PageFilterBar.test.tsx",
+    "line": 161,
+    "from": "antes",
+    "to": "before",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/widgets/page-toolbar/ui/PageToolbar.test.tsx",
+    "line": 96,
+    "from": "semDatas",
+    "to": "withoutDates",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/widgets/page-toolbar/ui/PageToolbar.tsx",
+    "line": 42,
+    "from": "filtros",
+    "to": "filters",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/widgets/page-toolbar/ui/PageToolbar.tsx",
+    "line": 43,
+    "from": "acoes",
+    "to": "actions",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/widgets/page-toolbar/ui/PageToolbar.tsx",
+    "line": 47,
+    "from": "filtros",
+    "to": "filters",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/widgets/page-toolbar/ui/PageToolbar.tsx",
+    "line": 49,
+    "from": "acoes",
+    "to": "actions",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/widgets/page-toolbar/ui/PageToolbar.tsx",
+    "line": 62,
+    "from": "temDatas",
+    "to": "hasDates",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/PagesSidebar.tsx",
+    "line": 52,
+    "from": "colapsavel",
+    "to": "collapsible",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/PagesSidebar.tsx",
+    "line": 83,
+    "from": "colapsavel",
+    "to": "collapsible",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/PagesSidebar.tsx",
+    "line": 88,
+    "from": "gruposCarregando",
+    "to": "groupsLoading",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/PagesSidebar.tsx",
+    "line": 97,
+    "from": "navColapsada",
+    "to": "isNavCollapsed",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/PagesSidebar.tsx",
+    "line": 98,
+    "from": "toggleNavColapsada",
+    "to": "toggleNavCollapsed",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/PagesSidebar.tsx",
+    "line": 99,
+    "from": "clientes",
+    "to": "clients",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/PagesSidebar.tsx",
+    "line": 100,
+    "from": "colapsada",
+    "to": "collapsed",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/PagesSidebar.tsx",
+    "line": 101,
+    "from": "clienteAtivo",
+    "to": "activeClient",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/PagesSidebar.tsx",
+    "line": 105,
+    "from": "editandoRelatorio",
+    "to": "isEditingReport",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/PagesSidebar.tsx",
+    "line": 109,
+    "from": "mostrandoChat",
+    "to": "isShowingChat",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/PagesSidebar.tsx",
+    "line": 118,
+    "from": "paginas",
+    "to": "pages",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 14
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/PagesSidebar.tsx",
+    "line": 119,
+    "from": "paginasCarregando",
+    "to": "pagesLoading",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/PagesSidebar.tsx",
+    "line": 120,
+    "from": "renomearPagina",
+    "to": "renamePage",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/PagesSidebar.tsx",
+    "line": 121,
+    "from": "removerPagina",
+    "to": "removePage",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/PagesSidebar.tsx",
+    "line": 122,
+    "from": "duplicarPagina",
+    "to": "duplicatePage",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/PagesSidebar.tsx",
+    "line": 125,
+    "from": "novaPaginaEm",
+    "to": "newPageIn",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/PagesSidebar.tsx",
+    "line": 125,
+    "from": "setNovaPaginaEm",
+    "to": "setNewPageIn",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 7,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/PagesSidebar.tsx",
+    "line": 128,
+    "from": "paginaViraTemplate",
+    "to": "pageToTemplate",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 11,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/PagesSidebar.tsx",
+    "line": 128,
+    "from": "setPaginaViraTemplate",
+    "to": "setPageToTemplate",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/PagesSidebar.tsx",
+    "line": 131,
+    "from": "trocaPendente",
+    "to": "pendingSwitch",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/PagesSidebar.tsx",
+    "line": 131,
+    "from": "setTrocaPendente",
+    "to": "setPendingSwitch",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/PagesSidebar.tsx",
+    "line": 147,
+    "from": "daUrl",
+    "to": "fromUrl",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/PagesSidebar.tsx",
+    "line": 150,
+    "from": "alvo",
+    "to": "target",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/PagesSidebar.tsx",
+    "line": 164,
+    "from": "primeira",
+    "to": "first",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/PagesSidebar.tsx",
+    "line": 179,
+    "from": "pedido",
+    "to": "requested",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/PagesSidebar.tsx",
+    "line": 184,
+    "from": "abrirPagina",
+    "to": "openPage",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/PagesSidebar.tsx",
+    "line": 190,
+    "from": "handleTrocarRelatorio",
+    "to": "handleSwitchReport",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/PagesSidebar.tsx",
+    "line": 196,
+    "from": "handleNovoRelatorio",
+    "to": "handleNewReport",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/PagesSidebar.tsx",
+    "line": 201,
+    "from": "nome",
+    "to": "name",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 23
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/PagesSidebar.tsx",
+    "line": 221,
+    "from": "handleRenomearRelatorio",
+    "to": "handleRenameReport",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/PagesSidebar.tsx",
+    "line": 221,
+    "from": "nomeAtual",
+    "to": "currentName",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/PagesSidebar.tsx",
+    "line": 226,
+    "from": "nome",
+    "to": "name",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 23
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/PagesSidebar.tsx",
+    "line": 237,
+    "from": "handleExcluirRelatorio",
+    "to": "handleDeleteReport",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/PagesSidebar.tsx",
+    "line": 237,
+    "from": "nome",
+    "to": "name",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 23
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/PagesSidebar.tsx",
+    "line": 256,
+    "from": "handleNovaPaginaEmBranco",
+    "to": "handleNewBlankPage",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/PagesSidebar.tsx",
+    "line": 363,
+    "from": "aba",
+    "to": "tab",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 13
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/PagesSidebar.tsx",
+    "line": 434,
+    "from": "nome",
+    "to": "name",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 23
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/PagesSidebar.tsx",
+    "line": 556,
+    "from": "aberto",
+    "to": "isOpen",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/ReportSwitcher.tsx",
+    "line": 28,
+    "from": "relatorios",
+    "to": "reports",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 15
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/ReportSwitcher.tsx",
+    "line": 30,
+    "from": "carregando",
+    "to": "loading",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 9
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/ReportSwitcher.tsx",
+    "line": 31,
+    "from": "onTrocar",
+    "to": "onSwitch",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 27
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/ReportSwitcher.tsx",
+    "line": 32,
+    "from": "onNovo",
+    "to": "onNew",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 11
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/ReportSwitcher.tsx",
+    "line": 33,
+    "from": "onRenomear",
+    "to": "onRename",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 8
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/ReportSwitcher.tsx",
+    "line": 33,
+    "from": "nome",
+    "to": "name",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 23
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/ReportSwitcher.tsx",
+    "line": 34,
+    "from": "onExcluir",
+    "to": "onDelete",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 8
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/ReportSwitcher.tsx",
+    "line": 34,
+    "from": "nome",
+    "to": "name",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 23
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/ReportSwitcher.tsx",
+    "line": 38,
+    "from": "relatorios",
+    "to": "reports",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 15
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/ReportSwitcher.tsx",
+    "line": 40,
+    "from": "carregando",
+    "to": "loading",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 9
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/ReportSwitcher.tsx",
+    "line": 41,
+    "from": "onTrocar",
+    "to": "onSwitch",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 27
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/ReportSwitcher.tsx",
+    "line": 42,
+    "from": "onNovo",
+    "to": "onNew",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 11
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/ReportSwitcher.tsx",
+    "line": 43,
+    "from": "onRenomear",
+    "to": "onRename",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 8
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/ReportSwitcher.tsx",
+    "line": 44,
+    "from": "onExcluir",
+    "to": "onDelete",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 8
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/ReportSwitcher.tsx",
+    "line": 62,
+    "from": "ativo",
+    "to": "isActive",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 16
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/SeletorDeAba.tsx",
+    "line": 6,
+    "from": "AbaDaColuna",
+    "to": "ColumnTab",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/SeletorDeAba.tsx",
+    "line": 8,
+    "from": "ABAS",
+    "to": "TABS",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/SeletorDeAba.tsx",
+    "line": 9,
+    "from": "rotulo",
+    "to": "label",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 13
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/SeletorDeAba.tsx",
+    "line": 9,
+    "from": "Icone",
+    "to": "Icon",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/SeletorDeAba.tsx",
+    "line": 10,
+    "from": "rotulo",
+    "to": "label",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 13
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/SeletorDeAba.tsx",
+    "line": 10,
+    "from": "Icone",
+    "to": "Icon",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/SeletorDeAba.tsx",
+    "line": 31,
+    "from": "SeletorDeAba",
+    "to": "TabSelector",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/SeletorDeAba.tsx",
+    "line": 32,
+    "from": "aba",
+    "to": "tab",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 13
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/SeletorDeAba.tsx",
+    "line": 33,
+    "from": "onTrocar",
+    "to": "onSwitch",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 27
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/SeletorDeAba.tsx",
+    "line": 36,
+    "from": "aba",
+    "to": "tab",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 13
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/SeletorDeAba.tsx",
+    "line": 37,
+    "from": "onTrocar",
+    "to": "onSwitch",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 27
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/SeletorDeAba.tsx",
+    "line": 37,
+    "from": "aba",
+    "to": "activeTab",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 13
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/SeletorDeAba.tsx",
+    "line": 58,
+    "from": "rotulo",
+    "to": "label",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 13
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/SeletorDeAba.tsx",
+    "line": 58,
+    "from": "Icone",
+    "to": "Icon",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/SeletorDeAba.tsx",
+    "line": 59,
+    "from": "ativa",
+    "to": "isActive",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/__tests__/PageListItem.test.tsx",
+    "line": 63,
+    "from": "nome",
+    "to": "name",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 23
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/__tests__/PageListItem.test.tsx",
+    "line": 65,
+    "from": "botao",
+    "to": "button",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 8
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/__tests__/PagesSidebar.test.tsx",
+    "line": 95,
+    "from": "relatorios",
+    "to": "reports",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 15
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/__tests__/PagesSidebar.test.tsx",
+    "line": 95,
+    "from": "carregando",
+    "to": "loading",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 9
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/__tests__/PagesSidebar.test.tsx",
+    "line": 95,
+    "from": "onTrocar",
+    "to": "onSwitch",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 27
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/__tests__/PagesSidebar.test.tsx",
+    "line": 95,
+    "from": "onNovo",
+    "to": "onNew",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 11
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/__tests__/PagesSidebar.test.tsx",
+    "line": 95,
+    "from": "onRenomear",
+    "to": "onRename",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 8
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/__tests__/PagesSidebar.test.tsx",
+    "line": 95,
+    "from": "onExcluir",
+    "to": "onDelete",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 8
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/__tests__/PagesSidebar.test.tsx",
+    "line": 96,
+    "from": "relatorios",
+    "to": "reports",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 15
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/__tests__/PagesSidebar.test.tsx",
+    "line": 98,
+    "from": "carregando",
+    "to": "loading",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 9
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/__tests__/PagesSidebar.test.tsx",
+    "line": 99,
+    "from": "onTrocar",
+    "to": "onSwitch",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 27
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/__tests__/PagesSidebar.test.tsx",
+    "line": 100,
+    "from": "onNovo",
+    "to": "onNew",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 11
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/__tests__/PagesSidebar.test.tsx",
+    "line": 101,
+    "from": "onRenomear",
+    "to": "onRename",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 8
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/__tests__/PagesSidebar.test.tsx",
+    "line": 101,
+    "from": "nome",
+    "to": "name",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 23
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/__tests__/PagesSidebar.test.tsx",
+    "line": 102,
+    "from": "onExcluir",
+    "to": "onDelete",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 8
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/__tests__/PagesSidebar.test.tsx",
+    "line": 102,
+    "from": "nome",
+    "to": "name",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 23
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/__tests__/PagesSidebar.test.tsx",
+    "line": 104,
+    "from": "ativo",
+    "to": "isActive",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 16
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/__tests__/PagesSidebar.test.tsx",
+    "line": 149,
+    "from": "PAGINAS",
+    "to": "PAGES",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/__tests__/PagesSidebar.test.tsx",
+    "line": 158,
+    "from": "paginas",
+    "to": "pages",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 14
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/__tests__/PagesSidebar.test.tsx",
+    "line": 169,
+    "from": "doisRelatorios",
+    "to": "twoReports",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/__tests__/PagesSidebar.test.tsx",
+    "line": 177,
+    "from": "preparar",
+    "to": "prepare",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 7
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/__tests__/PagesSidebar.test.tsx",
+    "line": 443,
+    "from": "botoes",
+    "to": "buttons",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/__tests__/ReportSwitcher.test.tsx",
+    "line": 11,
+    "from": "RELATORIOS",
+    "to": "REPORTS",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/__tests__/ReportSwitcher.test.tsx",
+    "line": 18,
+    "from": "onTrocar",
+    "to": "onSwitch",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 27
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/__tests__/ReportSwitcher.test.tsx",
+    "line": 19,
+    "from": "onNovo",
+    "to": "onNew",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 11
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/__tests__/ReportSwitcher.test.tsx",
+    "line": 20,
+    "from": "onRenomear",
+    "to": "onRename",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 8
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/__tests__/ReportSwitcher.test.tsx",
+    "line": 21,
+    "from": "onExcluir",
+    "to": "onDelete",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 8
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/__tests__/ReportSwitcher.test.tsx",
+    "line": 49,
+    "from": "carregando",
+    "to": "loading",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 9
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/__tests__/ReportSwitcher.test.tsx",
+    "line": 49,
+    "from": "relatorios",
+    "to": "reports",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 15
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/__tests__/ReportSwitcher.test.tsx",
+    "line": 55,
+    "from": "onNovo",
+    "to": "onNew",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 11
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/__tests__/ReportSwitcher.test.tsx",
+    "line": 55,
+    "from": "relatorios",
+    "to": "reports",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 15
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/__tests__/ReportSwitcher.test.tsx",
+    "line": 56,
+    "from": "convite",
+    "to": "invite",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/__tests__/SeletorDeAba.test.tsx",
+    "line": 24,
+    "from": "onTrocar",
+    "to": "onSwitch",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 27
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/__tests__/SeletorDeAba.test.tsx",
+    "line": 31,
+    "from": "onTrocar",
+    "to": "onSwitch",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 27
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/__tests__/SeletorDeAba.test.tsx",
+    "line": 40,
+    "from": "onTrocar",
+    "to": "onSwitch",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 27
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/__tests__/SeletorDeAba.test.tsx",
+    "line": 60,
+    "from": "botao",
+    "to": "button",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 8
+  },
+  {
+    "file": "src/widgets/data-table-widget/ui/CorpoDaTabela.tsx",
+    "line": 0,
+    "from": "src/widgets/data-table-widget/ui/CorpoDaTabela.tsx",
+    "to": "src/widgets/data-table-widget/ui/DataTableBody.tsx",
+    "kind": "file",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 1
+  },
+  {
+    "file": "src/widgets/data-table-widget/ui/__tests__/DataTableWidget.expandido.test.tsx",
+    "line": 0,
+    "from": "src/widgets/data-table-widget/ui/__tests__/DataTableWidget.expandido.test.tsx",
+    "to": "src/widgets/data-table-widget/ui/__tests__/DataTableWidget.expanded.test.tsx",
+    "kind": "file",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 1
+  },
+  {
+    "file": "src/widgets/kpi-grid/ui/__tests__/KpiCard.comparativo.test.tsx",
+    "line": 0,
+    "from": "src/widgets/kpi-grid/ui/__tests__/KpiCard.comparativo.test.tsx",
+    "to": "src/widgets/kpi-grid/ui/__tests__/KpiCard.comparison.test.tsx",
+    "kind": "file",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 1
+  },
+  {
+    "file": "src/widgets/kpi-grid/ui/__tests__/KpiCard.gradiente.test.tsx",
+    "line": 0,
+    "from": "src/widgets/kpi-grid/ui/__tests__/KpiCard.gradiente.test.tsx",
+    "to": "src/widgets/kpi-grid/ui/__tests__/KpiCard.gradient.test.tsx",
+    "kind": "file",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 1
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/SeletorDeAba.tsx",
+    "line": 0,
+    "from": "src/widgets/pages-sidebar/ui/SeletorDeAba.tsx",
+    "to": "src/widgets/pages-sidebar/ui/TabSelector.tsx",
+    "kind": "file",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 1
+  },
+  {
+    "file": "src/widgets/pages-sidebar/ui/__tests__/SeletorDeAba.test.tsx",
+    "line": 0,
+    "from": "src/widgets/pages-sidebar/ui/__tests__/SeletorDeAba.test.tsx",
+    "to": "src/widgets/pages-sidebar/ui/__tests__/TabSelector.test.tsx",
+    "kind": "file",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 1
+  }
+]

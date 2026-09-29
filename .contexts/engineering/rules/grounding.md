@@ -1,6 +1,6 @@
 ---
 title: Grounding
-type: rule
+type: rules
 status: active
 scope: engineering/rules
 last_updated: 2026-05-25
@@ -71,9 +71,9 @@ Antes disso: `Grep` por `STRIPE_SECRET_KEY` em `env.ts`, `.env.example`, schema 
 
 **Certo** — fluxo verificado:
 ```
-1. Glob "**/lib/db/*.ts"  → confirma src/lib/db/client.ts
-2. Read src/lib/db/client.ts → confirma export `db` e método `db.query`
-3. Escreve: import { db } from "@/lib/db/client"; await db.query(...)
+1. Glob "src/services/shared/*.ts"  → confirma src/services/shared/postgres-client.ts
+2. Read src/services/shared/postgres-client.ts → confirma export `db` e método `db.query`
+3. Escreve: import { db } from "@/services/shared/postgres-client"; await db.query(...)
 ```
 
 ## Sinais de violação (em code review)

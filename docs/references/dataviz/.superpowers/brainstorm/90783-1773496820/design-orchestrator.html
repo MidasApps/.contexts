@@ -1,0 +1,152 @@
+<h2>Design: Arquitetura do Orquestrador</h2>
+<p class="subtitle">Secao 1 de 5 — Fluxo principal e roteamento</p>
+
+<div class="mockup">
+  <div class="mockup-header">Fluxo Completo: Pergunta do Usuario ate Resposta</div>
+  <div class="mockup-body" style="font-family:monospace;font-size:12px;line-height:2;padding:20px;">
+
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+      <span style="background:#3b82f6;color:white;padding:6px 14px;border-radius:8px;font-weight:bold;white-space:nowrap;">1. Frontend</span>
+      <span style="color:#94a3b8;">useChat → sendMessage({ text }) → POST /api/chat</span>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+      <span style="background:#8b5cf6;color:white;padding:6px 14px;border-radius:8px;font-weight:bold;white-space:nowrap;">2. API Route</span>
+      <span style="color:#94a3b8;">Valida auth → extrai context/dataset/filters do body</span>
+    </div>
+
+    <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:16px;">
+      <span style="background:#dc2626;color:white;padding:6px 14px;border-radius:8px;font-weight:bold;white-space:nowrap;">3. Orchestrator</span>
+      <div style="color:#e2e8f0;">
+        streamText({<br/>
+        &nbsp;&nbsp;model: <span style="color:#fbbf24;">flash-lite</span> (rapido, barato)<br/>
+        &nbsp;&nbsp;system: <span style="color:#34d399;">"Voce e um router. Analise a pergunta e chame o agente correto."</span><br/>
+        &nbsp;&nbsp;tools: {<br/>
+        &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#f59e0b;">sql_agent</span>,
+        <span style="color:#f59e0b;">business_agent</span>,
+        <span style="color:#f59e0b;">dashboard_agent</span>,<br/>
+        &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#f59e0b;">comparison_agent</span>,
+        <span style="color:#f59e0b;">external_agent</span>,<br/>
+        &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#f59e0b;">export_agent</span>,
+        <span style="color:#f59e0b;">simulation_agent</span><br/>
+        &nbsp;&nbsp;}<br/>
+        &nbsp;&nbsp;stopWhen: stepCountIs(10)<br/>
+        })
+      </div>
+    </div>
+
+    <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:16px;">
+      <span style="background:#059669;color:white;padding:6px 14px;border-radius:8px;font-weight:bold;white-space:nowrap;">4. Sub-Agent</span>
+      <div style="color:#e2e8f0;">
+        Cada tool e um <span style="color:#fbbf24;">async generator</span>:<br/>
+        <span style="color:#94a3b8;">yield</span> { status: "analyzing" } &nbsp;→ frontend mostra indicador<br/>
+        <span style="color:#94a3b8;">yield</span> { status: "querying", sql } &nbsp;→ mostra SQL gerado<br/>
+        <span style="color:#94a3b8;">yield</span> { status: "processing", rowCount } &nbsp;→ mostra progresso<br/>
+        <span style="color:#22c55e;">return</span> { data, summary } &nbsp;→ resultado final pro orquestrador
+      </div>
+    </div>
+
+    <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:16px;">
+      <span style="background:#dc2626;color:white;padding:6px 14px;border-radius:8px;font-weight:bold;white-space:nowrap;">5. Orchestrator</span>
+      <div style="color:#e2e8f0;">
+        Recebe tool result → <span style="color:#34d399;">sintetiza resposta final em portugues</span><br/>
+        <span style="color:#94a3b8;">(pode chamar outro agente se precisar cruzar dados)</span>
+      </div>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:12px;">
+      <span style="background:#3b82f6;color:white;padding:6px 14px;border-radius:8px;font-weight:bold;white-space:nowrap;">6. Frontend</span>
+      <span style="color:#94a3b8;">Stream renderiza resposta + indicadores de tool em tempo real</span>
+    </div>
+
+  </div>
+</div>
+
+<div class="section" style="margin-top:20px;">
+  <h3>Decisoes de Design do Orquestrador</h3>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:12px;">
+    <div style="background:#1e293b;border:1px solid #334155;border-radius:8px;padding:16px;">
+      <div style="color:#f59e0b;font-weight:bold;margin-bottom:8px;">Modelo</div>
+      <div style="color:#e2e8f0;font-size:13px;">
+        <strong>Gemini 2.5 Flash-Lite</strong> — o orquestrador nao precisa raciocinar, so rotear.
+        Custo: $0.075/1M input. Latencia minima.
+      </div>
+    </div>
+    <div style="background:#1e293b;border:1px solid #334155;border-radius:8px;padding:16px;">
+      <div style="color:#f59e0b;font-weight:bold;margin-bottom:8px;">System Prompt</div>
+      <div style="color:#e2e8f0;font-size:13px;">
+        Enxuto: descreve cada agente em 1-2 linhas. Inclui regras de roteamento
+        (ex: "perguntas sobre contratos individuais → sql_agent").
+        <strong>Nao inclui contexto de negocio</strong> — isso fica nos sub-agentes.
+      </div>
+    </div>
+    <div style="background:#1e293b;border:1px solid #334155;border-radius:8px;padding:16px;">
+      <div style="color:#f59e0b;font-weight:bold;margin-bottom:8px;">Multi-Agent Chaining</div>
+      <div style="color:#e2e8f0;font-size:13px;">
+        O orquestrador pode chamar <strong>multiplos agentes em sequencia</strong> dentro dos 10 steps.
+        Ex: "Compare inadimplencia com a Selic" → sql_agent → external_agent → sintese.
+      </div>
+    </div>
+    <div style="background:#1e293b;border:1px solid #334155;border-radius:8px;padding:16px;">
+      <div style="color:#f59e0b;font-weight:bold;margin-bottom:8px;">Context Passing</div>
+      <div style="color:#e2e8f0;font-size:13px;">
+        O body do request inclui: <strong>dashboard context</strong> (indicadores visiveis),
+        <strong>dataset</strong> (cliente ativo), <strong>filters</strong> (periodo, projetos).
+        Cada sub-agente recebe apenas o contexto que precisa.
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section" style="margin-top:20px;">
+  <h3>Mapeamento de Roteamento</h3>
+  <div style="background:#1e293b;border:1px solid #334155;border-radius:8px;padding:16px;font-size:13px;">
+    <table style="width:100%;border-collapse:collapse;color:#e2e8f0;">
+      <thead>
+        <tr style="border-bottom:1px solid #475569;">
+          <th style="text-align:left;padding:8px;color:#f59e0b;">Tipo de Pergunta</th>
+          <th style="text-align:left;padding:8px;color:#f59e0b;">Agente</th>
+          <th style="text-align:left;padding:8px;color:#f59e0b;">Exemplo</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="border-bottom:1px solid #1e293b;">
+          <td style="padding:8px;">Consulta especifica / dados brutos</td>
+          <td style="padding:8px;color:#22c55e;">sql_agent</td>
+          <td style="padding:8px;color:#94a3b8;">"Quais contratos tem mais de 90 dias de atraso?"</td>
+        </tr>
+        <tr style="border-bottom:1px solid #1e293b;">
+          <td style="padding:8px;">Explicacao de conceito / regra</td>
+          <td style="padding:8px;color:#22c55e;">business_agent</td>
+          <td style="padding:8px;color:#94a3b8;">"O que significa PDD Liquid vs Bacen?"</td>
+        </tr>
+        <tr style="border-bottom:1px solid #1e293b;">
+          <td style="padding:8px;">O que estou vendo no dashboard</td>
+          <td style="padding:8px;color:#22c55e;">dashboard_agent</td>
+          <td style="padding:8px;color:#94a3b8;">"Resuma os KPIs atuais"</td>
+        </tr>
+        <tr style="border-bottom:1px solid #1e293b;">
+          <td style="padding:8px;">Variacao / tendencia / anomalia</td>
+          <td style="padding:8px;color:#22c55e;">comparison_agent</td>
+          <td style="padding:8px;color:#94a3b8;">"Como a inadimplencia evoluiu nos ultimos 6 meses?"</td>
+        </tr>
+        <tr style="border-bottom:1px solid #1e293b;">
+          <td style="padding:8px;">Dados economicos / mercado</td>
+          <td style="padding:8px;color:#22c55e;">external_agent</td>
+          <td style="padding:8px;color:#94a3b8;">"Qual a taxa Selic atual?"</td>
+        </tr>
+        <tr style="border-bottom:1px solid #1e293b;">
+          <td style="padding:8px;">Gerar relatorio / exportar</td>
+          <td style="padding:8px;color:#22c55e;">export_agent</td>
+          <td style="padding:8px;color:#94a3b8;">"Gere um PDF da carteira atual"</td>
+        </tr>
+        <tr>
+          <td style="padding:8px;">Cenario hipotetico / what-if</td>
+          <td style="padding:8px;color:#22c55e;">simulation_agent</td>
+          <td style="padding:8px;color:#94a3b8;">"Se o LTV subir 10%, qual o impacto na elegibilidade?"</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

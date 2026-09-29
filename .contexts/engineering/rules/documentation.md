@@ -2,7 +2,7 @@
 title: Regras de Documentação
 type: rules
 status: active
-last_updated: 2026-05-20
+last_updated: 2026-09-28
 ---
 
 # Regras de Documentação
@@ -16,6 +16,22 @@ Este documento governa apenas o **quando e como** da documentação. Conteúdos 
 ## Princípio geral
 
 **Código autoexplicativo vence comentário.** Antes de escrever um comentário ou doc, tente renomear, extrair função ou reestruturar.
+
+## Frontmatter dos contextos
+
+Todo markdown em `.contexts/` abre com o frontmatter abaixo. Exceção: ADRs usam o header MADR em bullets (`decisions/README.md`); `MEMORY.md` é índice sem frontmatter.
+
+```yaml
+---
+title:
+type: rules | contracts | stacks | architecture | practices | processes | decisions | business | product   # = nome da pasta
+status: active | current | template   # current = stack doc da versão vigente; accepted/superseded só em ADR
+last_updated: YYYY-MM-DD
+version:   # só stack, com o pin medido
+---
+```
+
+`last_updated` muda quando o conteúdo muda. `version` de stack aponta para `engineering/stacks/VERSIONS.md`, que é a medição, não um segundo baseline. O baseline está em `engineering/MEMORY.md`.
 
 - **Sempre** prefira nomes claros a comentários explicativos.
 - **Sempre** extraia funções nomeadas em vez de comentar blocos de código.

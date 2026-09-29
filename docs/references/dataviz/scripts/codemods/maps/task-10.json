@@ -1,0 +1,578 @@
+[
+  {
+    "file": "src/features/admin/model/__tests__/admin-hooks-race.test.tsx",
+    "line": 22,
+    "from": "armadilha",
+    "to": "trap",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/features/admin/model/useAdminAttributes.ts",
+    "line": 16,
+    "from": "SEM_ATRIBUTOS",
+    "to": "NO_ATTRIBUTES",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/features/admin/model/useAdminEntities.ts",
+    "line": 16,
+    "from": "SEM_ENTIDADES",
+    "to": "NO_ENTITIES",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/features/admin/model/useContractSchema.ts",
+    "line": 20,
+    "from": "SEM_SCHEMA",
+    "to": "NO_SCHEMA",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/features/admin/ui/BusinessProfileEditor.tsx",
+    "line": 38,
+    "from": "glossarioTexto",
+    "to": "glossaryText",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/features/admin/ui/BusinessProfileEditor.tsx",
+    "line": 43,
+    "from": "erroGlossario",
+    "to": "glossaryError",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/features/admin/ui/BusinessProfileEditor.tsx",
+    "line": 159,
+    "from": "PERFIL_VAZIO",
+    "to": "EMPTY_PROFILE",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/features/admin/ui/ClientForm.tsx",
+    "line": 30,
+    "from": "perfilPreenchido",
+    "to": "filledProfile",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/features/admin/ui/ClientForm.tsx",
+    "line": 50,
+    "from": "nome",
+    "to": "name",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "src/features/admin/ui/ClientForm.tsx",
+    "line": 50,
+    "from": "setNome",
+    "to": "setName",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 8,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/features/admin/ui/ClientForm.tsx",
+    "line": 51,
+    "from": "inicial",
+    "to": "initial",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/features/admin/ui/ClientForm.tsx",
+    "line": 51,
+    "from": "setInicial",
+    "to": "setInitial",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/features/admin/ui/ClientForm.tsx",
+    "line": 52,
+    "from": "cor",
+    "to": "selectedColor",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/features/admin/ui/ClientForm.tsx",
+    "line": 52,
+    "from": "setCor",
+    "to": "setSelectedColor",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/features/admin/ui/ClientForm.tsx",
+    "line": 56,
+    "from": "perfil",
+    "to": "profile",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/features/admin/ui/ClientForm.tsx",
+    "line": 56,
+    "from": "setPerfil",
+    "to": "setProfile",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/features/admin/ui/GroupForm.tsx",
+    "line": 28,
+    "from": "nome",
+    "to": "name",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "src/features/admin/ui/GroupForm.tsx",
+    "line": 28,
+    "from": "setNome",
+    "to": "setName",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 8,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/features/admin/ui/GroupForm.tsx",
+    "line": 29,
+    "from": "descricao",
+    "to": "description",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/features/admin/ui/GroupForm.tsx",
+    "line": 29,
+    "from": "setDescricao",
+    "to": "setDescription",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/features/admin/ui/__tests__/MetricRefsPicker.test.tsx",
+    "line": 6,
+    "from": "METRICAS",
+    "to": "METRICS",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/features/ai-studio/admin/ui/KnowledgeBasesTab.tsx",
+    "line": 18,
+    "from": "SEM_DOCS",
+    "to": "NO_DOCS",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/features/ai-studio/admin/ui/KnowledgeBasesTab.tsx",
+    "line": 30,
+    "from": "kbDoDialogo",
+    "to": "dialogKb",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/features/ai-studio/admin/ui/__tests__/KnowledgeBasesTab.test.tsx",
+    "line": 12,
+    "from": "pedidos",
+    "to": "requests",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 11
+  },
+  {
+    "file": "src/features/ai-studio/seed/portfolio-schema-texto.ts",
+    "line": 15,
+    "from": "PORTFOLIO_SCHEMA_TEXTO",
+    "to": "PORTFOLIO_SCHEMA_TEXT",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/features/business-context/types.test.ts",
+    "line": 39,
+    "from": "ruim",
+    "to": "bad",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/features/evals/scorers/__tests__/persona-fit.test.ts",
+    "line": 24,
+    "from": "operador",
+    "to": "operator",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/features/templates/ui/SaveAsTemplateDialog.tsx",
+    "line": 16,
+    "from": "PaginaParaTemplate",
+    "to": "PageForTemplate",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 12,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/features/templates/ui/SaveAsTemplateDialog.tsx",
+    "line": 45,
+    "from": "rascunhoPendente",
+    "to": "pendingDraft",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "src/features/templates/ui/SaveAsTemplateDialog.tsx",
+    "line": 49,
+    "from": "metaDaPagina",
+    "to": "pageMeta",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/features/templates/ui/SaveAsTemplateDialog.tsx",
+    "line": 84,
+    "from": "rascunhoPendente",
+    "to": "pendingDraft",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "src/features/templates/ui/SaveAsTemplateDialog.tsx",
+    "line": 88,
+    "from": "alvoId",
+    "to": "targetId",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/features/templates/ui/SaveAsTemplateDialog.tsx",
+    "line": 88,
+    "from": "setAlvoId",
+    "to": "setTargetId",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/features/templates/ui/SaveAsTemplateDialog.tsx",
+    "line": 103,
+    "from": "origemId",
+    "to": "sourceId",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/features/templates/ui/SaveAsTemplateDialog.tsx",
+    "line": 123,
+    "from": "trocarModo",
+    "to": "switchMode",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/features/templates/ui/SaveAsTemplateDialog.tsx",
+    "line": 123,
+    "from": "novo",
+    "to": "isNew",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/features/templates/ui/SaveAsTemplateDialog.tsx",
+    "line": 131,
+    "from": "alvo",
+    "to": "target",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 7
+  },
+  {
+    "file": "src/features/templates/ui/SaveAsTemplateDialog.tsx",
+    "line": 138,
+    "from": "escolherAlvo",
+    "to": "chooseTarget",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/features/templates/ui/SaveAsTemplateDialog.tsx",
+    "line": 141,
+    "from": "alvo",
+    "to": "target",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 7
+  },
+  {
+    "file": "src/features/templates/ui/SaveAsTemplateDialog.tsx",
+    "line": 188,
+    "from": "totalBlocos",
+    "to": "totalBlocks",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/features/templates/ui/SaveAsTemplateDialog.tsx",
+    "line": 189,
+    "from": "semTemplates",
+    "to": "hasNoTemplates",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/features/templates/ui/SaveAsTemplateFromPage.tsx",
+    "line": 18,
+    "from": "rascunhoPendente",
+    "to": "pendingDraft",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "src/features/templates/ui/SaveAsTemplateFromPage.tsx",
+    "line": 29,
+    "from": "rascunhoPendente",
+    "to": "pendingDraft",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "src/features/templates/ui/SaveAsTemplateFromPage.tsx",
+    "line": 46,
+    "from": "resto",
+    "to": "rest",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/features/templates/ui/TemplateMetaFields.tsx",
+    "line": 24,
+    "from": "TEMPLATE_META_VAZIO",
+    "to": "EMPTY_TEMPLATE_META",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/features/templates/ui/TemplateMetaFields.tsx",
+    "line": 45,
+    "from": "dicaDoNome",
+    "to": "nameHint",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/features/templates/ui/TemplateMetaFields.tsx",
+    "line": 53,
+    "from": "dicaDoNome",
+    "to": "nameHint",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/features/templates/ui/__tests__/SaveAsTemplateDialog.test.tsx",
+    "line": 13,
+    "from": "bloco",
+    "to": "block",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 8
+  },
+  {
+    "file": "src/features/templates/ui/__tests__/SaveAsTemplateDialog.test.tsx",
+    "line": 17,
+    "from": "pagina",
+    "to": "makePage",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 9
+  },
+  {
+    "file": "src/features/templates/ui/__tests__/SaveAsTemplateDialog.test.tsx",
+    "line": 51,
+    "from": "salvar",
+    "to": "save",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 12
+  },
+  {
+    "file": "src/features/templates/ui/__tests__/SaveAsTemplateDialog.test.tsx",
+    "line": 180,
+    "from": "rascunhoPendente",
+    "to": "pendingDraft",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "src/features/templates/ui/__tests__/SaveAsTemplateFromPage.test.tsx",
+    "line": 27,
+    "from": "bloco",
+    "to": "block",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 8
+  },
+  {
+    "file": "src/features/templates/ui/__tests__/SaveAsTemplateFromPage.test.tsx",
+    "line": 31,
+    "from": "paginaBase",
+    "to": "basePage",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 7,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/features/templates/ui/__tests__/SaveAsTemplateFromPage.test.tsx",
+    "line": 46,
+    "from": "renderizar",
+    "to": "renderDialog",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/features/templates/ui/__tests__/SaveAsTemplateFromPage.test.tsx",
+    "line": 50,
+    "from": "salvar",
+    "to": "save",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 12
+  },
+  {
+    "file": "src/features/ai-studio/seed/portfolio-schema-texto.ts",
+    "line": 0,
+    "from": "src/features/ai-studio/seed/portfolio-schema-texto.ts",
+    "to": "src/features/ai-studio/seed/portfolio-schema-text.ts",
+    "kind": "file",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 1
+  }
+]

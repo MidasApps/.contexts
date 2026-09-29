@@ -1,7 +1,9 @@
 ---
 title: PostgreSQL
-version: 18.x
-last_updated: 2026-07-13
+type: stacks
+category: database
+version: 18.6
+last_updated: 2026-09-28
 status: current
 upstream: https://www.postgresql.org/docs/18/
 ---
@@ -12,8 +14,8 @@ upstream: https://www.postgresql.org/docs/18/
 
 ## Versão alvo
 
-- **Pinned**: PostgreSQL **18.x** (atualizar minor versions de manutenção sem cerimônia).
-- **Postgres 19** está em beta (jun/2026) — **não** adotar em produção.
+- **Pinned**: PostgreSQL **18.6** (2026-08-13). O patch 18.5 não foi publicado. Atualizar o patch de manutenção da linha 18 sem cerimônia.
+- **Postgres 19** estava no beta 4 em 2026-09-24, sem GA. Não adotar. pgvector 0.8.6 publica imagem para `pg18`, não para 19.
 - **Não suportadas no projeto**: < 16. Bases em 16/17 devem planejar upgrade expand-migrate-contract para 18 (ver `@rules/migration`).
 
 ### Postgres 18 — o que importa
@@ -42,7 +44,7 @@ upstream: https://www.postgresql.org/docs/18/
 - `text` (não `varchar(n)` arbitrário).
 - `timestamptz` **sempre** (nunca `timestamp` sem timezone).
 - `uuid` para PKs (ver `@contracts/postgres`).
-- `numeric(p,s)` para money e quantias financeiras (nunca `float`/`double precision`).
+- `bigint` `amount_minor` para dinheiro. `numeric(p,s)` para taxa e quantidade fracionária. Nunca `float` / `double precision` (ver `@contracts/postgres`).
 - `boolean`, `inet`/`cidr`, `interval`, `daterange`/`tstzrange`.
 - `jsonb` (preferir sobre `json` — armazenamento binário, indexável).
 - Arrays nativos (`text[]`, `uuid[]`) quando semântica de conjunto pequeno e bounded.
@@ -76,8 +78,8 @@ CREATE INDEX events_data_gin ON events USING GIN (data jsonb_path_ops);
 ### Generated columns, partial e expression indexes
 
 ```sql
-ALTER TABLE invoices ADD COLUMN total_brl numeric(12,2)
-  GENERATED ALWAYS AS (subtotal + tax) STORED;
+ALTER TABLE invoices ADD COLUMN total_minor bigint
+  GENERATED ALWAYS AS (subtotal_minor + tax_minor) STORED;
 
 CREATE INDEX users_active_email_idx ON users (email)
   WHERE deleted_at IS NULL;
@@ -164,8 +166,9 @@ Driver moderno, TS-first, tagged template literals com escape automático, strea
 
 ```typescript
 import postgres from 'postgres';
+import { env } from '@/env'; // env validado por Zod (ver @contracts/secrets §5.4)
 
-const sql = postgres(process.env.DATABASE_URL!, {
+const sql = postgres(env.DATABASE_URL, {
   max: 10,
   idle_timeout: 20,
   connect_timeout: 10,
@@ -200,12 +203,14 @@ Use **somente em edge runtime**. Em Node runtime padrão, prefira `postgres` + p
 - Tipos inferidos: `typeof users.$inferSelect`, `typeof users.$inferInsert`.
 
 ```typescript
-import { pgTable, text, timestamp, boolean } from 'drizzle-orm/pg-core';
+import { sql } from 'drizzle-orm';
+import { pgTable, uuid, text, timestamp, boolean } from 'drizzle-orm/pg-core';
 
 export const users = pgTable('users', {
-  id: text('id').primaryKey(),
+  id: uuid('id').primaryKey().default(sql`uuidv7()`),
   email: text('email').notNull().unique(),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
   deletedAt: timestamp('deleted_at', { withTimezone: true }),
 });
 
@@ -316,7 +321,7 @@ Sem prescrição rígida; opções validadas:
 
 ## Local dev
 
-- **Docker Compose** com imagem `postgres:18-alpine` + extensions instaladas via `init.sql`.
+- **Docker Compose** com imagem `pgvector/pgvector:0.8.6-pg18` (Postgres 18 + pgvector; a imagem oficial `postgres:18` não traz `vector`) + extensions instaladas via `init.sql`.
 - Reset via script (`db:reset`); seed via SQL fixtures.
 - **testcontainers** para integration tests — banco real efêmero por suíte. Ver `@rules/testing`.
 
@@ -325,7 +330,7 @@ Exemplo mínimo:
 ```yaml
 services:
   postgres:
-    image: postgres:18-alpine
+    image: pgvector/pgvector:0.8.6-pg18
     environment:
       POSTGRES_PASSWORD: dev
     ports: ['5432:5432']
@@ -348,8 +353,8 @@ Foco em tecnologia. Convenções de modelagem ficam em `@contracts/postgres`.
 
 - `varchar(n)` com `n` arbitrário em vez de `text`.
 - `timestamp` sem timezone — **sempre** `timestamptz`.
-- `serial`/`bigserial` como PK em entidades de domínio (use `uuid` ou ULID `text`).
-- `float`/`double precision` para money — use `numeric(p,s)`.
+- `serial`/`bigserial` como PK em entidades de domínio (use `uuid DEFAULT uuidv7()`; ULID `text` só em bounded context legado com ADR, ver `@contracts/postgres`).
+- `float`/`double precision` para money — use `bigint` `amount_minor`. `numeric(p,s)` é para taxa e quantidade fracionária.
 - String concat em SQL (`sql.unsafe('... ' + userInput)`) — sempre parametrizado.
 - Connection per request sem pooler em serverless/edge.
 - `SELECT *` em hotspots — especifique colunas.
@@ -366,7 +371,7 @@ Foco em tecnologia. Convenções de modelagem ficam em `@contracts/postgres`.
 
 ## Referências
 
-- PostgreSQL 16 docs: https://www.postgresql.org/docs/16/
+- PostgreSQL 18 docs: https://www.postgresql.org/docs/18/
 - postgres.js: https://github.com/porsager/postgres
 - Drizzle ORM: https://orm.drizzle.team
 - pgvector: ver `@stacks/database/pgvector`

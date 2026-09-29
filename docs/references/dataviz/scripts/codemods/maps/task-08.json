@@ -1,0 +1,1848 @@
+[
+  {
+    "file": "src/features/ai-agents/tools/bqml/multi-tenancy.test.ts",
+    "line": 23,
+    "from": "perigoso",
+    "to": "dangerous",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/features/ai-agents/tools/bqml/multi-tenancy.ts",
+    "line": 58,
+    "from": "semCrases",
+    "to": "withoutBackticks",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/colunas-por-forma.test.ts",
+    "line": 50,
+    "from": "verificados",
+    "to": "checked",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/colunas-por-forma.test.ts",
+    "line": 70,
+    "from": "dica",
+    "to": "hint",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/colunas-por-forma.ts",
+    "line": 20,
+    "from": "Regra",
+    "to": "ColumnRule",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/colunas-por-forma.ts",
+    "line": 22,
+    "from": "colunas",
+    "to": "columns",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 44
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/colunas-por-forma.ts",
+    "line": 32,
+    "from": "REGRAS",
+    "to": "RULES",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/colunas-por-forma.ts",
+    "line": 47,
+    "from": "ResultadoDasColunas",
+    "to": "ColumnCheckResult",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/colunas-por-forma.ts",
+    "line": 49,
+    "from": "colunas",
+    "to": "columns",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 44
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/colunas-por-forma.ts",
+    "line": 49,
+    "from": "esperado",
+    "to": "expected",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/colunas-por-forma.ts",
+    "line": 60,
+    "from": "verificaColunas",
+    "to": "checkColumns",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 19
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/colunas-por-forma.ts",
+    "line": 60,
+    "from": "colunas",
+    "to": "columns",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 44
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/colunas-por-forma.ts",
+    "line": 61,
+    "from": "regra",
+    "to": "rule",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/colunas-por-forma.ts",
+    "line": 64,
+    "from": "igual",
+    "to": "matches",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/colunas-por-forma.ts",
+    "line": 70,
+    "from": "casa",
+    "to": "prefixMatches",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/colunas-por-forma.ts",
+    "line": 97,
+    "from": "dicaDeChavesDoBloco",
+    "to": "blockKeysHint",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 12
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/colunas-por-forma.ts",
+    "line": 97,
+    "from": "colunas",
+    "to": "columns",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 44
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/colunas-por-forma.ts",
+    "line": 99,
+    "from": "eixo",
+    "to": "axis",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/create-metric.test.ts",
+    "line": 4,
+    "from": "valida",
+    "to": "validate",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/create-metric.test.ts",
+    "line": 5,
+    "from": "grava",
+    "to": "save",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 23
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/create-metric.test.ts",
+    "line": 16,
+    "from": "Resultado",
+    "to": "Result",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 21
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/create-metric.test.ts",
+    "line": 17,
+    "from": "executar",
+    "to": "run",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 58
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/create-metric.test.ts",
+    "line": 21,
+    "from": "entrada",
+    "to": "input",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 7
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/create-metric.test.ts",
+    "line": 28,
+    "from": "registradas",
+    "to": "registered",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 11
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/create-metric.ts",
+    "line": 66,
+    "from": "rascunho",
+    "to": "draft",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 39
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/create-metric.ts",
+    "line": 76,
+    "from": "validacao",
+    "to": "validation",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 21
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/create-metric.ts",
+    "line": 76,
+    "from": "rascunho",
+    "to": "draft",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 39
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/create-metric.ts",
+    "line": 89,
+    "from": "gravada",
+    "to": "saved",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/list-metric-fields.test.ts",
+    "line": 4,
+    "from": "Resultado",
+    "to": "Result",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 21
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/list-metric-fields.test.ts",
+    "line": 5,
+    "from": "executar",
+    "to": "run",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 58
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/list-metric-fields.ts",
+    "line": 31,
+    "from": "entidade",
+    "to": "entity",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/list-metric-fields.ts",
+    "line": 32,
+    "from": "contratos",
+    "to": "contracts",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/list-metric-fields.ts",
+    "line": 43,
+    "from": "filtro",
+    "to": "filter",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 12
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/list-metric-fields.ts",
+    "line": 44,
+    "from": "todas",
+    "to": "all",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/list-metric-fields.ts",
+    "line": 55,
+    "from": "filtradas",
+    "to": "filtered",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/list-metric-fields.ts",
+    "line": 56,
+    "from": "entidades",
+    "to": "entities",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/revert-metric.test.ts",
+    "line": 6,
+    "from": "ultima",
+    "to": "latest",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/revert-metric.test.ts",
+    "line": 7,
+    "from": "arquiva",
+    "to": "archive",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/revert-metric.test.ts",
+    "line": 23,
+    "from": "Resultado",
+    "to": "Result",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 21
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/revert-metric.test.ts",
+    "line": 24,
+    "from": "executar",
+    "to": "run",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 58
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/revert-metric.test.ts",
+    "line": 30,
+    "from": "docValido",
+    "to": "validDoc",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/revert-metric.test.ts",
+    "line": 59,
+    "from": "salvo",
+    "to": "saved",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/revert-metric.ts",
+    "line": 47,
+    "from": "atual",
+    "to": "current",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 15
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/revert-metric.ts",
+    "line": 59,
+    "from": "revisao",
+    "to": "revision",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/revert-metric.ts",
+    "line": 85,
+    "from": "restaurado",
+    "to": "restored",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/revert-metric.ts",
+    "line": 98,
+    "from": "colunas",
+    "to": "columns",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 44
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/update-metric.test.ts",
+    "line": 4,
+    "from": "valida",
+    "to": "validate",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/update-metric.test.ts",
+    "line": 5,
+    "from": "grava",
+    "to": "save",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 23
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/update-metric.test.ts",
+    "line": 6,
+    "from": "usos",
+    "to": "uses",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 21
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/update-metric.test.ts",
+    "line": 25,
+    "from": "Resultado",
+    "to": "Result",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 21
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/update-metric.test.ts",
+    "line": 26,
+    "from": "executar",
+    "to": "run",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 58
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/update-metric.test.ts",
+    "line": 30,
+    "from": "metricaExistente",
+    "to": "existingMetric",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/update-metric.test.ts",
+    "line": 44,
+    "from": "registradas",
+    "to": "registered",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 11
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/update-metric.test.ts",
+    "line": 54,
+    "from": "SQL_NOVO",
+    "to": "NEW_SQL",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/update-metric.test.ts",
+    "line": 55,
+    "from": "corrigir",
+    "to": "fix",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 9
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/update-metric.test.ts",
+    "line": 56,
+    "from": "redefinir",
+    "to": "redefine",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/update-metric.test.ts",
+    "line": 59,
+    "from": "soAquiUsa",
+    "to": "onlyHereUses",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/update-metric.test.ts",
+    "line": 61,
+    "from": "outrasUsam",
+    "to": "othersUse",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/update-metric.ts",
+    "line": 89,
+    "from": "dadosAtuais",
+    "to": "currentData",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/update-metric.ts",
+    "line": 90,
+    "from": "atual",
+    "to": "current",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 15
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/update-metric.ts",
+    "line": 117,
+    "from": "rascunho",
+    "to": "draft",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 39
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/update-metric.ts",
+    "line": 127,
+    "from": "doCliente",
+    "to": "fromClient",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/update-metric.ts",
+    "line": 149,
+    "from": "usos",
+    "to": "uses",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 21
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/update-metric.ts",
+    "line": 150,
+    "from": "alcancaOutraPagina",
+    "to": "reachesOtherPage",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/update-metric.ts",
+    "line": 154,
+    "from": "corrigindo",
+    "to": "isFix",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/update-metric.ts",
+    "line": 180,
+    "from": "editaNoLugar",
+    "to": "editsInPlace",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/update-metric.ts",
+    "line": 182,
+    "from": "validacao",
+    "to": "validation",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 21
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/update-metric.ts",
+    "line": 183,
+    "from": "rascunho",
+    "to": "draft",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 39
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/update-metric.ts",
+    "line": 198,
+    "from": "metrica",
+    "to": "metric",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 17
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/update-metric.ts",
+    "line": 201,
+    "from": "gravada",
+    "to": "saved",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/update-metric.ts",
+    "line": 230,
+    "from": "variante",
+    "to": "variant",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/usos-da-metrica.test.ts",
+    "line": 6,
+    "from": "estrutura",
+    "to": "structure",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/usos-da-metrica.test.ts",
+    "line": 7,
+    "from": "leituras",
+    "to": "reads",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/usos-da-metrica.test.ts",
+    "line": 20,
+    "from": "dados",
+    "to": "data",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 16
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/usos-da-metrica.test.ts",
+    "line": 73,
+    "from": "usos",
+    "to": "uses",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 21
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/usos-da-metrica.test.ts",
+    "line": 88,
+    "from": "uso",
+    "to": "usage",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/usos-da-metrica.ts",
+    "line": 17,
+    "from": "UsoDaMetrica",
+    "to": "MetricUsage",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/usos-da-metrica.ts",
+    "line": 33,
+    "from": "contaReferencias",
+    "to": "countReferences",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/usos-da-metrica.ts",
+    "line": 35,
+    "from": "soma",
+    "to": "sum",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/usos-da-metrica.ts",
+    "line": 39,
+    "from": "chave",
+    "to": "key",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 22
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/usos-da-metrica.ts",
+    "line": 39,
+    "from": "valor",
+    "to": "value",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/usos-da-metrica.ts",
+    "line": 51,
+    "from": "usosDaMetrica",
+    "to": "metricUsages",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 7
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/usos-da-metrica.ts",
+    "line": 56,
+    "from": "gruposCol",
+    "to": "groupsCol",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/usos-da-metrica.ts",
+    "line": 59,
+    "from": "porGrupo",
+    "to": "byGroup",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/usos-da-metrica.ts",
+    "line": 64,
+    "from": "dados",
+    "to": "data",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 16
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/usos-da-metrica.ts",
+    "line": 65,
+    "from": "blocos",
+    "to": "blocks",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 9
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/usos-da-metrica.ts",
+    "line": 82,
+    "from": "usadaForaDe",
+    "to": "usedOutside",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 7
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/usos-da-metrica.ts",
+    "line": 83,
+    "from": "usos",
+    "to": "uses",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 21
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/usos-da-metrica.ts",
+    "line": 84,
+    "from": "alvo",
+    "to": "target",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 12
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/valida-rascunho.test.ts",
+    "line": 16,
+    "from": "rascunho",
+    "to": "draft",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 39
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/valida-rascunho.test.ts",
+    "line": 25,
+    "from": "respostas",
+    "to": "responses",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/valida-rascunho.test.ts",
+    "line": 25,
+    "from": "linhas",
+    "to": "rows",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/valida-rascunho.test.ts",
+    "line": 26,
+    "from": "chamada",
+    "to": "call",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/valida-rascunho.test.ts",
+    "line": 43,
+    "from": "rascunho",
+    "to": "draft",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 39
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/valida-rascunho.test.ts",
+    "line": 77,
+    "from": "segunda",
+    "to": "second",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/valida-rascunho.ts",
+    "line": 38,
+    "from": "RascunhoDeMetrica",
+    "to": "MetricDraft",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/valida-rascunho.ts",
+    "line": 49,
+    "from": "EtapaDaValidacao",
+    "to": "ValidationStep",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/valida-rascunho.ts",
+    "line": 51,
+    "from": "ValidacaoDeMetrica",
+    "to": "MetricValidation",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/valida-rascunho.ts",
+    "line": 69,
+    "from": "avisoDaAmostra",
+    "to": "sampleWarning",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/valida-rascunho.ts",
+    "line": 69,
+    "from": "linhas",
+    "to": "rows",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/valida-rascunho.ts",
+    "line": 69,
+    "from": "colunas",
+    "to": "columns",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 44
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/valida-rascunho.ts",
+    "line": 74,
+    "from": "medidas",
+    "to": "measures",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/valida-rascunho.ts",
+    "line": 75,
+    "from": "tudoNulo",
+    "to": "allNull",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/valida-rascunho.ts",
+    "line": 75,
+    "from": "linha",
+    "to": "row",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/valida-rascunho.ts",
+    "line": 76,
+    "from": "registro",
+    "to": "record",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/valida-rascunho.ts",
+    "line": 88,
+    "from": "ID_DE_RASCUNHO",
+    "to": "DRAFT_ID",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/valida-rascunho.ts",
+    "line": 103,
+    "from": "FILTROS_DE_VALIDACAO",
+    "to": "VALIDATION_FILTERS",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/valida-rascunho.ts",
+    "line": 109,
+    "from": "validaRascunho",
+    "to": "validateDraft",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 21
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/valida-rascunho.ts",
+    "line": 110,
+    "from": "rascunho",
+    "to": "draft",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 39
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/valida-rascunho.ts",
+    "line": 115,
+    "from": "rascunho",
+    "to": "draft",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 39
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/valida-rascunho.ts",
+    "line": 155,
+    "from": "colunas",
+    "to": "columns",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 44
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/valida-rascunho.ts",
+    "line": 162,
+    "from": "amostra",
+    "to": "sample",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/features/ai-agents/tools/page-filters/add-page-filter.test.ts",
+    "line": 19,
+    "from": "Resultado",
+    "to": "Result",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 21
+  },
+  {
+    "file": "src/features/ai-agents/tools/page-filters/add-page-filter.test.ts",
+    "line": 20,
+    "from": "executar",
+    "to": "run",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 58
+  },
+  {
+    "file": "src/features/ai-agents/tools/page-filters/add-page-filter.test.ts",
+    "line": 92,
+    "from": "gravado",
+    "to": "saved",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/features/ai-agents/tools/page-filters/add-page-filter.test.ts",
+    "line": 101,
+    "from": "gravado",
+    "to": "saved",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/features/ai-agents/tools/page-filters/add-page-filter.test.ts",
+    "line": 135,
+    "from": "comCategoria",
+    "to": "withCategory",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/features/ai-agents/tools/page-filters/add-page-filter.test.ts",
+    "line": 187,
+    "from": "comSerie",
+    "to": "withSeries",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/features/ai-agents/tools/page-filters/add-page-filter.ts",
+    "line": 49,
+    "from": "campo",
+    "to": "field",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 34
+  },
+  {
+    "file": "src/features/ai-agents/tools/page-filters/add-page-filter.ts",
+    "line": 75,
+    "from": "dados",
+    "to": "data",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 16
+  },
+  {
+    "file": "src/features/ai-agents/tools/page-filters/add-page-filter.ts",
+    "line": 79,
+    "from": "existentes",
+    "to": "existing",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/features/ai-agents/tools/page-filters/add-page-filter.ts",
+    "line": 80,
+    "from": "disponiveis",
+    "to": "available",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "src/features/ai-agents/tools/page-filters/add-page-filter.ts",
+    "line": 86,
+    "from": "escolhido",
+    "to": "chosen",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 15
+  },
+  {
+    "file": "src/features/ai-agents/tools/page-filters/add-page-filter.ts",
+    "line": 93,
+    "from": "lista",
+    "to": "list",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/features/ai-agents/tools/page-filters/add-page-filter.ts",
+    "line": 141,
+    "from": "honram",
+    "to": "honoring",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 12
+  },
+  {
+    "file": "src/features/ai-agents/tools/page-filters/add-page-filter.ts",
+    "line": 141,
+    "from": "ignoram",
+    "to": "ignoring",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 11
+  },
+  {
+    "file": "src/features/ai-agents/tools/page-filters/add-page-filter.ts",
+    "line": 141,
+    "from": "semComparacao",
+    "to": "withoutComparison",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 12
+  },
+  {
+    "file": "src/features/ai-agents/tools/page-filters/add-page-filter.ts",
+    "line": 147,
+    "from": "restantes",
+    "to": "remaining",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/features/ai-agents/tools/page-filters/filtro-de-pagina.test.ts",
+    "line": 11,
+    "from": "contexto",
+    "to": "contextOf",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 9
+  },
+  {
+    "file": "src/features/ai-agents/tools/page-filters/filtro-de-pagina.test.ts",
+    "line": 53,
+    "from": "campos",
+    "to": "fields",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "src/features/ai-agents/tools/page-filters/filtro-de-pagina.test.ts",
+    "line": 62,
+    "from": "campos",
+    "to": "fields",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "src/features/ai-agents/tools/page-filters/filtro-de-pagina.test.ts",
+    "line": 120,
+    "from": "comPin",
+    "to": "withPin",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/features/ai-agents/tools/page-filters/filtro-de-pagina.test.ts",
+    "line": 135,
+    "from": "honram",
+    "to": "honoring",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 12
+  },
+  {
+    "file": "src/features/ai-agents/tools/page-filters/filtro-de-pagina.test.ts",
+    "line": 135,
+    "from": "ignoram",
+    "to": "ignoring",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 11
+  },
+  {
+    "file": "src/features/ai-agents/tools/page-filters/filtro-de-pagina.test.ts",
+    "line": 135,
+    "from": "semComparacao",
+    "to": "withoutComparison",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 12
+  },
+  {
+    "file": "src/features/ai-agents/tools/page-filters/filtro-de-pagina.ts",
+    "line": 14,
+    "from": "MetricaComTemplate",
+    "to": "MetricWithTemplate",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/features/ai-agents/tools/page-filters/filtro-de-pagina.ts",
+    "line": 19,
+    "from": "metricasDaPagina",
+    "to": "pageMetrics",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/features/ai-agents/tools/page-filters/filtro-de-pagina.ts",
+    "line": 24,
+    "from": "bloco",
+    "to": "block",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/features/ai-agents/tools/page-filters/filtro-de-pagina.ts",
+    "line": 29,
+    "from": "saida",
+    "to": "output",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/features/ai-agents/tools/page-filters/filtro-de-pagina.ts",
+    "line": 31,
+    "from": "metrica",
+    "to": "metric",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 17
+  },
+  {
+    "file": "src/features/ai-agents/tools/page-filters/filtro-de-pagina.ts",
+    "line": 48,
+    "from": "CampoFiltravel",
+    "to": "FilterableField",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/features/ai-agents/tools/page-filters/filtro-de-pagina.ts",
+    "line": 74,
+    "from": "camposFiltraveisDaPagina",
+    "to": "pageFilterableFields",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "src/features/ai-agents/tools/page-filters/filtro-de-pagina.ts",
+    "line": 77,
+    "from": "declaradas",
+    "to": "declared",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/features/ai-agents/tools/page-filters/filtro-de-pagina.ts",
+    "line": 79,
+    "from": "jaDeclaradas",
+    "to": "alreadyDeclared",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/features/ai-agents/tools/page-filters/filtro-de-pagina.ts",
+    "line": 80,
+    "from": "porCampo",
+    "to": "byField",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/features/ai-agents/tools/page-filters/filtro-de-pagina.ts",
+    "line": 82,
+    "from": "metrica",
+    "to": "metric",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 17
+  },
+  {
+    "file": "src/features/ai-agents/tools/page-filters/filtro-de-pagina.ts",
+    "line": 83,
+    "from": "chave",
+    "to": "key",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 22
+  },
+  {
+    "file": "src/features/ai-agents/tools/page-filters/filtro-de-pagina.ts",
+    "line": 114,
+    "from": "metricasQueHonram",
+    "to": "metricsHonoringKey",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 8
+  },
+  {
+    "file": "src/features/ai-agents/tools/page-filters/filtro-de-pagina.ts",
+    "line": 117,
+    "from": "chave",
+    "to": "key",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 22
+  },
+  {
+    "file": "src/features/ai-agents/tools/page-filters/filtro-de-pagina.ts",
+    "line": 118,
+    "from": "honram",
+    "to": "honoring",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 12
+  },
+  {
+    "file": "src/features/ai-agents/tools/page-filters/filtro-de-pagina.ts",
+    "line": 118,
+    "from": "ignoram",
+    "to": "ignoring",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 11
+  },
+  {
+    "file": "src/features/ai-agents/tools/page-filters/filtro-de-pagina.ts",
+    "line": 118,
+    "from": "semComparacao",
+    "to": "withoutComparison",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 12
+  },
+  {
+    "file": "src/features/ai-agents/tools/page-filters/filtro-de-pagina.ts",
+    "line": 119,
+    "from": "honram",
+    "to": "honoring",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 12
+  },
+  {
+    "file": "src/features/ai-agents/tools/page-filters/filtro-de-pagina.ts",
+    "line": 120,
+    "from": "ignoram",
+    "to": "ignoring",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 11
+  },
+  {
+    "file": "src/features/ai-agents/tools/page-filters/filtro-de-pagina.ts",
+    "line": 121,
+    "from": "semComparacao",
+    "to": "withoutComparison",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 12
+  },
+  {
+    "file": "src/features/ai-agents/tools/page-filters/filtro-de-pagina.ts",
+    "line": 125,
+    "from": "cita",
+    "to": "cites",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/features/ai-agents/tools/page-filters/filtro-de-pagina.ts",
+    "line": 126,
+    "from": "comPin",
+    "to": "withPin",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/features/ai-agents/tools/page-filters/filtro-de-pagina.ts",
+    "line": 128,
+    "from": "metrica",
+    "to": "metric",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 17
+  },
+  {
+    "file": "src/features/ai-agents/tools/page-filters/filtro-de-pagina.ts",
+    "line": 134,
+    "from": "sabeComparar",
+    "to": "canCompare",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/features/ai-agents/tools/page-filters/filtro-de-pagina.ts",
+    "line": 137,
+    "from": "honram",
+    "to": "honoring",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 12
+  },
+  {
+    "file": "src/features/ai-agents/tools/page-filters/filtro-de-pagina.ts",
+    "line": 137,
+    "from": "ignoram",
+    "to": "ignoring",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 11
+  },
+  {
+    "file": "src/features/ai-agents/tools/page-filters/filtro-de-pagina.ts",
+    "line": 137,
+    "from": "semComparacao",
+    "to": "withoutComparison",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 12
+  },
+  {
+    "file": "src/features/ai-agents/tools/page-filters/list-page-fields.test.ts",
+    "line": 12,
+    "from": "Resultado",
+    "to": "Result",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 21
+  },
+  {
+    "file": "src/features/ai-agents/tools/page-filters/list-page-fields.test.ts",
+    "line": 13,
+    "from": "executar",
+    "to": "run",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 58
+  },
+  {
+    "file": "src/features/ai-agents/tools/page-filters/list-page-fields.ts",
+    "line": 60,
+    "from": "dados",
+    "to": "data",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 16
+  },
+  {
+    "file": "src/features/ai-agents/tools/page-filters/list-page-fields.ts",
+    "line": 64,
+    "from": "declaradas",
+    "to": "declared",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/features/ai-agents/tools/page-filters/list-page-fields.ts",
+    "line": 65,
+    "from": "campos",
+    "to": "fields",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "src/features/ai-agents/tools/page-filters/list-page-fields.ts",
+    "line": 67,
+    "from": "indicadores",
+    "to": "indicators",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/features/ai-agents/tools/page-filters/remove-page-filter.test.ts",
+    "line": 20,
+    "from": "Resultado",
+    "to": "Result",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 21
+  },
+  {
+    "file": "src/features/ai-agents/tools/page-filters/remove-page-filter.test.ts",
+    "line": 21,
+    "from": "executar",
+    "to": "run",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 58
+  },
+  {
+    "file": "src/features/ai-agents/tools/page-filters/remove-page-filter.ts",
+    "line": 8,
+    "from": "DO_EIXO_DE_TEMPO",
+    "to": "TIME_AXIS",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/features/ai-agents/tools/page-filters/remove-page-filter.ts",
+    "line": 26,
+    "from": "filtro",
+    "to": "filter",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 12
+  },
+  {
+    "file": "src/features/ai-agents/tools/page-filters/remove-page-filter.ts",
+    "line": 46,
+    "from": "dados",
+    "to": "data",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 16
+  },
+  {
+    "file": "src/features/ai-agents/tools/page-filters/remove-page-filter.ts",
+    "line": 49,
+    "from": "declarados",
+    "to": "declared",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "src/features/ai-agents/tools/page-filters/remove-page-filter.ts",
+    "line": 51,
+    "from": "alvo",
+    "to": "target",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 12
+  },
+  {
+    "file": "src/features/ai-agents/tools/page-filters/remove-page-filter.ts",
+    "line": 54,
+    "from": "seletores",
+    "to": "selectors",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/colunas-por-forma.test.ts",
+    "line": 0,
+    "from": "src/features/ai-agents/tools/metrics/colunas-por-forma.test.ts",
+    "to": "src/features/ai-agents/tools/metrics/columns-by-shape.test.ts",
+    "kind": "file",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 1
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/colunas-por-forma.ts",
+    "line": 0,
+    "from": "src/features/ai-agents/tools/metrics/colunas-por-forma.ts",
+    "to": "src/features/ai-agents/tools/metrics/columns-by-shape.ts",
+    "kind": "file",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 1
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/usos-da-metrica.test.ts",
+    "line": 0,
+    "from": "src/features/ai-agents/tools/metrics/usos-da-metrica.test.ts",
+    "to": "src/features/ai-agents/tools/metrics/metric-usages.test.ts",
+    "kind": "file",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 1
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/usos-da-metrica.ts",
+    "line": 0,
+    "from": "src/features/ai-agents/tools/metrics/usos-da-metrica.ts",
+    "to": "src/features/ai-agents/tools/metrics/metric-usages.ts",
+    "kind": "file",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 1
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/valida-rascunho.test.ts",
+    "line": 0,
+    "from": "src/features/ai-agents/tools/metrics/valida-rascunho.test.ts",
+    "to": "src/features/ai-agents/tools/metrics/validate-draft.test.ts",
+    "kind": "file",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 1
+  },
+  {
+    "file": "src/features/ai-agents/tools/metrics/valida-rascunho.ts",
+    "line": 0,
+    "from": "src/features/ai-agents/tools/metrics/valida-rascunho.ts",
+    "to": "src/features/ai-agents/tools/metrics/validate-draft.ts",
+    "kind": "file",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 1
+  },
+  {
+    "file": "src/features/ai-agents/tools/page-filters/filtro-de-pagina.test.ts",
+    "line": 0,
+    "from": "src/features/ai-agents/tools/page-filters/filtro-de-pagina.test.ts",
+    "to": "src/features/ai-agents/tools/page-filters/page-filter.test.ts",
+    "kind": "file",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 1
+  },
+  {
+    "file": "src/features/ai-agents/tools/page-filters/filtro-de-pagina.ts",
+    "line": 0,
+    "from": "src/features/ai-agents/tools/page-filters/filtro-de-pagina.ts",
+    "to": "src/features/ai-agents/tools/page-filters/page-filter.ts",
+    "kind": "file",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 1
+  }
+]

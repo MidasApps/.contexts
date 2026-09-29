@@ -3,6 +3,7 @@ title: Regras de Design de API
 type: rules
 status: active
 scope: HTTP Route Handlers (Next.js), Server Actions, Firebase Functions (HTTPS/Callable), webhooks, RPC interno
+last_updated: 2026-09-28
 ---
 
 # Regras de Design de API
@@ -16,7 +17,7 @@ Regras imperativas que governam **como** desenhamos superfícies de API. Este do
 - **Sempre** modele endpoints HTTP como recursos (substantivos), nunca como ações (verbos): use `POST /orders`, não `POST /createOrder`.
 - **Use** plural para coleções: `/orders`, `/users`, `/invoices` — nunca `/order`, `/user`.
 - **Use** kebab-case em paths: `/payment-methods`, nunca `/paymentMethods` ou `/payment_methods`.
-- **Use** camelCase em query strings e bodies JSON: `?sortBy=createdAt`, `{ "firstName": "..." }`.
+- **Use** camelCase em query strings e bodies JSON: `?createdAfter=...`, `{ "firstName": "..." }`.
 - **Não** misture verbos no path quando o método HTTP já carrega a semântica. Reserve verbos para ações que não mapeiam para CRUD: `POST /orders/:id/cancel`, `POST /invoices/:id/send`.
 - **Para Server Actions**, nomeie a função com verbo no infinitivo em camelCase: `createOrder`, `cancelInvoice`, `archiveProject`. Server Actions são RPC, não REST — não tente forçar semântica de recurso.
 - **Para Firebase Callable Functions**, siga o mesmo padrão de Server Actions: nomes verbais, camelCase, sem prefixos como `api` ou `fn`.
@@ -53,7 +54,7 @@ Regras imperativas que governam **como** desenhamos superfícies de API. Este do
 ## 4. Idempotência
 
 - **Toda** rota `PUT`, `DELETE`, `GET` é idempotente por contrato. Implemente para que seja verdade.
-- **Para `POST` que cria recurso**, aceite header `Idempotency-Key` (UUID gerado pelo cliente) quando a operação custar dinheiro, gerar efeito colateral externo (email, webhook, pagamento) ou for crítica. A chave é válida por no mínimo 24h.
+- **Para `POST` que cria recurso**, aceite header `Idempotency-Key` (chave opaca gerada pelo cliente, ULID por convenção — `@contracts/api` seção 11.1) quando a operação custar dinheiro, gerar efeito colateral externo (email, webhook, pagamento) ou for crítica. Em `/orders`, `/payments` e `/refunds` o header é **obrigatório** (`@contracts/api` §4.2, §11.1): ausente ou fora do formato → `400 VALIDATION_FAILED`. A chave é válida por no mínimo 24h.
 - **Armazene** o resultado da primeira execução indexado pela `Idempotency-Key` e retorne-o em chamadas subsequentes com a mesma chave, mesmo status code.
 - **Não** confunda idempotência com cache. Idempotência é sobre efeito; cache é sobre resposta.
 
@@ -63,14 +64,14 @@ Regras imperativas que governam **como** desenhamos superfícies de API. Este do
 - **Use** cursor-based pagination por padrão: `?cursor=<opaque>&limit=20`. O cursor é opaco para o cliente — não documente seu formato interno.
 - **Use** offset-based apenas quando o cliente precisa explicitamente saltar páginas (raro, geralmente admin UIs).
 - **Limite** padrão: 20. **Máximo** permitido: 100. Requisições acima do máximo retornam 400.
-- **Retorne** metadata de paginação no envelope: `{ "data": [...], "pagination": { "nextCursor": "...", "hasMore": true } }`. Não use headers para isso.
+- **Retorne** metadata de paginação no envelope: `{ "data": [...], "meta": { "page": { "cursor": "...", "hasMore": true, "limit": 20 } } }` (shape em `@contracts/api`). Não use headers para isso.
 - **Não** inclua `totalCount` em listagens grandes. Contar é caro. Se o cliente precisa de total, exponha endpoint separado `GET /resource/count`.
 
 ## 6. Filtros, ordenação e sparse fieldsets
 
 - **Filtros** vão em query string com nome do campo: `?status=active&createdAfter=2025-01-01`.
-- **Para filtros compostos**, use sufixos: `?priceGte=100&priceLte=500`, `?statusIn=active,pending`.
-- **Ordenação** usa `sortBy` e `sortOrder`: `?sortBy=createdAt&sortOrder=desc`. Para ordenação múltipla, aceite array: `?sortBy=status,createdAt&sortOrder=asc,desc`.
+- **Para filtros compostos**, use sufixos: `?amountMinorMin=100&amountMinorMax=500`, `?createdAfter=2025-01-01&createdBefore=2025-02-01`, lista separada por vírgula `?status=active,pending` (ver `@contracts/api` seção 10.1).
+- **Ordenação** usa um único parâmetro `sort`, campos separados por vírgula e prefixo `-` para descendente: `?sort=-createdAt,name`.
 - **Campos esparsos**: aceite `?fields=id,name,status` para reduzir payload quando útil. Documente quais endpoints suportam.
 - **Não** aceite filtros arbitrários por SQL-injection-like syntax (`?filter=status eq 'active'`). Use parâmetros nomeados.
 - **Rejeite** filtros desconhecidos com 400. Não ignore silenciosamente — isso esconde bugs do cliente.
@@ -81,12 +82,12 @@ Regras imperativas que governam **como** desenhamos superfícies de API. Este do
 - **Não** versione APIs internas (Server Actions, callables consumidas só pelo próprio app). Deploy atômico com o cliente.
 - **Para mudanças aditivas** (novo campo opcional, nova rota), **não** incremente versão. Adicione e documente.
 - **Para breaking changes** (remoção de campo, mudança de tipo, mudança de semântica), incremente major version e mantenha a anterior por no mínimo 6 meses.
-- **Marque** rotas deprecadas com header `Deprecation: true` e `Sunset: <date RFC 7231>` em toda resposta. Logue uso para identificar consumidores antes do sunset.
+- **Marque** rotas deprecadas com os headers `Deprecation: @<epoch-segundos>` (RFC 9745, Structured Field Date), `Sunset` (RFC 8594, HTTP-date) e `Link rel="successor-version"` em toda resposta, no formato de `@contracts/api` seção 17. Logue uso para identificar consumidores antes do sunset.
 - **Não** mantenha mais de duas versões majors simultaneamente em produção.
 
 ## 8. Identificadores
 
-- **Use** ULID para IDs gerados pelo servidor: ordenáveis por tempo, opacos ao cliente, URL-safe. Não use UUID v4 (não-ordenável) nem auto-increment (vaza volume).
+- **Use** o id do store, opaco e sem prefixo: `uuidv7()` no Postgres, ID automático no Firestore (ADR 0005). ULID só em `eventId`, `Idempotency-Key` e `X-Request-Id`. Não use auto-increment. UUID v4 fica para segredo que não é id de entidade.
 - **IDs são opacos**. **Nunca** parseie estrutura do ID no cliente. **Nunca** documente formato interno.
 - **Não** exponha IDs de banco (`uid` interno) ao público quando o recurso tem outra identidade natural pública (slug, código). Use o ID público.
 - **Para recursos hierárquicos**, prefira path nesting raso: `/projects/:projectId/tasks/:taskId`. Não aninhe mais de dois níveis — vira inferno de URL.
@@ -99,11 +100,11 @@ Regras imperativas que governam **como** desenhamos superfícies de API. Este do
   ```
   Para coleções:
   ```json
-  { "data": [...], "pagination": {...} }
+  { "data": [...], "meta": { "page": {...} } }
   ```
-- **Use** envelope consistente em **toda** resposta de erro — definido em `@rules/error-handling`. Este documento não redefine o shape.
+- **Use** envelope consistente em **toda** resposta de erro — definido em `@contracts/api` seção 6 (`{ error: { code, message, details?, requestId } }`). Este documento não redefine o shape.
 - **Não** retorne array bruto no root (`[...]`). Sempre embrulhe — permite adicionar metadata futura sem breaking change.
-- **Para Server Actions**, retorne `{ success: true, data }` ou `{ success: false, error }`. Server Actions não têm status code — o envelope carrega o sinal.
+- **Para Server Actions**, retorne `{ ok: true, data }` ou `{ ok: false, error }`, com `error` no shape de `@contracts/api` seção 6 (o mesmo discriminador `ok` do `Result`). Server Actions não têm status code — o envelope carrega o sinal.
 
 ## 10. Content negotiation
 
@@ -126,7 +127,7 @@ Regras imperativas que governam **como** desenhamos superfícies de API. Este do
 - **Inclua** header `X-Webhook-Id` único por entrega. Receptores usam para deduplicação.
 - **Retry** com backoff exponencial: 1m, 5m, 30m, 2h, 12h. Pare após 5 tentativas. Sucesso é qualquer 2xx do receptor.
 - **Não** envie payload sensível bruto (PII, tokens) em webhook. Envie ID do evento e exija que o receptor busque o dado via API autenticada.
-- **Documente** todos os tipos de evento em catálogo único. Cada evento tem versão (`order.created.v1`). Nunca renomeie evento — deprecie e crie novo.
+- **Documente** todos os tipos de evento em catálogo único. O nome é `eventName` em `SCREAMING_SNAKE_CASE` (`ORDER_PLACED`). A versão fica em campo próprio, não no nome. Nunca renomeie evento — deprecie e crie novo.
 
 ## 13. Webhooks (entrada)
 
@@ -137,12 +138,12 @@ Regras imperativas que governam **como** desenhamos superfícies de API. Este do
 
 ## 14. Rate limiting
 
-- **Toda** API pública expõe limites por consumidor. **Sempre** comunique limites via headers:
-  - `RateLimit-Limit`: total permitido na janela.
-  - `RateLimit-Remaining`: restante.
-  - `RateLimit-Reset`: segundos até reset.
+- **Toda** API pública expõe limites por consumidor. **Sempre** comunique limites via headers (nomes e semântica em `@contracts/api` seção 11.2):
+  - `X-RateLimit-Limit`: total permitido na janela.
+  - `X-RateLimit-Remaining`: restante.
+  - `X-RateLimit-Reset`: timestamp Unix do reset.
 - **Em 429**, envie `Retry-After` (segundos ou data HTTP).
-- **Não** rate-limite por IP em APIs autenticadas — limite por identidade (user/org/api-key). IP vira fallback para rotas anônimas.
+- **Não** rate-limite por IP em APIs autenticadas — limite por identidade (user/tenant/api-key). IP vira fallback para rotas anônimas.
 - **Aplique** rate limit antes de qualquer processamento custoso. Limite primeiro, processe depois.
 
 ## 15. APIs internas vs públicas
@@ -163,14 +164,14 @@ Regras imperativas que governam **como** desenhamos superfícies de API. Este do
 
 - **Defina** breaking change explicitamente: remover campo, mudar tipo de campo, mudar semântica de valor existente, mudar status code retornado, mudar formato de ID, mudar formato de data, tornar campo opcional em obrigatório.
 - **Adições** (novo campo opcional, nova rota, novo valor em enum quando documentado como extensível) **não** são breaking.
-- **Para deprecar** rota ou campo: marque com `Deprecation: true` header, anuncie em changelog, dê prazo mínimo de 6 meses para públicas e 1 sprint para internas, monitore uso via logs estruturados.
+- **Para deprecar** rota ou campo: envie `Deprecation: @<epoch-segundos>` (RFC 9745), `Sunset: <HTTP-date>` (RFC 8594) e `Link: <...>; rel="successor-version"`, no formato de `@contracts/api` seção 17 (`Deprecation: true` não é válido); anuncie em changelog, dê prazo mínimo de 6 meses para públicas e 1 sprint para internas, monitore uso via logs estruturados.
 - **Não** mude semântica de campo existente. Crie novo campo e deprecie o antigo.
 
 ## 18. Consistência transversal
 
 - **Toda** rota retorna `Content-Type` correto, status code apropriado, envelope consistente.
 - **Toda** API usa mesmo formato de data: ISO 8601 com timezone (`2026-05-20T14:30:00Z`). Nunca epoch em campo de payload (apenas em headers como `X-Webhook-Timestamp`).
-- **Toda** API usa mesmo formato de moeda: inteiro em menor unidade (centavos), com campo `currency` separado (ISO 4217). Nunca float para dinheiro.
+- **Toda** API usa o mesmo dinheiro: `amountMinor` inteiro na menor unidade da moeda e `currency` ISO 4217. Nunca float e nunca string decimal. O nome vem de `@.contexts/engineering/rules/data-modeling.md`.
 - **Toda** API usa mesmo formato de booleano: `true`/`false` JSON. Nunca `"yes"`, `"1"`, `1`.
 - **Toda** API usa mesma convenção de nulidade: campo opcional ausente vs presente com `null` significam coisas diferentes. **Ausente** = não informado. **`null` explícito** = limpar valor. Documente em `@contracts/api`.
 - **Inconsistência transversal entre rotas é bug**, não preferência de quem implementou. Revisor de PR rejeita.
@@ -210,7 +211,7 @@ Antes de aprovar PR que adiciona ou modifica rota HTTP, verificar:
 
 - `@contracts/api` — shape concreto de payloads, naming de campos, envelopes específicos.
 - `@rules/validation` — validação de input (schemas, sanitização).
-- `@rules/error-handling` — formato de erro, taxonomia, propagação.
+- `@rules/error-handling` — taxonomia e propagação de erros (o shape do envelope vive em `@contracts/api` seção 6).
 - `@rules/security` — autenticação, autorização, transporte, secrets.
 - `@rules/performance` — caching de resposta, ETags, compressão.
 - `@stacks/frontend/next@16` — Route Handlers, Server Actions, headers em Next.

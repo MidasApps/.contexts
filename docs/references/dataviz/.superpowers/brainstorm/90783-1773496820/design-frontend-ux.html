@@ -1,0 +1,253 @@
+<h2>Design: UX do Frontend</h2>
+<p class="subtitle">Secao 4 de 5 — Como o chat renderiza status parciais, tool indicators e resultados</p>
+
+<!-- CURRENT VS NEW -->
+<div class="section">
+  <h3>Antes vs Depois</h3>
+  <div class="split">
+    <div class="mockup">
+      <div class="mockup-header">Hoje — Tool indicators basicos</div>
+      <div class="mockup-body" style="padding:16px;font-size:12px;">
+        <div style="background:#0f172a;border-radius:8px;padding:12px;margin-bottom:8px;">
+          <div style="color:#94a3b8;font-size:11px;">Voce</div>
+          <div style="color:#e2e8f0;margin-top:4px;">Quais contratos tem mais inadimplencia?</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;padding:8px;background:#1e293b;border-radius:6px;margin-bottom:8px;">
+          <div style="width:8px;height:8px;background:#f59e0b;border-radius:50%;animation:pulse 1s infinite;"></div>
+          <span style="color:#f59e0b;font-size:11px;">Consultando contratos...</span>
+        </div>
+        <div style="background:#0f172a;border-radius:8px;padding:12px;">
+          <div style="color:#94a3b8;font-size:11px;">Assistente</div>
+          <div style="color:#e2e8f0;margin-top:4px;font-size:12px;">
+            Nao tenho a capacidade de listar individualmente os contratos...<br/>
+            <span style="color:#dc2626;">&#x2718; Resposta incompleta</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mockup">
+      <div class="mockup-header">Novo — Multi-agent com status progressivos</div>
+      <div class="mockup-body" style="padding:16px;font-size:12px;">
+        <div style="background:#0f172a;border-radius:8px;padding:12px;margin-bottom:8px;">
+          <div style="color:#94a3b8;font-size:11px;">Voce</div>
+          <div style="color:#e2e8f0;margin-top:4px;">Quais contratos tem mais inadimplencia?</div>
+        </div>
+
+        <!-- Step indicators -->
+        <div style="border-left:2px solid #334155;margin-left:12px;padding-left:12px;margin-bottom:8px;">
+          <div style="display:flex;align-items:center;gap:6px;padding:4px 0;">
+            <div style="width:8px;height:8px;background:#22c55e;border-radius:50%;"></div>
+            <span style="color:#22c55e;font-size:11px;">Roteando para SQL Agent</span>
+            <span style="color:#475569;font-size:10px;">0.3s</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;padding:4px 0;">
+            <div style="width:8px;height:8px;background:#22c55e;border-radius:50%;"></div>
+            <span style="color:#22c55e;font-size:11px;">Gerando SQL</span>
+            <span style="color:#475569;font-size:10px;">1.2s</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;padding:4px 0;">
+            <div style="width:8px;height:8px;background:#22c55e;border-radius:50%;"></div>
+            <span style="color:#60a5fa;font-size:11px;font-family:monospace;">SELECT id_contrato, nome_cliente, valor_atraso...</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;padding:4px 0;">
+            <div style="width:8px;height:8px;background:#22c55e;border-radius:50%;"></div>
+            <span style="color:#22c55e;font-size:11px;">Query executada — 47 rows</span>
+            <span style="color:#475569;font-size:10px;">2.1s</span>
+          </div>
+        </div>
+
+        <div style="background:#0f172a;border-radius:8px;padding:12px;">
+          <div style="color:#94a3b8;font-size:11px;">Assistente</div>
+          <div style="color:#e2e8f0;margin-top:4px;font-size:12px;">
+            Os contratos com maior inadimplencia sao:<br/><br/>
+            <span style="color:#f59e0b;">1.</span> CT-4521 — R$ 45.200 (91 dias)<br/>
+            <span style="color:#f59e0b;">2.</span> CT-3892 — R$ 38.100 (127 dias)<br/>
+            <span style="color:#f59e0b;">3.</span> CT-2103 — R$ 22.800 (62 dias)<br/>
+            <span style="color:#22c55e;">&#x2714; Resposta com dados reais</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PRELIMINARY RESULTS UI -->
+<div class="section" style="margin-top:24px;">
+  <h3>Renderizacao de Preliminary Results</h3>
+  <p style="color:#94a3b8;font-size:13px;">Cada yield do async generator aparece como um step indicator no chat.</p>
+
+  <div class="mockup">
+    <div class="mockup-header">Mapeamento: yield → UI Component</div>
+    <div class="mockup-body" style="padding:16px;font-size:12px;">
+      <table style="width:100%;border-collapse:collapse;color:#e2e8f0;">
+        <thead>
+          <tr style="border-bottom:1px solid #475569;">
+            <th style="text-align:left;padding:8px;color:#f59e0b;">yield status</th>
+            <th style="text-align:left;padding:8px;color:#f59e0b;">Icone</th>
+            <th style="text-align:left;padding:8px;color:#f59e0b;">Label</th>
+            <th style="text-align:left;padding:8px;color:#f59e0b;">Extra info</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom:1px solid #1e293b;">
+            <td style="padding:8px;font-family:monospace;color:#60a5fa;">routing</td>
+            <td style="padding:8px;">&#x2728;</td>
+            <td style="padding:8px;">"Roteando para {agentName}"</td>
+            <td style="padding:8px;color:#94a3b8;">Nome do agente selecionado</td>
+          </tr>
+          <tr style="border-bottom:1px solid #1e293b;">
+            <td style="padding:8px;font-family:monospace;color:#60a5fa;">analyzing</td>
+            <td style="padding:8px;">&#x1F9E0;</td>
+            <td style="padding:8px;">"Analisando pergunta"</td>
+            <td style="padding:8px;color:#94a3b8;">—</td>
+          </tr>
+          <tr style="border-bottom:1px solid #1e293b;">
+            <td style="padding:8px;font-family:monospace;color:#60a5fa;">generating_sql</td>
+            <td style="padding:8px;">&#x1F4DD;</td>
+            <td style="padding:8px;">"Gerando SQL"</td>
+            <td style="padding:8px;color:#94a3b8;">—</td>
+          </tr>
+          <tr style="border-bottom:1px solid #1e293b;">
+            <td style="padding:8px;font-family:monospace;color:#60a5fa;">executing_sql</td>
+            <td style="padding:8px;">&#x1F5C4;</td>
+            <td style="padding:8px;">"Executando query"</td>
+            <td style="padding:8px;color:#94a3b8;">Mostra SQL truncado em monospace</td>
+          </tr>
+          <tr style="border-bottom:1px solid #1e293b;">
+            <td style="padding:8px;font-family:monospace;color:#60a5fa;">query_complete</td>
+            <td style="padding:8px;">&#x2705;</td>
+            <td style="padding:8px;">"Query executada"</td>
+            <td style="padding:8px;color:#94a3b8;">Row count + tempo de execucao</td>
+          </tr>
+          <tr style="border-bottom:1px solid #1e293b;">
+            <td style="padding:8px;font-family:monospace;color:#60a5fa;">searching</td>
+            <td style="padding:8px;">&#x1F50D;</td>
+            <td style="padding:8px;">"Buscando dados economicos"</td>
+            <td style="padding:8px;color:#94a3b8;">Query de busca</td>
+          </tr>
+          <tr style="border-bottom:1px solid #1e293b;">
+            <td style="padding:8px;font-family:monospace;color:#60a5fa;">comparing</td>
+            <td style="padding:8px;">&#x1F4CA;</td>
+            <td style="padding:8px;">"Comparando periodos"</td>
+            <td style="padding:8px;color:#94a3b8;">Periodos sendo comparados</td>
+          </tr>
+          <tr style="border-bottom:1px solid #1e293b;">
+            <td style="padding:8px;font-family:monospace;color:#60a5fa;">simulating</td>
+            <td style="padding:8px;">&#x1F9EA;</td>
+            <td style="padding:8px;">"Rodando simulacao"</td>
+            <td style="padding:8px;color:#94a3b8;">Cenario e parametros</td>
+          </tr>
+          <tr style="border-bottom:1px solid #1e293b;">
+            <td style="padding:8px;font-family:monospace;color:#60a5fa;">exporting</td>
+            <td style="padding:8px;">&#x1F4E5;</td>
+            <td style="padding:8px;">"Gerando relatorio"</td>
+            <td style="padding:8px;color:#94a3b8;">Formato (PDF/CSV)</td>
+          </tr>
+          <tr>
+            <td style="padding:8px;font-family:monospace;color:#dc2626;">error</td>
+            <td style="padding:8px;">&#x26A0;</td>
+            <td style="padding:8px;">"Erro: {message}"</td>
+            <td style="padding:8px;color:#94a3b8;">Mensagem de erro legivel</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- TOOL RESULT RENDERING -->
+<div class="section" style="margin-top:24px;">
+  <h3>Tipos de Resultado Final</h3>
+  <p style="color:#94a3b8;font-size:13px;">Alem do texto, os agentes podem retornar dados estruturados que o frontend renderiza de forma rica.</p>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
+
+    <div style="background:#1e293b;border:1px solid #334155;border-radius:8px;padding:14px;">
+      <div style="color:#f59e0b;font-weight:bold;font-size:12px;margin-bottom:8px;">Tabela Inline</div>
+      <div style="color:#94a3b8;font-size:11px;margin-bottom:8px;">Quando SQL retorna rows tabulares</div>
+      <div style="background:#0f172a;border-radius:6px;padding:8px;font-size:10px;color:#e2e8f0;">
+        <table style="width:100%;border-collapse:collapse;">
+          <tr style="border-bottom:1px solid #334155;">
+            <th style="text-align:left;padding:3px;color:#f59e0b;">Contrato</th>
+            <th style="text-align:right;padding:3px;color:#f59e0b;">Atraso</th>
+          </tr>
+          <tr><td style="padding:3px;">CT-4521</td><td style="text-align:right;padding:3px;">R$ 45.2k</td></tr>
+          <tr><td style="padding:3px;">CT-3892</td><td style="text-align:right;padding:3px;">R$ 38.1k</td></tr>
+          <tr><td style="padding:3px;">CT-2103</td><td style="text-align:right;padding:3px;">R$ 22.8k</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div style="background:#1e293b;border:1px solid #334155;border-radius:8px;padding:14px;">
+      <div style="color:#f59e0b;font-weight:bold;font-size:12px;margin-bottom:8px;">KPI Highlight</div>
+      <div style="color:#94a3b8;font-size:11px;margin-bottom:8px;">Quando resultado e um valor chave</div>
+      <div style="background:#0f172a;border-radius:6px;padding:12px;text-align:center;">
+        <div style="color:#94a3b8;font-size:10px;">Inadimplencia</div>
+        <div style="color:#e2e8f0;font-size:24px;font-weight:bold;">0,49%</div>
+        <div style="color:#22c55e;font-size:11px;">&#x2193; 0,12pp vs mes anterior</div>
+      </div>
+    </div>
+
+    <div style="background:#1e293b;border:1px solid #334155;border-radius:8px;padding:14px;">
+      <div style="color:#f59e0b;font-weight:bold;font-size:12px;margin-bottom:8px;">Download Link</div>
+      <div style="color:#94a3b8;font-size:11px;margin-bottom:8px;">Quando Export Agent gera arquivo</div>
+      <div style="background:#0f172a;border-radius:6px;padding:12px;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="font-size:20px;">&#x1F4C4;</span>
+          <div>
+            <div style="color:#e2e8f0;font-size:12px;">relatorio-carteira.pdf</div>
+            <div style="color:#3b82f6;font-size:11px;text-decoration:underline;cursor:pointer;">Baixar (245 KB)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- COMPONENT CHANGES -->
+<div class="section" style="margin-top:24px;">
+  <h3>Mudancas no AISidebar</h3>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+    <div style="background:#1e293b;border:1px solid #334155;border-radius:8px;padding:14px;">
+      <div style="color:#22c55e;font-weight:bold;font-size:12px;margin-bottom:8px;">Novo: ToolStepIndicator</div>
+      <div style="color:#e2e8f0;font-size:11px;line-height:1.6;">
+        Componente que renderiza a timeline de steps do agente.<br/>
+        Recebe array de preliminary results e mostra:<br/>
+        - Icone + label por status<br/>
+        - SQL preview expandivel (click to copy)<br/>
+        - Tempo decorrido por step<br/>
+        - Estado: loading (pulsa), done (check verde), error (vermelho)
+      </div>
+    </div>
+    <div style="background:#1e293b;border:1px solid #334155;border-radius:8px;padding:14px;">
+      <div style="color:#22c55e;font-weight:bold;font-size:12px;margin-bottom:8px;">Novo: InlineDataRenderer</div>
+      <div style="color:#e2e8f0;font-size:11px;line-height:1.6;">
+        Renderiza dados estruturados inline no chat:<br/>
+        - Tabelas (ate 10 rows, expandivel)<br/>
+        - KPI cards com variacao<br/>
+        - Links de download para exports<br/>
+        - SQL collapsible com syntax highlight
+      </div>
+    </div>
+    <div style="background:#1e293b;border:1px solid #334155;border-radius:8px;padding:14px;">
+      <div style="color:#f59e0b;font-weight:bold;font-size:12px;margin-bottom:8px;">Atualizado: TOOL_LABELS</div>
+      <div style="color:#e2e8f0;font-size:11px;line-height:1.6;">
+        Mapa de labels expandido para os 7 agentes.<br/>
+        Cada agente tem icone, cor e label proprios.<br/>
+        Os status parciais (yield) tambem mapeados.
+      </div>
+    </div>
+    <div style="background:#1e293b;border:1px solid #334155;border-radius:8px;padding:14px;">
+      <div style="color:#f59e0b;font-weight:bold;font-size:12px;margin-bottom:8px;">Atualizado: Suggestions</div>
+      <div style="color:#e2e8f0;font-size:11px;line-height:1.6;">
+        Suggestions por pagina agora cobrem os novos agentes:<br/>
+        - "Gere um PDF da carteira" (export)<br/>
+        - "Simule LTV +10%" (simulation)<br/>
+        - "Compare com periodo anterior" (comparison)
+      </div>
+    </div>
+  </div>
+</div>

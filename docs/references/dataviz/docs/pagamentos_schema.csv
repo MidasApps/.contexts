@@ -1,0 +1,6 @@
+Nome do campo,Tipo,Modo,Descrição,Chave,Compilação,Valor padrão,Tags de políticas,Políticas de dados
+data_base_report,DATE,NULLABLE,-,-,-,-,-,-
+projeto,STRING,NULLABLE,-,-,-,-,-,-
+id_contrato,STRING,NULLABLE,-,-,-,-,-,-
+valor_pago,FLOAT,NULLABLE,-,-,-,-,-,-
+tipo_recebimento,STRING,NULLABLE,-,-,-,-,-,-

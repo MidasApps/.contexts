@@ -1,0 +1,1036 @@
+[
+  {
+    "file": "src/shared/lib/report/block-data.test.ts",
+    "line": 360,
+    "from": "nome",
+    "to": "name",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false
+  },
+  {
+    "file": "src/shared/lib/report/block-data.test.ts",
+    "line": 233,
+    "from": "nome",
+    "to": "name",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false
+  },
+  {
+    "file": "src/shared/lib/bigquery/__tests__/benchmark-min-clients.test.ts",
+    "line": 15,
+    "from": "CAMPOS",
+    "to": "FIELDS",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/shared/lib/bigquery/__tests__/benchmark-min-clients.test.ts",
+    "line": 21,
+    "from": "carteira",
+    "to": "portfolio",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 12
+  },
+  {
+    "file": "src/shared/lib/bigquery/__tests__/benchmark-min-clients.test.ts",
+    "line": 72,
+    "from": "semOver90",
+    "to": "withoutOver90",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/shared/lib/bigquery/__tests__/benchmark-min-clients.test.ts",
+    "line": 86,
+    "from": "magra",
+    "to": "leanClient",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/shared/lib/bigquery/__tests__/dry-run-error.test.ts",
+    "line": 7,
+    "from": "classe",
+    "to": "kind",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 7
+  },
+  {
+    "file": "src/shared/lib/bigquery/__tests__/dry-run-error.test.ts",
+    "line": 7,
+    "from": "posicao",
+    "to": "position",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/shared/lib/bigquery/__tests__/dry-run-error.test.ts",
+    "line": 20,
+    "from": "classe",
+    "to": "kind",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 7
+  },
+  {
+    "file": "src/shared/lib/bigquery/__tests__/dry-run-error.test.ts",
+    "line": 24,
+    "from": "classe",
+    "to": "kind",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 7
+  },
+  {
+    "file": "src/shared/lib/bigquery/celula.ts",
+    "line": 32,
+    "from": "ehEmbrulho",
+    "to": "isWrapper",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/shared/lib/bigquery/celula.ts",
+    "line": 33,
+    "from": "chaves",
+    "to": "keys",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/shared/lib/bigquery/celula.ts",
+    "line": 50,
+    "from": "desembrulhaCelula",
+    "to": "unwrapCell",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 14
+  },
+  {
+    "file": "src/shared/lib/bigquery/celula.ts",
+    "line": 64,
+    "from": "desembrulhaLinhas",
+    "to": "unwrapRows",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/shared/lib/bigquery/celula.ts",
+    "line": 65,
+    "from": "linha",
+    "to": "row",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "src/shared/lib/bigquery/celula.ts",
+    "line": 69,
+    "from": "coluna",
+    "to": "column",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/shared/lib/bigquery/celula.ts",
+    "line": 69,
+    "from": "celula",
+    "to": "cell",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/shared/lib/bigquery/cost-guard.ts",
+    "line": 45,
+    "from": "teto",
+    "to": "cap",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/shared/lib/bigquery/cost-guard.ts",
+    "line": 47,
+    "from": "configurado",
+    "to": "configured",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/shared/lib/bigquery/dry-run-error.ts",
+    "line": 20,
+    "from": "ClasseDeErroDeDryRun",
+    "to": "DryRunErrorClass",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/shared/lib/bigquery/dry-run-error.ts",
+    "line": 21,
+    "from": "classe",
+    "to": "kind",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 7
+  },
+  {
+    "file": "src/shared/lib/bigquery/dry-run-error.ts",
+    "line": 21,
+    "from": "posicao",
+    "to": "position",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/shared/lib/bigquery/dry-run-error.ts",
+    "line": 22,
+    "from": "classe",
+    "to": "kind",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 7
+  },
+  {
+    "file": "src/shared/lib/bigquery/dry-run-error.ts",
+    "line": 24,
+    "from": "classificaErroDeDryRun",
+    "to": "classifyDryRunError",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/shared/lib/bigquery/dry-run-error.ts",
+    "line": 26,
+    "from": "classe",
+    "to": "kind",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 7
+  },
+  {
+    "file": "src/shared/lib/bigquery/dry-run-error.ts",
+    "line": 27,
+    "from": "classe",
+    "to": "kind",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 7
+  },
+  {
+    "file": "src/shared/lib/bigquery/dry-run-error.ts",
+    "line": 27,
+    "from": "posicao",
+    "to": "position",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/shared/lib/bigquery/dry-run-error.ts",
+    "line": 31,
+    "from": "detalheDoErro",
+    "to": "errorDetail",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 1
+  },
+  {
+    "file": "src/shared/lib/bigquery/known-project-ids.ts",
+    "line": 20,
+    "from": "registrados",
+    "to": "registered",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/shared/lib/bigquery/known-project-ids.ts",
+    "line": 24,
+    "from": "limpo",
+    "to": "trimmed",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 23
+  },
+  {
+    "file": "src/shared/lib/bigquery/known-project-ids.ts",
+    "line": 35,
+    "from": "doAmbiente",
+    "to": "fromEnv",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/shared/lib/bigquery/query-scope.ts",
+    "line": 45,
+    "from": "dentroDoEscopo",
+    "to": "isInScope",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/shared/lib/bigquery/query-scope.ts",
+    "line": 45,
+    "from": "projetoPadrao",
+    "to": "defaultProject",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "src/shared/lib/bigquery/query-scope.ts",
+    "line": 47,
+    "from": "projeto",
+    "to": "project",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/shared/lib/bigquery/query-scope.ts",
+    "line": 70,
+    "from": "projetoPadrao",
+    "to": "defaultProject",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "src/shared/lib/bigquery/query-scope.ts",
+    "line": 74,
+    "from": "nome",
+    "to": "qualifiedName",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 22
+  },
+  {
+    "file": "src/shared/lib/bigquery/query-scope.ts",
+    "line": 74,
+    "from": "objeto",
+    "to": "objectId",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/shared/lib/bigquery/query-scope.ts",
+    "line": 76,
+    "from": "tabelas",
+    "to": "tables",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/shared/lib/bigquery/query-scope.ts",
+    "line": 79,
+    "from": "datasetsInteiros",
+    "to": "wholeDatasets",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/shared/lib/bigquery/query-scope.ts",
+    "line": 80,
+    "from": "rotinas",
+    "to": "routines",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/shared/lib/export/__tests__/temp-files.test.ts",
+    "line": 13,
+    "from": "criados",
+    "to": "created",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/shared/lib/export/__tests__/temp-files.test.ts",
+    "line": 15,
+    "from": "nomeDeExport",
+    "to": "newExportName",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/shared/lib/export/__tests__/temp-files.test.ts",
+    "line": 16,
+    "from": "nome",
+    "to": "name",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 22
+  },
+  {
+    "file": "src/shared/lib/export/__tests__/temp-files.test.ts",
+    "line": 21,
+    "from": "existe",
+    "to": "exists",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/shared/lib/export/__tests__/temp-files.test.ts",
+    "line": 21,
+    "from": "nome",
+    "to": "name",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 22
+  },
+  {
+    "file": "src/shared/lib/export/__tests__/temp-files.test.ts",
+    "line": 48,
+    "from": "nome",
+    "to": "name",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 22
+  },
+  {
+    "file": "src/shared/lib/export/__tests__/temp-files.test.ts",
+    "line": 55,
+    "from": "nome",
+    "to": "name",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 22
+  },
+  {
+    "file": "src/shared/lib/export/__tests__/temp-files.test.ts",
+    "line": 64,
+    "from": "nome",
+    "to": "name",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 22
+  },
+  {
+    "file": "src/shared/lib/export/__tests__/temp-files.test.ts",
+    "line": 74,
+    "from": "vencido",
+    "to": "stale",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/shared/lib/export/__tests__/temp-files.test.ts",
+    "line": 75,
+    "from": "recente",
+    "to": "recent",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/shared/lib/export/__tests__/temp-files.test.ts",
+    "line": 80,
+    "from": "umaHoraAtras",
+    "to": "oneHourAgo",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/shared/lib/export/__tests__/temp-files.test.ts",
+    "line": 90,
+    "from": "alheio",
+    "to": "foreign",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/shared/lib/export/__tests__/temp-files.test.ts",
+    "line": 93,
+    "from": "antigo",
+    "to": "old",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/shared/lib/report/block-data.test.ts",
+    "line": 20,
+    "from": "bloco",
+    "to": "makeBlock",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 34
+  },
+  {
+    "file": "src/shared/lib/report/block-data.test.ts",
+    "line": 25,
+    "from": "campos",
+    "to": "fieldsOf",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 19
+  },
+  {
+    "file": "src/shared/lib/report/block-data.test.ts",
+    "line": 30,
+    "from": "instantaneo",
+    "to": "snapshot",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/shared/lib/report/block-data.test.ts",
+    "line": 47,
+    "from": "grafico",
+    "to": "chart",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 8
+  },
+  {
+    "file": "src/shared/lib/report/block-data.test.ts",
+    "line": 51,
+    "from": "tabela",
+    "to": "table",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/shared/lib/report/block-data.test.ts",
+    "line": 83,
+    "from": "comSparkline",
+    "to": "withSparkline",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/shared/lib/report/block-data.test.ts",
+    "line": 97,
+    "from": "limpo",
+    "to": "cleaned",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 23
+  },
+  {
+    "file": "src/shared/lib/report/block-data.test.ts",
+    "line": 106,
+    "from": "limpo",
+    "to": "cleaned",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 23
+  },
+  {
+    "file": "src/shared/lib/report/block-data.test.ts",
+    "line": 112,
+    "from": "limpo",
+    "to": "cleaned",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 23
+  },
+  {
+    "file": "src/shared/lib/report/block-data.test.ts",
+    "line": 120,
+    "from": "limpo",
+    "to": "cleaned",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 23
+  },
+  {
+    "file": "src/shared/lib/report/block-data.test.ts",
+    "line": 126,
+    "from": "autorada",
+    "to": "authored",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/shared/lib/report/block-data.test.ts",
+    "line": 130,
+    "from": "limpo",
+    "to": "cleaned",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 23
+  },
+  {
+    "file": "src/shared/lib/report/block-data.test.ts",
+    "line": 186,
+    "from": "renomeado",
+    "to": "renamed",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/shared/lib/report/block-data.test.ts",
+    "line": 233,
+    "from": "casos",
+    "to": "cases",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/shared/lib/report/block-data.test.ts",
+    "line": 328,
+    "from": "comCaso",
+    "to": "withCase",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/shared/lib/report/block-data.test.ts",
+    "line": 329,
+    "from": "tipo",
+    "to": "blockType",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/shared/lib/report/block-data.test.ts",
+    "line": 335,
+    "from": "nome",
+    "to": "name",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 22
+  },
+  {
+    "file": "src/shared/lib/report/block-data.test.ts",
+    "line": 337,
+    "from": "antes",
+    "to": "before",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "src/shared/lib/report/block-data.test.ts",
+    "line": 339,
+    "from": "escritos",
+    "to": "written",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "src/shared/lib/report/block-data.test.ts",
+    "line": 339,
+    "from": "campo",
+    "to": "field",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 15
+  },
+  {
+    "file": "src/shared/lib/report/block-data.test.ts",
+    "line": 360,
+    "from": "comparativos",
+    "to": "comparisonCases",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/shared/lib/report/block-data.test.ts",
+    "line": 391,
+    "from": "nome",
+    "to": "name",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 22
+  },
+  {
+    "file": "src/shared/lib/report/block-data.test.ts",
+    "line": 399,
+    "from": "antes",
+    "to": "before",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "src/shared/lib/report/block-data.test.ts",
+    "line": 401,
+    "from": "depois",
+    "to": "after",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/shared/lib/report/block-data.test.ts",
+    "line": 402,
+    "from": "escritos",
+    "to": "written",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "src/shared/lib/report/block-data.test.ts",
+    "line": 402,
+    "from": "campo",
+    "to": "field",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 15
+  },
+  {
+    "file": "src/shared/lib/report/block-data.test.ts",
+    "line": 413,
+    "from": "antes",
+    "to": "before",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "src/shared/lib/report/block-data.test.ts",
+    "line": 418,
+    "from": "escritos",
+    "to": "written",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "src/shared/lib/report/block-data.test.ts",
+    "line": 418,
+    "from": "campo",
+    "to": "field",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 15
+  },
+  {
+    "file": "src/shared/lib/report/block-data.ts",
+    "line": 31,
+    "from": "CAMPOS_DE_DADO",
+    "to": "DATA_FIELDS",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/shared/lib/report/block-data.ts",
+    "line": 64,
+    "from": "CAMPOS_DE_SPARKLINE",
+    "to": "SPARKLINE_FIELDS",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/shared/lib/report/block-data.ts",
+    "line": 79,
+    "from": "camposDeDado",
+    "to": "dataFields",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 11
+  },
+  {
+    "file": "src/shared/lib/report/block-data.ts",
+    "line": 80,
+    "from": "campos",
+    "to": "fields",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 19
+  },
+  {
+    "file": "src/shared/lib/report/block-data.ts",
+    "line": 87,
+    "from": "semDadoMaterializado",
+    "to": "withoutMaterializedData",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 17
+  },
+  {
+    "file": "src/shared/lib/report/block-data.ts",
+    "line": 88,
+    "from": "campos",
+    "to": "fields",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 19
+  },
+  {
+    "file": "src/shared/lib/report/block-data.ts",
+    "line": 90,
+    "from": "limpo",
+    "to": "cleaned",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 23
+  },
+  {
+    "file": "src/shared/lib/report/block-data.ts",
+    "line": 91,
+    "from": "campo",
+    "to": "field",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 15
+  },
+  {
+    "file": "src/shared/lib/report/block-data.ts",
+    "line": 107,
+    "from": "mapaDeConfiguracao",
+    "to": "configurationMap",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/shared/lib/report/block-data.ts",
+    "line": 123,
+    "from": "dadoMaterializado",
+    "to": "materializedData",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "src/shared/lib/report/block-data.ts",
+    "line": 125,
+    "from": "dado",
+    "to": "data",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/shared/lib/report/block-data.ts",
+    "line": 126,
+    "from": "campo",
+    "to": "field",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 15
+  },
+  {
+    "file": "src/shared/lib/report/block-data.ts",
+    "line": 138,
+    "from": "dadoJaAplicado",
+    "to": "isDataApplied",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "src/shared/lib/report/block-data.ts",
+    "line": 138,
+    "from": "dado",
+    "to": "data",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/shared/lib/report/block-data.ts",
+    "line": 139,
+    "from": "atual",
+    "to": "current",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/shared/lib/report/block-data.ts",
+    "line": 141,
+    "from": "campo",
+    "to": "field",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 15
+  },
+  {
+    "file": "src/shared/lib/report/block-data.ts",
+    "line": 141,
+    "from": "valor",
+    "to": "value",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/shared/lib/report/block-data.ts",
+    "line": 155,
+    "from": "assinaturaDeConfiguracao",
+    "to": "configurationSignature",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 12
+  },
+  {
+    "file": "src/shared/lib/report/block-data.ts",
+    "line": 162,
+    "from": "mesmaConfiguracao",
+    "to": "isSameConfiguration",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/shared/lib/bigquery/__tests__/celula.test.ts",
+    "line": 0,
+    "from": "src/shared/lib/bigquery/__tests__/celula.test.ts",
+    "to": "src/shared/lib/bigquery/__tests__/cell.test.ts",
+    "kind": "file",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 1
+  },
+  {
+    "file": "src/shared/lib/bigquery/celula.ts",
+    "line": 0,
+    "from": "src/shared/lib/bigquery/celula.ts",
+    "to": "src/shared/lib/bigquery/cell.ts",
+    "kind": "file",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 1
+  }
+]

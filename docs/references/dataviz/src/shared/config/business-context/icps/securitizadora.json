@@ -1,0 +1,8 @@
+{
+  "id": "securitizadora",
+  "segment": "Securitizadora",
+  "examples": ["Opea", "Virgo", "Fortesec", "HabitaSec"],
+  "primaryKpis": ["originacao_emissoes", "oc", "es", "cvm60_compliance"],
+  "decisionJourney": "pipeline contínuo + comitê de risco",
+  "_meta": { "refinedBySme": false }
+}

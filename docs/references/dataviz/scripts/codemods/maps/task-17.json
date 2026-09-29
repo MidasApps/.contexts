@@ -1,0 +1,1293 @@
+[
+  {
+    "file": "src/widgets/ai-sidebar/ui/AISidebar.test.tsx",
+    "line": 27,
+    "from": "lista",
+    "to": "list",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/AISidebar.test.tsx",
+    "line": 65,
+    "from": "emitir",
+    "to": "emit",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 21
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/AISidebar.test.tsx",
+    "line": 135,
+    "from": "estado",
+    "to": "state",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 15
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/AISidebar.test.tsx",
+    "line": 176,
+    "from": "filtros",
+    "to": "filterState",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 8
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/AISidebar.test.tsx",
+    "line": 203,
+    "from": "reiniciarAmbiente",
+    "to": "resetEnvironment",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/AISidebar.test.tsx",
+    "line": 224,
+    "from": "turnoQueCriouBloco",
+    "to": "turnThatCreatedBlock",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/AISidebar.test.tsx",
+    "line": 241,
+    "from": "turnoQueCriouPagina",
+    "to": "turnThatCreatedPage",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/AISidebar.test.tsx",
+    "line": 263,
+    "from": "turnoQueCriouRelatorio",
+    "to": "turnThatCreatedReport",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/AISidebar.test.tsx",
+    "line": 290,
+    "from": "clicarPrimeiraSugestao",
+    "to": "clickFirstSuggestion",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/AISidebar.test.tsx",
+    "line": 291,
+    "from": "sugestao",
+    "to": "suggestion",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/AISidebar.test.tsx",
+    "line": 347,
+    "from": "abrirConversaAntiga",
+    "to": "openOldConversation",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/AISidebar.test.tsx",
+    "line": 347,
+    "from": "titulo",
+    "to": "title",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 7
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/AISidebar.test.tsx",
+    "line": 457,
+    "from": "linhas",
+    "to": "lines",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/AISidebar.test.tsx",
+    "line": 458,
+    "from": "turno",
+    "to": "turn",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/AISidebar.test.tsx",
+    "line": 478,
+    "from": "gravado",
+    "to": "saved",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 7
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/AISidebar.test.tsx",
+    "line": 689,
+    "from": "ultima",
+    "to": "last",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/AISidebar.test.tsx",
+    "line": 690,
+    "from": "gravado",
+    "to": "saved",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 7
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/AISidebar.tsx",
+    "line": 346,
+    "from": "MAX_LINHAS_INPUT",
+    "to": "MAX_INPUT_LINES",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/AISidebar.tsx",
+    "line": 349,
+    "from": "textoDaMensagem",
+    "to": "messageText",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/AISidebar.tsx",
+    "line": 356,
+    "from": "paraUIMessage",
+    "to": "toUIMessage",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/AISidebar.tsx",
+    "line": 373,
+    "from": "marcarToolCallsComoAplicadas",
+    "to": "markToolCallsApplied",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/AISidebar.tsx",
+    "line": 373,
+    "from": "aplicadas",
+    "to": "applied",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/AISidebar.tsx",
+    "line": 394,
+    "from": "paraSerializada",
+    "to": "toSerialized",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/AISidebar.tsx",
+    "line": 407,
+    "from": "tituloDaConversa",
+    "to": "conversationTitle",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/AISidebar.tsx",
+    "line": 407,
+    "from": "nomeDoIndicador",
+    "to": "indicatorName",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/AISidebar.tsx",
+    "line": 409,
+    "from": "primeira",
+    "to": "first",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/AISidebar.tsx",
+    "line": 410,
+    "from": "texto",
+    "to": "text",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/AISidebar.tsx",
+    "line": 544,
+    "from": "conversas",
+    "to": "conversations",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 11
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/AISidebar.tsx",
+    "line": 545,
+    "from": "carregandoLista",
+    "to": "isLoadingList",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/AISidebar.tsx",
+    "line": 546,
+    "from": "criarConversa",
+    "to": "createConversation",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/AISidebar.tsx",
+    "line": 547,
+    "from": "salvarConversa",
+    "to": "saveConversation",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/AISidebar.tsx",
+    "line": 548,
+    "from": "carregarConversa",
+    "to": "loadConversation",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/AISidebar.tsx",
+    "line": 549,
+    "from": "removerConversa",
+    "to": "removeConversation",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/AISidebar.tsx",
+    "line": 550,
+    "from": "fixarConversa",
+    "to": "pinConversation",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/AISidebar.tsx",
+    "line": 562,
+    "from": "conversaLivreId",
+    "to": "freeConversationId",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/AISidebar.tsx",
+    "line": 562,
+    "from": "setConversaLivreIdCru",
+    "to": "setFreeConversationIdRaw",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/AISidebar.tsx",
+    "line": 567,
+    "from": "setConversaLivreId",
+    "to": "setFreeConversationId",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/AISidebar.tsx",
+    "line": 571,
+    "from": "listaAberta",
+    "to": "isListOpen",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/AISidebar.tsx",
+    "line": 571,
+    "from": "setListaAberta",
+    "to": "setIsListOpen",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/AISidebar.tsx",
+    "line": 572,
+    "from": "conversaAtivaId",
+    "to": "activeConversationId",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 13
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/AISidebar.tsx",
+    "line": 576,
+    "from": "conversaCarregadaRef",
+    "to": "loadedConversationRef",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 7,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/AISidebar.tsx",
+    "line": 583,
+    "from": "conversaAplicadaRef",
+    "to": "appliedConversationRef",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 7,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/AISidebar.tsx",
+    "line": 584,
+    "from": "assinaturaSalvaRef",
+    "to": "savedSignatureRef",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/AISidebar.tsx",
+    "line": 594,
+    "from": "mostraHistorico",
+    "to": "showsHistory",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/AISidebar.tsx",
+    "line": 603,
+    "from": "historico",
+    "to": "history",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/AISidebar.tsx",
+    "line": 603,
+    "from": "setHistorico",
+    "to": "setHistory",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 8,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/AISidebar.tsx",
+    "line": 604,
+    "from": "buscandoHistorico",
+    "to": "isFetchingHistory",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/AISidebar.tsx",
+    "line": 606,
+    "from": "comecarNovaConversa",
+    "to": "startNewConversation",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/AISidebar.tsx",
+    "line": 625,
+    "from": "clienteDaConversaRef",
+    "to": "conversationClientRef",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/AISidebar.tsx",
+    "line": 629,
+    "from": "guardada",
+    "to": "stored",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/AISidebar.tsx",
+    "line": 663,
+    "from": "conversa",
+    "to": "conversation",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 18
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/AISidebar.tsx",
+    "line": 709,
+    "from": "turnoEstavel",
+    "to": "isTurnStable",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/AISidebar.tsx",
+    "line": 721,
+    "from": "assinatura",
+    "to": "signature",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/AISidebar.tsx",
+    "line": 771,
+    "from": "alturaLinha",
+    "to": "lineHeight",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/AISidebar.tsx",
+    "line": 772,
+    "from": "alturaMaxima",
+    "to": "maxHeight",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/AISidebar.tsx",
+    "line": 773,
+    "from": "passouDoTeto",
+    "to": "exceedsMax",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/AISidebar.tsx",
+    "line": 782,
+    "from": "filtroDateRange",
+    "to": "filterDateRange",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/AISidebar.tsx",
+    "line": 783,
+    "from": "filtroCompareEnabled",
+    "to": "filterCompareEnabled",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/AISidebar.tsx",
+    "line": 784,
+    "from": "filtroComparePeriod",
+    "to": "filterComparePeriod",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/AISidebar.tsx",
+    "line": 785,
+    "from": "filtroViewMode",
+    "to": "filterViewMode",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/AISidebar.tsx",
+    "line": 913,
+    "from": "paginaNovaRef",
+    "to": "newPageRef",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/AISidebar.tsx",
+    "line": 926,
+    "from": "relatorioNovoRef",
+    "to": "newReportRef",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/AISidebar.tsx",
+    "line": 927,
+    "from": "aoCriarRelatorio",
+    "to": "onReportCreated",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/AISidebar.tsx",
+    "line": 931,
+    "from": "aoCriarPaginaDeRelatorio",
+    "to": "onReportPageCreated",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/AISidebar.tsx",
+    "line": 932,
+    "from": "indice",
+    "to": "index",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/AISidebar.tsx",
+    "line": 948,
+    "from": "aoMudarFiltroDaPagina",
+    "to": "onPageFilterChanged",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/AISidebar.tsx",
+    "line": 1007,
+    "from": "relatorioNovo",
+    "to": "newReport",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/AISidebar.tsx",
+    "line": 1028,
+    "from": "pagina",
+    "to": "page",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/ConversationHistory.tsx",
+    "line": 10,
+    "from": "conversas",
+    "to": "conversations",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 11
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/ConversationHistory.tsx",
+    "line": 11,
+    "from": "carregando",
+    "to": "loading",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/ConversationHistory.tsx",
+    "line": 12,
+    "from": "ativaId",
+    "to": "activeId",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/ConversationHistory.tsx",
+    "line": 13,
+    "from": "onAbrir",
+    "to": "onOpen",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/ConversationHistory.tsx",
+    "line": 14,
+    "from": "onNova",
+    "to": "onNew",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/ConversationHistory.tsx",
+    "line": 15,
+    "from": "onFixar",
+    "to": "onPin",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/ConversationHistory.tsx",
+    "line": 15,
+    "from": "fixada",
+    "to": "pinned",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/ConversationHistory.tsx",
+    "line": 16,
+    "from": "onRemover",
+    "to": "onRemove",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/ConversationHistory.tsx",
+    "line": 19,
+    "from": "rotuloData",
+    "to": "dateLabel",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/ConversationHistory.tsx",
+    "line": 33,
+    "from": "conversas",
+    "to": "conversations",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 11
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/ConversationHistory.tsx",
+    "line": 34,
+    "from": "carregando",
+    "to": "loading",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/ConversationHistory.tsx",
+    "line": 35,
+    "from": "ativaId",
+    "to": "activeId",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/ConversationHistory.tsx",
+    "line": 36,
+    "from": "onAbrir",
+    "to": "onOpen",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/ConversationHistory.tsx",
+    "line": 37,
+    "from": "onNova",
+    "to": "onNew",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/ConversationHistory.tsx",
+    "line": 38,
+    "from": "onFixar",
+    "to": "onPin",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/ConversationHistory.tsx",
+    "line": 39,
+    "from": "onRemover",
+    "to": "onRemove",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/ConversationHistory.tsx",
+    "line": 41,
+    "from": "fixadas",
+    "to": "pinnedConversations",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/ConversationHistory.tsx",
+    "line": 42,
+    "from": "recentes",
+    "to": "recent",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/ConversationHistory.tsx",
+    "line": 109,
+    "from": "Secao",
+    "to": "Section",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/ConversationHistory.tsx",
+    "line": 109,
+    "from": "titulo",
+    "to": "title",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 7
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/ConversationHistory.tsx",
+    "line": 109,
+    "from": "titulo",
+    "to": "title",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 7
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/ConversationHistory.tsx",
+    "line": 121,
+    "from": "conversa",
+    "to": "conversation",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 18
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/ConversationHistory.tsx",
+    "line": 122,
+    "from": "ativa",
+    "to": "isActive",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/ConversationHistory.tsx",
+    "line": 123,
+    "from": "onAbrir",
+    "to": "onOpen",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/ConversationHistory.tsx",
+    "line": 124,
+    "from": "onFixar",
+    "to": "onPin",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/ConversationHistory.tsx",
+    "line": 125,
+    "from": "onRemover",
+    "to": "onRemove",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/ConversationHistory.tsx",
+    "line": 127,
+    "from": "conversa",
+    "to": "conversation",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 18
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/ConversationHistory.tsx",
+    "line": 129,
+    "from": "onAbrir",
+    "to": "onOpen",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/ConversationHistory.tsx",
+    "line": 130,
+    "from": "onFixar",
+    "to": "onPin",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/ConversationHistory.tsx",
+    "line": 130,
+    "from": "fixada",
+    "to": "pinned",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/ConversationHistory.tsx",
+    "line": 131,
+    "from": "onRemover",
+    "to": "onRemove",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/SelectedBlocksChip.tsx",
+    "line": 8,
+    "from": "nomeDoBloco",
+    "to": "blockName",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/SelectedBlocksChip.tsx",
+    "line": 28,
+    "from": "nomes",
+    "to": "names",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/SelectedBlocksChip.tsx",
+    "line": 29,
+    "from": "bloco",
+    "to": "block",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/SelectedBlocksChip.tsx",
+    "line": 33,
+    "from": "rotulo",
+    "to": "label",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/__tests__/SelectedBlocksChip.test.tsx",
+    "line": 8,
+    "from": "PAGINA",
+    "to": "PAGE",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/widgets/ai-sidebar/ui/__tests__/SelectedBlocksChip.test.tsx",
+    "line": 19,
+    "from": "semear",
+    "to": "seed",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 8
+  },
+  {
+    "file": "src/widgets/chat-sidebar/ui/AgentPicker.tsx",
+    "line": 30,
+    "from": "aberto",
+    "to": "isOpen",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 8
+  },
+  {
+    "file": "src/widgets/chat-sidebar/ui/AgentPicker.tsx",
+    "line": 30,
+    "from": "setAberto",
+    "to": "setIsOpen",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/widgets/chat-sidebar/ui/AgentPicker.tsx",
+    "line": 31,
+    "from": "busca",
+    "to": "search",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/widgets/chat-sidebar/ui/AgentPicker.tsx",
+    "line": 31,
+    "from": "setBusca",
+    "to": "setSearch",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/widgets/chat-sidebar/ui/AgentPicker.tsx",
+    "line": 37,
+    "from": "agente",
+    "to": "agent",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "src/widgets/chat-sidebar/ui/AgentPicker.tsx",
+    "line": 38,
+    "from": "opcoes",
+    "to": "options",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "src/widgets/chat-sidebar/ui/AgentPicker.tsx",
+    "line": 47,
+    "from": "fora",
+    "to": "outside",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/widgets/chat-sidebar/ui/AgentPicker.tsx",
+    "line": 59,
+    "from": "escolher",
+    "to": "choose",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/widgets/chat-sidebar/ui/AgentPicker.tsx",
+    "line": 113,
+    "from": "ativo",
+    "to": "isActive",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/widgets/chat-sidebar/ui/__tests__/AgentPicker.test.tsx",
+    "line": 11,
+    "from": "estado",
+    "to": "state",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 15
+  },
+  {
+    "file": "src/widgets/chat-sidebar/ui/__tests__/AgentPicker.test.tsx",
+    "line": 20,
+    "from": "abrir",
+    "to": "open",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 9
+  },
+  {
+    "file": "src/widgets/chat-sidebar/ui/__tests__/AgentPicker.test.tsx",
+    "line": 64,
+    "from": "marcado",
+    "to": "checked",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/widgets/chat-sidebar/ui/__tests__/AgentPicker.test.tsx",
+    "line": 81,
+    "from": "opcoes",
+    "to": "options",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "src/widgets/chat-sidebar/ui/__tests__/useAbaDoAssistente.test.tsx",
+    "line": 21,
+    "from": "Sonda",
+    "to": "Probe",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 17
+  },
+  {
+    "file": "src/widgets/chat-sidebar/ui/__tests__/useAbaDoAssistente.test.tsx",
+    "line": 26,
+    "from": "disparaAtalho",
+    "to": "fireShortcut",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/widgets/chat-sidebar/ui/useAbaDoAssistente.ts",
+    "line": 23,
+    "from": "useAbaDoAssistente",
+    "to": "useAssistantTab",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/widgets/chat-sidebar/ui/useAbaDoAssistente.ts",
+    "line": 24,
+    "from": "mostrando",
+    "to": "showing",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/widgets/chat-sidebar/ui/useAbaDoAssistente.ts",
+    "line": 27,
+    "from": "editandoRelatorio",
+    "to": "isEditingReport",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/widgets/chat-sidebar/ui/useAbaDoAssistente.ts",
+    "line": 30,
+    "from": "alterna",
+    "to": "toggle",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/widgets/chat-sidebar/ui/useAbaDoAssistente.ts",
+    "line": 37,
+    "from": "abertoAntesDaEdicao",
+    "to": "wasOpenBeforeEdit",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "src/widgets/chat-sidebar/ui/__tests__/useAbaDoAssistente.test.tsx",
+    "line": 0,
+    "from": "src/widgets/chat-sidebar/ui/__tests__/useAbaDoAssistente.test.tsx",
+    "to": "src/widgets/chat-sidebar/ui/__tests__/useAssistantTab.test.tsx",
+    "kind": "file",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 1
+  },
+  {
+    "file": "src/widgets/chat-sidebar/ui/useAbaDoAssistente.ts",
+    "line": 0,
+    "from": "src/widgets/chat-sidebar/ui/useAbaDoAssistente.ts",
+    "to": "src/widgets/chat-sidebar/ui/useAssistantTab.ts",
+    "kind": "file",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 1
+  }
+]

@@ -1,0 +1,1537 @@
+<meta charset="utf-8">
+<title>Épico: Consistência da Aplicação — Pendências</title>
+
+<style>
+  /* ─── Tokens ─────────────────────────────────────────────────
+     Neutros com viés frio (azul-violeta) de propósito: o acento é o
+     laranja do próprio produto, e ele destaca mais sobre fundo frio.
+     Semânticas (crítico/atenção/ok) são separadas do acento. */
+  :root {
+    color-scheme: light;
+
+    --paper:      #FFFFFF;
+    --ground:     #F4F4F7;
+    --sunken:     #ECECF1;
+    --line:       #DEDEE6;
+    --line-soft:  #E9E9EF;
+
+    --text:       #16171D;
+    --text-mid:   #4A4C58;
+    --text-dim:   #74768A;
+
+    --accent:     #C9531D;
+    --accent-ink: #8F3A12;
+    --accent-wash:#FBEDE5;
+
+    --critical:   #B93B3B;
+    --critical-wash: #FBEAEA;
+    --attention:  #9A6B10;
+    --attention-wash: #FBF2DE;
+    --ok:         #2E7A5B;
+    --ok-wash:    #E6F3ED;
+
+    --shadow: 0 1px 2px rgba(16,17,25,.05), 0 4px 14px rgba(16,17,25,.05);
+
+    --sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+
+    --measure: 68ch;
+    --radius: 10px;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      color-scheme: dark;
+      --paper:      #15161D;
+      --ground:     #0B0C11;
+      --sunken:     #1B1D26;
+      --line:       #2A2C38;
+      --line-soft:  #23252F;
+
+      --text:       #EDEDF2;
+      --text-mid:   #B4B6C4;
+      --text-dim:   #85879A;
+
+      --accent:     #F0803F;
+      --accent-ink: #F5A472;
+      --accent-wash:#2A1A11;
+
+      --critical:   #E8736F;
+      --critical-wash: #2B1618;
+      --attention:  #E0A93F;
+      --attention-wash: #2A2113;
+      --ok:         #5FBE93;
+      --ok-wash:    #12241D;
+
+      --shadow: 0 1px 2px rgba(0,0,0,.4), 0 4px 16px rgba(0,0,0,.3);
+    }
+  }
+
+  /* O toggle do leitor precisa vencer a media query nos DOIS sentidos. */
+  :root[data-theme="light"] {
+    color-scheme: light;
+    --paper: #FFFFFF; --ground: #F4F4F7; --sunken: #ECECF1;
+    --line: #DEDEE6; --line-soft: #E9E9EF;
+    --text: #16171D; --text-mid: #4A4C58; --text-dim: #74768A;
+    --accent: #C9531D; --accent-ink: #8F3A12; --accent-wash: #FBEDE5;
+    --critical: #B93B3B; --critical-wash: #FBEAEA;
+    --attention: #9A6B10; --attention-wash: #FBF2DE;
+    --ok: #2E7A5B; --ok-wash: #E6F3ED;
+    --shadow: 0 1px 2px rgba(16,17,25,.05), 0 4px 14px rgba(16,17,25,.05);
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --paper: #15161D; --ground: #0B0C11; --sunken: #1B1D26;
+    --line: #2A2C38; --line-soft: #23252F;
+    --text: #EDEDF2; --text-mid: #B4B6C4; --text-dim: #85879A;
+    --accent: #F0803F; --accent-ink: #F5A472; --accent-wash: #2A1A11;
+    --critical: #E8736F; --critical-wash: #2B1618;
+    --attention: #E0A93F; --attention-wash: #2A2113;
+    --ok: #5FBE93; --ok-wash: #12241D;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 4px 16px rgba(0,0,0,.3);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 0 20px 96px;
+  }
+
+  /* ─── Cabeçalho ─────────────────────────────────────────── */
+  .masthead {
+    padding: 56px 0 32px;
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: .72rem;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--accent-ink);
+    margin: 0;
+  }
+  h1 {
+    font-size: clamp(1.8rem, 4.2vw, 2.7rem);
+    line-height: 1.12;
+    letter-spacing: -.022em;
+    font-weight: 700;
+    margin: 0;
+    text-wrap: balance;
+    max-width: 20ch;
+  }
+  .standfirst {
+    margin: 0;
+    max-width: var(--measure);
+    color: var(--text-mid);
+    font-size: 1.05rem;
+  }
+  .meta-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 22px;
+    font-family: var(--mono);
+    font-size: .74rem;
+    letter-spacing: .04em;
+    color: var(--text-dim);
+  }
+  .meta-row b { color: var(--text-mid); font-weight: 600; }
+
+  /* ─── Painel de progresso ───────────────────────────────── */
+  .scoreboard {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin: 32px 0 0;
+  }
+  .score {
+    background: var(--paper);
+    padding: 16px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .score .n {
+    font-size: 1.9rem;
+    font-weight: 700;
+    letter-spacing: -.02em;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.1;
+  }
+  .score .k {
+    font-family: var(--mono);
+    font-size: .68rem;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    color: var(--text-dim);
+  }
+  .score.is-done .n { color: var(--ok); }
+  .score.is-you  .n { color: var(--critical); }
+  .score.is-mech .n { color: var(--attention); }
+
+  /* ─── Barra de filtro ───────────────────────────────────── */
+  .toolbar {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: color-mix(in srgb, var(--ground) 92%, transparent);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--line);
+    margin: 40px 0 0;
+    padding: 12px 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+  }
+  .toolbar .label {
+    font-family: var(--mono);
+    font-size: .68rem;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    color: var(--text-dim);
+    margin-right: 4px;
+  }
+  .chip {
+    font: inherit;
+    font-size: .82rem;
+    background: var(--paper);
+    color: var(--text-mid);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 5px 13px;
+    cursor: pointer;
+    transition: background .15s, color .15s, border-color .15s;
+  }
+  .chip:hover { border-color: var(--text-dim); }
+  .chip[aria-pressed="true"] {
+    background: var(--text);
+    color: var(--paper);
+    border-color: var(--text);
+  }
+  .chip:focus-visible,
+  .vote:focus-visible,
+  .ghost:focus-visible,
+  summary:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+  .spacer { flex: 1 1 auto; }
+  .ghost {
+    font: inherit;
+    font-size: .82rem;
+    background: transparent;
+    color: var(--accent-ink);
+    border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
+    border-radius: 999px;
+    padding: 5px 13px;
+    cursor: pointer;
+  }
+  .ghost:hover { background: var(--accent-wash); }
+
+  /* ─── Seções ────────────────────────────────────────────── */
+  section { margin-top: 52px; }
+  .sec-head { max-width: var(--measure); margin-bottom: 22px; }
+  .sec-head h2 {
+    font-size: 1.35rem;
+    letter-spacing: -.015em;
+    margin: 6px 0 8px;
+    line-height: 1.25;
+  }
+  .sec-head p { margin: 0; color: var(--text-mid); font-size: .96rem; }
+
+  .items { display: flex; flex-direction: column; gap: 14px; }
+
+  /* ─── Item ──────────────────────────────────────────────── */
+  .item {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--text-dim);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+  .item[data-sev="alta"]  { border-left-color: var(--critical); }
+  .item[data-sev="media"] { border-left-color: var(--attention); }
+  .item[data-sev="baixa"] { border-left-color: var(--text-dim); }
+  .item[hidden] { display: none; }
+
+  .item > summary {
+    list-style: none;
+    cursor: pointer;
+    padding: 16px 20px;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 12px;
+  }
+  .item > summary::-webkit-details-marker { display: none; }
+  .item > summary:hover { background: var(--sunken); }
+
+  .code {
+    font-family: var(--mono);
+    font-size: .74rem;
+    font-weight: 600;
+    letter-spacing: .04em;
+    color: var(--text-dim);
+    background: var(--sunken);
+    border-radius: 5px;
+    padding: 3px 7px;
+    white-space: nowrap;
+  }
+  .item-title {
+    font-weight: 600;
+    font-size: 1.02rem;
+    letter-spacing: -.01em;
+    line-height: 1.35;
+    text-wrap: balance;
+  }
+  .tags { display: flex; align-items: center; gap: 8px; }
+  .sev {
+    font-family: var(--mono);
+    font-size: .64rem;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    padding: 3px 8px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  .sev.alta  { background: var(--critical-wash);  color: var(--critical); }
+  .sev.media { background: var(--attention-wash); color: var(--attention); }
+  .sev.baixa { background: var(--sunken);         color: var(--text-dim); }
+  .verdict {
+    font-family: var(--mono);
+    font-size: .64rem;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: var(--text-dim);
+    white-space: nowrap;
+  }
+  .verdict[data-set="agora"]  { color: var(--ok); }
+  .verdict[data-set="depois"] { color: var(--attention); }
+  .verdict[data-set="nao"]    { color: var(--text-dim); text-decoration: line-through; }
+
+  .body {
+    padding: 4px 20px 20px;
+    border-top: 1px solid var(--line-soft);
+    display: grid;
+    gap: 18px;
+  }
+  @media (min-width: 820px) {
+    .body { grid-template-columns: 1fr 1fr; }
+    .body .full { grid-column: 1 / -1; }
+  }
+  .field { min-width: 0; }
+  .field h4 {
+    font-family: var(--mono);
+    font-size: .66rem;
+    text-transform: uppercase;
+    letter-spacing: .11em;
+    color: var(--text-dim);
+    margin: 16px 0 6px;
+    font-weight: 600;
+  }
+  .field p { margin: 0; color: var(--text-mid); font-size: .94rem; max-width: var(--measure); }
+  .field p + p { margin-top: 8px; }
+  .field strong { color: var(--text); font-weight: 600; }
+
+  .options { margin: 6px 0 0; padding-left: 18px; color: var(--text-mid); font-size: .94rem; }
+  .options li { margin-bottom: 5px; }
+  .options li::marker { color: var(--accent); }
+
+  .evidence {
+    font-family: var(--mono);
+    font-size: .78rem;
+    background: var(--sunken);
+    border-radius: 6px;
+    padding: 2px 6px;
+    color: var(--text-mid);
+    overflow-wrap: anywhere;
+  }
+
+  /* ─── Registro de decisão ───────────────────────────────── */
+  .decide {
+    grid-column: 1 / -1;
+    border-top: 1px dashed var(--line);
+    padding-top: 14px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+  }
+  .decide .label {
+    font-family: var(--mono);
+    font-size: .66rem;
+    text-transform: uppercase;
+    letter-spacing: .11em;
+    color: var(--text-dim);
+    margin-right: 4px;
+  }
+  .vote {
+    font: inherit;
+    font-size: .82rem;
+    background: var(--paper);
+    color: var(--text-mid);
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    padding: 5px 12px;
+    cursor: pointer;
+    transition: background .15s, color .15s, border-color .15s;
+  }
+  .vote:hover { border-color: var(--text-dim); }
+  .vote[aria-pressed="true"][data-vote="agora"]  { background: var(--ok-wash);        color: var(--ok);        border-color: var(--ok); }
+  .vote[aria-pressed="true"][data-vote="depois"] { background: var(--attention-wash); color: var(--attention); border-color: var(--attention); }
+  .vote[aria-pressed="true"][data-vote="nao"]    { background: var(--sunken);         color: var(--text);      border-color: var(--text-dim); }
+
+  /* ─── Resolvidos ────────────────────────────────────────── */
+  .done-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 10px;
+  }
+  .done-card {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--ok);
+    border-radius: var(--radius);
+    padding: 13px 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .done-card .t { font-weight: 600; font-size: .93rem; letter-spacing: -.005em; }
+  .done-card .d { font-size: .86rem; color: var(--text-mid); }
+  .done-card .c {
+    font-family: var(--mono);
+    font-size: .68rem;
+    color: var(--text-dim);
+    letter-spacing: .03em;
+  }
+
+  /* ─── Resumo ────────────────────────────────────────────── */
+  .summary-panel {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 20px;
+    box-shadow: var(--shadow);
+  }
+  .summary-panel h3 { margin: 0 0 4px; font-size: 1.05rem; letter-spacing: -.01em; }
+  .summary-panel .hint { margin: 0 0 14px; color: var(--text-mid); font-size: .92rem; }
+  #resumo {
+    width: 100%;
+    min-height: 190px;
+    font-family: var(--mono);
+    font-size: .8rem;
+    line-height: 1.65;
+    color: var(--text);
+    background: var(--sunken);
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    padding: 13px;
+    resize: vertical;
+  }
+  #resumo:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+  footer {
+    margin-top: 56px;
+    padding-top: 22px;
+    border-top: 1px solid var(--line);
+    color: var(--text-dim);
+    font-size: .85rem;
+    max-width: var(--measure);
+  }
+  footer code { font-family: var(--mono); font-size: .82rem; }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; animation: none !important; }
+  }
+</style>
+
+<div class="wrap">
+
+  <header class="masthead">
+    <p class="eyebrow">Épico · Consistência e segurança da aplicação</p>
+    <h1>O que ainda falta decidir e corrigir</h1>
+    <p class="standfirst">
+      Uma revisão de engenharia examinou os ~184 módulos do liquid-dataviz e apontou 20 riscos
+      no código e 9 lacunas de documentação. Nove riscos já foram corrigidos. Esta página lista
+      o que sobrou, em linguagem comum, para você avaliar item a item.
+    </p>
+    <div class="meta-row">
+      <span><b>Data</b> 04/08/2026</span>
+      <span><b>Branch</b> chore/limpeza-vila-rosa</span>
+      <span><b>Origem</b> 2026-08-04-revisao-modulos-e-aderencia-a-convencoes.md</span>
+      <span><b>Testes</b> 1.475 passando, 0 falhando</span>
+    </div>
+  </header>
+
+  <div class="scoreboard">
+    <div class="score is-done"><span class="n">9</span><span class="k">já resolvidos</span></div>
+    <div class="score is-you"><span class="n">5</span><span class="k">dependem de você</span></div>
+    <div class="score is-mech"><span class="n">6</span><span class="k">correção mecânica</span></div>
+    <div class="score"><span class="n">1</span><span class="k">fora do código</span></div>
+    <div class="score"><span class="n">5</span><span class="k">documentação</span></div>
+  </div>
+
+  <div class="toolbar">
+    <span class="label">Ver</span>
+    <button class="chip" data-filter="todos" aria-pressed="true">Todos</button>
+    <button class="chip" data-filter="voce" aria-pressed="false">Dependem de você</button>
+    <button class="chip" data-filter="mecanico" aria-pressed="false">Mecânicos</button>
+    <button class="chip" data-filter="externo" aria-pressed="false">Fora do código</button>
+    <button class="chip" data-filter="doc" aria-pressed="false">Documentação</button>
+    <button class="chip" data-filter="pendente" aria-pressed="false">Sem decisão</button>
+    <span class="spacer"></span>
+    <button class="ghost" id="expandir">Abrir todos</button>
+    <button class="ghost" id="limpar">Limpar decisões</button>
+  </div>
+
+  <!-- ══════════ DEPENDEM DE VOCÊ ══════════ -->
+  <section id="sec-voce">
+    <div class="sec-head">
+      <p class="eyebrow">Grupo 1 de 4</p>
+      <h2>Dependem de uma decisão sua</h2>
+      <p>
+        Não estão parados por falta de tempo. Cada um tem mais de um caminho defensável, e
+        escolher errado muda o comportamento do produto para quem já usa. A escolha é sua.
+      </p>
+    </div>
+    <div class="items">
+
+      <details class="item" data-group="voce" data-sev="alta" data-id="R3">
+        <summary>
+          <span class="code">R3</span>
+          <span class="item-title">Quem tem e-mail da casa entra como administrador de tudo</span>
+          <span class="tags"><span class="sev alta">Alta</span><span class="verdict" data-set="">sem decisão</span></span>
+        </summary>
+        <div class="body">
+          <div class="field">
+            <h4>O que é</h4>
+            <p>
+              O sistema decide quem é administrador olhando o final do endereço de e-mail. Hoje,
+              qualquer conta terminada em <span class="evidence">askliquid.com</span> recebe acesso
+              irrestrito — vê os dados de todos os clientes.
+            </p>
+            <p>
+              Pior: esse domínio está escrito no código como valor padrão. Se a configuração do
+              ambiente sumir, o sistema <strong>não falha</strong> — ele assume esse domínio sozinho
+              e continua concedendo acesso total.
+            </p>
+          </div>
+          <div class="field">
+            <h4>O risco de deixar como está</h4>
+            <p>
+              Não existe degrau intermediário entre “é da casa” e “vê tudo de todo mundo”. Um
+              analista que só precisa acompanhar um cliente recebe o mesmo alcance de quem
+              administra a plataforma.
+            </p>
+            <p>
+              Existe um controle mais fino previsto no sistema (um papel de administrador por
+              cliente), mas ele é <strong>anulado</strong> por esse atalho do domínio.
+            </p>
+          </div>
+          <div class="field full">
+            <h4>O que precisa ser decidido</h4>
+            <ul class="options">
+              <li><strong>Manter como está.</strong> Simples, e todo mundo hoje continua trabalhando igual.</li>
+              <li><strong>Manter o domínio, mas sem o valor padrão no código.</strong> Sem configuração, o sistema recusa em vez de adivinhar. Mudança pequena; exige garantir que a configuração exista em produção antes de subir.</li>
+              <li><strong>Criar o degrau intermediário.</strong> O domínio passa a conceder acesso básico, e o acesso irrestrito vira uma lista explícita de pessoas. Mais seguro e mais trabalhoso: hoje há 10 usuários, e cada um precisa ser reclassificado.</li>
+            </ul>
+            <p style="margin-top:10px">
+              <strong>Eu não toquei nisso de propósito.</strong> Qualquer das opções muda hoje o
+              acesso de gente que está trabalhando.
+            </p>
+          </div>
+          <div class="decide">
+            <span class="label">Decisão</span>
+            <button class="vote" data-vote="agora"  aria-pressed="false">Fazer agora</button>
+            <button class="vote" data-vote="depois" aria-pressed="false">Deixar para depois</button>
+            <button class="vote" data-vote="nao"    aria-pressed="false">Não fazer</button>
+          </div>
+        </div>
+      </details>
+
+      <details class="item" data-group="voce" data-sev="alta" data-id="R4">
+        <summary>
+          <span class="code">R4</span>
+          <span class="item-title">Nada limita quantas vezes alguém aciona as funções caras</span>
+          <span class="tags"><span class="sev alta">Alta</span><span class="verdict" data-set="">sem decisão</span></span>
+        </summary>
+        <div class="body">
+          <div class="field">
+            <h4>O que é</h4>
+            <p>
+              Três operações pesadas não têm nenhum freio: o chat de análise (pode rodar até 5
+              minutos por pergunta), a geração de painel por IA (até 10 minutos) e a exportação de
+              PDF, que <strong>abre um navegador inteiro no servidor</strong> a cada chamada.
+            </p>
+            <p>
+              Não existe no sistema nenhuma resposta do tipo “calma, você está pedindo demais”.
+            </p>
+          </div>
+          <div class="field">
+            <h4>O risco de deixar como está</h4>
+            <p>
+              Uma pessoa clicando repetidamente — ou uma tela com defeito repetindo a chamada
+              sozinha — consegue ocupar o servidor e gerar custo de IA e de consulta sem que nada
+              interrompa.
+            </p>
+            <p>
+              O teto de custo por consulta que acabei de instalar limita <em>cada</em> consulta.
+              Ele não limita <em>quantas</em> consultas.
+            </p>
+          </div>
+          <div class="field full">
+            <h4>O que precisa ser decidido</h4>
+            <p>
+              A parte técnica tem uma armadilha: contar as chamadas na memória do servidor
+              <strong>não funciona</strong> aqui, porque o serviço sobe e desce várias cópias de si
+              mesmo conforme a demanda — cada cópia teria seu próprio contador e o limite valeria
+              multiplicado.
+            </p>
+            <ul class="options">
+              <li><strong>Contador compartilhado.</strong> Guardar a contagem num lugar comum às cópias. É a solução correta e a que dá mais trabalho.</li>
+              <li><strong>Limite na borda.</strong> Configurar o limite na camada de entrada da hospedagem, antes de chegar na aplicação. Menos código, depende do que a hospedagem oferece.</li>
+              <li><strong>Só o PDF por enquanto.</strong> É o mais caro por chamada e o mais fácil de limitar isoladamente.</li>
+            </ul>
+          </div>
+          <div class="decide">
+            <span class="label">Decisão</span>
+            <button class="vote" data-vote="agora"  aria-pressed="false">Fazer agora</button>
+            <button class="vote" data-vote="depois" aria-pressed="false">Deixar para depois</button>
+            <button class="vote" data-vote="nao"    aria-pressed="false">Não fazer</button>
+          </div>
+        </div>
+      </details>
+
+      <details class="item" data-group="voce" data-sev="media" data-id="R5">
+        <summary>
+          <span class="code">R5</span>
+          <span class="item-title">Indicador novo pode escapar da checagem de página</span>
+          <span class="tags"><span class="sev media">Média</span><span class="verdict" data-set="">sem decisão</span></span>
+        </summary>
+        <div class="body">
+          <div class="field">
+            <h4>O que é</h4>
+            <p>
+              Cada indicador é associado a uma página, numa lista escrita à mão com 64 entradas.
+              Quando alguém pede um indicador, o sistema confere se essa pessoa tem acesso à página
+              dele.
+            </p>
+            <p>
+              Se o indicador <strong>não estiver na lista</strong>, a conferência de página é
+              silenciosamente pulada. A conferência de cliente continua valendo.
+            </p>
+          </div>
+          <div class="field">
+            <h4>O risco de deixar como está</h4>
+            <p>
+              Um indicador criado e não cadastrado na lista fica visível para qualquer usuário
+              daquele cliente, mesmo quem não tem a página liberada. O dado não vaza para outro
+              cliente — vaza entre perfis do mesmo cliente.
+            </p>
+            <p>
+              Como a falha é silenciosa, ninguém percebe: o indicador simplesmente funciona.
+            </p>
+          </div>
+          <div class="field full">
+            <h4>O que precisa ser decidido</h4>
+            <ul class="options">
+              <li><strong>Inverter para negar por padrão.</strong> Indicador fora da lista deixa de responder. É o comportamento seguro, mas <em>quebra todo indicador novo</em> até alguém cadastrá-lo — inclusive os que a IA cria pelo chat.</li>
+              <li><strong>Manter permitindo, mas avisar.</strong> Registrar um alerta sempre que um indicador fora da lista for usado, e revisar periodicamente. Não fecha o buraco; torna-o visível.</li>
+              <li><strong>Derivar a página do próprio indicador</strong> em vez de manter a lista à mão. Elimina a categoria do problema; é o maior esforço dos três.</li>
+            </ul>
+          </div>
+          <div class="decide">
+            <span class="label">Decisão</span>
+            <button class="vote" data-vote="agora"  aria-pressed="false">Fazer agora</button>
+            <button class="vote" data-vote="depois" aria-pressed="false">Deixar para depois</button>
+            <button class="vote" data-vote="nao"    aria-pressed="false">Não fazer</button>
+          </div>
+        </div>
+      </details>
+
+      <details class="item" data-group="voce" data-sev="media" data-id="R6">
+        <summary>
+          <span class="code">R6</span>
+          <span class="item-title">Não dá para saber quanto a IA custou nem por que demorou</span>
+          <span class="tags"><span class="sev media">Média</span><span class="verdict" data-set="">sem decisão</span></span>
+        </summary>
+        <div class="body">
+          <div class="field">
+            <h4>O que é</h4>
+            <p>
+              As duas rotas de IA do produto não medem nada: nem quanto texto foi processado, nem
+              quanto custou, nem onde o tempo foi gasto. O que existe hoje chamado de
+              “rastreamento” são apenas mensagens no log do servidor.
+            </p>
+          </div>
+          <div class="field">
+            <h4>O risco de deixar como está</h4>
+            <p>
+              Gasto anormal só aparece na fatura, no fim do mês, sem como atribuir a um cliente,
+              a uma pergunta ou a um agente específico.
+            </p>
+            <p>
+              Quando um usuário reclama de lentidão, não há como responder onde o tempo foi — se na
+              consulta ao banco, se no modelo, se num agente que chamou outro.
+            </p>
+          </div>
+          <div class="field full">
+            <h4>O que precisa ser decidido</h4>
+            <p>
+              É escolha de ferramenta, e ela é difícil de trocar depois. As convenções do projeto
+              já citam uma opção (Langfuse), mas nada foi instalado.
+            </p>
+            <ul class="options">
+              <li><strong>Ferramenta especializada em IA</strong> (ex.: Langfuse). Mostra custo por pergunta e o passo a passo de cada agente. Mais um serviço externo recebendo dados.</li>
+              <li><strong>Padrão aberto de telemetria</strong> (OpenTelemetry). Não amarra a fornecedor e cobre o resto do sistema junto; dá mais trabalho para extrair custo.</li>
+              <li><strong>Medição mínima própria.</strong> Registrar tokens, custo estimado e duração numa coleção do banco que já usamos. Barato, resolve 80%, sem tela pronta.</li>
+            </ul>
+          </div>
+          <div class="decide">
+            <span class="label">Decisão</span>
+            <button class="vote" data-vote="agora"  aria-pressed="false">Fazer agora</button>
+            <button class="vote" data-vote="depois" aria-pressed="false">Deixar para depois</button>
+            <button class="vote" data-vote="nao"    aria-pressed="false">Não fazer</button>
+          </div>
+        </div>
+      </details>
+
+      <details class="item" data-group="voce" data-sev="media" data-id="CSP">
+        <summary>
+          <span class="code">CSP</span>
+          <span class="item-title">Falta a trava que impede a execução de script injetado</span>
+          <span class="tags"><span class="sev media">Média</span><span class="verdict" data-set="">sem decisão</span></span>
+        </summary>
+        <div class="body">
+          <div class="field">
+            <h4>O que é</h4>
+            <p>
+              Instalei os cabeçalhos de segurança que faltavam, menos um: a regra que diz ao
+              navegador <em>quais scripts ele pode executar</em>. Sem ela, se um script estranho
+              conseguir entrar na página, o navegador o executa sem questionar.
+            </p>
+          </div>
+          <div class="field">
+            <h4>Por que ficou de fora</h4>
+            <p>
+              O framework que o produto usa injeta trechos de script direto na página para
+              funcionar. Ligar essa regra sem preparar o terreno <strong>derruba a aplicação
+              inteira</strong> — tela branca em produção.
+            </p>
+            <p>
+              Preferi não entregar uma trava que quebra o produto do que entregar segurança no
+              papel. Deixei anotado no código.
+            </p>
+          </div>
+          <div class="field full">
+            <h4>O que precisa ser decidido</h4>
+            <p>
+              Não é decisão de <em>se</em>, é de <em>quando</em>: precisa de uma janela para
+              implementar e validar em ambiente de homologação antes de ir para produção.
+            </p>
+            <ul class="options">
+              <li><strong>Agendar a janela.</strong> Estimativa: meio dia de implementação, mais um período de observação em homologação.</li>
+              <li><strong>Adiar.</strong> Os outros quatro cabeçalhos já estão valendo e cobrem parte do risco.</li>
+            </ul>
+          </div>
+          <div class="decide">
+            <span class="label">Decisão</span>
+            <button class="vote" data-vote="agora"  aria-pressed="false">Fazer agora</button>
+            <button class="vote" data-vote="depois" aria-pressed="false">Deixar para depois</button>
+            <button class="vote" data-vote="nao"    aria-pressed="false">Não fazer</button>
+          </div>
+        </div>
+      </details>
+
+    </div>
+  </section>
+
+  <!-- ══════════ MECÂNICOS ══════════ -->
+  <section id="sec-mec">
+    <div class="sec-head">
+      <p class="eyebrow">Grupo 2 de 4</p>
+      <h2>Correção mecânica — só precisam de prioridade</h2>
+      <p>
+        Aqui o caminho já é claro e não muda o comportamento do produto para quem usa. O que falta
+        é lugar na fila. Posso fazer qualquer um destes sem nova decisão sua.
+      </p>
+    </div>
+    <div class="items">
+
+      <details class="item" data-group="mecanico" data-sev="media" data-id="R13">
+        <summary>
+          <span class="code">R13</span>
+          <span class="item-title">Existem oito cópias diferentes do verificador de acesso</span>
+          <span class="tags"><span class="sev media">Média</span><span class="verdict" data-set="">sem decisão</span></span>
+        </summary>
+        <div class="body">
+          <div class="field">
+            <h4>O que é</h4>
+            <p>
+              A função que confere “esta pessoa está autenticada?” foi copiada e colada em oito
+              arquivos, e as cópias <strong>divergiram entre si</strong>. Cada uma repete também uma
+              permissividade que só deveria existir na máquina do desenvolvedor.
+            </p>
+          </div>
+          <div class="field">
+            <h4>Por que importa</h4>
+            <p>
+              Corrigir uma cópia não corrige as outras sete — e quem corrige normalmente não sabe
+              que as outras existem.
+            </p>
+            <p>
+              <strong>Isto já custou caro neste projeto duas vezes:</strong> uma função de token
+              duplicada em três arquivos causou a falha de autenticação da exportação de PDF. É o
+              mesmo padrão.
+            </p>
+          </div>
+          <div class="field full">
+            <h4>Esforço e risco</h4>
+            <p>
+              Trocar as oito cópias pela função central que já existe. Mudança ampla mas mecânica;
+              o risco é qualquer cópia ter um comportamento próprio que alguma tela dependa — o que
+              exige conferir uma a uma, não substituir em massa.
+            </p>
+          </div>
+          <div class="decide">
+            <span class="label">Decisão</span>
+            <button class="vote" data-vote="agora"  aria-pressed="false">Fazer agora</button>
+            <button class="vote" data-vote="depois" aria-pressed="false">Deixar para depois</button>
+            <button class="vote" data-vote="nao"    aria-pressed="false">Não fazer</button>
+          </div>
+        </div>
+      </details>
+
+      <details class="item" data-group="mecanico" data-sev="media" data-id="R16">
+        <summary>
+          <span class="code">R16</span>
+          <span class="item-title">Não existe ponto de retorno se um deploy quebrar</span>
+          <span class="tags"><span class="sev media">Média</span><span class="verdict" data-set="">sem decisão</span></span>
+        </summary>
+        <div class="body">
+          <div class="field">
+            <h4>O que é</h4>
+            <p>
+              São 911 alterações registradas e <strong>nenhuma marca de versão</strong>. A imagem
+              publicada é sempre chamada de “a mais recente”, sem carimbo de qual código ela contém.
+              A verificação de saúde do serviço aponta para a página inicial, que responde “estou
+              bem” mesmo com o banco fora do ar.
+            </p>
+          </div>
+          <div class="field">
+            <h4>O risco de deixar como está</h4>
+            <p>
+              Se um deploy quebrar produção, não há “voltar para a versão de ontem” — não existe
+              uma versão de ontem identificável para onde voltar.
+            </p>
+          </div>
+          <div class="field full">
+            <h4>Esforço e risco</h4>
+            <p>
+              Três correções pequenas e independentes: marcar versões, carimbar a imagem com a
+              identificação do código, e criar um endereço de saúde que confira as dependências de
+              verdade. Nenhuma altera o comportamento do produto.
+            </p>
+          </div>
+          <div class="decide">
+            <span class="label">Decisão</span>
+            <button class="vote" data-vote="agora"  aria-pressed="false">Fazer agora</button>
+            <button class="vote" data-vote="depois" aria-pressed="false">Deixar para depois</button>
+            <button class="vote" data-vote="nao"    aria-pressed="false">Não fazer</button>
+          </div>
+        </div>
+      </details>
+
+      <details class="item" data-group="mecanico" data-sev="media" data-id="R14">
+        <summary>
+          <span class="code">R14</span>
+          <span class="item-title">Não é possível montar o ambiente do zero</span>
+          <span class="tags"><span class="sev media">Média</span><span class="verdict" data-set="">sem decisão</span></span>
+        </summary>
+        <div class="body">
+          <div class="field">
+            <h4>O que é</h4>
+            <p>
+              Os scripts que criavam a estrutura inicial — contratos de dados, produtos, grupos de
+              permissão, clientes — foram removidos na limpeza. Os que sobraram apenas
+              <em>complementam</em> uma base existente e param se ela não estiver lá.
+            </p>
+          </div>
+          <div class="field">
+            <h4>O risco de deixar como está</h4>
+            <p>
+              Abrir um cliente novo, montar um ambiente de homologação ou recuperar de uma perda
+              depende de dados que já estão no banco de produção. Não há caminho a partir do vazio.
+            </p>
+          </div>
+          <div class="field full">
+            <h4>Esforço e risco</h4>
+            <p>
+              É o item de maior esforço deste grupo: exige reconstruir os scripts a partir do que
+              está hoje em produção, e depois provar que funcionam num banco vazio. Sem essa prova,
+              a correção não vale nada.
+            </p>
+          </div>
+          <div class="decide">
+            <span class="label">Decisão</span>
+            <button class="vote" data-vote="agora"  aria-pressed="false">Fazer agora</button>
+            <button class="vote" data-vote="depois" aria-pressed="false">Deixar para depois</button>
+            <button class="vote" data-vote="nao"    aria-pressed="false">Não fazer</button>
+          </div>
+        </div>
+      </details>
+
+      <details class="item" data-group="mecanico" data-sev="media" data-id="R7">
+        <summary>
+          <span class="code">R7</span>
+          <span class="item-title">A IA promete citar a fonte e ninguém confere se citou</span>
+          <span class="tags"><span class="sev media">Média</span><span class="verdict" data-set="">sem decisão</span></span>
+        </summary>
+        <div class="body">
+          <div class="field">
+            <h4>O que é</h4>
+            <p>
+              A instrução dada aos agentes exige que toda afirmação venha com a fonte do dado. A
+              verificação que garantiria isso foi <strong>especificada e nunca construída</strong> —
+              existe no documento de projeto, não no código.
+            </p>
+          </div>
+          <div class="field">
+            <h4>O risco de deixar como está</h4>
+            <p>
+              Uma resposta com número e sem origem parece tão confiável quanto uma verificada. Num
+              produto de risco de crédito, é exatamente o tipo de afirmação que alguém repassa para
+              o cliente final.
+            </p>
+          </div>
+          <div class="field full">
+            <h4>Esforço e risco</h4>
+            <p>
+              Pequeno: uma verificação sobre a resposta antes de entregá-la. A decisão embutida é o
+              que fazer quando falta a citação — recusar a resposta ou marcá-la visivelmente como
+              não verificada. Sugiro <strong>marcar</strong>, porque recusar transforma um problema
+              de qualidade em indisponibilidade.
+            </p>
+          </div>
+          <div class="decide">
+            <span class="label">Decisão</span>
+            <button class="vote" data-vote="agora"  aria-pressed="false">Fazer agora</button>
+            <button class="vote" data-vote="depois" aria-pressed="false">Deixar para depois</button>
+            <button class="vote" data-vote="nao"    aria-pressed="false">Não fazer</button>
+          </div>
+        </div>
+      </details>
+
+      <details class="item" data-group="mecanico" data-sev="baixa" data-id="R19">
+        <summary>
+          <span class="code">R19</span>
+          <span class="item-title">Nenhum registro de quem criou ou alterou cada dado</span>
+          <span class="tags"><span class="sev baixa">Baixa</span><span class="verdict" data-set="">sem decisão</span></span>
+        </summary>
+        <div class="body">
+          <div class="field">
+            <h4>O que é</h4>
+            <p>
+              Nenhuma coleção do banco guarda quem criou ou alterou o registro, nem qual versão do
+              formato ele segue. E há uma mudança de formato em andamento agora — o sistema
+              descobre qual formato cada registro usa <em>tentando adivinhar pelo conteúdo</em>.
+            </p>
+          </div>
+          <div class="field">
+            <h4>O risco de deixar como está</h4>
+            <p>
+              Sem trilha de auditoria, não há como responder “quem mudou esta permissão?”. E a
+              adivinhação de formato falha silenciosamente em registros de borda.
+            </p>
+          </div>
+          <div class="field full">
+            <h4>Esforço e risco</h4>
+            <p>
+              Mecânico, mas amplo: acrescentar os campos em toda escrita nova. Registros antigos
+              ficam sem eles — o que é aceitável, desde que o código tolere a ausência.
+            </p>
+          </div>
+          <div class="decide">
+            <span class="label">Decisão</span>
+            <button class="vote" data-vote="agora"  aria-pressed="false">Fazer agora</button>
+            <button class="vote" data-vote="depois" aria-pressed="false">Deixar para depois</button>
+            <button class="vote" data-vote="nao"    aria-pressed="false">Não fazer</button>
+          </div>
+        </div>
+      </details>
+
+      <details class="item" data-group="mecanico" data-sev="baixa" data-id="R20">
+        <summary>
+          <span class="code">R20</span>
+          <span class="item-title">Suspeita de um cache que mistura dados de clientes</span>
+          <span class="tags"><span class="sev baixa">A confirmar</span><span class="verdict" data-set="">sem decisão</span></span>
+        </summary>
+        <div class="body">
+          <div class="field">
+            <h4>O que é</h4>
+            <p>
+              Uma rotina de comparação lê todos os clientes e monta um pacote único de dados. Isso
+              <em>pode</em> significar que informação de um cliente alcance outro.
+            </p>
+          </div>
+          <div class="field">
+            <h4>Por que está aqui e não nos confirmados</h4>
+            <p>
+              <strong>Não foi confirmado.</strong> O achado cruza as áreas de dois grupos de
+              revisão e ficou sem verificação até o fim. Não sei dizer se é um problema real ou se a
+              comparação é intencionalmente agregada e anônima.
+            </p>
+            <p>
+              Preferi listar como pendente a apresentar como risco confirmado.
+            </p>
+          </div>
+          <div class="field full">
+            <h4>Próximo passo</h4>
+            <p>
+              Meia hora de verificação para virar “é um problema, com este tamanho” ou “não é
+              problema, encerrado”. Só depois disso vira tarefa.
+            </p>
+          </div>
+          <div class="decide">
+            <span class="label">Decisão</span>
+            <button class="vote" data-vote="agora"  aria-pressed="false">Verificar agora</button>
+            <button class="vote" data-vote="depois" aria-pressed="false">Deixar para depois</button>
+            <button class="vote" data-vote="nao"    aria-pressed="false">Não fazer</button>
+          </div>
+        </div>
+      </details>
+
+    </div>
+  </section>
+
+  <!-- ══════════ FORA DO CÓDIGO ══════════ -->
+  <section id="sec-ext">
+    <div class="sec-head">
+      <p class="eyebrow">Grupo 3 de 4</p>
+      <h2>Fora do código</h2>
+      <p>Não se resolve programando. É configuração e combinado de time.</p>
+    </div>
+    <div class="items">
+
+      <details class="item" data-group="externo" data-sev="media" data-id="R17">
+        <summary>
+          <span class="code">R17</span>
+          <span class="item-title">Nenhuma das 49 entregas passou por aprovação humana</span>
+          <span class="tags"><span class="sev media">Média</span><span class="verdict" data-set="">sem decisão</span></span>
+        </summary>
+        <div class="body">
+          <div class="field">
+            <h4>O que é</h4>
+            <p>
+              Das 49 propostas de mudança abertas no repositório, <strong>zero</strong> receberam
+              aprovação de outra pessoa. O branch principal aceita escrita direta, sem passar por
+              revisão. Há uma proposta aberta cujas alterações já estão no principal.
+            </p>
+          </div>
+          <div class="field">
+            <h4>O risco de deixar como está</h4>
+            <p>
+              Não é sobre desconfiar de quem escreve. É que hoje não existe momento em que uma
+              segunda pessoa olha antes de o código chegar ao cliente — e esta revisão inteira
+              encontrou vários problemas que uma segunda leitura pegaria.
+            </p>
+          </div>
+          <div class="field full">
+            <h4>O que fazer</h4>
+            <p>
+              Configuração no GitHub, minutos de trabalho: exigir aprovação e proteger o branch
+              principal. O custo real não é técnico — é o time passar a esperar revisão. Com uma
+              pessoa só, vira atrito sem ganho; com duas ou mais, vale.
+            </p>
+          </div>
+          <div class="decide">
+            <span class="label">Decisão</span>
+            <button class="vote" data-vote="agora"  aria-pressed="false">Configurar agora</button>
+            <button class="vote" data-vote="depois" aria-pressed="false">Deixar para depois</button>
+            <button class="vote" data-vote="nao"    aria-pressed="false">Não fazer</button>
+          </div>
+        </div>
+      </details>
+
+    </div>
+  </section>
+
+  <!-- ══════════ DOCUMENTAÇÃO ══════════ -->
+  <section id="sec-doc">
+    <div class="sec-head">
+      <p class="eyebrow">Grupo 4 de 4</p>
+      <h2>Regras escritas que faltam</h2>
+      <p>
+        Não são bugs. São as regras de engenharia que, se existissem, teriam evitado boa parte dos
+        problemas acima — e que hoje moram só em comentários dentro do código. Conforme você
+        decidiu, foram <strong>identificadas e não criadas</strong>.
+      </p>
+    </div>
+    <div class="items">
+
+      <details class="item" data-group="doc" data-sev="alta" data-id="L1-L3">
+        <summary>
+          <span class="code">L1·L2·L3</span>
+          <span class="item-title">As três regras que teriam evitado metade dos problemas</span>
+          <span class="tags"><span class="sev alta">Alta</span><span class="verdict" data-set="">sem decisão</span></span>
+        </summary>
+        <div class="body">
+          <div class="field">
+            <h4>O que falta</h4>
+            <p>
+              <strong>Separação entre clientes.</strong> As regras existentes descrevem um modelo de
+              separação que este produto <em>não usa</em>. A regra real vive num único arquivo, em
+              comentários.
+            </p>
+            <p>
+              <strong>A camada semântica.</strong> É o coração do produto — o que traduz “PDD” em
+              consulta ao banco do cliente. Procurei no catálogo inteiro de convenções: <strong>zero
+              menções</strong>.
+            </p>
+            <p>
+              <strong>Custo.</strong> Havia quatro tetos de custo em quatro arquivos que não se
+              conversam, com quatro números diferentes.
+            </p>
+          </div>
+          <div class="field">
+            <h4>Por que importa</h4>
+            <p>
+              Já regrediu uma vez: existe um comentário no código documentando um vazamento
+              corrigido em que usuários autenticados podiam ler dados de bases não mapeadas.
+            </p>
+            <p>
+              Os dois problemas de custo que corrigi nesta rodada são consequência direta da regra
+              de custo não existir.
+            </p>
+          </div>
+          <div class="field full">
+            <h4>O que precisa ser decidido</h4>
+            <p>
+              Se aciono o agente que escreve essas convenções. É trabalho de documentação, não muda
+              código, e é o que impede o mesmo tipo de erro de voltar.
+            </p>
+          </div>
+          <div class="decide">
+            <span class="label">Decisão</span>
+            <button class="vote" data-vote="agora"  aria-pressed="false">Escrever agora</button>
+            <button class="vote" data-vote="depois" aria-pressed="false">Deixar para depois</button>
+            <button class="vote" data-vote="nao"    aria-pressed="false">Não fazer</button>
+          </div>
+        </div>
+      </details>
+
+      <details class="item" data-group="doc" data-sev="alta" data-id="CONTRA">
+        <summary>
+          <span class="code">Conflito</span>
+          <span class="item-title">Duas regras vigentes mandam o contrário uma da outra</span>
+          <span class="tags"><span class="sev alta">Alta</span><span class="verdict" data-set="">sem decisão</span></span>
+        </summary>
+        <div class="body">
+          <div class="field">
+            <h4>O que é</h4>
+            <p>
+              Duas convenções do catálogo mandam versionar as instruções da IA junto com o código.
+              Uma decisão de arquitetura já aprovada deste produto decidiu o <strong>oposto</strong>:
+              elas vivem no banco, editáveis pela tela de administração.
+            </p>
+          </div>
+          <div class="field">
+            <h4>O risco de deixar como está</h4>
+            <p>
+              Quem chegar agora — pessoa ou assistente de IA — segue a que ler primeiro. Não é uma
+              lacuna, é uma contradição ativa entre dois documentos que valem ao mesmo tempo.
+            </p>
+          </div>
+          <div class="field full">
+            <h4>O que precisa ser decidido</h4>
+            <p>
+              Qual das duas vence, e ajustar a perdedora. Precisa ser resolvido <em>antes</em> de
+              escrever a convenção de configuração de IA — senão ela já nasce contraditória.
+            </p>
+          </div>
+          <div class="decide">
+            <span class="label">Decisão</span>
+            <button class="vote" data-vote="agora"  aria-pressed="false">Resolver agora</button>
+            <button class="vote" data-vote="depois" aria-pressed="false">Deixar para depois</button>
+            <button class="vote" data-vote="nao"    aria-pressed="false">Não fazer</button>
+          </div>
+        </div>
+      </details>
+
+      <details class="item" data-group="doc" data-sev="alta" data-id="DESATU">
+        <summary>
+          <span class="code">Desatual.</span>
+          <span class="item-title">Três convenções ensinam a escrever código que não funciona mais</span>
+          <span class="tags"><span class="sev alta">Alta</span><span class="verdict" data-set="">sem decisão</span></span>
+        </summary>
+        <div class="body">
+          <div class="field">
+            <h4>O que é</h4>
+            <p>
+              Duas convenções descrevem versões antigas das bibliotecas de IA — o produto usa
+              versões bem mais novas, com formas de uso diferentes. Uma terceira aponta o banco de
+              dados <em>descontinuado</em> como se fosse o atual.
+            </p>
+          </div>
+          <div class="field">
+            <h4>O risco de deixar como está</h4>
+            <p>
+              Este é o risco mais imediato deste grupo: <strong>um assistente de IA que siga essas
+              convenções literalmente escreve código incompatível</strong> — e o documento
+              desatualizado sobre IA é justamente o mais consultado.
+            </p>
+          </div>
+          <div class="field full">
+            <h4>Esforço</h4>
+            <p>
+              Pequeno e sem risco: atualizar as versões e corrigir as referências ao banco antigo.
+              É o melhor retorno por esforço de todo este grupo.
+            </p>
+          </div>
+          <div class="decide">
+            <span class="label">Decisão</span>
+            <button class="vote" data-vote="agora"  aria-pressed="false">Atualizar agora</button>
+            <button class="vote" data-vote="depois" aria-pressed="false">Deixar para depois</button>
+            <button class="vote" data-vote="nao"    aria-pressed="false">Não fazer</button>
+          </div>
+        </div>
+      </details>
+
+      <details class="item" data-group="doc" data-sev="media" data-id="L4-L9">
+        <summary>
+          <span class="code">L4–L9</span>
+          <span class="item-title">Outras seis regras faltantes</span>
+          <span class="tags"><span class="sev media">Média</span><span class="verdict" data-set="">sem decisão</span></span>
+        </summary>
+        <div class="body">
+          <div class="field">
+            <h4>O que falta</h4>
+            <p>
+              <strong>Configuração da IA:</strong> as instruções são salvas por cima das anteriores,
+              sem histórico — a política de reversão manda “voltar à versão anterior”, e não existe
+              versão anterior.
+            </p>
+            <p>
+              <strong>Memória e busca da IA:</strong> as coleções guardam dados pessoais de devedores
+              sem prazo de retenção escrito nem regra de remoção.
+            </p>
+            <p>
+              <strong>Scripts de carga:</strong> rodar com a opção de forçar <em>descarta em silêncio</em>
+              as customizações que o cliente fez na tela.
+            </p>
+          </div>
+          <div class="field">
+            <h4>E mais três</h4>
+            <p>
+              <strong>SQL gerado por IA:</strong> a única barreira é uma lista de palavras proibidas —
+              e a própria justificativa dela no código revela que já houve uma versão contornável.
+            </p>
+            <p>
+              <strong>Avaliação de qualidade da IA:</strong> os limites e o critério de bloqueio moram
+              em constantes de código; ninguém está nomeado como responsável.
+            </p>
+            <p>
+              <strong>Visualização de dados:</strong> o produto <em>é</em> um produto de gráficos, e a
+              convenção que governaria isso é um modelo em branco. Numa tela de risco, uma escala
+              de cor mal escolhida é erro de leitura do dado.
+            </p>
+          </div>
+          <div class="field full">
+            <h4>O que precisa ser decidido</h4>
+            <p>
+              Se estas seis entram junto com as três prioritárias ou ficam para uma segunda rodada.
+              A de dados pessoais é a que eu subiria de prioridade, por causa da LGPD.
+            </p>
+          </div>
+          <div class="decide">
+            <span class="label">Decisão</span>
+            <button class="vote" data-vote="agora"  aria-pressed="false">Escrever agora</button>
+            <button class="vote" data-vote="depois" aria-pressed="false">Deixar para depois</button>
+            <button class="vote" data-vote="nao"    aria-pressed="false">Não fazer</button>
+          </div>
+        </div>
+      </details>
+
+      <details class="item" data-group="doc" data-sev="media" data-id="ADR14">
+        <summary>
+          <span class="code">ADR</span>
+          <span class="item-title">Uma decisão de arquitetura registrada descreve algo que mudou</span>
+          <span class="tags"><span class="sev media">Média</span><span class="verdict" data-set="">sem decisão</span></span>
+        </summary>
+        <div class="body">
+          <div class="field">
+            <h4>O que é</h4>
+            <p>
+              O documento que registra como a IA do produto funciona está errado em três pontos:
+              descreve como pendente uma migração já concluída, cita um componente que não existe
+              mais, e diz que a supervisão entre agentes foi removida — ela voltou, por outro
+              caminho.
+            </p>
+          </div>
+          <div class="field">
+            <h4>O risco de deixar como está</h4>
+            <p>
+              Estes documentos são a fonte oficial de “como este produto funciona”. Quando um deles
+              descreve algo que mudou, quem consulta é levado a um desenho que não existe.
+            </p>
+            <p>
+              Pela regra do próprio projeto, decisão aprovada não se edita: escreve-se uma nova que
+              substitui a anterior.
+            </p>
+          </div>
+          <div class="field full">
+            <h4>Esforço</h4>
+            <p>Baixo — é redação, não código. Uma decisão nova substituindo a antiga.</p>
+          </div>
+          <div class="decide">
+            <span class="label">Decisão</span>
+            <button class="vote" data-vote="agora"  aria-pressed="false">Escrever agora</button>
+            <button class="vote" data-vote="depois" aria-pressed="false">Deixar para depois</button>
+            <button class="vote" data-vote="nao"    aria-pressed="false">Não fazer</button>
+          </div>
+        </div>
+      </details>
+
+    </div>
+  </section>
+
+  <!-- ══════════ RESUMO ══════════ -->
+  <section>
+    <div class="sec-head">
+      <p class="eyebrow">Fechamento</p>
+      <h2>Suas decisões</h2>
+      <p>Atualiza sozinho conforme você marca. Copie e me mande — eu executo a partir daqui.</p>
+    </div>
+    <div class="summary-panel">
+      <h3>Resumo</h3>
+      <p class="hint">As marcações ficam salvas neste navegador. Nada é enviado a lugar nenhum.</p>
+      <textarea id="resumo" readonly aria-label="Resumo das decisões"></textarea>
+    </div>
+  </section>
+
+  <!-- ══════════ JÁ RESOLVIDOS ══════════ -->
+  <section>
+    <div class="sec-head">
+      <p class="eyebrow">Contexto</p>
+      <h2>O que já foi corrigido nesta rodada</h2>
+      <p>
+        Nove dos vinte riscos, entregues e verificados. Estão aqui para você ver o épico inteiro,
+        não para avaliar.
+      </p>
+    </div>
+    <div class="done-grid">
+      <div class="done-card">
+        <span class="c">R1 · R2</span>
+        <span class="t">Teto de gasto por consulta</span>
+        <span class="d">A IA podia varrer volume ilimitado do banco. Agora o banco recusa a consulta antes de cobrar. Vale nos dois caminhos.</span>
+      </div>
+      <div class="done-card">
+        <span class="c">R2</span>
+        <span class="t">Consulta da IA é validada antes de salvar</span>
+        <span class="d">A consulta gerada pela IA era gravada sem conferência e só falhava depois, longe da causa.</span>
+      </div>
+      <div class="done-card">
+        <span class="c">R12</span>
+        <span class="t">Conferência no que define permissão</span>
+        <span class="d">Rotas e acessos entravam sem validação. Fechou também uma brecha de gravação em local indevido que não estava no relatório.</span>
+      </div>
+      <div class="done-card">
+        <span class="c">R15</span>
+        <span class="t">Testes voltaram a servir de alarme</span>
+        <span class="d">Cinco testes falhavam sempre por acessarem a rede. A suíte inteira passou a rodar limpa: 1.475 testes, e o tempo caiu de 6 para 1,5 minuto.</span>
+      </div>
+      <div class="done-card">
+        <span class="c">R11</span>
+        <span class="t">PDF exportado deixa de ficar exposto</span>
+        <span class="d">O endereço de download é aberto por necessidade, justificado por o arquivo ser temporário — e nada o apagava. Agora o link vale uma vez.</span>
+      </div>
+      <div class="done-card">
+        <span class="c">R9</span>
+        <span class="t">Erro não expõe detalhe interno</span>
+        <span class="d">A tela de erro mostrava a mensagem técnica crua. Em produção mostra só um código de referência.</span>
+      </div>
+      <div class="done-card">
+        <span class="c">R18</span>
+        <span class="t">Cabeçalhos de segurança</span>
+        <span class="d">Quatro dos cinco instalados. O quinto está na lista acima, com motivo.</span>
+      </div>
+      <div class="done-card">
+        <span class="c">R8</span>
+        <span class="t">Painéis operáveis por teclado</span>
+        <span class="d">Expandir um indicador só funcionava com mouse — inacessível por teclado.</span>
+      </div>
+      <div class="done-card">
+        <span class="c">R10</span>
+        <span class="t">Tema claro e escuro consistentes</span>
+        <span class="d">Parte da interface seguia o tema do sistema operacional em vez do escolhido no produto.</span>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p>
+      Documento gerado a partir de <code>docs/reviews/2026-08-04-revisao-modulos-e-aderencia-a-convencoes.md</code>,
+      que traz a evidência técnica de cada item (arquivo e linha). Os itens marcados “a confirmar”
+      estão assim porque não foram verificados — não porque são menos graves.
+    </p>
+  </footer>
+
+</div>
+
+<script>
+  (function () {
+    'use strict';
+
+    var CHAVE = 'liquid-epico-2026-08-04';
+    var ROTULOS = { agora: 'FAZER AGORA', depois: 'DEPOIS', nao: 'NAO FAZER' };
+    var decisoes = {};
+
+    // localStorage pode estar bloqueado no sandbox; degrada para memória.
+    try {
+      var salvo = window.localStorage.getItem(CHAVE);
+      if (salvo) decisoes = JSON.parse(salvo) || {};
+    } catch (e) { decisoes = {}; }
+
+    function persistir() {
+      try { window.localStorage.setItem(CHAVE, JSON.stringify(decisoes)); } catch (e) { /* memória apenas */ }
+    }
+
+    var itens = Array.prototype.slice.call(document.querySelectorAll('.item[data-id]'));
+
+    function pintarItem(item) {
+      var id = item.getAttribute('data-id');
+      var escolha = decisoes[id] || '';
+      var veredito = item.querySelector('.verdict');
+      if (veredito) {
+        veredito.setAttribute('data-set', escolha);
+        veredito.textContent = escolha ? ROTULOS[escolha].toLowerCase() : 'sem decisão';
+      }
+      Array.prototype.forEach.call(item.querySelectorAll('.vote'), function (b) {
+        b.setAttribute('aria-pressed', b.getAttribute('data-vote') === escolha ? 'true' : 'false');
+      });
+    }
+
+    function montarResumo() {
+      var linhas = [];
+      var grupos = [
+        ['voce', 'DEPENDEM DE VOCE'],
+        ['mecanico', 'CORRECAO MECANICA'],
+        ['externo', 'FORA DO CODIGO'],
+        ['doc', 'DOCUMENTACAO']
+      ];
+      var pendentes = 0;
+
+      grupos.forEach(function (g) {
+        var doGrupo = itens.filter(function (i) { return i.getAttribute('data-group') === g[0]; });
+        var comDecisao = doGrupo.filter(function (i) { return decisoes[i.getAttribute('data-id')]; });
+        if (!comDecisao.length) return;
+        linhas.push(g[1]);
+        comDecisao.forEach(function (i) {
+          var id = i.getAttribute('data-id');
+          var titulo = i.querySelector('.item-title').textContent.trim();
+          linhas.push('  [' + ROTULOS[decisoes[id]] + '] ' + id + ' — ' + titulo);
+        });
+        linhas.push('');
+      });
+
+      pendentes = itens.filter(function (i) { return !decisoes[i.getAttribute('data-id')]; }).length;
+
+      if (!linhas.length) {
+        return 'Nenhum item decidido ainda.\n\nMarque "Fazer agora", "Deixar para depois" ou "Não fazer"\nem cada item. O resumo aparece aqui.';
+      }
+      if (pendentes) linhas.push('Ainda sem decisão: ' + pendentes + ' de ' + itens.length + '.');
+      else linhas.push('Todos os ' + itens.length + ' itens decididos.');
+      return linhas.join('\n');
+    }
+
+    var caixaResumo = document.getElementById('resumo');
+    function atualizar() {
+      itens.forEach(pintarItem);
+      caixaResumo.value = montarResumo();
+    }
+
+    document.addEventListener('click', function (ev) {
+      var botao = ev.target.closest ? ev.target.closest('.vote') : null;
+      if (!botao) return;
+      var item = botao.closest('.item');
+      var id = item.getAttribute('data-id');
+      var escolha = botao.getAttribute('data-vote');
+      // Clicar de novo na mesma opção desmarca.
+      if (decisoes[id] === escolha) delete decisoes[id];
+      else decisoes[id] = escolha;
+      persistir();
+      atualizar();
+    });
+
+    // ─── Filtro ───
+    var filtroAtual = 'todos';
+    var chips = Array.prototype.slice.call(document.querySelectorAll('.chip'));
+
+    function aplicarFiltro() {
+      itens.forEach(function (i) {
+        var grupo = i.getAttribute('data-group');
+        var decidido = !!decisoes[i.getAttribute('data-id')];
+        var mostrar =
+          filtroAtual === 'todos' ? true :
+          filtroAtual === 'pendente' ? !decidido :
+          grupo === filtroAtual;
+        i.hidden = !mostrar;
+      });
+      // Esconde a seção inteira quando nada dela sobrou.
+      ['sec-voce', 'sec-mec', 'sec-ext', 'sec-doc'].forEach(function (idSecao) {
+        var secao = document.getElementById(idSecao);
+        var visiveis = secao.querySelectorAll('.item:not([hidden])').length;
+        secao.hidden = visiveis === 0;
+      });
+    }
+
+    chips.forEach(function (c) {
+      c.addEventListener('click', function () {
+        filtroAtual = c.getAttribute('data-filter');
+        chips.forEach(function (o) {
+          o.setAttribute('aria-pressed', o === c ? 'true' : 'false');
+        });
+        aplicarFiltro();
+      });
+    });
+
+    // ─── Abrir / fechar todos ───
+    var btnExpandir = document.getElementById('expandir');
+    btnExpandir.addEventListener('click', function () {
+      var abrir = btnExpandir.textContent.indexOf('Abrir') === 0;
+      itens.forEach(function (i) { i.open = abrir; });
+      btnExpandir.textContent = abrir ? 'Fechar todos' : 'Abrir todos';
+    });
+
+    document.getElementById('limpar').addEventListener('click', function () {
+      decisoes = {};
+      persistir();
+      atualizar();
+      aplicarFiltro();
+    });
+
+    atualizar();
+    aplicarFiltro();
+  })();
+</script>

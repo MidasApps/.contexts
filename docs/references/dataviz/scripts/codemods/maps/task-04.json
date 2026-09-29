@@ -1,0 +1,1392 @@
+[
+  {
+    "file": "src/shared/config/agents/chat-agent-catalog.ts",
+    "line": 44,
+    "from": "descricao",
+    "to": "description",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false
+  },
+  {
+    "file": "src/shared/config/agents/chat-agent-catalog.ts",
+    "line": 43,
+    "from": "nome",
+    "to": "name",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false
+  },
+  {
+    "file": "src/shared/config/__tests__/cores-fixas-de-tema.test.ts",
+    "line": 26,
+    "from": "RAIZES",
+    "to": "ROOTS",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/shared/config/__tests__/cores-fixas-de-tema.test.ts",
+    "line": 40,
+    "from": "COR_FIXA",
+    "to": "HARDCODED_COLOR",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/shared/config/__tests__/cores-fixas-de-tema.test.ts",
+    "line": 52,
+    "from": "BRANCO_SOLIDO_EM_GRADIENTE",
+    "to": "SOLID_WHITE_IN_GRADIENT",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/shared/config/__tests__/cores-fixas-de-tema.test.ts",
+    "line": 53,
+    "from": "BRANCO_INLINE",
+    "to": "INLINE_WHITE",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/shared/config/__tests__/cores-fixas-de-tema.test.ts",
+    "line": 63,
+    "from": "PERMITIDOS",
+    "to": "ALLOWED",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/shared/config/__tests__/cores-fixas-de-tema.test.ts",
+    "line": 65,
+    "from": "arquivosDeUi",
+    "to": "uiFiles",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/shared/config/__tests__/cores-fixas-de-tema.test.ts",
+    "line": 66,
+    "from": "raiz",
+    "to": "root",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/shared/config/__tests__/cores-fixas-de-tema.test.ts",
+    "line": 68,
+    "from": "relativo",
+    "to": "relativePath",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/shared/config/__tests__/cores-fixas-de-tema.test.ts",
+    "line": 69,
+    "from": "caminho",
+    "to": "filePath",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "src/shared/config/__tests__/cores-fixas-de-tema.test.ts",
+    "line": 74,
+    "from": "infratores",
+    "to": "offenders",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/shared/config/__tests__/cores-fixas-de-tema.test.ts",
+    "line": 76,
+    "from": "caminho",
+    "to": "filePath",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "src/shared/config/__tests__/cores-fixas-de-tema.test.ts",
+    "line": 78,
+    "from": "fonte",
+    "to": "source",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "src/shared/config/__tests__/cores-fixas-de-tema.test.ts",
+    "line": 79,
+    "from": "achados",
+    "to": "findings",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/shared/config/__tests__/cores-fixas-de-tema.test.ts",
+    "line": 99,
+    "from": "caminho",
+    "to": "filePath",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "src/shared/config/__tests__/cores-fixas-de-tema.test.ts",
+    "line": 100,
+    "from": "fonte",
+    "to": "source",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "src/shared/config/__tests__/paleta.test.ts",
+    "line": 23,
+    "from": "paraLinear",
+    "to": "toLinear",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/shared/config/__tests__/paleta.test.ts",
+    "line": 44,
+    "from": "distancia",
+    "to": "distance",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/shared/config/__tests__/paleta.test.ts",
+    "line": 50,
+    "from": "luminancia",
+    "to": "luminance",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/shared/config/__tests__/paleta.test.ts",
+    "line": 55,
+    "from": "contraste",
+    "to": "contrast",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/shared/config/__tests__/paleta.test.ts",
+    "line": 55,
+    "from": "fundo",
+    "to": "background",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/shared/config/__tests__/paleta.test.ts",
+    "line": 62,
+    "from": "simulaDicromacia",
+    "to": "simulateDichromacy",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/shared/config/__tests__/paleta.test.ts",
+    "line": 62,
+    "from": "tipo",
+    "to": "kind",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 21
+  },
+  {
+    "file": "src/shared/config/__tests__/paleta.test.ts",
+    "line": 70,
+    "from": "canal",
+    "to": "channel",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/shared/config/__tests__/paleta.test.ts",
+    "line": 81,
+    "from": "piorPar",
+    "to": "worstPair",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/shared/config/__tests__/paleta.test.ts",
+    "line": 81,
+    "from": "cores",
+    "to": "colors",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 7
+  },
+  {
+    "file": "src/shared/config/__tests__/paleta.test.ts",
+    "line": 81,
+    "from": "transforma",
+    "to": "transform",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/shared/config/__tests__/paleta.test.ts",
+    "line": 82,
+    "from": "pior",
+    "to": "worst",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 12
+  },
+  {
+    "file": "src/shared/config/__tests__/paleta.test.ts",
+    "line": 92,
+    "from": "FUNDO_ESCURO",
+    "to": "DARK_BACKGROUND",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/shared/config/__tests__/paleta.test.ts",
+    "line": 93,
+    "from": "FUNDO_CLARO",
+    "to": "LIGHT_BACKGROUND",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/shared/config/__tests__/paleta.test.ts",
+    "line": 117,
+    "from": "minimo",
+    "to": "minimum",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/shared/config/__tests__/paleta.test.ts",
+    "line": 118,
+    "from": "pior",
+    "to": "worst",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 12
+  },
+  {
+    "file": "src/shared/config/__tests__/paleta.test.ts",
+    "line": 127,
+    "from": "tipo",
+    "to": "kind",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 21
+  },
+  {
+    "file": "src/shared/config/__tests__/paleta.test.ts",
+    "line": 128,
+    "from": "pior",
+    "to": "worst",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 12
+  },
+  {
+    "file": "src/shared/config/__tests__/paleta.test.ts",
+    "line": 136,
+    "from": "cor",
+    "to": "color",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/shared/config/agents/__tests__/comparativo.test.ts",
+    "line": 22,
+    "from": "tipo",
+    "to": "blockType",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 21
+  },
+  {
+    "file": "src/shared/config/agents/__tests__/comparativo.test.ts",
+    "line": 34,
+    "from": "tipo",
+    "to": "blockType",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 21
+  },
+  {
+    "file": "src/shared/config/agents/__tests__/comparativo.test.ts",
+    "line": 41,
+    "from": "tipo",
+    "to": "blockType",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 21
+  },
+  {
+    "file": "src/shared/config/agents/__tests__/comparativo.test.ts",
+    "line": 41,
+    "from": "frase",
+    "to": "sentence",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/shared/config/agents/__tests__/comparativo.test.ts",
+    "line": 52,
+    "from": "doContrato",
+    "to": "fromContract",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/shared/config/agents/__tests__/comparativo.test.ts",
+    "line": 53,
+    "from": "tipo",
+    "to": "blockType",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 21
+  },
+  {
+    "file": "src/shared/config/agents/chat-agent-catalog.ts",
+    "line": 23,
+    "from": "ESPECIALISTAS",
+    "to": "SPECIALISTS",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/shared/config/agents/chat-agent-catalog.ts",
+    "line": 34,
+    "from": "EspecialistaId",
+    "to": "SpecialistId",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/shared/config/agents/chat-agent-catalog.ts",
+    "line": 37,
+    "from": "AGENTE_PADRAO_ID",
+    "to": "DEFAULT_AGENT_ID",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 16
+  },
+  {
+    "file": "src/shared/config/agents/chat-agent-catalog.ts",
+    "line": 46,
+    "from": "busca",
+    "to": "searchTerms",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 11
+  },
+  {
+    "file": "src/shared/config/agents/chat-agent-catalog.ts",
+    "line": 110,
+    "from": "valor",
+    "to": "value",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 12
+  },
+  {
+    "file": "src/shared/config/agents/chat-agent-catalog.ts",
+    "line": 112,
+    "from": "achado",
+    "to": "match",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/shared/config/agents/chat-agent-catalog.ts",
+    "line": 118,
+    "from": "alvo",
+    "to": "target",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/shared/config/agents/chat-agent-catalog.ts",
+    "line": 123,
+    "from": "achatar",
+    "to": "foldText",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/shared/config/agents/chat-agent-catalog.ts",
+    "line": 123,
+    "from": "texto",
+    "to": "text",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/shared/config/agents/chat-agent-catalog.ts",
+    "line": 131,
+    "from": "filtrarAgentes",
+    "to": "filterAgents",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 8
+  },
+  {
+    "file": "src/shared/config/agents/chat-agent-catalog.ts",
+    "line": 131,
+    "from": "termo",
+    "to": "term",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/shared/config/agents/comparativo.ts",
+    "line": 25,
+    "from": "COMPARATIVO_POR_BLOCO",
+    "to": "COMPARISON_BY_BLOCK",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "src/shared/config/agents/comparativo.ts",
+    "line": 53,
+    "from": "aceitaComparativo",
+    "to": "supportsComparison",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/shared/config/agents/comparativo.ts",
+    "line": 53,
+    "from": "tipo",
+    "to": "blockType",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 21
+  },
+  {
+    "file": "src/shared/config/agents/comparativo.ts",
+    "line": 58,
+    "from": "comparativoDoBloco",
+    "to": "comparisonForBlock",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/shared/config/agents/comparativo.ts",
+    "line": 58,
+    "from": "tipo",
+    "to": "blockType",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 21
+  },
+  {
+    "file": "src/shared/config/agents/dynamic-context.ts",
+    "line": 47,
+    "from": "catalogo",
+    "to": "catalog",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/shared/config/agents/metric-shape-catalog.test.ts",
+    "line": 14,
+    "from": "contexto",
+    "to": "contextOf",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 10
+  },
+  {
+    "file": "src/shared/config/agents/metric-shape-catalog.test.ts",
+    "line": 18,
+    "from": "escalar",
+    "to": "scalarMetric",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "src/shared/config/agents/metric-shape-catalog.test.ts",
+    "line": 40,
+    "from": "semForma",
+    "to": "withoutShape",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/shared/config/agents/metric-shape-catalog.test.ts",
+    "line": 48,
+    "from": "linhaDe",
+    "to": "lineOf",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 9
+  },
+  {
+    "file": "src/shared/config/agents/metric-shape-catalog.test.ts",
+    "line": 49,
+    "from": "linha",
+    "to": "line",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "src/shared/config/agents/metric-shape-catalog.test.ts",
+    "line": 61,
+    "from": "linhaPivot",
+    "to": "pivotLine",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/shared/config/agents/metric-shape-catalog.test.ts",
+    "line": 68,
+    "from": "semId",
+    "to": "withoutId",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/shared/config/agents/metric-shape-catalog.test.ts",
+    "line": 75,
+    "from": "linha",
+    "to": "line",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "src/shared/config/agents/metric-shape-catalog.test.ts",
+    "line": 88,
+    "from": "forma",
+    "to": "shape",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 14
+  },
+  {
+    "file": "src/shared/config/agents/shared-context.ts",
+    "line": 168,
+    "from": "LEGENDA_DE_FORMAS",
+    "to": "SHAPE_LEGEND",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/shared/config/agents/shared-context.ts",
+    "line": 182,
+    "from": "detalhes",
+    "to": "details",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "src/shared/config/agents/shared-context.ts",
+    "line": 197,
+    "from": "legenda",
+    "to": "legend",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/shared/config/agents/template-blocks.ts",
+    "line": 22,
+    "from": "TIPOS_DA_PALETA",
+    "to": "PALETTE_TYPES",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/shared/config/business-context/index.test.ts",
+    "line": 11,
+    "from": "perfil",
+    "to": "profile",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "src/shared/config/chart-theme.test.ts",
+    "line": 20,
+    "from": "COR_CRAVADA",
+    "to": "HARDCODED_COLOR",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/shared/config/chart-theme.test.ts",
+    "line": 23,
+    "from": "coresDe",
+    "to": "colorsOf",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 7
+  },
+  {
+    "file": "src/shared/config/chart-theme.test.ts",
+    "line": 52,
+    "from": "valores",
+    "to": "values",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/shared/config/chart-theme.test.ts",
+    "line": 60,
+    "from": "valor",
+    "to": "value",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 12
+  },
+  {
+    "file": "src/shared/config/chart-theme.ts",
+    "line": 76,
+    "from": "corDaSerie",
+    "to": "seriesColor",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/shared/config/chart-theme.ts",
+    "line": 76,
+    "from": "indice",
+    "to": "index",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/shared/config/glossary.ts",
+    "line": 21,
+    "from": "regulamento",
+    "to": "regulations",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 11
+  },
+  {
+    "file": "src/shared/repositories/__tests__/client-semantic-context.test.ts",
+    "line": 70,
+    "from": "campo",
+    "to": "field",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/shared/repositories/__tests__/client-semantic-context.test.ts",
+    "line": 70,
+    "from": "valor",
+    "to": "value",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 12
+  },
+  {
+    "file": "src/shared/repositories/__tests__/client-semantic-context.test.ts",
+    "line": 325,
+    "from": "contratos",
+    "to": "contracts",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/shared/repositories/__tests__/client-semantic-context.test.ts",
+    "line": 436,
+    "from": "contratos",
+    "to": "contracts",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/shared/repositories/__tests__/client-semantic-context.test.ts",
+    "line": 503,
+    "from": "saldo",
+    "to": "balance",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/shared/repositories/__tests__/client-semantic-context.test.ts",
+    "line": 504,
+    "from": "atraso",
+    "to": "delinquency",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/shared/repositories/client-semantic-context.ts",
+    "line": 78,
+    "from": "conhecida",
+    "to": "isKnown",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/shared/repositories/client-semantic-context.ts",
+    "line": 110,
+    "from": "bruto",
+    "to": "raw",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/shared/repositories/client-semantic-context.ts",
+    "line": 113,
+    "from": "saida",
+    "to": "output",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/shared/repositories/client-semantic-context.ts",
+    "line": 114,
+    "from": "chave",
+    "to": "key",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/shared/repositories/client-semantic-context.ts",
+    "line": 114,
+    "from": "valor",
+    "to": "value",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 12
+  },
+  {
+    "file": "src/shared/repositories/client-semantic-context.ts",
+    "line": 128,
+    "from": "leMetrica",
+    "to": "readMetric",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/shared/repositories/client-semantic-context.ts",
+    "line": 233,
+    "from": "metricsResolvidas",
+    "to": "resolvedMetrics",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/shared/repositories/client-semantic-context.ts",
+    "line": 246,
+    "from": "lida",
+    "to": "parsed",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "src/shared/repositories/client-semantic-context.ts",
+    "line": 270,
+    "from": "proprias",
+    "to": "ownedMetrics",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/shared/repositories/client-semantic-context.ts",
+    "line": 273,
+    "from": "lida",
+    "to": "parsed",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "src/shared/repositories/client-semantic-context.ts",
+    "line": 303,
+    "from": "contratosResolvidos",
+    "to": "resolvedContracts",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/shared/repositories/client-semantic-context.ts",
+    "line": 305,
+    "from": "lidas",
+    "to": "parsedEntities",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/shared/repositories/client-semantic-context.ts",
+    "line": 345,
+    "from": "contrato",
+    "to": "contract",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/shared/schemas/__tests__/metric-shape.test.ts",
+    "line": 19,
+    "from": "forma",
+    "to": "shape",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 14
+  },
+  {
+    "file": "src/shared/schemas/__tests__/metric-shape.test.ts",
+    "line": 25,
+    "from": "forma",
+    "to": "shape",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 14
+  },
+  {
+    "file": "src/shared/schemas/__tests__/metric-shape.test.ts",
+    "line": 32,
+    "from": "forma",
+    "to": "shape",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 14
+  },
+  {
+    "file": "src/shared/schemas/__tests__/metric-shape.test.ts",
+    "line": 33,
+    "from": "bloco",
+    "to": "block",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 15
+  },
+  {
+    "file": "src/shared/schemas/__tests__/metric-shape.test.ts",
+    "line": 50,
+    "from": "semMetrica",
+    "to": "withoutMetric",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/shared/schemas/__tests__/metric-shape.test.ts",
+    "line": 51,
+    "from": "forma",
+    "to": "shape",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 14
+  },
+  {
+    "file": "src/shared/schemas/__tests__/metric-shape.test.ts",
+    "line": 52,
+    "from": "bloco",
+    "to": "block",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 15
+  },
+  {
+    "file": "src/shared/schemas/__tests__/timestamps-ausentes.test.ts",
+    "line": 52,
+    "from": "porTimestamp",
+    "to": "byTimestamp",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/shared/stores/app-store.ts",
+    "line": 108,
+    "from": "relatorio",
+    "to": "groupName",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/shared/stores/app-store.ts",
+    "line": 108,
+    "from": "pagina",
+    "to": "pageTitle",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/shared/stores/app-store.ts",
+    "line": 112,
+    "from": "navColapsada",
+    "to": "isNavCollapsed",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/shared/stores/app-store.ts",
+    "line": 113,
+    "from": "toggleNavColapsada",
+    "to": "toggleNavCollapsed",
+    "kind": "prop",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/shared/stores/app-store.ts",
+    "line": 264,
+    "from": "NAV_COLAPSADA_STORAGE_KEY",
+    "to": "NAV_COLLAPSED_STORAGE_KEY",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/shared/stores/app-store.ts",
+    "line": 270,
+    "from": "readNavColapsada",
+    "to": "readNavCollapsed",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/shared/stores/app-store.ts",
+    "line": 279,
+    "from": "saveNavColapsada",
+    "to": "saveNavCollapsed",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2,
+    "note": "mixed-language"
+  },
+  {
+    "file": "src/shared/stores/app-store.ts",
+    "line": 279,
+    "from": "colapsada",
+    "to": "collapsed",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/shared/stores/app-store.ts",
+    "line": 307,
+    "from": "relatorio",
+    "to": "groupName",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/shared/stores/app-store.ts",
+    "line": 307,
+    "from": "pagina",
+    "to": "pageTitle",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/shared/stores/app-store.ts",
+    "line": 311,
+    "from": "proximo",
+    "to": "next",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/shared/stores/canvas-store.test.ts",
+    "line": 22,
+    "from": "paginaCom",
+    "to": "pageWith",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/shared/stores/canvas-store.test.ts",
+    "line": 22,
+    "from": "blocos",
+    "to": "blocks",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/shared/stores/canvas-store.test.ts",
+    "line": 28,
+    "from": "bloco",
+    "to": "block",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 15
+  },
+  {
+    "file": "src/shared/stores/canvas-store.test.ts",
+    "line": 80,
+    "from": "atualizado",
+    "to": "updated",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/shared/stores/canvas-store.test.ts",
+    "line": 115,
+    "from": "paginaNova",
+    "to": "newPage",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "src/shared/stores/canvas-store.ts",
+    "line": 93,
+    "from": "largura",
+    "to": "widthOf",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/shared/stores/canvas-store.ts",
+    "line": 94,
+    "from": "ultima",
+    "to": "lastRow",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 6
+  },
+  {
+    "file": "src/shared/stores/canvas-store.ts",
+    "line": 95,
+    "from": "ocupado",
+    "to": "usedWidth",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/shared/stores/canvas-store.ts",
+    "line": 96,
+    "from": "soma",
+    "to": "sum",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/shared/stores/canvas-store.ts",
+    "line": 171,
+    "from": "larguraNaLinha",
+    "to": "widthInRow",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/shared/stores/canvas-store.ts",
+    "line": 175,
+    "from": "ocupadoNoDestino",
+    "to": "usedInTarget",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/shared/stores/canvas-store.ts",
+    "line": 176,
+    "from": "soma",
+    "to": "sum",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 4
+  },
+  {
+    "file": "src/shared/stores/canvas-store.ts",
+    "line": 217,
+    "from": "tipoAtual",
+    "to": "currentType",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 3
+  },
+  {
+    "file": "src/shared/ui/__tests__/dialog.test.tsx",
+    "line": 20,
+    "from": "abrir",
+    "to": "open",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 5
+  },
+  {
+    "file": "src/shared/ui/month-range-picker.test.tsx",
+    "line": 29,
+    "from": "gatilho",
+    "to": "trigger",
+    "kind": "local",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 2
+  },
+  {
+    "file": "src/shared/config/__tests__/cores-fixas-de-tema.test.ts",
+    "line": 0,
+    "from": "src/shared/config/__tests__/cores-fixas-de-tema.test.ts",
+    "to": "src/shared/config/__tests__/hardcoded-theme-colors.test.ts",
+    "kind": "file",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 1
+  },
+  {
+    "file": "src/shared/config/__tests__/paleta.test.ts",
+    "line": 0,
+    "from": "src/shared/config/__tests__/paleta.test.ts",
+    "to": "src/shared/config/__tests__/palette.test.ts",
+    "kind": "file",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 1
+  },
+  {
+    "file": "src/shared/config/agents/__tests__/comparativo.test.ts",
+    "line": 0,
+    "from": "src/shared/config/agents/__tests__/comparativo.test.ts",
+    "to": "src/shared/config/agents/__tests__/comparison.test.ts",
+    "kind": "file",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 1
+  },
+  {
+    "file": "src/shared/config/agents/comparativo.ts",
+    "line": 0,
+    "from": "src/shared/config/agents/comparativo.ts",
+    "to": "src/shared/config/agents/comparison.ts",
+    "kind": "file",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 1
+  },
+  {
+    "file": "src/shared/schemas/__tests__/timestamps-ausentes.test.ts",
+    "line": 0,
+    "from": "src/shared/schemas/__tests__/timestamps-ausentes.test.ts",
+    "to": "src/shared/schemas/__tests__/missing-timestamps.test.ts",
+    "kind": "file",
+    "persisted": false,
+    "needsAudit": false,
+    "occurrences": 1
+  }
+]

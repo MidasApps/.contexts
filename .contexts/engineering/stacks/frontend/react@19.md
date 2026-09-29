@@ -1,7 +1,9 @@
 ---
 title: React
-version: 19.2.x
-last_updated: 2026-07-13
+type: stacks
+category: frontend
+version: 19.3.0
+last_updated: 2026-09-28
 status: current
 upstream: https://react.dev
 release_notes: https://react.dev/blog/2024/12/05/react-19
@@ -19,20 +21,20 @@ Biblioteca de UI do projeto. Opera como camada de componentes dentro de @stacks/
 
 - **Linha:** React 19.x estável (lançada em dezembro de 2024).
 - **Status:** padrão para todos os apps web do projeto.
-- **Dependência de Next:** Next 16 requer React 19.2+ (peer obrigatório) — versões caminham juntas; ver @stacks/frontend/next@16.
+- **Dependência de Next:** Next 16.3.6 aceita React `^19`. O pin do projeto é **19.3.0**, que também satisfaz `@ai-sdk/react@4` (`^19.2.1`). Ver @stacks/frontend/next@16.
 - **Pinagem:** `react` e `react-dom` em versão exata no `package.json`. `@types/react` e `@types/react-dom` na linha 19.
 - **Strict Mode:** **ligado** em dev. Detecta side effects em render, double-invocation de effects, problemas de cleanup. Não desligar.
-- **React Compiler:** opt-in, ainda em RC/estabilização. Tratado em seção própria; não obrigatório.
+- **React Compiler:** estável (1.0+); continua opt-in no projeto. No Next 16: `reactCompiler: true` (top-level em `next.config.ts`) + `babel-plugin-react-compiler`. Tratado em seção própria; não obrigatório.
 
 ```json
 {
   "dependencies": {
-    "react": "19.2.0",
-    "react-dom": "19.2.0"
+    "react": "19.3.0",
+    "react-dom": "19.3.0"
   },
   "devDependencies": {
-    "@types/react": "19.2.0",
-    "@types/react-dom": "19.2.0"
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0"
   }
 }
 ```
@@ -78,31 +80,28 @@ Substitui `useFormState` de 18. Retorna `[state, formAction, isPending]`.
 import { useActionState } from 'react';
 import { createPost } from './actions';
 
-type State = { ok: boolean; error?: string; postId?: string };
-
-const initial: State = { ok: false };
+// Result de Server Action (ADR 0003): error no envelope de contracts/api.md §6
+type State =
+  | { ok: true; data: { postId: string } }
+  | { ok: false; error: { code: string; message: string; details?: { field: string; issue: string }[]; requestId: string } }
+  | null;
 
 export function PostForm() {
   const [state, formAction, isPending] = useActionState<State, FormData>(
-    async (_prev, formData) => {
-      try {
-        const post = await createPost(formData);
-        return { ok: true, postId: post.id };
-      } catch (err) {
-        return { ok: false, error: err instanceof Error ? err.message : 'unknown' };
-      }
-    },
-    initial,
+    (_prev, formData) => createPost(formData), // a action já devolve o Result; sem try/catch que vaze err.message
+    null,
   );
+  // campos inválidos vêm em error.details[].field (nunca z.flattenError do server)
+  const isInvalid = (field: string) => state?.ok === false && Boolean(state.error.details?.some((d) => d.field === field));
 
   return (
     <form action={formAction}>
-      <input name="title" required />
+      <input name="title" required aria-invalid={isInvalid('title')} />
       <textarea name="body" required />
       <button type="submit" disabled={isPending}>
         {isPending ? 'Publicando…' : 'Publicar'}
       </button>
-      {state.error && <p role="alert">{state.error}</p>}
+      {state?.ok === false && <p role="alert">{state.error.message}</p>}
     </form>
   );
 }
@@ -161,8 +160,8 @@ Reverte ao valor real quando a transição que disparou o optimistic update term
 ```tsx
 // Server Component passa Promise não-resolvida para Client Component
 import { Suspense } from 'react';
-import { getPosts } from '@/lib/posts';
-import { PostList } from './post-list';
+import { getPosts } from '@/services/posts/composition';
+import { PostList } from './PostList';
 
 export default function Page() {
   const postsPromise = getPosts(); // não dá await aqui
@@ -175,7 +174,7 @@ export default function Page() {
 ```
 
 ```tsx
-// post-list.tsx
+// PostList.tsx
 'use client';
 import { use } from 'react';
 
@@ -225,7 +224,7 @@ function Article({ post }: { post: Post }) {
 }
 ```
 
-**Em apps Next 15, prefira a Metadata API** (`generateMetadata` em `page.tsx`/`layout.tsx`) — ver @stacks/frontend/next@16. Document metadata no React é fallback útil para componentes deeply nested onde a Metadata API não chega; em geral evitar duplicar.
+**Em apps Next 16, prefira a Metadata API** (`generateMetadata` em `page.tsx`/`layout.tsx`) — ver @stacks/frontend/next@16. Document metadata no React é fallback útil para componentes deeply nested onde a Metadata API não chega; em geral evitar duplicar.
 
 ### 8. Stylesheets com `precedence`
 
@@ -318,13 +317,13 @@ Em apps Next, o root é gerenciado pela framework — esses handlers são config
 
 React 19 estabiliza Server Components (RSC) e Server Functions (`'use server'`). No projeto, são consumidos via @stacks/frontend/next@16 (App Router).
 
-**Server Component** (default em Next 15):
+**Server Component** (default em Next 16):
 
 ```tsx
-// posts-page.tsx
-import { getPosts } from '@/lib/posts';
+// PostsPage.tsx
+import { getPosts } from '@/services/posts/composition';
 
-export default async function PostsPage() {
+export async function PostsPage() {
   const posts = await getPosts();
   return <ul>{posts.map(p => <li key={p.id}>{p.title}</li>)}</ul>;
 }
@@ -333,16 +332,39 @@ export default async function PostsPage() {
 **Server Function** (Server Action em Next):
 
 ```ts
-// app/posts/actions.ts
+// src/app/posts/actions.ts: só "use server" + wrapper de uma linha (ADR 0003, Amendments)
 'use server';
-import { z } from 'zod';
+import { createPostAction } from '@/services/posts/adapters/driving/create-post-action';
 
-const Input = z.object({ title: z.string().min(1).max(200) });
+export const createPost = async (formData: FormData) => createPostAction(formData);
+```
 
-export async function createPost(formData: FormData) {
-  const input = Input.parse({ title: formData.get('title') });
-  return db.posts.insert(input);
-}
+```ts
+// src/services/posts/adapters/driving/create-post-action.ts (mesmo adapter de @stacks/frontend/next@16)
+import { updateTag } from 'next/cache';
+import { CreatePostInputSchema } from '@/contracts/posts/create-post-input.schema'; // client + server: z.strictObject({ title: z.string().min(1).max(120) })
+import { createPost } from '@/services/posts/composition'; // use case application/use-cases/create-post.ts
+import { getRequestId } from '@/services/shared/request-id'; // async: lê x-request-id (setado pelo proxy.ts) via await headers()
+
+export const createPostAction = async (formData: FormData) => {
+  const user = await requireUser(); // authn/authz primeiro
+  const parsed = CreatePostInputSchema.safeParse({ title: formData.get('title') });
+  if (!parsed.success) {
+    // Result: { ok: false, error } com error no envelope de contracts/api.md seção 6
+    return {
+      ok: false,
+      error: {
+        code: 'VALIDATION_FAILED',
+        message: 'One or more fields are invalid.',
+        details: parsed.error.issues.map((i) => ({ field: i.path.map(String).join('.'), issue: i.code.toUpperCase() })),
+        requestId: await getRequestId(),
+      },
+    } as const;
+  }
+  const post = await createPost({ ...parsed.data, authorId: user.id });
+  updateTag('posts'); // read-your-writes (@stacks/frontend/next@16)
+  return { ok: true, data: { postId: post.id } } as const;
+};
 ```
 
 Server Functions são identificadas por **referência** (não pelo código) ao atravessar o boundary client→server. O cliente recebe um ID opaco que aponta para a função no servidor.
@@ -442,11 +464,11 @@ function Button(props: ButtonProps) {
 ### Props
 
 ```ts
-interface ButtonProps {
+type ButtonProps = {
   variant?: 'primary' | 'secondary';
   children: React.ReactNode;
   onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
-}
+};
 ```
 
 ### Eventos
@@ -495,7 +517,7 @@ Não tipar com `React.ForwardRefRenderFunction`. Use ref como prop.
 
 Compilador opt-in (babel/swc plugin) que **memoiza automaticamente** componentes e cálculos. Reduz necessidade de `useMemo`/`useCallback`/`memo` manual.
 
-**Estado:** RC/estabilizando em 2026. Não obrigatório.
+**Estado:** estável. No Next 16 habilita-se com `reactCompiler: true` (top-level em `next.config.ts`) e `babel-plugin-react-compiler` instalado. Continua opt-in no projeto; não obrigatório.
 
 **Quando habilitar:**
 
@@ -535,7 +557,7 @@ function Card({ className, children }: { className?: string; children: React.Rea
 
 ### Com Zustand 5 (state management)
 
-Stores externos integram via `useSyncExternalStore` (Zustand já faz internamente). Em projeto, Zustand é o store padrão para estado global de client. Ver @stacks/state/zustand@5 (futuro).
+Stores externos integram via `useSyncExternalStore` (Zustand já faz internamente). Em projeto, Zustand é o store padrão para estado global de client. Ver @stacks/state/zustand@5.
 
 ### Com Vercel AI SDK e provedores de IA
 
@@ -605,7 +627,7 @@ Migração formal registra-se como ADR (ver @decisions).
 ## Roadmap
 
 - **Patches 19.x:** absorver em upgrade pontual. Validar com testes e build limpos.
-- **React Compiler GA:** quando estabilizar, avaliar opt-in via ADR. Critério: build pipeline absorve, ganhos medidos, sem regressão em libs externas.
+- **React Compiler (estável):** avaliar opt-in via ADR. Critério: build pipeline absorve, ganhos medidos, sem regressão em libs externas.
 - **React 20.x:** avaliar quando Next.js suportar e ecossistema (AI SDK, libs de UI) acompanhar.
 
 ## Referências
@@ -619,7 +641,7 @@ Migração formal registra-se como ADR (ver @decisions).
 
 ## Referências cruzadas
 
-- @stacks/runtime/node@24 — runtime do server onde RSC executa.
+- @stacks/runtime/node@26 — runtime do server onde RSC executa.
 - @stacks/language/typescript@7 — tipos de React 19, `tsconfig` para JSX.
 - @stacks/frontend/next@16 — framework hospedeiro; App Router, Server Actions, caching.
 - @stacks/frontend/tailwind@4 — estilização via `className`.

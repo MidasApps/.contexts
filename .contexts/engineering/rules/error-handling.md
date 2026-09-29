@@ -3,12 +3,12 @@ title: Error Handling Rules
 type: rules
 status: active
 scope: engineering
-last_updated: 2026-05-20
+last_updated: 2026-09-28
 ---
 
 # Regras de Error Handling
 
-Regras imperativas e enforce sobre como tratar erros no código. Cobre taxonomia, propagação, retry, timeout, cancelamento, boundaries e anti-patterns. Para envelope HTTP de erro, ver `@rules/api-design`. Para regras de logging estruturado, ver `@rules/observability`. Para não-vazamento de PII e stack traces, ver `@rules/security`. Para validação de input, ver `@rules/validation`.
+Regras imperativas e enforce sobre como tratar erros no código. Cobre taxonomia, propagação, retry, timeout, cancelamento, boundaries e anti-patterns. Para o envelope HTTP de erro (fonte única), ver `@contracts/api` seção 6. Para regras de logging estruturado, ver `@rules/observability`. Para não-vazamento de PII e stack traces, ver `@rules/security`. Para validação de input, ver `@rules/validation`.
 
 ## 1. Taxonomia de erros
 
@@ -20,7 +20,7 @@ Regras imperativas e enforce sobre como tratar erros no código. Cobre taxonomia
 
 ## 2. Tipos de erro customizados
 
-- **Sempre** defina classes de erro custom estendendo `Error` com nome único e discriminador `kind` (string literal) para narrowing.
+- **Sempre** defina classes de erro custom estendendo `Error` com nome único e discriminador `code` (string literal em SCREAMING_SNAKE_CASE, `readonly`) para narrowing. É a forma exigida por `@rules/development`.
 - **Sempre** inclua `cause` (segundo argumento de `Error`) ao re-lançar para preservar a cadeia.
 - **Sempre** anexe contexto estruturado como propriedade (`context: Record<string, unknown>`), nunca concatene no `message`.
 - **Nunca** inclua PII, secrets, tokens ou conteúdo de usuário em `message` ou `context`. Ver `@rules/security`.
@@ -29,14 +29,16 @@ Regras imperativas e enforce sobre como tratar erros no código. Cobre taxonomia
 ```ts
 // ok
 class OrderNotFoundError extends Error {
-  readonly kind = "order_not_found" as const;
-  constructor(public orderId: string, options?: { cause?: unknown }) {
-    super(`order ${orderId} not found`, options);
+  readonly code = "ORDER_NOT_FOUND";
+  readonly orderId: OrderId;
+  constructor(orderId: OrderId, options?: ErrorOptions) {
+    super("order not found", options);
     this.name = "OrderNotFoundError";
+    this.orderId = orderId; // parameter property é proibida por erasableSyntaxOnly
   }
 }
 
-// errado: sem discriminador, sem cause, PII no message
+// errado: sem discriminador, sem cause
 class Err extends Error {
   constructor(msg: string) { super(msg); }
 }
@@ -54,7 +56,7 @@ class Err extends Error {
 - **Sempre** capture exceptions no boundary mais externo razoável: route handler do Next.js, handler do Firebase Function, top-level do worker, error boundary do React.
 - **Nunca** capture exception no meio do fluxo sem ação concreta (handle, transformar, ou re-lançar com contexto).
 - **Sempre** transforme erros de infraestrutura em erros de domínio ao cruzar a fronteira de camada (ex: `pg` lança → `RepositoryError` no repositório → `OrderNotFoundError` no use case).
-- **Nunca** vaze tipos de erro de uma dependência (Prisma, Firestore, axios) para fora do adapter que a encapsula.
+- **Nunca** vaze tipos de erro de uma dependência (`pg`/Drizzle, Firestore, SDK de LLM) para fora do adapter que a encapsula.
 - **Re-lance com contexto** quando precisar enriquecer: `throw new DomainError("…", { cause: e })`. Nunca `throw e` sem contexto adicional.
 
 ## 5. Catch silencioso é proibido
@@ -77,7 +79,7 @@ class Err extends Error {
 - **Sempre** separe a `message` técnica do erro de uma `userMessage` (ou tradução i18n) destinada ao usuário final.
 - **Nunca** exponha `error.message`, `error.stack` ou `cause` diretamente em respostas HTTP, UI ou logs públicos.
 - **Sempre** mapeie erros de domínio para mensagens user-facing genéricas no boundary (route handler, Server Action, RSC).
-- **Use** o envelope de erro definido em `@rules/api-design` para respostas HTTP.
+- **Use** o envelope de erro definido em `@contracts/api` seção 6 para respostas HTTP. Esta rule não redefine o shape.
 
 ## 8. Retry
 
@@ -120,7 +122,7 @@ class Err extends Error {
 
 - **Sempre** crie `error.tsx` por segmento de rota que pode falhar em render server-side.
 - **Sempre** crie `global-error.tsx` no root para capturar falhas do layout raiz.
-- **Sempre** capture exceptions em route handlers e Server Actions, retornando o envelope de erro de `@rules/api-design`.
+- **Sempre** capture exceptions em route handlers e Server Actions, retornando o envelope de erro de `@contracts/api` seção 6.
 - **Nunca** deixe um Server Action propagar erro cru para o cliente — o framework expõe stack em dev e mensagem genérica em prod, perdendo controle do contrato.
 - Ver `@stacks/frontend/next@16` para API.
 
@@ -141,7 +143,7 @@ class Err extends Error {
 
 - `try { … } catch { return null; }` — perde diagnóstico, esconde bug. Use `Result` ou propague.
 - `catch (e: any)` ou `catch (e)` sem narrowing — sempre `catch (e: unknown)` seguido de checagem (`instanceof`, discriminador).
-- `throw "string"` ou `throw { code: 1 }` — sempre `throw new Error(...)` ou subclasse.
+- `throw "string"` ou `throw { code: 1 }` — sempre subclasse de `Error` com `code`; `new Error(...)` genérico só para bug/invariante impossível.
 - `.catch(console.error)` em produção — logging fora do schema, sem contexto, sem propagação.
 - `if (err) throw err` no meio de uma cadeia de await sem enriquecer contexto.
 - Capturar e re-lançar sem `cause`: `} catch (e) { throw new MyError("failed"); }` — perde stack original.
@@ -153,14 +155,14 @@ class Err extends Error {
 ## 17. Testes de erro
 
 - **Sempre** teste o caminho de erro com a mesma seriedade do caminho feliz.
-- **Sempre** asserte o tipo discriminado (`expect(result.error.kind).toBe("…")`), nunca apenas `expect(() => …).toThrow()` genérico.
+- **Sempre** asserte o discriminador (`expect(result).toMatchObject({ ok: false, error: { code: "…" } })`), nunca apenas `expect(() => …).toThrow()` genérico.
 - **Sempre** teste timeouts, cancelamento via `AbortSignal` e retry quando o código os implementa.
 - Ver `@rules/testing` para padrões de teste.
 
 ## Referências cruzadas
 
 - `@rules/validation` — erros de input/schema.
-- `@rules/api-design` — envelope HTTP de erro.
+- `@contracts/api` — seção 6: envelope HTTP de erro.
 - `@rules/observability` — logging estruturado, métricas, traces de erro.
 - `@rules/security` — não vazamento de PII e stack.
 - `@stacks/frontend/react@19` — Error Boundary.

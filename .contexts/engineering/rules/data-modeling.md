@@ -3,7 +3,7 @@ title: Regras de Modelagem de Dados
 type: rules
 scope: engineering
 status: active
-last_updated: 2026-07-13
+last_updated: 2026-09-28
 related:
   - "@.contexts/engineering/rules/development.md"
   - "@.contexts/engineering/rules/validation.md"
@@ -23,7 +23,30 @@ Regras imperativas e agnósticas de tecnologia sobre como modelar dados no domí
 
 ## Escopo
 
-Aplica-se a toda modelagem de dados persistidos ou trafegados entre componentes do sistema, independentemente da tecnologia de armazenamento (Firestore, PostgreSQL, pgvector, BigQuery, eventos, cache). Define princípios universais que precedem as convenções específicas de cada store. Não cobre convenções de naming de coleções, tabelas ou campos por tecnologia (ver Contracts), nem regras de validação em fronteiras de entrada (ver `@.contexts/engineering/rules/validation.md`), nem manual de uso de ferramentas específicas (ver Stacks).
+Aplica-se a toda modelagem de dados persistidos ou trafegados entre componentes do sistema, independentemente da tecnologia de armazenamento (Firestore, PostgreSQL, pgvector, BigQuery, eventos, cache). Define princípios universais que precedem as convenções específicas de cada store. Não cobre validação de entrada (ver `@.contexts/engineering/rules/validation.md`) nem o manual da ferramenta (ver Stacks).
+
+## Nomes físicos por camada
+
+A mesma ideia tem um nome por camada. A tradução acontece na boundary de persistência ou de serialização. Um payload não mistura as formas.
+
+| Camada | Convenção | Exemplo |
+|---|---|---|
+| Campo JSON, Firestore e propriedade TypeScript | camelCase | `createdAt`, `amountMinor`, `tenantId` |
+| Tipo, classe, componente React, schema Zod exportado | PascalCase | `Order`, `Money`, `UserSchema` |
+| Constante imutável de módulo | SCREAMING_SNAKE_CASE | `MAX_PAGE_SIZE` |
+| Arquivo que não é componente React | kebab-case | `place-order.ts`, `user.schema.ts` (schema Zod: `UserSchema`) |
+| Arquivo de componente React | PascalCase | `Button.tsx` |
+| Segmento de URL | kebab-case, coleção no plural | `/order-items` |
+| Identificador Postgres ou BigQuery | snake_case | `created_at`, `amount_minor`, `tenant_id` |
+| Variável de ambiente | SCREAMING_SNAKE_CASE | `DATABASE_URL` |
+| Valor de enum persistido | lowercase snake_case | `pending`, `in_review` |
+| `eventName` | SCREAMING_SNAKE_CASE, particípio passado | `ORDER_PLACED` |
+
+`eventName` não é um enum de status. Os dois namespaces não compartilham caixa.
+
+Identificador público no JSON é a string do store, sem prefixo de tipo. Postgres gera `uuidv7()`. Firestore usa o ID automático do documento (ADR 0005). `eventId`, `Idempotency-Key` e `X-Request-Id` usam ULID. Log carrega `entityType` e `id` em campos separados.
+
+Dinheiro é inteiro na menor unidade da moeda mais `currency` (ISO 4217). No JSON e no Firestore o campo é `amountMinor`. No SQL e no BigQuery a coluna é `amount_minor` (`BIGINT` / `INT64`). `NUMERIC` guarda taxa, razão ou quantidade fracionária, não o valor monetário.
 
 ---
 
@@ -41,7 +64,7 @@ Aplica-se a toda modelagem de dados persistidos ou trafegados entre componentes 
 
 - **Sempre** gere identificadores opacos. O identificador não carrega significado de negócio, não revela ordem de criação para o usuário final, não embute tenant id, nem categoria.
 - **Nunca** use auto-increment numérico como identificador de entidades expostas externamente. Vaza volume, é previsível, conflita em sistemas distribuídos.
-- **Sempre** prefira **UUIDv7** (`uuidv7()` no Postgres 18) ou **ULID** quando a ordenação por tempo de criação for útil para indexação ou paginação. Em **Postgres**, default = `uuidv7()`; em **Firestore**/event IDs client-side, ULID continua o padrão textual.
+- **Sempre** use **UUIDv7** (`uuidv7()` no Postgres 18) como PK no Postgres. No **Firestore**, o ID de documento é o **ID automático** (`collection.doc()` / `add()`); ULID e UUIDv7 são monotônicos e geram hotspot de escrita como ID de documento (ADR 0005, `@contracts/firebase-firestore` §2). Ordem por tempo no Firestore vem de `createdAt`, nunca do ID. **ULID** fica para `eventId`, `Idempotency-Key` e `X-Request-Id`.
 - **Sempre** prefira UUID v4 quando ordenação temporal for indesejada por questões de privacidade ou enumeração (tokens públicos, identificadores expostos em URLs sensíveis).
 - **Nunca** use UUID v1. Vaza MAC address e timestamp em formato decodificável.
 - **Nunca** misture UUIDv7 e ULID como PK no mesmo bounded context sem ADR (ver `@contracts/postgres`).
@@ -49,13 +72,13 @@ Aplica-se a toda modelagem de dados persistidos ou trafegados entre componentes 
 - **Nunca** mude o identificador de uma entidade depois que ela existe. Identidade é imutável; mudou, é outra entidade.
 - **Sempre** trate o identificador como string opaca no código que não é o de geração. Não parseie, não extraia partes, não infira ordem.
 - **Nunca** exponha identificadores internos (chaves primárias de banco) em APIs públicas se forem diferentes do identificador de domínio. Mantenha uma única identidade pública.
-- **Sempre** prefixe o identificador com o tipo da entidade quando trafegado em logs e APIs (`user_01H...`, `order_01H...`) para legibilidade e roteamento. Decida o esquema uma vez e mantenha consistente.
+- **Sempre** registre o tipo da entidade em campo próprio (`entityType`) quando o id trafega em log. O id em si não carrega prefixo.
 
 ## 3. Tipos fortes e branded types
 
 - **Sempre** branded types em TypeScript para identificadores. `UserId` e `OrderId` não devem ser intercambiáveis só porque ambos são `string`.
 - **Nunca** passe `string` cru como parâmetro de função quando o domínio espera um identificador específico. O compilador deve recusar `findOrder(userId)`.
-- **Sempre** branded types para valores escalares com unidade ou regra (`Email`, `Slug`, `IsoDateString`, `PositiveInt`, `Cents`). O tipo carrega o invariante.
+- **Sempre** branded types para valores escalares com unidade ou regra (`Email`, `Slug`, `IsoDateString`, `PositiveInt`, `Money`). O tipo carrega o invariante. Dinheiro é `amountMinor` mais `currency`, não um tipo chamado `Cents`.
 - **Nunca** crie um branded type sem um construtor que valide. Branded sem validação é falso conforto.
 - **Sempre** construa branded types em um único lugar (factory ou schema). Quem recebe o tipo confia que a invariante já foi verificada.
 - **Nunca** faça cast direto (`as UserId`) para criar um branded type fora da factory. Cast burla o invariante.
@@ -122,8 +145,8 @@ Aplica-se a toda modelagem de dados persistidos ou trafegados entre componentes 
 ## 10. Money e valores decimais
 
 - **Nunca** armazene dinheiro como float. Nunca. Float perde precisão em soma e comparação.
-- **Sempre** armazene dinheiro como inteiro na menor unidade da moeda (centavos para BRL e USD, yen como inteiro para JPY).
-- **Sempre** modele dinheiro como value object com `amount: integer + currency: string`. Valor sem moeda é incompleto.
+- **Sempre** armazene dinheiro como inteiro na menor unidade da moeda (centavos para BRL e USD, yen como inteiro para JPY). O nome do campo é `amountMinor`, não `amount` e não `amountCents`.
+- **Sempre** modele dinheiro como value object com `amountMinor: integer + currency: string`. Valor sem moeda é incompleto.
 - **Nunca** some valores em moedas diferentes sem conversão explícita. Operação aritmética entre `BRL` e `USD` deve falhar em tipo, não em runtime.
 - **Sempre** use bibliotecas dedicadas para decimais quando inteiros não bastam (medidas científicas, taxas de câmbio, percentuais com muitas casas). Nunca confie em `Number` puro.
 - **Nunca** armazene preço como string formatada (`"R$ 19,90"`). Formato é apresentação; armazene o número.
@@ -141,7 +164,7 @@ Aplica-se a toda modelagem de dados persistidos ou trafegados entre componentes 
 
 - **Nunca** persista dado derivado que pode ser calculado em runtime com custo aceitável. `fullName` derivado de `firstName + lastName` não é persistido.
 - **Sempre** persista dado derivado apenas quando: o cálculo é caro, o histórico do valor importa (snapshot), ou o índice depende do campo.
-- **Sempre** marque campos derivados persistidos com nome que indique sua natureza (`computedTotalCents`, `denormalizedUserName`) quando a distinção for útil para o leitor.
+- **Sempre** marque campos derivados persistidos com nome que indique sua natureza (`computedTotalMinor`, `denormalizedUserName`) quando a distinção for útil para o leitor.
 - **Nunca** permita escrita direta em campo derivado fora do mecanismo que o computa. Trigger, função, ou camada de domínio é a única origem.
 - **Sempre** declare a estratégia de recomputação: síncrono na escrita, assíncrono via evento, batch periódico. Dado derivado sem estratégia de atualização degrada silenciosamente.
 
