@@ -1,6 +1,7 @@
 import { existsSync } from "node:fs";
 import path from "node:path";
 import type { NextConfig } from "next";
+import { buildSecurityHeaders } from "./src/config/security-headers";
 
 /** Workspace root (`app/`): one `.env.local` and one lockfile for every app. */
 const WORKSPACE_ROOT = path.resolve(import.meta.dirname, "../..");
@@ -20,6 +21,14 @@ const nextConfig: NextConfig = {
   // Workspace packages ship TypeScript sources (`exports` point at `src/*.ts`).
   transpilePackages: ["@core/contracts", "@core/services"],
   turbopack: { root: WORKSPACE_ROOT },
+  // NODE_ENV is set by the Next CLI itself (`next dev` → development).
+  headers: () =>
+    Promise.resolve([
+      {
+        source: "/:path*",
+        headers: buildSecurityHeaders({ isDevelopment: process.env.NODE_ENV === "development" }),
+      },
+    ]),
 };
 
 // Next's config loader requires a default export.
