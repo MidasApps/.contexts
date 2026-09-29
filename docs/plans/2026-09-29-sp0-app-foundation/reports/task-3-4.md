@@ -104,12 +104,57 @@ framework-ok
 
 ## Deviations and notes
 
-- **OpenAPI generator:** `contracts/api.md` §15 and `schemas.md` §15 name `@asteasolutions/zod-to-openapi`. Here the spec is built from native `z.toJSONSchema`, as spec §16.4 and the brief ask, and no extra dependency was added. Revisit this when `/v1` endpoints (paths, examples per endpoint) arrive.
+- **OpenAPI generator** (superseded, see Review fixes 4): `contracts/api.md` §15 and `schemas.md` §15 name `@asteasolutions/zod-to-openapi`. Here the spec is built from native `z.toJSONSchema`, as spec §16.4 and the brief ask, and no extra dependency was added. Revisit this when `/v1` endpoints (paths, examples per endpoint) arrive.
 - **`MoneySchema.amountMinor` is non-negative**, following `schemas.md` §7 (the brief only said `int`). A signed amount, for example for refunds or balances, would need a separate primitive.
 - **Registry uses `z.globalRegistry` only.** Field `.meta()` always writes there, so an injectable registry was dropped. Tests isolate state through a fresh `createContractRegistry()`, since the global registry tolerates repeated ids.
-- **Registration on import:** contract modules call `defineContract` at module load. This is inherent to a registry, but the rule `development` limits module side effects to `composition.ts`. The catalog scripts load contracts through `src/index.ts`.
-- **Redaction depth:** contract-level examples are redacted by top-level field `pii`. A `personal` or `sensitive` value nested inside an object field whose own `pii` is `none` is not redacted inside **examples**, although its JSON Schema property is. Authors should set the parent field's `pii` to the highest level it contains.
+- **Registration on import** (fixed, see Review fixes 5): contract modules call `defineContract` at module load. This is inherent to a registry, but the rule `development` limits module side effects to `composition.ts`. The catalog scripts load contracts through `src/index.ts`.
+- **Redaction depth** (fixed, see Review fixes 1–2): contract-level examples are redacted by top-level field `pii`. A `personal` or `sensitive` value nested inside an object field whose own `pii` is `none` is not redacted inside **examples**, although its JSON Schema property is. Authors should set the parent field's `pii` to the highest level it contains.
 - **Relation targets must exist** in the catalog: `contracts:check` enforces this, so `example.Note` has `relations: []`.
 - **Commit 1 scripts:** `package.json` already declared the `contracts:*` scripts in `a507dcf`, and the script files arrived in `c16c76d`.
 - Not done here (out of scope for Tasks 3–4): semantic SQL views, the `contracts/data-catalog.md` doctrine (the framework is read-only), and the parity test between Drizzle and the contracts.
 - Still open from Task 2: no test covers boundaries across bare workspace specifiers (`@core/contracts` imported from another package). The first consumer package should add one.
+
+## Review fixes (Spec FAIL / CHANGES_REQUIRED)
+
+TDD: the new tests (`contract.test.ts`, `composition.test.ts`, `scripts/catalog/ai-catalog.test.ts`, and updated `registry.test.ts` and `build-catalog.test.ts`) failed first with `Cannot find module './contract.ts'` and `'./composition.ts'` (5 files). They now pass: 7 files, 46 tests.
+
+1. **Sensitive fields behind wrappers leaked into `catalog.ai.json`.**
+   - `buildAiCatalog` now hides a top-level property whenever its field `pii` in `entry.fields` (authoritative) is `sensitive`.
+   - At every level, `effectivePii` reads `x-pii` on the node and, recursively, on its `anyOf`/`oneOf`/`allOf` members.
+   - Pruning walks every schema node: `properties`, `items`, `additionalProperties` and combinators. It removes the property, drops it from `required`, and redacts the `examples` and `default` of `personal` nodes.
+   - Tests cover `.meta().nullable()`, `.nullable().meta()`, `.meta().optional()`, `.meta().default()` and `.default().meta()`. The serialized AI entry contains no secret description, value or default.
+2. **Nested sensitive values leaked through examples.**
+   - `inspectSchema` (`src/contracts/field-meta-rules.ts`) enforces field meta recursively through wrappers, arrays and sets (`[]`), records and maps (`{}`), unions, intersections, tuples and pipes. `z.lazy` is skipped, and a seen-set guards against getter recursion.
+   - Every nested field needs `description` and `pii` (`MISSING_FIELD_META`, with paths like `items[].sku` and `labels{}.text`).
+   - A field's pii must be at least the highest pii nested in it, and the contract's pii must be at least the highest pii of its fields (`PII_BELOW_FIELDS`).
+   - `MoneySchema` sub-fields now carry meta.
+   - Examples are redacted by `redactExampleValue`, which walks the JSON Schema alongside the value (`$ref`, properties, record values, array items, combinators). It drops `sensitive` values, redacts `personal` ones, and drops undeclared keys when `additionalProperties: false`.
+   - The AI catalog ignores a contract's root `x-pii`, because it summarizes the fields and field pii is authoritative. A contract is excluded only when it is `sensitive` and has no non-sensitive field.
+3. Covered by 2.
+4. **OpenAPI.** I measured `@asteasolutions/zod-to-openapi@9.1.0` (latest, peer `zod ^4.0.0`, runs on 4.6.5) in a scratch spike. It needs `extendZodWithOpenApi(z)`, which patches the Zod prototype. It copies raw meta keys with no override hook, and it inlined a nested registered schema instead of emitting a `$ref`. So the generator keeps native `z.toJSONSchema`, and the reasons are recorded in `app/docs/decisions/0001-openapi-generation.md`, which the code references.
+5. **Import-time registration.**
+   - `defineContract` (`src/contracts/contract.ts`) is now pure: it validates and returns `{ id, meta, schema }`.
+   - `createContractRegistry(definitions)` registers explicitly and writes the meta to `z.globalRegistry` for `z.toJSONSchema`.
+   - `src/composition.ts` exports `CORE_CONTRACTS` and `composeCoreContracts()`, and both catalog scripts call it.
+   - The old module-level `defineContract`/`listContracts` singletons are gone.
+   - `example.Note` exports `NoteSchema` plus `NoteContract`.
+- **Minor, both fixed:**
+  - A property whose `$ref` points to a contract excluded from the AI catalog is dropped, so no ref dangles (tested).
+  - Registering the same schema instance under a second id throws `DUPLICATE_CONTRACT_SCHEMA`.
+
+Generated artifacts are byte-identical after the fixes, because `example.Note` has no nested or sensitive fields.
+
+```
+$ cd app && pnpm -F @core/contracts test && pnpm -F @core/contracts typecheck && pnpm -F @core/contracts lint && pnpm contracts:catalog && pnpm contracts:check
+ Test Files  7 passed (7)
+      Tests  46 passed (46)
+$ tsc --noEmit                        (exit 0)
+$ eslint .                            (exit 0)
+@core/contracts:contracts:catalog: contracts:catalog wrote 5 files for 1 contracts
+@core/contracts:contracts:check: contracts:check ok (1 contracts, 5 files)
+(chain exit 0)
+$ git diff --quiet main -- .contexts .claude && echo framework-ok
+framework-ok
+```
+
+Note: while the fixes were in progress, `pnpm -F … test` briefly failed with `ERR_PNPM_UNSUPPORTED_ENGINE` (`superstatic@10.0.0` wants Node 20/22/24). That came from the concurrent Tasks 5–6 work, not from `@core/contracts`. I ran the binaries directly in the meantime, and the full pnpm chain above passed afterwards.
