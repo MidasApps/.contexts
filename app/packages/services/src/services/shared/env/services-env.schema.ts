@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { parseDatabaseUrl, socketFilePath } from "../postgres/database-url.ts";
 import { toEnvIssues } from "./env-issues.ts";
 import { InvalidEnvError } from "./invalid-env-error.ts";
 
@@ -18,6 +19,15 @@ const EMULATOR_HOST_KEYS = [
 const REQUIRED_LOCAL_EMULATORS = ["FIREBASE_AUTH_EMULATOR_HOST", "FIRESTORE_EMULATOR_HOST"] as const;
 const LOCAL_DATABASE_HOSTS = new Set(["localhost", "127.0.0.1", "[::1]", "postgres"]);
 const DEMO_PROJECT_PREFIX = "demo-";
+// Cloud Run mounts Cloud SQL sockets under /cloudsql/<project:region:instance>.
+const CLOUD_SQL_SOCKET_DIR = /^\/cloudsql\/[\w.-]+:[\w-]+:[\w-]+$/;
+// sun_path holds 108 bytes including the terminating NUL.
+const MAX_SOCKET_PATH_LENGTH = 107;
+
+// TCP URL, or the Cloud SQL socket form that z.url() cannot parse (decision 0023).
+const DatabaseUrlSchema = z
+  .string()
+  .refine((value) => parseDatabaseUrl(value) !== undefined, { error: "expected a postgres URL" });
 
 const daysSchema = (args: { max: number; fallback: number }) =>
   z.coerce.number().int().min(1).max(args.max).default(args.fallback);
@@ -34,7 +44,7 @@ const MfaFactorsSchema = z
 const BaseServicesEnvSchema = z.object({
   APP_ENV: z.enum(["local", "dev", "staging", "prod"]),
   FIREBASE_PROJECT_ID: z.string().min(1),
-  DATABASE_URL: z.url({ protocol: /^postgres(ql)?$/ }),
+  DATABASE_URL: DatabaseUrlSchema,
   // Real provider by default; `fake` is the explicit CI/test/offline switch (spec §11).
   AI_MODE: z.enum(["real", "fake"]).default("real"),
   FIREBASE_AUTH_EMULATOR_HOST: HostPortSchema.optional(),
@@ -66,8 +76,9 @@ const assertLocalStaysLocal = (env: BaseServicesEnv, ctx: RefinementContext) => 
   }
   // Zod 4 still runs this refinement after a field issue; an unparsable URL is
   // already reported by the field schema, so it is skipped here.
-  if (!URL.canParse(env.DATABASE_URL)) return;
-  if (!LOCAL_DATABASE_HOSTS.has(new URL(env.DATABASE_URL).hostname)) {
+  const target = parseDatabaseUrl(env.DATABASE_URL);
+  if (target === undefined) return;
+  if (target.kind === "socket" || !LOCAL_DATABASE_HOSTS.has(target.hostname)) {
     flag(ctx, "DATABASE_URL", "local must use the local Postgres container");
   }
 };
@@ -82,9 +93,21 @@ const assertRemoteHasNoEmulators = (env: BaseServicesEnv, ctx: RefinementContext
   }
 };
 
+// Outside local the socket form is Cloud SQL only (SP0 follow-up #3).
+const assertRemoteSocketIsCloudSql = (env: BaseServicesEnv, ctx: RefinementContext) => {
+  const target = parseDatabaseUrl(env.DATABASE_URL);
+  if (target?.kind !== "socket") return;
+  if (!CLOUD_SQL_SOCKET_DIR.test(target.socketDir) || socketFilePath(target).length > MAX_SOCKET_PATH_LENGTH) {
+    flag(ctx, "DATABASE_URL", "socket DSN must use /cloudsql/<project:region:instance> within the unix path limit");
+  }
+};
+
 export const ServicesEnvSchema = BaseServicesEnvSchema.superRefine((env, ctx) => {
   if (env.APP_ENV === "local") assertLocalStaysLocal(env, ctx);
-  else assertRemoteHasNoEmulators(env, ctx);
+  else {
+    assertRemoteHasNoEmulators(env, ctx);
+    assertRemoteSocketIsCloudSql(env, ctx);
+  }
 });
 
 export type ServicesEnv = z.infer<typeof ServicesEnvSchema>;

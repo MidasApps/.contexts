@@ -63,6 +63,24 @@ describe("ServicesEnvSchema", () => {
     expect(issuePaths(source)).toEqual(["DATABASE_URL", "AI_MODE"]);
   });
 
+  it("accepts the Cloud SQL unix socket DSN outside local", () => {
+    const socketUrl = "postgresql://svc@/app?host=/cloudsql/acme-prod:southamerica-east1:core-db";
+    expect(loadServicesEnv({ ...REMOTE_ENV, APP_ENV: "prod", DATABASE_URL: socketUrl }).DATABASE_URL).toBe(socketUrl);
+  });
+
+  it("rejects the socket DSN in local, which must use the Postgres container", () => {
+    const socketUrl = "postgresql://app@/app?host=/cloudsql/acme-prod:southamerica-east1:core-db";
+    expect(issuePaths({ ...LOCAL_ENV, DATABASE_URL: socketUrl })).toEqual(["DATABASE_URL"]);
+  });
+
+  it("rejects a socket directory outside /cloudsql or too long for a unix socket path", () => {
+    const longInstance = `/cloudsql/${"p".repeat(40)}:${"r".repeat(20)}:${"i".repeat(40)}`;
+    expect(issuePaths({ ...REMOTE_ENV, DATABASE_URL: "postgresql://svc@/app?host=/tmp/pg" })).toEqual(["DATABASE_URL"]);
+    expect(issuePaths({ ...REMOTE_ENV, DATABASE_URL: `postgresql://svc@/app?host=${longInstance}` })).toEqual([
+      "DATABASE_URL",
+    ]);
+  });
+
   it("throws INVALID_ENV at boot naming the fields but not their values", () => {
     const secretUrl = "mysql://user:s3cr3t@10.0.0.5/app";
     const load = () => loadServicesEnv({ ...REMOTE_ENV, DATABASE_URL: secretUrl });

@@ -15,11 +15,14 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run --project unit",
     "test:emulators": "vitest run --project emulators",
-    "test:postgres": "vitest run --project postgres"
+    "test:postgres": "vitest run --project postgres",
+    "db:generate": "drizzle-kit generate"
   },
   "dependencies": {
     "@core/contracts": "workspace:*",
+    "drizzle-orm": "catalog:",
     "firebase-admin": "catalog:",
+    "postgres": "catalog:",
     "ulid": "catalog:",
     "zod": "catalog:"
   },
@@ -27,9 +30,9 @@
     "@core/config": "workspace:*",
     "@firebase/rules-unit-testing": "catalog:",
     "@types/node": "catalog:",
+    "drizzle-kit": "catalog:",
     "eslint": "catalog:",
     "firebase": "catalog:",
-    "postgres": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"
   }

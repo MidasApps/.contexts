@@ -158,5 +158,10 @@ jobs:
           for file in infra/postgres/init/*.sql; do
             psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f "$file"
           done
+      # Versioned migrations (decision 0023); the CI database is the local kind.
+      - name: Apply migrations
+        run: pnpm db:migrate
+        env:
+          APP_ENV: local
       - name: Postgres tests
         run: pnpm test:postgres

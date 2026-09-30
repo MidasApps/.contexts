@@ -56,3 +56,24 @@ export {
   softDeleteFields,
 } from "./services/shared/firestore/soft-delete.ts";
 export { runInTransaction } from "./services/shared/firestore/transaction-runner.ts";
+export {
+  type DatabaseTarget,
+  parseDatabaseUrl,
+  type SocketDatabaseTarget,
+  socketFilePath,
+  type TcpDatabaseTarget,
+} from "./services/shared/postgres/database-url.ts";
+export {
+  buildPostgresConnection,
+  createPostgresClient,
+  InvalidDatabaseUrlError,
+  type PostgresConnection,
+  type PostgresPoolOptions,
+} from "./services/shared/postgres/postgres-client.ts";
+export {
+  InvalidNodeIdError,
+  TenantContextMissingError,
+  type TenantScope,
+  withTenantTransaction,
+} from "./services/shared/postgres/with-tenant-transaction.ts";
+export { aiSchema } from "./services/shared/postgres/drizzle-schemas.ts";

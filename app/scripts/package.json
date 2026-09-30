@@ -13,6 +13,9 @@
     "test:emulators": "vitest run --project emulators"
   },
   "dependencies": {
+    "@core/services": "workspace:*",
+    "drizzle-orm": "catalog:",
+    "postgres": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {
