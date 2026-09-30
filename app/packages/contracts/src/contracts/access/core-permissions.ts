@@ -1,3 +1,4 @@
+import { AGENT_PERMISSIONS } from "../agents/agent-permissions.ts";
 import type { Permission } from "../primitives/catalog-meta.schema.ts";
 import type { PlatformRole } from "../identity/platform-staff.schema.ts";
 import type { PermissionDefinition, PermissionKind } from "./permission-definition.schema.ts";
@@ -24,11 +25,8 @@ const MEMBERS = ["owner", "admin", "member"] as const;
 const ADMINS = ["owner", "admin"] as const;
 const STAFF = ["platform-admin", "platform-support"] as const;
 
-/**
- * The core permission catalog, exactly SP1 spec §5.1. Modules add theirs through the
- * access registry (`createAccessCore({ permissions })`), which rejects duplicates.
- */
-export const CORE_PERMISSIONS: readonly PermissionDefinition[] = [
+/** The permissions of SP1 spec §5.1 (identity, tenancy, access, audit, platform). */
+export const SP1_PERMISSIONS: readonly PermissionDefinition[] = [
   tenant("core.organization.read", "read", EVERYONE),
   tenant("core.organization.update", "write", ADMINS),
   tenant("core.organization.delete", "write", ["owner"]),
@@ -62,4 +60,14 @@ export const CORE_PERMISSIONS: readonly PermissionDefinition[] = [
   platform("platform.audit-log.read", "read", STAFF),
   platform("platform.user.impersonate", "write", STAFF),
   platform("platform.staff.manage", "write", ["platform-admin"]),
+];
+
+/**
+ * The core permission catalog: SP1 spec §5.1 plus the permissions of the agent
+ * runtime (SP3 spec §2.2, `AGENT_PERMISSIONS`). Modules add theirs through the access
+ * registry (`createAccessCore({ permissions })`), which rejects duplicates.
+ */
+export const CORE_PERMISSIONS: readonly PermissionDefinition[] = [
+  ...SP1_PERMISSIONS,
+  ...AGENT_PERMISSIONS.map((permission): PermissionDefinition => ({ ...permission, defaultRoles: [...permission.defaultRoles] })),
 ];

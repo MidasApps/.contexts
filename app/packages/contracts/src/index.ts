@@ -279,7 +279,7 @@ export {
   PermissionDefinitionContract, PermissionDefinitionSchema, PermissionKindSchema, PermissionScopeSchema,
   type PermissionDefinition, type PermissionKind, type PermissionScope,
 } from "./contracts/access/permission-definition.schema.ts";
-export { CORE_PERMISSIONS } from "./contracts/access/core-permissions.ts";
+export { CORE_PERMISSIONS, SP1_PERMISSIONS } from "./contracts/access/core-permissions.ts";
 export {
   MAX_ROLES_PER_GRANT, RoleIdSchema, RoleRefContract, RoleRefListSchema, RoleRefSchema, roleRefKey, roleRefsField,
   type RoleId, type RoleRef,

@@ -1,10 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { PermissionSchema } from "../primitives/catalog-meta.schema.ts";
-import { CORE_PERMISSIONS } from "./core-permissions.ts";
+import { AGENT_PERMISSIONS } from "../agents/agent-permissions.ts";
+import { CORE_PERMISSIONS, SP1_PERMISSIONS } from "./core-permissions.ts";
 import { PermissionDefinitionSchema } from "./permission-definition.schema.ts";
 
 const ids = CORE_PERMISSIONS.map((permission) => permission.id);
+const sp1Ids = SP1_PERMISSIONS.map((permission) => permission.id);
 const tenantPermissions = CORE_PERMISSIONS.filter((permission) => permission.scope === "tenant");
+const sp1TenantPermissions = SP1_PERMISSIONS.filter((permission) => permission.scope === "tenant");
 const platformPermissions = CORE_PERMISSIONS.filter((permission) => permission.scope === "platform");
 const rolesOf = (id: string) => CORE_PERMISSIONS.find((permission) => permission.id === id)?.defaultRoles;
 
@@ -18,7 +21,7 @@ describe("CORE_PERMISSIONS", () => {
   });
 
   it("lists exactly the permissions of SP1 spec §5.1", () => {
-    expect([...ids].sort()).toEqual(
+    expect([...sp1Ids].sort()).toEqual(
       [
         "core.organization.read", "core.organization.update", "core.organization.delete",
         "core.project.read", "core.project.create", "core.project.update", "core.project.delete",
@@ -32,6 +35,11 @@ describe("CORE_PERMISSIONS", () => {
         "platform.user.impersonate", "platform.staff.manage",
       ].sort(),
     );
+  });
+
+  it("includes every agent runtime permission (SP3 spec §2.2) unchanged", () => {
+    expect(ids).toEqual([...sp1Ids, ...AGENT_PERMISSIONS.map((permission) => permission.id)]);
+    for (const agent of AGENT_PERMISSIONS) expect(CORE_PERMISSIONS.find((permission) => permission.id === agent.id)).toEqual(agent);
   });
 
   it("gives every tenant permission at least one default role, owner included", () => {
@@ -48,15 +56,15 @@ describe("CORE_PERMISSIONS", () => {
 
   it("keeps member and viewer to the rows of the spec", () => {
     const holders = (role: "member" | "viewer") =>
-      tenantPermissions.filter((permission) => permission.defaultRoles.includes(role)).map((permission) => permission.id).sort();
+      sp1TenantPermissions.filter((permission) => permission.defaultRoles.includes(role)).map((permission) => permission.id).sort();
     expect(holders("viewer")).toEqual(["core.organization.read", "core.project.read", "core.unit.read"]);
     expect(holders("member")).toEqual(
       ["core.approval.read", "core.member.read", "core.organization.read", "core.project.read", "core.role.read", "core.unit.read"],
     );
   });
 
-  it("marks reads and writes by the action", () => {
-    for (const permission of CORE_PERMISSIONS) {
+  it("marks the SP1 reads and writes by the action", () => {
+    for (const permission of SP1_PERMISSIONS) {
       const readAction = /\.read$/.test(permission.id);
       expect(permission.kind).toBe(readAction ? "read" : "write");
     }
