@@ -34,3 +34,25 @@ export {
   REQUEST_ID_HEADER,
   resolveRequestId,
 } from "./services/shared/observability/request-id.ts";
+export {
+  createFirebaseAdmin,
+  EmulatorOutsideLocalError,
+  type FirebaseAdmin,
+  type FirebaseAdminSdk,
+} from "./services/shared/firebase/firebase-admin.ts";
+export { createContractConverter } from "./services/shared/firestore/contract-converter.ts";
+export { CorruptDocumentError } from "./services/shared/firestore/corrupt-document-error.ts";
+export {
+  type CreateAuditFields,
+  SYSTEM_ACTOR,
+  type UpdateAuditFields,
+  withCreateAudit,
+  withUpdateAudit,
+} from "./services/shared/firestore/audit-fields.ts";
+export {
+  initialSoftDeleteFields,
+  notDeleted,
+  type SoftDeleteFields,
+  softDeleteFields,
+} from "./services/shared/firestore/soft-delete.ts";
+export { runInTransaction } from "./services/shared/firestore/transaction-runner.ts";

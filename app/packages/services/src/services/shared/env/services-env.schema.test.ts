@@ -70,4 +70,57 @@ describe("ServicesEnvSchema", () => {
     expect(load).toThrow(/DATABASE_URL/);
     expect(load).not.toThrow(/s3cr3t/);
   });
+
+  it("defaults the SP1 session, API key, organization and MFA settings", () => {
+    expect(loadServicesEnv(REMOTE_ENV)).toMatchObject({
+      SESSION_MAX_AGE_DAYS: 5,
+      DESKTOP_SESSION_MAX_AGE_DAYS: 30,
+      API_KEY_PREFIX: "core",
+      ORGANIZATION_SELF_SERVE: true,
+      MFA_FACTORS: ["totp"],
+    });
+  });
+
+  it("parses the SP1 settings from strings", () => {
+    const source = {
+      ...REMOTE_ENV,
+      SESSION_MAX_AGE_DAYS: "14",
+      DESKTOP_SESSION_MAX_AGE_DAYS: "90",
+      API_KEY_PREFIX: "acme",
+      ORGANIZATION_SELF_SERVE: "false",
+      MFA_FACTORS: "phone, totp,phone",
+    };
+    expect(loadServicesEnv(source)).toMatchObject({
+      SESSION_MAX_AGE_DAYS: 14,
+      DESKTOP_SESSION_MAX_AGE_DAYS: 90,
+      API_KEY_PREFIX: "acme",
+      ORGANIZATION_SELF_SERVE: false,
+      MFA_FACTORS: ["phone", "totp"],
+    });
+  });
+
+  it("rejects SP1 settings out of range", () => {
+    const source = {
+      ...REMOTE_ENV,
+      SESSION_MAX_AGE_DAYS: "15",
+      DESKTOP_SESSION_MAX_AGE_DAYS: "0",
+      API_KEY_PREFIX: "Core_1",
+      ORGANIZATION_SELF_SERVE: "yes",
+      MFA_FACTORS: "totp,email",
+    };
+    expect(issuePaths(source)).toEqual([
+      "SESSION_MAX_AGE_DAYS",
+      "DESKTOP_SESSION_MAX_AGE_DAYS",
+      "API_KEY_PREFIX",
+      "ORGANIZATION_SELF_SERVE",
+      "MFA_FACTORS.1",
+    ]);
+  });
+
+  it("rejects a fractional session age and an empty MFA list", () => {
+    expect(issuePaths({ ...REMOTE_ENV, SESSION_MAX_AGE_DAYS: "2.5", MFA_FACTORS: " , " })).toEqual([
+      "SESSION_MAX_AGE_DAYS",
+      "MFA_FACTORS",
+    ]);
+  });
 });

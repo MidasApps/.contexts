@@ -17,6 +17,22 @@ describe("loadFunctionsEnv", () => {
     expect(() => loadFunctionsEnv({ APP_ENV: "s3cr3t" })).not.toThrow(/s3cr3t/);
   });
 
+  it("accepts emulator hosts in local", () => {
+    const source = { APP_ENV: "local", FIRESTORE_EMULATOR_HOST: "127.0.0.1:8080", FIREBASE_AUTH_EMULATOR_HOST: "127.0.0.1:9099" };
+    expect(loadFunctionsEnv(source)).toEqual({ APP_ENV: "local" });
+  });
+
+  it("rejects emulator hosts outside local, naming each one", () => {
+    const source = { APP_ENV: "prod", FIRESTORE_EMULATOR_HOST: "127.0.0.1:8080", FIREBASE_AUTH_EMULATOR_HOST: "127.0.0.1:9099" };
+    expect(() => loadFunctionsEnv(source)).toThrow(InvalidEnvError);
+    expect(() => loadFunctionsEnv(source)).toThrow(/FIREBASE_AUTH_EMULATOR_HOST.*FIRESTORE_EMULATOR_HOST/);
+    expect(() => loadFunctionsEnv(source)).not.toThrow(/127\.0\.0\.1/);
+  });
+
+  it("treats an empty emulator host outside local as unset", () => {
+    expect(loadFunctionsEnv({ APP_ENV: "staging", FIRESTORE_EMULATOR_HOST: "" })).toEqual({ APP_ENV: "staging" });
+  });
+
   it("ignores variables the Functions runtime injects", () => {
     expect(loadFunctionsEnv({ APP_ENV: "local", GCLOUD_PROJECT: "demo-core", K_SERVICE: "healthz" })).toEqual({
       APP_ENV: "local",

@@ -7,9 +7,34 @@ import { z } from "zod";
  * Functions `.env` files, and no function here talks to Postgres yet. Add a
  * variable only when a function reads it; secrets go through `defineSecret`.
  */
-export const FunctionsEnvSchema = z.object({
-  APP_ENV: ServicesEnvSchema.shape.APP_ENV,
-});
+const EmulatorHostSchema = z.string().optional();
+
+// Emulator mode accepts unsigned tokens, so a stray host outside local would let
+// anyone forge them (follow-up #12c). Declared only to be checked, then dropped.
+const EMULATOR_HOST_KEYS = [
+  "FIREBASE_AUTH_EMULATOR_HOST",
+  "FIRESTORE_EMULATOR_HOST",
+  "FIREBASE_STORAGE_EMULATOR_HOST",
+  "FIREBASE_DATABASE_EMULATOR_HOST",
+  "PUBSUB_EMULATOR_HOST",
+] as const;
+
+export const FunctionsEnvSchema = z
+  .object({
+    APP_ENV: ServicesEnvSchema.shape.APP_ENV,
+    FIREBASE_AUTH_EMULATOR_HOST: EmulatorHostSchema,
+    FIRESTORE_EMULATOR_HOST: EmulatorHostSchema,
+    FIREBASE_STORAGE_EMULATOR_HOST: EmulatorHostSchema,
+    FIREBASE_DATABASE_EMULATOR_HOST: EmulatorHostSchema,
+    PUBSUB_EMULATOR_HOST: EmulatorHostSchema,
+  })
+  .superRefine((env, ctx) => {
+    if (env.APP_ENV === "local") return;
+    for (const key of EMULATOR_HOST_KEYS) {
+      if (env[key]) ctx.addIssue({ code: "custom", path: [key], message: "emulators are local only" });
+    }
+  })
+  .transform(({ APP_ENV }) => ({ APP_ENV }));
 
 export type FunctionsEnv = z.infer<typeof FunctionsEnvSchema>;
 

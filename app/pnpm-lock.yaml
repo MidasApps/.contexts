@@ -557,6 +557,9 @@ importers:
       '@core/contracts':
         specifier: workspace:*
         version: link:../contracts
+      firebase-admin:
+        specifier: 'catalog:'
+        version: 14.5.0(@firebase/app-compat@0.5.18)(@firebase/app@0.16.2)(supports-color@7.2.0)
       ulid:
         specifier: 'catalog:'
         version: 3.0.2

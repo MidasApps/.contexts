@@ -19,6 +19,18 @@ const REQUIRED_LOCAL_EMULATORS = ["FIREBASE_AUTH_EMULATOR_HOST", "FIRESTORE_EMUL
 const LOCAL_DATABASE_HOSTS = new Set(["localhost", "127.0.0.1", "[::1]", "postgres"]);
 const DEMO_PROJECT_PREFIX = "demo-";
 
+const daysSchema = (args: { max: number; fallback: number }) =>
+  z.coerce.number().int().min(1).max(args.max).default(args.fallback);
+
+// Boolean env values are the literal strings "true"/"false"; anything else is a typo.
+const BooleanStringSchema = z.enum(["true", "false"]).transform((value) => value === "true");
+
+// Comma-separated list; order kept, duplicates dropped (SP1 spec §3.4, decision 0007).
+const MfaFactorsSchema = z
+  .string()
+  .transform((value) => [...new Set(value.split(",").map((item) => item.trim()).filter((item) => item !== ""))])
+  .pipe(z.array(z.enum(["totp", "phone"])).min(1));
+
 const BaseServicesEnvSchema = z.object({
   APP_ENV: z.enum(["local", "dev", "staging", "prod"]),
   FIREBASE_PROJECT_ID: z.string().min(1),
@@ -29,6 +41,12 @@ const BaseServicesEnvSchema = z.object({
   FIRESTORE_EMULATOR_HOST: HostPortSchema.optional(),
   FIREBASE_STORAGE_EMULATOR_HOST: HostPortSchema.optional(),
   PUBSUB_EMULATOR_HOST: HostPortSchema.optional(),
+  // Identity and access settings (SP1 spec §8; decisions 0007, 0008).
+  SESSION_MAX_AGE_DAYS: daysSchema({ max: 14, fallback: 5 }),
+  DESKTOP_SESSION_MAX_AGE_DAYS: daysSchema({ max: 90, fallback: 30 }),
+  API_KEY_PREFIX: z.string().regex(/^[a-z]{2,12}$/, { error: "expected 2-12 lower-case letters" }).default("core"),
+  ORGANIZATION_SELF_SERVE: BooleanStringSchema.default(true),
+  MFA_FACTORS: MfaFactorsSchema.default(["totp"]),
 });
 
 type BaseServicesEnv = z.infer<typeof BaseServicesEnvSchema>;
