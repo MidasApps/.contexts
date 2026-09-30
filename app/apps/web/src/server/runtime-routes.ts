@@ -4,6 +4,7 @@ import {
   buildFilesRoutes,
   buildKnowledgeDocumentsRoutes,
   buildKnowledgeSourcesRoutes,
+  buildMcpRoutes,
   createCoreAgentCommandExecutors,
   createFirebaseAdmin,
   createFirebaseConnectorsServices,
@@ -25,7 +26,8 @@ const UNUSED_SEARCH_MODEL = "web/no-search";
  * `/v1` routes of the SP3 contexts that `createCoreServer` does not build: files (uploads,
  * SP3 Task 13), the knowledge base (documents over Postgres, sources through the Mastra
  * gateway, Task 14) and tenant connectors (Firestore + secret store, Task 21). They share
- * the core server's pipeline, audit writer and Admin SDK app. It also registers the SP1
+ * the core server's pipeline, audit writer and Admin SDK app, plus `POST /v1/mcp` (the core
+ * MCP server through the Mastra gateway, Task 24). It also registers the SP1
  * approval handler of kind `agent-command` (decision 0025): approvals are decided here, so the
  * approved agent command runs here, at most once per `runId:toolCallId`.
  */
@@ -63,5 +65,6 @@ export const buildRuntimeRoutes = async (core: CoreServer): Promise<CoreRoutes> 
     ...buildFilesRoutes({ pipeline: core.pipeline, files }),
     ...buildKnowledgeDocumentsRoutes({ pipeline: core.pipeline, knowledge }),
     ...buildKnowledgeSourcesRoutes({ pipeline: core.pipeline, gateway, getReadyFile: files.getReadyFile, resolveAccessContext: core.resolveAccessContext }),
+    ...buildMcpRoutes({ pipeline: core.pipeline, gateway, resolveAccessContext: core.resolveAccessContext }),
   };
 };

@@ -30,6 +30,7 @@
   "devDependencies": {
     "@core/config": "workspace:*",
     "@mastra/deployer": "catalog:",
+    "@mastra/mcp": "catalog:",
     "@types/node": "catalog:",
     "eslint": "catalog:",
     "mastra": "catalog:",

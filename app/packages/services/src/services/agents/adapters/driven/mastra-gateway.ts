@@ -1,6 +1,6 @@
 import { MastraClient } from "@mastra/client-js";
 import type { AgentCallScope, AgentRunInput, AgentRuntimeGateway } from "../../application/ports/agent-runtime-gateway.ts";
-import { buildForwardedHeaders, type MastraConnection, postForStream, stripServerOwnedKeys, withDeadline } from "./mastra-request.ts";
+import { buildForwardedHeaders, type MastraConnection, postForStream, postMcp, stripServerOwnedKeys, withDeadline } from "./mastra-request.ts";
 import type { ServerlessIdTokenSource } from "./serverless-id-token.ts";
 
 /** A JSON generate can take a long model turn; streams only wait for their first byte. */
@@ -103,6 +103,6 @@ export const createMastraGateway = (options: MastraGatewayOptions): AgentRuntime
         await client.getMemoryThread({ threadId: input.threadId, agentId: input.agentId }).delete({ agentId: input.agentId });
         return null;
       }),
-    callMcp: (input) => stream(input.scope, `/mcp/${pathSegment(input.serverId)}/mcp`, input.body, "application/json, text/event-stream"),
+    callMcp: (input) => postMcp({ connection, scope: input.scope, path: `/mcp/${pathSegment(input.serverId)}/mcp`, body: input.body, headers: input.headers ?? {} }),
   };
 };

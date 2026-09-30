@@ -15,9 +15,9 @@ type MastraToolCallContext = {
 /** A Mastra tool built from a core definition; the registry keeps the definition beside it. */
 export type BoundCoreTool = ReturnType<typeof bindCoreTool>;
 
-const toCallInfo = (ctx: MastraToolCallContext | undefined): ToolCallInfo => ({
+const toCallInfo = (ctx: MastraToolCallContext | undefined, fixedAgentId?: string): ToolCallInfo => ({
   requestContext: ctx?.requestContext,
-  agentId: ctx?.agent?.agentId ?? "",
+  agentId: fixedAgentId ?? ctx?.agent?.agentId ?? "",
   toolCallId: ctx?.agent?.toolCallId ?? "",
   ...(ctx?.workflow?.runId === undefined ? {} : { runId: ctx.workflow.runId }),
   ...(ctx?.abortSignal === undefined ? {} : { abortSignal: ctx.abortSignal }),
@@ -27,8 +27,9 @@ const toCallInfo = (ctx: MastraToolCallContext | undefined): ToolCallInfo => ({
  * Mastra tool for a core definition. Mutations always need user confirmation
  * (`requireApproval: true`, decision 0025) and may also return the pending
  * approval result, so their output schema accepts it.
+ * @param options.agentId caller key for the ceiling when no agent runs the tool (the core MCP server).
  */
-export const bindCoreTool = (definition: CoreToolDefinition, deps: CoreToolDeps) =>
+export const bindCoreTool = (definition: CoreToolDefinition, deps: CoreToolDeps, options: { readonly agentId?: string } = {}) =>
   createTool({
     id: definition.id,
     description: definition.description,
@@ -36,7 +37,7 @@ export const bindCoreTool = (definition: CoreToolDefinition, deps: CoreToolDeps)
     outputSchema: definition.kind === "mutation" ? z.union([definition.outputSchema, PendingApprovalResultSchema]) : definition.outputSchema,
     requireApproval: definition.kind === "mutation",
     strict: true,
-    execute: (input, ctx) => runCoreTool(definition, deps, input, toCallInfo(ctx as MastraToolCallContext)),
+    execute: (input, ctx) => runCoreTool(definition, deps, input, toCallInfo(ctx as MastraToolCallContext, options.agentId)),
   });
 
 export type ToolRegistry = {

@@ -12,6 +12,7 @@ export type AgentContextOverrides = {
   readonly permissions?: readonly string[];
   readonly principalKind?: "user" | "service";
   readonly principal?: AccessPrincipal;
+  readonly conversationId?: string;
 };
 
 /**
@@ -36,6 +37,7 @@ export const buildAgentContextEntries = (overrides: AgentContextOverrides = {}):
     requestId: TEST_REQUEST_ID,
     organizationId: tenantId,
     aiMode: "fake",
+    ...(overrides.conversationId === undefined ? {} : { conversationId: overrides.conversationId }),
   };
   return [...Object.entries(context), [AGENT_PRINCIPAL_KEY, principal]];
 };

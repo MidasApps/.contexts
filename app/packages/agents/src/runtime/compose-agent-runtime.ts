@@ -44,6 +44,10 @@ import type { WebClientEnv } from "../tools/web/firecrawl-client.ts";
 import { createFirecrawlTools, createWebToolsRuntime, type WebToolsRuntime } from "../tools/web/web-tools-runtime.ts";
 import { type CoreVoice, createVoice } from "../voice/create-voice.ts";
 import { createVoiceRoutes } from "../voice/voice-routes.ts";
+import type { MCPServerBase } from "@mastra/core/mcp";
+import { createCoreMcpServer, CORE_MCP_SERVER_ID, MCP_CALLER_ID, MCP_CEILING } from "../mcp-server/core-mcp-server.ts";
+import { setMcpRequestAuth } from "../mcp-server/mcp-request-context.ts";
+import { LOCAL_MCP_REQUEST_STATE_KEY } from "./agent-env.schema.ts";
 import { type AgentDefinition, type AgentFactoryDeps, type AgentModule, AgentModuleError } from "./agent-module.ts";
 import type { AgentRuntimePorts } from "./runtime-ports.ts";
 
@@ -53,7 +57,7 @@ export const MEMORY_VECTOR_KEY = "memory";
 export type ComposeAgentRuntimeArgs = {
   readonly env: ModelFactoryEnv &
     Pick<ObservabilityEnv, "OTEL_EXPORTER_OTLP_ENDPOINT"> &
-    Pick<WebClientEnv, "FIRECRAWL_API_KEY" | "FIRECRAWL_API_URL"> & { readonly AI_MEMORY_OBSERVATIONAL?: boolean };
+    Pick<WebClientEnv, "FIRECRAWL_API_KEY" | "FIRECRAWL_API_URL"> & { readonly AI_MEMORY_OBSERVATIONAL?: boolean; readonly MCP_REQUEST_STATE_KEY?: string };
   readonly ports: AgentRuntimePorts;
   /** `APP_MODULES` of `apps/mastra`, built with `defineAgentModule`. */
   readonly modules: readonly AgentModule[];
@@ -88,7 +92,10 @@ export type RuntimeParts = {
   readonly workflows: Record<string, AnyWorkflow>;
   /** Core scorers (Task 27); the LLM judge only in real mode. */
   readonly scorers: Record<string, CoreScorer>;
-  readonly mcpServers: Record<string, never>;
+  /** The core MCP server (`core`, Task 24); `/v1/mcp` reaches it through the gateway. */
+  readonly mcpServers: Record<string, MCPServerBase>;
+  /** `server.mcpOptions` of `new Mastra()`: bridges the verified agent context into MCP requests. */
+  readonly mcpOptions: { readonly setRequestAuth: typeof setMcpRequestAuth };
   readonly storage: MastraCompositeStore;
   readonly vectors: Record<string, MastraVector>;
   /** Tenant-scoped memory for the chat agents (Task 20 attaches it to the supervisor). */
@@ -163,7 +170,10 @@ const SUPERVISOR_CEILING = ["core.chat.use"];
 
 // Ceilings are data, known before any tool is bound: every call is capped by its agent's.
 const toolDepsOf = (args: ComposeAgentRuntimeArgs, agents: readonly AgentDefinition[]): CoreToolDeps => {
-  const ceilings = [...agents.map((agent) => [agent.id, new Set(agent.ceiling)] as const), [SUPERVISOR_AGENT_ID, new Set(SUPERVISOR_CEILING)] as const];
+  const ceilings = [
+    ...agents.map((agent) => [agent.id, new Set(agent.ceiling)] as const), [SUPERVISOR_AGENT_ID, new Set(SUPERVISOR_CEILING)] as const,
+    [MCP_CALLER_ID, new Set(MCP_CEILING)] as const,
+  ];
   return {
     access: args.ports.access,
     audit: args.ports.audit,
@@ -193,6 +203,14 @@ const buildAgents = (definitions: readonly AgentDefinition[], deps: AgentFactory
   const subagents = build(definitions.filter((definition) => !isEntry(definition)));
   const supervisor = createSupervisorAgent({ deps, subagents, ...(instructionsDirs === undefined ? {} : { instructionsDirs }) });
   return { agents: { ...build(definitions.filter(isEntry)), [SUPERVISOR_AGENT_ID]: supervisor }, subagents };
+};
+
+/** The core MCP server over the registry's read tools and the supervisor (decision 0027 D3-15). */
+const buildMcpServers = (args: ComposeAgentRuntimeArgs, tools: ToolRegistry, toolDeps: CoreToolDeps, assistant: Agent | undefined): Record<string, MCPServerBase> => {
+  if (assistant === undefined) return {};
+  const catalog = createAiCatalogReader(args.aiCatalog ?? loadBundledAiCatalog());
+  const requestStateKey = args.env.MCP_REQUEST_STATE_KEY ?? LOCAL_MCP_REQUEST_STATE_KEY;
+  return { [CORE_MCP_SERVER_ID]: createCoreMcpServer({ registry: tools, toolDeps, assistant, catalog, requestStateKey }) };
 };
 
 /**
@@ -234,7 +252,8 @@ export const composeAgentRuntime = (args: ComposeAgentRuntimeArgs): RuntimeParts
     subagents,
     workflows: coreWorkflows(args, models),
     scorers: createCoreScorers(models.mode === "real" ? { judgeModel: models.language("judge") } : {}),
-    mcpServers: {},
+    mcpServers: buildMcpServers(args, tools, toolDeps, agents[SUPERVISOR_AGENT_ID]),
+    mcpOptions: { setRequestAuth: setMcpRequestAuth },
     storage: args.storage,
     vectors: args.vector === undefined ? {} : { [MEMORY_VECTOR_KEY]: args.vector },
     memory,

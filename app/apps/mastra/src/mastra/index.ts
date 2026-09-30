@@ -24,5 +24,5 @@ export const mastra = new Mastra({
   vectors: runtime.vectors,
   logger: new PinoLogger(buildLoggerOptions(env)),
   observability: runtime.observability,
-  server: { ...buildServerConfig(env), auth: runtime.auth, middleware: runtime.middleware, apiRoutes: runtime.apiRoutes },
+  server: { ...buildServerConfig(env), auth: runtime.auth, middleware: runtime.middleware, apiRoutes: runtime.apiRoutes, mcpOptions: runtime.mcpOptions },
 });

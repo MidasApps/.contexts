@@ -123,3 +123,37 @@ Tenants connect their own APIs (OpenAPI), MCP servers and databases; external cl
   - *Not done.* `extract-text`'s PDF hook is not wired to Firecrawl `parse`: it would send
     tenant documents to a third party, which needs a compliance decision
     (`.contexts/business/compliance.md` is still a template).
+- **2026-09-30 — core MCP server and `POST /v1/mcp` (SP3 Task 24).**
+  - *Server.* `MCPServer` `core` (`@mastra/mcp` 2.1.1, MCP revision 2026-07-28) with the read
+    tools `listEntities`, `describeEntity`, `searchKnowledge`, `querySemanticSql` (the core
+    pipeline, caller key `mcp` with ceiling `core.mcp.use`, `core.chat.use`,
+    `core.catalog.read`, `core.catalog.query`, `core.knowledge.read`), the supervisor as
+    `ask_assistant`, and the AI catalog entries the caller may read as `catalog://<id>`
+    resources. `requestState.key` is `MCP_REQUEST_STATE_KEY` (≥ 32 bytes outside local, shared
+    by every instance). No mutation tool is exposed.
+  - *Context bridge.* `MCPServer` builds its own request context per MCP request, so the
+    context middleware's keys would never reach the tools or `ask_assistant`. Mastra's
+    `server.mcpOptions.setRequestAuth` copies the verified snapshot into `req.auth.extra`
+    (server-side only), and the server's `mapAuthInfoToUser` writes it back with
+    `writeAgentContext` (tenant, principal, resource and thread keys) and returns the uid that
+    continuations are bound to. Without a snapshot the tools fail with `CONTEXT_MISSING`.
+  - *Conversation.* An MCP call without `X-Conversation-Id` gets a new conversation owned by
+    the caller (decision 0019 amendment), so `ask_assistant` runs the tenant memory.
+  - *`POST /v1/mcp?organizationId=…`.* Auth (user Bearer or API key) → validate (a JSON-RPC 2.0
+    message, loose because the protocol owns its fields) → `core.mcp.use` at the organization
+    → the gateway posts to Mastra `/api/mcp/core/mcp` with the caller's own Bearer and scope.
+    The organization is in the query, like `GET /v1/me/context`: users must name it (400
+    `VALIDATION_FAILED` otherwise); an API key acts in its own organization and a different
+    one is 403. The spec's path `/v1/mcp` is kept; nesting under
+    `/v1/organizations/{id}` was rejected because an API key already names its tenant.
+  - *Sessions.* The 2026-07-28 revision is stateless: the server never issues
+    `Mcp-Session-Id`, so no instance affinity is needed on Cloud Run. The gateway forwards
+    only the MCP transport headers (`Accept`, `Mcp-Method`, `Mcp-Name`, `Mcp-Param-*`,
+    `MCP-Protocol-Version`, `Mcp-Session-Id`, `Last-Event-ID`) and passes back the status,
+    `Content-Type` (JSON or SSE), `Mcp-Session-Id`, `MCP-Protocol-Version` and
+    `X-Conversation-Id`; a 202 without a body passes through. Only POST is served (no GET
+    listen stream, no DELETE). A non-2xx Mastra answer is mapped to the `/v1` envelope by
+    status, as for every gateway call, so MCP protocol errors with a 4xx status reach the
+    client as the envelope, not as JSON-RPC.
+  - *Rate limit.* Policy `mcp-call`: 60 requests per minute per principal (an API key counts
+    as its own principal).

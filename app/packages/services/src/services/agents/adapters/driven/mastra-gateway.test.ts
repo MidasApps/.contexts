@@ -243,6 +243,32 @@ describe("createMastraGateway streams", () => {
   });
 });
 
+describe("createMastraGateway MCP calls", () => {
+  it("forwards the MCP headers under the caller's scope and passes status and MCP headers back", async () => {
+    routes.set("POST /api/mcp/core/mcp", (_request, response) => {
+      response.writeHead(200, { "content-type": "text/event-stream", "mcp-session-id": "sess-9", "set-cookie": "x=1" }).end("data: {}\n\n");
+    });
+    const result = await gateway().callMcp({
+      scope: SCOPE,
+      serverId: "core",
+      body: { jsonrpc: "2.0", id: 1, method: "tools/list" },
+      headers: { "mcp-method": "tools/list", "mcp-protocol-version": "2026-07-28", authorization: "Bearer forged", "x-tenant-id": "Intruder" },
+    });
+    if (!result.ok) throw new Error("expected an answer");
+    expect(result.data).toMatchObject({ status: 200, contentType: "text/event-stream", headers: { "mcp-session-id": "sess-9" } });
+    expect(result.data.headers).not.toHaveProperty("set-cookie");
+    expect(recorded[0]?.headers).toMatchObject({ "mcp-method": "tools/list", "mcp-protocol-version": "2026-07-28", authorization: "Bearer caller-id-token", "x-tenant-id": SCOPE.tenantId });
+  });
+
+  it("passes a 202 without a body (notification) and maps an upstream 403", async () => {
+    routes.set("POST /api/mcp/core/mcp", (_request, response) => response.writeHead(202).end());
+    const accepted = await gateway().callMcp({ scope: SCOPE, serverId: "core", body: { jsonrpc: "2.0", method: "notifications/cancelled" } });
+    expect(accepted).toMatchObject({ ok: true, data: { status: 202 } });
+    routes.set("POST /api/mcp/core/mcp", json(403, { error: "Forbidden" }));
+    expect(await gateway().callMcp({ scope: SCOPE, serverId: "core", body: {} })).toEqual({ ok: false, error: { code: "FORBIDDEN", status: 403 } });
+  });
+});
+
 describe("createMastraGateway JSON calls", () => {
   it("starts a workflow run and deletes a thread through the SDK", async () => {
     routes.set("POST /api/workflows/knowledge-ingest/create-run", json(200, { runId: "run-1" }));

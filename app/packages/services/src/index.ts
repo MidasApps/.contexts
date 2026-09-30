@@ -387,6 +387,16 @@ export {
   type WorkflowResumeInput,
   type WorkflowStartInput,
 } from "./services/agents/index.ts";
+// SP3 core MCP server entry `/v1/mcp` (Task 24).
+export {
+  buildMcpRoutes,
+  CORE_MCP_SERVER,
+  MCP_REQUEST_HEADERS,
+  MCP_USE_PERMISSION,
+  mcpHeadersOf,
+  type McpCallInput,
+  type McpGatewayResponse,
+} from "./services/agents/index.ts";
 // SP3 agent commands: the SP1 `agent-command` approval handler and command idempotency (follow-up #26).
 export {
   AGENT_COMMAND_HANDLER_KIND,

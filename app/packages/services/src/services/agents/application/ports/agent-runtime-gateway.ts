@@ -97,6 +97,28 @@ export type WorkflowResumeInput = {
 
 export type ThreadInput = { readonly scope: AgentCallScope; readonly agentId: string; readonly threadId: string };
 
+/**
+ * One MCP message for a Mastra MCP server (`/api/mcp/<serverId>/mcp`). `headers` carries only
+ * the MCP transport headers of the client (`MCP_REQUEST_HEADERS`); nothing else is forwarded.
+ */
+export type McpCallInput = {
+  readonly scope: AgentCallScope;
+  readonly serverId: string;
+  readonly body: unknown;
+  readonly headers?: Readonly<Record<string, string>>;
+};
+
+/**
+ * Mastra's MCP answer as the client must see it: status (200 with JSON or SSE, 202 without a
+ * body for notifications), the MCP response headers, and the body unread.
+ */
+export type McpGatewayResponse = {
+  readonly status: number;
+  readonly body: ReadableStream<Uint8Array> | null;
+  readonly contentType: string | null;
+  readonly headers: Readonly<Record<string, string>>;
+};
+
 export type AgentRuntimeGateway = {
   readonly generate: (input: AgentRunInput) => Promise<GatewayResult<unknown>>;
   readonly stream: (input: AgentRunInput) => Promise<GatewayResult<GatewayStream>>;
@@ -110,5 +132,5 @@ export type AgentRuntimeGateway = {
   readonly listThreadMessages: (input: ThreadInput) => Promise<GatewayResult<unknown>>;
   readonly deleteThread: (input: ThreadInput) => Promise<GatewayResult<null>>;
   /** MCP Streamable HTTP message to a Mastra MCP server (`/api/mcp/<serverId>/mcp`). */
-  readonly callMcp: (input: { readonly scope: AgentCallScope; readonly serverId: string; readonly body: unknown }) => Promise<GatewayResult<GatewayStream>>;
+  readonly callMcp: (input: McpCallInput) => Promise<GatewayResult<McpGatewayResponse>>;
 };

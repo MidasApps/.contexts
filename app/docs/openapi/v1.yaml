@@ -876,6 +876,136 @@ paths:
       tags:
         - access
       x-auth: user
+  /v1/mcp:
+    post:
+      operationId: agents.callMcp
+      parameters:
+        - description: Organization to act in; required for users, and when given it must be an API key's own organization.
+          in: query
+          name: organizationId
+          required: false
+          schema:
+            minLength: 1
+            type: string
+            x-pii: none
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties: {}
+              description: A JSON-RPC 2.0 request or notification of the Model Context Protocol.
+              properties:
+                jsonrpc:
+                  const: "2.0"
+                  description: JSON-RPC version.
+                  type: string
+                  x-pii: none
+                method:
+                  description: MCP method, e.g. tools/list or tools/call.
+                  maxLength: 200
+                  minLength: 1
+                  type: string
+                  x-pii: none
+              required:
+                - jsonrpc
+                - method
+              type: object
+              x-pii: none
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: {}
+                description: A JSON-RPC 2.0 response of the Model Context Protocol.
+                properties:
+                  jsonrpc:
+                    const: "2.0"
+                    description: JSON-RPC version.
+                    type: string
+                    x-pii: none
+                required:
+                  - jsonrpc
+                type: object
+                x-pii: none
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: VALIDATION_FAILED
+          x-error-codes:
+            - VALIDATION_FAILED
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UNAUTHORIZED
+          x-error-codes:
+            - UNAUTHORIZED
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: FORBIDDEN
+          x-error-codes:
+            - FORBIDDEN
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: NOT_FOUND
+          x-error-codes:
+            - NOT_FOUND
+        "429":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: RATE_LIMITED
+          headers:
+            Retry-After:
+              description: Seconds to wait before retrying.
+              schema:
+                minimum: 0
+                type: integer
+            X-RateLimit-Limit:
+              description: Requests allowed in the window.
+              schema:
+                minimum: 0
+                type: integer
+            X-RateLimit-Remaining:
+              description: Requests left in the window.
+              schema:
+                minimum: 0
+                type: integer
+            X-RateLimit-Reset:
+              description: Unix time (seconds) when the window resets.
+              schema:
+                minimum: 0
+                type: integer
+          x-error-codes:
+            - RATE_LIMITED
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: INTERNAL_ERROR
+          x-error-codes:
+            - INTERNAL_ERROR
+      security:
+        - bearerAuth: []
+      summary: "Model Context Protocol endpoint of the core MCP server: read tools, the assistant and catalog resources (core.mcp.use)."
+      tags:
+        - agents
+      x-auth: principal
+      x-rate-limit: mcp-call
   /v1/me:
     get:
       operationId: identity.getMe

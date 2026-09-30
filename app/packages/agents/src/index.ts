@@ -355,3 +355,6 @@ export { createFirecrawlWebContent, WEB_CONTENT_MAX_CHARS, WEB_INGEST_MAX_CHARS,
 export { createWebScrapeTool, WEB_SCRAPE_TOOL_ID } from "./tools/web/web-scrape.tool.ts";
 export { createWebSearchTool, WEB_SEARCH_TOOL_ID } from "./tools/web/web-search.tool.ts";
 export { createFirecrawlTools, createWebContentPort, createWebToolsRuntime, FIRECRAWL_TOOL_IDS, guardResolverFor, type WebToolsRuntime } from "./tools/web/web-tools-runtime.ts";
+// Core MCP server (SP3 Task 24, decision 0027).
+export { CORE_MCP_SERVER_ID, CORE_MCP_TOOLS, CoreMcpServerError, createCoreMcpServer, MCP_CALLER_ID, MCP_CEILING } from "./mcp-server/core-mcp-server.ts";
+export { hydrateMcpRequestContext, MCP_AGENT_CONTEXT_KEY, setMcpRequestAuth } from "./mcp-server/mcp-request-context.ts";

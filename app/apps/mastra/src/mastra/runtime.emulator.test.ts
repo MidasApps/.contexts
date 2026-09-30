@@ -3,6 +3,7 @@ import type { RegionalSettings } from "@core/agents";
 import { RoleIdSchema } from "@core/contracts";
 import { createAccessCore, createFirebaseAdmin, createInMemoryAccessStore, type ResolveAccessContext } from "@core/services";
 import { Mastra } from "@mastra/core/mastra";
+import { MCPClient } from "@mastra/mcp";
 import { InMemoryStore } from "@mastra/core/storage";
 import { createNodeServer } from "@mastra/deployer/server";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
@@ -68,12 +69,14 @@ let baseUrl = "";
 let closeServer: () => Promise<void> = () => Promise.resolve();
 let member = { uid: "", idToken: "" };
 let viewer = { uid: "", idToken: "" };
+let admin = { uid: "", idToken: "" };
 
 beforeAll(async () => {
-  [member, viewer] = await Promise.all([signUp("runtime-member"), signUp("runtime-viewer")]);
+  [member, viewer, admin] = await Promise.all([signUp("runtime-member"), signUp("runtime-viewer"), signUp("runtime-admin")]);
   const readers = createInMemoryAccessStore();
   readers.putOrganization({ id: TENANT });
-  for (const uid of [member.uid, viewer.uid]) readers.putUser(uid);
+  for (const uid of [member.uid, viewer.uid, admin.uid]) readers.putUser(uid);
+  readers.putGrant({ tenantId: TENANT, principalId: admin.uid, nodeId: TENANT, roles: [{ kind: "system", key: "admin" }] });
   readers.putGrant({ tenantId: TENANT, principalId: member.uid, nodeId: TENANT, roles: [{ kind: "system", key: "member" }] });
   readers.putRole({ id: "no-chat", tenantId: TENANT, permissions: ["core.knowledge.read"] });
   readers.putGrant({ tenantId: TENANT, principalId: viewer.uid, nodeId: TENANT, roles: [{ kind: "custom", roleId: RoleIdSchema.parse("no-chat") }] });
@@ -90,9 +93,10 @@ beforeAll(async () => {
   const port = await freePort();
   mastra = new Mastra({
     agents: runtime.agents,
+    mcpServers: runtime.mcpServers,
     storage: runtime.storage,
     observability: runtime.observability,
-    server: { port, host: "127.0.0.1", auth: runtime.auth, middleware: runtime.middleware, apiRoutes: runtime.apiRoutes },
+    server: { port, host: "127.0.0.1", auth: runtime.auth, middleware: runtime.middleware, apiRoutes: runtime.apiRoutes, mcpOptions: runtime.mcpOptions },
   });
   const server = await createNodeServer(mastra, { tools: {} });
   baseUrl = `http://127.0.0.1:${port}`;
@@ -167,6 +171,24 @@ describe("Mastra runtime composition (Auth Emulator)", () => {
     const thread = await memory?.getThreadById({ threadId: conversationId ?? "" });
     expect(thread?.resourceId).toBe(`${TENANT}:${member.uid}`);
   }, 60_000);
+
+  it("serves the core MCP server to a caller with core.mcp.use, with the caller's tenant in every tool", async () => {
+    const client = new MCPClient({
+      id: `runtime-mcp-${Date.now()}`,
+      servers: { core: { url: new URL(`${baseUrl}/api/mcp/core/mcp`), requestInit: { headers: { authorization: `Bearer ${admin.idToken}`, "x-tenant-id": TENANT } }, timeout: 30_000 } },
+    });
+    try {
+      const tools = (await client.listTools()) as Record<string, { execute: (input: unknown, context?: unknown) => Promise<unknown> }>;
+      expect(Object.keys(tools)).toContain("core_ask_assistant");
+      expect(JSON.stringify(await tools.core_listEntities?.execute({ limit: 3 }))).toContain("entities");
+      expect(JSON.stringify(await tools.core_ask_assistant?.execute({ message: "What is our onboarding policy?" }))).toContain("text");
+    } finally {
+      await client.disconnect();
+    }
+    // A member without core.mcp.use never reaches the MCP server.
+    const refused = await fetch(`${baseUrl}/api/mcp/core/mcp`, { method: "POST", headers: { "content-type": "application/json", ...memberHeaders() }, body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "tools/list" }) });
+    expect(refused.status).toBe(403);
+  }, 90_000);
 
   it("closes built-in routes the core does not serve", async () => {
     const response = await fetch(`${baseUrl}/api/vectors/x`, { headers: memberHeaders() });

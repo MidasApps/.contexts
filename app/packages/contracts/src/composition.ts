@@ -3,6 +3,7 @@
 // and only run when a caller invokes the function).
 import { ACCESS_CONTRACTS } from "./contracts/access/contracts.ts";
 import { ACCESS_ENDPOINTS } from "./contracts/access/endpoints.ts";
+import { AGENTS_ENDPOINTS } from "./contracts/agents/endpoints.ts";
 import { AgentRequestContextContract } from "./contracts/agents/agent-request-context.schema.ts";
 import { AgentSettingsContract } from "./contracts/agents/agent-settings.schema.ts";
 import { AgentApprovalRequestContract } from "./contracts/agents/approval-request.schema.ts";
@@ -74,6 +75,8 @@ export const CORE_ENDPOINTS: readonly EndpointDefinition[] = [
   ...IDENTITY_ENDPOINTS,
   ...ACCESS_ENDPOINTS,
   ...AUDIT_ENDPOINTS,
+  // SP3 core MCP server (Task 24).
+  ...AGENTS_ENDPOINTS,
   // SP3 files (uploads), knowledge base and connectors.
   ...FILES_ENDPOINTS,
   ...KNOWLEDGE_ENDPOINTS,

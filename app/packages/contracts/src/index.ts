@@ -84,6 +84,7 @@ export { CurrencySchema, MoneySchema, type Currency, type Money } from "./contra
 export { TimeZoneSchema, type TimeZone } from "./contracts/primitives/time-zone.schema.ts";
 // SP3 agent runtime contracts.
 export { AGENT_PERMISSIONS, type AgentPermissionDefinition } from "./contracts/agents/agent-permissions.ts";
+export { AGENTS_ENDPOINTS, callMcpEndpoint, McpMessageSchema, McpResponseSchema } from "./contracts/agents/endpoints.ts";
 export {
   AgentRequestContextContract,
   AgentRequestContextSchema,

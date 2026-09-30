@@ -13,7 +13,11 @@ export type {
   ToolCallDecisionInput,
   WorkflowResumeInput,
   WorkflowStartInput,
+  McpCallInput,
+  McpGatewayResponse,
 } from "./application/ports/agent-runtime-gateway.ts";
+export { buildMcpRoutes, CORE_MCP_SERVER, MCP_USE_PERMISSION } from "./adapters/driving/mcp-route-handler.ts";
+export { MCP_REQUEST_HEADERS, mcpHeadersOf } from "./adapters/driven/mastra-request.ts";
 export { createMastraGateway, DEFAULT_GATEWAY_TIMEOUTS, type MastraGatewayOptions } from "./adapters/driven/mastra-gateway.ts";
 export { gatewayErrorResponse, mapMastraStatus } from "./adapters/driven/mastra-error-mapper.ts";
 export { createServerlessIdTokenSource, type IdTokenMinter, ServerlessIdTokenError, type ServerlessIdTokenSource } from "./adapters/driven/serverless-id-token.ts";

@@ -1,5 +1,5 @@
 import { FORWARDED_HEADERS } from "@core/contracts";
-import type { AgentCallScope, AgentRunOptions, GatewayResult, GatewayStream } from "../../application/ports/agent-runtime-gateway.ts";
+import type { AgentCallScope, AgentRunOptions, GatewayResult, GatewayStream, McpGatewayResponse } from "../../application/ports/agent-runtime-gateway.ts";
 import { mapMastraStatus, statusOfClientError, UPSTREAM_TIMEOUT, UPSTREAM_UNAVAILABLE } from "./mastra-error-mapper.ts";
 import type { ServerlessIdTokenSource } from "./serverless-id-token.ts";
 
@@ -122,5 +122,47 @@ export const postForStream = (args: {
       contentType: response.headers.get("content-type") ?? "application/octet-stream",
       ...(conversationId === null ? {} : { conversationId }),
     };
+  });
+};
+
+/**
+ * MCP transport headers a client may send (MCP 2026-07-28: `Mcp-Method`, `Mcp-Name`,
+ * `MCP-Protocol-Version`, `Mcp-Param-*`; older clients: `Mcp-Session-Id`, `Last-Event-ID`).
+ * `Mcp-Session-Id` is forwarded verbatim both ways; the 2.x server is stateless and never
+ * issues one, so no instance affinity is needed (decision 0027).
+ */
+export const MCP_REQUEST_HEADERS: readonly string[] = ["accept", "mcp-method", "mcp-name", "mcp-protocol-version", "mcp-session-id", "last-event-id"];
+const MCP_PARAM_HEADER = /^mcp-param-[a-z0-9-]{1,64}$/;
+const MCP_RESPONSE_HEADERS: readonly string[] = ["mcp-session-id", "mcp-protocol-version", FORWARDED_HEADERS.conversationId];
+
+/** The MCP headers of a client request (lower-cased), nothing else. */
+export const mcpHeadersOf = (headers: Headers): Record<string, string> =>
+  Object.fromEntries([...headers.entries()].filter(([name]) => MCP_REQUEST_HEADERS.includes(name) || MCP_PARAM_HEADER.test(name)));
+
+/**
+ * Raw POST of one MCP message: our forwarded scope headers win over the client's MCP headers,
+ * `Accept` defaults to JSON or SSE, and a 2xx answer (a 202 has no body) is returned with its
+ * status and MCP response headers. A non-2xx answer is mapped by status like every other call.
+ */
+export const postMcp = (args: {
+  connection: MastraConnection;
+  scope: AgentCallScope;
+  path: string;
+  body: unknown;
+  headers: Readonly<Record<string, string>>;
+}): Promise<GatewayResult<McpGatewayResponse>> => {
+  const { connection, scope } = args;
+  return withDeadline(scope, connection.timeouts.streamConnectMs, async (signal) => {
+    const headers = { accept: "application/json, text/event-stream", ...args.headers, ...(await buildForwardedHeaders(connection, scope)), "content-type": "application/json" };
+    const response = await connection.fetch(`${connection.baseUrl}${connection.apiPrefix}${args.path}`, { method: "POST", headers, body: JSON.stringify(args.body), signal });
+    if (!response.ok) {
+      await response.body?.cancel();
+      throw new UpstreamStatusError(response.status, response.headers.get("retry-after"));
+    }
+    const passed = MCP_RESPONSE_HEADERS.flatMap((name) => {
+      const value = response.headers.get(name);
+      return value === null ? [] : [[name, value] as const];
+    });
+    return { status: response.status, body: response.body, contentType: response.headers.get("content-type"), headers: Object.fromEntries(passed) };
   });
 };

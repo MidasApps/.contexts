@@ -17,6 +17,7 @@ describe("rate limit policies (decision 0009)", () => {
       "claims-sync": [10, MINUTE, "principal", "requests"],
       "invitation-accept": [20, MINUTE, "principal", "requests"],
       "invitation-preview": [20, MINUTE, "principal", "requests"],
+      "mcp-call": [60, MINUTE, "principal", "requests"],
     });
   });
 

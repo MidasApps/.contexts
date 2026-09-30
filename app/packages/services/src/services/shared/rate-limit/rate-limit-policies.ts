@@ -25,6 +25,8 @@ export const RATE_LIMIT_POLICIES = [
   { id: "claims-sync", limit: 10, windowMs: MINUTE_MS, subject: "principal", counts: "requests" },
   { id: "invitation-accept", limit: 20, windowMs: MINUTE_MS, subject: "principal", counts: "requests" },
   { id: "invitation-preview", limit: 20, windowMs: MINUTE_MS, subject: "principal", counts: "requests" },
+  // SP3 core MCP server (Task 24): one MCP message per request; the budget guard caps model spend.
+  { id: "mcp-call", limit: 60, windowMs: MINUTE_MS, subject: "principal", counts: "requests" },
 ] as const satisfies readonly RateLimitPolicy[];
 
 export type RateLimitPolicyId = (typeof RATE_LIMIT_POLICIES)[number]["id"];
