@@ -146,7 +146,10 @@ do not import `client`; `agents` reach `services` only through use cases;
   context, 0003 public liveness endpoint, 0004 Functions env files, 0005 contract
   pii semantics, 0006 tenancy and access model, 0007 authentication sessions,
   0008 API keys and device activation, 0009 rate limiting and idempotency store,
-  0010 dependency audit advisories).
+  0010 dependency audit advisories, 0011 client data and rendering model,
+  0012 routing and router port, 0013 i18n, money and time zone, 0014 UI kit
+  shadcn atomic, 0015 module contract, 0016 web content security policy,
+  0017 desktop session secure store and testing, 0018 mobile targets deferred).
 - Framework ADRs: `../.contexts/engineering/decisions/`.
 - Design spec: `../docs/superpowers/specs/2026-09-29-agentic-app-core-design.md`.
 - SP0 plan, reports and follow-ups: `../docs/plans/2026-09-29-sp0-app-foundation/`.
