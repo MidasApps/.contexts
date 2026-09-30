@@ -4,6 +4,7 @@ import { paginateInMemory } from "../../../shared/pagination/page.ts";
 import type { OrganizationRepository } from "../../application/ports/driven/organization-repository.ts";
 import type { ProjectRepository } from "../../application/ports/driven/project-repository.ts";
 import type { UnitRepository } from "../../application/ports/driven/unit-repository.ts";
+import type { TreeLock, UnitTreeLockStore } from "../../application/ports/driven/unit-tree-lock-store.ts";
 
 type Row<T> = { value: T; deletedAt: string | null };
 
@@ -15,6 +16,7 @@ export type InMemoryTenancyStore = {
   readonly organizations: OrganizationRepository;
   readonly projects: ProjectRepository;
   readonly units: UnitRepository;
+  readonly treeLocks: UnitTreeLockStore & { readonly lockOf: (projectId: string) => TreeLock | undefined };
   readonly unitRow: (id: string) => (Unit & { deletedAt: string | null }) | undefined;
 };
 
@@ -103,6 +105,17 @@ const makeUnits = (tables: Tables, mirror: InMemoryAccessStore): UnitRepository 
   };
 };
 
+const makeTreeLocks = (tables: Tables): InMemoryTenancyStore["treeLocks"] => {
+  const locks = new Map<string, TreeLock>();
+  return {
+    newLockId: () => nextId(tables, "lock"),
+    get: (_tx, projectId) => Promise.resolve(locks.get(projectId) ?? null),
+    put: (_tx, lock) => void locks.set(lock.projectId, lock),
+    remove: (_tx, projectId) => void locks.delete(projectId),
+    lockOf: (projectId) => locks.get(projectId),
+  };
+};
+
 /** Creates empty in-memory tenancy repositories mirrored into `mirror`. */
 export const createInMemoryTenancyStore = (mirror: InMemoryAccessStore): InMemoryTenancyStore => {
   const tables: Tables = { organizations: new Map(), projects: new Map(), units: new Map(), next: { value: 0 } };
@@ -110,6 +123,7 @@ export const createInMemoryTenancyStore = (mirror: InMemoryAccessStore): InMemor
     organizations: makeOrganizations(tables, mirror),
     projects: makeProjects(tables, mirror),
     units: makeUnits(tables, mirror),
+    treeLocks: makeTreeLocks(tables),
     unitRow: (id) => {
       const row = tables.units.get(id);
       return row === undefined ? undefined : { ...row.value, deletedAt: row.deletedAt };

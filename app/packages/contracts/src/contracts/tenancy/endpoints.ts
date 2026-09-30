@@ -150,9 +150,9 @@ export const createUnitEndpoint = defineEndpoint({
   params: projectParams,
   body: CreateUnitInputSchema,
   responses: { 201: dataEnvelope(UnitSchema) },
-  errors: { 403: FORBIDDEN, 404: NOT_FOUND, 422: ["INVALID_UNIT_PARENT"] },
+  errors: { 403: FORBIDDEN, 404: NOT_FOUND, 409: ["CONFLICT"], 422: ["INVALID_UNIT_PARENT"] },
   idempotency: "optional",
-  summary: "Creates a unit under the project or a unit (core.unit.create at the parent).",
+  summary: "Creates a unit under the project or a unit (core.unit.create at the parent); 409 while the tree is being changed.",
 });
 
 export const getUnitEndpoint = defineEndpoint({
@@ -174,8 +174,8 @@ export const updateUnitEndpoint = defineEndpoint({
   params: unitParams,
   body: UpdateUnitInputSchema,
   responses: { 200: dataEnvelope(UnitSchema) },
-  errors: { 403: FORBIDDEN, 404: NOT_FOUND, 422: ["INVALID_UNIT_PARENT", "SUBTREE_TOO_LARGE"] },
-  summary: "Renames or moves a unit inside its project (core.unit.update).",
+  errors: { 403: FORBIDDEN, 404: NOT_FOUND, 409: ["CONFLICT"], 422: ["INVALID_UNIT_PARENT", "SUBTREE_TOO_LARGE"] },
+  summary: "Renames or moves a unit inside its project (core.unit.update); moves are serialized per project (409).",
 });
 
 export const deleteUnitEndpoint = defineEndpoint({
@@ -185,8 +185,8 @@ export const deleteUnitEndpoint = defineEndpoint({
   auth: "principal",
   params: unitParams,
   responses: { 204: null },
-  errors: { 403: FORBIDDEN, 404: NOT_FOUND, 422: ["SUBTREE_TOO_LARGE"] },
-  summary: "Soft-deletes a unit and its subtree (core.unit.delete).",
+  errors: { 403: FORBIDDEN, 404: NOT_FOUND, 409: ["CONFLICT"], 422: ["SUBTREE_TOO_LARGE"] },
+  summary: "Soft-deletes a unit and its subtree (core.unit.delete); serialized with moves per project (409).",
 });
 
 export const listUnitTypesEndpoint = defineEndpoint({

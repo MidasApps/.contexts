@@ -7,6 +7,7 @@ export const TENANCY_ERROR_MAPPING: DomainErrorMapping = {
   NOT_FOUND: { status: 404 },
   INVALID_UNIT_PARENT: { status: 422 },
   SUBTREE_TOO_LARGE: { status: 422 },
+  CONFLICT: { status: 409 },
 };
 
 /**

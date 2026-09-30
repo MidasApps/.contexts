@@ -1,16 +1,21 @@
 import type { Unit, UnitId, UpdateUnitInput } from "@core/contracts";
+import type { Transaction } from "firebase-admin/firestore";
 import { requirePermission } from "../../../access/application/grant-checks.ts";
 import { auditActorOf } from "../../../audit/domain/audit-actor.ts";
 import { err, ok, type Result } from "../../../shared/result/result.ts";
 import { InvalidUnitParentError } from "../../domain/errors/invalid-unit-parent-error.ts";
 import { SubtreeTooLargeError } from "../../domain/errors/subtree-too-large-error.ts";
+import { TenancyNotFoundError } from "../../domain/errors/tenancy-not-found-error.ts";
+import type { UnitTreeBusyError } from "../../domain/errors/unit-tree-busy-error.ts";
 import { MAX_SUBTREE_REWRITE, planMove, type TreeRewrite } from "../../domain/unit-tree.ts";
+import type { TreeLock } from "../ports/driven/unit-tree-lock-store.ts";
 import { changedKeys, recordTenancyAudit, unitNode, type TenancyCommand, type TenancyDeps } from "../tenancy-deps.ts";
+import { acquireTreeLock, commitTreeChange, releaseTreeLock } from "../unit-tree-lock.ts";
 import { loadAuthorizedUnit, loadTreeParent, type UnitError } from "./unit-access.ts";
 
 export type UpdateUnitCommand = TenancyCommand & { readonly unitId: UnitId; readonly input: UpdateUnitInput };
 
-export type UpdateUnitError = UnitError | InvalidUnitParentError | SubtreeTooLargeError;
+export type UpdateUnitError = UnitError | InvalidUnitParentError | SubtreeTooLargeError | UnitTreeBusyError;
 
 export type UpdateUnit = (command: UpdateUnitCommand) => Promise<Result<Unit, UpdateUnitError>>;
 
@@ -41,11 +46,54 @@ const planUnitMove = async (deps: TenancyDeps, command: UpdateUnitCommand, unit:
   return ok({ placed, descendants: plan.rewrites.filter((rewrite) => rewrite.id !== unit.id) });
 };
 
+const auditUpdate = (tx: Transaction, deps: TenancyDeps, command: UpdateUnitCommand, next: Unit, moving: boolean) =>
+  recordTenancyAudit(tx, deps, command, {
+    tenantId: next.tenantId,
+    action: moving ? "UNIT_MOVED" : "UNIT_UPDATED",
+    target: { type: "unit", id: next.id },
+    node: unitNode(next),
+    changes: changedKeys(command.input),
+  });
+
+// Rename and overrides only: fields applied to the unit as read in the transaction, so a
+// concurrent move's tree fields are never overwritten with stale ones.
+const renameUnit = (deps: TenancyDeps, command: UpdateUnitCommand, now: string) =>
+  deps.unitOfWork.run(async (tx): Promise<Result<Unit, UpdateUnitError>> => {
+    const current = await deps.units.get(tx, command.unitId);
+    if (current === null) return err(new TenancyNotFoundError("unit"));
+    const next = applyFields(current, command.input, now);
+    deps.units.update(tx, { unit: next, actorId: auditActorOf(command.actor).id });
+    await auditUpdate(tx, deps, command, next, false);
+    return ok(next);
+  });
+
+// Under the project's tree lock (decision 0030 §4): plan from the unit as read after the
+// lock, rewrite descendants in batches, then commit the unit only if the lock is still ours.
+// A throw keeps the lock; its lease expires and the next tree change finishes the move.
+const moveUnit = async (deps: TenancyDeps, command: UpdateUnitCommand, lock: TreeLock, parentUnitId: UnitId | null, now: string): Promise<Result<Unit, UpdateUnitError>> => {
+  const fresh = await deps.units.get(undefined, command.unitId);
+  if (fresh === null) return err(new TenancyNotFoundError("unit"));
+  const move = await planUnitMove(deps, command, fresh, parentUnitId);
+  if (!move.ok) return move;
+  const next = applyFields(move.data.placed, command.input, now);
+  const actorId = auditActorOf(command.actor).id;
+  if (move.data.descendants.length > 0) await deps.units.rewriteTree({ rewrites: move.data.descendants, updatedAt: now, actorId });
+  const committed = await commitTreeChange(deps, {
+    lock,
+    expected: fresh,
+    write: async (tx) => {
+      deps.units.update(tx, { unit: next, actorId });
+      await auditUpdate(tx, deps, command, next, true);
+    },
+  });
+  return committed.ok ? ok(next) : committed;
+};
+
 /**
- * Renames, re-sets overrides or moves a unit inside its project (`core.unit.update` at
- * the unit and, for a move, at the new parent). A move rewrites the descendants in
- * batches first, then the unit with its audit entry; a retry heals an interrupted move.
- * Access projections hold node ids only, so a move inside a project leaves them unchanged.
+ * Renames, re-sets overrides or moves a unit inside its project (`core.unit.update` at the
+ * unit and, for a move, at the new parent). Moves are serialized per project (409 CONFLICT
+ * while another move or delete runs). Access projections hold node ids only, so a move
+ * inside a project leaves them unchanged.
  */
 export const makeUpdateUnit =
   (deps: TenancyDeps): UpdateUnit =>
@@ -54,21 +102,12 @@ export const makeUpdateUnit =
     if (!loaded.ok) return loaded;
     const now = deps.clock.now().toISOString();
     const { parentUnitId } = command.input;
-    const moving = parentUnitId !== undefined;
-    const move = moving ? await planUnitMove(deps, command, loaded.data, parentUnitId) : ok<Move>({ placed: loaded.data, descendants: [] });
-    if (!move.ok) return move;
-    const next = applyFields(move.data.placed, command.input, now);
-    const actorId = auditActorOf(command.actor).id;
-    if (move.data.descendants.length > 0) await deps.units.rewriteTree({ rewrites: move.data.descendants, updatedAt: now, actorId });
-    await deps.unitOfWork.run(async (tx) => {
-      deps.units.update(tx, { unit: next, actorId });
-      await recordTenancyAudit(tx, deps, command, {
-        tenantId: next.tenantId,
-        action: moving ? "UNIT_MOVED" : "UNIT_UPDATED",
-        target: { type: "unit", id: next.id },
-        node: unitNode(next),
-        changes: changedKeys(command.input),
-      });
-    });
-    return ok(next);
+    if (parentUnitId === undefined) return renameUnit(deps, command, now);
+    const scope = { tenantId: loaded.data.tenantId, projectId: loaded.data.projectId };
+    const lock = await acquireTreeLock(deps, scope, { kind: "move", unitId: loaded.data.id, parentUnitId });
+    if (!lock.ok) return lock;
+    const moved = await moveUnit(deps, command, lock.data, parentUnitId, now);
+    // An expected refusal before any rewrite frees the lock at once.
+    if (!moved.ok && moved.error.code !== "CONFLICT") await releaseTreeLock(deps, lock.data);
+    return moved;
   };

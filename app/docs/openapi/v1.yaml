@@ -4584,8 +4584,9 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/http.ErrorEnvelope"
-          description: IDEMPOTENCY_KEY_REUSED
+          description: CONFLICT, IDEMPOTENCY_KEY_REUSED
           x-error-codes:
+            - CONFLICT
             - IDEMPOTENCY_KEY_REUSED
         "422":
           content:
@@ -4605,7 +4606,7 @@ paths:
             - INTERNAL_ERROR
       security:
         - bearerAuth: []
-      summary: Creates a unit under the project or a unit (core.unit.create at the parent).
+      summary: Creates a unit under the project or a unit (core.unit.create at the parent); 409 while the tree is being changed.
       tags:
         - tenancy
       x-auth: principal
@@ -4977,6 +4978,14 @@ paths:
           description: NOT_FOUND
           x-error-codes:
             - NOT_FOUND
+        "409":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: CONFLICT
+          x-error-codes:
+            - CONFLICT
         "422":
           content:
             application/json:
@@ -4995,7 +5004,7 @@ paths:
             - INTERNAL_ERROR
       security:
         - bearerAuth: []
-      summary: Soft-deletes a unit and its subtree (core.unit.delete).
+      summary: Soft-deletes a unit and its subtree (core.unit.delete); serialized with moves per project (409).
       tags:
         - tenancy
       x-auth: principal
@@ -5123,6 +5132,14 @@ paths:
           description: NOT_FOUND
           x-error-codes:
             - NOT_FOUND
+        "409":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: CONFLICT
+          x-error-codes:
+            - CONFLICT
         "422":
           content:
             application/json:
@@ -5142,7 +5159,7 @@ paths:
             - INTERNAL_ERROR
       security:
         - bearerAuth: []
-      summary: Renames or moves a unit inside its project (core.unit.update).
+      summary: Renames or moves a unit inside its project (core.unit.update); moves are serialized per project (409).
       tags:
         - tenancy
       x-auth: principal

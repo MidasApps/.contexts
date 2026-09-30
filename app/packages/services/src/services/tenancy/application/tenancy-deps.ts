@@ -10,12 +10,15 @@ import type { UnitTypeRegistry } from "../domain/unit-type-registry.ts";
 import type { OrganizationRepository } from "./ports/driven/organization-repository.ts";
 import type { ProjectRepository } from "./ports/driven/project-repository.ts";
 import type { UnitRepository } from "./ports/driven/unit-repository.ts";
+import type { UnitTreeLockStore } from "./ports/driven/unit-tree-lock-store.ts";
 
 /** Dependencies of the tenancy use cases, built by `createTenancyServices`. */
 export type TenancyDeps = {
   readonly organizations: OrganizationRepository;
   readonly projects: ProjectRepository;
   readonly units: UnitRepository;
+  /** One tree change (move, delete) at a time per project (decision 0030 §4). */
+  readonly treeLocks: UnitTreeLockStore;
   readonly unitTypes: UnitTypeRegistry;
   /** The owner grant of a new organization, claims sync, and the projection read model. */
   readonly access: Pick<AccessServices, "prepareGrant" | "syncClaims" | "projections">;

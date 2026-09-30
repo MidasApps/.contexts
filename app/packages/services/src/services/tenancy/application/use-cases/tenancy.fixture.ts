@@ -1,6 +1,7 @@
 // Test world of the tenancy use cases: the access write world (in-memory grants and
 // projections) plus in-memory tenancy repositories mirrored into its access store.
 import { OrganizationIdSchema, ProjectIdSchema, UnitIdSchema, UserIdSchema, type TenantId, type UnitTypeDefinition, type UserPrincipal } from "@core/contracts";
+import type { Clock } from "../../../shared/clock/clock.ts";
 import { makeAccessWriteWorld, REQUEST_ID } from "../../../access/application/use-cases/access-write.fixture.ts";
 import { createInMemoryTenancyStore } from "../../adapters/driven/in-memory-tenancy-store.ts";
 import { createTenancyServices } from "../../composition.ts";
@@ -23,7 +24,7 @@ export const ids = {
 };
 
 /** A fresh world; `selfServe` defaults to true. Accounts exist for every uid. */
-export const makeTenancyWorld = (options: { selfServe?: boolean } = {}) => {
+export const makeTenancyWorld = (options: { selfServe?: boolean; clock?: Clock } = {}) => {
   const world = makeAccessWriteWorld();
   const tenancyStore = createInMemoryTenancyStore(world.store);
   const tenancy = createTenancyServices({
@@ -31,11 +32,12 @@ export const makeTenancyWorld = (options: { selfServe?: boolean } = {}) => {
     organizations: tenancyStore.organizations,
     projects: tenancyStore.projects,
     units: tenancyStore.units,
+    treeLocks: tenancyStore.treeLocks,
     access: world.services,
     accounts: { getProfile: (uid) => Promise.resolve({ email: `${uid}@example.com`, displayName: uid }) },
     audit: world.deps.audit,
     unitOfWork: world.deps.unitOfWork,
-    clock: world.deps.clock,
+    clock: options.clock ?? world.deps.clock,
     selfServe: options.selfServe ?? true,
   });
   const command = (uid: string) => ({ actor: userOf(uid), access: world.access(), requestId: REQUEST_ID });

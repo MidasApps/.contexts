@@ -42,6 +42,21 @@ beforeEach(async () => {
 });
 
 describe("units routes (emulator)", () => {
+  it("answers 409 to a move while another tree change holds the project lock, and moves once it is gone", { timeout: 30_000 }, async () => {
+    const siteA = await unitOf("A", "sample.site");
+    const siteB = await unitOf("B", "sample.site");
+    const room = await unitOf("Room", "sample.room", siteA.id);
+    const lockRef = firestore.collection(CORE_COLLECTIONS.unitTreeLocks).doc(projectId);
+    await lockRef.set({ tenantId: organizationId, projectId, lockId: "other", operation: { kind: "delete", unitId: siteB.id }, expiresAt: new Date(Date.now() + 60_000) });
+    const busy = await harness.call("tenancy.updateUnit", { method: "PATCH", path: `/v1/units/${room.id}`, as: "owner", body: { parentUnitId: siteB.id } });
+    expect(busy.status).toBe(409);
+    expect(await codeOf(busy)).toBe("CONFLICT");
+    await lockRef.delete();
+    const moved = await harness.call("tenancy.updateUnit", { method: "PATCH", path: `/v1/units/${room.id}`, as: "owner", body: { parentUnitId: siteB.id } });
+    expect(moved.status).toBe(200);
+    expect((await lockRef.get()).exists).toBe(false);
+  });
+
   it("deleting a project soft-deletes its units first (none outlives it)", { timeout: 30_000 }, async () => {
     const site = await unitOf("Site", "sample.site");
     const room = await unitOf("Room", "sample.room", site.id);

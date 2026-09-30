@@ -9,6 +9,7 @@ export const CORE_COLLECTIONS = {
   organizations: "organizations",
   projects: "projects",
   units: "units",
+  unitTreeLocks: "unit-tree-locks",
   roles: "roles",
   memberships: "memberships",
   access: "access",
