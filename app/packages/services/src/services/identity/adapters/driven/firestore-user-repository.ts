@@ -1,5 +1,6 @@
-import { DEFAULT_USER_PREFERENCES, UserContract, type User, type UserId } from "@core/contracts";
+import { DEFAULT_USER_PREFERENCES, UserContract, UserPreferencesSchema, type User, type UserId } from "@core/contracts";
 import { FieldValue, type DocumentData, type Firestore } from "firebase-admin/firestore";
+import { z } from "zod";
 import { CORE_COLLECTIONS, CORE_SCHEMA_VERSION } from "../../../shared/firestore/collections.ts";
 import { createContractConverter, toFirestoreUpdate } from "../../../shared/firestore/contract-converter.ts";
 import { CorruptDocumentError } from "../../../shared/firestore/corrupt-document-error.ts";
@@ -8,6 +9,12 @@ import type { NewUserProfile } from "../../../access/application/ports/driven/us
 import type { UserRepository } from "../../application/ports/driven/user-repository.ts";
 
 const converter = createContractConverter(UserContract);
+
+// Only the regional preferences; missing or unreadable ones fall back to the node's settings.
+const RegionalPreferencesFieldsSchema = z.object({
+  preferences: UserPreferencesSchema.pick({ locale: true, timeZone: true, currency: true }).optional().catch(undefined),
+});
+const regionalFields = createContractConverter({ schema: RegionalPreferencesFieldsSchema });
 
 const newUser = (uid: UserId, profile: NewUserProfile, now: string): User => ({
   id: uid,
@@ -53,6 +60,7 @@ export const createFirestoreUserRepository = (deps: { firestore: Firestore }): U
       const ref = typed().doc(uid);
       return (tx === undefined ? await ref.get() : await tx.get(ref)).data() ?? null;
     },
+    getRegionalPreferences: async (uid) => (await raw().withConverter(regionalFields).doc(uid).get()).data()?.preferences,
     ensure: async (args) => {
       const current = await readValid(args.uid);
       if (current !== null) return current;

@@ -1,4 +1,5 @@
 import { OrganizationIdSchema, UserIdSchema } from "@core/contracts";
+import { FieldValue } from "firebase-admin/firestore";
 import { beforeEach, describe, expect, it } from "vitest";
 import { fixedClock } from "../../../shared/clock/clock.ts";
 import { CORE_COLLECTIONS } from "../../../shared/firestore/collections.ts";
@@ -157,5 +158,15 @@ describe("me routes (emulator)", () => {
     await seedActiveUser(firestore, "me-outsider");
     const hidden = await harness.call("identity.getAccessContext", { method: "GET", path: `/v1/me/context?organizationId=${organizationId}`, as: "me-outsider" });
     expect(hidden.status).toBe(404);
+  });
+
+  it("resolves the access context with default preferences when the users doc lacks them", { timeout: 30_000 }, async () => {
+    const organizationId = await createOrganization("No preferences");
+    await firestore.collection(CORE_COLLECTIONS.users).doc("me-founder").update({ preferences: FieldValue.delete() });
+
+    const context = await harness.call("identity.getAccessContext", { method: "GET", path: `/v1/me/context?organizationId=${organizationId}`, as: "me-founder" });
+
+    expect(context.status).toBe(200);
+    expect((await body(context)).data?.["regional"]).toEqual({ locale: "pt-BR", displayTimeZone: "America/Sao_Paulo", nodeTimeZone: "America/Sao_Paulo", currency: "BRL" });
   });
 });

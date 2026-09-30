@@ -2,6 +2,9 @@ import type { OrganizationId, User, UserId, UserPreferences } from "@core/contra
 import type { Transaction } from "firebase-admin/firestore";
 import type { NewUserProfile } from "../../../../access/application/ports/driven/user-access-version.ts";
 
+/** The preferences that shape regional settings (SP1 spec §4). */
+export type RegionalPreferences = Pick<UserPreferences, "locale" | "timeZone" | "currency">;
+
 /** Fields `PATCH /v1/me` rewrites; `photoUrl: null` removes the photo. */
 export type UserProfilePatch = {
   readonly displayName?: string;
@@ -15,6 +18,12 @@ export type UserProfilePatch = {
  */
 export type UserRepository = {
   readonly get: (tx: Transaction | undefined, uid: UserId) => Promise<User | null>;
+  /**
+   * The regional preferences alone, read leniently: a doc without `preferences`, or with an
+   * unreadable one, answers `undefined` (the node's settings apply), so a partial users doc
+   * never fails a context resolution.
+   */
+  readonly getRegionalPreferences: (uid: UserId) => Promise<RegionalPreferences | undefined>;
   /**
    * Makes sure the doc exists with every field of the `identity.User` contract: creates it
    * from `profile` on the first `GET /v1/me`, fills fields a partial doc lacks, and keeps

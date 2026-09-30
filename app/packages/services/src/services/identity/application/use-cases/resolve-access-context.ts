@@ -1,9 +1,10 @@
-import type { NodeRef, Permission, Principal, RegionalSettings, TenantNodeRef, UserPreferences } from "@core/contracts";
+import type { NodeRef, Permission, Principal, RegionalSettings, TenantNodeRef } from "@core/contracts";
 import type { RequestAccess } from "../../../access/composition.ts";
 import { AccessDeniedError } from "../../../access/domain/errors/access-denied-error.ts";
 import { err, ok, type Result } from "../../../shared/result/result.ts";
 import { regionalSettingsAt, type NodeDetails } from "../../../tenancy/application/use-cases/resolve-regional-settings.ts";
 import type { MeDeps } from "../me-deps.ts";
+import type { RegionalPreferences } from "../ports/driven/user-repository.ts";
 
 /**
  * What a principal may do at a node and how to render it there (SP1 spec §10): the input
@@ -35,9 +36,10 @@ export type LoadAccessContext = (input: { principal: Principal; node: TenantNode
 
 type Deps = Pick<MeDeps, "users" | "loadNode">;
 
-// A device or an API key renders with the node's settings; only users have preferences.
-const preferencesOf = async (deps: Deps, principal: Principal): Promise<Pick<UserPreferences, "locale" | "timeZone" | "currency"> | undefined> =>
-  principal.type === "user" ? (await deps.users.get(undefined, principal.uid))?.preferences : undefined;
+// A device or an API key renders with the node's settings; only users have preferences. A users
+// doc without readable preferences renders with the node's settings too (fail-safe).
+const preferencesOf = async (deps: Deps, principal: Principal): Promise<RegionalPreferences | undefined> =>
+  principal.type === "user" ? deps.users.getRegionalPreferences(principal.uid) : undefined;
 
 const nodeIds = (node: TenantNodeRef) => ({
   tenantId: node.tenantId,

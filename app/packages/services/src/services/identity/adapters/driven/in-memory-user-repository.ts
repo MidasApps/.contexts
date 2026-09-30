@@ -11,6 +11,8 @@ export const createInMemoryUserRepository = (): InMemoryUserRepository => {
   const users = new Map<string, User>();
   return {
     get: (_tx, uid) => Promise.resolve(users.get(uid) ?? null),
+    // `put` may store a partial doc (tests of the fail-safe default).
+    getRegionalPreferences: (uid) => Promise.resolve((users.get(uid) as Partial<User> | undefined)?.preferences),
     ensure: ({ uid, profile, now }) => {
       const existing = users.get(uid);
       if (existing !== undefined) return Promise.resolve(existing);
