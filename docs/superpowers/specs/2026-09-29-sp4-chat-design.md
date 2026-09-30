@@ -99,14 +99,14 @@ title + summary, ≤ 50), `createdAt`, `updatedAt`. Contract `conversations.Conv
 Firestore Rules: clients may **read** their own conversations (`ownerId == uid` and
 `access/{tenantId}_{uid}` exists) for realtime lists; writes are denied (D8).
 
-Endpoints (permissions `chat.conversation.<action>`; owner-only in v1):
+Endpoints (permissions `core.conversation.<action>`; owner-only in v1):
 
 | Method + path | Behaviour |
 |---|---|
 | `POST /v1/chat` | body `ChatRequest { conversationId?, agentId?, message: UIMessage (last only), trigger?: 'submit-message'|'regenerate-message', attachments?: fileId[] }`; creates the conversation when absent (returns id in header `x-conversation-id` and in the `start` message metadata); resolves attachments (§4.3); calls Mastra; stores `activeRunId`; returns the UI message stream |
 | `GET /v1/chat/{conversationId}/stream` | resume: 204 when no active run; otherwise the replayed stream (§4.2) |
 | `POST /v1/chat/{conversationId}/stop` | aborts the active run on Mastra, clears `activeRunId`; 204 |
-| `POST /v1/chat/{conversationId}/tool-approvals` | `{ runId, toolCallId, approved, reason? }` → audit `agents.tool_call.approved|declined` → Mastra approve/decline → continuation stream (used when the native AI SDK approval path is not available, see §4.4) |
+| `POST /v1/chat/{conversationId}/tool-approvals` | `{ runId, toolCallId, approved, reason? }` → audit `AGENT_TOOL_CALL_APPROVED|DECLINED` → Mastra approve/decline → continuation stream (used when the native AI SDK approval path is not available, see §4.4) |
 | `GET /v1/conversations` | cursor list: `?cursor&limit≤50&archived=false&pinned&q` (`q` → `searchTokens array-contains-any`) |
 | `GET /v1/conversations/{id}` | metadata |
 | `GET /v1/conversations/{id}/messages` | Mastra messages → `toAISdkMessages(…, { version: 'v7' })` → `validateUIMessages`; cursor by message index |
@@ -187,7 +187,7 @@ validation). In chat:
   over WebRTC. Disabled in fake mode (503 `FEATURE_UNAVAILABLE`). Tool use in realtime and
   Mastra `OpenAIRealtimeVoice` over WebSocket are out of v1 (Next route handlers do not
   terminate WebSockets).
-- Permissions: `chat.voice.use`; rate limit 30 transcriptions/min per user.
+- Permissions: `core.voice.use`; rate limit 30 transcriptions/min per user.
 
 ## 5. Client (`@core/client`, FSD)
 
