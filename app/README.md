@@ -59,16 +59,16 @@ Steps: `scripts/src/seed/seed-steps.ts`.
 | Account | Access | Password (`.env.local`, else the local default) |
 |---|---|---|
 | `owner@demo.local` | owner of "Demo Organization" (active) and "Second Organization" | `SEED_OWNER_PASSWORD` / `demo-owner-password` |
-| `member@demo.local` | `member` on "Project 1" of the demo organization | `SEED_MEMBER_PASSWORD` / `demo-member-password` |
+| `member@demo.local` | `member` on "Project 1" of the demo organization (active organization: the demo one; decision 0030 A5) | `SEED_MEMBER_PASSWORD` / `demo-member-password` |
 | `viewer@demo.local` | `viewer` on the demo organization (active) | `SEED_VIEWER_PASSWORD` / `demo-viewer-password` |
 | `invitee@demo.local` | no membership (accepts an invitation in the SP2 e2e) | `SEED_INVITEE_PASSWORD` / `demo-invitee-password` |
 | `staff@demo.local` | platform staff `platform-admin`, SMS factor `+15555550100` | `SEED_STAFF_PASSWORD` / `demo-staff-password` |
 
 The demo organization has "Project 1" and "Project 2"; the second has "Project 1".
 "Project 1" of the demo organization holds "Unit A" and, under it, "Unit A.1",
-of the seed-only unit type `seed.unit` (the core registers no unit type; renames
-and moves of these units need that type registered by an installed module). The
-knowledge base samples go to the demo organization.
+of the core's neutral unit type `core.unit`, which every app registers, so these
+units can be renamed and moved (decision 0030 A6). The knowledge base samples go
+to the demo organization.
 
 ### Identity, tenancy and access (SP1)
 

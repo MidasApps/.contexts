@@ -112,3 +112,28 @@ Each item below is a policy choice; the code comments point here.
     and a suspension hides nothing secret from the organization's own members, so we keep the gap. Deleting an
     organization revokes its projections (`isRevoked`), and project deletes cascade to units (§3), so soft deletes
     need no second read.
+- **A5 — 2026-09-30 (follow-up #22): any live grant in the organization lets its holder switch to it.**
+  `PUT /v1/me/active-organization` used to authorize `core.organization.read` at the organization. Grants inherit
+  only downwards, so a user whose only grant sits on a project or a unit was refused, got no `tenantId` claim, and
+  could not use a UI keyed on the active organization nor read directly what its grants allow.
+  - **Check.** The caller must be a live member: `requireOrganizationMember` (access context) reads the caller's
+    live grants in that organization from the source of truth (`memberships`), never from the access projection,
+    and accepts the first grant node, organization first, where `getEffectivePermissions` succeeds (live node
+    chain, active organization, active user). Any role qualifies, custom roles included. A grant on a deleted
+    project or unit, a revoked grant, a suspended organization or a disabled user is refused. It checks at most
+    50 distinct nodes. A reader error rejects (`500`), never allows. Impersonation is still refused first. Without
+    any live grant, the answer stays `404`.
+  - **Switching grants nothing.** The claim is a projection for Security Rules, and the Rules already scope a
+    member to its access projection (`visibleProjectIds`, `unitIds`). `/v1` keeps authorizing every node. So a
+    project-only member still gets `404` from `GET /v1/me/context?organizationId=…` at the organization level; the
+    UI asks for the context at the member's project or unit.
+  - `GET /v1/me/organizations` already listed such organizations (it pages the live projections); a test pins it.
+    The local seed now also sets the active organization of `member@demo.local`.
+  - **Alternative rejected:** the live access projection (`isRevoked == false`) alone. It is a read model, and it
+    stays live for a grant whose project was deleted since.
+- **A6 — 2026-09-30 (follow-up #21): the core registers one neutral unit type, `core.unit`.** SP1 spec §4 said
+  the core registers none, so the local seed declared its own `seed.unit`. An app that does not install that type
+  answered `422` when a seeded unit was moved. `createTenancyServices` now always registers `CORE_UNIT_TYPES`
+  before the modules' types: `core.unit` (label `common.unitTypes.unit`, allowed under `project` and under
+  `core.unit`). `core` is a reserved module id, so no module can redeclare it. The seed uses `core.unit` and
+  installs no module. `GET /v1/unit-types` lists it for every app.
