@@ -37,8 +37,8 @@ pnpm -F @core/mastra db:init --confirm-env <APP_ENV>    # same role: storage.ini
 
 Both steps are idempotent; locally they run without `--confirm-env`
 (`pnpm db:migrate && pnpm -F @core/mastra db:init`). `db:init` loads
-`app/.env.local` like `mastra dev` and needs a valid Mastra env (e.g.
-`AI_MODE=fake`, or `real` with the provider keys).
+`app/.env.local` like `mastra dev` but reads only the services env
+(`APP_ENV`, `DATABASE_URL` and the Firebase project); no AI or MCP keys are needed.
 
 ## How to test
 

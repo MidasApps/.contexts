@@ -1,3 +1,5 @@
+import { loadServicesEnv, type ServicesEnv } from "@core/services";
+
 /** Thrown when `db:init` would run DDL on a remote database nobody confirmed. */
 export class UnconfirmedStorageInitError extends Error {
   readonly code = "UNCONFIRMED_STORAGE_INIT";
@@ -34,3 +36,17 @@ BEGIN
   END IF;
 END
 $$;`;
+
+/** What `db:init` reads: APP_ENV and DATABASE_URL (with the services rules). */
+export type StorageInitEnv = Pick<ServicesEnv, "APP_ENV" | "DATABASE_URL">;
+
+/**
+ * Env of `db:init`: only the services env (APP_ENV, DATABASE_URL and its
+ * local/remote rules), never the agent runtime env, so a deploy step that runs
+ * DDL needs no AI provider or MCP keys.
+ * @throws {InvalidEnvError} naming each invalid variable, never its value.
+ */
+export const loadStorageInitEnv = (source: Record<string, string | undefined>): StorageInitEnv => {
+  const { APP_ENV, DATABASE_URL } = loadServicesEnv(source);
+  return { APP_ENV, DATABASE_URL };
+};

@@ -6,8 +6,7 @@ import { existsSync } from "node:fs";
 import path from "node:path";
 import { PostgresStore } from "@mastra/pg";
 import { buildStorageConfig } from "../src/mastra/mastra-options.ts";
-import { loadMastraEnv } from "../src/mastra-env.schema.ts";
-import { assertStorageInitConfirmed, MASTRA_RUNTIME_GRANTS_SQL } from "../src/storage/storage-init-target.ts";
+import { assertStorageInitConfirmed, loadStorageInitEnv, MASTRA_RUNTIME_GRANTS_SQL } from "../src/storage/storage-init-target.ts";
 
 const ENV_FILE = path.resolve(import.meta.dirname, "../../../.env.local");
 
@@ -18,7 +17,8 @@ const print = (line: string): void => {
 const main = async (): Promise<void> => {
   // Never overrides a variable already set in the shell (deploy sets its own).
   if (existsSync(ENV_FILE)) process.loadEnvFile(ENV_FILE);
-  const env = loadMastraEnv(process.env);
+  // Services env only: DDL needs no AI provider or MCP keys.
+  const env = loadStorageInitEnv(process.env);
   assertStorageInitConfirmed(env.APP_ENV, process.argv.slice(2));
   const store = new PostgresStore(buildStorageConfig(env, { init: "force" }));
   try {

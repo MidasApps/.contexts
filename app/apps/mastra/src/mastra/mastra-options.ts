@@ -16,10 +16,14 @@ export const MASTRA_STORAGE_SCHEMA = "mastra";
  * creates and migrates the tables in deploy with a DDL-capable role (decision 0023).
  * @param options `init: "force"` is only for that `db:init` step.
  */
-export const buildStorageConfig = (env: MastraEnv, options: { init?: "env" | "force" } = {}) => ({
+export const buildStorageConfig = (
+  env: Pick<MastraEnv, "DATABASE_URL"> & Partial<Pick<MastraEnv, "MASTRA_STORAGE_INIT">>,
+  options: { init?: "env" | "force" } = {},
+) => ({
   id: "mastra-storage",
   connectionString: env.DATABASE_URL,
   schemaName: MASTRA_STORAGE_SCHEMA,
+  // A missing MASTRA_STORAGE_INIT (the db:init env) never disables init.
   disableInit: options.init !== "force" && env.MASTRA_STORAGE_INIT === "skip",
 });
 
