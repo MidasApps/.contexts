@@ -7,6 +7,7 @@ import {
   handleTranscription,
   MAX_AUDIO_BYTES,
   MAX_AUDIO_SECONDS,
+  MAX_SPEECH_BODY_BYTES,
   SPEECH_ROUTE_PATH,
   TRANSCRIPTION_ROUTE_PATH,
 } from "./voice-routes.ts";
@@ -130,6 +131,12 @@ describe("voice routes", () => {
       const error = (await response.json()) as { error: { code: string; details: { field: string }[] } };
       expect(error.error.code).toBe("VALIDATION_FAILED");
       expect(error.error.details.map((detail) => detail.field).sort()).toEqual(["", "text"]);
+    });
+
+    it("refuses a body over 64 KiB with 413 before parsing it", async () => {
+      const response = await handleSpeech(speechRequest({ text: "x".repeat(MAX_SPEECH_BODY_BYTES) }), deps());
+      expect(response.status).toBe(413);
+      expect((await errorOf(response)).code).toBe("PAYLOAD_TOO_LARGE");
     });
 
     it("refuses a body that is not JSON with 400", async () => {

@@ -9,6 +9,8 @@ import { SpeechInputSchema } from "./speech-input.schema.ts";
 /** Upload cap of a transcription (spec Task 26); the Mastra `bodySizeLimit` sits above it. */
 export const MAX_AUDIO_BYTES = 5 * 1024 * 1024;
 export const MAX_AUDIO_SECONDS = 60;
+/** Speech bodies are small JSON (text ≤ 4000 chars); Mastra's body limit skips custom routes. */
+export const MAX_SPEECH_BODY_BYTES = 64 * 1024;
 /** Custom routes live outside the Mastra API prefix; SP4 reaches them through `/v1`. */
 export const TRANSCRIPTION_ROUTE_PATH = "/voice/transcriptions";
 export const SPEECH_ROUTE_PATH = "/voice/speech";
@@ -22,7 +24,7 @@ const MESSAGES: Record<ErrorCode, string> = {
   FEATURE_UNAVAILABLE: "Voice is not available.",
   VALIDATION_FAILED: "One or more fields are invalid.",
   UNSUPPORTED_MEDIA_TYPE: "The audio format is not supported.",
-  PAYLOAD_TOO_LARGE: "The audio is larger than 5 MB.",
+  PAYLOAD_TOO_LARGE: "The request body is too large.",
   AUDIO_TOO_LONG: "The audio is longer than 60 seconds.",
   UPSTREAM_UNAVAILABLE: "The voice provider is unavailable.",
 };
@@ -91,11 +93,13 @@ export const handleTranscription = async (request: Request, deps: VoiceRouteDeps
   }
 };
 
-const readJson = async (request: Request): Promise<{ ok: true; value: unknown } | { ok: false }> => {
+const readJson = async (request: Request): Promise<{ ok: true; value: unknown } | { ok: false; reason: "too-large" | "invalid" }> => {
+  const body = await readCapped(request, MAX_SPEECH_BODY_BYTES);
+  if (body === "too-large") return { ok: false, reason: "too-large" };
   try {
-    return { ok: true, value: await request.json() };
+    return { ok: true, value: JSON.parse(Buffer.from(body).toString("utf8")) };
   } catch {
-    return { ok: false };
+    return { ok: false, reason: "invalid" };
   }
 };
 
@@ -104,7 +108,11 @@ export const handleSpeech = async (request: Request, deps: VoiceRouteDeps): Prom
   const requestId = requestIdOf(request);
   if (deps.voice === null || !deps.voice.capabilities.speech) return errorResponse("FEATURE_UNAVAILABLE", requestId);
   const body = await readJson(request);
-  if (!body.ok) return errorResponse("VALIDATION_FAILED", requestId, [{ field: "body", issue: "INVALID_JSON" }]);
+  if (!body.ok) {
+    return body.reason === "too-large"
+      ? errorResponse("PAYLOAD_TOO_LARGE", requestId)
+      : errorResponse("VALIDATION_FAILED", requestId, [{ field: "body", issue: "INVALID_JSON" }]);
+  }
   const parsed = SpeechInputSchema.safeParse(body.value);
   if (!parsed.success) {
     const details = parsed.error.issues.map((issue) => ({ field: issue.path.map(String).join("."), issue: issue.code.toUpperCase() }));
