@@ -193,3 +193,36 @@ export type { ApiHandler, ApiHandlerContext, EndpointPrincipal } from "./service
 export { apiError, dataResponse, type DomainErrorMapping, mapDomainError, noContentResponse } from "./services/shared/http/api-errors.ts";
 export { matchPathParams } from "./services/shared/http/path-params.ts";
 export { clientIpOf } from "./services/shared/http/client-ip.ts";
+// SP3 catalog context: semantic view registry and read-only SQL runner (Task 11).
+export {
+  createBigQuerySemanticRunner,
+  createPostgresSemanticRunner,
+  createSemanticViewRegistry,
+  DEFAULT_SEMANTIC_LIMIT,
+  DEFAULT_STATEMENT_TIMEOUT_MS,
+  guardSemanticSql,
+  InvalidSemanticViewError,
+  makeRunSemanticQuery,
+  MAX_SEMANTIC_LIMIT,
+  MAX_SEMANTIC_PARAMS,
+  MAX_SQL_LENGTH,
+  SEMANTIC_READER_ROLE,
+  SEMANTIC_SCHEMA,
+  wrapWithLimit,
+  type GuardedSql,
+  type RunSemanticQuery,
+  type RunSemanticQueryError,
+  type RunSemanticQueryInput,
+  type SemanticQueryPrincipal,
+  type SemanticQueryResult,
+  type SemanticQueryRows,
+  type SemanticQueryRunner,
+  type SemanticQueryScope,
+  type SemanticRunnerFailure,
+  type SemanticSqlGuard,
+  type SemanticView,
+  type SemanticViewRegistry,
+  type SqlParam,
+  type SqlRejection,
+  type SqlRejectionReason,
+} from "./services/catalog/index.ts";

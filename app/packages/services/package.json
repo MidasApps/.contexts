@@ -23,6 +23,7 @@
     "@core/contracts": "workspace:*",
     "drizzle-orm": "catalog:",
     "firebase-admin": "catalog:",
+    "libpg-query": "catalog:",
     "postgres": "catalog:",
     "ulid": "catalog:",
     "zod": "catalog:"

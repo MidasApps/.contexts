@@ -57,6 +57,7 @@ catalog:
   firebase-functions: 7.4.0
   firebase-tools: 15.32.0
   jsdom: 30.1.1
+  libpg-query: 18.1.5 # PG 18 parser (WASM) for the semantic SQL guard (decision 0024)
   lucide-react: 1.49.0
   mastra: 1.31.3 # CLI; same release train as @mastra/core
   next: 16.3.7

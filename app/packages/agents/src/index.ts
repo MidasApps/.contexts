@@ -26,6 +26,7 @@ export type {
   NodeRef,
   RegionalSettings,
   SecretStore,
+  SemanticQueryPort,
   SettingsPort,
   UsagePort,
 } from "./runtime/runtime-ports.ts";
@@ -135,3 +136,4 @@ export {
   type RenderFormDeps,
   SCHEMA_FORM_COMPONENT,
 } from "./tools/catalog/render-form.tool.ts";
+export { CATALOG_QUERY_PERMISSION, createQuerySemanticSqlTool, SEMANTIC_QUERY_EXECUTED } from "./tools/sql/query-semantic-sql.tool.ts";

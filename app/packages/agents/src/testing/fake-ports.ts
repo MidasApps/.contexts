@@ -168,5 +168,6 @@ export const createFakeRuntimePorts = (overrides: Partial<AgentRuntimePorts> = {
   connectors: { listActive: () => Promise.resolve([]) },
   secrets: { get: () => Promise.resolve(null) },
   settings: createFakeSettingsPort(),
+  catalog: { runSemanticQuery: () => Promise.resolve({ ok: false, error: { code: "CONNECTOR_DISABLED" } }) },
   ...overrides,
 });

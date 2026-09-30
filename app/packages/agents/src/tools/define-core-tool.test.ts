@@ -270,10 +270,10 @@ describe("runCoreTool", () => {
   });
 
   it("audits a read tool that opts in (for example SQL queries)", async () => {
-    const audited = defineCoreTool({ ...listNotes, audit: { action: "SEMANTIC_QUERY_EXECUTED" } });
+    const audited = defineCoreTool({ ...listNotes, audit: { action: "SEMANTIC_QUERY_EXECUTED", metadata: (output) => ({ count: String(output.count) }) } });
     const { deps, audit } = setup();
     await runCoreTool(audited, deps, { limit: 2 }, call());
-    expect(audit.entries[0]).toMatchObject({ action: "SEMANTIC_QUERY_EXECUTED", metadata: { outcome: "succeeded" } });
+    expect(audit.entries[0]).toMatchObject({ action: "SEMANTIC_QUERY_EXECUTED", metadata: { outcome: "succeeded", count: "2" } });
   });
 });
 

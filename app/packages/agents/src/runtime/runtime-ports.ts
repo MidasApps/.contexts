@@ -1,4 +1,5 @@
 import type { AgentApprovalRequest, AgentSettings, Citation, Connector, LlmCall } from "@core/contracts";
+import type { RunSemanticQuery } from "@core/services";
 
 /**
  * Ports through which `@core/agents` consumes SP1/SP3 services (decision 0019).
@@ -114,6 +115,9 @@ export type SecretStore = {
   readonly get: (secretRef: string) => Promise<string | null>;
 };
 
+/** SP3 `catalog` context: read-only SQL over semantic views (bound to `makeRunSemanticQuery`). */
+export type SemanticQueryPort = { readonly runSemanticQuery: RunSemanticQuery };
+
 export type SettingsPort = { readonly getAgentSettings: (input: { tenantId: string }) => Promise<AgentSettings> };
 
 export type AgentRuntimePorts = {
@@ -125,4 +129,5 @@ export type AgentRuntimePorts = {
   readonly connectors: ConnectorsPort;
   readonly secrets: SecretStore;
   readonly settings: SettingsPort;
+  readonly catalog: SemanticQueryPort;
 };

@@ -15,6 +15,13 @@
       "when": 1790728874360,
       "tag": "0001_mastra_runtime_role",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1790744264403,
+      "tag": "0002_semantic_reader_grants",
+      "breakpoints": true
     }
   ]
 }

@@ -51,8 +51,11 @@ export type CoreToolDefinition<TInput extends z.ZodObject = z.ZodObject, TOutput
   readonly commandId?: string;
   /** Generative UI component id (SP4 registry). */
   readonly ui?: { readonly component: string };
-  /** Audit a read tool too (mutations are always audited as `AGENT_TOOL_EXECUTED`). */
-  readonly audit?: { readonly action: string };
+  /**
+   * Audit a read tool too (mutations are always audited as `AGENT_TOOL_EXECUTED`).
+   * `metadata` adds safe fields of a successful call (ids, fingerprints; never raw input).
+   */
+  readonly audit?: { readonly action: string; metadata?(output: z.output<TOutput>): Readonly<Record<string, string>> };
   /** Overrides the default timeout (read 15 s, mutation 30 s). */
   readonly timeoutMs?: number;
 };

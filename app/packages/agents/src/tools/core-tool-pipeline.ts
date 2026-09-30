@@ -126,7 +126,8 @@ const parseOutput = (definition: CoreToolDefinition, output: unknown): unknown =
 const executeAndAudit = async (definition: CoreToolDefinition, deps: CoreToolDeps, input: Record<string, unknown>, ctx: CoreToolContext, parent?: AbortSignal) => {
   try {
     const output = parseOutput(definition, await executeWithDeadline(definition, deps, input, ctx, parent));
-    await recordAudit({ definition, deps, ctx, input, outcome: "succeeded" });
+    const extras = definition.audit?.metadata?.(output);
+    await recordAudit({ definition, deps, ctx, input, outcome: "succeeded", ...(extras === undefined ? {} : { extras }) });
     return output;
   } catch (error: unknown) {
     if (isCoreToolError(error) && error.code !== "AUDIT_UNAVAILABLE") {
