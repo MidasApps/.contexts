@@ -22,4 +22,21 @@ describe("buildPostgresConnection", () => {
       username: "svc",
     });
   });
+
+  it("maps socket query parameters: sslmode to ssl, pool settings to options, the rest to server parameters", () => {
+    const connection = buildPostgresConnection({
+      DATABASE_URL: "postgresql://svc@/app?host=/cloudsql/a:b:c&sslmode=require&connect_timeout=5&application_name=core-api",
+    });
+
+    expect(connection.options).toMatchObject({ ssl: "require", connect_timeout: 5, connection: { application_name: "core-api" } });
+  });
+
+  it("turns sslmode=disable into ssl false and lets explicit pool options win", () => {
+    const connection = buildPostgresConnection(
+      { DATABASE_URL: "postgresql://svc@/app?host=/cloudsql/a:b:c&sslmode=disable&connect_timeout=5" },
+      { connectTimeoutSeconds: 2 },
+    );
+
+    expect(connection.options).toMatchObject({ ssl: false, connect_timeout: 2 });
+  });
 });

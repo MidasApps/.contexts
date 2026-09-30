@@ -13,6 +13,8 @@ export type SocketDatabaseTarget = {
   username: string;
   password?: string;
   port: number;
+  /** Query parameters other than `host` and `port` (e.g. `sslmode`, `application_name`). */
+  params: Readonly<Record<string, string>>;
 };
 export type DatabaseTarget = TcpDatabaseTarget | SocketDatabaseTarget;
 
@@ -34,6 +36,29 @@ const parsePort = (value: string | null): number | undefined => {
   return Number.isInteger(port) && port >= 1 && port <= 65_535 ? port : undefined;
 };
 
+const SOCKET_ROUTING_PARAMS = new Set(["host", "port"]);
+
+const extraParams = (params: URLSearchParams): Record<string, string> =>
+  Object.fromEntries([...params].filter(([key]) => !SOCKET_ROUTING_PARAMS.has(key)));
+
+/** `decodeURIComponent` without the throw: a malformed escape makes the DSN unsupported. */
+const decodeComponent = (value: string): string | undefined => {
+  try {
+    return decodeURIComponent(value);
+  } catch (error: unknown) {
+    if (error instanceof URIError) return undefined;
+    throw error;
+  }
+};
+
+const decodeCredentials = (raw: { username: string; password: string | undefined; database: string }) => {
+  const username = decodeComponent(raw.username);
+  const database = decodeComponent(raw.database);
+  const password = raw.password === undefined ? undefined : decodeComponent(raw.password);
+  if (username === undefined || database === undefined || (raw.password !== undefined && password === undefined)) return undefined;
+  return { username, database, ...(password === undefined ? {} : { password }) };
+};
+
 const parseSocketDsn = (value: string): SocketDatabaseTarget | undefined => {
   const match = SOCKET_DSN.exec(value);
   if (match === null) return undefined;
@@ -41,15 +66,9 @@ const parseSocketDsn = (value: string): SocketDatabaseTarget | undefined => {
   const params = new URLSearchParams(query);
   const socketDir = params.get("host");
   const port = parsePort(params.get("port"));
-  if (socketDir?.startsWith("/") !== true || port === undefined) return undefined;
-  return {
-    kind: "socket",
-    socketDir,
-    database: decodeURIComponent(database),
-    username: decodeURIComponent(username),
-    ...(password === undefined ? {} : { password: decodeURIComponent(password) }),
-    port,
-  };
+  const credentials = decodeCredentials({ username, password, database });
+  if (socketDir?.startsWith("/") !== true || port === undefined || credentials === undefined) return undefined;
+  return { kind: "socket", socketDir, ...credentials, port, params: extraParams(params) };
 };
 
 /** Reads a Postgres DSN; `undefined` when it is neither supported form. */

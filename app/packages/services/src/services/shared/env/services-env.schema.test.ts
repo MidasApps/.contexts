@@ -62,6 +62,12 @@ describe("ServicesEnvSchema", () => {
     expect(issuePaths({ ...LOCAL_ENV, DATABASE_URL: "nope" })).toEqual(["DATABASE_URL"]);
   });
 
+  it("reports a malformed percent-escape in the socket DSN as an env issue, not a URIError", () => {
+    const socketUrl = "postgresql://svc%zz@/app?host=/cloudsql/acme-prod:southamerica-east1:core-db";
+    expect(issuePaths({ ...REMOTE_ENV, DATABASE_URL: socketUrl })).toEqual(["DATABASE_URL"]);
+    expect(() => loadServicesEnv({ ...REMOTE_ENV, DATABASE_URL: socketUrl })).toThrow(InvalidEnvError);
+  });
+
   it("rejects a non-postgres DATABASE_URL and an unknown AI_MODE", () => {
     const source = { ...REMOTE_ENV, DATABASE_URL: "mysql://x@10.0.0.5/app", AI_MODE: "mock" };
     expect(issuePaths(source)).toEqual(["DATABASE_URL", "AI_MODE"]);

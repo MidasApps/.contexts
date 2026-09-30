@@ -1,5 +1,5 @@
 import postgres, { type Options, type Sql } from "postgres";
-import { parseDatabaseUrl } from "./database-url.ts";
+import { parseDatabaseUrl, type SocketDatabaseTarget } from "./database-url.ts";
 
 type PostgresOptions = Options<Record<string, postgres.PostgresType>>;
 
@@ -20,6 +20,26 @@ export class InvalidDatabaseUrlError extends Error {
     this.name = "InvalidDatabaseUrlError";
   }
 }
+
+// Query keys postgres.js reads as client options (not server parameters) from a URL.
+const INTEGER_OPTION_PARAMS = new Set(["connect_timeout", "idle_timeout", "max_lifetime", "keep_alive"]);
+
+/**
+ * The socket form bypasses postgres.js URL parsing, so its query parameters are
+ * mapped the same way the driver maps a URL query: `sslmode` → `ssl`
+ * (`disable` → off), integer pool settings → options, anything else → server
+ * parameters (`connection`, e.g. `application_name`).
+ */
+const socketParamOptions = (params: SocketDatabaseTarget["params"]): PostgresOptions => {
+  const options: PostgresOptions = {};
+  const connection: Record<string, string> = {};
+  for (const [key, value] of Object.entries(params)) {
+    if (key === "sslmode" || key === "ssl") options.ssl = value === "disable" || value === "false" ? false : (value as NonNullable<PostgresOptions["ssl"]>);
+    else if (INTEGER_OPTION_PARAMS.has(key) && Number.isInteger(Number(value))) Object.assign(options, { [key]: Number(value) });
+    else connection[key] = value;
+  }
+  return Object.keys(connection).length === 0 ? options : { ...options, connection };
+};
 
 /**
  * Driver arguments for a validated `DATABASE_URL`: a TCP URL goes as is; the
@@ -43,6 +63,10 @@ export const buildPostgresConnection = (
     url: undefined,
     options: {
       ...base,
+      ...socketParamOptions(target.params),
+      // Explicit pool settings beat the DSN; the DSN beats the defaults.
+      ...(pool.connectTimeoutSeconds === undefined ? {} : { connect_timeout: pool.connectTimeoutSeconds }),
+      ...(pool.max === undefined ? {} : { max: pool.max }),
       host: target.socketDir,
       port: target.port,
       database: target.database,
