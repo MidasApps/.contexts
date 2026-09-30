@@ -23,6 +23,10 @@ import { createFirebaseUserAccountReader } from "./identity/adapters/driven/fire
 import { createFirestoreUserRepository } from "./identity/adapters/driven/firestore-user-repository.ts";
 import type { ResolveAccessContext } from "./identity/application/use-cases/resolve-access-context.ts";
 import { createIdentityServices, type IdentityServices } from "./identity/composition.ts";
+import { createFirebaseSessionVertical } from "./identity/firebase-session-composition.ts";
+import type { SessionActions } from "./identity/adapters/driving/session-actions.ts";
+import type { SessionGuards } from "./identity/adapters/driving/session-guards.ts";
+import type { SessionServices } from "./identity/session-composition.ts";
 import { makeVerifyBearer, type VerifyBearer } from "./identity/application/use-cases/resolve-principal.ts";
 import { systemClock, type Clock } from "./shared/clock/clock.ts";
 import type { FirebaseAdmin } from "./shared/firebase/firebase-admin.ts";
@@ -76,6 +80,12 @@ export type CoreServer = {
   readonly tenancy: TenancyServices;
   /** `/v1/me*`: profile, active organization, claims sync, access context (SP1 Task 12). */
   readonly identity: IdentityServices;
+  /** Web and desktop sessions (SP1 Task 13). */
+  readonly sessions: SessionServices;
+  /** Server Action bodies for SP2's `(auth)/actions.ts` (decision 0007). */
+  readonly sessionActions: SessionActions;
+  /** RSC guards for SP2's `(app)` and `/admin` layouts. */
+  readonly sessionGuards: SessionGuards;
   /**
    * SP3 hook (SP1 spec §10): effective permissions and regional settings of a principal at a
    * node, or null (fail-closed). Also exported as `resolveAccessContext` of `identity`.
@@ -97,6 +107,9 @@ type CoreServerArgs = {
     readonly NEXT_PUBLIC_APP_URL?: string;
     /** Per-IP rate limits read the client IP behind this many trusted proxies (default 1). */
     readonly TRUSTED_PROXY_HOPS?: number;
+    /** Web session cookie lifetime (default 5) and desktop session sliding lifetime (default 30). */
+    readonly SESSION_MAX_AGE_DAYS?: number;
+    readonly DESKTOP_SESSION_MAX_AGE_DAYS?: number;
   };
   firebase: FirebaseAdmin;
   logger: Logger;
@@ -200,7 +213,17 @@ export const createCoreServer = (args: CoreServerArgs): CoreServer => {
     access: access.core,
     audit,
   };
-  const routes = buildCoreRoutes({ pipeline, access: access.services, members: access.members, tenancy, identity });
+  const sessionVertical = createFirebaseSessionVertical({
+    firebase: args.firebase,
+    principals: access.readers.principals,
+    audit,
+    clock,
+    logger: args.logger,
+    randomBytes: args.adapters?.randomBytes ?? randomBytes,
+    env: args.env,
+  });
+  const { sessions } = sessionVertical;
+  const routes = buildCoreRoutes({ pipeline, access: access.services, members: access.members, tenancy, identity, sessions });
   return {
     routes,
     verifyBearer,
@@ -210,6 +233,9 @@ export const createCoreServer = (args: CoreServerArgs): CoreServer => {
     tenancy,
     identity,
     resolveAccessContext: identity.resolveAccessContext,
+    sessions,
+    sessionActions: sessionVertical.sessionActions,
+    sessionGuards: sessionVertical.sessionGuards,
     audit,
     pipeline,
   };

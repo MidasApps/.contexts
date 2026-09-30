@@ -51,6 +51,12 @@
           "type": "boolean",
           "x-pii": "none"
         },
+        "sessionId": {
+          "description": "Web or desktop session whose exchange minted the token (developer claim `sessionId` of a custom-token sign-in).",
+          "minLength": 1,
+          "type": "string",
+          "x-pii": "none"
+        },
         "type": {
           "const": "user",
           "description": "A person signed in with Firebase Auth.",

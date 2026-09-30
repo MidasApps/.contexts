@@ -32,3 +32,20 @@ export { AccountMissingError } from "./domain/errors/account-missing-error.ts";
 export { createFirestoreUserRepository } from "./adapters/driven/firestore-user-repository.ts";
 export { createFirebaseAuthAccountReader } from "./adapters/driven/firebase-auth-account-reader.ts";
 export { createInMemoryUserRepository, type InMemoryUserRepository } from "./adapters/driven/in-memory-user-repository.ts";
+// Web and desktop sessions (SP1 Task 13, decision 0007).
+export { createSessionServices, type SessionServices } from "./session-composition.ts";
+export type { SessionDeps } from "./application/session-deps.ts";
+export {
+  makeSessionActions,
+  SESSION_COOKIE_NAME,
+  type CookieJar,
+  type SessionActionContext,
+  type SessionActionError,
+  type SessionActionResult,
+  type SessionActions,
+} from "./adapters/driving/session-actions.ts";
+export { makeSessionGuards, type SessionGuards, type StaffSessionGuardResult, type WebSessionGuardResult } from "./adapters/driving/session-guards.ts";
+export { createFirebaseSessionVertical, type FirebaseSessionVertical } from "./firebase-session-composition.ts";
+export { createInMemorySessionRepository, type InMemorySessionRepository } from "./adapters/driven/in-memory-session-repository.ts";
+export { createFakeFirebaseAuth, type FakeFirebaseAuth } from "./adapters/driven/fake-firebase-auth.ts";
+export type { SessionRecord } from "./domain/session-record.schema.ts";

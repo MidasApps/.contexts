@@ -3,7 +3,7 @@ import { defineContract } from "../contract.ts";
 import { EXAMPLE_IDS } from "../example-values.ts";
 import { none, personal } from "../field-docs.ts";
 import { TenantIdSchema, UserIdSchema } from "../primitives/ids.schema.ts";
-import { ApiKeyIdSchema, DeviceIdSchema, ImpersonationSessionIdSchema } from "./ids.schema.ts";
+import { ApiKeyIdSchema, DeviceIdSchema, ImpersonationSessionIdSchema, SessionIdSchema } from "./ids.schema.ts";
 
 const tenantId = TenantIdSchema.meta(none("The only organization this principal can act in."));
 
@@ -11,6 +11,9 @@ const UserPrincipalSchema = z.strictObject({
   type: z.literal("user").meta(none("A person signed in with Firebase Auth.")),
   uid: UserIdSchema.meta(personal("Firebase Auth uid of the user.")),
   mfa: z.boolean().meta(none("Whether the verified token proves a second factor (SP1 spec §3.4).")),
+  sessionId: SessionIdSchema.optional().meta(
+    none("Web or desktop session whose exchange minted the token (developer claim `sessionId` of a custom-token sign-in)."),
+  ),
   impersonation: z
     .strictObject({
       sessionId: ImpersonationSessionIdSchema.meta(none("Active impersonation session (read-only, time-boxed).")),

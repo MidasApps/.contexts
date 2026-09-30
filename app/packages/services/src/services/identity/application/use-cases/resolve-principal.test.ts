@@ -75,6 +75,15 @@ describe("resolvePrincipal", () => {
 });
 
 describe("verifyBearer: claims", () => {
+  it("carries the session id of a custom-token sign-in minted by a session exchange", async () => {
+    const { verifyBearer } = setup({
+      c: token({ signInProvider: "custom", claims: { sessionId: "sess-1", smfa: true } }),
+      p: token({ signInProvider: "password", claims: { sessionId: "sess-1" } }),
+    });
+    expect(await verifyBearer({ token: "c", checkRevoked: false })).toEqual({ type: "user", uid: "user-1", mfa: true, sessionId: "sess-1" });
+    expect(await verifyBearer({ token: "p", checkRevoked: false })).toEqual({ type: "user", uid: "user-1", mfa: false });
+  });
+
   it("maps the device claim to a device principal of its tenant", async () => {
     const { verifyBearer } = setup({ d: token({ uid: "dev-1", signInProvider: "custom", claims: { principalType: "device", tenantId: "org-a" } }) });
     expect(await verifyBearer({ token: "d", checkRevoked: false })).toEqual({ type: "device", deviceId: "dev-1", tenantId: "org-a" });

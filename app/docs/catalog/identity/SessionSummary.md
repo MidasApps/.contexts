@@ -16,6 +16,7 @@ An active web or desktop session of the signed-in user (GET /v1/me/sessions).
 | Field | Required | PII | Description | UI |
 |---|---|---|---|---|
 | `createdAt` | yes | `none` | When the session was created (UTC). |  |
+| `current` | yes | `none` | True for the session whose exchange minted the calling token. |  |
 | `expiresAt` | yes | `none` | When the session expires (UTC). |  |
 | `id` | yes | `none` | Session id. |  |
 | `kind` | yes | `none` | `web` (session cookie) or `desktop` (session secret). |  |
@@ -38,7 +39,8 @@ _None._
     "userAgent": "Firefox on Windows",
     "createdAt": "2026-09-29T14:30:00.000Z",
     "lastSeenAt": "2026-09-29T15:00:00.000Z",
-    "expiresAt": "2026-10-06T14:30:00.000Z"
+    "expiresAt": "2026-10-06T14:30:00.000Z",
+    "current": true
   }
 ]
 ```

@@ -38,14 +38,19 @@ const stringClaim = (claims: VerifiedToken["claims"], name: string): string | un
 };
 
 // `smfa` is set only from a verified session record and only on custom-token sign-ins (decision 0007 §3).
-const provesMfa = (token: VerifiedToken): boolean =>
+/** Whether a verified token proves a second factor (SP1 spec §3.4). */
+export const provesMfa = (token: Pick<VerifiedToken, "claims" | "signInProvider" | "secondFactor">): boolean =>
   (token.secondFactor !== null && MFA_FACTORS.has(token.secondFactor)) ||
   (token.signInProvider === "custom" && token.claims["smfa"] === true);
 
 const userCandidate = (token: VerifiedToken): unknown => {
   const sessionId = stringClaim(token.claims, "imp");
   const staffUid = stringClaim(token.claims, "impBy");
-  if (sessionId === undefined && staffUid === undefined) return { type: "user", uid: token.uid, mfa: provesMfa(token) };
+  if (sessionId === undefined && staffUid === undefined) {
+    // Only our session exchanges mint custom tokens with `sessionId` (developer claims cannot be forged).
+    const session = token.signInProvider === "custom" ? stringClaim(token.claims, "sessionId") : undefined;
+    return { type: "user", uid: token.uid, mfa: provesMfa(token), ...(session === undefined ? {} : { sessionId: session }) };
+  }
   if (sessionId === undefined || staffUid === undefined) return null;
   // The staff member's MFA is not the impersonated user's: never carried over.
   return { type: "user", uid: token.uid, mfa: false, impersonation: { sessionId, staffUid } };

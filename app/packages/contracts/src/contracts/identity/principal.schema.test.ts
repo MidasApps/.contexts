@@ -8,6 +8,7 @@ describe("PrincipalSchema", () => {
   it("accepts the user, device and service principals of SP1 spec §3.1", () => {
     for (const principal of [
       { type: "user", uid, mfa: false },
+      { type: "user", uid, mfa: true, sessionId: EXAMPLE_IDS.session },
       { type: "user", uid, mfa: true, impersonation: { sessionId, staffUid: otherUser } },
       { type: "device", deviceId, tenantId },
       { type: "service", apiKeyId, tenantId, ownerUid: uid },

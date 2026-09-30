@@ -15,8 +15,10 @@ export const CORE_COLLECTIONS = {
   access: "access",
   invitations: "invitations",
   devices: "devices",
+  deviceActivations: "device-activations",
   apiKeys: "api-keys",
   impersonationSessions: "impersonation-sessions",
+  sessions: "sessions",
 } as const;
 
 /** Stored shape version of every core entity (contracts/firebase-firestore.md §17). */

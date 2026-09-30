@@ -11139,6 +11139,11 @@ components:
               description: Whether the verified token proves a second factor (SP1 spec §3.4).
               type: boolean
               x-pii: none
+            sessionId:
+              description: Web or desktop session whose exchange minted the token (developer claim `sessionId` of a custom-token sign-in).
+              minLength: 1
+              type: string
+              x-pii: none
             type:
               const: user
               description: A person signed in with Firebase Auth.
@@ -11265,6 +11270,7 @@ components:
       description: An active web or desktop session of the signed-in user (GET /v1/me/sessions).
       examples:
         - createdAt: "2026-09-29T14:30:00.000Z"
+          current: true
           expiresAt: "2026-10-06T14:30:00.000Z"
           id: Ss8yH0nU2jM4iK6oL8pZ
           kind: web
@@ -11277,6 +11283,10 @@ components:
           format: date-time
           pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z))$
           type: string
+          x-pii: none
+        current:
+          description: True for the session whose exchange minted the calling token.
+          type: boolean
           x-pii: none
         expiresAt:
           description: When the session expires (UTC).
@@ -11319,6 +11329,7 @@ components:
         - createdAt
         - lastSeenAt
         - expiresAt
+        - current
       type: object
       x-kind: view
       x-pii: personal

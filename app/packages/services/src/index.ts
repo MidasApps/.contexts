@@ -190,6 +190,21 @@ export {
   type ResolvedAccessContext,
   type UserRepository,
 } from "./services/identity/index.ts";
+// SP1 web and desktop sessions (Task 13).
+export {
+  createSessionServices,
+  makeSessionActions,
+  makeSessionGuards,
+  SESSION_COOKIE_NAME,
+  type CookieJar,
+  type SessionActionContext,
+  type SessionActionResult,
+  type SessionActions,
+  type SessionGuards,
+  type SessionServices,
+  type StaffSessionGuardResult,
+  type WebSessionGuardResult,
+} from "./services/identity/index.ts";
 export { createFirestoreUnitOfWork, inMemoryUnitOfWork, type UnitOfWork } from "./services/shared/firestore/unit-of-work.ts";
 export { CORE_COLLECTIONS, CORE_SCHEMA_VERSION } from "./services/shared/firestore/collections.ts";
 export { decodeCursor, encodeCursor, type CursorPosition } from "./services/shared/pagination/cursor.ts";

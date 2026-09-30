@@ -17,6 +17,7 @@ export const SessionSummarySchema = z.object({
   createdAt: IsoDateTimeSchema.meta(none("When the session was created (UTC).")),
   lastSeenAt: IsoDateTimeSchema.meta(none("Last exchange or request seen for the session (UTC).")),
   expiresAt: IsoDateTimeSchema.meta(none("When the session expires (UTC).")),
+  current: z.boolean().meta(none("True for the session whose exchange minted the calling token.")),
 });
 export type SessionSummary = z.infer<typeof SessionSummarySchema>;
 
@@ -33,6 +34,7 @@ export const SessionSummaryContract = defineContract(SessionSummarySchema, {
       createdAt: EXAMPLE_TIMES.created,
       lastSeenAt: EXAMPLE_TIMES.updated,
       expiresAt: EXAMPLE_TIMES.expires,
+      current: true,
     },
   ],
   pii: "personal",
