@@ -51,24 +51,34 @@ const approvalDataOf = (chunk: UIMessageChunk): ApprovalData | undefined =>
 
 /**
  * Pass-through transform of a chat stream: after each `data-tool-call-approval` it writes the
- * `data-tool-preview` of the same tool call, and it reports the run state (`suspended` at an
- * approval request, else `finished` at the end).
+ * `data-tool-preview` of the same tool call, and it reports the run state as the chunks pass
+ * (`suspended` at an approval request, `finished` at `finish` or at the end of the stream).
+ * With `closeAtSuspension` (observe) it ends the stream after the preview: a durable run
+ * publishes nothing more until the approval is answered, so an observer would wait for ever.
  */
 export const createChatStreamTap = (args: {
   readonly previewer: ToolPreviewer;
   readonly requestContext: RequestContextReader;
   readonly onState: (state: ChatRunState) => void;
+  readonly closeAtSuspension?: boolean;
 }): TransformStream<UIMessageChunk, UIMessageChunk> => {
-  let suspended = false;
+  let reported: ChatRunState | undefined;
+  const report = (state: ChatRunState) => {
+    if (reported === "suspended" || reported === state) return;
+    reported = state;
+    args.onState(state);
+  };
   return new TransformStream<UIMessageChunk, UIMessageChunk>({
     transform: async (chunk, controller) => {
       controller.enqueue(chunk);
-      if (chunk.type === "tool-approval-request") suspended = true;
+      if (chunk.type === "tool-approval-request") report("suspended");
+      if (chunk.type === "finish") report("finished");
       const approval = approvalDataOf(chunk);
       if (approval === undefined || typeof approval.toolCallId !== "string" || typeof approval.toolName !== "string") return;
       const data = await args.previewer.describe({ toolName: approval.toolName, toolCallId: approval.toolCallId, args: approval.args, requestContext: args.requestContext });
       controller.enqueue({ type: "data-tool-preview", id: approval.toolCallId, data });
+      if (args.closeAtSuspension === true) controller.terminate();
     },
-    flush: () => args.onState(suspended ? "suspended" : "finished"),
+    flush: () => report("finished"),
   });
 };

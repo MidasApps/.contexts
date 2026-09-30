@@ -134,6 +134,22 @@ describe("chat routes (fake mode, in-process Mastra)", { timeout: 30_000 }, () =
     expect(text(replayed)).toBe(text(original));
   });
 
+  it("observe ends at the approval of a run whose client disconnected, then answers 204", async () => {
+    const { harness, deps } = setup();
+    const response = await handleChatPost({ request: chatRequest({ messages: [userMessage('Confirm: create the project named "Launch"')] }), agentId: "assistant", requestContext: contextFor(), mastra: harness.mastra }, deps);
+    const reader = response.body?.getReader();
+    await reader?.read();
+    await reader?.cancel();
+    expect(deps.owners.ownerOf("run-1")?.state).toBe("running");
+    const replay = await handleObserve({ agentId: "assistant", runId: "run-1", requestContext: contextFor(), mastra: harness.mastra }, deps);
+    expect(replay.status).toBe(200);
+    const types = (await readChunks(replay)).map((chunk) => chunk.type);
+    expect(types).toEqual(expect.arrayContaining(["start", "tool-approval-request", "data-tool-call-approval", "data-tool-preview"]));
+    expect(types.at(-1)).toBe("data-tool-preview");
+    expect(deps.owners.ownerOf("run-1")?.state).toBe("suspended");
+    expect((await handleObserve({ agentId: "assistant", runId: "run-1", requestContext: contextFor(), mastra: harness.mastra }, deps)).status).toBe(204);
+  });
+
   it("abort answers 204 and stops a slow run of the caller; another owner's run keeps going", async () => {
     const { harness, deps } = setup();
     const slow = `[[fake:slow {"delayMs":60}]] [[fake:text {"text":"${"S".repeat(640)}"}]]`;
