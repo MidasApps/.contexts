@@ -8,6 +8,7 @@ import type {
   LanguageModelV4Usage,
 } from "@ai-sdk/provider";
 import { simulateReadableStream } from "ai";
+import { extractCitationIds } from "../../knowledge/citation.ts";
 import { deferred } from "./deferred.ts";
 import { buildFakeJsonAnswer } from "./fake-structured-output.ts";
 import {
@@ -59,8 +60,14 @@ const lastToolResults = (prompt: LanguageModelV4Prompt): ToolResultSummary[] => 
   return last.content.flatMap((part) => (part.type === "tool-result" ? [{ toolName: part.toolName, output: part.output }] : []));
 };
 
+// A summary cites the knowledge passages it saw, like a grounded model would.
+const citationsOf = (output: unknown): string => {
+  const ids = extractCitationIds(JSON.stringify(output) ?? "");
+  return ids.length === 0 ? "" : ` ${ids.map((id) => `[${id}]`).join(" ")}`;
+};
+
 const summarizeToolResults = (results: readonly ToolResultSummary[]): FakeTurn => ({
-  text: results.map(({ toolName, output }) => `Fake summary of ${toolName}: ${JSON.stringify(output).slice(0, 200)}`).join("\n"),
+  text: results.map(({ toolName, output }) => `Fake summary of ${toolName}: ${JSON.stringify(output).slice(0, 200)}${citationsOf(output)}`).join("\n"),
 });
 
 const toolNamesOf = (options: LanguageModelV4CallOptions): string[] => (options.tools ?? []).map((tool) => tool.name);

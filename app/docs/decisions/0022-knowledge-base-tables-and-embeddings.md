@@ -94,3 +94,21 @@ The knowledge base needs tenant isolation that holds even if application code fo
   - *Events and audit.* `KNOWLEDGE_DOCUMENT_INDEXED` is a structured log line with a ULID
     `eventId` until the event bus exists. Ingestion and deletes are not audited yet: SP1's
     `AUDIT_ACTIONS` has no knowledge action.
+- **2026-09-30 — search tool, citation guard and knowledge agent (SP3 Task 15).**
+  - `knowledge.searchKnowledge` (read, `core.knowledge.read`): the model sends only `query`,
+    optional `namespaces` and `topK` ≤ 8. Tenant comes from the context; namespaces are the
+    model's request ∩ the allowed set (`tenant`, the active `project:*`, and `catalog` for
+    `core.catalog.read` holders), falling back to the whole allowed set. Catalog hits are kept
+    only when the caller may see the contract (the AI catalog reader, decision 0024; catalog
+    documents are titled with the contract id). Module namespaces join with SP5 agent settings.
+  - `citation-guard` (output processor, `processOutputResult`): the retrieved set is every
+    `kb:` id in this turn's tool results; `[kb:...]` markers outside it are removed, and each
+    assistant message gets `content.metadata.confidence` = `grounded` or `low` (no valid
+    citation).
+  - Agent `knowledge` (chat role, `maxSteps` 6, ceiling `core.chat.use`, `core.knowledge.read`,
+    `core.catalog.read`), instructions `instructions/knowledge.v1.md` read by
+    `loadInstructions`. `apps/mastra` copies the folder into `src/mastra/public/instructions`
+    (gitignored) before `mastra build` and `mastra dev`, because the bundle reads it next to
+    itself. The fake model's tool follow-up now cites the `kb:` ids it saw, so fake runs are
+    grounded. Skill `skills/knowledge-citations/SKILL.md` is validated with
+    `validateSkillContent`; attaching skills to agents is Task 20 (D3-21).

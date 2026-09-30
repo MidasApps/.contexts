@@ -198,3 +198,16 @@ export {
   renderContractDocument,
 } from "./knowledge/workflows/catalog-reindex.workflow.ts";
 export { KnowledgeUseCaseError, knowledgePortFromUseCases } from "./knowledge/knowledge-port-from-use-cases.ts";
+// SP3 knowledge agent, search tool and citation guard (Task 15).
+export {
+  allowedNamespacesOf,
+  createSearchKnowledgeTool,
+  effectiveNamespaces,
+  KNOWLEDGE_READ_PERMISSION,
+  MAX_KNOWLEDGE_RESULTS,
+  SEARCH_KNOWLEDGE_TOOL_ID,
+  type SearchKnowledgeDeps,
+} from "./tools/knowledge/search-knowledge.tool.ts";
+export { CITATION_GUARD_ID, type CitationConfidence, createCitationGuard, type GuardedAnswer, guardCitations } from "./processors/citation-guard.ts";
+export { createKnowledgeAgentDefinition, KNOWLEDGE_AGENT_ID, KNOWLEDGE_AGENT_MAX_STEPS, KNOWLEDGE_INSTRUCTIONS } from "./agents/knowledge-agent.ts";
+export { InstructionsNotFoundError, loadInstructions, PACKAGE_INSTRUCTIONS_DIR } from "./agents/load-instructions.ts";

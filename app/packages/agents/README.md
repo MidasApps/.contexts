@@ -14,6 +14,11 @@ auth provider. `apps/mastra` composes it; the package never imports a module or
   (decision 0021). In `real` mode the boot needs the provider key of every text
   and embedding role (and of their fallbacks); voice keys are optional.
 
+- Knowledge (SP3 Tasks 14-15): `knowledge-ingest` and `catalog-reindex` workflows,
+  the `knowledge.searchKnowledge` tool, the `citation-guard` output processor and the
+  `knowledge` agent (decision 0022 amendments). Agent instructions live in
+  `src/agents/instructions/<agent>.v<N>.md`; core skills in `skills/<name>/SKILL.md`.
+
 ## How to test
 
 ```bash

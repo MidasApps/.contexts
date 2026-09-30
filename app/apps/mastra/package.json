@@ -7,8 +7,8 @@
     "node": ">=26.0.0 <27"
   },
   "scripts": {
-    "dev": "node --eval \"process.getBuiltinModule('node:fs').rmSync('.mastra', { recursive: true, force: true })\" && mastra dev --env ../../.env.local",
-    "build": "mastra build",
+    "dev": "node scripts/copy-agent-assets.ts && node --eval \"process.getBuiltinModule('node:fs').rmSync('.mastra', { recursive: true, force: true })\" && mastra dev --env ../../.env.local",
+    "build": "node scripts/copy-agent-assets.ts && mastra build",
     "start": "node .mastra/output/index.mjs",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",

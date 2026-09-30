@@ -4,6 +4,7 @@ import type { ApiRoute } from "@mastra/core/server";
 import type { MastraCompositeStore } from "@mastra/core/storage";
 import type { Observability } from "@mastra/observability";
 import type { AnyWorkflow } from "@mastra/core/workflows";
+import { createKnowledgeAgentDefinition } from "../agents/knowledge-agent.ts";
 import { PING_AGENT } from "../agents/ping-agent.ts";
 import type { AgentMiddleware } from "../auth/agent-middleware.ts";
 import { createContextMiddleware } from "../auth/context-middleware.ts";
@@ -17,6 +18,7 @@ import { createAiCatalogReader } from "../tools/catalog/ai-catalog-reader.ts";
 import { loadBundledAiCatalog } from "../tools/catalog/ai-catalog-source.ts";
 import { createDescribeEntityTool } from "../tools/catalog/describe-entity.tool.ts";
 import { createListEntitiesTool } from "../tools/catalog/list-entities.tool.ts";
+import { createSearchKnowledgeTool } from "../tools/knowledge/search-knowledge.tool.ts";
 import type { CoreToolDefinition } from "../tools/define-core-tool.ts";
 import { createQuerySemanticSqlTool } from "../tools/sql/query-semantic-sql.tool.ts";
 import { createToolRegistry, type ToolRegistry } from "../tools/tool-registry.ts";
@@ -38,6 +40,8 @@ export type ComposeAgentRuntimeArgs = {
   readonly models?: AgentModels;
   readonly exporters?: ObservabilityExporter[];
   readonly aiCatalog?: unknown;
+  /** Directories tried first for agent instructions (the bundled copy in `apps/mastra`). */
+  readonly instructionsDirs?: readonly string[];
 };
 
 /** What `new Mastra({...})` receives from the runtime (spec §3.3); `pubsub` arrives with Task 25. */
@@ -56,15 +60,23 @@ export type RuntimeParts = {
   readonly tools: ToolRegistry;
 };
 
-const CORE_AGENTS: readonly AgentDefinition[] = [PING_AGENT];
+const coreAgents = (args: ComposeAgentRuntimeArgs): AgentDefinition[] => [
+  PING_AGENT,
+  createKnowledgeAgentDefinition(args.instructionsDirs === undefined ? {} : { instructionsDirs: args.instructionsDirs }),
+];
 
-const coreTools = (args: ComposeAgentRuntimeArgs): CoreToolDefinition[] => {
+const coreTools = (args: ComposeAgentRuntimeArgs, models: AgentModels): CoreToolDefinition[] => {
   const catalog = createAiCatalogReader(args.aiCatalog ?? loadBundledAiCatalog());
-  return [createListEntitiesTool({ catalog }), createDescribeEntityTool({ catalog }), createQuerySemanticSqlTool({ catalog: args.ports.catalog })];
+  return [
+    createListEntitiesTool({ catalog }),
+    createDescribeEntityTool({ catalog }),
+    createQuerySemanticSqlTool({ catalog: args.ports.catalog }),
+    createSearchKnowledgeTool({ knowledge: args.ports.knowledge, embedding: models.embedding, catalog }),
+  ];
 };
 
-const collectAgents = (modules: readonly AgentModule[]): AgentDefinition[] => {
-  const all = [...CORE_AGENTS, ...modules.flatMap((module) => module.agents ?? [])];
+const collectAgents = (args: ComposeAgentRuntimeArgs): AgentDefinition[] => {
+  const all = [...coreAgents(args), ...args.modules.flatMap((module) => module.agents ?? [])];
   const seen = new Set<string>();
   for (const agent of all) {
     if (seen.has(agent.id)) throw new AgentModuleError({ code: "DUPLICATE_CAPABILITY", moduleId: "runtime", capabilityId: agent.id });
@@ -87,11 +99,11 @@ const coreWorkflows = (args: ComposeAgentRuntimeArgs, models: AgentModels): Reco
   return { [ingest.id]: ingest, [reindex.id]: reindex };
 };
 
-const buildToolRegistry = (args: ComposeAgentRuntimeArgs, agents: readonly AgentDefinition[]): ToolRegistry => {
+const buildToolRegistry = (args: ComposeAgentRuntimeArgs, agents: readonly AgentDefinition[], models: AgentModels): ToolRegistry => {
   // Ceilings are data, known before any tool is bound: every call is capped by its agent's.
   const agentCeilings = Object.fromEntries(agents.map((agent) => [agent.id, new Set(agent.ceiling)]));
   const registry = createToolRegistry({ access: args.ports.access, audit: args.ports.audit, approvals: args.ports.approvals, agentCeilings });
-  for (const tool of [...coreTools(args), ...args.modules.flatMap((module) => module.tools ?? [])]) registry.register(tool);
+  for (const tool of [...coreTools(args, models), ...args.modules.flatMap((module) => module.tools ?? [])]) registry.register(tool);
   return registry;
 };
 
@@ -102,9 +114,9 @@ const buildToolRegistry = (args: ComposeAgentRuntimeArgs, agents: readonly Agent
  * @throws {AgentModuleError} for duplicated agents; {DuplicateToolError} for duplicated tools (boot errors).
  */
 export const composeAgentRuntime = (args: ComposeAgentRuntimeArgs): RuntimeParts => {
-  const definitions = collectAgents(args.modules);
-  const tools = buildToolRegistry(args, definitions);
+  const definitions = collectAgents(args);
   const models = args.models ?? createModelProvider(args.env);
+  const tools = buildToolRegistry(args, definitions, models);
   const deps = { models, tools, ports: args.ports };
   const agents = Object.fromEntries(definitions.map((definition) => [definition.id, definition.create(deps)]));
   const apiPrefix = args.apiPrefix;

@@ -52,10 +52,10 @@ const echoTool = (id: string) =>
 describe("composeAgentRuntime", () => {
   it("returns the ping agent, the auth provider, both middlewares and the core tools", () => {
     const runtime = compose();
-    expect(Object.keys(runtime.agents)).toEqual([PING_AGENT_ID]);
+    expect(Object.keys(runtime.agents)).toEqual([PING_AGENT_ID, "knowledge"]);
     expect(runtime.auth).toBeInstanceOf(FirebaseMastraAuth);
     expect(runtime.middleware.map((entry) => entry.path)).toEqual(["/api/*", "/api/*"]);
-    expect(runtime.tools.ids()).toEqual(["catalog.listEntities", "catalog.describeEntity", "sql.querySemanticSql"]);
+    expect(runtime.tools.ids()).toEqual(["catalog.listEntities", "catalog.describeEntity", "sql.querySemanticSql", "knowledge.searchKnowledge"]);
     expect(runtime).toMatchObject({ scorers: {}, mcpServers: {}, vectors: {}, apiRoutes: [] });
     expect(Object.keys(runtime.workflows).sort()).toEqual(["catalog-reindex", "knowledge-ingest"]);
   });
