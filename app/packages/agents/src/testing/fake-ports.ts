@@ -56,6 +56,8 @@ export const createFakeAccessPort = (args: {
   memberships?: readonly FakeMembership[];
   /** Permissions whose definition has `requiresApproval: true`. */
   approvalPermissions?: readonly string[];
+  /** API key scopes by `apiKeyId`: a key never exceeds them (SP1 `tenant-access.ts`). */
+  apiKeyScopes?: Readonly<Record<string, readonly string[]>>;
 }): FakeAccessPort => {
   const verifyCalls: { token: string; checkRevoked: boolean }[] = [];
   const membershipOf = (principal: AccessPrincipal, node: NodeRef): FakeMembership | undefined => {
@@ -64,8 +66,11 @@ export const createFakeAccessPort = (args: {
     if (tenantId === undefined || uid === undefined || !principalTenantMatches(principal, tenantId)) return undefined;
     return args.memberships?.find((membership) => membership.tenantId === tenantId && membership.uid === uid);
   };
+  const scopesOf = (principal: AccessPrincipal): readonly string[] | undefined =>
+    principal.type === "service" ? args.apiKeyScopes?.[principal.apiKeyId] : undefined;
   const effective = (principal: AccessPrincipal, node: NodeRef, ceiling?: ReadonlySet<string>): ReadonlySet<string> => {
-    const granted = membershipOf(principal, node)?.permissions ?? [];
+    const scopes = scopesOf(principal);
+    const granted = (membershipOf(principal, node)?.permissions ?? []).filter((permission) => scopes?.includes(permission) ?? true);
     return new Set(ceiling === undefined ? granted : granted.filter((permission) => ceiling.has(permission)));
   };
   return {

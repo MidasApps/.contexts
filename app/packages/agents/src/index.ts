@@ -9,7 +9,7 @@ export {
   UNSCOPED_RESOURCE_PREFIX,
 } from "./auth/agent-principal.ts";
 export { readBearerToken, readForwardedHeader, readRequestPath, requiresRevocationCheck } from "./auth/bearer-only.ts";
-export { FirebaseMastraAuth, type FirebaseMastraAuthOptions, requiredPermissionFor } from "./auth/firebase-mastra-auth.ts";
+export { DEFAULT_MASTRA_API_PREFIX, FirebaseMastraAuth, type FirebaseMastraAuthOptions, requiredPermissionFor } from "./auth/firebase-mastra-auth.ts";
 export type {
   AccessContext,
   AccessPort,

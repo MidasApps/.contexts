@@ -1,8 +1,8 @@
 import type { MastraAuthRequest } from "@mastra/core/server";
-import { describe, expect, it } from "vitest";
-import type { AccessPrincipal } from "../runtime/runtime-ports.ts";
+import { describe, expect, it, vi } from "vitest";
+import type { AccessPort, AccessPrincipal } from "../runtime/runtime-ports.ts";
 import { createFakeAccessPort, FAKE_REGIONAL } from "../testing/fake-ports.ts";
-import { FirebaseMastraAuth } from "./firebase-mastra-auth.ts";
+import { FirebaseMastraAuth, requiredPermissionFor } from "./firebase-mastra-auth.ts";
 
 const TENANT = "Jd8sK2lPq0WnR5tYu3bV";
 const MEMBER: AccessPrincipal = { type: "user", uid: "member-uid", mfa: false };
@@ -151,6 +151,77 @@ describe("FirebaseMastraAuth.authorizeUser", () => {
     const principal = await auth.authenticateToken("member-token", request);
     if (principal === null) throw new Error("expected a principal");
     expect(auth.authorizeUser(principal, request)).toBe(false);
+  });
+});
+
+describe("FirebaseMastraAuth with API keys", () => {
+  const OTHER_TENANT = "Qw3eR4tY5uI6oP7aS8dF";
+  const OWNER_PERMISSIONS = ["core.chat.use", "core.mcp.use", "core.knowledge.read"];
+
+  /** An SP1 binding that forgets the key's tenant and scopes: the auth must still fail closed. */
+  const laxAccess = (key: AccessPrincipal, effective: readonly string[]): AccessPort => ({
+    verifyBearer: () => Promise.resolve(key),
+    resolveAccessContext: ({ principal, node }) =>
+      Promise.resolve(
+        node.level === "platform"
+          ? null
+          : { tenantId: node.tenantId, principal, permissions: OWNER_PERMISSIONS, regional: FAKE_REGIONAL },
+      ),
+    authorize: () => Promise.resolve({ allowed: false, reason: "PERMISSION_NOT_GRANTED" }),
+    getEffectivePermissions: () => Promise.resolve(new Set(effective)),
+  });
+
+  it("gives no membership to a key forwarded with another tenant", async () => {
+    const key: AccessPrincipal = { type: "service", apiKeyId: "key-2", tenantId: TENANT, ownerUid: "member-uid" };
+    const access = { ...laxAccess(key, OWNER_PERMISSIONS), resolveAccessContext: vi.fn(laxAccess(key, OWNER_PERMISSIONS).resolveAccessContext) };
+    const auth = new FirebaseMastraAuth({ access });
+    const request = mastraRequest({ headers: { authorization: "Bearer core_live_key", "x-tenant-id": OTHER_TENANT } });
+    const principal = await auth.authenticateToken("core_live_key", request);
+    expect(principal).toMatchObject({ kind: "service", tenantId: OTHER_TENANT, isMember: false });
+    expect(principal?.permissions.size).toBe(0);
+    expect(access.resolveAccessContext).not.toHaveBeenCalled();
+    if (principal === null) throw new Error("expected a principal");
+    expect(auth.authorizeUser(principal, request)).toBe(false);
+  });
+
+  it("limits a key to its scopes even when the access context lists the owner's grants", async () => {
+    const key: AccessPrincipal = { type: "service", apiKeyId: "key-3", tenantId: TENANT, ownerUid: "member-uid" };
+    const auth = new FirebaseMastraAuth({ access: laxAccess(key, ["core.mcp.use"]) });
+    const chat = mastraRequest({ headers: withBearer("core_live_key") });
+    const principal = await auth.authenticateToken("core_live_key", chat);
+    if (principal === null) throw new Error("expected a principal");
+    expect([...principal.permissions]).toEqual(["core.mcp.use"]);
+    expect(auth.authorizeUser(principal, chat)).toBe(false);
+    expect(auth.authorizeUser(principal, mastraRequest({ path: "/api/mcp/core/mcp", headers: withBearer("core_live_key") }))).toBe(true);
+  });
+
+  it("applies the scopes of the fake access port like SP1", async () => {
+    const access = createFakeAccessPort({
+      credentials: { core_live_key: API_KEY },
+      memberships: [{ tenantId: TENANT, uid: "member-uid", permissions: OWNER_PERMISSIONS }],
+      apiKeyScopes: { "key-1": ["core.knowledge.read"] },
+    });
+    const principal = await new FirebaseMastraAuth({ access }).authenticateToken("core_live_key", mastraRequest({ headers: withBearer("core_live_key") }));
+    expect([...(principal?.permissions ?? [])]).toEqual(["core.knowledge.read"]);
+  });
+});
+
+describe("requiredPermissionFor", () => {
+  it("derives the MCP route from the configured API prefix", () => {
+    expect(requiredPermissionFor("/api/mcp/core/mcp")).toBe("core.mcp.use");
+    expect(requiredPermissionFor("/api/mcp/core/mcp", "/mastra")).toBe("core.chat.use");
+    expect(requiredPermissionFor("/mastra/mcp/core/mcp", "/mastra/")).toBe("core.mcp.use");
+    expect(requiredPermissionFor("/api/mcpx/other", "/api")).toBe("core.chat.use");
+    expect(requiredPermissionFor(undefined)).toBe("core.chat.use");
+  });
+
+  it("uses the prefix passed to the provider", async () => {
+    const { access } = createAuth();
+    const auth = new FirebaseMastraAuth({ access, apiPrefix: "/mastra" });
+    const request = mastraRequest({ path: "/mastra/mcp/core/mcp", headers: withBearer("member-token") });
+    const principal = await auth.authenticateToken("member-token", request);
+    if (principal === null) throw new Error("expected a principal");
+    expect(auth.authorizeUser(principal, request)).toBe(true);
   });
 });
 
