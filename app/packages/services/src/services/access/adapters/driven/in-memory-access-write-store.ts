@@ -65,6 +65,15 @@ const makeMemberships = (tables: Tables): MembershipRepository => {
       return Promise.resolve(row === undefined || row.deletedAt !== null ? null : row.value);
     },
     listOfPrincipal: (_tx, { tenantId, principalId }) => Promise.resolve(live().filter((m) => m.tenantId === tenantId && m.principalId === principalId)),
+    listOfPrincipals: ({ tenantId, principalIds }) => Promise.resolve(live().filter((m) => m.tenantId === tenantId && principalIds.includes(m.principalId))),
+    list: ({ tenantId, principalId, page }) =>
+      Promise.resolve(
+        paginateInMemory({
+          items: live().filter((m) => m.tenantId === tenantId && (principalId === undefined || m.principalId === principalId)),
+          page,
+          positionOf: (m) => [m.createdAt, m.id],
+        }),
+      ),
     listOrganizationOwners: (_tx, tenantId) =>
       Promise.resolve(live().filter((m) => m.tenantId === tenantId && m.node.level === "organization" && m.principalType === "user" && holdsOwner(m.roles))),
     isRoleInUse: (_tx, { tenantId, roleId }) =>
@@ -105,6 +114,14 @@ const projectionKey = (tenantId: string, principalId: string): string => `${tena
 const makeProjections = (tables: Tables): AccessProjectionStore => ({
   get: (_tx, { tenantId, principalId }) => Promise.resolve(tables.projections.get(projectionKey(tenantId, principalId)) ?? null),
   write: (_tx, { projection }) => void tables.projections.set(projection.id, projection),
+  listMembers: ({ tenantId, page }) =>
+    Promise.resolve(
+      paginateInMemory({
+        items: [...tables.projections.values()].filter((p) => p.tenantId === tenantId && p.principalType === "user" && !p.isRevoked),
+        page,
+        positionOf: (p) => [p.principalId, p.id],
+      }),
+    ),
   listUnrevoked: (_tx, { tenantId, limit }) =>
     Promise.resolve([...tables.projections.values()].filter((p) => p.tenantId === tenantId && !p.isRevoked).slice(0, limit)),
   markRevoked: (_tx, { projections, updatedAt }) => {

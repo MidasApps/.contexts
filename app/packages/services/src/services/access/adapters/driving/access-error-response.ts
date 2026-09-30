@@ -11,6 +11,9 @@ export const ACCESS_ERROR_MAPPING: DomainErrorMapping = {
   ROLE_IN_USE: { status: 409 },
   LAST_OWNER: { status: 422 },
   MEMBERSHIP_EXISTS: { status: 409 },
+  EMAIL_MISMATCH: { status: 403 },
+  INVITATION_ALREADY_USED: { status: 409 },
+  INVITATION_EXPIRED: { status: 410 },
 };
 
 /**

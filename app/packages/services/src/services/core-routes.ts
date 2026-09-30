@@ -1,6 +1,10 @@
 import { CORE_ENDPOINTS } from "@core/contracts";
+import { buildInvitationsRoutes } from "./access/adapters/driving/invitations-routes.ts";
+import { buildMembersRoutes } from "./access/adapters/driving/members-routes.ts";
+import { buildMembershipsRoutes } from "./access/adapters/driving/memberships-routes.ts";
 import { buildRolesRoutes } from "./access/adapters/driving/roles-routes.ts";
 import type { AccessServices } from "./access/composition.ts";
+import type { MemberServices } from "./access/member-composition.ts";
 import { buildOrganizationsRoutes } from "./tenancy/adapters/driving/organizations-routes.ts";
 import { buildProjectsRoutes } from "./tenancy/adapters/driving/projects-routes.ts";
 import { buildUnitTypesRoutes } from "./tenancy/adapters/driving/unit-types-routes.ts";
@@ -16,7 +20,12 @@ import { REQUEST_ID_HEADER, resolveRequestId } from "./shared/observability/requ
 export type CoreRoutes = Readonly<Record<string, RouteHandler>>;
 
 /** What the verticals of the route table need. */
-export type CoreRouteDeps = { readonly pipeline: ApiRouteDeps; readonly access: AccessServices; readonly tenancy: TenancyServices };
+export type CoreRouteDeps = {
+  readonly pipeline: ApiRouteDeps;
+  readonly access: AccessServices;
+  readonly members: MemberServices;
+  readonly tenancy: TenancyServices;
+};
 
 /**
  * The `/v1` route table. Each vertical (SP1 Tasks 9–18) adds its handlers here with
@@ -25,6 +34,9 @@ export type CoreRouteDeps = { readonly pipeline: ApiRouteDeps; readonly access: 
  */
 export const buildCoreRoutes = (deps: CoreRouteDeps): CoreRoutes => ({
   ...buildRolesRoutes(deps),
+  ...buildMembersRoutes(deps),
+  ...buildMembershipsRoutes(deps),
+  ...buildInvitationsRoutes(deps),
   ...buildOrganizationsRoutes(deps),
   ...buildProjectsRoutes(deps),
   ...buildUnitsRoutes(deps),

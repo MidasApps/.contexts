@@ -3,6 +3,7 @@
 import type { Firestore } from "firebase-admin/firestore";
 import { createFakeTokenVerifier } from "../../identity/adapters/driven/fake-token-verifier.ts";
 import { createCoreServer, type CoreServer, type CoreServerModule } from "../../composition.ts";
+import type { Clock } from "../clock/clock.ts";
 import { createFirebaseAdmin, type FirebaseAdmin } from "../firebase/firebase-admin.ts";
 import { CORE_COLLECTIONS } from "../firestore/collections.ts";
 import { createLogger, type LogRecord } from "../observability/logger.ts";
@@ -22,15 +23,27 @@ export const seedActiveUser = async (firestore: Firestore, uid: string): Promise
   await firestore.collection(CORE_COLLECTIONS.users).doc(uid).set({ status: "active", accessVersion: 0, lastContext: {} });
 };
 
-/** Makes sure an Auth Emulator account with an email exists (createOrganization reads its profile). */
-export const ensureAuthUser = async (auth: FirebaseAdmin["auth"], uid: string): Promise<void> => {
+/**
+ * Makes sure an Auth Emulator account with an email exists (createOrganization reads its
+ * profile); `email` and `emailVerified` default to `<uid>@example.com`, unverified.
+ */
+export const ensureAuthUser = async (
+  auth: FirebaseAdmin["auth"],
+  uid: string,
+  account: { email?: string; emailVerified?: boolean } = {},
+): Promise<void> => {
+  const email = account.email ?? `${uid}@example.com`;
   try {
     await auth.getUser(uid);
+    await auth.updateUser(uid, { email, emailVerified: account.emailVerified ?? false });
   } catch {
     // auth/user-not-found: create it; any other failure resurfaces in createUser.
-    await auth.createUser({ uid, email: `${uid}@example.com`, displayName: uid });
+    await auth.createUser({ uid, email, emailVerified: account.emailVerified ?? false, displayName: uid });
   }
 };
+
+/** Base URL of invitation links built by the emulator server. */
+export const EMULATOR_APP_URL = "https://app.example.com";
 
 type CallArgs = { readonly method: string; readonly path: string; readonly as?: string; readonly body?: unknown };
 
@@ -43,11 +56,13 @@ export const buildEmulatorServer = (args: {
   uids: readonly string[];
   modules?: readonly CoreServerModule[];
   selfServe?: boolean;
+  clock?: Clock;
 }): { server: CoreServer; call: (endpointId: string, request: CallArgs) => Promise<Response>; logs: LogRecord[] } => {
   const logs: LogRecord[] = [];
   const tokens = Object.fromEntries(args.uids.map((uid) => [`token-${uid}`, { uid, claims: {}, signInProvider: "password", secondFactor: null }]));
   const base = {
-    env: { API_KEY_PREFIX: "core", ORGANIZATION_SELF_SERVE: args.selfServe ?? true },
+    env: { API_KEY_PREFIX: "core", ORGANIZATION_SELF_SERVE: args.selfServe ?? true, NEXT_PUBLIC_APP_URL: EMULATOR_APP_URL },
+    ...(args.clock === undefined ? {} : { clock: args.clock }),
     firebase: args.firebase,
     logger: createLogger({ context: { service: "test", env: "local" }, sink: (record) => logs.push(record) }),
     ...(args.modules === undefined ? {} : { modules: args.modules }),

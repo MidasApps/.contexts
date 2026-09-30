@@ -1,15 +1,22 @@
 // Composition root of the core server: builds every adapter once per process and binds the
 // `/v1` pipeline, the access core, the access write side and the audit writer. Apps call it lazily.
+import { randomBytes } from "node:crypto";
 import type { PermissionDefinition, UnitTypeDefinition } from "@core/contracts";
 import { createFirestoreAccessAdapters, type FirestoreAccessAdapters } from "./access/adapters/driven/firestore-access-adapters.ts";
+import { createNoopInvitationNotifier } from "./access/adapters/driven/noop-invitation-notifier.ts";
+import type { AccessWriteDeps } from "./access/application/access-write-deps.ts";
 import type { AccessReaders } from "./access/application/ports/driven/access-readers.ts";
+import type { InvitationNotifier } from "./access/application/ports/driven/invitation-notifier.ts";
 import { makeSyncClaims } from "./access/application/use-cases/sync-claims.ts";
 import { createAccessCore, createAccessServices, type AccessCore, type AccessServices } from "./access/composition.ts";
+import type { RandomBytes } from "./access/domain/invitation-token.ts";
+import { createMemberServices, type MemberServices } from "./access/member-composition.ts";
 import { createFirestoreAuditLogWriter } from "./audit/adapters/driven/firestore-audit-log-writer.ts";
 import { makeRecordAudit, type AuditWriter } from "./audit/application/use-cases/record-audit.ts";
 import { buildCoreRoutes, type CoreRoutes } from "./core-routes.ts";
 import { createFirebaseTokenVerifier } from "./identity/adapters/driven/firebase-token-verifier.ts";
 import { refuseAllApiKeys, type ApiKeyAuthenticator } from "./identity/application/ports/driven/api-key-authenticator.ts";
+import { noopApiKeyRevoker, type ApiKeyRevoker } from "./identity/application/ports/driven/api-key-revoker.ts";
 import type { TokenVerifier } from "./identity/application/ports/driven/token-verifier.ts";
 import { createFirebaseUserAccountReader } from "./identity/adapters/driven/firebase-user-account-reader.ts";
 import { makeVerifyBearer, type VerifyBearer } from "./identity/application/use-cases/resolve-principal.ts";
@@ -43,6 +50,12 @@ export type CoreServerAdapters = {
   /** Emulator route tests pass `createFakeTokenVerifier` (the Auth Emulator always checks revocation). */
   readonly tokenVerifier?: TokenVerifier;
   readonly tenancy?: FirestoreTenancyAdapters;
+  /** Stand-in until the API keys vertical (SP1 Task 14) provides the Firestore revoker. */
+  readonly apiKeyRevoker?: ApiKeyRevoker;
+  /** The core logs only; an application may deliver invitation links (SP1 spec §6.2). */
+  readonly invitationNotifier?: InvitationNotifier;
+  /** Randomness for invitation tokens (defaults to `crypto.randomBytes`). */
+  readonly randomBytes?: RandomBytes;
 };
 
 export type CoreServer = {
@@ -53,6 +66,8 @@ export type CoreServer = {
   readonly access: AccessCore;
   /** Access write side: grants, roles, claims sync (SP1 Task 9). */
   readonly accessServices: AccessServices;
+  /** Members, grant listing and invitations (SP1 Task 11). */
+  readonly members: MemberServices;
   /** Organizations, projects, units and regional settings (SP1 Task 10). */
   readonly tenancy: TenancyServices;
   readonly audit: AuditWriter;
@@ -61,8 +76,11 @@ export type CoreServer = {
 };
 
 type CoreServerArgs = {
-  /** `ORGANIZATION_SELF_SERVE` defaults to true (SP1 spec §6.1). */
-  env: { readonly API_KEY_PREFIX: string; readonly ORGANIZATION_SELF_SERVE?: boolean };
+  /**
+   * `ORGANIZATION_SELF_SERVE` defaults to true (SP1 spec §6.1); `NEXT_PUBLIC_APP_URL` builds
+   * invitation links (a server without it refuses to create invitations).
+   */
+  env: { readonly API_KEY_PREFIX: string; readonly ORGANIZATION_SELF_SERVE?: boolean; readonly NEXT_PUBLIC_APP_URL?: string };
   firebase: FirebaseAdmin;
   logger: Logger;
   clock?: Clock;
@@ -80,7 +98,7 @@ const buildAccess = (args: CoreServerArgs, clock: Clock, audit: AuditWriter) => 
     clock,
   });
   const syncClaims = makeSyncClaims({ users: adapters.users, projections: adapters.projections, principals: readers.principals, claims: adapters.claims, logger: args.logger });
-  const services = createAccessServices({
+  const writeDeps: AccessWriteDeps = {
     registry: core.registry,
     memberships: adapters.memberships,
     roles: adapters.roles,
@@ -91,8 +109,19 @@ const buildAccess = (args: CoreServerArgs, clock: Clock, audit: AuditWriter) => 
     unitOfWork: createFirestoreUnitOfWork({ firestore }),
     clock,
     syncClaims,
+  };
+  const members = createMemberServices({
+    ...writeDeps,
+    invitations: adapters.invitations,
+    directory: adapters.directory,
+    organizations: adapters.organizations,
+    notifier: args.adapters?.invitationNotifier ?? createNoopInvitationNotifier({ logger: args.logger }),
+    apiKeys: args.adapters?.apiKeyRevoker ?? noopApiKeyRevoker,
+    randomBytes: args.adapters?.randomBytes ?? randomBytes,
+    appUrl: args.env.NEXT_PUBLIC_APP_URL,
+    logger: args.logger,
   });
-  return { core, services };
+  return { core, services: createAccessServices(writeDeps), members };
 };
 
 const buildTenancy = (args: CoreServerArgs, clock: Clock, audit: AuditWriter, access: AccessServices): TenancyServices => {
@@ -138,6 +167,6 @@ export const createCoreServer = (args: CoreServerArgs): CoreServer => {
     access: access.core,
     audit,
   };
-  const routes = buildCoreRoutes({ pipeline, access: access.services, tenancy });
-  return { routes, verifyBearer, access: access.core, accessServices: access.services, tenancy, audit, pipeline };
+  const routes = buildCoreRoutes({ pipeline, access: access.services, members: access.members, tenancy });
+  return { routes, verifyBearer, access: access.core, accessServices: access.services, members: access.members, tenancy, audit, pipeline };
 };

@@ -12,6 +12,7 @@ export const CORE_COLLECTIONS = {
   roles: "roles",
   memberships: "memberships",
   access: "access",
+  invitations: "invitations",
   devices: "devices",
   apiKeys: "api-keys",
   impersonationSessions: "impersonation-sessions",

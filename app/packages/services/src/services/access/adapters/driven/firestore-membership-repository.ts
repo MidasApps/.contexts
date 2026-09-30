@@ -1,7 +1,8 @@
 import { IsoDateTimeSchema, MembershipIdSchema, MembershipSchema, type Membership, type RoleRef } from "@core/contracts";
-import type { DocumentData, Firestore, Query, Transaction } from "firebase-admin/firestore";
+import { FieldPath, Timestamp, type DocumentData, type Firestore, type Query, type Transaction } from "firebase-admin/firestore";
 import { CORE_COLLECTIONS, CORE_SCHEMA_VERSION } from "../../../shared/firestore/collections.ts";
 import { createContractConverter, toFirestoreUpdate } from "../../../shared/firestore/contract-converter.ts";
+import { pageFromOverfetch } from "../../../shared/pagination/page.ts";
 import type { MembershipRepository } from "../../application/ports/driven/membership-repository.ts";
 import { nodeIdOf } from "../../domain/access-projection.ts";
 import { customRoleIdsOf, holdsOwner } from "../../domain/role-permissions.ts";
@@ -44,6 +45,12 @@ export const membershipDocument = (membership: Membership, actorId: string): Doc
 const readAll = async (tx: Transaction, query: Query<StoredMembership>): Promise<Membership[]> =>
   (await tx.get(query)).docs.flatMap((doc) => liveOnly(doc.data()) ?? []);
 
+// Firestore allows at most 30 values in an `in` filter.
+const IN_FILTER_LIMIT = 30;
+
+const chunksOf = <T>(items: readonly T[], size: number): T[][] =>
+  Array.from({ length: Math.ceil(items.length / size) }, (_, index) => items.slice(index * size, (index + 1) * size));
+
 const rolesUpdate = (roles: readonly RoleRef[]) => ({ roles: [...roles], customRoleIds: customRoleIdsOf(roles) });
 
 /** Firestore `MembershipRepository` over the top-level `memberships` collection. */
@@ -60,6 +67,19 @@ export const createFirestoreMembershipRepository = (deps: { firestore: Firestore
     },
     listOfPrincipal: (tx, { tenantId, principalId }) =>
       readAll(tx, live().where("tenantId", "==", tenantId).where("principalId", "==", principalId)),
+    listOfPrincipals: async ({ tenantId, principalIds }) => {
+      const chunks = chunksOf([...new Set(principalIds)], IN_FILTER_LIMIT);
+      const snapshots = await Promise.all(chunks.map((ids) => live().where("tenantId", "==", tenantId).where("principalId", "in", ids).get()));
+      return snapshots.flatMap((snapshot) => snapshot.docs.flatMap((doc) => liveOnly(doc.data()) ?? []));
+    },
+    list: async ({ tenantId, principalId, page }) => {
+      let query = live().where("tenantId", "==", tenantId);
+      if (principalId !== undefined) query = query.where("principalId", "==", principalId);
+      query = query.orderBy("createdAt").orderBy(FieldPath.documentId());
+      if (page.after !== undefined) query = query.startAfter(Timestamp.fromDate(new Date(page.after[0])), page.after[1]);
+      const fetched = (await query.limit(page.limit + 1).get()).docs.flatMap((doc) => liveOnly(doc.data()) ?? []);
+      return pageFromOverfetch({ fetched, limit: page.limit, positionOf: (membership) => [membership.createdAt, membership.id] });
+    },
     listOrganizationOwners: async (tx, tenantId) => {
       const query = live().where("tenantId", "==", tenantId).where("nodeId", "==", tenantId).where("principalType", "==", "user");
       return (await readAll(tx, query)).filter((membership) => holdsOwner(membership.roles));

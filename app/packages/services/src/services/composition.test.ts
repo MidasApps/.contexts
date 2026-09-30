@@ -57,6 +57,21 @@ describe("createCoreServer", () => {
         "tenancy.listUnitTypes",
       ]),
     );
+    expect(Object.keys(build().routes)).toEqual(
+      expect.arrayContaining([
+        "access.listMembers",
+        "access.removeMember",
+        "access.listMemberships",
+        "access.grantMembership",
+        "access.updateMembership",
+        "access.revokeMembership",
+        "access.listInvitations",
+        "access.createInvitation",
+        "access.revokeInvitation",
+        "access.previewInvitation",
+        "access.acceptInvitation",
+      ]),
+    );
   });
 
   it("registers the unit types of the installed modules", () => {

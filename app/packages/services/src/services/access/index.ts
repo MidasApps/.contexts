@@ -26,6 +26,25 @@ export { createFirestoreAccessAdapters, type FirestoreAccessAdapters } from "./a
 export { ClaimsTooLargeError, MAX_CLAIMS_BYTES } from "./adapters/driven/firebase-claims-writer.ts";
 export { createInMemoryAccessWriteStore, type InMemoryAccessWriteStore } from "./adapters/driven/in-memory-access-write-store.ts";
 export { accessErrorResponse } from "./adapters/driving/access-error-response.ts";
+// Members and invitations (SP1 Task 11).
+export { createMemberServices, type MemberServices } from "./member-composition.ts";
+export { AppUrlMissingError, type MemberDeps } from "./application/member-deps.ts";
+export type { InvitationRepository } from "./application/ports/driven/invitation-repository.ts";
+export type { InvitationNotifier } from "./application/ports/driven/invitation-notifier.ts";
+export type { DirectoryAccount, DirectoryEntry, UserDirectory } from "./application/ports/driven/user-directory.ts";
+export type { OrganizationDirectory } from "./application/ports/driven/organization-directory.ts";
+export type { AcceptInvitation, AcceptInvitationCommand, AcceptInvitationError } from "./application/use-cases/accept-invitation.ts";
+export type { CreateInvitation, CreateInvitationCommand } from "./application/use-cases/create-invitation.ts";
+export type { RemoveMember, RemoveMemberCommand, RemoveMemberError } from "./application/use-cases/remove-member.ts";
+export { maskEmail, normalizeEmail, sameEmail } from "./domain/email.ts";
+export { EmailMismatchError, InvitationAlreadyUsedError, InvitationExpiredError } from "./domain/errors/invitation-errors.ts";
+export { checkInvitationUsable, effectiveInvitationStatus } from "./domain/invitation-state.ts";
+export { buildAcceptUrl, generateInvitationToken, hashInvitationToken, InvalidRandomBytesError, type RandomBytes } from "./domain/invitation-token.ts";
+export { createFirestoreInvitationRepository } from "./adapters/driven/firestore-invitation-repository.ts";
+export { createFirebaseUserDirectory } from "./adapters/driven/firebase-user-directory.ts";
+export { createFirestoreOrganizationDirectory } from "./adapters/driven/firestore-organization-directory.ts";
+export { createInMemoryInvitationRepository, type InMemoryInvitationRepository } from "./adapters/driven/in-memory-invitation-repository.ts";
+export { createNoopInvitationNotifier } from "./adapters/driven/noop-invitation-notifier.ts";
 export type { AuthorizeDecision, DenyReason, GrantSource } from "./domain/authorization.ts";
 export type { CustomRoleRecord, GrantRecord } from "./domain/grant.ts";
 export { chainNodeIds, checkNodeChain, isNodeWithin, type ChainNode, type ChainUnit, type NodeChain } from "./domain/node-chain.ts";

@@ -1,7 +1,8 @@
 import { accessProjectionId, AccessProjectionSchema, type AccessProjection } from "@core/contracts";
-import type { Firestore } from "firebase-admin/firestore";
+import { FieldPath, type Firestore } from "firebase-admin/firestore";
 import { CORE_COLLECTIONS, CORE_SCHEMA_VERSION } from "../../../shared/firestore/collections.ts";
 import { createContractConverter, toFirestoreUpdate } from "../../../shared/firestore/contract-converter.ts";
+import { pageFromOverfetch } from "../../../shared/pagination/page.ts";
 import type { AccessProjectionStore } from "../../application/ports/driven/access-projection-writer.ts";
 
 const stored = { schema: AccessProjectionSchema };
@@ -25,6 +26,17 @@ export const createFirestoreAccessProjectionStore = (deps: { firestore: Firestor
     },
     write: (tx, { projection, actorId }) =>
       void tx.set(raw().doc(projection.id), { ...converter.toFirestore(projection), updatedBy: actorId, schemaVersion: CORE_SCHEMA_VERSION }),
+    listMembers: async ({ tenantId, page }) => {
+      let query = typed()
+        .where("tenantId", "==", tenantId)
+        .where("principalType", "==", "user")
+        .where("isRevoked", "==", false)
+        .orderBy("principalId")
+        .orderBy(FieldPath.documentId());
+      if (page.after !== undefined) query = query.startAfter(...page.after);
+      const fetched = (await query.limit(page.limit + 1).get()).docs.map((doc) => doc.data());
+      return pageFromOverfetch({ fetched, limit: page.limit, positionOf: (projection) => [projection.principalId, projection.id] });
+    },
     listUnrevoked: async (tx, { tenantId, limit }) => {
       const query = typed().where("tenantId", "==", tenantId).where("isRevoked", "==", false).limit(limit);
       return (tx === undefined ? await query.get() : await tx.get(query)).docs.map((doc) => doc.data());

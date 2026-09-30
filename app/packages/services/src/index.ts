@@ -160,6 +160,25 @@ export {
   UnknownRoleError,
   type UserAccessVersionStore,
 } from "./services/access/index.ts";
+// SP1 members and invitations (Task 11).
+export {
+  AppUrlMissingError,
+  createFirebaseUserDirectory,
+  createFirestoreInvitationRepository,
+  createInMemoryInvitationRepository,
+  createMemberServices,
+  createNoopInvitationNotifier,
+  EmailMismatchError,
+  InvitationAlreadyUsedError,
+  InvitationExpiredError,
+  type InvitationNotifier,
+  type InvitationRepository,
+  type MemberDeps,
+  type MemberServices,
+  normalizeEmail,
+  type UserDirectory,
+} from "./services/access/index.ts";
+export { noopApiKeyRevoker, type ApiKeyRevoker } from "./services/identity/application/ports/driven/api-key-revoker.ts";
 export { createFirestoreUnitOfWork, inMemoryUnitOfWork, type UnitOfWork } from "./services/shared/firestore/unit-of-work.ts";
 export { CORE_COLLECTIONS, CORE_SCHEMA_VERSION } from "./services/shared/firestore/collections.ts";
 export { decodeCursor, encodeCursor, type CursorPosition } from "./services/shared/pagination/cursor.ts";
