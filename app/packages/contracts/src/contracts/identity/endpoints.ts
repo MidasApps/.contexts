@@ -59,7 +59,7 @@ export const setActiveOrganizationEndpoint = defineEndpoint({
   responses: { 204: null },
   errors: { 403: FORBIDDEN, 404: NOT_FOUND },
   rateLimit: "active-organization-switch",
-  summary: "Switches the active organization and syncs claims (core.organization.read).",
+  summary: "Switches the active organization and syncs claims (any live grant in the organization).",
 });
 
 export const syncClaimsEndpoint = defineEndpoint({

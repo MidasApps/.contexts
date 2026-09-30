@@ -21,8 +21,8 @@ const nodeOf = (state: SeedState, at: MemberGrant["at"]): SeedGrantNode => {
 /**
  * Accounts `member`, `viewer` and `invitee` (verified; the invitee has no membership, so the
  * SP2 e2e can accept an invitation with it), their profiles, and the grants of
- * `SEED_MEMBER_GRANTS` made by the owner. The organization-level viewer starts in the demo
- * organization.
+ * `SEED_MEMBER_GRANTS` made by the owner. Both grantees start in the demo organization,
+ * the project-level member included (decision 0030 A5).
  * Idempotent: an existing grant on the node is left as it is.
  */
 export const seedMembers = async (args: { core: SeedCore; auth: AuthAdmin; target: SeedTarget; state: SeedState }): Promise<string> => {
@@ -39,9 +39,7 @@ export const seedMembers = async (args: { core: SeedCore; auth: AuthAdmin; targe
     const node = nodeOf(state, grant.at);
     const granted = await core.grantRole({ actorUid: ownerUid, principalUid, node, role: grant.role });
     if (granted === "granted") changes.push(`${grant.user} as ${grant.role} on the ${grant.at}`);
-    // `PUT /v1/me/active-organization` authorizes `core.organization.read` at the organization,
-    // which a project-level grant does not give (grants inherit downwards only).
-    if (node.level !== "organization") continue;
+    // Any live grant in the organization's tree lets its holder switch (decision 0030 A5).
     const active = await core.ensureActiveOrganization({ uid: principalUid, organizationId: node.organizationId });
     if (active === "set") changes.push(`${grant.user} active organization`);
   }

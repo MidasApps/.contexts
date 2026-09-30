@@ -1,5 +1,4 @@
 import type { OrganizationId, UserPrincipal } from "@core/contracts";
-import { requirePermission } from "../../../access/application/grant-checks.ts";
 import type { RequestAccess } from "../../../access/composition.ts";
 import { AccessDeniedError } from "../../../access/domain/errors/access-denied-error.ts";
 import { auditActorOf } from "../../../audit/domain/audit-actor.ts";
@@ -16,18 +15,20 @@ export type SetActiveOrganizationCommand = {
 export type SetActiveOrganization = (command: SetActiveOrganizationCommand) => Promise<Result<void, AccessDeniedError>>;
 
 /**
- * `PUT /v1/me/active-organization` (SP1 spec §5.4): the caller must be a member
- * (`core.organization.read`); writes `lastContext`, audits `ACTIVE_ORGANIZATION_CHANGED`
- * and syncs claims, so the next ID token carries `tenantId`. The API never trusts that
- * claim; it is a projection for Security Rules. Refused under impersonation.
+ * `PUT /v1/me/active-organization` (SP1 spec §5.4, decision 0030 A5): the caller must be a
+ * live member, with any live grant in the organization's tree (a project- or unit-only member
+ * qualifies; switching grants nothing); writes `lastContext`, audits
+ * `ACTIVE_ORGANIZATION_CHANGED` and syncs claims, so the next ID token carries `tenantId`.
+ * The API never trusts that claim; it is a projection for Security Rules. Refused under
+ * impersonation.
  */
 export const makeSetActiveOrganization =
-  (deps: Pick<MeDeps, "users" | "audit" | "unitOfWork" | "clock" | "syncClaims">): SetActiveOrganization =>
+  (deps: Pick<MeDeps, "users" | "membership" | "audit" | "unitOfWork" | "clock" | "syncClaims">): SetActiveOrganization =>
   async (command) => {
     const { actor, organizationId } = command;
     if (actor.impersonation !== undefined) return err(new AccessDeniedError("IMPERSONATION_READ_ONLY"));
     const node = { level: "organization" as const, tenantId: organizationId };
-    const allowed = await requirePermission({ ...command, permission: "core.organization.read", node });
+    const allowed = await deps.membership.requireOrganizationMember({ access: command.access, actor, tenantId: organizationId });
     if (!allowed.ok) return allowed;
     const updatedAt = deps.clock.now().toISOString();
     await deps.unitOfWork.run(async (tx) => {

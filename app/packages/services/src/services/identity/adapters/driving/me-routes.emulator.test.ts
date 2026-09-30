@@ -7,7 +7,7 @@ import { buildEmulatorServer, clearCoreCollections, emulatorFirebase, ensureAuth
 const firebase = emulatorFirebase();
 const { firestore, auth } = firebase;
 // One instant for the whole file: the 10-per-minute switch budget stays in one window.
-const harness = buildEmulatorServer({ firebase, uids: ["me-founder", "me-outsider"], clock: fixedClock("2026-09-30T12:00:00.000Z") });
+const harness = buildEmulatorServer({ firebase, uids: ["me-founder", "me-outsider", "me-member"], clock: fixedClock("2026-09-30T12:00:00.000Z") });
 const DEFAULTS = { locale: "pt-BR", timeZone: "America/Sao_Paulo", currency: "BRL" };
 
 type Body = { data?: Record<string, unknown> & { id?: string }; error?: { code: string } };
@@ -40,6 +40,8 @@ beforeEach(async () => {
   await clearCoreCollections(firestore);
   await ensureAuthUser(auth, "me-founder");
   await ensureAuthUser(auth, "me-outsider");
+  await ensureAuthUser(auth, "me-member");
+  await auth.setCustomUserClaims("me-member", null);
   await auth.setCustomUserClaims("me-founder", null);
 }, 30_000);
 
@@ -74,6 +76,41 @@ describe("me routes (emulator)", () => {
 
     await seedActiveUser(firestore, "me-outsider");
     expect((await switchTo(target, "me-outsider")).status).toBe(404);
+  });
+
+  it("lets a project-only member switch (204, decision 0030 A5); its token carries the tenantId", { timeout: 30_000 }, async () => {
+    const organizationId = OrganizationIdSchema.parse(await createOrganization("Projects only"));
+    const project = await harness.call("tenancy.createProject", { method: "POST", path: `/v1/organizations/${organizationId}/projects`, as: "me-founder", body: { name: "Alpha" } });
+    const projectId = (await body(project)).data?.id ?? "";
+    expect(project.status).toBe(201);
+    // A full users doc (preferences included), as the first GET /v1/me of a real client creates it.
+    expect((await harness.call("identity.getMe", { method: "GET", path: "/v1/me", as: "me-member" })).status).toBe(200);
+    await firestore.runTransaction(async (tx) => {
+      const plan = await harness.server.accessServices.prepareGrant(tx, {
+        tenantId: organizationId,
+        principal: { type: "user", id: "me-member" },
+        node: { level: "project", tenantId: organizationId, projectId } as never,
+        roles: [{ kind: "system", key: "viewer" }],
+        grantedBy: UserIdSchema.parse("seed"),
+        actor: { type: "system", id: "system" },
+        requestId: "seed",
+      });
+      if (!plan.ok) throw plan.error;
+      await plan.data.commit();
+    });
+
+    const listed = (await body(await harness.call("identity.listMyOrganizations", { method: "GET", path: "/v1/me/organizations", as: "me-member" }))).data as unknown as { id: string }[];
+    expect(listed.map((organization) => organization.id)).toEqual([organizationId]);
+    expect((await switchTo(organizationId, "me-member")).status).toBe(204);
+    expect((await freshIdTokenClaims("me-member"))["tenantId"]).toBe(organizationId);
+    // Switching grants nothing: the organization-level context stays hidden.
+    const context = await harness.call("identity.getAccessContext", { method: "GET", path: `/v1/me/context?organizationId=${organizationId}`, as: "me-member" });
+    expect(context.status).toBe(404);
+    const projectContext = await harness.call("identity.getAccessContext", { method: "GET", path: `/v1/me/context?organizationId=${organizationId}&projectId=${projectId}`, as: "me-member" });
+    expect(projectContext.status).toBe(200);
+
+    await seedActiveUser(firestore, "me-outsider");
+    expect((await switchTo(organizationId, "me-outsider")).status).toBe(404);
   });
 
   it("answers 429 with Retry-After on the 11th switch in a minute", { timeout: 60_000 }, async () => {

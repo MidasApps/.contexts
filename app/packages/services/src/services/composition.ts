@@ -217,6 +217,7 @@ export const createCoreServer = (args: CoreServerArgs): CoreServer => {
     staff: access.readers.principals,
     access: access.core,
     projections: access.services.projections,
+    membership: access.services,
     syncClaims: access.services.syncClaims,
     organizations: tenancyAdapters.organizations,
     loadNode: tenancy.loadNode,

@@ -16,6 +16,7 @@ export const makeMeWorld = () => {
     staff: world.store.principals,
     access: world.core,
     projections: world.writes.projections,
+    membership: world.services,
     syncClaims: world.deps.syncClaims,
     organizations: world.tenancyStore.organizations,
     loadNode: world.tenancy.loadNode,

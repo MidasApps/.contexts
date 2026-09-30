@@ -44,7 +44,8 @@ describe("SP1 seed steps", () => {
     expect(fake.phones.get(staff ?? "")).toBe(SEED_STAFF_PHONE);
     expect([member, viewer, invitee, staff].every((uid) => fake.profiles.has(uid ?? ""))).toBe(true);
     expect(fake.active.get(viewer ?? "")).toBe(state.demoOrganizationId);
-    expect(fake.active.has(member ?? "")).toBe(false);
+    // A project-level member switches too (decision 0030 A5).
+    expect(fake.active.get(member ?? "")).toBe(state.demoOrganizationId);
   });
 
   it("reports unchanged for every step on the second run and creates no second copy", async () => {

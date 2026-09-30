@@ -2,7 +2,7 @@ import type { Me, PlatformRole, User } from "@core/contracts";
 import type { AccessProjectionStore } from "../../access/application/ports/driven/access-projection-writer.ts";
 import type { PrincipalStatusReader } from "../../access/application/ports/driven/principal-status-reader.ts";
 import type { SyncClaims } from "../../access/application/use-cases/sync-claims.ts";
-import type { AccessCore } from "../../access/composition.ts";
+import type { AccessCore, AccessServices } from "../../access/composition.ts";
 import type { AuditWriter } from "../../audit/application/use-cases/record-audit.ts";
 import type { Clock } from "../../shared/clock/clock.ts";
 import type { UnitOfWork } from "../../shared/firestore/unit-of-work.ts";
@@ -19,6 +19,8 @@ export type MeDeps = {
   /** A fresh request scope per `resolveAccessContext` call (SP3 calls it outside `/v1`). */
   readonly access: AccessCore;
   readonly projections: Pick<AccessProjectionStore, "listOfPrincipal">;
+  /** Membership check of `PUT /v1/me/active-organization` (decision 0030 A5). */
+  readonly membership: Pick<AccessServices, "requireOrganizationMember">;
   readonly syncClaims: SyncClaims;
   readonly organizations: Pick<OrganizationRepository, "get">;
   readonly loadNode: LoadNode;

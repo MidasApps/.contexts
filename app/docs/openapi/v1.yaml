@@ -1048,7 +1048,7 @@ paths:
             - INTERNAL_ERROR
       security:
         - bearerAuth: []
-      summary: Switches the active organization and syncs claims (core.organization.read).
+      summary: Switches the active organization and syncs claims (any live grant in the organization).
       tags:
         - identity
       x-auth: user
