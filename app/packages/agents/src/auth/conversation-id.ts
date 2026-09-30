@@ -20,13 +20,15 @@ export const newConversationId = (random: (max: number) => number = randomInt): 
 /**
  * Whether a request starts a run that needs a memory thread: an agent `generate`/`stream`
  * (the supervisor owns the tenant memory, and Mastra fails a memory run without a thread)
- * or a call to an MCP server (its `ask_<agent>` tools run the supervisor). Tool approval
- * routes resume the run they belong to and never get a new thread.
+ * or a call to an MCP server (its `ask_<agent>` tools run the supervisor), and a chat turn
+ * (`POST /chat/:agentId`, outside the prefix, SP4). Tool approval routes resume the run they
+ * belong to and never get a new thread.
  */
 export const startsConversationRun = (request: Request, apiPrefix?: string): boolean => {
   if (request.method !== "POST") return false;
   const prefix = normalizeApiPrefix(apiPrefix);
   const path = new URL(request.url).pathname;
+  if (/^\/chat\/[^/]+$/.test(path)) return true;
   if (!path.startsWith(`${prefix}/`)) return false;
   const rest = path.slice(prefix.length);
   return /^\/agents\/[^/]+\/(?:generate|stream)$/.test(rest) || /^\/mcp\/[^/]+\/mcp$/.test(rest);

@@ -28,6 +28,7 @@
     "@apidevtools/swagger-parser": "catalog:",
     "@core/contracts": "workspace:*",
     "@core/services": "workspace:*",
+    "@mastra/ai-sdk": "catalog:",
     "@mastra/core": "catalog:",
     "@mastra/mcp": "catalog:",
     "@mastra/memory": "catalog:",

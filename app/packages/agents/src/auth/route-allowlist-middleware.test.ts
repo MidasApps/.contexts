@@ -12,6 +12,14 @@ const run = async (method: string, path: string, apiPrefix?: string) => {
   return { nextCalled, status: response instanceof Response ? response.status : undefined };
 };
 
+describe("isAllowedRoute with hidden agents", () => {
+  it("closes every agent route of a hidden (chat-only) agent and keeps the others", () => {
+    expect(isAllowedRoute("POST", "/agents/assistant-chat/stream", ["assistant-chat"])).toBe(false);
+    expect(isAllowedRoute("GET", "/agents/assistant-chat", ["assistant-chat"])).toBe(false);
+    expect(isAllowedRoute("POST", "/agents/assistant/stream", ["assistant-chat"])).toBe(true);
+  });
+});
+
 describe("createRouteAllowlistMiddleware", () => {
   it("is mounted on the API prefix", () => {
     expect(createRouteAllowlistMiddleware({}).path).toBe("/api/*");

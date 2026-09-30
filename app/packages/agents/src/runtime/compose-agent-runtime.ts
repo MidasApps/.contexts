@@ -14,6 +14,11 @@ import { PING_AGENT } from "../agents/ping-agent.ts";
 import { createSupervisorAgent, SUPERVISOR_AGENT_ID } from "../agents/supervisor-agent.ts";
 import { createTenantAgentSettingsReader } from "../agents/tenant-agent-settings.ts";
 import { createWebAgentDefinition } from "../agents/web-agent.ts";
+import type { ChatRuntime } from "../chat/chat-http.ts";
+import { CHAT_ROUTES_PATTERN, createChatRoutes } from "../chat/chat-routes.ts";
+import { createChatRunOwners } from "../chat/chat-run-owners.ts";
+import { chatAgentIdOf, createDurableChatAgent } from "../chat/durable-supervisor.ts";
+import { createToolPreviewer } from "../chat/tool-preview.ts";
 import { type ConnectorLoaders, createConnectorToolResolver, defaultConnectorLoaders } from "../connectors/connector-registry.ts";
 import type { AgentMiddleware } from "../auth/agent-middleware.ts";
 import { createContextMiddleware } from "../auth/context-middleware.ts";
@@ -85,7 +90,10 @@ export type ComposeAgentRuntimeArgs = {
 
 /** What `new Mastra({...})` receives from the runtime (spec §3.3); `pubsub` arrives with Task 25. */
 export type RuntimeParts = {
-  /** Entry agents Mastra serves: `assistant` (supervisor), `ping` and module entry agents. */
+  /**
+   * Entry agents Mastra serves: `assistant` (supervisor), `ping`, module entry agents and the
+   * durable chat wrapper of the supervisor (`assistant-chat`, reachable only through `/chat/*`).
+   */
   readonly agents: Record<string, Agent>;
   /** Subagents reachable only through the supervisor (knowledge, data, action, web, module agents). */
   readonly subagents: Record<string, Agent>;
@@ -104,8 +112,10 @@ export type RuntimeParts = {
   readonly auth: FirebaseMastraAuth;
   /** Route allowlist first, then the context middleware. */
   readonly middleware: AgentMiddleware[];
-  /** Voice routes (`/voice/transcriptions`, `/voice/speech`, Task 26). */
+  /** Voice routes (`/voice/transcriptions`, `/voice/speech`, Task 26) and the chat routes (SP4 Task 2). */
   readonly apiRoutes: ApiRoute[];
+  /** Chat agents, run owners and the approval previewer the chat routes share (SP4, decision 0031). */
+  readonly chat: ChatRuntime;
   readonly tools: ToolRegistry;
   /** `CompositeVoice` over the voice roles; `null` when no voice model is configured (SP4 attaches it). */
   readonly voice: CoreVoice | null;
@@ -213,6 +223,20 @@ const buildMcpServers = (args: ComposeAgentRuntimeArgs, tools: ToolRegistry, too
   return { [CORE_MCP_SERVER_ID]: createCoreMcpServer({ registry: tools, toolDeps, assistant, catalog, requestStateKey }) };
 };
 
+/** Chat entry agents (spec §4.2): the supervisor gets a durable wrapper served by `/chat/*`. */
+const CHAT_AGENT_IDS = [SUPERVISOR_AGENT_ID];
+
+const buildChat = (agents: Record<string, Agent>, tools: ToolRegistry, toolDeps: CoreToolDeps) => {
+  const durable = CHAT_AGENT_IDS.flatMap((id) => (agents[id] === undefined ? [] : [[id, createDurableChatAgent(agents[id])] as const]));
+  const runtime: ChatRuntime = {
+    chatAgents: Object.fromEntries(durable.map(([id]) => [id, chatAgentIdOf(id)])),
+    owners: createChatRunOwners(),
+    previewer: createToolPreviewer({ tools, toolDeps }),
+  };
+  // DurableAgent extends Agent; Mastra registers it (workflow, cache, PubSub) like any agent.
+  return { runtime, agents: { ...agents, ...Object.fromEntries(durable.map(([id, agent]) => [chatAgentIdOf(id), agent as unknown as Agent])) } };
+};
+
 /**
  * Builds every runtime part Mastra serves (spec §3.3, decision 0019): agents,
  * tools bound to the SP1/SP3 ports, the auth provider, the route allowlist and
@@ -247,8 +271,11 @@ export const composeAgentRuntime = (args: ComposeAgentRuntimeArgs): RuntimeParts
   const auth = new FirebaseMastraAuth({ access: args.ports.access, ...(apiPrefix === undefined ? {} : { apiPrefix }) });
   const prefix = apiPrefix === undefined ? {} : { apiPrefix };
   const voice = createVoice({ models });
+  const chat = buildChat(agents, tools, toolDeps);
+  const contextMiddleware = (path?: string) =>
+    createContextMiddleware({ auth, aiMode: args.env.AI_MODE, threadOwnerOf: threadOwnerFromStorage(args.storage), ...prefix, ...(path === undefined ? {} : { path }) });
   return {
-    agents,
+    agents: chat.agents,
     subagents,
     workflows: coreWorkflows(args, models),
     scorers: createCoreScorers(models.mode === "real" ? { judgeModel: models.language("judge") } : {}),
@@ -264,9 +291,14 @@ export const composeAgentRuntime = (args: ComposeAgentRuntimeArgs): RuntimeParts
       ...(args.exporters === undefined ? {} : { exporters: args.exporters }),
     }),
     auth,
-    middleware: [createRouteAllowlistMiddleware(prefix), createContextMiddleware({ auth, aiMode: args.env.AI_MODE, threadOwnerOf: threadOwnerFromStorage(args.storage), ...prefix })],
-    apiRoutes: createVoiceRoutes({ voice, logger: processLogger }),
+    middleware: [
+      createRouteAllowlistMiddleware({ ...prefix, hiddenAgentIds: Object.values(chat.runtime.chatAgents) }),
+      contextMiddleware(),
+      contextMiddleware(CHAT_ROUTES_PATTERN),
+    ],
+    apiRoutes: [...createVoiceRoutes({ voice, logger: processLogger }), ...createChatRoutes({ ...chat.runtime, logger: processLogger })],
     tools,
     voice,
+    chat: chat.runtime,
   };
 };

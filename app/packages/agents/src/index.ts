@@ -358,3 +358,21 @@ export { createFirecrawlTools, createWebContentPort, createWebToolsRuntime, FIRE
 // Core MCP server (SP3 Task 24, decision 0027).
 export { CORE_MCP_SERVER_ID, CORE_MCP_TOOLS, CoreMcpServerError, createCoreMcpServer, MCP_CALLER_ID, MCP_CEILING } from "./mcp-server/core-mcp-server.ts";
 export { hydrateMcpRequestContext, MCP_AGENT_CONTEXT_KEY, setMcpRequestAuth } from "./mcp-server/mcp-request-context.ts";
+// SP4 chat routes (Task 2, decision 0031).
+export {
+  ABORT_ROUTE_PATH,
+  CHAT_HEARTBEAT_MS,
+  CHAT_ROUTE_PATH,
+  CHAT_ROUTES_PATTERN,
+  createChatRoutes,
+  handleAbort,
+  handleChatPost,
+  handleObserve,
+  MAX_CHAT_BODY_BYTES,
+  OBSERVE_ROUTE_PATH,
+} from "./chat/chat-routes.ts";
+export type { ChatRouteDeps, ChatRuntime } from "./chat/chat-http.ts";
+export { type ChatRouteBody, ChatRouteBodySchema } from "./chat/chat-request.schema.ts";
+export { approvalRunIdsOf, type ChatRunOwner, type ChatRunOwners, type ChatRunState, createChatRunOwners } from "./chat/chat-run-owners.ts";
+export { CHAT_AGENT_SUFFIX, chatAgentIdOf, createDurableChatAgent } from "./chat/durable-supervisor.ts";
+export { createChatStreamTap, createToolPreviewer, type ToolPreviewData, type ToolPreviewer } from "./chat/tool-preview.ts";

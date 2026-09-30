@@ -22,6 +22,8 @@ export type ContextMiddlewareOptions = {
   readonly apiPrefix?: string;
   /** Memory thread owners; without it thread ownership is left to Mastra. */
   readonly threadOwnerOf?: ThreadOwnerLookup;
+  /** Mount path; defaults to the API prefix (`/api/*`). The chat routes mount a second instance on `/chat/*`. */
+  readonly path?: string;
 };
 
 const readHeader = (request: Request, name: string): string | undefined => {
@@ -97,7 +99,7 @@ const refuseForeignThread = async (options: ContextMiddlewareOptions, request: R
  * conversation gets a new one, returned in `X-Conversation-Id`; a malformed id answers 400.
  */
 export const createContextMiddleware = (options: ContextMiddlewareOptions): AgentMiddleware => ({
-  path: apiPathPattern(options.apiPrefix),
+  path: options.path ?? apiPathPattern(options.apiPrefix),
   handler: async (context, next) => {
     const store = context.get("requestContext");
     clearAgentContext(store);

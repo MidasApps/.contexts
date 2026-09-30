@@ -34,9 +34,13 @@ const ALLOWED_ROUTES: readonly RouteRule[] = [
 /**
  * Whether a built-in route is served.
  * @param path the path after the API prefix (`/agents/x/stream`).
+ * @param hiddenAgentIds agents served only by custom routes (the durable chat wrappers, SP4):
+ *   every `/agents/<id>` route of theirs answers 404.
  */
-export const isAllowedRoute = (method: string, path: string): boolean => {
+export const isAllowedRoute = (method: string, path: string, hiddenAgentIds: readonly string[] = []): boolean => {
   const upper = method.toUpperCase();
+  const agentId = /^\/agents\/([^/]+)/.exec(path)?.[1];
+  if (agentId !== undefined && hiddenAgentIds.includes(agentId)) return false;
   return ALLOWED_ROUTES.some((rule) => (rule.methods === "any" || rule.methods.has(upper)) && rule.pattern.test(path));
 };
 
@@ -47,15 +51,16 @@ const notFound = (): Response =>
  * 404 for every built-in route outside `ALLOWED_ROUTES` (spec §4.3). Custom API
  * routes live outside the prefix (Mastra requires it) and are not affected.
  * @param options.apiPrefix Mastra `server.apiPrefix` (default `/api`).
+ * @param options.hiddenAgentIds agents reachable only through the chat routes (`/chat/*`).
  */
-export const createRouteAllowlistMiddleware = (options: { readonly apiPrefix?: string }): AgentMiddleware => {
+export const createRouteAllowlistMiddleware = (options: { readonly apiPrefix?: string; readonly hiddenAgentIds?: readonly string[] }): AgentMiddleware => {
   const prefix = normalizeApiPrefix(options.apiPrefix);
   return {
     path: apiPathPattern(prefix),
     handler: async (context, next) => {
       const { pathname } = new URL(context.req.raw.url);
       const relative = pathname.startsWith(`${prefix}/`) ? pathname.slice(prefix.length) : undefined;
-      if (relative === undefined || !isAllowedRoute(context.req.raw.method, relative)) return notFound();
+      if (relative === undefined || !isAllowedRoute(context.req.raw.method, relative, options.hiddenAgentIds)) return notFound();
       await next();
       return undefined;
     },

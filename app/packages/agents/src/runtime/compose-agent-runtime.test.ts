@@ -56,10 +56,11 @@ const echoTool = (id: string) =>
 describe("composeAgentRuntime", () => {
   it("returns the entry agents, the subagents, the auth provider, both middlewares and the core tools", () => {
     const runtime = compose();
-    expect(Object.keys(runtime.agents)).toEqual([PING_AGENT_ID, "assistant"]);
+    expect(Object.keys(runtime.agents)).toEqual([PING_AGENT_ID, "assistant", "assistant-chat"]);
+    expect(runtime.chat.chatAgents).toEqual({ assistant: "assistant-chat" });
     expect(Object.keys(runtime.subagents)).toEqual(["knowledge", "data", "action", "web"]);
     expect(runtime.auth).toBeInstanceOf(FirebaseMastraAuth);
-    expect(runtime.middleware.map((entry) => entry.path)).toEqual(["/api/*", "/api/*"]);
+    expect(runtime.middleware.map((entry) => entry.path)).toEqual(["/api/*", "/api/*", "/chat/*"]);
     expect(runtime.tools.ids()).toEqual([
       "catalog.listEntities",
       "catalog.describeEntity",
@@ -73,7 +74,13 @@ describe("composeAgentRuntime", () => {
     expect(Object.keys(runtime.mcpServers)).toEqual(["core"]);
     expect(runtime).toMatchObject({ vectors: {} });
     expect(Object.keys(runtime.scorers)).toEqual(["tool-routing", "citations-grounded", "tenant-leak", "format-compliance"]);
-    expect(runtime.apiRoutes.map((route) => `${route.method} ${route.path}`)).toEqual(["POST /voice/transcriptions", "POST /voice/speech"]);
+    expect(runtime.apiRoutes.map((route) => `${route.method} ${route.path}`)).toEqual([
+      "POST /voice/transcriptions",
+      "POST /voice/speech",
+      "POST /chat/:agentId",
+      "GET /chat/:agentId/runs/:runId/observe",
+      "POST /chat/runs/:runId/abort",
+    ]);
     expect(runtime.voice?.capabilities).toEqual({ transcription: true, speech: true, realtime: false });
     expect(Object.keys(runtime.workflows).sort()).toEqual(["catalog-reindex", "knowledge-ingest"]);
   });

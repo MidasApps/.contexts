@@ -34,6 +34,12 @@ describe("startsConversationRun", () => {
     expect(startsConversationRun(post("/other/agents/assistant/generate"))).toBe(false);
   });
 
+  it("is true for a chat turn outside the prefix (SP4), not for its observe or abort routes", () => {
+    expect(startsConversationRun(post("/chat/assistant"))).toBe(true);
+    expect(startsConversationRun(post("/chat/runs/run-1/abort"))).toBe(false);
+    expect(startsConversationRun(new Request("http://mastra.internal/chat/assistant"))).toBe(false);
+  });
+
   it("honors a custom API prefix", () => {
     expect(startsConversationRun(post("/mastra/agents/assistant/stream"), "/mastra/")).toBe(true);
     expect(startsConversationRun(post("/api/agents/assistant/stream"), "/mastra")).toBe(false);

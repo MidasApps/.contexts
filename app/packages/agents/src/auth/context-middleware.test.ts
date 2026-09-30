@@ -38,6 +38,22 @@ describe("createContextMiddleware", () => {
     expect(setup().middleware.path).toBe("/api/*");
   });
 
+  it("mounts a chat instance on /chat/* that gives a chat turn a new conversation of the caller", async () => {
+    const access = createFakeAccessPort({
+      credentials: { "member-token": MEMBER },
+      memberships: [{ tenantId: TENANT, uid: "member-uid", permissions: ["core.chat.use"] }],
+    });
+    const chat = createContextMiddleware({ auth: new FirebaseMastraAuth({ access }), aiMode: "fake", path: "/chat/*" });
+    expect(chat.path).toBe("/chat/*");
+    const store = new RequestContext<unknown>();
+    const headers: Record<string, string> = {};
+    const raw = new Request("http://mastra.internal/chat/assistant", { method: "POST", headers: memberHeaders });
+    await chat.handler({ req: { raw }, get: () => store, header: (name, value) => (headers[name] = value) }, () => Promise.resolve());
+    expect(store.get(MASTRA_RESOURCE_ID_KEY)).toBe(`${TENANT}:member-uid`);
+    expect(store.get(MASTRA_THREAD_ID_KEY)).toMatch(/^[A-Za-z0-9]{20}$/);
+    expect(headers["x-conversation-id"]).toBe(store.get(MASTRA_THREAD_ID_KEY));
+  });
+
   it("writes the typed context of a member and overwrites a client-sent tenant", async () => {
     const { store, nextCalled } = await run(memberHeaders, [
       ["tenantId", "ClientTenant00000000"],

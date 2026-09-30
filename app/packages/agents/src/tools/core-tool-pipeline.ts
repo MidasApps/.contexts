@@ -5,6 +5,7 @@ import {
   type CoreToolContext,
   type CoreToolDefinition,
   type CoreToolDeps,
+  type CoreToolPreview,
   DEFAULT_TIMEOUT_MS,
   hashToolInput,
   type PendingApprovalResult,
@@ -178,4 +179,23 @@ export const runCoreTool = async (definition: CoreToolDefinition, deps: CoreTool
     return { status: "pending-approval", approvalId } satisfies PendingApprovalResult;
   }
   return executeAndAudit(definition, deps, input, ctx, call.abortSignal);
+};
+
+/**
+ * What an approver sees before a mutation runs (SP4 `data-tool-preview`, decision 0032): the
+ * summary and, only when SP1 would allow the call, the definition's before/after. It writes
+ * nothing and records no audit entry.
+ * @throws {CoreToolError} `TOOL_INPUT_INVALID` or `CONTEXT_MISSING`.
+ */
+export const previewCoreToolCall = async (
+  definition: CoreToolDefinition,
+  deps: CoreToolDeps,
+  rawInput: unknown,
+  call: ToolCallInfo,
+): Promise<{ summary: string; preview: CoreToolPreview | null }> => {
+  const input = parseInput(definition, rawInput);
+  const base = buildContext(definition, deps, call);
+  const summary = definition.summarize?.(input) ?? `Run ${definition.id}`;
+  if (definition.preview === undefined || !(await authorizeCall(definition, deps, base)).allowed) return { summary, preview: null };
+  return { summary, preview: await definition.preview(input, { ...base, abortSignal: call.abortSignal ?? new AbortController().signal }) };
 };
