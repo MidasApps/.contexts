@@ -11,6 +11,12 @@ import { AUDIT_CONTRACTS } from "./contracts/audit/contracts.ts";
 import { AUDIT_ENDPOINTS } from "./contracts/audit/endpoints.ts";
 import { ConnectorContract } from "./contracts/connectors/connector.schema.ts";
 import { ConnectorToolPolicyContract } from "./contracts/connectors/connector-tool-policy.schema.ts";
+import {
+  CreateConnectorInputContract,
+  SetConnectorSecretInputContract,
+  UpdateConnectorInputContract,
+} from "./contracts/connectors/connector-input.schema.ts";
+import { CONNECTORS_ENDPOINTS } from "./contracts/connectors/endpoints.ts";
 import type { ContractDefinition } from "./contracts/contract.ts";
 import { NoteContract } from "./contracts/example/note.schema.ts";
 import { FILES_ENDPOINTS } from "./contracts/files/endpoints.ts";
@@ -51,6 +57,9 @@ export const CORE_CONTRACTS: readonly ContractDefinition[] = [
   CitationContract,
   ConnectorContract,
   ConnectorToolPolicyContract,
+  CreateConnectorInputContract,
+  UpdateConnectorInputContract,
+  SetConnectorSecretInputContract,
   LlmCallContract,
   UsageSummaryContract,
   FileUploadRequestContract,
@@ -65,9 +74,10 @@ export const CORE_ENDPOINTS: readonly EndpointDefinition[] = [
   ...IDENTITY_ENDPOINTS,
   ...ACCESS_ENDPOINTS,
   ...AUDIT_ENDPOINTS,
-  // SP3 files (uploads) and knowledge base.
+  // SP3 files (uploads), knowledge base and connectors.
   ...FILES_ENDPOINTS,
   ...KNOWLEDGE_ENDPOINTS,
+  ...CONNECTORS_ENDPOINTS,
 ];
 
 /** Builds a fresh registry with the core contracts (catalog scripts, apps at startup). */

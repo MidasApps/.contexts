@@ -154,6 +154,26 @@ export {
   ConnectorToolPolicySchema,
   type ConnectorToolPolicy,
 } from "./contracts/connectors/connector-tool-policy.schema.ts";
+export {
+  CreateConnectorInputContract,
+  CreateConnectorInputSchema,
+  type CreateConnectorInput,
+  SetConnectorSecretInputContract,
+  SetConnectorSecretInputSchema,
+  type SetConnectorSecretInput,
+  UpdateConnectorInputContract,
+  UpdateConnectorInputSchema,
+  type UpdateConnectorInput,
+} from "./contracts/connectors/connector-input.schema.ts";
+export {
+  CONNECTORS_ENDPOINTS,
+  createConnectorEndpoint,
+  deleteConnectorEndpoint,
+  getConnectorEndpoint,
+  listConnectorsEndpoint,
+  setConnectorSecretEndpoint,
+  updateConnectorEndpoint,
+} from "./contracts/connectors/endpoints.ts";
 export { LlmCallContract, LlmCallSchema, type LlmCall } from "./contracts/usage/llm-call.schema.ts";
 export { UsageSummaryContract, UsageSummarySchema, type UsageSummary } from "./contracts/usage/usage-summary.schema.ts";
 export {

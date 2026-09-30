@@ -55,6 +55,11 @@ export const AUDIT_ACTIONS = [
   // Uploads (SP3 files context): an accepted object, or one refused by the magic-bytes check.
   "FILE_UPLOADED",
   "FILE_REJECTED",
+  // Tenant connectors (SP3 connectors context): the secret itself is never audited.
+  "CONNECTOR_CREATED",
+  "CONNECTOR_UPDATED",
+  "CONNECTOR_DELETED",
+  "CONNECTOR_SECRET_SET",
 ] as const;
 
 export const AuditActionSchema = z.enum(AUDIT_ACTIONS);

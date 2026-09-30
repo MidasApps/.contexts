@@ -14,5 +14,16 @@ service cloud.firestore {
     match /files/{fileId} {
       allow read, write: if false;
     }
+
+    // Tenant connectors (SP3 connectors context): managed through `/v1/.../connectors`
+    // only; they hold a secret reference, never the secret.
+    match /connectors/{connectorId} {
+      allow read, write: if false;
+    }
+
+    // Local secret store (Firestore emulator, APP_ENV=local only): never a client.
+    match /local-secrets/{secretName} {
+      allow read, write: if false;
+    }
   }
 }

@@ -22,6 +22,7 @@
   "dependencies": {
     "@core/contracts": "workspace:*",
     "@google-cloud/bigquery": "catalog:",
+    "@google-cloud/secret-manager": "catalog:",
     "@mastra/client-js": "catalog:",
     "drizzle-orm": "catalog:",
     "file-type": "catalog:",

@@ -74,7 +74,11 @@
         "KNOWLEDGE_DOCUMENT_INGESTED",
         "KNOWLEDGE_DOCUMENT_DELETED",
         "FILE_UPLOADED",
-        "FILE_REJECTED"
+        "FILE_REJECTED",
+        "CONNECTOR_CREATED",
+        "CONNECTOR_UPDATED",
+        "CONNECTOR_DELETED",
+        "CONNECTOR_SECRET_SET"
       ],
       "type": "string",
       "x-pii": "none"

@@ -1,7 +1,9 @@
 import { type AgentRuntimePorts, embeddingModelIdOf, type FilesPort } from "@core/agents";
+import { TenantIdSchema } from "@core/contracts";
 import {
   type AccessReaders,
   type ApiKeyAuthenticator,
+  createFirebaseConnectorsServices,
   createFirebaseFilesServices,
   createKnowledgeServices,
   createLogKnowledgeEventPublisher,
@@ -28,7 +30,7 @@ import { bindProjectsPort } from "./projects-port-binding.ts";
 import { bindUsagePort } from "./usage-port-binding.ts";
 import { UNWIRED_PORTS } from "./unwired-ports.ts";
 
-export type RuntimePortsEnv = Pick<ServicesEnv, "API_KEY_PREFIX" | "DATABASE_URL" | "APP_ENV" | "AI_MODE" | "FIREBASE_STORAGE_EMULATOR_HOST"> & {
+export type RuntimePortsEnv = Pick<ServicesEnv, "API_KEY_PREFIX" | "DATABASE_URL" | "APP_ENV" | "AI_MODE" | "FIREBASE_STORAGE_EMULATOR_HOST" | "FIREBASE_PROJECT_ID"> & {
   /** Model id of the stored vectors in real mode; search only compares vectors of this model (decision 0022). */
   readonly AI_MODEL_EMBEDDING: string;
   /** Bucket of uploads (files context). */
@@ -68,7 +70,9 @@ export type RuntimePortsAdapters = {
  * - usage: ledger writes and tenant budget checks over `usage.llm_calls` / `usage.tenant_budgets`
  *   (row level security, role `usage_runtime`).
  * - projects: SP1 `createProject` (the action agent's core command, SP3 Task 20).
- * - approvals, connectors, secrets, settings, web content: fail-closed until their tasks.
+ * - connectors and secrets: active tenant connectors (Firestore) and the secret store (Secret
+ *   Manager outside local, the emulator collection in local), read server-side only.
+ * - approvals, settings, web content: fail-closed until their tasks.
  * @param args.modules installed modules (their permissions join SP1's registry).
  */
 export const createRuntimePorts = (args: {
@@ -94,11 +98,14 @@ export const createRuntimePorts = (args: {
   const runner = createPostgresSemanticRunner(sql);
   const knowledge = createKnowledgeServices({ repository: createPostgresKnowledgeRepository(sql), embeddingModel: embeddingModelIdOf(args.env) });
   const files = createFirebaseFilesServices({ firebase: args.firebase, env: args.env, logger: args.logger });
+  const connectors = createFirebaseConnectorsServices({ firebase: args.firebase, env: args.env, audit: core.audit, clock: systemClock });
   return {
     access: bindAccessPort({ verifyBearer: core.verifyBearer, access: core.access, resolveAccessContext: adapters.resolveAccessContext ?? core.resolveAccessContext }),
     audit: bindAuditPort(core.audit),
     catalog: { runSemanticQuery: makeRunSemanticQuery({ views: createSemanticViewRegistry([]), guard: guardSemanticSql, runner }) },
     ...UNWIRED_PORTS,
+    connectors: { listActive: ({ tenantId }) => connectors.listActiveConnectors({ tenantId: TenantIdSchema.parse(tenantId) }) },
+    secrets: { get: (secretRef) => connectors.secrets.get(secretRef) },
     knowledge: bindKnowledgePort(knowledge),
     files: bindFilesPort(files),
     knowledgeEvents: createLogKnowledgeEventPublisher(args.logger),

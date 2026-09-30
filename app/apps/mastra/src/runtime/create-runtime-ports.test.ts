@@ -11,6 +11,7 @@ const ENV = {
   APP_ENV: "local",
   AI_MODE: "fake",
   FILES_BUCKET: "demo-core.appspot.com",
+  FIREBASE_PROJECT_ID: "demo-core",
 } as const;
 const TENANT = "Jd8sK2lPq0WnR5tYu3bV";
 const MEMBER = { type: "user", uid: "member-uid", mfa: false } as const;
@@ -51,8 +52,6 @@ describe("createRuntimePorts (default bindings)", () => {
     const bound = ports();
     const action = {} as never;
     await expect(bound.approvals.requestApproval({ principal: MEMBER, node: ORG, permission: "core.chat.use", action })).rejects.toBeInstanceOf(PortNotWiredError);
-    await expect(bound.connectors.listActive({ tenantId: TENANT })).rejects.toBeInstanceOf(PortNotWiredError);
-    await expect(bound.secrets.get("ref")).rejects.toBeInstanceOf(PortNotWiredError);
     await expect(bound.settings.getAgentSettings({ tenantId: TENANT })).rejects.toBeInstanceOf(PortNotWiredError);
     await expect(bound.webContent.scrape({ url: "https://docs.example.com", tenantId: TENANT })).rejects.toBeInstanceOf(PortNotWiredError);
   });

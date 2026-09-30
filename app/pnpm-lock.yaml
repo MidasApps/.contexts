@@ -194,6 +194,9 @@ catalogs:
     '@google-cloud/bigquery':
       specifier: 9.1.0
       version: 9.1.0
+    '@google-cloud/secret-manager':
+      specifier: 7.1.1
+      version: 7.1.1
     '@mastra/client-js':
       specifier: 1.50.0
       version: 1.50.0
@@ -838,6 +841,9 @@ importers:
       '@google-cloud/bigquery':
         specifier: 'catalog:'
         version: 9.1.0(supports-color@7.2.0)
+      '@google-cloud/secret-manager':
+        specifier: 'catalog:'
+        version: 7.1.1(supports-color@7.2.0)
       '@mastra/client-js':
         specifier: 'catalog:'
         version: 1.50.0(@grpc/grpc-js@1.14.5)(ai@7.0.122(zod@4.6.5))(express@5.2.1(supports-color@7.2.0))(supports-color@7.2.0)(zod-to-json-schema@3.25.2(zod@4.6.5))(zod@4.6.5)
@@ -2196,6 +2202,10 @@ packages:
   '@google-cloud/pubsub@5.3.1':
     resolution: {integrity: sha512-xXAQBVVrFviWz8L8yDKEqv1ziVw/gMSpYHt3IxSYRSY0fTyjis+xOrKJILj8dd8PAUHGnGiAIYuTprflkE9jsQ==}
     engines: {node: '>=18'}
+
+  '@google-cloud/secret-manager@7.1.1':
+    resolution: {integrity: sha512-unNIepgnJexSa2No/QYXkQriYsduNk3hYu8puuAVm2d7RiooraJKGI54Jo5YDPcM9OmNeZAtvEplvWaDP9mV3Q==}
+    engines: {node: '>=22'}
 
   '@google-cloud/sql@0.25.0':
     resolution: {integrity: sha512-OKAA98q2M25rQcqcFvbQniix4zTFcbeSyauj+PcPd+6ngn7eXvAUqpuCRVxbIGmA8r5OtE6Ru/oCJ1xwcUR2vA==}
@@ -10539,6 +10549,12 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+  '@google-cloud/secret-manager@7.1.1(supports-color@7.2.0)':
+    dependencies:
+      google-gax: 6.9.0(supports-color@7.2.0)
+    transitivePeerDependencies:
+      - supports-color
+
   '@google-cloud/sql@0.25.0(supports-color@7.2.0)':
     dependencies:
       google-gax: 5.0.8(supports-color@7.2.0)
@@ -15073,7 +15089,6 @@ snapshots:
       retry-request: 9.0.1(supports-color@7.2.0)
     transitivePeerDependencies:
       - supports-color
-    optional: true
 
   google-logging-utils@0.0.2: {}
 
@@ -16821,7 +16836,6 @@ snapshots:
   proto3-json-serializer@4.0.2:
     dependencies:
       protobufjs: 7.6.6
-    optional: true
 
   protobufjs@7.6.6:
     dependencies:

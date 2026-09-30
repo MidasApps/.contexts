@@ -30,3 +30,28 @@ Tenants connect their own APIs (OpenAPI), MCP servers and databases; external cl
 - **`@mastra/agent-browser` / stagehand.** 0.x packages pinned behind upstream; a separate Playwright MCP service isolates the browser from the Mastra process.
 - **Exposing mutation tools over MCP now.** MCP clients have no standard confirmation UI for our approval flow.
 - **`@mendable/firecrawl-js`.** Same SDK as `firecrawl` 4.42.0; one package name is enough.
+
+## Amendments
+
+- **2026-09-30 — connectors store and secret store (SP3 Task 21).**
+  - *API.* `/v1/organizations/{organizationId}/connectors` (list with cursor pages, create 201),
+    `.../connectors/{connectorId}` (get, patch, delete 204) and `PUT .../{connectorId}/secret`
+    (write-only, 204; no read path). Reads need `core.connector.read`, changes
+    `core.connector.write` (owner and admin). The path nests under the organization, like the
+    knowledge routes, so the tenant is always explicit.
+  - *Rules beyond the schema.* Every endpoint the connector calls first (MCP and browser `url`,
+    OpenAPI `specUrl`) must be https on the default port with its host in `allowedHosts`; a
+    patched config must still be a valid config of the connector's type. The server owns `id`,
+    `tenantId`, `status` on create (`active`), `secretRef` and the audit fields.
+  - *Secrets.* `secretRef` is set only by `PUT .../secret` to `connector-<tenantId>-<connectorId>`.
+    Secret Manager (`@google-cloud/secret-manager` 7.1.1, automatic replication, a version per
+    put, `latest` on read, loaded lazily) outside `local`; the `local-secrets` collection of the
+    Firestore emulator in `local` (the adapter throws outside `local`). Deleting a connector
+    deletes its document first, then its secret. Values never reach Firestore connector
+    documents, responses, logs or audit entries.
+  - *Audit.* `CONNECTOR_CREATED`, `CONNECTOR_UPDATED` (changed field names), `CONNECTOR_DELETED`,
+    `CONNECTOR_SECRET_SET`, written with the change in one transaction.
+  - *Storage.* `connectors/{autoId}` with `schemaVersion` and `updatedBy`; composite index
+    `tenantId + createdAt desc`; Security Rules deny every client on `connectors` and
+    `local-secrets`. The Mastra runtime reads active connectors and secrets through the
+    `connectors` and `secrets` ports (server-side, tenant from the verified context).

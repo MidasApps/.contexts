@@ -1,9 +1,11 @@
 import "server-only";
 import {
+  buildConnectorsRoutes,
   buildFilesRoutes,
   buildKnowledgeDocumentsRoutes,
   buildKnowledgeSourcesRoutes,
   createFirebaseAdmin,
+  createFirebaseConnectorsServices,
   createFirebaseFilesServices,
   createKnowledgeServices,
   createMastraGateway,
@@ -19,8 +21,9 @@ const UNUSED_SEARCH_MODEL = "web/no-search";
 
 /**
  * `/v1` routes of the SP3 contexts that `createCoreServer` does not build: files (uploads,
- * SP3 Task 13) and the knowledge base (documents over Postgres, sources through the Mastra
- * gateway, Task 14). They share the core server's pipeline and Admin SDK app.
+ * SP3 Task 13), the knowledge base (documents over Postgres, sources through the Mastra
+ * gateway, Task 14) and tenant connectors (Firestore + secret store, Task 21). They share
+ * the core server's pipeline, audit writer and Admin SDK app.
  */
 export const buildRuntimeRoutes = async (core: CoreServer): Promise<CoreRoutes> => {
   const { env, processEnvForFirebaseGuard } = await import("@/env");
@@ -39,7 +42,14 @@ export const buildRuntimeRoutes = async (core: CoreServer): Promise<CoreRoutes> 
     baseUrl: env.MASTRA_URL,
     serverlessToken: env.APP_ENV === "local" || env.MASTRA_AUDIENCE === undefined ? null : createServerlessIdTokenSource({ audience: env.MASTRA_AUDIENCE }),
   });
+  const connectors = createFirebaseConnectorsServices({
+    firebase,
+    env: { APP_ENV: env.APP_ENV, FIREBASE_PROJECT_ID: env.FIREBASE_PROJECT_ID },
+    audit: core.audit,
+    clock: core.pipeline.clock,
+  });
   return {
+    ...buildConnectorsRoutes({ pipeline: core.pipeline, connectors }),
     ...buildFilesRoutes({ pipeline: core.pipeline, files }),
     ...buildKnowledgeDocumentsRoutes({ pipeline: core.pipeline, knowledge }),
     ...buildKnowledgeSourcesRoutes({ pipeline: core.pipeline, gateway, getReadyFile: files.getReadyFile, resolveAccessContext: core.resolveAccessContext }),

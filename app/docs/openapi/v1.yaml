@@ -2524,6 +2524,522 @@ paths:
       tags:
         - audit
       x-auth: user
+  /v1/organizations/{organizationId}/connectors:
+    get:
+      operationId: connectors.list
+      parameters:
+        - description: Organization that owns the connectors.
+          in: path
+          name: organizationId
+          required: true
+          schema:
+            minLength: 1
+            type: string
+            x-pii: none
+        - description: Cursor returned by the previous page.
+          in: query
+          name: cursor
+          required: false
+          schema:
+            minLength: 1
+            type: string
+            x-pii: none
+        - description: Page size, 1-100 (default 20).
+          in: query
+          name: limit
+          required: false
+          schema:
+            default: 20
+            maximum: 100
+            minimum: 1
+            type: integer
+            x-pii: none
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    description: The items of this page.
+                    items:
+                      $ref: "#/components/schemas/connectors.Connector"
+                    type: array
+                    x-pii: personal
+                  meta:
+                    additionalProperties: false
+                    description: Response metadata.
+                    properties:
+                      page:
+                        additionalProperties: false
+                        description: Pagination state.
+                        properties:
+                          cursor:
+                            anyOf:
+                              - minLength: 1
+                                type: string
+                              - type: "null"
+                            description: Opaque cursor of the next page; null at the end.
+                            x-pii: none
+                          hasMore:
+                            description: Whether another page exists.
+                            type: boolean
+                            x-pii: none
+                          limit:
+                            description: Page size used for this response.
+                            maximum: 100
+                            minimum: 1
+                            type: integer
+                            x-pii: none
+                        required:
+                          - cursor
+                          - hasMore
+                          - limit
+                        type: object
+                        x-pii: none
+                    required:
+                      - page
+                    type: object
+                    x-pii: none
+                required:
+                  - data
+                  - meta
+                type: object
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: VALIDATION_FAILED
+          x-error-codes:
+            - VALIDATION_FAILED
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UNAUTHORIZED
+          x-error-codes:
+            - UNAUTHORIZED
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: FORBIDDEN
+          x-error-codes:
+            - FORBIDDEN
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: INTERNAL_ERROR
+          x-error-codes:
+            - INTERNAL_ERROR
+      security:
+        - bearerAuth: []
+      summary: Lists the organization's connectors, newest first (core.connector.read). Secrets are never returned.
+      tags:
+        - connectors
+      x-auth: principal
+    post:
+      operationId: connectors.create
+      parameters:
+        - description: Organization that owns the connectors.
+          in: path
+          name: organizationId
+          required: true
+          schema:
+            minLength: 1
+            type: string
+            x-pii: none
+        - description: ULID; a retry with the same key and body replays the first response (24 h).
+          in: header
+          name: Idempotency-Key
+          required: false
+          schema:
+            format: ulid
+            pattern: ^[0-7][0-9A-HJKMNP-TV-Za-hjkmnp-tv-z]{25}$
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/connectors.CreateConnectorInput"
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: "#/components/schemas/connectors.Connector"
+                required:
+                  - data
+                type: object
+          description: Created
+          headers:
+            Location:
+              description: URL of the created resource.
+              schema:
+                type: string
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: VALIDATION_FAILED
+          x-error-codes:
+            - VALIDATION_FAILED
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UNAUTHORIZED
+          x-error-codes:
+            - UNAUTHORIZED
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: FORBIDDEN
+          x-error-codes:
+            - FORBIDDEN
+        "409":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: IDEMPOTENCY_KEY_REUSED
+          x-error-codes:
+            - IDEMPOTENCY_KEY_REUSED
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: INTERNAL_ERROR
+          x-error-codes:
+            - INTERNAL_ERROR
+      security:
+        - bearerAuth: []
+      summary: "Registers a connector (core.connector.write): https only, every endpoint host in allowedHosts."
+      tags:
+        - connectors
+      x-auth: principal
+  /v1/organizations/{organizationId}/connectors/{connectorId}:
+    delete:
+      operationId: connectors.delete
+      parameters:
+        - description: Organization that owns the connectors.
+          in: path
+          name: organizationId
+          required: true
+          schema:
+            minLength: 1
+            type: string
+            x-pii: none
+        - description: Connector id.
+          in: path
+          name: connectorId
+          required: true
+          schema:
+            minLength: 1
+            type: string
+            x-pii: none
+      responses:
+        "204":
+          description: No Content
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: VALIDATION_FAILED
+          x-error-codes:
+            - VALIDATION_FAILED
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UNAUTHORIZED
+          x-error-codes:
+            - UNAUTHORIZED
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: FORBIDDEN
+          x-error-codes:
+            - FORBIDDEN
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: NOT_FOUND
+          x-error-codes:
+            - NOT_FOUND
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: INTERNAL_ERROR
+          x-error-codes:
+            - INTERNAL_ERROR
+      security:
+        - bearerAuth: []
+      summary: Deletes a connector and its secret (core.connector.write).
+      tags:
+        - connectors
+      x-auth: principal
+    get:
+      operationId: connectors.get
+      parameters:
+        - description: Organization that owns the connectors.
+          in: path
+          name: organizationId
+          required: true
+          schema:
+            minLength: 1
+            type: string
+            x-pii: none
+        - description: Connector id.
+          in: path
+          name: connectorId
+          required: true
+          schema:
+            minLength: 1
+            type: string
+            x-pii: none
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: "#/components/schemas/connectors.Connector"
+                required:
+                  - data
+                type: object
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: VALIDATION_FAILED
+          x-error-codes:
+            - VALIDATION_FAILED
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UNAUTHORIZED
+          x-error-codes:
+            - UNAUTHORIZED
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: FORBIDDEN
+          x-error-codes:
+            - FORBIDDEN
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: NOT_FOUND
+          x-error-codes:
+            - NOT_FOUND
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: INTERNAL_ERROR
+          x-error-codes:
+            - INTERNAL_ERROR
+      security:
+        - bearerAuth: []
+      summary: Reads one connector (core.connector.read).
+      tags:
+        - connectors
+      x-auth: principal
+    patch:
+      operationId: connectors.update
+      parameters:
+        - description: Organization that owns the connectors.
+          in: path
+          name: organizationId
+          required: true
+          schema:
+            minLength: 1
+            type: string
+            x-pii: none
+        - description: Connector id.
+          in: path
+          name: connectorId
+          required: true
+          schema:
+            minLength: 1
+            type: string
+            x-pii: none
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/connectors.UpdateConnectorInput"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: "#/components/schemas/connectors.Connector"
+                required:
+                  - data
+                type: object
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: VALIDATION_FAILED
+          x-error-codes:
+            - VALIDATION_FAILED
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UNAUTHORIZED
+          x-error-codes:
+            - UNAUTHORIZED
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: FORBIDDEN
+          x-error-codes:
+            - FORBIDDEN
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: NOT_FOUND
+          x-error-codes:
+            - NOT_FOUND
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: INTERNAL_ERROR
+          x-error-codes:
+            - INTERNAL_ERROR
+      security:
+        - bearerAuth: []
+      summary: Changes a connector's name, status, tool allowlist or config (core.connector.write).
+      tags:
+        - connectors
+      x-auth: principal
+  /v1/organizations/{organizationId}/connectors/{connectorId}/secret:
+    put:
+      operationId: connectors.setSecret
+      parameters:
+        - description: Organization that owns the connectors.
+          in: path
+          name: organizationId
+          required: true
+          schema:
+            minLength: 1
+            type: string
+            x-pii: none
+        - description: Connector id.
+          in: path
+          name: connectorId
+          required: true
+          schema:
+            minLength: 1
+            type: string
+            x-pii: none
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/connectors.SetConnectorSecretInput"
+        required: true
+      responses:
+        "204":
+          description: No Content
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: VALIDATION_FAILED
+          x-error-codes:
+            - VALIDATION_FAILED
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UNAUTHORIZED
+          x-error-codes:
+            - UNAUTHORIZED
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: FORBIDDEN
+          x-error-codes:
+            - FORBIDDEN
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: NOT_FOUND
+          x-error-codes:
+            - NOT_FOUND
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: INTERNAL_ERROR
+          x-error-codes:
+            - INTERNAL_ERROR
+      security:
+        - bearerAuth: []
+      summary: Stores or replaces the connector's secret in the secret store (core.connector.write); write-only.
+      tags:
+        - connectors
+      x-auth: principal
   /v1/organizations/{organizationId}/device-activations:
     post:
       operationId: identity.createDeviceActivation
@@ -8310,6 +8826,10 @@ components:
             - KNOWLEDGE_DOCUMENT_DELETED
             - FILE_UPLOADED
             - FILE_REJECTED
+            - CONNECTOR_CREATED
+            - CONNECTOR_UPDATED
+            - CONNECTOR_DELETED
+            - CONNECTOR_SECRET_SET
           type: string
           x-pii: none
         actor:
@@ -8596,6 +9116,10 @@ components:
             - KNOWLEDGE_DOCUMENT_DELETED
             - FILE_UPLOADED
             - FILE_REJECTED
+            - CONNECTOR_CREATED
+            - CONNECTOR_UPDATED
+            - CONNECTOR_DELETED
+            - CONNECTOR_SECRET_SET
           type: string
           x-pii: none
         actorId:
@@ -8706,6 +9230,10 @@ components:
             - KNOWLEDGE_DOCUMENT_DELETED
             - FILE_UPLOADED
             - FILE_REJECTED
+            - CONNECTOR_CREATED
+            - CONNECTOR_UPDATED
+            - CONNECTOR_DELETED
+            - CONNECTOR_SECRET_SET
           type: string
           x-pii: none
         actor:
@@ -9538,6 +10066,395 @@ components:
       type: object
       x-kind: settings
       x-permission: core.connector.read
+      x-pii: none
+      x-relations: []
+      x-tenancyScope: organization
+    connectors.CreateConnectorInput:
+      description: Registers an OpenAPI, MCP, Postgres or browser connector for the organization; its secret is set separately.
+      examples:
+        - config:
+            allowedHosts:
+              - mcp.example.com
+            auth: none
+            url: https://mcp.example.com/mcp
+          name: docs-mcp
+          toolPolicy:
+            allow:
+              - search
+            readOnly:
+              - search
+          type: mcp
+      oneOf:
+        - additionalProperties: false
+          properties:
+            config:
+              additionalProperties: false
+              description: OpenAPI settings.
+              properties:
+                allowedHosts:
+                  description: Hosts requests may reach, redirects included.
+                  items:
+                    pattern: ^(?=.{1,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$
+                    type: string
+                  maxItems: 20
+                  minItems: 1
+                  type: array
+                  x-pii: none
+                apiKeyHeader:
+                  anyOf:
+                    - pattern: ^[A-Za-z0-9-]{1,100}$
+                      type: string
+                    - type: "null"
+                  description: Header name for api-key auth; null otherwise.
+                  x-pii: none
+                auth:
+                  description: How the secret is sent; the secret itself is in the secret store.
+                  enum:
+                    - none
+                    - bearer
+                    - api-key
+                  type: string
+                  x-pii: none
+                specUrl:
+                  description: URL of the OpenAPI 3.0/3.1 document.
+                  format: uri
+                  maxLength: 2048
+                  type: string
+                  x-pii: none
+              required:
+                - specUrl
+                - allowedHosts
+                - auth
+                - apiKeyHeader
+              type: object
+              x-pii: none
+            name:
+              description: Display name; also the prefix of the generated tool names.
+              maxLength: 100
+              minLength: 1
+              type: string
+              x-pii: none
+            toolPolicy:
+              additionalProperties: false
+              description: Tools agents may call and which skip approval.
+              properties:
+                allow:
+                  description: Tools agents may call; anything else is hidden.
+                  items:
+                    pattern: ^[A-Za-z][A-Za-z0-9_.-]{0,127}$
+                    type: string
+                  maxItems: 500
+                  type: array
+                  x-pii: none
+                readOnly:
+                  description: Subset of allow that runs without approval.
+                  items:
+                    pattern: ^[A-Za-z][A-Za-z0-9_.-]{0,127}$
+                    type: string
+                  maxItems: 500
+                  type: array
+                  x-pii: none
+              required:
+                - allow
+                - readOnly
+              type: object
+              x-pii: none
+            type:
+              const: openapi
+              description: HTTP API described by OpenAPI.
+              type: string
+              x-pii: none
+          required:
+            - name
+            - type
+            - config
+            - toolPolicy
+          type: object
+        - additionalProperties: false
+          properties:
+            config:
+              additionalProperties: false
+              description: MCP settings.
+              properties:
+                allowedHosts:
+                  description: Hosts requests may reach, redirects included.
+                  items:
+                    pattern: ^(?=.{1,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$
+                    type: string
+                  maxItems: 20
+                  minItems: 1
+                  type: array
+                  x-pii: none
+                auth:
+                  description: How the connector authenticates; tokens live in the secret store.
+                  enum:
+                    - none
+                    - bearer
+                    - oauth
+                  type: string
+                  x-pii: none
+                url:
+                  description: Streamable HTTP endpoint of the MCP server.
+                  format: uri
+                  maxLength: 2048
+                  type: string
+                  x-pii: none
+              required:
+                - url
+                - allowedHosts
+                - auth
+              type: object
+              x-pii: none
+            name:
+              description: Display name; also the prefix of the generated tool names.
+              maxLength: 100
+              minLength: 1
+              type: string
+              x-pii: none
+            toolPolicy:
+              additionalProperties: false
+              description: Tools agents may call and which skip approval.
+              properties:
+                allow:
+                  description: Tools agents may call; anything else is hidden.
+                  items:
+                    pattern: ^[A-Za-z][A-Za-z0-9_.-]{0,127}$
+                    type: string
+                  maxItems: 500
+                  type: array
+                  x-pii: none
+                readOnly:
+                  description: Subset of allow that runs without approval.
+                  items:
+                    pattern: ^[A-Za-z][A-Za-z0-9_.-]{0,127}$
+                    type: string
+                  maxItems: 500
+                  type: array
+                  x-pii: none
+              required:
+                - allow
+                - readOnly
+              type: object
+              x-pii: none
+            type:
+              const: mcp
+              description: Remote MCP server.
+              type: string
+              x-pii: none
+          required:
+            - name
+            - type
+            - config
+            - toolPolicy
+          type: object
+        - additionalProperties: false
+          properties:
+            config:
+              additionalProperties: false
+              description: Postgres settings; the DSN is the secret.
+              properties:
+                allowedRelations:
+                  description: schema.table or schema.view names the read-only SQL tool may read.
+                  items:
+                    pattern: ^[a-z_][a-z0-9_]*\.[a-z_][a-z0-9_]*$
+                    type: string
+                  maxItems: 200
+                  minItems: 1
+                  type: array
+                  x-pii: none
+              required:
+                - allowedRelations
+              type: object
+              x-pii: none
+            name:
+              description: Display name; also the prefix of the generated tool names.
+              maxLength: 100
+              minLength: 1
+              type: string
+              x-pii: none
+            toolPolicy:
+              additionalProperties: false
+              description: Tools agents may call and which skip approval.
+              properties:
+                allow:
+                  description: Tools agents may call; anything else is hidden.
+                  items:
+                    pattern: ^[A-Za-z][A-Za-z0-9_.-]{0,127}$
+                    type: string
+                  maxItems: 500
+                  type: array
+                  x-pii: none
+                readOnly:
+                  description: Subset of allow that runs without approval.
+                  items:
+                    pattern: ^[A-Za-z][A-Za-z0-9_.-]{0,127}$
+                    type: string
+                  maxItems: 500
+                  type: array
+                  x-pii: none
+              required:
+                - allow
+                - readOnly
+              type: object
+              x-pii: none
+            type:
+              const: postgres
+              description: Tenant-owned Postgres, read only.
+              type: string
+              x-pii: none
+          required:
+            - name
+            - type
+            - config
+            - toolPolicy
+          type: object
+        - additionalProperties: false
+          properties:
+            config:
+              additionalProperties: false
+              description: Browser settings.
+              properties:
+                allowedHosts:
+                  description: Hosts requests may reach, redirects included.
+                  items:
+                    pattern: ^(?=.{1,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$
+                    type: string
+                  maxItems: 20
+                  minItems: 1
+                  type: array
+                  x-pii: none
+                url:
+                  description: Playwright MCP server endpoint.
+                  format: uri
+                  maxLength: 2048
+                  type: string
+                  x-pii: none
+              required:
+                - url
+                - allowedHosts
+              type: object
+              x-pii: none
+            name:
+              description: Display name; also the prefix of the generated tool names.
+              maxLength: 100
+              minLength: 1
+              type: string
+              x-pii: none
+            toolPolicy:
+              additionalProperties: false
+              description: Tools agents may call and which skip approval.
+              properties:
+                allow:
+                  description: Tools agents may call; anything else is hidden.
+                  items:
+                    pattern: ^[A-Za-z][A-Za-z0-9_.-]{0,127}$
+                    type: string
+                  maxItems: 500
+                  type: array
+                  x-pii: none
+                readOnly:
+                  description: Subset of allow that runs without approval.
+                  items:
+                    pattern: ^[A-Za-z][A-Za-z0-9_.-]{0,127}$
+                    type: string
+                  maxItems: 500
+                  type: array
+                  x-pii: none
+              required:
+                - allow
+                - readOnly
+              type: object
+              x-pii: none
+            type:
+              const: browser
+              description: Browser automation via Playwright MCP.
+              type: string
+              x-pii: none
+          required:
+            - name
+            - type
+            - config
+            - toolPolicy
+          type: object
+      x-kind: command
+      x-permission: core.connector.write
+      x-pii: none
+      x-relations: []
+      x-tenancyScope: organization
+    connectors.SetConnectorSecretInput:
+      additionalProperties: false
+      description: Stores or replaces the connector's secret in the secret store (write-only).
+      examples:
+        - value: <secret>
+      properties:
+        value:
+          description: Bearer token, API key or DSN of the connector.
+          maxLength: 8192
+          minLength: 1
+          type: string
+          x-pii: sensitive
+      required:
+        - value
+      type: object
+      x-kind: command
+      x-permission: core.connector.write
+      x-pii: sensitive
+      x-relations: []
+      x-tenancyScope: organization
+    connectors.UpdateConnectorInput:
+      additionalProperties: false
+      description: Changes a connector's name, status, tool allowlist or config.
+      examples:
+        - status: disabled
+      properties:
+        config:
+          additionalProperties: {}
+          description: New config for the connector's type.
+          propertyNames:
+            type: string
+          type: object
+          x-pii: none
+        name:
+          description: New display name.
+          maxLength: 100
+          minLength: 1
+          type: string
+          x-pii: none
+        status:
+          description: Enable or disable the connector for agents.
+          enum:
+            - active
+            - disabled
+          type: string
+          x-pii: none
+        toolPolicy:
+          additionalProperties: false
+          description: New tool allowlist.
+          properties:
+            allow:
+              description: Tools agents may call; anything else is hidden.
+              items:
+                pattern: ^[A-Za-z][A-Za-z0-9_.-]{0,127}$
+                type: string
+              maxItems: 500
+              type: array
+              x-pii: none
+            readOnly:
+              description: Subset of allow that runs without approval.
+              items:
+                pattern: ^[A-Za-z][A-Za-z0-9_.-]{0,127}$
+                type: string
+              maxItems: 500
+              type: array
+              x-pii: none
+          required:
+            - allow
+            - readOnly
+          type: object
+          x-pii: none
+      type: object
+      x-kind: command
+      x-permission: core.connector.write
       x-pii: none
       x-relations: []
       x-tenancyScope: organization
