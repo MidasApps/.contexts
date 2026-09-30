@@ -35,8 +35,9 @@ describe("Firestore idempotency store", () => {
     const key = scope("01K6B00000000000000000000A");
     const response = { status: 201, body: '{"data":{"id":"p1"}}', location: "/v1/projects/p1" };
 
-    expect(await store.begin(key, "hash-a")).toEqual({ kind: "new" });
-    await store.complete(key, response);
+    const begin = await store.begin(key, "hash-a");
+    expect(begin.kind).toBe("new");
+    await store.complete(key, begin.kind === "new" ? begin.attemptId : "", response);
 
     expect(await store.begin(key, "hash-a")).toEqual({ kind: "replay", response });
     const stored = (await firestore.collection(IDEMPOTENCY_RECORDS_COLLECTION).doc(key).get()).data();
@@ -48,8 +49,8 @@ describe("Firestore idempotency store", () => {
     const { clock } = movableClock("2026-09-29T12:00:00.000Z");
     const store = createFirestoreIdempotencyStore({ firestore, clock });
     const key = scope("01K6B00000000000000000000B");
-    await store.begin(key, "hash-a");
-    await store.complete(key, { status: 204, body: null });
+    const begin = await store.begin(key, "hash-a");
+    await store.complete(key, begin.kind === "new" ? begin.attemptId : "", { status: 204, body: null });
     expect(await store.begin(key, "hash-b")).toEqual({ kind: "conflict" });
   });
 
@@ -57,11 +58,16 @@ describe("Firestore idempotency store", () => {
     const { clock, advance } = movableClock("2026-09-29T12:00:00.000Z");
     const store = createFirestoreIdempotencyStore({ firestore, clock });
     const key = scope("01K6B00000000000000000000C");
-    expect(await store.begin(key, "hash-a")).toEqual({ kind: "new" });
+    const first = await store.begin(key, "hash-a");
+    expect(first.kind).toBe("new");
     expect(await store.begin(key, "hash-a")).toEqual({ kind: "in-flight" });
     advance(60_000);
-    expect(await store.begin(key, "hash-a")).toEqual({ kind: "new" });
-    await store.release(key);
+    const second = await store.begin(key, "hash-a");
+    expect(second.kind).toBe("new");
+    // The first attempt lost its lease: its late release leaves the second attempt's record.
+    await store.release(key, first.kind === "new" ? first.attemptId : "");
+    expect((await firestore.collection(IDEMPOTENCY_RECORDS_COLLECTION).doc(key).get()).exists).toBe(true);
+    await store.release(key, second.kind === "new" ? second.attemptId : "");
     expect((await firestore.collection(IDEMPOTENCY_RECORDS_COLLECTION).doc(key).get()).exists).toBe(false);
   });
 

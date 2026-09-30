@@ -1,9 +1,10 @@
+import { randomUUID } from "node:crypto";
 import { Timestamp, type DocumentReference, type Firestore } from "firebase-admin/firestore";
 import { z } from "zod";
 import { systemClock, type Clock } from "../clock/clock.ts";
 import { CorruptDocumentError } from "../firestore/corrupt-document-error.ts";
 import { runInTransaction } from "../firestore/transaction-runner.ts";
-import { decideBegin, type IdempotencyRecord, type StoredResponse } from "./idempotency-decision.ts";
+import { decideBegin, ownsAttempt, type IdempotencyRecord, type StoredResponse } from "./idempotency-decision.ts";
 import type { IdempotencyStore } from "./idempotency-store.ts";
 
 /** One document per scope key (decision 0009 §3); `expiresAt` carries a TTL policy. */
@@ -13,6 +14,7 @@ const StoredResponseSchema = z.object({
   status: z.int().min(100).max(599),
   body: z.string().nullable(),
   location: z.string().optional(),
+  redacted: z.boolean().optional(),
 });
 
 const StoredRecordSchema = z.object({
@@ -21,6 +23,8 @@ const StoredRecordSchema = z.object({
   response: StoredResponseSchema.nullable(),
   expiresAt: z.instanceof(Timestamp),
   leaseUntil: z.instanceof(Timestamp),
+  // Records written before attempt ids existed match no attempt; they expire with the TTL.
+  attemptId: z.string().default(""),
 });
 
 const readRecord = (ref: DocumentReference, data: unknown): IdempotencyRecord | null => {
@@ -32,7 +36,14 @@ const readRecord = (ref: DocumentReference, data: unknown): IdempotencyRecord | 
   }
   const { response, expiresAt, leaseUntil, ...rest } = parsed.data;
   const storedResponse: StoredResponse | null =
-    response === null ? null : { status: response.status, body: response.body, ...(response.location === undefined ? {} : { location: response.location }) };
+    response === null
+      ? null
+      : {
+          status: response.status,
+          body: response.body,
+          ...(response.location === undefined ? {} : { location: response.location }),
+          ...(response.redacted === true ? { redacted: true } : {}),
+        };
   return { ...rest, response: storedResponse, expiresAt: expiresAt.toDate(), leaseUntil: leaseUntil.toDate() };
 };
 
@@ -42,6 +53,7 @@ const toStored = (record: IdempotencyRecord) => ({
   response: record.response,
   expiresAt: Timestamp.fromDate(record.expiresAt),
   leaseUntil: Timestamp.fromDate(record.leaseUntil),
+  attemptId: record.attemptId,
 });
 
 /**
@@ -49,32 +61,33 @@ const toStored = (record: IdempotencyRecord) => ({
  * in transactions on `idempotency-records/{scopeKey}`. Response bodies are kept as JSON
  * text for 24 h, then the TTL policy deletes them.
  */
-export const createFirestoreIdempotencyStore = (deps: { firestore: Firestore; clock?: Clock }): IdempotencyStore => {
+export const createFirestoreIdempotencyStore = (deps: { firestore: Firestore; clock?: Clock; newAttemptId?: () => string }): IdempotencyStore => {
   const clock = deps.clock ?? systemClock;
+  const newAttemptId = deps.newAttemptId ?? randomUUID;
   const refOf = (scopeKey: string) => deps.firestore.collection(IDEMPOTENCY_RECORDS_COLLECTION).doc(scopeKey);
   return {
     begin: (scopeKey, requestHash) => {
       const ref = refOf(scopeKey);
       return runInTransaction(deps.firestore, async (tx) => {
         const record = readRecord(ref, (await tx.get(ref)).data());
-        const { begin, write } = decideBegin({ record, requestHash, now: clock.now() });
+        const { begin, write } = decideBegin({ record, requestHash, now: clock.now(), attemptId: newAttemptId() });
         if (write !== null) tx.set(ref, toStored(write));
         return begin;
       });
     },
-    complete: (scopeKey, response) => {
+    complete: (scopeKey, attemptId, response) => {
       const ref = refOf(scopeKey);
       return runInTransaction(deps.firestore, async (tx) => {
         const record = readRecord(ref, (await tx.get(ref)).data());
-        // A record the TTL already removed cannot be completed; the next retry starts over.
-        if (record !== null) tx.set(ref, toStored({ ...record, state: "done", response }));
+        // Gone (TTL) or taken over by a later attempt: this attempt's result is dropped.
+        if (ownsAttempt(record, attemptId)) tx.set(ref, toStored({ ...record, state: "done", response }));
       });
     },
-    release: (scopeKey) => {
+    release: (scopeKey, attemptId) => {
       const ref = refOf(scopeKey);
       return runInTransaction(deps.firestore, async (tx) => {
         const record = readRecord(ref, (await tx.get(ref)).data());
-        if (record?.state === "in-flight") tx.delete(ref);
+        if (ownsAttempt(record, attemptId)) tx.delete(ref);
       });
     },
   };

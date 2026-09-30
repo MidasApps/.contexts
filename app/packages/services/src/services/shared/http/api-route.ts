@@ -11,7 +11,7 @@ import { getRateLimitPolicy, type RateLimitPolicy } from "../rate-limit/rate-lim
 import type { RateLimiter } from "../rate-limit/rate-limiter.ts";
 import { apiError } from "./api-errors.ts";
 import type { ApiHandler, EndpointPrincipal } from "./api-handler-context.ts";
-import { beginIdempotentAttempt, principalKey, replayResponse } from "./api-idempotency.ts";
+import { beginIdempotentAttempt, ONE_TIME_SECRET_ENDPOINT_IDS, principalKey, replayResponse } from "./api-idempotency.ts";
 import { createRateLimitGate, isCallerFailure, type RateLimitGate } from "./api-rate-limit.ts";
 import { authenticateRequest } from "./authenticate-request.ts";
 import { clientIpOf, DEFAULT_TRUSTED_PROXY_HOPS } from "./client-ip.ts";
@@ -26,6 +26,8 @@ export type ApiRouteDeps = {
   /** Defaults to the core policies (decision 0009). */
   readonly rateLimitPolicies?: readonly RateLimitPolicy[];
   readonly idempotency: IdempotencyStore;
+  /** Endpoint ids whose successes are never stored for replay (default `ONE_TIME_SECRET_ENDPOINT_IDS`). */
+  readonly oneTimeSecretEndpoints?: ReadonlySet<string>;
   readonly verifyBearer: VerifyBearer;
   readonly apiKeyPrefix: string;
   /** `TRUSTED_PROXY_HOPS`: which `X-Forwarded-For` entry is the client IP (default 1). */
@@ -94,10 +96,11 @@ const validateAndHandle = async <E extends EndpointDefinition>(run: Pipeline<E>,
     endpointId: run.endpoint.id,
     idempotencyKey: parsed.idempotencyKey,
     input: parsed.input,
+    redactSuccess: (run.deps.oneTimeSecretEndpoints ?? ONE_TIME_SECRET_ENDPOINT_IDS).has(run.endpoint.id),
   });
   if (attempt.begin.kind === "conflict") return apiError(409, "IDEMPOTENCY_KEY_REUSED", run.requestId);
   if (attempt.begin.kind === "in-flight") return inProgressResponse(run.requestId);
-  if (attempt.begin.kind === "replay") return replayResponse(attempt.begin.response);
+  if (attempt.begin.kind === "replay") return replayResponse(attempt.begin.response, run.requestId);
   try {
     const response = await callHandler(run, principal, parsed.input);
     await attempt.finish(response);

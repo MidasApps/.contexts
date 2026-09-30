@@ -59,7 +59,8 @@ describe("Firestore rate limiter", () => {
     expect((await limiter.peek("test-five-per-minute", "10.0.0.2")).remaining).toBe(4);
   });
 
-  it("counts concurrent hits exactly", async () => {
+  // Eight transactions contend on one bucket; the emulator resolves it with lock waits.
+  it("counts concurrent hits exactly", { timeout: 30_000 }, async () => {
     const { clock } = movableClock("2026-09-29T12:00:00.000Z");
     const limiter = createFirestoreRateLimiter({ firestore, clock, policies });
     const results = await Promise.all(Array.from({ length: 8 }, () => limiter.consume("test-five-per-minute", "10.0.0.2")));

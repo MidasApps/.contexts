@@ -229,6 +229,35 @@ describe("withApiRoute: idempotency", () => {
     expect((await errorOf(busy)).code).toBe("IDEMPOTENCY_REQUEST_IN_PROGRESS");
   });
 
+  it("never stores a one-time secret: a replay answers 409 CONFLICT with the resource location", async () => {
+    const { deps } = setup();
+    let runs = 0;
+    const route = withApiRoute(createThing, { ...deps, oneTimeSecretEndpoints: new Set(["test.createThing"]) }, () => {
+      runs += 1;
+      return Promise.resolve(dataResponse({ data: { id: "k1", secret: "s3cr3t" } }, { status: 201, location: "/v1/things/k1" }));
+    });
+    expect((await route(post('{"name":"a","count":1}'))).status).toBe(201);
+    const replay = await route(post('{"name":"a","count":1}'));
+    expect(runs).toBe(1);
+    expect(replay.status).toBe(409);
+    expect(replay.headers.get("location")).toBe("/v1/things/k1");
+    expect(replay.headers.get("idempotent-replayed")).toBe("true");
+    const text = await replay.text();
+    expect(text).not.toContain("s3cr3t");
+    expect(JSON.parse(text)).toMatchObject({ error: { code: "CONFLICT" } });
+  });
+
+  it("replays a stored error with the replaying request's id", async () => {
+    const { deps } = setup();
+    const route = withApiRoute(createThing, deps, ({ requestId }) =>
+      Promise.resolve(Response.json({ error: { code: "UNKNOWN_PERMISSION", message: "x", requestId } }, { status: 422 })),
+    );
+    await route(call("/v1/things", { method: "POST", headers: { ...bearer(), ...json, "idempotency-key": KEY_A, "x-request-id": "01K6B000000000000000000RQ1" }, body: '{"name":"a","count":1}' }));
+    const replay = await route(call("/v1/things", { method: "POST", headers: { ...bearer(), ...json, "idempotency-key": KEY_A, "x-request-id": "01K6B000000000000000000RQ2" }, body: '{"name":"a","count":1}' }));
+    expect(replay.status).toBe(422);
+    expect((await errorOf(replay)).requestId).toBe("01K6B000000000000000000RQ2");
+  });
+
   it("releases the key when the handler throws, so the client can retry", async () => {
     const { deps } = setup();
     let fail = true;
