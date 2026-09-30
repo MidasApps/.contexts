@@ -1,15 +1,45 @@
 // Composition root of @core/contracts: the only place that registers contracts
 // and endpoints (rule `development`: module side effects live in composition.ts,
 // and only run when a caller invokes the function).
+import { AgentRequestContextContract } from "./contracts/agents/agent-request-context.schema.ts";
+import { AgentSettingsContract } from "./contracts/agents/agent-settings.schema.ts";
+import { AgentApprovalRequestContract } from "./contracts/agents/approval-request.schema.ts";
+import { ToolUiContract } from "./contracts/agents/tool-ui.schema.ts";
+import { ConnectorContract } from "./contracts/connectors/connector.schema.ts";
+import { ConnectorToolPolicyContract } from "./contracts/connectors/connector-tool-policy.schema.ts";
 import type { ContractDefinition } from "./contracts/contract.ts";
 import { NoteContract } from "./contracts/example/note.schema.ts";
+import { FileUploadRequestContract } from "./contracts/files/file-upload-request.schema.ts";
+import { StoredFileContract } from "./contracts/files/stored-file.schema.ts";
+import { CitationContract } from "./contracts/knowledge/citation.schema.ts";
+import { KnowledgeDocumentContract } from "./contracts/knowledge/knowledge-document.schema.ts";
+import { KnowledgeSourceContract } from "./contracts/knowledge/knowledge-source.schema.ts";
+import { LlmCallContract } from "./contracts/usage/llm-call.schema.ts";
+import { UsageSummaryContract } from "./contracts/usage/usage-summary.schema.ts";
 import type { EndpointDefinition } from "./contracts/http/endpoint.ts";
 import { createEndpointRegistry, type EndpointRegistry } from "./contracts/http/endpoint-registry.ts";
 import { ErrorEnvelopeContract } from "./contracts/http/envelopes.schema.ts";
 import { createContractRegistry, type ContractRegistry } from "./contracts/registry.ts";
 
 /** Every contract of the core; add new contracts here. `example.Note` is removable. */
-export const CORE_CONTRACTS: readonly ContractDefinition[] = [NoteContract, ErrorEnvelopeContract];
+export const CORE_CONTRACTS: readonly ContractDefinition[] = [
+  NoteContract,
+  ErrorEnvelopeContract,
+  // SP3 agent runtime.
+  AgentRequestContextContract,
+  AgentSettingsContract,
+  ToolUiContract,
+  AgentApprovalRequestContract,
+  KnowledgeDocumentContract,
+  KnowledgeSourceContract,
+  CitationContract,
+  ConnectorContract,
+  ConnectorToolPolicyContract,
+  LlmCallContract,
+  UsageSummaryContract,
+  FileUploadRequestContract,
+  StoredFileContract,
+];
 
 /** Every `/v1` endpoint of the core (SP1 spec §7.3); add descriptors here. */
 export const CORE_ENDPOINTS: readonly EndpointDefinition[] = [];

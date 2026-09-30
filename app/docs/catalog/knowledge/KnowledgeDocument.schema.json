@@ -1,0 +1,164 @@
+{
+  "additionalProperties": false,
+  "description": "A document indexed in the knowledge base; agents cite its chunks when answering.",
+  "examples": [
+    {
+      "contentHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "createdAt": "2026-09-29T14:30:00.000Z",
+      "createdBy": "uA1b2C3d4E5f6G7h8I9j",
+      "id": "01928f6e-7b2a-7c3d-9e4f-5a6b7c8d9e0f",
+      "mimeType": "text/markdown",
+      "namespace": "tenant",
+      "source": "upload",
+      "sourceRef": "Fz9sK2lPq0WnR5tYu3bV",
+      "sourceUrl": null,
+      "status": "ready",
+      "tenantId": "Jd8sK2lPq0WnR5tYu3bV",
+      "title": "Onboarding guide",
+      "updatedAt": "2026-09-29T14:31:00.000Z"
+    }
+  ],
+  "properties": {
+    "contentHash": {
+      "description": "SHA-256 of the extracted text; unchanged content is not re-indexed.",
+      "pattern": "^[a-f0-9]{64}$",
+      "type": "string",
+      "x-pii": "none"
+    },
+    "createdAt": {
+      "description": "When the document was registered (UTC).",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+      "type": "string",
+      "x-pii": "none"
+    },
+    "createdBy": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Uid of the user who added it; null for platform content.",
+      "x-pii": "personal"
+    },
+    "id": {
+      "description": "Document id (uuidv7).",
+      "format": "uuid",
+      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+      "type": "string",
+      "x-pii": "none"
+    },
+    "mimeType": {
+      "anyOf": [
+        {
+          "maxLength": 255,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Media type of the original content.",
+      "x-pii": "none"
+    },
+    "namespace": {
+      "description": "Namespace the search tool filters on.",
+      "pattern": "^(?:tenant|catalog|project:[A-Za-z0-9_-]+|module:[a-z][a-z0-9-]*)$",
+      "type": "string",
+      "x-pii": "none"
+    },
+    "source": {
+      "description": "Where the content came from.",
+      "enum": [
+        "upload",
+        "url",
+        "catalog",
+        "module"
+      ],
+      "type": "string",
+      "x-pii": "none"
+    },
+    "sourceRef": {
+      "description": "File id, URL, contract id or module doc path; unique per tenant and source.",
+      "maxLength": 2048,
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "sourceUrl": {
+      "anyOf": [
+        {
+          "format": "uri",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Public URL of the source, when there is one.",
+      "x-pii": "none"
+    },
+    "status": {
+      "description": "Indexing status.",
+      "enum": [
+        "pending",
+        "ready",
+        "failed",
+        "deleted"
+      ],
+      "type": "string",
+      "x-pii": "none"
+    },
+    "tenantId": {
+      "description": "Owning organization, or _platform for shared platform content.",
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "title": {
+      "anyOf": [
+        {
+          "maxLength": 500,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Document title shown in citations.",
+      "x-pii": "personal"
+    },
+    "updatedAt": {
+      "description": "When the document last changed (UTC).",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+      "type": "string",
+      "x-pii": "none"
+    }
+  },
+  "required": [
+    "id",
+    "tenantId",
+    "namespace",
+    "source",
+    "sourceRef",
+    "title",
+    "sourceUrl",
+    "mimeType",
+    "contentHash",
+    "status",
+    "createdBy",
+    "createdAt",
+    "updatedAt"
+  ],
+  "type": "object",
+  "x-kind": "entity",
+  "x-permission": "core.knowledge.read",
+  "x-pii": "personal",
+  "x-relations": [],
+  "x-tenancyScope": "organization"
+}

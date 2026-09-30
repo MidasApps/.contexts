@@ -1,0 +1,156 @@
+{
+  "additionalProperties": false,
+  "description": "Per-organization configuration of the agent runtime: enabled subagents, web tools, PII guardrail and budget caps.",
+  "examples": [
+    {
+      "budget": {
+        "monthlyMicroUsd": 50000000,
+        "monthlyTokens": 20000000
+      },
+      "createdAt": "2026-09-29T14:30:00.000Z",
+      "enabledAgents": [
+        "knowledge",
+        "data",
+        "action"
+      ],
+      "guardrails": {
+        "pii": "warn"
+      },
+      "tenantId": "Jd8sK2lPq0WnR5tYu3bV",
+      "updatedAt": "2026-09-29T14:30:00.000Z",
+      "updatedBy": "uA1b2C3d4E5f6G7h8I9j",
+      "webTools": {
+        "browser": false,
+        "firecrawl": false
+      }
+    }
+  ],
+  "properties": {
+    "budget": {
+      "additionalProperties": false,
+      "description": "Monthly caps enforced by the tenant budget guard; alerts fire at 80 %.",
+      "properties": {
+        "monthlyMicroUsd": {
+          "description": "Hard monthly model spend cap in micro-USD.",
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "type": "integer",
+          "x-pii": "none"
+        },
+        "monthlyTokens": {
+          "description": "Hard monthly token cap (used when a price is unknown).",
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "type": "integer",
+          "x-pii": "none"
+        }
+      },
+      "required": [
+        "monthlyMicroUsd",
+        "monthlyTokens"
+      ],
+      "type": "object",
+      "x-pii": "none"
+    },
+    "createdAt": {
+      "description": "When the settings were created (UTC).",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+      "type": "string",
+      "x-pii": "none"
+    },
+    "enabledAgents": {
+      "description": "Subagents the supervisor may delegate to in this tenant.",
+      "items": {
+        "pattern": "^[a-z][a-z0-9-]*$",
+        "type": "string"
+      },
+      "type": "array",
+      "x-pii": "none"
+    },
+    "guardrails": {
+      "additionalProperties": false,
+      "description": "Tenant-tunable guardrail levels.",
+      "properties": {
+        "pii": {
+          "description": "What the PII detector does with personal data in user input.",
+          "enum": [
+            "warn",
+            "redact"
+          ],
+          "type": "string",
+          "x-pii": "none"
+        }
+      },
+      "required": [
+        "pii"
+      ],
+      "type": "object",
+      "x-pii": "none"
+    },
+    "tenantId": {
+      "description": "Organization the settings belong to (document id).",
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "updatedAt": {
+      "description": "When the settings last changed (UTC).",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+      "type": "string",
+      "x-pii": "none"
+    },
+    "updatedBy": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Uid of the last editor; null for defaults.",
+      "x-pii": "personal"
+    },
+    "webTools": {
+      "additionalProperties": false,
+      "description": "Opt-ins for tools that reach the public web.",
+      "properties": {
+        "browser": {
+          "description": "Browser automation through a Playwright MCP connector (off by default).",
+          "type": "boolean",
+          "x-pii": "none"
+        },
+        "firecrawl": {
+          "description": "Web search and scrape through Firecrawl (off by default).",
+          "type": "boolean",
+          "x-pii": "none"
+        }
+      },
+      "required": [
+        "firecrawl",
+        "browser"
+      ],
+      "type": "object",
+      "x-pii": "none"
+    }
+  },
+  "required": [
+    "tenantId",
+    "enabledAgents",
+    "webTools",
+    "guardrails",
+    "budget",
+    "updatedBy",
+    "createdAt",
+    "updatedAt"
+  ],
+  "type": "object",
+  "x-kind": "settings",
+  "x-permission": "core.agent-settings.read",
+  "x-pii": "personal",
+  "x-relations": [],
+  "x-tenancyScope": "organization"
+}

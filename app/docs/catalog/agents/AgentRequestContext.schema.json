@@ -1,0 +1,144 @@
+{
+  "additionalProperties": false,
+  "description": "Per-run context every agent, tool and workflow reads: tenant, caller, effective permissions and regional settings.",
+  "examples": [
+    {
+      "activeScreen": "notes.list",
+      "aiMode": "fake",
+      "conversationId": "Cv3sK2lPq0WnR5tYu3bV",
+      "currency": "BRL",
+      "displayTimeZone": "America/Sao_Paulo",
+      "locale": "pt-BR",
+      "nodeTimeZone": "America/Sao_Paulo",
+      "organizationId": "Jd8sK2lPq0WnR5tYu3bV",
+      "permissions": [
+        "core.chat.use",
+        "core.knowledge.read"
+      ],
+      "principalKind": "user",
+      "projectId": "Pq8sK2lPq0WnR5tYu3bV",
+      "requestId": "01J8Z3K4M5N6P7Q8R9S0T1V2W3",
+      "tenantId": "Jd8sK2lPq0WnR5tYu3bV",
+      "userId": "uA1b2C3d4E5f6G7h8I9j"
+    }
+  ],
+  "properties": {
+    "activeScreen": {
+      "description": "Route id of the UI screen the caller is on.",
+      "maxLength": 200,
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "aiMode": {
+      "description": "Whether models are real providers or the deterministic fakes.",
+      "enum": [
+        "real",
+        "fake"
+      ],
+      "type": "string",
+      "x-pii": "none"
+    },
+    "conversationId": {
+      "description": "Chat conversation id; also the memory thread id.",
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "currency": {
+      "description": "Default ISO 4217 currency of the active node.",
+      "pattern": "^[A-Z]{3}$",
+      "type": "string",
+      "x-pii": "none"
+    },
+    "displayTimeZone": {
+      "description": "IANA time zone used to show dates to the caller.",
+      "type": "string",
+      "x-pii": "none"
+    },
+    "locale": {
+      "description": "BCP 47 locale for answers and formatting.",
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "nodeTimeZone": {
+      "description": "IANA time zone of the active node, for calendar rules.",
+      "type": "string",
+      "x-pii": "none"
+    },
+    "organizationId": {
+      "description": "Same value as tenantId; the key Mastra TokenCostControl reads.",
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "permissions": {
+      "description": "Effective permissions: principal grants intersected with the agent ceiling.",
+      "items": {
+        "pattern": "^[a-z][a-z0-9-]*\\.[a-z][a-z0-9-]*\\.[a-z][a-z0-9-]*$",
+        "type": "string"
+      },
+      "type": "array",
+      "x-pii": "none"
+    },
+    "principalKind": {
+      "description": "Whether a person or an API key made the call.",
+      "enum": [
+        "user",
+        "service"
+      ],
+      "type": "string",
+      "x-pii": "none"
+    },
+    "projectId": {
+      "description": "Active project, when the request is scoped to one.",
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "requestId": {
+      "description": "X-Request-Id of the /v1 call (ULID).",
+      "format": "ulid",
+      "pattern": "^[0-7][0-9A-HJKMNP-TV-Za-hjkmnp-tv-z]{25}$",
+      "type": "string",
+      "x-pii": "none"
+    },
+    "tenantId": {
+      "description": "Active organization; from the verified principal, never from the client body.",
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "unitId": {
+      "description": "Active unit, when the request is scoped to one.",
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "userId": {
+      "description": "Firebase Auth uid of the caller (API key owner for services).",
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "personal"
+    }
+  },
+  "required": [
+    "tenantId",
+    "userId",
+    "principalKind",
+    "permissions",
+    "locale",
+    "displayTimeZone",
+    "nodeTimeZone",
+    "currency",
+    "requestId",
+    "organizationId",
+    "aiMode"
+  ],
+  "type": "object",
+  "x-kind": "settings",
+  "x-pii": "personal",
+  "x-relations": [],
+  "x-tenancyScope": "user"
+}

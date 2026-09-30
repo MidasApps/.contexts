@@ -1,0 +1,41 @@
+{
+  "additionalProperties": false,
+  "description": "A UI component a tool asks the chat to render, such as a schema form for a command.",
+  "examples": [
+    {
+      "component": "schema-form",
+      "props": {
+        "commandId": "example.CreateNoteCommand",
+        "contractId": "example.Note",
+        "initialValues": {},
+        "mode": "create"
+      }
+    }
+  ],
+  "properties": {
+    "component": {
+      "description": "Component id in the client registry, e.g. schema-form.",
+      "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+      "type": "string",
+      "x-pii": "none"
+    },
+    "props": {
+      "additionalProperties": {},
+      "description": "Props for the component; may hold form values typed by the user.",
+      "propertyNames": {
+        "type": "string"
+      },
+      "type": "object",
+      "x-pii": "personal"
+    }
+  },
+  "required": [
+    "component",
+    "props"
+  ],
+  "type": "object",
+  "x-kind": "ui-component",
+  "x-pii": "personal",
+  "x-relations": [],
+  "x-tenancyScope": "organization"
+}

@@ -82,5 +82,80 @@ export { IsoDateTimeSchema, type IsoDateTime } from "./contracts/primitives/iso-
 export { LocaleSchema, type Locale } from "./contracts/primitives/locale.schema.ts";
 export { CurrencySchema, MoneySchema, type Currency, type Money } from "./contracts/primitives/money.schema.ts";
 export { TimeZoneSchema, type TimeZone } from "./contracts/primitives/time-zone.schema.ts";
+// SP3 agent runtime contracts.
+export { AGENT_PERMISSIONS, type AgentPermissionDefinition } from "./contracts/agents/agent-permissions.ts";
+export {
+  AgentRequestContextContract,
+  AgentRequestContextSchema,
+  type AgentRequestContext,
+} from "./contracts/agents/agent-request-context.schema.ts";
+export {
+  AgentKeySchema,
+  AgentSettingsContract,
+  AgentSettingsSchema,
+  type AgentKey,
+  type AgentSettings,
+} from "./contracts/agents/agent-settings.schema.ts";
+export {
+  AGENT_COMMAND_ACTION_KIND,
+  AgentApprovalRequestContract,
+  AgentApprovalRequestSchema,
+  type AgentApprovalRequest,
+} from "./contracts/agents/approval-request.schema.ts";
+export {
+  ACTIVE_SCREEN_MAX_LENGTH,
+  FORWARDED_HEADERS,
+  type ForwardedHeaderName,
+} from "./contracts/agents/forwarded-headers.ts";
+export { ToolUiContract, ToolUiSchema, type ToolUi } from "./contracts/agents/tool-ui.schema.ts";
+export {
+  CitationContract,
+  CitationIdSchema,
+  CitationSchema,
+  type Citation,
+  type CitationId,
+} from "./contracts/knowledge/citation.schema.ts";
+export {
+  KnowledgeDocumentContract,
+  KnowledgeDocumentIdSchema,
+  KnowledgeDocumentSchema,
+  KnowledgeDocumentSourceSchema,
+  KnowledgeDocumentStatusSchema,
+  KnowledgeNamespaceSchema,
+  PLATFORM_TENANT_ID,
+  type KnowledgeDocument,
+  type KnowledgeDocumentId,
+  type KnowledgeDocumentSource,
+  type KnowledgeDocumentStatus,
+  type KnowledgeNamespace,
+} from "./contracts/knowledge/knowledge-document.schema.ts";
+export { KnowledgeSourceContract, KnowledgeSourceSchema, type KnowledgeSource } from "./contracts/knowledge/knowledge-source.schema.ts";
+export {
+  AllowedHostSchema,
+  ConnectorContract,
+  ConnectorIdSchema,
+  ConnectorSchema,
+  type Connector,
+  type ConnectorId,
+  type ConnectorType,
+} from "./contracts/connectors/connector.schema.ts";
+export {
+  ConnectorToolNameSchema,
+  ConnectorToolPolicyContract,
+  ConnectorToolPolicySchema,
+  type ConnectorToolPolicy,
+} from "./contracts/connectors/connector-tool-policy.schema.ts";
+export { LlmCallContract, LlmCallSchema, type LlmCall } from "./contracts/usage/llm-call.schema.ts";
+export { UsageSummaryContract, UsageSummarySchema, type UsageSummary } from "./contracts/usage/usage-summary.schema.ts";
+export {
+  FileNameSchema,
+  FilePurposeSchema,
+  FileUploadRequestContract,
+  FileUploadRequestSchema,
+  MAX_UPLOAD_BYTES,
+  type FilePurpose,
+  type FileUploadRequest,
+} from "./contracts/files/file-upload-request.schema.ts";
+export { FileIdSchema, StoredFileContract, StoredFileSchema, type FileId, type StoredFile } from "./contracts/files/stored-file.schema.ts";
 // Removable sample contract (keeps the catalog non-empty).
 export { NoteContract, NoteIdSchema, NoteSchema, type Note, type NoteId } from "./contracts/example/note.schema.ts";

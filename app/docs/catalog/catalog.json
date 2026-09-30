@@ -2,6 +2,1810 @@
   "catalogVersion": 1,
   "contracts": [
     {
+      "context": "agents",
+      "description": "Per-run context every agent, tool and workflow reads: tenant, caller, effective permissions and regional settings.",
+      "examples": [
+        {
+          "activeScreen": "notes.list",
+          "aiMode": "fake",
+          "conversationId": "Cv3sK2lPq0WnR5tYu3bV",
+          "currency": "BRL",
+          "displayTimeZone": "America/Sao_Paulo",
+          "locale": "pt-BR",
+          "nodeTimeZone": "America/Sao_Paulo",
+          "organizationId": "Jd8sK2lPq0WnR5tYu3bV",
+          "permissions": [
+            "core.chat.use",
+            "core.knowledge.read"
+          ],
+          "principalKind": "user",
+          "projectId": "Pq8sK2lPq0WnR5tYu3bV",
+          "requestId": "01J8Z3K4M5N6P7Q8R9S0T1V2W3",
+          "tenantId": "Jd8sK2lPq0WnR5tYu3bV",
+          "userId": "uA1b2C3d4E5f6G7h8I9j"
+        }
+      ],
+      "fields": [
+        {
+          "description": "Route id of the UI screen the caller is on.",
+          "name": "activeScreen",
+          "pii": "none",
+          "required": false
+        },
+        {
+          "description": "Whether models are real providers or the deterministic fakes.",
+          "name": "aiMode",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Chat conversation id; also the memory thread id.",
+          "name": "conversationId",
+          "pii": "none",
+          "required": false
+        },
+        {
+          "description": "Default ISO 4217 currency of the active node.",
+          "name": "currency",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "IANA time zone used to show dates to the caller.",
+          "name": "displayTimeZone",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "BCP 47 locale for answers and formatting.",
+          "name": "locale",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "IANA time zone of the active node, for calendar rules.",
+          "name": "nodeTimeZone",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Same value as tenantId; the key Mastra TokenCostControl reads.",
+          "name": "organizationId",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Effective permissions: principal grants intersected with the agent ceiling.",
+          "name": "permissions",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Whether a person or an API key made the call.",
+          "name": "principalKind",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Active project, when the request is scoped to one.",
+          "name": "projectId",
+          "pii": "none",
+          "required": false
+        },
+        {
+          "description": "X-Request-Id of the /v1 call (ULID).",
+          "name": "requestId",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Active organization; from the verified principal, never from the client body.",
+          "name": "tenantId",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Active unit, when the request is scoped to one.",
+          "name": "unitId",
+          "pii": "none",
+          "required": false
+        },
+        {
+          "description": "Firebase Auth uid of the caller (API key owner for services).",
+          "name": "userId",
+          "pii": "personal",
+          "required": true
+        }
+      ],
+      "id": "agents.AgentRequestContext",
+      "jsonSchema": {
+        "additionalProperties": false,
+        "description": "Per-run context every agent, tool and workflow reads: tenant, caller, effective permissions and regional settings.",
+        "examples": [
+          {
+            "activeScreen": "notes.list",
+            "aiMode": "fake",
+            "conversationId": "Cv3sK2lPq0WnR5tYu3bV",
+            "currency": "BRL",
+            "displayTimeZone": "America/Sao_Paulo",
+            "locale": "pt-BR",
+            "nodeTimeZone": "America/Sao_Paulo",
+            "organizationId": "Jd8sK2lPq0WnR5tYu3bV",
+            "permissions": [
+              "core.chat.use",
+              "core.knowledge.read"
+            ],
+            "principalKind": "user",
+            "projectId": "Pq8sK2lPq0WnR5tYu3bV",
+            "requestId": "01J8Z3K4M5N6P7Q8R9S0T1V2W3",
+            "tenantId": "Jd8sK2lPq0WnR5tYu3bV",
+            "userId": "uA1b2C3d4E5f6G7h8I9j"
+          }
+        ],
+        "properties": {
+          "activeScreen": {
+            "description": "Route id of the UI screen the caller is on.",
+            "maxLength": 200,
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "aiMode": {
+            "description": "Whether models are real providers or the deterministic fakes.",
+            "enum": [
+              "real",
+              "fake"
+            ],
+            "type": "string",
+            "x-pii": "none"
+          },
+          "conversationId": {
+            "description": "Chat conversation id; also the memory thread id.",
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "currency": {
+            "description": "Default ISO 4217 currency of the active node.",
+            "pattern": "^[A-Z]{3}$",
+            "type": "string",
+            "x-pii": "none"
+          },
+          "displayTimeZone": {
+            "description": "IANA time zone used to show dates to the caller.",
+            "type": "string",
+            "x-pii": "none"
+          },
+          "locale": {
+            "description": "BCP 47 locale for answers and formatting.",
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "nodeTimeZone": {
+            "description": "IANA time zone of the active node, for calendar rules.",
+            "type": "string",
+            "x-pii": "none"
+          },
+          "organizationId": {
+            "description": "Same value as tenantId; the key Mastra TokenCostControl reads.",
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "permissions": {
+            "description": "Effective permissions: principal grants intersected with the agent ceiling.",
+            "items": {
+              "pattern": "^[a-z][a-z0-9-]*\\.[a-z][a-z0-9-]*\\.[a-z][a-z0-9-]*$",
+              "type": "string"
+            },
+            "type": "array",
+            "x-pii": "none"
+          },
+          "principalKind": {
+            "description": "Whether a person or an API key made the call.",
+            "enum": [
+              "user",
+              "service"
+            ],
+            "type": "string",
+            "x-pii": "none"
+          },
+          "projectId": {
+            "description": "Active project, when the request is scoped to one.",
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "requestId": {
+            "description": "X-Request-Id of the /v1 call (ULID).",
+            "format": "ulid",
+            "pattern": "^[0-7][0-9A-HJKMNP-TV-Za-hjkmnp-tv-z]{25}$",
+            "type": "string",
+            "x-pii": "none"
+          },
+          "tenantId": {
+            "description": "Active organization; from the verified principal, never from the client body.",
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "unitId": {
+            "description": "Active unit, when the request is scoped to one.",
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "userId": {
+            "description": "Firebase Auth uid of the caller (API key owner for services).",
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "personal"
+          }
+        },
+        "required": [
+          "tenantId",
+          "userId",
+          "principalKind",
+          "permissions",
+          "locale",
+          "displayTimeZone",
+          "nodeTimeZone",
+          "currency",
+          "requestId",
+          "organizationId",
+          "aiMode"
+        ],
+        "type": "object",
+        "x-kind": "settings",
+        "x-pii": "personal",
+        "x-relations": [],
+        "x-tenancyScope": "user"
+      },
+      "kind": "settings",
+      "name": "AgentRequestContext",
+      "pii": "personal",
+      "relations": [],
+      "tenancyScope": "user"
+    },
+    {
+      "context": "agents",
+      "description": "Per-organization configuration of the agent runtime: enabled subagents, web tools, PII guardrail and budget caps.",
+      "examples": [
+        {
+          "budget": {
+            "monthlyMicroUsd": 50000000,
+            "monthlyTokens": 20000000
+          },
+          "createdAt": "2026-09-29T14:30:00.000Z",
+          "enabledAgents": [
+            "knowledge",
+            "data",
+            "action"
+          ],
+          "guardrails": {
+            "pii": "warn"
+          },
+          "tenantId": "Jd8sK2lPq0WnR5tYu3bV",
+          "updatedAt": "2026-09-29T14:30:00.000Z",
+          "updatedBy": "uA1b2C3d4E5f6G7h8I9j",
+          "webTools": {
+            "browser": false,
+            "firecrawl": false
+          }
+        }
+      ],
+      "fields": [
+        {
+          "description": "Monthly caps enforced by the tenant budget guard; alerts fire at 80 %.",
+          "name": "budget",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "When the settings were created (UTC).",
+          "name": "createdAt",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Subagents the supervisor may delegate to in this tenant.",
+          "name": "enabledAgents",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Tenant-tunable guardrail levels.",
+          "name": "guardrails",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Organization the settings belong to (document id).",
+          "name": "tenantId",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "When the settings last changed (UTC).",
+          "name": "updatedAt",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Uid of the last editor; null for defaults.",
+          "name": "updatedBy",
+          "pii": "personal",
+          "required": true
+        },
+        {
+          "description": "Opt-ins for tools that reach the public web.",
+          "name": "webTools",
+          "pii": "none",
+          "required": true
+        }
+      ],
+      "id": "agents.AgentSettings",
+      "jsonSchema": {
+        "additionalProperties": false,
+        "description": "Per-organization configuration of the agent runtime: enabled subagents, web tools, PII guardrail and budget caps.",
+        "examples": [
+          {
+            "budget": {
+              "monthlyMicroUsd": 50000000,
+              "monthlyTokens": 20000000
+            },
+            "createdAt": "2026-09-29T14:30:00.000Z",
+            "enabledAgents": [
+              "knowledge",
+              "data",
+              "action"
+            ],
+            "guardrails": {
+              "pii": "warn"
+            },
+            "tenantId": "Jd8sK2lPq0WnR5tYu3bV",
+            "updatedAt": "2026-09-29T14:30:00.000Z",
+            "updatedBy": "uA1b2C3d4E5f6G7h8I9j",
+            "webTools": {
+              "browser": false,
+              "firecrawl": false
+            }
+          }
+        ],
+        "properties": {
+          "budget": {
+            "additionalProperties": false,
+            "description": "Monthly caps enforced by the tenant budget guard; alerts fire at 80 %.",
+            "properties": {
+              "monthlyMicroUsd": {
+                "description": "Hard monthly model spend cap in micro-USD.",
+                "maximum": 9007199254740991,
+                "minimum": 0,
+                "type": "integer",
+                "x-pii": "none"
+              },
+              "monthlyTokens": {
+                "description": "Hard monthly token cap (used when a price is unknown).",
+                "maximum": 9007199254740991,
+                "minimum": 0,
+                "type": "integer",
+                "x-pii": "none"
+              }
+            },
+            "required": [
+              "monthlyMicroUsd",
+              "monthlyTokens"
+            ],
+            "type": "object",
+            "x-pii": "none"
+          },
+          "createdAt": {
+            "description": "When the settings were created (UTC).",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "type": "string",
+            "x-pii": "none"
+          },
+          "enabledAgents": {
+            "description": "Subagents the supervisor may delegate to in this tenant.",
+            "items": {
+              "pattern": "^[a-z][a-z0-9-]*$",
+              "type": "string"
+            },
+            "type": "array",
+            "x-pii": "none"
+          },
+          "guardrails": {
+            "additionalProperties": false,
+            "description": "Tenant-tunable guardrail levels.",
+            "properties": {
+              "pii": {
+                "description": "What the PII detector does with personal data in user input.",
+                "enum": [
+                  "warn",
+                  "redact"
+                ],
+                "type": "string",
+                "x-pii": "none"
+              }
+            },
+            "required": [
+              "pii"
+            ],
+            "type": "object",
+            "x-pii": "none"
+          },
+          "tenantId": {
+            "description": "Organization the settings belong to (document id).",
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "updatedAt": {
+            "description": "When the settings last changed (UTC).",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "type": "string",
+            "x-pii": "none"
+          },
+          "updatedBy": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Uid of the last editor; null for defaults.",
+            "x-pii": "personal"
+          },
+          "webTools": {
+            "additionalProperties": false,
+            "description": "Opt-ins for tools that reach the public web.",
+            "properties": {
+              "browser": {
+                "description": "Browser automation through a Playwright MCP connector (off by default).",
+                "type": "boolean",
+                "x-pii": "none"
+              },
+              "firecrawl": {
+                "description": "Web search and scrape through Firecrawl (off by default).",
+                "type": "boolean",
+                "x-pii": "none"
+              }
+            },
+            "required": [
+              "firecrawl",
+              "browser"
+            ],
+            "type": "object",
+            "x-pii": "none"
+          }
+        },
+        "required": [
+          "tenantId",
+          "enabledAgents",
+          "webTools",
+          "guardrails",
+          "budget",
+          "updatedBy",
+          "createdAt",
+          "updatedAt"
+        ],
+        "type": "object",
+        "x-kind": "settings",
+        "x-permission": "core.agent-settings.read",
+        "x-pii": "personal",
+        "x-relations": [],
+        "x-tenancyScope": "organization"
+      },
+      "kind": "settings",
+      "name": "AgentSettings",
+      "permission": "core.agent-settings.read",
+      "pii": "personal",
+      "relations": [],
+      "tenancyScope": "organization"
+    },
+    {
+      "context": "agents",
+      "description": "Payload of an approval request (kind agent-command) that holds an agent mutation until a second member approves it.",
+      "examples": [
+        {
+          "agentId": "action",
+          "commandId": "example.ArchiveNoteCommand",
+          "idempotencyKey": "run_01J8Z3K4M5:call_7",
+          "input": {
+            "noteId": "Xk2mQ9vLr3TnB7pWc1aZ"
+          },
+          "kind": "agent-command",
+          "permission": "example.note.archive",
+          "preview": {
+            "after": {
+              "archived": true
+            },
+            "before": {
+              "archived": false
+            }
+          },
+          "requestedBy": "uA1b2C3d4E5f6G7h8I9j",
+          "runId": "run_01J8Z3K4M5",
+          "summary": "Archive the note Supplier follow-up",
+          "tenantId": "Jd8sK2lPq0WnR5tYu3bV",
+          "toolCallId": "call_7",
+          "toolId": "command.example.ArchiveNoteCommand"
+        }
+      ],
+      "fields": [
+        {
+          "description": "Agent that proposed the command.",
+          "name": "agentId",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Command contract id whose schema validates `input`.",
+          "name": "commandId",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "`runId:toolCallId`; the command runs at most once per key.",
+          "name": "idempotencyKey",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Command input as validated by the command contract.",
+          "name": "input",
+          "pii": "personal",
+          "required": true
+        },
+        {
+          "description": "Approval action kind handled by the agent runtime.",
+          "name": "kind",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Permission the command requires; re-checked on execution.",
+          "name": "permission",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Before/after preview shown to approvers; null when unavailable.",
+          "name": "preview",
+          "pii": "personal",
+          "required": true
+        },
+        {
+          "description": "Uid of the user whose agent run asked for the command.",
+          "name": "requestedBy",
+          "pii": "personal",
+          "required": true
+        },
+        {
+          "description": "Mastra run id of the agent stream.",
+          "name": "runId",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Human-readable description of the change for approvers.",
+          "name": "summary",
+          "pii": "personal",
+          "required": true
+        },
+        {
+          "description": "Organization where the command runs.",
+          "name": "tenantId",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Model tool call id inside the run.",
+          "name": "toolCallId",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Tool id, `command.<contractId>`.",
+          "name": "toolId",
+          "pii": "none",
+          "required": true
+        }
+      ],
+      "id": "agents.ApprovalRequest",
+      "jsonSchema": {
+        "additionalProperties": false,
+        "description": "Payload of an approval request (kind agent-command) that holds an agent mutation until a second member approves it.",
+        "examples": [
+          {
+            "agentId": "action",
+            "commandId": "example.ArchiveNoteCommand",
+            "idempotencyKey": "run_01J8Z3K4M5:call_7",
+            "input": {
+              "noteId": "Xk2mQ9vLr3TnB7pWc1aZ"
+            },
+            "kind": "agent-command",
+            "permission": "example.note.archive",
+            "preview": {
+              "after": {
+                "archived": true
+              },
+              "before": {
+                "archived": false
+              }
+            },
+            "requestedBy": "uA1b2C3d4E5f6G7h8I9j",
+            "runId": "run_01J8Z3K4M5",
+            "summary": "Archive the note Supplier follow-up",
+            "tenantId": "Jd8sK2lPq0WnR5tYu3bV",
+            "toolCallId": "call_7",
+            "toolId": "command.example.ArchiveNoteCommand"
+          }
+        ],
+        "properties": {
+          "agentId": {
+            "description": "Agent that proposed the command.",
+            "pattern": "^[a-z][a-z0-9-]*$",
+            "type": "string",
+            "x-pii": "none"
+          },
+          "commandId": {
+            "description": "Command contract id whose schema validates `input`.",
+            "pattern": "^[a-z][a-z0-9-]*\\.[A-Z][A-Za-z0-9]*$",
+            "type": "string",
+            "x-pii": "none"
+          },
+          "idempotencyKey": {
+            "description": "`runId:toolCallId`; the command runs at most once per key.",
+            "maxLength": 401,
+            "minLength": 3,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "input": {
+            "additionalProperties": {},
+            "description": "Command input as validated by the command contract.",
+            "propertyNames": {
+              "type": "string"
+            },
+            "type": "object",
+            "x-pii": "personal"
+          },
+          "kind": {
+            "const": "agent-command",
+            "description": "Approval action kind handled by the agent runtime.",
+            "type": "string",
+            "x-pii": "none"
+          },
+          "permission": {
+            "description": "Permission the command requires; re-checked on execution.",
+            "pattern": "^[a-z][a-z0-9-]*\\.[a-z][a-z0-9-]*\\.[a-z][a-z0-9-]*$",
+            "type": "string",
+            "x-pii": "none"
+          },
+          "preview": {
+            "anyOf": [
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "after": {
+                    "description": "State after the change.",
+                    "x-pii": "personal"
+                  },
+                  "before": {
+                    "description": "State before the change, when the command can preview it.",
+                    "x-pii": "personal"
+                  }
+                },
+                "required": [
+                  "before",
+                  "after"
+                ],
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Before/after preview shown to approvers; null when unavailable.",
+            "x-pii": "personal"
+          },
+          "requestedBy": {
+            "description": "Uid of the user whose agent run asked for the command.",
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "personal"
+          },
+          "runId": {
+            "description": "Mastra run id of the agent stream.",
+            "maxLength": 200,
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "summary": {
+            "description": "Human-readable description of the change for approvers.",
+            "maxLength": 500,
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "personal"
+          },
+          "tenantId": {
+            "description": "Organization where the command runs.",
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "toolCallId": {
+            "description": "Model tool call id inside the run.",
+            "maxLength": 200,
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "toolId": {
+            "description": "Tool id, `command.<contractId>`.",
+            "maxLength": 200,
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          }
+        },
+        "required": [
+          "kind",
+          "tenantId",
+          "requestedBy",
+          "agentId",
+          "toolId",
+          "commandId",
+          "permission",
+          "input",
+          "runId",
+          "toolCallId",
+          "idempotencyKey",
+          "summary",
+          "preview"
+        ],
+        "type": "object",
+        "x-kind": "command",
+        "x-permission": "core.approval.read",
+        "x-pii": "personal",
+        "x-relations": [],
+        "x-tenancyScope": "organization"
+      },
+      "kind": "command",
+      "name": "ApprovalRequest",
+      "permission": "core.approval.read",
+      "pii": "personal",
+      "relations": [],
+      "tenancyScope": "organization"
+    },
+    {
+      "context": "agents",
+      "description": "A UI component a tool asks the chat to render, such as a schema form for a command.",
+      "examples": [
+        {
+          "component": "schema-form",
+          "props": {
+            "commandId": "example.CreateNoteCommand",
+            "contractId": "example.Note",
+            "initialValues": {},
+            "mode": "create"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "description": "Component id in the client registry, e.g. schema-form.",
+          "name": "component",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Props for the component; may hold form values typed by the user.",
+          "name": "props",
+          "pii": "personal",
+          "required": true
+        }
+      ],
+      "id": "agents.ToolUi",
+      "jsonSchema": {
+        "additionalProperties": false,
+        "description": "A UI component a tool asks the chat to render, such as a schema form for a command.",
+        "examples": [
+          {
+            "component": "schema-form",
+            "props": {
+              "commandId": "example.CreateNoteCommand",
+              "contractId": "example.Note",
+              "initialValues": {},
+              "mode": "create"
+            }
+          }
+        ],
+        "properties": {
+          "component": {
+            "description": "Component id in the client registry, e.g. schema-form.",
+            "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+            "type": "string",
+            "x-pii": "none"
+          },
+          "props": {
+            "additionalProperties": {},
+            "description": "Props for the component; may hold form values typed by the user.",
+            "propertyNames": {
+              "type": "string"
+            },
+            "type": "object",
+            "x-pii": "personal"
+          }
+        },
+        "required": [
+          "component",
+          "props"
+        ],
+        "type": "object",
+        "x-kind": "ui-component",
+        "x-pii": "personal",
+        "x-relations": [],
+        "x-tenancyScope": "organization"
+      },
+      "kind": "ui-component",
+      "name": "ToolUi",
+      "pii": "personal",
+      "relations": [],
+      "tenancyScope": "organization"
+    },
+    {
+      "context": "connectors",
+      "description": "An external system (OpenAPI, MCP, Postgres or browser) an organization lets its agents use.",
+      "examples": [
+        {
+          "config": {
+            "allowedHosts": [
+              "api.example.com"
+            ],
+            "apiKeyHeader": null,
+            "auth": "bearer",
+            "specUrl": "https://api.example.com/openapi.json"
+          },
+          "createdAt": "2026-09-29T14:30:00.000Z",
+          "createdBy": "uA1b2C3d4E5f6G7h8I9j",
+          "id": "Cn4sK2lPq0WnR5tYu3bV",
+          "name": "issues-api",
+          "secretRef": "connector-Jd8sK2lPq0WnR5tYu3bV-Cn4sK2lPq0WnR5tYu3bV",
+          "status": "active",
+          "tenantId": "Jd8sK2lPq0WnR5tYu3bV",
+          "toolPolicy": {
+            "allow": [
+              "listIssues",
+              "createIssue"
+            ],
+            "readOnly": [
+              "listIssues"
+            ]
+          },
+          "type": "openapi",
+          "updatedAt": "2026-09-29T14:30:00.000Z"
+        },
+        {
+          "config": {
+            "allowedHosts": [
+              "mcp.example.com"
+            ],
+            "auth": "none",
+            "url": "https://mcp.example.com/mcp"
+          },
+          "createdAt": "2026-09-29T14:30:00.000Z",
+          "createdBy": "uA1b2C3d4E5f6G7h8I9j",
+          "id": "Cn4sK2lPq0WnR5tYu3bV",
+          "name": "docs-mcp",
+          "secretRef": null,
+          "status": "active",
+          "tenantId": "Jd8sK2lPq0WnR5tYu3bV",
+          "toolPolicy": {
+            "allow": [
+              "search"
+            ],
+            "readOnly": [
+              "search"
+            ]
+          },
+          "type": "mcp",
+          "updatedAt": "2026-09-29T14:30:00.000Z"
+        },
+        {
+          "config": {
+            "allowedRelations": [
+              "public.orders_summary"
+            ]
+          },
+          "createdAt": "2026-09-29T14:30:00.000Z",
+          "createdBy": "uA1b2C3d4E5f6G7h8I9j",
+          "id": "Cn4sK2lPq0WnR5tYu3bV",
+          "name": "warehouse",
+          "secretRef": "connector-Jd8sK2lPq0WnR5tYu3bV-Pg4sK2lPq0WnR5tYu3bV",
+          "status": "active",
+          "tenantId": "Jd8sK2lPq0WnR5tYu3bV",
+          "toolPolicy": {
+            "allow": [
+              "query"
+            ],
+            "readOnly": [
+              "query"
+            ]
+          },
+          "type": "postgres",
+          "updatedAt": "2026-09-29T14:30:00.000Z"
+        },
+        {
+          "config": {
+            "allowedHosts": [
+              "browser.example.com"
+            ],
+            "url": "https://browser.example.com/mcp"
+          },
+          "createdAt": "2026-09-29T14:30:00.000Z",
+          "createdBy": "uA1b2C3d4E5f6G7h8I9j",
+          "id": "Cn4sK2lPq0WnR5tYu3bV",
+          "name": "browser",
+          "secretRef": null,
+          "status": "active",
+          "tenantId": "Jd8sK2lPq0WnR5tYu3bV",
+          "toolPolicy": {
+            "allow": [
+              "browser_navigate"
+            ],
+            "readOnly": []
+          },
+          "type": "browser",
+          "updatedAt": "2026-09-29T14:30:00.000Z"
+        }
+      ],
+      "fields": [],
+      "id": "connectors.Connector",
+      "jsonSchema": {
+        "description": "An external system (OpenAPI, MCP, Postgres or browser) an organization lets its agents use.",
+        "examples": [
+          {
+            "config": {
+              "allowedHosts": [
+                "api.example.com"
+              ],
+              "apiKeyHeader": null,
+              "auth": "bearer",
+              "specUrl": "https://api.example.com/openapi.json"
+            },
+            "createdAt": "2026-09-29T14:30:00.000Z",
+            "createdBy": "uA1b2C3d4E5f6G7h8I9j",
+            "id": "Cn4sK2lPq0WnR5tYu3bV",
+            "name": "issues-api",
+            "secretRef": "connector-Jd8sK2lPq0WnR5tYu3bV-Cn4sK2lPq0WnR5tYu3bV",
+            "status": "active",
+            "tenantId": "Jd8sK2lPq0WnR5tYu3bV",
+            "toolPolicy": {
+              "allow": [
+                "listIssues",
+                "createIssue"
+              ],
+              "readOnly": [
+                "listIssues"
+              ]
+            },
+            "type": "openapi",
+            "updatedAt": "2026-09-29T14:30:00.000Z"
+          },
+          {
+            "config": {
+              "allowedHosts": [
+                "mcp.example.com"
+              ],
+              "auth": "none",
+              "url": "https://mcp.example.com/mcp"
+            },
+            "createdAt": "2026-09-29T14:30:00.000Z",
+            "createdBy": "uA1b2C3d4E5f6G7h8I9j",
+            "id": "Cn4sK2lPq0WnR5tYu3bV",
+            "name": "docs-mcp",
+            "secretRef": null,
+            "status": "active",
+            "tenantId": "Jd8sK2lPq0WnR5tYu3bV",
+            "toolPolicy": {
+              "allow": [
+                "search"
+              ],
+              "readOnly": [
+                "search"
+              ]
+            },
+            "type": "mcp",
+            "updatedAt": "2026-09-29T14:30:00.000Z"
+          },
+          {
+            "config": {
+              "allowedRelations": [
+                "public.orders_summary"
+              ]
+            },
+            "createdAt": "2026-09-29T14:30:00.000Z",
+            "createdBy": "uA1b2C3d4E5f6G7h8I9j",
+            "id": "Cn4sK2lPq0WnR5tYu3bV",
+            "name": "warehouse",
+            "secretRef": "connector-Jd8sK2lPq0WnR5tYu3bV-Pg4sK2lPq0WnR5tYu3bV",
+            "status": "active",
+            "tenantId": "Jd8sK2lPq0WnR5tYu3bV",
+            "toolPolicy": {
+              "allow": [
+                "query"
+              ],
+              "readOnly": [
+                "query"
+              ]
+            },
+            "type": "postgres",
+            "updatedAt": "2026-09-29T14:30:00.000Z"
+          },
+          {
+            "config": {
+              "allowedHosts": [
+                "browser.example.com"
+              ],
+              "url": "https://browser.example.com/mcp"
+            },
+            "createdAt": "2026-09-29T14:30:00.000Z",
+            "createdBy": "uA1b2C3d4E5f6G7h8I9j",
+            "id": "Cn4sK2lPq0WnR5tYu3bV",
+            "name": "browser",
+            "secretRef": null,
+            "status": "active",
+            "tenantId": "Jd8sK2lPq0WnR5tYu3bV",
+            "toolPolicy": {
+              "allow": [
+                "browser_navigate"
+              ],
+              "readOnly": []
+            },
+            "type": "browser",
+            "updatedAt": "2026-09-29T14:30:00.000Z"
+          }
+        ],
+        "oneOf": [
+          {
+            "additionalProperties": false,
+            "properties": {
+              "config": {
+                "additionalProperties": false,
+                "description": "OpenAPI settings.",
+                "properties": {
+                  "allowedHosts": {
+                    "description": "Hosts requests may reach, redirects included.",
+                    "items": {
+                      "pattern": "^(?=.{1,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\\.)+[a-z]{2,63}$",
+                      "type": "string"
+                    },
+                    "maxItems": 20,
+                    "minItems": 1,
+                    "type": "array",
+                    "x-pii": "none"
+                  },
+                  "apiKeyHeader": {
+                    "anyOf": [
+                      {
+                        "pattern": "^[A-Za-z0-9-]{1,100}$",
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "description": "Header name for api-key auth; null otherwise.",
+                    "x-pii": "none"
+                  },
+                  "auth": {
+                    "description": "How the secret is sent; the secret itself is in the secret store.",
+                    "enum": [
+                      "none",
+                      "bearer",
+                      "api-key"
+                    ],
+                    "type": "string",
+                    "x-pii": "none"
+                  },
+                  "specUrl": {
+                    "description": "URL of the OpenAPI 3.0/3.1 document.",
+                    "format": "uri",
+                    "maxLength": 2048,
+                    "type": "string",
+                    "x-pii": "none"
+                  }
+                },
+                "required": [
+                  "specUrl",
+                  "allowedHosts",
+                  "auth",
+                  "apiKeyHeader"
+                ],
+                "type": "object",
+                "x-pii": "none"
+              },
+              "createdAt": {
+                "description": "When the connector was created (UTC).",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                "type": "string",
+                "x-pii": "none"
+              },
+              "createdBy": {
+                "description": "Uid of the admin who created it.",
+                "minLength": 1,
+                "type": "string",
+                "x-pii": "personal"
+              },
+              "id": {
+                "description": "Firestore automatic id of the connector.",
+                "minLength": 1,
+                "type": "string",
+                "x-pii": "none"
+              },
+              "name": {
+                "description": "Display name; also the prefix of the generated tool names.",
+                "maxLength": 100,
+                "minLength": 1,
+                "type": "string",
+                "x-pii": "none"
+              },
+              "secretRef": {
+                "anyOf": [
+                  {
+                    "maxLength": 255,
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "description": "Name of the secret in the secret store; never the secret.",
+                "x-pii": "none"
+              },
+              "status": {
+                "description": "Whether agents can use the connector.",
+                "enum": [
+                  "active",
+                  "disabled",
+                  "error"
+                ],
+                "type": "string",
+                "x-pii": "none"
+              },
+              "tenantId": {
+                "description": "Owning organization.",
+                "minLength": 1,
+                "type": "string",
+                "x-pii": "none"
+              },
+              "toolPolicy": {
+                "additionalProperties": false,
+                "description": "Tools agents may call and which skip approval.",
+                "properties": {
+                  "allow": {
+                    "description": "Tools agents may call; anything else is hidden.",
+                    "items": {
+                      "pattern": "^[A-Za-z][A-Za-z0-9_.-]{0,127}$",
+                      "type": "string"
+                    },
+                    "maxItems": 500,
+                    "type": "array",
+                    "x-pii": "none"
+                  },
+                  "readOnly": {
+                    "description": "Subset of allow that runs without approval.",
+                    "items": {
+                      "pattern": "^[A-Za-z][A-Za-z0-9_.-]{0,127}$",
+                      "type": "string"
+                    },
+                    "maxItems": 500,
+                    "type": "array",
+                    "x-pii": "none"
+                  }
+                },
+                "required": [
+                  "allow",
+                  "readOnly"
+                ],
+                "type": "object",
+                "x-pii": "none"
+              },
+              "type": {
+                "const": "openapi",
+                "description": "HTTP API described by OpenAPI.",
+                "type": "string",
+                "x-pii": "none"
+              },
+              "updatedAt": {
+                "description": "When the connector last changed (UTC).",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                "type": "string",
+                "x-pii": "none"
+              }
+            },
+            "required": [
+              "id",
+              "tenantId",
+              "name",
+              "status",
+              "secretRef",
+              "toolPolicy",
+              "createdBy",
+              "createdAt",
+              "updatedAt",
+              "type",
+              "config"
+            ],
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "config": {
+                "additionalProperties": false,
+                "description": "MCP settings.",
+                "properties": {
+                  "allowedHosts": {
+                    "description": "Hosts requests may reach, redirects included.",
+                    "items": {
+                      "pattern": "^(?=.{1,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\\.)+[a-z]{2,63}$",
+                      "type": "string"
+                    },
+                    "maxItems": 20,
+                    "minItems": 1,
+                    "type": "array",
+                    "x-pii": "none"
+                  },
+                  "auth": {
+                    "description": "How the connector authenticates; tokens live in the secret store.",
+                    "enum": [
+                      "none",
+                      "bearer",
+                      "oauth"
+                    ],
+                    "type": "string",
+                    "x-pii": "none"
+                  },
+                  "url": {
+                    "description": "Streamable HTTP endpoint of the MCP server.",
+                    "format": "uri",
+                    "maxLength": 2048,
+                    "type": "string",
+                    "x-pii": "none"
+                  }
+                },
+                "required": [
+                  "url",
+                  "allowedHosts",
+                  "auth"
+                ],
+                "type": "object",
+                "x-pii": "none"
+              },
+              "createdAt": {
+                "description": "When the connector was created (UTC).",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                "type": "string",
+                "x-pii": "none"
+              },
+              "createdBy": {
+                "description": "Uid of the admin who created it.",
+                "minLength": 1,
+                "type": "string",
+                "x-pii": "personal"
+              },
+              "id": {
+                "description": "Firestore automatic id of the connector.",
+                "minLength": 1,
+                "type": "string",
+                "x-pii": "none"
+              },
+              "name": {
+                "description": "Display name; also the prefix of the generated tool names.",
+                "maxLength": 100,
+                "minLength": 1,
+                "type": "string",
+                "x-pii": "none"
+              },
+              "secretRef": {
+                "anyOf": [
+                  {
+                    "maxLength": 255,
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "description": "Name of the secret in the secret store; never the secret.",
+                "x-pii": "none"
+              },
+              "status": {
+                "description": "Whether agents can use the connector.",
+                "enum": [
+                  "active",
+                  "disabled",
+                  "error"
+                ],
+                "type": "string",
+                "x-pii": "none"
+              },
+              "tenantId": {
+                "description": "Owning organization.",
+                "minLength": 1,
+                "type": "string",
+                "x-pii": "none"
+              },
+              "toolPolicy": {
+                "additionalProperties": false,
+                "description": "Tools agents may call and which skip approval.",
+                "properties": {
+                  "allow": {
+                    "description": "Tools agents may call; anything else is hidden.",
+                    "items": {
+                      "pattern": "^[A-Za-z][A-Za-z0-9_.-]{0,127}$",
+                      "type": "string"
+                    },
+                    "maxItems": 500,
+                    "type": "array",
+                    "x-pii": "none"
+                  },
+                  "readOnly": {
+                    "description": "Subset of allow that runs without approval.",
+                    "items": {
+                      "pattern": "^[A-Za-z][A-Za-z0-9_.-]{0,127}$",
+                      "type": "string"
+                    },
+                    "maxItems": 500,
+                    "type": "array",
+                    "x-pii": "none"
+                  }
+                },
+                "required": [
+                  "allow",
+                  "readOnly"
+                ],
+                "type": "object",
+                "x-pii": "none"
+              },
+              "type": {
+                "const": "mcp",
+                "description": "Remote MCP server.",
+                "type": "string",
+                "x-pii": "none"
+              },
+              "updatedAt": {
+                "description": "When the connector last changed (UTC).",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                "type": "string",
+                "x-pii": "none"
+              }
+            },
+            "required": [
+              "id",
+              "tenantId",
+              "name",
+              "status",
+              "secretRef",
+              "toolPolicy",
+              "createdBy",
+              "createdAt",
+              "updatedAt",
+              "type",
+              "config"
+            ],
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "config": {
+                "additionalProperties": false,
+                "description": "Postgres settings; the DSN is the secret.",
+                "properties": {
+                  "allowedRelations": {
+                    "description": "schema.table or schema.view names the read-only SQL tool may read.",
+                    "items": {
+                      "pattern": "^[a-z_][a-z0-9_]*\\.[a-z_][a-z0-9_]*$",
+                      "type": "string"
+                    },
+                    "maxItems": 200,
+                    "minItems": 1,
+                    "type": "array",
+                    "x-pii": "none"
+                  }
+                },
+                "required": [
+                  "allowedRelations"
+                ],
+                "type": "object",
+                "x-pii": "none"
+              },
+              "createdAt": {
+                "description": "When the connector was created (UTC).",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                "type": "string",
+                "x-pii": "none"
+              },
+              "createdBy": {
+                "description": "Uid of the admin who created it.",
+                "minLength": 1,
+                "type": "string",
+                "x-pii": "personal"
+              },
+              "id": {
+                "description": "Firestore automatic id of the connector.",
+                "minLength": 1,
+                "type": "string",
+                "x-pii": "none"
+              },
+              "name": {
+                "description": "Display name; also the prefix of the generated tool names.",
+                "maxLength": 100,
+                "minLength": 1,
+                "type": "string",
+                "x-pii": "none"
+              },
+              "secretRef": {
+                "anyOf": [
+                  {
+                    "maxLength": 255,
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "description": "Name of the secret in the secret store; never the secret.",
+                "x-pii": "none"
+              },
+              "status": {
+                "description": "Whether agents can use the connector.",
+                "enum": [
+                  "active",
+                  "disabled",
+                  "error"
+                ],
+                "type": "string",
+                "x-pii": "none"
+              },
+              "tenantId": {
+                "description": "Owning organization.",
+                "minLength": 1,
+                "type": "string",
+                "x-pii": "none"
+              },
+              "toolPolicy": {
+                "additionalProperties": false,
+                "description": "Tools agents may call and which skip approval.",
+                "properties": {
+                  "allow": {
+                    "description": "Tools agents may call; anything else is hidden.",
+                    "items": {
+                      "pattern": "^[A-Za-z][A-Za-z0-9_.-]{0,127}$",
+                      "type": "string"
+                    },
+                    "maxItems": 500,
+                    "type": "array",
+                    "x-pii": "none"
+                  },
+                  "readOnly": {
+                    "description": "Subset of allow that runs without approval.",
+                    "items": {
+                      "pattern": "^[A-Za-z][A-Za-z0-9_.-]{0,127}$",
+                      "type": "string"
+                    },
+                    "maxItems": 500,
+                    "type": "array",
+                    "x-pii": "none"
+                  }
+                },
+                "required": [
+                  "allow",
+                  "readOnly"
+                ],
+                "type": "object",
+                "x-pii": "none"
+              },
+              "type": {
+                "const": "postgres",
+                "description": "Tenant-owned Postgres, read only.",
+                "type": "string",
+                "x-pii": "none"
+              },
+              "updatedAt": {
+                "description": "When the connector last changed (UTC).",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                "type": "string",
+                "x-pii": "none"
+              }
+            },
+            "required": [
+              "id",
+              "tenantId",
+              "name",
+              "status",
+              "secretRef",
+              "toolPolicy",
+              "createdBy",
+              "createdAt",
+              "updatedAt",
+              "type",
+              "config"
+            ],
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "config": {
+                "additionalProperties": false,
+                "description": "Browser settings.",
+                "properties": {
+                  "allowedHosts": {
+                    "description": "Hosts requests may reach, redirects included.",
+                    "items": {
+                      "pattern": "^(?=.{1,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\\.)+[a-z]{2,63}$",
+                      "type": "string"
+                    },
+                    "maxItems": 20,
+                    "minItems": 1,
+                    "type": "array",
+                    "x-pii": "none"
+                  },
+                  "url": {
+                    "description": "Playwright MCP server endpoint.",
+                    "format": "uri",
+                    "maxLength": 2048,
+                    "type": "string",
+                    "x-pii": "none"
+                  }
+                },
+                "required": [
+                  "url",
+                  "allowedHosts"
+                ],
+                "type": "object",
+                "x-pii": "none"
+              },
+              "createdAt": {
+                "description": "When the connector was created (UTC).",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                "type": "string",
+                "x-pii": "none"
+              },
+              "createdBy": {
+                "description": "Uid of the admin who created it.",
+                "minLength": 1,
+                "type": "string",
+                "x-pii": "personal"
+              },
+              "id": {
+                "description": "Firestore automatic id of the connector.",
+                "minLength": 1,
+                "type": "string",
+                "x-pii": "none"
+              },
+              "name": {
+                "description": "Display name; also the prefix of the generated tool names.",
+                "maxLength": 100,
+                "minLength": 1,
+                "type": "string",
+                "x-pii": "none"
+              },
+              "secretRef": {
+                "anyOf": [
+                  {
+                    "maxLength": 255,
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "description": "Name of the secret in the secret store; never the secret.",
+                "x-pii": "none"
+              },
+              "status": {
+                "description": "Whether agents can use the connector.",
+                "enum": [
+                  "active",
+                  "disabled",
+                  "error"
+                ],
+                "type": "string",
+                "x-pii": "none"
+              },
+              "tenantId": {
+                "description": "Owning organization.",
+                "minLength": 1,
+                "type": "string",
+                "x-pii": "none"
+              },
+              "toolPolicy": {
+                "additionalProperties": false,
+                "description": "Tools agents may call and which skip approval.",
+                "properties": {
+                  "allow": {
+                    "description": "Tools agents may call; anything else is hidden.",
+                    "items": {
+                      "pattern": "^[A-Za-z][A-Za-z0-9_.-]{0,127}$",
+                      "type": "string"
+                    },
+                    "maxItems": 500,
+                    "type": "array",
+                    "x-pii": "none"
+                  },
+                  "readOnly": {
+                    "description": "Subset of allow that runs without approval.",
+                    "items": {
+                      "pattern": "^[A-Za-z][A-Za-z0-9_.-]{0,127}$",
+                      "type": "string"
+                    },
+                    "maxItems": 500,
+                    "type": "array",
+                    "x-pii": "none"
+                  }
+                },
+                "required": [
+                  "allow",
+                  "readOnly"
+                ],
+                "type": "object",
+                "x-pii": "none"
+              },
+              "type": {
+                "const": "browser",
+                "description": "Browser automation via Playwright MCP.",
+                "type": "string",
+                "x-pii": "none"
+              },
+              "updatedAt": {
+                "description": "When the connector last changed (UTC).",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                "type": "string",
+                "x-pii": "none"
+              }
+            },
+            "required": [
+              "id",
+              "tenantId",
+              "name",
+              "status",
+              "secretRef",
+              "toolPolicy",
+              "createdBy",
+              "createdAt",
+              "updatedAt",
+              "type",
+              "config"
+            ],
+            "type": "object"
+          }
+        ],
+        "x-kind": "entity",
+        "x-permission": "core.connector.read",
+        "x-pii": "personal",
+        "x-relations": [],
+        "x-tenancyScope": "organization"
+      },
+      "kind": "entity",
+      "name": "Connector",
+      "permission": "core.connector.read",
+      "pii": "personal",
+      "relations": [],
+      "tenancyScope": "organization"
+    },
+    {
+      "context": "connectors",
+      "description": "Allowlist of connector tools agents may call and which of them skip approval.",
+      "examples": [
+        {
+          "allow": [
+            "listIssues",
+            "getIssue",
+            "createIssue"
+          ],
+          "readOnly": [
+            "listIssues",
+            "getIssue"
+          ]
+        }
+      ],
+      "fields": [
+        {
+          "description": "Tools agents may call; anything else is hidden.",
+          "name": "allow",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Subset of allow that runs without approval.",
+          "name": "readOnly",
+          "pii": "none",
+          "required": true
+        }
+      ],
+      "id": "connectors.ConnectorToolPolicy",
+      "jsonSchema": {
+        "additionalProperties": false,
+        "description": "Allowlist of connector tools agents may call and which of them skip approval.",
+        "examples": [
+          {
+            "allow": [
+              "listIssues",
+              "getIssue",
+              "createIssue"
+            ],
+            "readOnly": [
+              "listIssues",
+              "getIssue"
+            ]
+          }
+        ],
+        "properties": {
+          "allow": {
+            "description": "Tools agents may call; anything else is hidden.",
+            "items": {
+              "pattern": "^[A-Za-z][A-Za-z0-9_.-]{0,127}$",
+              "type": "string"
+            },
+            "maxItems": 500,
+            "type": "array",
+            "x-pii": "none"
+          },
+          "readOnly": {
+            "description": "Subset of allow that runs without approval.",
+            "items": {
+              "pattern": "^[A-Za-z][A-Za-z0-9_.-]{0,127}$",
+              "type": "string"
+            },
+            "maxItems": 500,
+            "type": "array",
+            "x-pii": "none"
+          }
+        },
+        "required": [
+          "allow",
+          "readOnly"
+        ],
+        "type": "object",
+        "x-kind": "settings",
+        "x-permission": "core.connector.read",
+        "x-pii": "none",
+        "x-relations": [],
+        "x-tenancyScope": "organization"
+      },
+      "kind": "settings",
+      "name": "ConnectorToolPolicy",
+      "permission": "core.connector.read",
+      "pii": "none",
+      "relations": [],
+      "tenancyScope": "organization"
+    },
+    {
       "context": "example",
       "description": "A free-text note inside an organization. Sample contract; remove it in derived apps.",
       "examples": [
@@ -207,6 +2011,344 @@
       "tenancyScope": "organization"
     },
     {
+      "context": "files",
+      "description": "Asks for a signed URL to upload a chat attachment or a knowledge document.",
+      "examples": [
+        {
+          "contentType": "text/markdown",
+          "fileName": "onboarding-guide.md",
+          "purpose": "knowledge",
+          "sizeBytes": 18432
+        }
+      ],
+      "fields": [
+        {
+          "description": "Declared media type; the bytes are checked again after upload.",
+          "name": "contentType",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Original file name, shown to users.",
+          "name": "fileName",
+          "pii": "personal",
+          "required": true
+        },
+        {
+          "description": "What the file is for; selects the allowed types and size.",
+          "name": "purpose",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Declared size; the signed URL enforces it.",
+          "name": "sizeBytes",
+          "pii": "none",
+          "required": true
+        }
+      ],
+      "id": "files.FileUploadRequest",
+      "jsonSchema": {
+        "additionalProperties": false,
+        "description": "Asks for a signed URL to upload a chat attachment or a knowledge document.",
+        "examples": [
+          {
+            "contentType": "text/markdown",
+            "fileName": "onboarding-guide.md",
+            "purpose": "knowledge",
+            "sizeBytes": 18432
+          }
+        ],
+        "properties": {
+          "contentType": {
+            "description": "Declared media type; the bytes are checked again after upload.",
+            "pattern": "^[a-z]+\\/[a-z0-9][a-z0-9.+-]*$",
+            "type": "string",
+            "x-pii": "none"
+          },
+          "fileName": {
+            "description": "Original file name, shown to users.",
+            "maxLength": 255,
+            "minLength": 1,
+            "pattern": "^(?!\\.{1,2}$)[^/\\\\\\u0000-\\u001f]+$",
+            "type": "string",
+            "x-pii": "personal"
+          },
+          "purpose": {
+            "description": "What the file is for; selects the allowed types and size.",
+            "enum": [
+              "chat-attachment",
+              "knowledge"
+            ],
+            "type": "string",
+            "x-pii": "none"
+          },
+          "sizeBytes": {
+            "description": "Declared size; the signed URL enforces it.",
+            "exclusiveMinimum": 0,
+            "maximum": 209715200,
+            "type": "integer",
+            "x-pii": "none"
+          }
+        },
+        "required": [
+          "purpose",
+          "fileName",
+          "contentType",
+          "sizeBytes"
+        ],
+        "type": "object",
+        "x-kind": "command",
+        "x-permission": "core.file.upload",
+        "x-pii": "personal",
+        "x-relations": [],
+        "x-tenancyScope": "organization"
+      },
+      "kind": "command",
+      "name": "FileUploadRequest",
+      "permission": "core.file.upload",
+      "pii": "personal",
+      "relations": [],
+      "tenancyScope": "organization"
+    },
+    {
+      "context": "files",
+      "description": "A file uploaded by a member, validated by content before agents or the knowledge base can read it.",
+      "examples": [
+        {
+          "contentType": "text/markdown",
+          "createdAt": "2026-09-29T14:30:00.000Z",
+          "createdBy": "uA1b2C3d4E5f6G7h8I9j",
+          "fileName": "onboarding-guide.md",
+          "id": "Fz9sK2lPq0WnR5tYu3bV",
+          "purpose": "knowledge",
+          "rejectionReason": null,
+          "sizeBytes": 18432,
+          "status": "ready",
+          "storagePath": "tenants/Jd8sK2lPq0WnR5tYu3bV/files/Fz9sK2lPq0WnR5tYu3bV",
+          "tenantId": "Jd8sK2lPq0WnR5tYu3bV",
+          "updatedAt": "2026-09-29T14:30:05.000Z"
+        }
+      ],
+      "fields": [
+        {
+          "description": "Media type detected from the bytes once ready; declared type before.",
+          "name": "contentType",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "When the upload was requested (UTC).",
+          "name": "createdAt",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Uid of the uploader.",
+          "name": "createdBy",
+          "pii": "personal",
+          "required": true
+        },
+        {
+          "description": "Original file name.",
+          "name": "fileName",
+          "pii": "personal",
+          "required": true
+        },
+        {
+          "description": "Firestore automatic id of the file.",
+          "name": "id",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "What the file is for.",
+          "name": "purpose",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Why validation rejected the upload; null otherwise.",
+          "name": "rejectionReason",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Size in bytes.",
+          "name": "sizeBytes",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "pending until the upload is validated.",
+          "name": "status",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Object path, tenants/{tenantId}/files/{fileId}.",
+          "name": "storagePath",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Owning organization.",
+          "name": "tenantId",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "When the file last changed (UTC).",
+          "name": "updatedAt",
+          "pii": "none",
+          "required": true
+        }
+      ],
+      "id": "files.StoredFile",
+      "jsonSchema": {
+        "additionalProperties": false,
+        "description": "A file uploaded by a member, validated by content before agents or the knowledge base can read it.",
+        "examples": [
+          {
+            "contentType": "text/markdown",
+            "createdAt": "2026-09-29T14:30:00.000Z",
+            "createdBy": "uA1b2C3d4E5f6G7h8I9j",
+            "fileName": "onboarding-guide.md",
+            "id": "Fz9sK2lPq0WnR5tYu3bV",
+            "purpose": "knowledge",
+            "rejectionReason": null,
+            "sizeBytes": 18432,
+            "status": "ready",
+            "storagePath": "tenants/Jd8sK2lPq0WnR5tYu3bV/files/Fz9sK2lPq0WnR5tYu3bV",
+            "tenantId": "Jd8sK2lPq0WnR5tYu3bV",
+            "updatedAt": "2026-09-29T14:30:05.000Z"
+          }
+        ],
+        "properties": {
+          "contentType": {
+            "description": "Media type detected from the bytes once ready; declared type before.",
+            "maxLength": 255,
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "createdAt": {
+            "description": "When the upload was requested (UTC).",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "type": "string",
+            "x-pii": "none"
+          },
+          "createdBy": {
+            "description": "Uid of the uploader.",
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "personal"
+          },
+          "fileName": {
+            "description": "Original file name.",
+            "maxLength": 255,
+            "minLength": 1,
+            "pattern": "^(?!\\.{1,2}$)[^/\\\\\\u0000-\\u001f]+$",
+            "type": "string",
+            "x-pii": "personal"
+          },
+          "id": {
+            "description": "Firestore automatic id of the file.",
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "purpose": {
+            "description": "What the file is for.",
+            "enum": [
+              "chat-attachment",
+              "knowledge"
+            ],
+            "type": "string",
+            "x-pii": "none"
+          },
+          "rejectionReason": {
+            "anyOf": [
+              {
+                "enum": [
+                  "TYPE_NOT_ALLOWED",
+                  "TOO_LARGE",
+                  "CONTENT_MISMATCH"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Why validation rejected the upload; null otherwise.",
+            "x-pii": "none"
+          },
+          "sizeBytes": {
+            "description": "Size in bytes.",
+            "maximum": 209715200,
+            "minimum": 0,
+            "type": "integer",
+            "x-pii": "none"
+          },
+          "status": {
+            "description": "pending until the upload is validated.",
+            "enum": [
+              "pending",
+              "ready",
+              "rejected"
+            ],
+            "type": "string",
+            "x-pii": "none"
+          },
+          "storagePath": {
+            "description": "Object path, tenants/{tenantId}/files/{fileId}.",
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "tenantId": {
+            "description": "Owning organization.",
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "updatedAt": {
+            "description": "When the file last changed (UTC).",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "type": "string",
+            "x-pii": "none"
+          }
+        },
+        "required": [
+          "id",
+          "tenantId",
+          "purpose",
+          "fileName",
+          "contentType",
+          "sizeBytes",
+          "status",
+          "rejectionReason",
+          "storagePath",
+          "createdBy",
+          "createdAt",
+          "updatedAt"
+        ],
+        "type": "object",
+        "x-kind": "entity",
+        "x-pii": "personal",
+        "x-relations": [],
+        "x-tenancyScope": "organization"
+      },
+      "kind": "entity",
+      "name": "StoredFile",
+      "pii": "personal",
+      "relations": [],
+      "tenancyScope": "organization"
+    },
+    {
       "context": "http",
       "description": "Error body returned by every /v1 endpoint on failure (contracts/api.md §6).",
       "examples": [
@@ -324,6 +2466,1122 @@
       "pii": "none",
       "relations": [],
       "tenancyScope": "platform"
+    },
+    {
+      "context": "knowledge",
+      "description": "A knowledge base passage returned by search and cited by agent answers.",
+      "examples": [
+        {
+          "citationId": "kb:01928f6e-7b2a-7c3d-9e4f-5a6b7c8d9e0f#3",
+          "documentId": "01928f6e-7b2a-7c3d-9e4f-5a6b7c8d9e0f",
+          "score": 0.82,
+          "snippet": "New members get access after an owner approves the invitation.",
+          "sourceUrl": null,
+          "title": "Onboarding guide"
+        }
+      ],
+      "fields": [
+        {
+          "description": "Stable marker the answer uses to cite this chunk.",
+          "name": "citationId",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Document the chunk belongs to.",
+          "name": "documentId",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Similarity score, 0-1; results below 0.3 are dropped.",
+          "name": "score",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Text of the chunk; tenant content, treated as data.",
+          "name": "snippet",
+          "pii": "personal",
+          "required": true
+        },
+        {
+          "description": "Public URL of the source, when there is one.",
+          "name": "sourceUrl",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Title of the document.",
+          "name": "title",
+          "pii": "personal",
+          "required": true
+        }
+      ],
+      "id": "knowledge.Citation",
+      "jsonSchema": {
+        "additionalProperties": false,
+        "description": "A knowledge base passage returned by search and cited by agent answers.",
+        "examples": [
+          {
+            "citationId": "kb:01928f6e-7b2a-7c3d-9e4f-5a6b7c8d9e0f#3",
+            "documentId": "01928f6e-7b2a-7c3d-9e4f-5a6b7c8d9e0f",
+            "score": 0.82,
+            "snippet": "New members get access after an owner approves the invitation.",
+            "sourceUrl": null,
+            "title": "Onboarding guide"
+          }
+        ],
+        "properties": {
+          "citationId": {
+            "description": "Stable marker the answer uses to cite this chunk.",
+            "pattern": "^kb:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}#\\d+$",
+            "type": "string",
+            "x-pii": "none"
+          },
+          "documentId": {
+            "description": "Document the chunk belongs to.",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "type": "string",
+            "x-pii": "none"
+          },
+          "score": {
+            "description": "Similarity score, 0-1; results below 0.3 are dropped.",
+            "maximum": 1,
+            "minimum": 0,
+            "type": "number",
+            "x-pii": "none"
+          },
+          "snippet": {
+            "description": "Text of the chunk; tenant content, treated as data.",
+            "maxLength": 4000,
+            "type": "string",
+            "x-pii": "personal"
+          },
+          "sourceUrl": {
+            "anyOf": [
+              {
+                "format": "uri",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Public URL of the source, when there is one.",
+            "x-pii": "none"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "maxLength": 500,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Title of the document.",
+            "x-pii": "personal"
+          }
+        },
+        "required": [
+          "citationId",
+          "documentId",
+          "title",
+          "sourceUrl",
+          "snippet",
+          "score"
+        ],
+        "type": "object",
+        "x-kind": "view",
+        "x-permission": "core.knowledge.read",
+        "x-pii": "personal",
+        "x-relations": [
+          {
+            "field": "documentId",
+            "target": "knowledge.KnowledgeDocument",
+            "type": "references"
+          }
+        ],
+        "x-tenancyScope": "organization"
+      },
+      "kind": "view",
+      "name": "Citation",
+      "permission": "core.knowledge.read",
+      "pii": "personal",
+      "relations": [
+        {
+          "field": "documentId",
+          "target": "knowledge.KnowledgeDocument",
+          "type": "references"
+        }
+      ],
+      "tenancyScope": "organization"
+    },
+    {
+      "context": "knowledge",
+      "description": "A document indexed in the knowledge base; agents cite its chunks when answering.",
+      "examples": [
+        {
+          "contentHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+          "createdAt": "2026-09-29T14:30:00.000Z",
+          "createdBy": "uA1b2C3d4E5f6G7h8I9j",
+          "id": "01928f6e-7b2a-7c3d-9e4f-5a6b7c8d9e0f",
+          "mimeType": "text/markdown",
+          "namespace": "tenant",
+          "source": "upload",
+          "sourceRef": "Fz9sK2lPq0WnR5tYu3bV",
+          "sourceUrl": null,
+          "status": "ready",
+          "tenantId": "Jd8sK2lPq0WnR5tYu3bV",
+          "title": "Onboarding guide",
+          "updatedAt": "2026-09-29T14:31:00.000Z"
+        }
+      ],
+      "fields": [
+        {
+          "description": "SHA-256 of the extracted text; unchanged content is not re-indexed.",
+          "name": "contentHash",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "When the document was registered (UTC).",
+          "name": "createdAt",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Uid of the user who added it; null for platform content.",
+          "name": "createdBy",
+          "pii": "personal",
+          "required": true
+        },
+        {
+          "description": "Document id (uuidv7).",
+          "name": "id",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Media type of the original content.",
+          "name": "mimeType",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Namespace the search tool filters on.",
+          "name": "namespace",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Where the content came from.",
+          "name": "source",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "File id, URL, contract id or module doc path; unique per tenant and source.",
+          "name": "sourceRef",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Public URL of the source, when there is one.",
+          "name": "sourceUrl",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Indexing status.",
+          "name": "status",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Owning organization, or _platform for shared platform content.",
+          "name": "tenantId",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Document title shown in citations.",
+          "name": "title",
+          "pii": "personal",
+          "required": true
+        },
+        {
+          "description": "When the document last changed (UTC).",
+          "name": "updatedAt",
+          "pii": "none",
+          "required": true
+        }
+      ],
+      "id": "knowledge.KnowledgeDocument",
+      "jsonSchema": {
+        "additionalProperties": false,
+        "description": "A document indexed in the knowledge base; agents cite its chunks when answering.",
+        "examples": [
+          {
+            "contentHash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+            "createdAt": "2026-09-29T14:30:00.000Z",
+            "createdBy": "uA1b2C3d4E5f6G7h8I9j",
+            "id": "01928f6e-7b2a-7c3d-9e4f-5a6b7c8d9e0f",
+            "mimeType": "text/markdown",
+            "namespace": "tenant",
+            "source": "upload",
+            "sourceRef": "Fz9sK2lPq0WnR5tYu3bV",
+            "sourceUrl": null,
+            "status": "ready",
+            "tenantId": "Jd8sK2lPq0WnR5tYu3bV",
+            "title": "Onboarding guide",
+            "updatedAt": "2026-09-29T14:31:00.000Z"
+          }
+        ],
+        "properties": {
+          "contentHash": {
+            "description": "SHA-256 of the extracted text; unchanged content is not re-indexed.",
+            "pattern": "^[a-f0-9]{64}$",
+            "type": "string",
+            "x-pii": "none"
+          },
+          "createdAt": {
+            "description": "When the document was registered (UTC).",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "type": "string",
+            "x-pii": "none"
+          },
+          "createdBy": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Uid of the user who added it; null for platform content.",
+            "x-pii": "personal"
+          },
+          "id": {
+            "description": "Document id (uuidv7).",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "type": "string",
+            "x-pii": "none"
+          },
+          "mimeType": {
+            "anyOf": [
+              {
+                "maxLength": 255,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Media type of the original content.",
+            "x-pii": "none"
+          },
+          "namespace": {
+            "description": "Namespace the search tool filters on.",
+            "pattern": "^(?:tenant|catalog|project:[A-Za-z0-9_-]+|module:[a-z][a-z0-9-]*)$",
+            "type": "string",
+            "x-pii": "none"
+          },
+          "source": {
+            "description": "Where the content came from.",
+            "enum": [
+              "upload",
+              "url",
+              "catalog",
+              "module"
+            ],
+            "type": "string",
+            "x-pii": "none"
+          },
+          "sourceRef": {
+            "description": "File id, URL, contract id or module doc path; unique per tenant and source.",
+            "maxLength": 2048,
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "sourceUrl": {
+            "anyOf": [
+              {
+                "format": "uri",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Public URL of the source, when there is one.",
+            "x-pii": "none"
+          },
+          "status": {
+            "description": "Indexing status.",
+            "enum": [
+              "pending",
+              "ready",
+              "failed",
+              "deleted"
+            ],
+            "type": "string",
+            "x-pii": "none"
+          },
+          "tenantId": {
+            "description": "Owning organization, or _platform for shared platform content.",
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "maxLength": 500,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Document title shown in citations.",
+            "x-pii": "personal"
+          },
+          "updatedAt": {
+            "description": "When the document last changed (UTC).",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "type": "string",
+            "x-pii": "none"
+          }
+        },
+        "required": [
+          "id",
+          "tenantId",
+          "namespace",
+          "source",
+          "sourceRef",
+          "title",
+          "sourceUrl",
+          "mimeType",
+          "contentHash",
+          "status",
+          "createdBy",
+          "createdAt",
+          "updatedAt"
+        ],
+        "type": "object",
+        "x-kind": "entity",
+        "x-permission": "core.knowledge.read",
+        "x-pii": "personal",
+        "x-relations": [],
+        "x-tenancyScope": "organization"
+      },
+      "kind": "entity",
+      "name": "KnowledgeDocument",
+      "permission": "core.knowledge.read",
+      "pii": "personal",
+      "relations": [],
+      "tenancyScope": "organization"
+    },
+    {
+      "context": "knowledge",
+      "description": "Adds a file or a web page to the organization knowledge base; indexing runs in the background.",
+      "examples": [
+        {
+          "fileId": "Fz9sK2lPq0WnR5tYu3bV",
+          "kind": "file"
+        },
+        {
+          "kind": "url",
+          "url": "https://docs.example.com/guide"
+        }
+      ],
+      "fields": [],
+      "id": "knowledge.KnowledgeSource",
+      "jsonSchema": {
+        "description": "Adds a file or a web page to the organization knowledge base; indexing runs in the background.",
+        "examples": [
+          {
+            "fileId": "Fz9sK2lPq0WnR5tYu3bV",
+            "kind": "file"
+          },
+          {
+            "kind": "url",
+            "url": "https://docs.example.com/guide"
+          }
+        ],
+        "oneOf": [
+          {
+            "additionalProperties": false,
+            "properties": {
+              "fileId": {
+                "description": "Id of a ready file uploaded with purpose knowledge.",
+                "minLength": 1,
+                "type": "string",
+                "x-pii": "none"
+              },
+              "kind": {
+                "const": "file",
+                "description": "Ingest an uploaded file.",
+                "type": "string",
+                "x-pii": "none"
+              }
+            },
+            "required": [
+              "kind",
+              "fileId"
+            ],
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "kind": {
+                "const": "url",
+                "description": "Ingest a public web page.",
+                "type": "string",
+                "x-pii": "none"
+              },
+              "url": {
+                "description": "Public https URL to scrape.",
+                "format": "uri",
+                "maxLength": 2048,
+                "type": "string",
+                "x-pii": "none"
+              }
+            },
+            "required": [
+              "kind",
+              "url"
+            ],
+            "type": "object"
+          }
+        ],
+        "x-kind": "command",
+        "x-permission": "core.knowledge.write",
+        "x-pii": "none",
+        "x-relations": [],
+        "x-tenancyScope": "organization"
+      },
+      "kind": "command",
+      "name": "KnowledgeSource",
+      "permission": "core.knowledge.write",
+      "pii": "none",
+      "relations": [],
+      "tenancyScope": "organization"
+    },
+    {
+      "context": "usage",
+      "description": "A model call recorded in the usage ledger with tokens, cost and latency, per organization.",
+      "examples": [
+        {
+          "agentId": "assistant",
+          "cachedTokens": 0,
+          "costMicroUsd": 1500,
+          "finishReason": "stop",
+          "id": "01928f6e-7b2a-7c3d-9e4f-5a6b7c8d9e0f",
+          "inputTokens": 1200,
+          "latencyMs": 820,
+          "model": "gemini-3.5-flash",
+          "occurredAt": "2026-09-29T14:30:00.000Z",
+          "outputTokens": 350,
+          "provider": "google",
+          "requestId": "01J8Z3K4M5N6P7Q8R9S0T1V2W3",
+          "tenantId": "Jd8sK2lPq0WnR5tYu3bV",
+          "traceId": "4bf92f3577b34da6a3ce929d0e0e4736",
+          "userId": "uA1b2C3d4E5f6G7h8I9j"
+        }
+      ],
+      "fields": [
+        {
+          "description": "Agent, workflow or processor that called the model.",
+          "name": "agentId",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Prompt tokens served from the provider cache.",
+          "name": "cachedTokens",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Cost in micro-USD from the price table; null when the price is unknown.",
+          "name": "costMicroUsd",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Why generation stopped, as the provider reported it.",
+          "name": "finishReason",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Ledger row id (uuidv7).",
+          "name": "id",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Prompt tokens.",
+          "name": "inputTokens",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Wall time of the call in milliseconds.",
+          "name": "latencyMs",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Provider model id.",
+          "name": "model",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "When the call finished (UTC).",
+          "name": "occurredAt",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Completion tokens.",
+          "name": "outputTokens",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Model provider, e.g. google.",
+          "name": "provider",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "X-Request-Id of the call that triggered the model, when known.",
+          "name": "requestId",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Organization billed for the call.",
+          "name": "tenantId",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "W3C trace id of the run.",
+          "name": "traceId",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Uid of the caller; null for platform jobs.",
+          "name": "userId",
+          "pii": "personal",
+          "required": true
+        }
+      ],
+      "id": "usage.LlmCall",
+      "jsonSchema": {
+        "additionalProperties": false,
+        "description": "A model call recorded in the usage ledger with tokens, cost and latency, per organization.",
+        "examples": [
+          {
+            "agentId": "assistant",
+            "cachedTokens": 0,
+            "costMicroUsd": 1500,
+            "finishReason": "stop",
+            "id": "01928f6e-7b2a-7c3d-9e4f-5a6b7c8d9e0f",
+            "inputTokens": 1200,
+            "latencyMs": 820,
+            "model": "gemini-3.5-flash",
+            "occurredAt": "2026-09-29T14:30:00.000Z",
+            "outputTokens": 350,
+            "provider": "google",
+            "requestId": "01J8Z3K4M5N6P7Q8R9S0T1V2W3",
+            "tenantId": "Jd8sK2lPq0WnR5tYu3bV",
+            "traceId": "4bf92f3577b34da6a3ce929d0e0e4736",
+            "userId": "uA1b2C3d4E5f6G7h8I9j"
+          }
+        ],
+        "properties": {
+          "agentId": {
+            "description": "Agent, workflow or processor that called the model.",
+            "maxLength": 200,
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "cachedTokens": {
+            "description": "Prompt tokens served from the provider cache.",
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer",
+            "x-pii": "none"
+          },
+          "costMicroUsd": {
+            "anyOf": [
+              {
+                "maximum": 9007199254740991,
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Cost in micro-USD from the price table; null when the price is unknown.",
+            "x-pii": "none"
+          },
+          "finishReason": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Why generation stopped, as the provider reported it.",
+            "x-pii": "none"
+          },
+          "id": {
+            "description": "Ledger row id (uuidv7).",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "type": "string",
+            "x-pii": "none"
+          },
+          "inputTokens": {
+            "description": "Prompt tokens.",
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer",
+            "x-pii": "none"
+          },
+          "latencyMs": {
+            "description": "Wall time of the call in milliseconds.",
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer",
+            "x-pii": "none"
+          },
+          "model": {
+            "description": "Provider model id.",
+            "maxLength": 200,
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "occurredAt": {
+            "description": "When the call finished (UTC).",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "type": "string",
+            "x-pii": "none"
+          },
+          "outputTokens": {
+            "description": "Completion tokens.",
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer",
+            "x-pii": "none"
+          },
+          "provider": {
+            "description": "Model provider, e.g. google.",
+            "maxLength": 100,
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "requestId": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "X-Request-Id of the call that triggered the model, when known.",
+            "x-pii": "none"
+          },
+          "tenantId": {
+            "description": "Organization billed for the call.",
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "traceId": {
+            "anyOf": [
+              {
+                "pattern": "^[0-9a-f]{32}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "W3C trace id of the run.",
+            "x-pii": "none"
+          },
+          "userId": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Uid of the caller; null for platform jobs.",
+            "x-pii": "personal"
+          }
+        },
+        "required": [
+          "id",
+          "requestId",
+          "traceId",
+          "tenantId",
+          "userId",
+          "agentId",
+          "provider",
+          "model",
+          "inputTokens",
+          "outputTokens",
+          "cachedTokens",
+          "costMicroUsd",
+          "latencyMs",
+          "finishReason",
+          "occurredAt"
+        ],
+        "type": "object",
+        "x-kind": "view",
+        "x-permission": "core.usage.read",
+        "x-pii": "personal",
+        "x-relations": [],
+        "x-tenancyScope": "organization"
+      },
+      "kind": "view",
+      "name": "LlmCall",
+      "permission": "core.usage.read",
+      "pii": "personal",
+      "relations": [],
+      "tenancyScope": "organization"
+    },
+    {
+      "context": "usage",
+      "description": "Month-to-date model usage and cost of an organization compared with its budget caps.",
+      "examples": [
+        {
+          "budget": {
+            "alertThresholdPercent": 80,
+            "monthlyMicroUsd": 50000000,
+            "monthlyTokens": 20000000
+          },
+          "byModel": [
+            {
+              "model": "gemini-3.5-flash",
+              "provider": "google",
+              "totals": {
+                "calls": 42,
+                "costMicroUsd": 61000,
+                "inputTokens": 50000,
+                "outputTokens": 12000,
+                "unpricedCalls": 0
+              }
+            }
+          ],
+          "month": "2026-09",
+          "tenantId": "Jd8sK2lPq0WnR5tYu3bV",
+          "totals": {
+            "calls": 42,
+            "costMicroUsd": 61000,
+            "inputTokens": 50000,
+            "outputTokens": 12000,
+            "unpricedCalls": 0
+          }
+        }
+      ],
+      "fields": [
+        {
+          "description": "Caps in force for the month.",
+          "name": "budget",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Breakdown per model.",
+          "name": "byModel",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Calendar month in UTC, YYYY-MM.",
+          "name": "month",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Organization the summary is about.",
+          "name": "tenantId",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Totals for the month.",
+          "name": "totals",
+          "pii": "none",
+          "required": true
+        }
+      ],
+      "id": "usage.UsageSummary",
+      "jsonSchema": {
+        "additionalProperties": false,
+        "description": "Month-to-date model usage and cost of an organization compared with its budget caps.",
+        "examples": [
+          {
+            "budget": {
+              "alertThresholdPercent": 80,
+              "monthlyMicroUsd": 50000000,
+              "monthlyTokens": 20000000
+            },
+            "byModel": [
+              {
+                "model": "gemini-3.5-flash",
+                "provider": "google",
+                "totals": {
+                  "calls": 42,
+                  "costMicroUsd": 61000,
+                  "inputTokens": 50000,
+                  "outputTokens": 12000,
+                  "unpricedCalls": 0
+                }
+              }
+            ],
+            "month": "2026-09",
+            "tenantId": "Jd8sK2lPq0WnR5tYu3bV",
+            "totals": {
+              "calls": 42,
+              "costMicroUsd": 61000,
+              "inputTokens": 50000,
+              "outputTokens": 12000,
+              "unpricedCalls": 0
+            }
+          }
+        ],
+        "properties": {
+          "budget": {
+            "additionalProperties": false,
+            "description": "Caps in force for the month.",
+            "properties": {
+              "alertThresholdPercent": {
+                "description": "Percent of a cap that triggers an alert; always below 100.",
+                "maximum": 99,
+                "minimum": 1,
+                "type": "integer",
+                "x-pii": "none"
+              },
+              "monthlyMicroUsd": {
+                "description": "Hard spend cap for the month in micro-USD.",
+                "maximum": 9007199254740991,
+                "minimum": 0,
+                "type": "integer",
+                "x-pii": "none"
+              },
+              "monthlyTokens": {
+                "description": "Hard token cap for the month.",
+                "maximum": 9007199254740991,
+                "minimum": 0,
+                "type": "integer",
+                "x-pii": "none"
+              }
+            },
+            "required": [
+              "monthlyMicroUsd",
+              "monthlyTokens",
+              "alertThresholdPercent"
+            ],
+            "type": "object",
+            "x-pii": "none"
+          },
+          "byModel": {
+            "description": "Breakdown per model.",
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "model": {
+                  "description": "Provider model id.",
+                  "minLength": 1,
+                  "type": "string",
+                  "x-pii": "none"
+                },
+                "provider": {
+                  "description": "Model provider.",
+                  "minLength": 1,
+                  "type": "string",
+                  "x-pii": "none"
+                },
+                "totals": {
+                  "additionalProperties": false,
+                  "description": "Totals for this model.",
+                  "properties": {
+                    "calls": {
+                      "description": "Model calls.",
+                      "maximum": 9007199254740991,
+                      "minimum": 0,
+                      "type": "integer",
+                      "x-pii": "none"
+                    },
+                    "costMicroUsd": {
+                      "description": "Known cost in micro-USD (calls without a price are excluded).",
+                      "maximum": 9007199254740991,
+                      "minimum": 0,
+                      "type": "integer",
+                      "x-pii": "none"
+                    },
+                    "inputTokens": {
+                      "description": "Prompt tokens.",
+                      "maximum": 9007199254740991,
+                      "minimum": 0,
+                      "type": "integer",
+                      "x-pii": "none"
+                    },
+                    "outputTokens": {
+                      "description": "Completion tokens.",
+                      "maximum": 9007199254740991,
+                      "minimum": 0,
+                      "type": "integer",
+                      "x-pii": "none"
+                    },
+                    "unpricedCalls": {
+                      "description": "Calls whose model had no price; their tokens still count against the token cap.",
+                      "maximum": 9007199254740991,
+                      "minimum": 0,
+                      "type": "integer",
+                      "x-pii": "none"
+                    }
+                  },
+                  "required": [
+                    "calls",
+                    "inputTokens",
+                    "outputTokens",
+                    "costMicroUsd",
+                    "unpricedCalls"
+                  ],
+                  "type": "object",
+                  "x-pii": "none"
+                }
+              },
+              "required": [
+                "provider",
+                "model",
+                "totals"
+              ],
+              "type": "object"
+            },
+            "type": "array",
+            "x-pii": "none"
+          },
+          "month": {
+            "description": "Calendar month in UTC, YYYY-MM.",
+            "pattern": "^\\d{4}-(?:0[1-9]|1[0-2])$",
+            "type": "string",
+            "x-pii": "none"
+          },
+          "tenantId": {
+            "description": "Organization the summary is about.",
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "totals": {
+            "additionalProperties": false,
+            "description": "Totals for the month.",
+            "properties": {
+              "calls": {
+                "description": "Model calls.",
+                "maximum": 9007199254740991,
+                "minimum": 0,
+                "type": "integer",
+                "x-pii": "none"
+              },
+              "costMicroUsd": {
+                "description": "Known cost in micro-USD (calls without a price are excluded).",
+                "maximum": 9007199254740991,
+                "minimum": 0,
+                "type": "integer",
+                "x-pii": "none"
+              },
+              "inputTokens": {
+                "description": "Prompt tokens.",
+                "maximum": 9007199254740991,
+                "minimum": 0,
+                "type": "integer",
+                "x-pii": "none"
+              },
+              "outputTokens": {
+                "description": "Completion tokens.",
+                "maximum": 9007199254740991,
+                "minimum": 0,
+                "type": "integer",
+                "x-pii": "none"
+              },
+              "unpricedCalls": {
+                "description": "Calls whose model had no price; their tokens still count against the token cap.",
+                "maximum": 9007199254740991,
+                "minimum": 0,
+                "type": "integer",
+                "x-pii": "none"
+              }
+            },
+            "required": [
+              "calls",
+              "inputTokens",
+              "outputTokens",
+              "costMicroUsd",
+              "unpricedCalls"
+            ],
+            "type": "object",
+            "x-pii": "none"
+          }
+        },
+        "required": [
+          "tenantId",
+          "month",
+          "totals",
+          "budget",
+          "byModel"
+        ],
+        "type": "object",
+        "x-kind": "view",
+        "x-permission": "core.usage.read",
+        "x-pii": "none",
+        "x-relations": [],
+        "x-tenancyScope": "organization"
+      },
+      "kind": "view",
+      "name": "UsageSummary",
+      "permission": "core.usage.read",
+      "pii": "none",
+      "relations": [],
+      "tenancyScope": "organization"
     }
   ]
 }

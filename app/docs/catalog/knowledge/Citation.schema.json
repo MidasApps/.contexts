@@ -1,0 +1,88 @@
+{
+  "additionalProperties": false,
+  "description": "A knowledge base passage returned by search and cited by agent answers.",
+  "examples": [
+    {
+      "citationId": "kb:01928f6e-7b2a-7c3d-9e4f-5a6b7c8d9e0f#3",
+      "documentId": "01928f6e-7b2a-7c3d-9e4f-5a6b7c8d9e0f",
+      "score": 0.82,
+      "snippet": "New members get access after an owner approves the invitation.",
+      "sourceUrl": null,
+      "title": "Onboarding guide"
+    }
+  ],
+  "properties": {
+    "citationId": {
+      "description": "Stable marker the answer uses to cite this chunk.",
+      "pattern": "^kb:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}#\\d+$",
+      "type": "string",
+      "x-pii": "none"
+    },
+    "documentId": {
+      "description": "Document the chunk belongs to.",
+      "format": "uuid",
+      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+      "type": "string",
+      "x-pii": "none"
+    },
+    "score": {
+      "description": "Similarity score, 0-1; results below 0.3 are dropped.",
+      "maximum": 1,
+      "minimum": 0,
+      "type": "number",
+      "x-pii": "none"
+    },
+    "snippet": {
+      "description": "Text of the chunk; tenant content, treated as data.",
+      "maxLength": 4000,
+      "type": "string",
+      "x-pii": "personal"
+    },
+    "sourceUrl": {
+      "anyOf": [
+        {
+          "format": "uri",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Public URL of the source, when there is one.",
+      "x-pii": "none"
+    },
+    "title": {
+      "anyOf": [
+        {
+          "maxLength": 500,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Title of the document.",
+      "x-pii": "personal"
+    }
+  },
+  "required": [
+    "citationId",
+    "documentId",
+    "title",
+    "sourceUrl",
+    "snippet",
+    "score"
+  ],
+  "type": "object",
+  "x-kind": "view",
+  "x-permission": "core.knowledge.read",
+  "x-pii": "personal",
+  "x-relations": [
+    {
+      "field": "documentId",
+      "target": "knowledge.KnowledgeDocument",
+      "type": "references"
+    }
+  ],
+  "x-tenancyScope": "organization"
+}

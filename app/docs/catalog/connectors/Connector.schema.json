@@ -1,0 +1,741 @@
+{
+  "description": "An external system (OpenAPI, MCP, Postgres or browser) an organization lets its agents use.",
+  "examples": [
+    {
+      "config": {
+        "allowedHosts": [
+          "api.example.com"
+        ],
+        "apiKeyHeader": null,
+        "auth": "bearer",
+        "specUrl": "https://api.example.com/openapi.json"
+      },
+      "createdAt": "2026-09-29T14:30:00.000Z",
+      "createdBy": "uA1b2C3d4E5f6G7h8I9j",
+      "id": "Cn4sK2lPq0WnR5tYu3bV",
+      "name": "issues-api",
+      "secretRef": "connector-Jd8sK2lPq0WnR5tYu3bV-Cn4sK2lPq0WnR5tYu3bV",
+      "status": "active",
+      "tenantId": "Jd8sK2lPq0WnR5tYu3bV",
+      "toolPolicy": {
+        "allow": [
+          "listIssues",
+          "createIssue"
+        ],
+        "readOnly": [
+          "listIssues"
+        ]
+      },
+      "type": "openapi",
+      "updatedAt": "2026-09-29T14:30:00.000Z"
+    },
+    {
+      "config": {
+        "allowedHosts": [
+          "mcp.example.com"
+        ],
+        "auth": "none",
+        "url": "https://mcp.example.com/mcp"
+      },
+      "createdAt": "2026-09-29T14:30:00.000Z",
+      "createdBy": "uA1b2C3d4E5f6G7h8I9j",
+      "id": "Cn4sK2lPq0WnR5tYu3bV",
+      "name": "docs-mcp",
+      "secretRef": null,
+      "status": "active",
+      "tenantId": "Jd8sK2lPq0WnR5tYu3bV",
+      "toolPolicy": {
+        "allow": [
+          "search"
+        ],
+        "readOnly": [
+          "search"
+        ]
+      },
+      "type": "mcp",
+      "updatedAt": "2026-09-29T14:30:00.000Z"
+    },
+    {
+      "config": {
+        "allowedRelations": [
+          "public.orders_summary"
+        ]
+      },
+      "createdAt": "2026-09-29T14:30:00.000Z",
+      "createdBy": "uA1b2C3d4E5f6G7h8I9j",
+      "id": "Cn4sK2lPq0WnR5tYu3bV",
+      "name": "warehouse",
+      "secretRef": "connector-Jd8sK2lPq0WnR5tYu3bV-Pg4sK2lPq0WnR5tYu3bV",
+      "status": "active",
+      "tenantId": "Jd8sK2lPq0WnR5tYu3bV",
+      "toolPolicy": {
+        "allow": [
+          "query"
+        ],
+        "readOnly": [
+          "query"
+        ]
+      },
+      "type": "postgres",
+      "updatedAt": "2026-09-29T14:30:00.000Z"
+    },
+    {
+      "config": {
+        "allowedHosts": [
+          "browser.example.com"
+        ],
+        "url": "https://browser.example.com/mcp"
+      },
+      "createdAt": "2026-09-29T14:30:00.000Z",
+      "createdBy": "uA1b2C3d4E5f6G7h8I9j",
+      "id": "Cn4sK2lPq0WnR5tYu3bV",
+      "name": "browser",
+      "secretRef": null,
+      "status": "active",
+      "tenantId": "Jd8sK2lPq0WnR5tYu3bV",
+      "toolPolicy": {
+        "allow": [
+          "browser_navigate"
+        ],
+        "readOnly": []
+      },
+      "type": "browser",
+      "updatedAt": "2026-09-29T14:30:00.000Z"
+    }
+  ],
+  "oneOf": [
+    {
+      "additionalProperties": false,
+      "properties": {
+        "config": {
+          "additionalProperties": false,
+          "description": "OpenAPI settings.",
+          "properties": {
+            "allowedHosts": {
+              "description": "Hosts requests may reach, redirects included.",
+              "items": {
+                "pattern": "^(?=.{1,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\\.)+[a-z]{2,63}$",
+                "type": "string"
+              },
+              "maxItems": 20,
+              "minItems": 1,
+              "type": "array",
+              "x-pii": "none"
+            },
+            "apiKeyHeader": {
+              "anyOf": [
+                {
+                  "pattern": "^[A-Za-z0-9-]{1,100}$",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Header name for api-key auth; null otherwise.",
+              "x-pii": "none"
+            },
+            "auth": {
+              "description": "How the secret is sent; the secret itself is in the secret store.",
+              "enum": [
+                "none",
+                "bearer",
+                "api-key"
+              ],
+              "type": "string",
+              "x-pii": "none"
+            },
+            "specUrl": {
+              "description": "URL of the OpenAPI 3.0/3.1 document.",
+              "format": "uri",
+              "maxLength": 2048,
+              "type": "string",
+              "x-pii": "none"
+            }
+          },
+          "required": [
+            "specUrl",
+            "allowedHosts",
+            "auth",
+            "apiKeyHeader"
+          ],
+          "type": "object",
+          "x-pii": "none"
+        },
+        "createdAt": {
+          "description": "When the connector was created (UTC).",
+          "format": "date-time",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+          "type": "string",
+          "x-pii": "none"
+        },
+        "createdBy": {
+          "description": "Uid of the admin who created it.",
+          "minLength": 1,
+          "type": "string",
+          "x-pii": "personal"
+        },
+        "id": {
+          "description": "Firestore automatic id of the connector.",
+          "minLength": 1,
+          "type": "string",
+          "x-pii": "none"
+        },
+        "name": {
+          "description": "Display name; also the prefix of the generated tool names.",
+          "maxLength": 100,
+          "minLength": 1,
+          "type": "string",
+          "x-pii": "none"
+        },
+        "secretRef": {
+          "anyOf": [
+            {
+              "maxLength": 255,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Name of the secret in the secret store; never the secret.",
+          "x-pii": "none"
+        },
+        "status": {
+          "description": "Whether agents can use the connector.",
+          "enum": [
+            "active",
+            "disabled",
+            "error"
+          ],
+          "type": "string",
+          "x-pii": "none"
+        },
+        "tenantId": {
+          "description": "Owning organization.",
+          "minLength": 1,
+          "type": "string",
+          "x-pii": "none"
+        },
+        "toolPolicy": {
+          "additionalProperties": false,
+          "description": "Tools agents may call and which skip approval.",
+          "properties": {
+            "allow": {
+              "description": "Tools agents may call; anything else is hidden.",
+              "items": {
+                "pattern": "^[A-Za-z][A-Za-z0-9_.-]{0,127}$",
+                "type": "string"
+              },
+              "maxItems": 500,
+              "type": "array",
+              "x-pii": "none"
+            },
+            "readOnly": {
+              "description": "Subset of allow that runs without approval.",
+              "items": {
+                "pattern": "^[A-Za-z][A-Za-z0-9_.-]{0,127}$",
+                "type": "string"
+              },
+              "maxItems": 500,
+              "type": "array",
+              "x-pii": "none"
+            }
+          },
+          "required": [
+            "allow",
+            "readOnly"
+          ],
+          "type": "object",
+          "x-pii": "none"
+        },
+        "type": {
+          "const": "openapi",
+          "description": "HTTP API described by OpenAPI.",
+          "type": "string",
+          "x-pii": "none"
+        },
+        "updatedAt": {
+          "description": "When the connector last changed (UTC).",
+          "format": "date-time",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+          "type": "string",
+          "x-pii": "none"
+        }
+      },
+      "required": [
+        "id",
+        "tenantId",
+        "name",
+        "status",
+        "secretRef",
+        "toolPolicy",
+        "createdBy",
+        "createdAt",
+        "updatedAt",
+        "type",
+        "config"
+      ],
+      "type": "object"
+    },
+    {
+      "additionalProperties": false,
+      "properties": {
+        "config": {
+          "additionalProperties": false,
+          "description": "MCP settings.",
+          "properties": {
+            "allowedHosts": {
+              "description": "Hosts requests may reach, redirects included.",
+              "items": {
+                "pattern": "^(?=.{1,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\\.)+[a-z]{2,63}$",
+                "type": "string"
+              },
+              "maxItems": 20,
+              "minItems": 1,
+              "type": "array",
+              "x-pii": "none"
+            },
+            "auth": {
+              "description": "How the connector authenticates; tokens live in the secret store.",
+              "enum": [
+                "none",
+                "bearer",
+                "oauth"
+              ],
+              "type": "string",
+              "x-pii": "none"
+            },
+            "url": {
+              "description": "Streamable HTTP endpoint of the MCP server.",
+              "format": "uri",
+              "maxLength": 2048,
+              "type": "string",
+              "x-pii": "none"
+            }
+          },
+          "required": [
+            "url",
+            "allowedHosts",
+            "auth"
+          ],
+          "type": "object",
+          "x-pii": "none"
+        },
+        "createdAt": {
+          "description": "When the connector was created (UTC).",
+          "format": "date-time",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+          "type": "string",
+          "x-pii": "none"
+        },
+        "createdBy": {
+          "description": "Uid of the admin who created it.",
+          "minLength": 1,
+          "type": "string",
+          "x-pii": "personal"
+        },
+        "id": {
+          "description": "Firestore automatic id of the connector.",
+          "minLength": 1,
+          "type": "string",
+          "x-pii": "none"
+        },
+        "name": {
+          "description": "Display name; also the prefix of the generated tool names.",
+          "maxLength": 100,
+          "minLength": 1,
+          "type": "string",
+          "x-pii": "none"
+        },
+        "secretRef": {
+          "anyOf": [
+            {
+              "maxLength": 255,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Name of the secret in the secret store; never the secret.",
+          "x-pii": "none"
+        },
+        "status": {
+          "description": "Whether agents can use the connector.",
+          "enum": [
+            "active",
+            "disabled",
+            "error"
+          ],
+          "type": "string",
+          "x-pii": "none"
+        },
+        "tenantId": {
+          "description": "Owning organization.",
+          "minLength": 1,
+          "type": "string",
+          "x-pii": "none"
+        },
+        "toolPolicy": {
+          "additionalProperties": false,
+          "description": "Tools agents may call and which skip approval.",
+          "properties": {
+            "allow": {
+              "description": "Tools agents may call; anything else is hidden.",
+              "items": {
+                "pattern": "^[A-Za-z][A-Za-z0-9_.-]{0,127}$",
+                "type": "string"
+              },
+              "maxItems": 500,
+              "type": "array",
+              "x-pii": "none"
+            },
+            "readOnly": {
+              "description": "Subset of allow that runs without approval.",
+              "items": {
+                "pattern": "^[A-Za-z][A-Za-z0-9_.-]{0,127}$",
+                "type": "string"
+              },
+              "maxItems": 500,
+              "type": "array",
+              "x-pii": "none"
+            }
+          },
+          "required": [
+            "allow",
+            "readOnly"
+          ],
+          "type": "object",
+          "x-pii": "none"
+        },
+        "type": {
+          "const": "mcp",
+          "description": "Remote MCP server.",
+          "type": "string",
+          "x-pii": "none"
+        },
+        "updatedAt": {
+          "description": "When the connector last changed (UTC).",
+          "format": "date-time",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+          "type": "string",
+          "x-pii": "none"
+        }
+      },
+      "required": [
+        "id",
+        "tenantId",
+        "name",
+        "status",
+        "secretRef",
+        "toolPolicy",
+        "createdBy",
+        "createdAt",
+        "updatedAt",
+        "type",
+        "config"
+      ],
+      "type": "object"
+    },
+    {
+      "additionalProperties": false,
+      "properties": {
+        "config": {
+          "additionalProperties": false,
+          "description": "Postgres settings; the DSN is the secret.",
+          "properties": {
+            "allowedRelations": {
+              "description": "schema.table or schema.view names the read-only SQL tool may read.",
+              "items": {
+                "pattern": "^[a-z_][a-z0-9_]*\\.[a-z_][a-z0-9_]*$",
+                "type": "string"
+              },
+              "maxItems": 200,
+              "minItems": 1,
+              "type": "array",
+              "x-pii": "none"
+            }
+          },
+          "required": [
+            "allowedRelations"
+          ],
+          "type": "object",
+          "x-pii": "none"
+        },
+        "createdAt": {
+          "description": "When the connector was created (UTC).",
+          "format": "date-time",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+          "type": "string",
+          "x-pii": "none"
+        },
+        "createdBy": {
+          "description": "Uid of the admin who created it.",
+          "minLength": 1,
+          "type": "string",
+          "x-pii": "personal"
+        },
+        "id": {
+          "description": "Firestore automatic id of the connector.",
+          "minLength": 1,
+          "type": "string",
+          "x-pii": "none"
+        },
+        "name": {
+          "description": "Display name; also the prefix of the generated tool names.",
+          "maxLength": 100,
+          "minLength": 1,
+          "type": "string",
+          "x-pii": "none"
+        },
+        "secretRef": {
+          "anyOf": [
+            {
+              "maxLength": 255,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Name of the secret in the secret store; never the secret.",
+          "x-pii": "none"
+        },
+        "status": {
+          "description": "Whether agents can use the connector.",
+          "enum": [
+            "active",
+            "disabled",
+            "error"
+          ],
+          "type": "string",
+          "x-pii": "none"
+        },
+        "tenantId": {
+          "description": "Owning organization.",
+          "minLength": 1,
+          "type": "string",
+          "x-pii": "none"
+        },
+        "toolPolicy": {
+          "additionalProperties": false,
+          "description": "Tools agents may call and which skip approval.",
+          "properties": {
+            "allow": {
+              "description": "Tools agents may call; anything else is hidden.",
+              "items": {
+                "pattern": "^[A-Za-z][A-Za-z0-9_.-]{0,127}$",
+                "type": "string"
+              },
+              "maxItems": 500,
+              "type": "array",
+              "x-pii": "none"
+            },
+            "readOnly": {
+              "description": "Subset of allow that runs without approval.",
+              "items": {
+                "pattern": "^[A-Za-z][A-Za-z0-9_.-]{0,127}$",
+                "type": "string"
+              },
+              "maxItems": 500,
+              "type": "array",
+              "x-pii": "none"
+            }
+          },
+          "required": [
+            "allow",
+            "readOnly"
+          ],
+          "type": "object",
+          "x-pii": "none"
+        },
+        "type": {
+          "const": "postgres",
+          "description": "Tenant-owned Postgres, read only.",
+          "type": "string",
+          "x-pii": "none"
+        },
+        "updatedAt": {
+          "description": "When the connector last changed (UTC).",
+          "format": "date-time",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+          "type": "string",
+          "x-pii": "none"
+        }
+      },
+      "required": [
+        "id",
+        "tenantId",
+        "name",
+        "status",
+        "secretRef",
+        "toolPolicy",
+        "createdBy",
+        "createdAt",
+        "updatedAt",
+        "type",
+        "config"
+      ],
+      "type": "object"
+    },
+    {
+      "additionalProperties": false,
+      "properties": {
+        "config": {
+          "additionalProperties": false,
+          "description": "Browser settings.",
+          "properties": {
+            "allowedHosts": {
+              "description": "Hosts requests may reach, redirects included.",
+              "items": {
+                "pattern": "^(?=.{1,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\\.)+[a-z]{2,63}$",
+                "type": "string"
+              },
+              "maxItems": 20,
+              "minItems": 1,
+              "type": "array",
+              "x-pii": "none"
+            },
+            "url": {
+              "description": "Playwright MCP server endpoint.",
+              "format": "uri",
+              "maxLength": 2048,
+              "type": "string",
+              "x-pii": "none"
+            }
+          },
+          "required": [
+            "url",
+            "allowedHosts"
+          ],
+          "type": "object",
+          "x-pii": "none"
+        },
+        "createdAt": {
+          "description": "When the connector was created (UTC).",
+          "format": "date-time",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+          "type": "string",
+          "x-pii": "none"
+        },
+        "createdBy": {
+          "description": "Uid of the admin who created it.",
+          "minLength": 1,
+          "type": "string",
+          "x-pii": "personal"
+        },
+        "id": {
+          "description": "Firestore automatic id of the connector.",
+          "minLength": 1,
+          "type": "string",
+          "x-pii": "none"
+        },
+        "name": {
+          "description": "Display name; also the prefix of the generated tool names.",
+          "maxLength": 100,
+          "minLength": 1,
+          "type": "string",
+          "x-pii": "none"
+        },
+        "secretRef": {
+          "anyOf": [
+            {
+              "maxLength": 255,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Name of the secret in the secret store; never the secret.",
+          "x-pii": "none"
+        },
+        "status": {
+          "description": "Whether agents can use the connector.",
+          "enum": [
+            "active",
+            "disabled",
+            "error"
+          ],
+          "type": "string",
+          "x-pii": "none"
+        },
+        "tenantId": {
+          "description": "Owning organization.",
+          "minLength": 1,
+          "type": "string",
+          "x-pii": "none"
+        },
+        "toolPolicy": {
+          "additionalProperties": false,
+          "description": "Tools agents may call and which skip approval.",
+          "properties": {
+            "allow": {
+              "description": "Tools agents may call; anything else is hidden.",
+              "items": {
+                "pattern": "^[A-Za-z][A-Za-z0-9_.-]{0,127}$",
+                "type": "string"
+              },
+              "maxItems": 500,
+              "type": "array",
+              "x-pii": "none"
+            },
+            "readOnly": {
+              "description": "Subset of allow that runs without approval.",
+              "items": {
+                "pattern": "^[A-Za-z][A-Za-z0-9_.-]{0,127}$",
+                "type": "string"
+              },
+              "maxItems": 500,
+              "type": "array",
+              "x-pii": "none"
+            }
+          },
+          "required": [
+            "allow",
+            "readOnly"
+          ],
+          "type": "object",
+          "x-pii": "none"
+        },
+        "type": {
+          "const": "browser",
+          "description": "Browser automation via Playwright MCP.",
+          "type": "string",
+          "x-pii": "none"
+        },
+        "updatedAt": {
+          "description": "When the connector last changed (UTC).",
+          "format": "date-time",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+          "type": "string",
+          "x-pii": "none"
+        }
+      },
+      "required": [
+        "id",
+        "tenantId",
+        "name",
+        "status",
+        "secretRef",
+        "toolPolicy",
+        "createdBy",
+        "createdAt",
+        "updatedAt",
+        "type",
+        "config"
+      ],
+      "type": "object"
+    }
+  ],
+  "x-kind": "entity",
+  "x-permission": "core.connector.read",
+  "x-pii": "personal",
+  "x-relations": [],
+  "x-tenancyScope": "organization"
+}

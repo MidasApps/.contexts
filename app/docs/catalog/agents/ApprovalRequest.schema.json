@@ -1,0 +1,160 @@
+{
+  "additionalProperties": false,
+  "description": "Payload of an approval request (kind agent-command) that holds an agent mutation until a second member approves it.",
+  "examples": [
+    {
+      "agentId": "action",
+      "commandId": "example.ArchiveNoteCommand",
+      "idempotencyKey": "run_01J8Z3K4M5:call_7",
+      "input": {
+        "noteId": "Xk2mQ9vLr3TnB7pWc1aZ"
+      },
+      "kind": "agent-command",
+      "permission": "example.note.archive",
+      "preview": {
+        "after": {
+          "archived": true
+        },
+        "before": {
+          "archived": false
+        }
+      },
+      "requestedBy": "uA1b2C3d4E5f6G7h8I9j",
+      "runId": "run_01J8Z3K4M5",
+      "summary": "Archive the note Supplier follow-up",
+      "tenantId": "Jd8sK2lPq0WnR5tYu3bV",
+      "toolCallId": "call_7",
+      "toolId": "command.example.ArchiveNoteCommand"
+    }
+  ],
+  "properties": {
+    "agentId": {
+      "description": "Agent that proposed the command.",
+      "pattern": "^[a-z][a-z0-9-]*$",
+      "type": "string",
+      "x-pii": "none"
+    },
+    "commandId": {
+      "description": "Command contract id whose schema validates `input`.",
+      "pattern": "^[a-z][a-z0-9-]*\\.[A-Z][A-Za-z0-9]*$",
+      "type": "string",
+      "x-pii": "none"
+    },
+    "idempotencyKey": {
+      "description": "`runId:toolCallId`; the command runs at most once per key.",
+      "maxLength": 401,
+      "minLength": 3,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "input": {
+      "additionalProperties": {},
+      "description": "Command input as validated by the command contract.",
+      "propertyNames": {
+        "type": "string"
+      },
+      "type": "object",
+      "x-pii": "personal"
+    },
+    "kind": {
+      "const": "agent-command",
+      "description": "Approval action kind handled by the agent runtime.",
+      "type": "string",
+      "x-pii": "none"
+    },
+    "permission": {
+      "description": "Permission the command requires; re-checked on execution.",
+      "pattern": "^[a-z][a-z0-9-]*\\.[a-z][a-z0-9-]*\\.[a-z][a-z0-9-]*$",
+      "type": "string",
+      "x-pii": "none"
+    },
+    "preview": {
+      "anyOf": [
+        {
+          "additionalProperties": false,
+          "properties": {
+            "after": {
+              "description": "State after the change.",
+              "x-pii": "personal"
+            },
+            "before": {
+              "description": "State before the change, when the command can preview it.",
+              "x-pii": "personal"
+            }
+          },
+          "required": [
+            "before",
+            "after"
+          ],
+          "type": "object"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Before/after preview shown to approvers; null when unavailable.",
+      "x-pii": "personal"
+    },
+    "requestedBy": {
+      "description": "Uid of the user whose agent run asked for the command.",
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "personal"
+    },
+    "runId": {
+      "description": "Mastra run id of the agent stream.",
+      "maxLength": 200,
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "summary": {
+      "description": "Human-readable description of the change for approvers.",
+      "maxLength": 500,
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "personal"
+    },
+    "tenantId": {
+      "description": "Organization where the command runs.",
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "toolCallId": {
+      "description": "Model tool call id inside the run.",
+      "maxLength": 200,
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "toolId": {
+      "description": "Tool id, `command.<contractId>`.",
+      "maxLength": 200,
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    }
+  },
+  "required": [
+    "kind",
+    "tenantId",
+    "requestedBy",
+    "agentId",
+    "toolId",
+    "commandId",
+    "permission",
+    "input",
+    "runId",
+    "toolCallId",
+    "idempotencyKey",
+    "summary",
+    "preview"
+  ],
+  "type": "object",
+  "x-kind": "command",
+  "x-permission": "core.approval.read",
+  "x-pii": "personal",
+  "x-relations": [],
+  "x-tenancyScope": "organization"
+}

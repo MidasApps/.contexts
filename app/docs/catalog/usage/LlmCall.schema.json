@@ -1,0 +1,184 @@
+{
+  "additionalProperties": false,
+  "description": "A model call recorded in the usage ledger with tokens, cost and latency, per organization.",
+  "examples": [
+    {
+      "agentId": "assistant",
+      "cachedTokens": 0,
+      "costMicroUsd": 1500,
+      "finishReason": "stop",
+      "id": "01928f6e-7b2a-7c3d-9e4f-5a6b7c8d9e0f",
+      "inputTokens": 1200,
+      "latencyMs": 820,
+      "model": "gemini-3.5-flash",
+      "occurredAt": "2026-09-29T14:30:00.000Z",
+      "outputTokens": 350,
+      "provider": "google",
+      "requestId": "01J8Z3K4M5N6P7Q8R9S0T1V2W3",
+      "tenantId": "Jd8sK2lPq0WnR5tYu3bV",
+      "traceId": "4bf92f3577b34da6a3ce929d0e0e4736",
+      "userId": "uA1b2C3d4E5f6G7h8I9j"
+    }
+  ],
+  "properties": {
+    "agentId": {
+      "description": "Agent, workflow or processor that called the model.",
+      "maxLength": 200,
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "cachedTokens": {
+      "description": "Prompt tokens served from the provider cache.",
+      "maximum": 9007199254740991,
+      "minimum": 0,
+      "type": "integer",
+      "x-pii": "none"
+    },
+    "costMicroUsd": {
+      "anyOf": [
+        {
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Cost in micro-USD from the price table; null when the price is unknown.",
+      "x-pii": "none"
+    },
+    "finishReason": {
+      "anyOf": [
+        {
+          "maxLength": 64,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Why generation stopped, as the provider reported it.",
+      "x-pii": "none"
+    },
+    "id": {
+      "description": "Ledger row id (uuidv7).",
+      "format": "uuid",
+      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+      "type": "string",
+      "x-pii": "none"
+    },
+    "inputTokens": {
+      "description": "Prompt tokens.",
+      "maximum": 9007199254740991,
+      "minimum": 0,
+      "type": "integer",
+      "x-pii": "none"
+    },
+    "latencyMs": {
+      "description": "Wall time of the call in milliseconds.",
+      "maximum": 9007199254740991,
+      "minimum": 0,
+      "type": "integer",
+      "x-pii": "none"
+    },
+    "model": {
+      "description": "Provider model id.",
+      "maxLength": 200,
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "occurredAt": {
+      "description": "When the call finished (UTC).",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+      "type": "string",
+      "x-pii": "none"
+    },
+    "outputTokens": {
+      "description": "Completion tokens.",
+      "maximum": 9007199254740991,
+      "minimum": 0,
+      "type": "integer",
+      "x-pii": "none"
+    },
+    "provider": {
+      "description": "Model provider, e.g. google.",
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "requestId": {
+      "anyOf": [
+        {
+          "maxLength": 64,
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "X-Request-Id of the call that triggered the model, when known.",
+      "x-pii": "none"
+    },
+    "tenantId": {
+      "description": "Organization billed for the call.",
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "traceId": {
+      "anyOf": [
+        {
+          "pattern": "^[0-9a-f]{32}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "W3C trace id of the run.",
+      "x-pii": "none"
+    },
+    "userId": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Uid of the caller; null for platform jobs.",
+      "x-pii": "personal"
+    }
+  },
+  "required": [
+    "id",
+    "requestId",
+    "traceId",
+    "tenantId",
+    "userId",
+    "agentId",
+    "provider",
+    "model",
+    "inputTokens",
+    "outputTokens",
+    "cachedTokens",
+    "costMicroUsd",
+    "latencyMs",
+    "finishReason",
+    "occurredAt"
+  ],
+  "type": "object",
+  "x-kind": "view",
+  "x-permission": "core.usage.read",
+  "x-pii": "personal",
+  "x-relations": [],
+  "x-tenancyScope": "organization"
+}

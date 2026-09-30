@@ -1,0 +1,56 @@
+{
+  "additionalProperties": false,
+  "description": "Asks for a signed URL to upload a chat attachment or a knowledge document.",
+  "examples": [
+    {
+      "contentType": "text/markdown",
+      "fileName": "onboarding-guide.md",
+      "purpose": "knowledge",
+      "sizeBytes": 18432
+    }
+  ],
+  "properties": {
+    "contentType": {
+      "description": "Declared media type; the bytes are checked again after upload.",
+      "pattern": "^[a-z]+\\/[a-z0-9][a-z0-9.+-]*$",
+      "type": "string",
+      "x-pii": "none"
+    },
+    "fileName": {
+      "description": "Original file name, shown to users.",
+      "maxLength": 255,
+      "minLength": 1,
+      "pattern": "^(?!\\.{1,2}$)[^/\\\\\\u0000-\\u001f]+$",
+      "type": "string",
+      "x-pii": "personal"
+    },
+    "purpose": {
+      "description": "What the file is for; selects the allowed types and size.",
+      "enum": [
+        "chat-attachment",
+        "knowledge"
+      ],
+      "type": "string",
+      "x-pii": "none"
+    },
+    "sizeBytes": {
+      "description": "Declared size; the signed URL enforces it.",
+      "exclusiveMinimum": 0,
+      "maximum": 209715200,
+      "type": "integer",
+      "x-pii": "none"
+    }
+  },
+  "required": [
+    "purpose",
+    "fileName",
+    "contentType",
+    "sizeBytes"
+  ],
+  "type": "object",
+  "x-kind": "command",
+  "x-permission": "core.file.upload",
+  "x-pii": "personal",
+  "x-relations": [],
+  "x-tenancyScope": "organization"
+}

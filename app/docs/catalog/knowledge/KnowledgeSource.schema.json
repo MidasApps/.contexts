@@ -1,0 +1,65 @@
+{
+  "description": "Adds a file or a web page to the organization knowledge base; indexing runs in the background.",
+  "examples": [
+    {
+      "fileId": "Fz9sK2lPq0WnR5tYu3bV",
+      "kind": "file"
+    },
+    {
+      "kind": "url",
+      "url": "https://docs.example.com/guide"
+    }
+  ],
+  "oneOf": [
+    {
+      "additionalProperties": false,
+      "properties": {
+        "fileId": {
+          "description": "Id of a ready file uploaded with purpose knowledge.",
+          "minLength": 1,
+          "type": "string",
+          "x-pii": "none"
+        },
+        "kind": {
+          "const": "file",
+          "description": "Ingest an uploaded file.",
+          "type": "string",
+          "x-pii": "none"
+        }
+      },
+      "required": [
+        "kind",
+        "fileId"
+      ],
+      "type": "object"
+    },
+    {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "url",
+          "description": "Ingest a public web page.",
+          "type": "string",
+          "x-pii": "none"
+        },
+        "url": {
+          "description": "Public https URL to scrape.",
+          "format": "uri",
+          "maxLength": 2048,
+          "type": "string",
+          "x-pii": "none"
+        }
+      },
+      "required": [
+        "kind",
+        "url"
+      ],
+      "type": "object"
+    }
+  ],
+  "x-kind": "command",
+  "x-permission": "core.knowledge.write",
+  "x-pii": "none",
+  "x-relations": [],
+  "x-tenancyScope": "organization"
+}

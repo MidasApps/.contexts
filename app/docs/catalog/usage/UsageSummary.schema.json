@@ -1,0 +1,224 @@
+{
+  "additionalProperties": false,
+  "description": "Month-to-date model usage and cost of an organization compared with its budget caps.",
+  "examples": [
+    {
+      "budget": {
+        "alertThresholdPercent": 80,
+        "monthlyMicroUsd": 50000000,
+        "monthlyTokens": 20000000
+      },
+      "byModel": [
+        {
+          "model": "gemini-3.5-flash",
+          "provider": "google",
+          "totals": {
+            "calls": 42,
+            "costMicroUsd": 61000,
+            "inputTokens": 50000,
+            "outputTokens": 12000,
+            "unpricedCalls": 0
+          }
+        }
+      ],
+      "month": "2026-09",
+      "tenantId": "Jd8sK2lPq0WnR5tYu3bV",
+      "totals": {
+        "calls": 42,
+        "costMicroUsd": 61000,
+        "inputTokens": 50000,
+        "outputTokens": 12000,
+        "unpricedCalls": 0
+      }
+    }
+  ],
+  "properties": {
+    "budget": {
+      "additionalProperties": false,
+      "description": "Caps in force for the month.",
+      "properties": {
+        "alertThresholdPercent": {
+          "description": "Percent of a cap that triggers an alert; always below 100.",
+          "maximum": 99,
+          "minimum": 1,
+          "type": "integer",
+          "x-pii": "none"
+        },
+        "monthlyMicroUsd": {
+          "description": "Hard spend cap for the month in micro-USD.",
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "type": "integer",
+          "x-pii": "none"
+        },
+        "monthlyTokens": {
+          "description": "Hard token cap for the month.",
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "type": "integer",
+          "x-pii": "none"
+        }
+      },
+      "required": [
+        "monthlyMicroUsd",
+        "monthlyTokens",
+        "alertThresholdPercent"
+      ],
+      "type": "object",
+      "x-pii": "none"
+    },
+    "byModel": {
+      "description": "Breakdown per model.",
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "model": {
+            "description": "Provider model id.",
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "provider": {
+            "description": "Model provider.",
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "totals": {
+            "additionalProperties": false,
+            "description": "Totals for this model.",
+            "properties": {
+              "calls": {
+                "description": "Model calls.",
+                "maximum": 9007199254740991,
+                "minimum": 0,
+                "type": "integer",
+                "x-pii": "none"
+              },
+              "costMicroUsd": {
+                "description": "Known cost in micro-USD (calls without a price are excluded).",
+                "maximum": 9007199254740991,
+                "minimum": 0,
+                "type": "integer",
+                "x-pii": "none"
+              },
+              "inputTokens": {
+                "description": "Prompt tokens.",
+                "maximum": 9007199254740991,
+                "minimum": 0,
+                "type": "integer",
+                "x-pii": "none"
+              },
+              "outputTokens": {
+                "description": "Completion tokens.",
+                "maximum": 9007199254740991,
+                "minimum": 0,
+                "type": "integer",
+                "x-pii": "none"
+              },
+              "unpricedCalls": {
+                "description": "Calls whose model had no price; their tokens still count against the token cap.",
+                "maximum": 9007199254740991,
+                "minimum": 0,
+                "type": "integer",
+                "x-pii": "none"
+              }
+            },
+            "required": [
+              "calls",
+              "inputTokens",
+              "outputTokens",
+              "costMicroUsd",
+              "unpricedCalls"
+            ],
+            "type": "object",
+            "x-pii": "none"
+          }
+        },
+        "required": [
+          "provider",
+          "model",
+          "totals"
+        ],
+        "type": "object"
+      },
+      "type": "array",
+      "x-pii": "none"
+    },
+    "month": {
+      "description": "Calendar month in UTC, YYYY-MM.",
+      "pattern": "^\\d{4}-(?:0[1-9]|1[0-2])$",
+      "type": "string",
+      "x-pii": "none"
+    },
+    "tenantId": {
+      "description": "Organization the summary is about.",
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "totals": {
+      "additionalProperties": false,
+      "description": "Totals for the month.",
+      "properties": {
+        "calls": {
+          "description": "Model calls.",
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "type": "integer",
+          "x-pii": "none"
+        },
+        "costMicroUsd": {
+          "description": "Known cost in micro-USD (calls without a price are excluded).",
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "type": "integer",
+          "x-pii": "none"
+        },
+        "inputTokens": {
+          "description": "Prompt tokens.",
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "type": "integer",
+          "x-pii": "none"
+        },
+        "outputTokens": {
+          "description": "Completion tokens.",
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "type": "integer",
+          "x-pii": "none"
+        },
+        "unpricedCalls": {
+          "description": "Calls whose model had no price; their tokens still count against the token cap.",
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "type": "integer",
+          "x-pii": "none"
+        }
+      },
+      "required": [
+        "calls",
+        "inputTokens",
+        "outputTokens",
+        "costMicroUsd",
+        "unpricedCalls"
+      ],
+      "type": "object",
+      "x-pii": "none"
+    }
+  },
+  "required": [
+    "tenantId",
+    "month",
+    "totals",
+    "budget",
+    "byModel"
+  ],
+  "type": "object",
+  "x-kind": "view",
+  "x-permission": "core.usage.read",
+  "x-pii": "none",
+  "x-relations": [],
+  "x-tenancyScope": "organization"
+}
