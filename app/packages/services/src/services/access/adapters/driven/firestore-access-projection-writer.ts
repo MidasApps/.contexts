@@ -37,6 +37,12 @@ export const createFirestoreAccessProjectionStore = (deps: { firestore: Firestor
       const fetched = (await query.limit(page.limit + 1).get()).docs.map((doc) => doc.data());
       return pageFromOverfetch({ fetched, limit: page.limit, positionOf: (projection) => [projection.principalId, projection.id] });
     },
+    listOfPrincipal: async ({ principalId, page }) => {
+      let query = typed().where("principalId", "==", principalId).where("isRevoked", "==", false).orderBy("tenantId").orderBy(FieldPath.documentId());
+      if (page.after !== undefined) query = query.startAfter(...page.after);
+      const fetched = (await query.limit(page.limit + 1).get()).docs.map((doc) => doc.data());
+      return pageFromOverfetch({ fetched, limit: page.limit, positionOf: (projection) => [projection.tenantId, projection.id] });
+    },
     listUnrevoked: async (tx, { tenantId, limit }) => {
       const query = typed().where("tenantId", "==", tenantId).where("isRevoked", "==", false).limit(limit);
       return (tx === undefined ? await query.get() : await tx.get(query)).docs.map((doc) => doc.data());

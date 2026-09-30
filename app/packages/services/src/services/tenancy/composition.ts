@@ -9,7 +9,12 @@ import { makeGetOrganization, type GetOrganization } from "./application/use-cas
 import { makeListProjects, type ListProjects } from "./application/use-cases/list-projects.ts";
 import { makeListUnits, type ListUnits } from "./application/use-cases/list-units.ts";
 import { makeCreateProject, makeDeleteProject, makeGetProject, makeUpdateProject } from "./application/use-cases/project-use-cases.ts";
-import { makeResolveNodeRegionalSettings, type ResolveNodeRegionalSettings } from "./application/use-cases/resolve-regional-settings.ts";
+import {
+  makeLoadNode,
+  makeResolveNodeRegionalSettings,
+  type LoadNode,
+  type ResolveNodeRegionalSettings,
+} from "./application/use-cases/resolve-regional-settings.ts";
 import { makeDeleteUnit, makeGetUnit, makeListUnitTypes } from "./application/use-cases/unit-use-cases.ts";
 import { makeUpdateOrganization, type UpdateOrganization } from "./application/use-cases/update-organization.ts";
 import { makeUpdateUnit, type UpdateUnit } from "./application/use-cases/update-unit.ts";
@@ -33,6 +38,8 @@ export type TenancyServices = {
   readonly deleteUnit: ReturnType<typeof makeDeleteUnit>;
   readonly listUnitTypes: ReturnType<typeof makeListUnitTypes>;
   readonly resolveRegionalSettings: ResolveNodeRegionalSettings;
+  /** A node and its chain, unauthorized (the access context authorizes first, SP1 Task 12). */
+  readonly loadNode: LoadNode;
 };
 
 /**
@@ -60,5 +67,6 @@ export const createTenancyServices = (args: { unitTypes: readonly UnitTypeDefini
     deleteUnit: makeDeleteUnit(deps),
     listUnitTypes: makeListUnitTypes(deps),
     resolveRegionalSettings: makeResolveNodeRegionalSettings(deps),
+    loadNode: makeLoadNode(deps),
   };
 };

@@ -5,6 +5,8 @@ import { buildMembershipsRoutes } from "./access/adapters/driving/memberships-ro
 import { buildRolesRoutes } from "./access/adapters/driving/roles-routes.ts";
 import type { AccessServices } from "./access/composition.ts";
 import type { MemberServices } from "./access/member-composition.ts";
+import { buildMeRoutes } from "./identity/adapters/driving/me-routes.ts";
+import type { IdentityServices } from "./identity/composition.ts";
 import { buildOrganizationsRoutes } from "./tenancy/adapters/driving/organizations-routes.ts";
 import { buildProjectsRoutes } from "./tenancy/adapters/driving/projects-routes.ts";
 import { buildUnitTypesRoutes } from "./tenancy/adapters/driving/unit-types-routes.ts";
@@ -25,6 +27,7 @@ export type CoreRouteDeps = {
   readonly access: AccessServices;
   readonly members: MemberServices;
   readonly tenancy: TenancyServices;
+  readonly identity: IdentityServices;
 };
 
 /**
@@ -37,6 +40,7 @@ export const buildCoreRoutes = (deps: CoreRouteDeps): CoreRoutes => ({
   ...buildMembersRoutes(deps),
   ...buildMembershipsRoutes(deps),
   ...buildInvitationsRoutes(deps),
+  ...buildMeRoutes(deps),
   ...buildOrganizationsRoutes(deps),
   ...buildProjectsRoutes(deps),
   ...buildUnitsRoutes(deps),

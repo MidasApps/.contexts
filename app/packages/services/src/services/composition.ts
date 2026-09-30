@@ -18,7 +18,11 @@ import { createFirebaseTokenVerifier } from "./identity/adapters/driven/firebase
 import { refuseAllApiKeys, type ApiKeyAuthenticator } from "./identity/application/ports/driven/api-key-authenticator.ts";
 import { noopApiKeyRevoker, type ApiKeyRevoker } from "./identity/application/ports/driven/api-key-revoker.ts";
 import type { TokenVerifier } from "./identity/application/ports/driven/token-verifier.ts";
+import { createFirebaseAuthAccountReader } from "./identity/adapters/driven/firebase-auth-account-reader.ts";
 import { createFirebaseUserAccountReader } from "./identity/adapters/driven/firebase-user-account-reader.ts";
+import { createFirestoreUserRepository } from "./identity/adapters/driven/firestore-user-repository.ts";
+import type { ResolveAccessContext } from "./identity/application/use-cases/resolve-access-context.ts";
+import { createIdentityServices, type IdentityServices } from "./identity/composition.ts";
 import { makeVerifyBearer, type VerifyBearer } from "./identity/application/use-cases/resolve-principal.ts";
 import { systemClock, type Clock } from "./shared/clock/clock.ts";
 import type { FirebaseAdmin } from "./shared/firebase/firebase-admin.ts";
@@ -70,6 +74,13 @@ export type CoreServer = {
   readonly members: MemberServices;
   /** Organizations, projects, units and regional settings (SP1 Task 10). */
   readonly tenancy: TenancyServices;
+  /** `/v1/me*`: profile, active organization, claims sync, access context (SP1 Task 12). */
+  readonly identity: IdentityServices;
+  /**
+   * SP3 hook (SP1 spec §10): effective permissions and regional settings of a principal at a
+   * node, or null (fail-closed). Also exported as `resolveAccessContext` of `identity`.
+   */
+  readonly resolveAccessContext: ResolveAccessContext;
   readonly audit: AuditWriter;
   /** The dependencies every `withApiRoute` of this server shares. */
   readonly pipeline: ApiRouteDeps;
@@ -121,14 +132,14 @@ const buildAccess = (args: CoreServerArgs, clock: Clock, audit: AuditWriter) => 
     appUrl: args.env.NEXT_PUBLIC_APP_URL,
     logger: args.logger,
   });
-  return { core, services: createAccessServices(writeDeps), members };
+  return { core, readers, services: createAccessServices(writeDeps), members };
 };
 
-const buildTenancy = (args: CoreServerArgs, clock: Clock, audit: AuditWriter, access: AccessServices): TenancyServices => {
+const buildTenancy = (args: CoreServerArgs, clock: Clock, audit: AuditWriter, access: AccessServices, adapters: FirestoreTenancyAdapters): TenancyServices => {
   const { firestore, auth } = args.firebase;
   return createTenancyServices({
     unitTypes: (args.modules ?? []).flatMap((module) => module.unitTypes ?? []),
-    ...(args.adapters?.tenancy ?? createFirestoreTenancyAdapters({ firestore })),
+    ...adapters,
     access,
     accounts: createFirebaseUserAccountReader({ auth }),
     audit,
@@ -151,7 +162,21 @@ export const createCoreServer = (args: CoreServerArgs): CoreServer => {
   const { firestore, auth } = args.firebase;
   const audit = makeRecordAudit({ writer: createFirestoreAuditLogWriter({ firestore }), clock });
   const access = buildAccess(args, clock, audit);
-  const tenancy = buildTenancy(args, clock, audit, access.services);
+  const tenancyAdapters = args.adapters?.tenancy ?? createFirestoreTenancyAdapters({ firestore });
+  const tenancy = buildTenancy(args, clock, audit, access.services, tenancyAdapters);
+  const identity = createIdentityServices({
+    users: createFirestoreUserRepository({ firestore }),
+    accounts: createFirebaseAuthAccountReader({ auth }),
+    staff: access.readers.principals,
+    access: access.core,
+    projections: access.services.projections,
+    syncClaims: access.services.syncClaims,
+    organizations: tenancyAdapters.organizations,
+    loadNode: tenancy.loadNode,
+    audit,
+    unitOfWork: createFirestoreUnitOfWork({ firestore }),
+    clock,
+  });
   const verifyBearer = makeVerifyBearer({
     tokenVerifier: args.adapters?.tokenVerifier ?? createFirebaseTokenVerifier({ auth }),
     apiKeyAuthenticator: args.adapters?.apiKeyAuthenticator ?? refuseAllApiKeys,
@@ -167,6 +192,17 @@ export const createCoreServer = (args: CoreServerArgs): CoreServer => {
     access: access.core,
     audit,
   };
-  const routes = buildCoreRoutes({ pipeline, access: access.services, members: access.members, tenancy });
-  return { routes, verifyBearer, access: access.core, accessServices: access.services, members: access.members, tenancy, audit, pipeline };
+  const routes = buildCoreRoutes({ pipeline, access: access.services, members: access.members, tenancy, identity });
+  return {
+    routes,
+    verifyBearer,
+    access: access.core,
+    accessServices: access.services,
+    members: access.members,
+    tenancy,
+    identity,
+    resolveAccessContext: identity.resolveAccessContext,
+    audit,
+    pipeline,
+  };
 };

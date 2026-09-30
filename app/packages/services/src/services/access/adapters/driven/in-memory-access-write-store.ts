@@ -122,6 +122,14 @@ const makeProjections = (tables: Tables): AccessProjectionStore => ({
         positionOf: (p) => [p.principalId, p.id],
       }),
     ),
+  listOfPrincipal: ({ principalId, page }) =>
+    Promise.resolve(
+      paginateInMemory({
+        items: [...tables.projections.values()].filter((p) => p.principalId === principalId && !p.isRevoked),
+        page,
+        positionOf: (p) => [p.tenantId, p.id],
+      }),
+    ),
   listUnrevoked: (_tx, { tenantId, limit }) =>
     Promise.resolve([...tables.projections.values()].filter((p) => p.tenantId === tenantId && !p.isRevoked).slice(0, limit)),
   markRevoked: (_tx, { projections, updatedAt }) => {

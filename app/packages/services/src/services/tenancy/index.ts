@@ -4,7 +4,7 @@ export type { TenancyCommand, TenancyDeps } from "./application/tenancy-deps.ts"
 export type { OrganizationRepository } from "./application/ports/driven/organization-repository.ts";
 export type { ProjectRepository } from "./application/ports/driven/project-repository.ts";
 export type { UnitRepository } from "./application/ports/driven/unit-repository.ts";
-export type { ResolveNodeRegionalSettings } from "./application/use-cases/resolve-regional-settings.ts";
+export { regionalSettingsAt, type LoadNode, type NodeDetails, type ResolveNodeRegionalSettings } from "./application/use-cases/resolve-regional-settings.ts";
 export { UserAccountMissingError } from "./application/use-cases/create-organization.ts";
 export { resolveRegionalSettings } from "./domain/regional-settings.ts";
 export { MAX_SUBTREE_REWRITE, placementUnder, planMove, type MovePlan, type TreeRewrite, type TreeUnit } from "./domain/unit-tree.ts";

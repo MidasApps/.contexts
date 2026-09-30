@@ -178,7 +178,18 @@ export {
   normalizeEmail,
   type UserDirectory,
 } from "./services/access/index.ts";
-export { noopApiKeyRevoker, type ApiKeyRevoker } from "./services/identity/application/ports/driven/api-key-revoker.ts";
+// SP1 me vertical and the SP3 hook `resolveAccessContext` (Task 12).
+export {
+  AccountMissingError,
+  type ApiKeyRevoker,
+  createIdentityServices,
+  createInMemoryUserRepository,
+  type IdentityServices,
+  noopApiKeyRevoker,
+  type ResolveAccessContext,
+  type ResolvedAccessContext,
+  type UserRepository,
+} from "./services/identity/index.ts";
 export { createFirestoreUnitOfWork, inMemoryUnitOfWork, type UnitOfWork } from "./services/shared/firestore/unit-of-work.ts";
 export { CORE_COLLECTIONS, CORE_SCHEMA_VERSION } from "./services/shared/firestore/collections.ts";
 export { decodeCursor, encodeCursor, type CursorPosition } from "./services/shared/pagination/cursor.ts";
@@ -193,6 +204,9 @@ export {
   type FirestoreTenancyAdapters,
   type InMemoryTenancyStore,
   InvalidUnitParentError,
+  type LoadNode,
+  type NodeDetails,
+  regionalSettingsAt,
   type InvalidUnitParentReason,
   MAX_SUBTREE_REWRITE,
   type OrganizationRepository,

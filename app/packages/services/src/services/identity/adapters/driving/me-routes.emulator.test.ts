@@ -1,0 +1,124 @@
+import { OrganizationIdSchema, UserIdSchema } from "@core/contracts";
+import { beforeEach, describe, expect, it } from "vitest";
+import { fixedClock } from "../../../shared/clock/clock.ts";
+import { CORE_COLLECTIONS } from "../../../shared/firestore/collections.ts";
+import { buildEmulatorServer, clearCoreCollections, emulatorFirebase, ensureAuthUser, seedActiveUser } from "../../../shared/testing/core-server-emulator.fixture.ts";
+
+const firebase = emulatorFirebase();
+const { firestore, auth } = firebase;
+// One instant for the whole file: the 10-per-minute switch budget stays in one window.
+const harness = buildEmulatorServer({ firebase, uids: ["me-founder", "me-outsider"], clock: fixedClock("2026-09-30T12:00:00.000Z") });
+const DEFAULTS = { locale: "pt-BR", timeZone: "America/Sao_Paulo", currency: "BRL" };
+
+type Body = { data?: Record<string, unknown> & { id?: string }; error?: { code: string } };
+const body = async (response: Response) => (await response.json()) as Body;
+
+const createOrganization = async (name: string): Promise<string> => {
+  const response = await harness.call("tenancy.createOrganization", { method: "POST", path: "/v1/organizations", as: "me-founder", body: { name, defaults: DEFAULTS } });
+  const id = (await body(response)).data?.id;
+  if (response.status !== 201 || id === undefined) throw new Error(`organization not created: ${response.status}`);
+  return id;
+};
+
+const switchTo = (organizationId: string, as = "me-founder") =>
+  harness.call("identity.setActiveOrganization", { method: "PUT", path: "/v1/me/active-organization", as, body: { organizationId } });
+
+// What `getIdToken(true)` does: a fresh ID token from the Auth Emulator's REST API.
+const freshIdTokenClaims = async (uid: string): Promise<Record<string, unknown>> => {
+  const customToken = await auth.createCustomToken(uid);
+  const host = process.env["FIREBASE_AUTH_EMULATOR_HOST"] ?? "";
+  const response = await fetch(`http://${host}/identitytoolkit.googleapis.com/v1/accounts:signInWithCustomToken?key=fake-api-key`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ token: customToken, returnSecureToken: true }),
+  });
+  const { idToken } = (await response.json()) as { idToken: string };
+  return { ...(await auth.verifyIdToken(idToken)) };
+};
+
+beforeEach(async () => {
+  await clearCoreCollections(firestore);
+  await ensureAuthUser(auth, "me-founder");
+  await ensureAuthUser(auth, "me-outsider");
+  await auth.setCustomUserClaims("me-founder", null);
+}, 30_000);
+
+describe("me routes (emulator)", () => {
+  it("creates the users doc on the first GET /me; PATCH validates the IANA time zone", { timeout: 30_000 }, async () => {
+    expect((await firestore.collection(CORE_COLLECTIONS.users).doc("me-outsider").get()).exists).toBe(false);
+    const first = await harness.call("identity.getMe", { method: "GET", path: "/v1/me", as: "me-outsider" });
+    expect(first.status).toBe(200);
+    expect((await body(first)).data).toMatchObject({ uid: "me-outsider", email: "me-outsider@example.com", accessVersion: 0, isPlatformStaff: false, mfaEnrolled: false });
+    expect((await firestore.collection(CORE_COLLECTIONS.users).doc("me-outsider").get()).data()).toMatchObject({ email: "me-outsider@example.com", status: "active", schemaVersion: 1 });
+    expect((await harness.call("identity.getMe", { method: "GET", path: "/v1/me", as: "me-outsider" })).status).toBe(200);
+
+    const invalid = await harness.call("identity.updateMe", { method: "PATCH", path: "/v1/me", as: "me-outsider", body: { preferences: { timeZone: "Mars/Olympus_Mons" } } });
+    expect(invalid.status).toBe(400);
+    expect((await body(invalid)).error?.code).toBe("VALIDATION_FAILED");
+    const valid = await harness.call("identity.updateMe", { method: "PATCH", path: "/v1/me", as: "me-outsider", body: { displayName: "Out Sider", preferences: { timeZone: "America/Recife" } } });
+    expect((await body(valid)).data).toMatchObject({ displayName: "Out Sider", preferences: { timeZone: "America/Recife" } });
+  });
+
+  it("switches the active organization (204) and the next ID token carries its tenantId", { timeout: 30_000 }, async () => {
+    const first = await createOrganization("First");
+    await createOrganization("Second");
+    expect((await freshIdTokenClaims("me-founder"))["tenantId"]).toBe(first);
+
+    const second = (await body(await harness.call("identity.listMyOrganizations", { method: "GET", path: "/v1/me/organizations", as: "me-founder" }))).data as unknown as { id: string; name: string }[];
+    const target = second.find((organization) => organization.name === "Second")?.id ?? "";
+    expect(second.map((organization) => organization.name).sort()).toEqual(["First", "Second"]);
+
+    expect((await switchTo(target)).status).toBe(204);
+    expect((await freshIdTokenClaims("me-founder"))["tenantId"]).toBe(target);
+    expect((await firestore.collection(CORE_COLLECTIONS.users).doc("me-founder").get()).data()?.["lastContext"]).toEqual({ organizationId: target });
+
+    await seedActiveUser(firestore, "me-outsider");
+    expect((await switchTo(target, "me-outsider")).status).toBe(404);
+  });
+
+  it("answers 429 with Retry-After on the 11th switch in a minute", { timeout: 60_000 }, async () => {
+    const organizationId = await createOrganization("Busy");
+    for (let attempt = 1; attempt <= 10; attempt += 1) expect((await switchTo(organizationId)).status).toBe(204);
+    const limited = await switchTo(organizationId);
+    expect(limited.status).toBe(429);
+    expect(Number(limited.headers.get("retry-after"))).toBeGreaterThan(0);
+  });
+
+  it("heals stale claims after a direct membership change (POST /me/claims/sync)", { timeout: 30_000 }, async () => {
+    const organizationId = OrganizationIdSchema.parse(await createOrganization("Direct"));
+    await firestore.collection(CORE_COLLECTIONS.projects).doc("me-p1").set({ tenantId: organizationId, name: "P", status: "active", settings: {}, deletedAt: null });
+    // A grant written without the post-commit sync: the claims keep the old accessVersion.
+    await firestore.runTransaction(async (tx) => {
+      const plan = await harness.server.accessServices.prepareGrant(tx, {
+        tenantId: organizationId,
+        principal: { type: "user", id: "me-founder" },
+        node: { level: "project", tenantId: organizationId, projectId: "me-p1" } as never,
+        roles: [{ kind: "system", key: "viewer" }],
+        grantedBy: UserIdSchema.parse("seed"),
+        actor: { type: "system", id: "system" },
+        requestId: "seed",
+      });
+      if (!plan.ok) throw plan.error;
+      await plan.data.commit();
+    });
+    expect((await auth.getUser("me-founder")).customClaims?.["accessVersion"]).toBe(1);
+
+    const synced = await harness.call("identity.syncClaims", { method: "POST", path: "/v1/me/claims/sync", as: "me-founder" });
+    expect(synced.status).toBe(204);
+    expect((await auth.getUser("me-founder")).customClaims).toMatchObject({ accessVersion: 2, tenantId: organizationId });
+  });
+
+  it("resolves the access context of a member (200) and hides the node from an outsider (404)", { timeout: 30_000 }, async () => {
+    const organizationId = await createOrganization("Context");
+    const context = await harness.call("identity.getAccessContext", { method: "GET", path: `/v1/me/context?organizationId=${organizationId}`, as: "me-founder" });
+    expect(context.status).toBe(200);
+    const data = (await body(context)).data as { permissions: string[]; regional: unknown; organization: { name: string } };
+    expect(data.organization.name).toBe("Context");
+    expect(data.permissions).toContain("core.organization.delete");
+    expect(data.regional).toEqual({ locale: "pt-BR", displayTimeZone: "America/Sao_Paulo", nodeTimeZone: "America/Sao_Paulo", currency: "BRL" });
+
+    await seedActiveUser(firestore, "me-outsider");
+    const hidden = await harness.call("identity.getAccessContext", { method: "GET", path: `/v1/me/context?organizationId=${organizationId}`, as: "me-outsider" });
+    expect(hidden.status).toBe(404);
+  });
+});

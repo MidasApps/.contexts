@@ -1,0 +1,78 @@
+import { describe, expect, it } from "vitest";
+import { REQUEST_ID, userOf } from "../../../tenancy/application/use-cases/tenancy.fixture.ts";
+import { makeMeWorld } from "./me.fixture.ts";
+
+describe("getMe", () => {
+  it("creates the users doc from the Auth account on the first call, idempotently", async () => {
+    const world = makeMeWorld();
+    world.account("ana", { mfaEnrolled: true });
+
+    const first = await world.identity.getMe({ actor: userOf("ana") });
+    const second = await world.identity.getMe({ actor: userOf("ana") });
+
+    expect(first).toEqual(second);
+    expect(first).toMatchObject({
+      ok: true,
+      data: { uid: "ana", email: "ana@example.com", displayName: "ana", accessVersion: 0, isPlatformStaff: false, mfaEnrolled: true, preferences: { theme: "system" } },
+    });
+    expect(world.users.userOf("ana")).toMatchObject({ status: "active", lastContext: {} });
+  });
+
+  it("answers ACCOUNT_MISSING when the Auth account is gone", async () => {
+    const world = makeMeWorld();
+    expect(await world.identity.getMe({ actor: userOf("ghost") })).toMatchObject({ ok: false, error: { code: "ACCOUNT_MISSING" } });
+  });
+
+  it("flags active platform staff with its role", async () => {
+    const world = makeMeWorld();
+    world.account("staff-1");
+    world.store.putPlatformStaff("staff-1", { role: "platform-support", isActive: true });
+    expect(await world.identity.getMe({ actor: userOf("staff-1") })).toMatchObject({ ok: true, data: { isPlatformStaff: true, platformRole: "platform-support" } });
+  });
+});
+
+describe("updateMe", () => {
+  it("changes the name and preferences; null removes a regional preference", async () => {
+    const world = makeMeWorld();
+    world.account("ana");
+    await world.identity.updateMe({ actor: userOf("ana"), input: { preferences: { timeZone: "America/Recife", locale: "en-US" } } });
+    const updated = await world.identity.updateMe({ actor: userOf("ana"), input: { displayName: "Ana S.", preferences: { locale: null, notifications: { productUpdates: true } } } });
+
+    expect(updated).toMatchObject({ ok: true, data: { displayName: "Ana S.", preferences: { timeZone: "America/Recife", notifications: { productUpdates: true, securityAlerts: true } } } });
+    expect(updated.ok ? updated.data.preferences.locale : "kept").toBeUndefined();
+  });
+
+  it("is refused under impersonation (read-only)", async () => {
+    const world = makeMeWorld();
+    world.account("ana");
+    const impersonated = { ...userOf("ana"), impersonation: { sessionId: "imp-1", staffUid: "staff-1" } } as unknown as ReturnType<typeof userOf>;
+    expect(await world.identity.updateMe({ actor: impersonated, input: { displayName: "x" } })).toMatchObject({ ok: false, error: { reason: "IMPERSONATION_READ_ONLY" } });
+  });
+});
+
+describe("setActiveOrganization and listMyOrganizations", () => {
+  it("switches to an organization the caller belongs to, audits and syncs claims", async () => {
+    const world = makeMeWorld();
+    const first = await world.organizationOf("owner", "First");
+    const second = await world.organizationOf("owner", "Second");
+    world.account("owner");
+    await world.identity.getMe({ actor: userOf("owner") });
+
+    const switched = await world.identity.setActiveOrganization({ actor: userOf("owner"), access: world.access(), organizationId: first.id, requestId: REQUEST_ID });
+
+    expect(switched.ok).toBe(true);
+    expect(world.users.userOf("owner")?.lastContext).toEqual({ organizationId: first.id });
+    expect(world.auditLog.entries("tenant").at(-1)).toMatchObject({ action: "ACTIVE_ORGANIZATION_CHANGED", tenantId: first.id, target: { type: "user", id: "owner" } });
+    const listed = await world.identity.listMyOrganizations({ actor: userOf("owner"), page: { after: undefined, limit: 10 } });
+    expect(listed.items.map((organization) => organization.name).sort()).toEqual(["First", "Second"]);
+    expect(second.id).not.toBe(first.id);
+  });
+
+  it("refuses an organization the caller does not belong to (not found)", async () => {
+    const world = makeMeWorld();
+    const other = await world.organizationOf("owner");
+    world.store.putUser("outsider");
+    const refused = await world.identity.setActiveOrganization({ actor: userOf("outsider"), access: world.access(), organizationId: other.id, requestId: REQUEST_ID });
+    expect(refused).toMatchObject({ ok: false, error: { reason: "NOT_A_MEMBER" } });
+  });
+});

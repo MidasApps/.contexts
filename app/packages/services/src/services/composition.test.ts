@@ -72,6 +72,16 @@ describe("createCoreServer", () => {
         "access.acceptInvitation",
       ]),
     );
+    expect(Object.keys(build().routes)).toEqual(
+      expect.arrayContaining([
+        "identity.getMe",
+        "identity.updateMe",
+        "identity.setActiveOrganization",
+        "identity.syncClaims",
+        "identity.listMyOrganizations",
+        "identity.getAccessContext",
+      ]),
+    );
   });
 
   it("registers the unit types of the installed modules", () => {
