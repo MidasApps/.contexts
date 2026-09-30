@@ -45,3 +45,10 @@ is not reachable from every runtime.
 - **Postgres.** Not provisioned for every runtime in SP1; adds a connection pool to the web for two small tables.
 - **Redis / Memorystore.** New infrastructure and cost for low-volume limits; revisit if SP3 needs high-rate limits.
 - **Sliding log.** Exact, but one document per request multiplies writes.
+
+## Amendments
+
+- **2026-09-29 (SP1 review of Tasks 1–3).** The two `409` answers of Decision 3 get distinct codes: a different
+  request hash is `409 IDEMPOTENCY_KEY_REUSED` (client bug, never retry with that key); a record still `in-flight`
+  is `409 IDEMPOTENCY_REQUEST_IN_PROGRESS` with `Retry-After: 1` (retry the same request later). Both are in
+  `CORE_ERROR_CODES` (`packages/contracts/src/contracts/http/error-codes.ts`).

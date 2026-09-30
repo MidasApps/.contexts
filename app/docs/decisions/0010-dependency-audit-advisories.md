@@ -51,3 +51,18 @@
   advisories we cannot reach.
 - **Ignore list in CI (`--ignore`).** Hides new findings in the same packages; the audit level already filters
   moderates.
+
+## Amendments
+
+- **2026-09-29 (SP1 review of Tasks 1–3).** `pnpm audit --json` re-run after the Postgres work of SP3 landed:
+  0 critical, 0 high, 3 moderate.
+  - `uuid@9.0.1` has one more path, `packages/services > firebase-admin > @google-cloud/storage > gaxios` (and
+    `... > google-auth-library > (gcp-metadata | gtoken) > gaxios`), since SP1 Task 2 added `firebase-admin` to
+    `@core/services`. Same `gaxios@6.7.1` `v4()`-only use: not reachable; decision unchanged.
+  - New row: **GHSA-67mh-4wv8-2f99** (`esbuild` ≤ 0.24.2: its dev server lets any website send requests and read the
+    responses), `esbuild@0.18.20`, patched ≥ 0.25.0, path `packages/services > drizzle-kit (devDependency) >
+    @esbuild-kit/esm-loader > @esbuild-kit/core-utils > esbuild`. Reachability: `drizzle-kit` runs only as a local
+    CLI (`db:generate`, migrations) and never starts esbuild's `serve` dev server; nothing ships to a deployed
+    artifact. Not reachable. Decision: **accept**, re-check 2026-12-29 or on the next `drizzle-kit` bump (upstream
+    is dropping `@esbuild-kit/*`); no override, because forcing esbuild 0.25 under `@esbuild-kit/core-utils` is a
+    breaking range jump inside a dev-only CLI.

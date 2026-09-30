@@ -55,3 +55,10 @@ across restarts without a browser cookie jar. Staff access needs MFA, which a cu
   and still needs the cookie on `/v1`.
 - **Refresh token in the desktop keychain.** Firebase refresh tokens cannot be scoped, listed or revoked one by
   one; our session secret can.
+
+## Amendments
+
+- **2026-09-29 (SP1 review of Tasks 1–3).** Units of `expiresIn`: `createSessionCookie` takes milliseconds, so the
+  call in Decision 1 is `createSessionCookie(idToken, { expiresIn: SESSION_MAX_AGE_DAYS * 86_400_000 })` (days ×
+  86 400 000 ms; 5 days = 432 000 000 ms, the Firebase range is 5 minutes to 14 days). The cookie `Max-Age` uses the
+  same value in seconds (`SESSION_MAX_AGE_DAYS * 86_400`).
