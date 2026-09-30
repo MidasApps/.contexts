@@ -48,8 +48,20 @@ describe("createPermissionRegistry", () => {
   it("rejects a duplicate id across sources", () => {
     const duplicate = moduleSource([samplePermission(), samplePermission()]);
     expect(captureCode(() => createPermissionRegistry([CORE_PERMISSION_SOURCE, duplicate]))).toBe("DUPLICATE_PERMISSION");
-    const again = { moduleId: "core", permissions: [CORE_PERMISSIONS[0] as PermissionDefinition] };
-    expect(captureCode(() => createPermissionRegistry([CORE_PERMISSION_SOURCE, again]))).toBe("DUPLICATE_PERMISSION");
+    expect(captureCode(() => createPermissionRegistry([CORE_PERMISSION_SOURCE, CORE_PERMISSION_SOURCE]))).toBe("DUPLICATE_PERMISSION");
+  });
+
+  it("rejects a module id that is not kebab-case", () => {
+    for (const moduleId of ["Sample", "1sample", "sample_mod", "sample.mod", ""]) {
+      expect(captureCode(() => createPermissionRegistry([{ moduleId, permissions: [] }]))).toBe("INVALID_MODULE_ID");
+    }
+  });
+
+  it("reserves the core and platform module ids for the core catalog", () => {
+    const fakeCore = { moduleId: "core", permissions: [CORE_PERMISSIONS[0] as PermissionDefinition] };
+    expect(captureCode(() => createPermissionRegistry([fakeCore]))).toBe("RESERVED_MODULE_ID");
+    const fakePlatform = { moduleId: "platform", permissions: [] };
+    expect(captureCode(() => createPermissionRegistry([CORE_PERMISSION_SOURCE, fakePlatform]))).toBe("RESERVED_MODULE_ID");
   });
 
   it("rejects a module permission outside the module prefix", () => {

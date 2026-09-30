@@ -16,19 +16,30 @@ export const CORE_PERMISSION_SOURCE: PermissionSource = { moduleId: "core", perm
 
 const CORE_MODULE_ID = "core";
 const CORE_PREFIXES = ["core.", "platform."] as const;
+// Same shape as a permission id's first segment; `core` and `platform` belong to the core catalog.
+const MODULE_ID_PATTERN = /^[a-z][a-z0-9-]*$/;
+const RESERVED_MODULE_IDS: ReadonlySet<string> = new Set([CORE_MODULE_ID, "platform"]);
 
-export type PermissionRegistryErrorCode = "DUPLICATE_PERMISSION" | "PERMISSION_OUTSIDE_MODULE" | "INVALID_PERMISSION_DEFINITION";
+export type PermissionRegistryErrorCode =
+  | "DUPLICATE_PERMISSION"
+  | "PERMISSION_OUTSIDE_MODULE"
+  | "INVALID_PERMISSION_DEFINITION"
+  | "INVALID_MODULE_ID"
+  | "RESERVED_MODULE_ID";
 
 /** Bug: a permission catalog that cannot be registered (raised at startup). */
 export class PermissionRegistryError extends Error {
   readonly code: PermissionRegistryErrorCode;
-  readonly permissionId: string;
+  /** The offending permission; undefined when the whole source is rejected. */
+  readonly permissionId: string | undefined;
+  readonly moduleId: string;
 
-  constructor(args: { code: PermissionRegistryErrorCode; permissionId: string; moduleId: string }) {
-    super(`${args.code}: ${args.permissionId} (module ${args.moduleId})`);
+  constructor(args: { code: PermissionRegistryErrorCode; permissionId?: string; moduleId: string }) {
+    super(`${args.code}: ${args.permissionId ?? "(source)"} (module ${args.moduleId})`);
     this.name = "PermissionRegistryError";
     this.code = args.code;
     this.permissionId = args.permissionId;
+    this.moduleId = args.moduleId;
   }
 }
 
@@ -55,9 +66,18 @@ const validateDefinition = (source: PermissionSource, definition: PermissionDefi
   return parsed.data;
 };
 
+// Only the core catalog object may use a reserved id: a module named `core` could otherwise mint `core.*` permissions.
+const validateSource = (source: PermissionSource): void => {
+  if (!MODULE_ID_PATTERN.test(source.moduleId)) throw new PermissionRegistryError({ code: "INVALID_MODULE_ID", moduleId: source.moduleId });
+  if (RESERVED_MODULE_IDS.has(source.moduleId) && source !== CORE_PERMISSION_SOURCE) {
+    throw new PermissionRegistryError({ code: "RESERVED_MODULE_ID", moduleId: source.moduleId });
+  }
+};
+
 const indexSources = (sources: readonly PermissionSource[]): Map<string, PermissionDefinition> => {
   const byId = new Map<string, PermissionDefinition>();
   for (const source of sources) {
+    validateSource(source);
     for (const definition of source.permissions) {
       const valid = validateDefinition(source, definition);
       if (byId.has(valid.id)) {
@@ -96,7 +116,8 @@ const EMPTY: ReadonlySet<Permission> = new Set();
 /**
  * Builds the permission catalog from the core and module sources (a composition step).
  * @throws {PermissionRegistryError} on a duplicate id, an id outside its module's
- *   prefix, or a definition that fails `PermissionDefinitionSchema`.
+ *   prefix, a definition that fails `PermissionDefinitionSchema`, a module id that is
+ *   not kebab-case, or a reserved module id (`core`, `platform`) outside `CORE_PERMISSION_SOURCE`.
  */
 export const createPermissionRegistry = (sources: readonly PermissionSource[]): PermissionRegistry => {
   const byId = indexSources(sources);
