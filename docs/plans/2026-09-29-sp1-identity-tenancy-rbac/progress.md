@@ -12,3 +12,6 @@
 - 2026-09-30 | Task 8 complete | commits: 91f2129 | review: pending
 - 2026-09-30 | Task 9 complete | commits: 0c600de | review: pending
 - 2026-09-30 | Task 10 complete | commits: 5ab6834 | review: pending
+- 2026-09-30 | Task 11 complete | commits: e081d3f | review: pending
+- 2026-09-30 | Task 12 complete | commits: 593ec6b | review: pending
+- 2026-09-30 | Review fixes Tasks 7-10 (decision 0030) + SP3 audit outcome/metadata | commits: 4b4a78b, 5272f18, 249785e, 18f9811, 11c2dff, 3d5270a, a365363, 4a3a282 | review: pending

@@ -1,0 +1,72 @@
+# 0030. SP1 review hardening: rate limits, client IP, grant races, unit tree lock, idempotency secrets, owner hierarchy
+
+- **Status:** accepted
+- **Date:** 2026-09-30
+- **Scope:** `app/packages/services/src/services/{shared/http,shared/rate-limit,shared/idempotency,access,tenancy}`,
+  `app/packages/contracts/src/contracts/{access,tenancy}/endpoints.ts` (local decision of the boilerplate; the
+  framework in `.contexts/` is unchanged)
+- **Refines:** decision 0009 (rate limits, idempotency), decision 0006 (tenancy and access model), SP1 spec §5.3,
+  §6.1, §7.2; source: the review of SP1 Tasks 7–10
+
+## Context
+
+The review of SP1 Tasks 7–10 found gaps where a race, a crash or a forged header opens access or leaks a secret.
+Each item below is a policy choice; the code comments point here.
+
+## Decision
+
+1. **Failure-counted rate limits reserve first.** `device-redeem` and `api-key-failure` used to peek before the work
+   and count after it, so a parallel burst passed the check before any failure was counted. The pipeline now
+   consumes a slot before the work for every policy and, for failure-counted ones, refunds it when the work
+   succeeded (`RateLimiter.refund`, same window only). A work that throws keeps its slot (fail-closed). A burst of
+   legitimate calls may briefly see `429`; these endpoints are low volume.
+2. **Client IP behind trusted proxies only.** The per-IP subject is the `X-Forwarded-For` entry appended by the
+   outermost trusted proxy: the `TRUSTED_PROXY_HOPS`-th entry from the right (services env, `0..5`, default `1` for
+   App Hosting / Cloud Run behind Google's front end; `2` with an external HTTPS load balancer in front).
+   `X-Real-IP` is never read. A header shorter than the trusted chain, or `0` hops, maps to the shared `unknown`
+   bucket, never to a client-chosen value. Follow-up 19 verifies the hop count in the first remote environment.
+3. **Grant transactions re-read the organization; project deletes cascade.** `authorize()` runs before a grant
+   transaction, so every grant change (grant, update, revoke, member removal, invitation acceptance) now reads
+   `organizations/{id}` inside its transaction (`OrganizationGuard`) and aborts with `404` when it is gone: the read
+   conflicts with the delete's write, and a deleted organization never gets a live grant or an un-revoked
+   projection. `createOrganization` skips it (the organization is created in the same transaction). For projects we
+   chose **cascade** over a Rules check of the parent project: deleting a project soft-deletes its units first, in
+   rounds of 400, then the project; Rules and queries never see a unit that outlives its project, and a retry after
+   a crash finishes the units. `authorize()` already denies a unit whose project is deleted.
+4. **Unit tree lock per project.** A move or subtree delete rewrites descendants in batches before its final
+   transaction. It now holds `unit-tree-locks/{projectId}` (`lockId`, the operation, a 2-minute lease): a second
+   move or delete answers `409 CONFLICT`; unit creation answers `409` while the lock is held (a new unit would copy
+   a stale parent path); renames update the unit as read in their own transaction and are never blocked. The final
+   transaction commits only while the lock is still its own and the unit's tree fields are unchanged, and frees the
+   lock atomically with the write. A retry of the same operation takes the lock over and heals (re-planning rewrites
+   only stale units). After the lease, the next tree change first finishes the abandoned operation as `system`
+   (audited `UNIT_MOVED` / `UNIT_DELETED`); a move whose target was deleted meanwhile heals in place.
+5. **Idempotency never replays secrets.** Successes of endpoints that return a one-time secret
+   (`ONE_TIME_SECRET_ENDPOINT_IDS`: invitation link, API key, activation code, desktop session and exchange, device
+   redeem, impersonation token) are stored without body; a replay answers `409 CONFLICT` with `Location` and
+   `Idempotent-Replayed: true` (the resource exists, the secret is gone). Their errors are stored as usual. An
+   impersonated request is scoped by its session (`user:<uid>:imp:<sessionId>`), so staff never replays the user's
+   own results. `complete` and `release` take the attempt id `begin` returned and do nothing once a later attempt
+   took the lease over. A replayed error envelope carries the replaying request's `requestId`.
+6. **Owner hierarchy.** Changing, revoking a grant or removing a member requires the target's current permissions ⊆
+   `effective(actor, grant node)` (403 `ESCALATION_FORBIDDEN`), the same rule as granting (SP1 spec §5.3). Owners
+   hold every tenant permission, so only owners change or remove owners; an admin keeps managing members, viewers
+   and other admins. The last-owner guard still applies to owners.
+7. **Grantees must exist.** A user grant requires the grantee's `users/{uid}` doc (404 `NOT_FOUND`), unless the grant
+   creates it (organization owner, accepted invitation).
+
+## Consequences
+
+- New server-only collection `unit-tree-locks` (Security Rules deny it by default); new env `TRUSTED_PROXY_HOPS`.
+- Endpoint descriptors: `createUnit`, `updateUnit`, `deleteUnit` declare `409 CONFLICT`; `revokeMembership` and
+  `removeMember` declare `403 ESCALATION_FORBIDDEN`; OpenAPI regenerated.
+- A crashed move blocks tree changes of its project for at most the lease (2 min), then heals itself.
+
+## Alternatives considered
+
+- **Rules check of the parent project** instead of the cascade: one more `get()` per unit read and a deleted
+  project's units still returned by server queries; rejected.
+- **Idempotency disabled** for secret endpoints: a retried POST would create a second key/invitation; the redacted
+  record keeps "at most once" and tells the client the resource exists.
+- **Per-unit `moveInProgress` markers** instead of a project lock: every read of the tree would have to check
+  ancestors for markers; the project lock is one document and matches the batch scope of a move.
