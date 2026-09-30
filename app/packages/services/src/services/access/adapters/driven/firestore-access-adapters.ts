@@ -6,6 +6,7 @@ import type { ClaimsWriter } from "../../application/ports/driven/claims-writer.
 import type { InvitationRepository } from "../../application/ports/driven/invitation-repository.ts";
 import type { MembershipRepository } from "../../application/ports/driven/membership-repository.ts";
 import type { OrganizationDirectory } from "../../application/ports/driven/organization-directory.ts";
+import type { OrganizationGuard } from "../../application/ports/driven/organization-guard.ts";
 import type { UserDirectory } from "../../application/ports/driven/user-directory.ts";
 import type { RoleRepository } from "../../application/ports/driven/role-repository.ts";
 import type { UserAccessVersionStore } from "../../application/ports/driven/user-access-version.ts";
@@ -13,6 +14,7 @@ import { createFirebaseClaimsWriter } from "./firebase-claims-writer.ts";
 import { createFirebaseUserDirectory } from "./firebase-user-directory.ts";
 import { createFirestoreInvitationRepository } from "./firestore-invitation-repository.ts";
 import { createFirestoreOrganizationDirectory } from "./firestore-organization-directory.ts";
+import { createFirestoreOrganizationGuard } from "./firestore-organization-guard.ts";
 import { createFirestoreAccessProjectionStore } from "./firestore-access-projection-writer.ts";
 import { createFirestoreGrantReader } from "./firestore-grant-reader.ts";
 import { createFirestoreMembershipRepository } from "./firestore-membership-repository.ts";
@@ -33,6 +35,7 @@ export type FirestoreAccessAdapters = {
   readonly invitations: InvitationRepository;
   readonly directory: UserDirectory;
   readonly organizations: OrganizationDirectory;
+  readonly tenantGuard: OrganizationGuard;
 };
 
 /**
@@ -56,5 +59,6 @@ export const createFirestoreAccessAdapters = (deps: { firestore: Firestore; auth
     invitations: createFirestoreInvitationRepository({ firestore }),
     directory: createFirebaseUserDirectory({ firestore, auth: deps.auth }),
     organizations: createFirestoreOrganizationDirectory({ firestore }),
+    tenantGuard: createFirestoreOrganizationGuard({ firestore }),
   };
 };

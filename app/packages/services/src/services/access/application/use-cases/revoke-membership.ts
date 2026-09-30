@@ -8,7 +8,7 @@ import { AccessNotFoundError } from "../../domain/errors/access-not-found-error.
 import { LastOwnerError } from "../../domain/errors/last-owner-error.ts";
 import type { AccessWriteDeps } from "../access-write-deps.ts";
 import { requirePermission } from "../grant-checks.ts";
-import { readPrincipalState, writePrincipalState } from "../membership-writes.ts";
+import { organizationGone, readPrincipalState, writePrincipalState } from "../membership-writes.ts";
 import { wouldLoseLastOwner } from "./last-owner-guard.ts";
 
 export type RevokeMembershipCommand = {
@@ -30,6 +30,7 @@ const applyRevoke = async (tx: Transaction, deps: AccessWriteDeps, command: Revo
     readPrincipalState(tx, deps, { tenantId: membership.tenantId, principal }),
     wouldLoseLastOwner(tx, deps, membership),
   ]);
+  if (!state.tenantLive) return err(organizationGone());
   if (losesOwner) return err(new LastOwnerError(membership.tenantId));
   const now = deps.clock.now().toISOString();
   const actor = auditActorOf(command.actor);

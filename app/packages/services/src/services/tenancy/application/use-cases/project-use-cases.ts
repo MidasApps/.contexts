@@ -88,15 +88,34 @@ export const makeUpdateProject =
     return ok(next);
   };
 
-/** Soft-deletes a project (`core.project.delete`); its units become unreachable with it. */
+// Units per round of a project delete; each round is one query and one batch.
+const CASCADE_ROUND = 400;
+
+/**
+ * Soft-deletes every live unit of a project, in rounds, before the project itself
+ * (decision 0030 §3): Security Rules read units without their project, so none may outlive
+ * it. An interrupted delete leaves the project live and a retry finishes the units.
+ */
+const cascadeUnits = async (deps: Pick<TenancyDeps, "units">, args: { projectId: ProjectId; deletedAt: string; actorId: string }): Promise<void> => {
+  for (;;) {
+    const units = await deps.units.listOfProject({ projectId: args.projectId, limit: CASCADE_ROUND });
+    if (units.length === 0) return;
+    await deps.units.softDeleteMany({ ids: units.map((unit) => unit.id), deletedAt: args.deletedAt, actorId: args.actorId });
+  }
+};
+
+/** Soft-deletes a project and, first, every unit of it (`core.project.delete`). */
 export const makeDeleteProject =
   (deps: TenancyDeps) =>
   async (command: ProjectCommand & TenancyCommand): Promise<Result<void, ProjectError>> => {
     const loaded = await loadAuthorizedProject(deps, { ...command, permission: "core.project.delete" });
     if (!loaded.ok) return loaded;
     const project = loaded.data;
+    const deletedAt = deps.clock.now().toISOString();
+    const actorId = auditActorOf(command.actor).id;
+    await cascadeUnits(deps, { projectId: project.id, deletedAt, actorId });
     await deps.unitOfWork.run(async (tx) => {
-      deps.projects.softDelete(tx, { id: project.id, deletedAt: deps.clock.now().toISOString(), actorId: auditActorOf(command.actor).id });
+      deps.projects.softDelete(tx, { id: project.id, deletedAt, actorId });
       await recordTenancyAudit(tx, deps, command, { tenantId: project.tenantId, action: "PROJECT_DELETED", target: { type: "project", id: project.id }, node: projectNode(project) });
     });
     return ok(undefined);

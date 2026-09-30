@@ -4,6 +4,7 @@ import { err, ok, type Result } from "../../../shared/result/result.ts";
 import type { RequestAccess } from "../../composition.ts";
 import type { ProjectionPrincipal } from "../../domain/access-projection.ts";
 import { AccessDeniedError } from "../../domain/errors/access-denied-error.ts";
+import type { AccessNotFoundError } from "../../domain/errors/access-not-found-error.ts";
 import type { MembershipExistsError } from "../../domain/errors/membership-exists-error.ts";
 import type { AccessWriteDeps } from "../access-write-deps.ts";
 import { checkGrantable, type GrantCheckError } from "../grant-checks.ts";
@@ -20,7 +21,7 @@ export type GrantMembershipCommand = {
   readonly requestId: string;
 };
 
-export type GrantMembershipError = GrantCheckError | MembershipExistsError;
+export type GrantMembershipError = GrantCheckError | MembershipExistsError | AccessNotFoundError;
 
 export type GrantMembership = (command: GrantMembershipCommand) => Promise<Result<Membership, GrantMembershipError>>;
 

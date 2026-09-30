@@ -83,6 +83,7 @@ const makeUnits = (tables: Tables, mirror: InMemoryAccessStore): UnitRepository 
       Promise.resolve(
         paginateInMemory({ items: liveValues(tables.units).filter((u) => u.projectId === projectId && u.parentUnitId === parentUnitId), page, positionOf: (u) => [u.name, u.id] }),
       ),
+    listOfProject: ({ projectId, limit }) => Promise.resolve(liveValues(tables.units).filter((u) => u.projectId === projectId).slice(0, limit)),
     listDescendants: ({ tenantId, unitId, limit }) =>
       Promise.resolve(liveValues(tables.units).filter((u) => u.tenantId === tenantId && u.ancestorIds.includes(unitId)).slice(0, limit)),
     create: (_tx, { unit }) => put(unit, null),

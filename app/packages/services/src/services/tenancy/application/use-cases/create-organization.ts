@@ -54,6 +54,7 @@ export const makeCreateOrganization =
         actor,
         requestId: command.requestId,
         newUser: profile,
+        organizationCreated: true,
       });
       // A fresh organization has no grant yet; a clash here is a bug.
       if (!plan.ok) throw plan.error;

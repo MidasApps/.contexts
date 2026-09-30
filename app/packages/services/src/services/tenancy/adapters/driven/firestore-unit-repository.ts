@@ -48,6 +48,8 @@ export const createFirestoreUnitRepository = (deps: { firestore: Firestore }): U
       const fetched = (await query.limit(page.limit + 1).get()).docs.flatMap((doc) => liveOnly(doc.data()) ?? []);
       return pageFromOverfetch({ fetched, limit: page.limit, positionOf: (unit) => [unit.name, unit.id] });
     },
+    listOfProject: async ({ projectId, limit }) =>
+      (await live().where("projectId", "==", projectId).limit(limit).get()).docs.flatMap((doc) => liveOnly(doc.data()) ?? []),
     listDescendants: async ({ tenantId, unitId, limit }) =>
       (await live().where("tenantId", "==", tenantId).where("ancestorIds", "array-contains", unitId).limit(limit).get()).docs.flatMap(
         (doc) => liveOnly(doc.data()) ?? [],

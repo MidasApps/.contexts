@@ -57,6 +57,21 @@ describe("projects", () => {
     expect((await world.tenancy.deleteProject({ ...world.command("owner"), projectId: alpha.id })).ok).toBe(true);
     expect(await world.tenancy.getProject({ ...world.command("owner"), projectId: alpha.id })).toMatchObject({ ok: false, error: { code: "NOT_FOUND" } });
   });
+
+  it("soft-deletes every unit of a deleted project, so no unit outlives it", async () => {
+    const world = await setup();
+    const alpha = await world.project("Alpha");
+    const site = await world.unit(alpha.id, "Site", "sample.site");
+    const room = await world.unit(alpha.id, "Room", "sample.room", site.id);
+    const beta = await world.project("Beta");
+    const other = await world.unit(beta.id, "Other", "sample.site");
+
+    expect((await world.tenancy.deleteProject({ ...world.command("owner"), projectId: alpha.id })).ok).toBe(true);
+
+    expect(world.tenancyStore.unitRow(site.id)?.deletedAt).not.toBeNull();
+    expect(world.tenancyStore.unitRow(room.id)?.deletedAt).not.toBeNull();
+    expect(world.tenancyStore.unitRow(other.id)?.deletedAt).toBeNull();
+  });
 });
 
 describe("units", () => {

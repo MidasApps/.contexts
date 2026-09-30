@@ -122,6 +122,7 @@ const buildAccess = (args: CoreServerArgs, clock: Clock, audit: AuditWriter) => 
     roleReader: readers.roles,
     projections: adapters.projections,
     users: adapters.users,
+    tenantGuard: adapters.tenantGuard,
     audit,
     unitOfWork: createFirestoreUnitOfWork({ firestore }),
     clock,

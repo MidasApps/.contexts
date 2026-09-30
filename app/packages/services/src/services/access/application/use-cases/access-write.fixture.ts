@@ -59,6 +59,13 @@ export const makeAccessWriteWorld = () => {
     roleReader: writes.roleReader,
     projections: writes.projections,
     users: writes.users,
+    // The organization rows of the Task 6 store, as `authorize()` sees them.
+    tenantGuard: {
+      isLive: async (_tx, tenantId) => {
+        const chain = await store.nodeChains.loadChain({ level: "organization", tenantId });
+        return chain !== null && !chain.organization.isDeleted;
+      },
+    },
     audit: makeRecordAudit({ writer: auditLog, clock }),
     unitOfWork: inMemoryUnitOfWork,
     clock,

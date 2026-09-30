@@ -11,6 +11,8 @@ export type UnitRepository = {
   readonly getMany: (ids: readonly UnitId[]) => Promise<Unit[]>;
   /** Live children of the project root (`parentUnitId: null`) or of a unit, sorted by `(name, id)`. */
   readonly listChildren: (args: { projectId: ProjectId; parentUnitId: UnitId | null; page: PageRequest }) => Promise<Page<Unit>>;
+  /** Up to `limit` live units of a project, in no order (project deletes cascade in rounds). */
+  readonly listOfProject: (args: { projectId: ProjectId; limit: number }) => Promise<Unit[]>;
   /** Up to `limit` live units whose `ancestorIds` contain `unitId`. */
   readonly listDescendants: (args: { tenantId: TenantId; unitId: UnitId; limit: number }) => Promise<Unit[]>;
   readonly create: (tx: Transaction, args: { unit: Unit; actorId: string }) => void;

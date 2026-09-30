@@ -42,6 +42,33 @@ beforeEach(async () => {
 });
 
 describe("units routes (emulator)", () => {
+  it("deleting a project soft-deletes its units first (none outlives it)", { timeout: 30_000 }, async () => {
+    const site = await unitOf("Site", "sample.site");
+    const room = await unitOf("Room", "sample.room", site.id);
+    expect((await harness.call("tenancy.deleteProject", { method: "DELETE", path: `/v1/projects/${projectId}`, as: "owner" })).status).toBe(204);
+    for (const unit of [site, room]) {
+      expect((await firestore.collection(CORE_COLLECTIONS.units).doc(unit.id).get()).data()?.["deletedAt"]).not.toBeNull();
+    }
+    expect((await harness.call("tenancy.getUnit", { method: "GET", path: `/v1/units/${room.id}`, as: "owner" })).status).toBe(404);
+  });
+
+  it("refuses a grant into an organization deleted after the check (404)", { timeout: 30_000 }, async () => {
+    await firestore.collection(CORE_COLLECTIONS.organizations).doc(organizationId).update({ deletedAt: new Date() });
+    const tenantId = OrganizationIdSchema.parse(organizationId);
+    const plan = await firestore.runTransaction((tx) =>
+      harness.server.accessServices.prepareGrant(tx, {
+        tenantId,
+        principal: { type: "user", id: "owner" },
+        node: { level: "project", tenantId, projectId: ProjectIdSchema.parse(projectId) },
+        roles: [{ kind: "system", key: "viewer" }],
+        grantedBy: UserIdSchema.parse("owner"),
+        actor: { type: "user", id: "owner" },
+        requestId: "race",
+      }),
+    );
+    expect(plan).toMatchObject({ ok: false, error: { code: "NOT_FOUND", resource: "organization" } });
+  });
+
   it("moves a unit and rewrites its descendants; a cycle answers 422", async () => {
     const siteA = await unitOf("A", "sample.site");
     const siteB = await unitOf("B", "sample.site");

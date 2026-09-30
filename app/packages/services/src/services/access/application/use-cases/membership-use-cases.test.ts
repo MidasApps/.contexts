@@ -1,5 +1,6 @@
 import { MembershipIdSchema, RoleIdSchema } from "@core/contracts";
 import { describe, expect, it } from "vitest";
+import { createAccessServices } from "../../composition.ts";
 import { makeAccessWriteWorld, nodes, REQUEST_ID, system, user } from "./access-write.fixture.ts";
 
 const setup = async () => {
@@ -123,6 +124,21 @@ describe("revokeMembership", () => {
     expect(world.auditLog.entries("tenant").at(-1)).toMatchObject({ action: "MEMBERSHIP_REVOKED" });
     const decision = await world.access().authorize({ principal: user("u2"), permission: "core.project.read", node: nodes.p1 });
     expect(decision).toEqual({ allowed: false, reason: "NOT_A_MEMBER" });
+  });
+
+  it("aborts grant changes when the organization was deleted after the authorization check", async () => {
+    const world = await setup();
+    const granted = await world.services.grantMembership(grantCommand(world));
+    if (!granted.ok) throw granted.error;
+    // The tenant guard runs inside the transaction; authorize() ran before and saw it live.
+    const deleted = createAccessServices({ ...world.deps, tenantGuard: { isLive: () => Promise.resolve(false) } });
+
+    const again = await deleted.grantMembership(grantCommand(world, { access: world.access(), node: nodes.u1 }));
+    const updated = await deleted.updateMembership({ actor: user("owner-1"), access: world.access(), membershipId: granted.data.id, roles: [system("viewer")], requestId: REQUEST_ID });
+    const revoked = await deleted.revokeMembership({ actor: user("owner-1"), access: world.access(), membershipId: granted.data.id, requestId: REQUEST_ID });
+
+    for (const result of [again, updated, revoked]) expect(result).toMatchObject({ ok: false, error: { code: "NOT_FOUND", resource: "organization" } });
+    expect(world.writes.projectionOf("org-a", "u2")).toMatchObject({ projectIds: ["p1"], unitIds: [], version: 1 });
   });
 
   it("refuses to remove the last owner grant", async () => {

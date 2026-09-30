@@ -47,6 +47,7 @@ const applyAccept = async (tx: Transaction, deps: Deps, command: AcceptInvitatio
   const plan = await prepareGrant(tx, deps, { ...common, principal, roles: invitation.roles, grantedBy: invitation.invitedBy, actor, newUser: args.profile });
   // Already granted at that node: the invitation is consumed without a second grant.
   if (plan.ok) await plan.data.commit();
+  else if (plan.error instanceof AccessNotFoundError) return err(new AccessNotFoundError("invitation"));
   deps.invitations.setStatus(tx, { id: invitation.id, status: "accepted", acceptedByUid: command.actor.uid, updatedAt: deps.clock.now().toISOString(), actorId: actor.id });
   await deps.audit.record({ log: "tenant", ...common, action: "INVITATION_ACCEPTED", actor, target: { type: "invitation", id: invitation.id }, outcome: "success" }, tx);
   return ok(invitation);

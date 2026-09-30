@@ -12,6 +12,7 @@ import type { Transaction } from "firebase-admin/firestore";
 import type { AuditActor } from "../../audit/domain/audit-actor.ts";
 import { err, ok, type Result } from "../../shared/result/result.ts";
 import { buildAccessProjection, nodeIdOf, type ProjectionPrincipal } from "../domain/access-projection.ts";
+import { AccessNotFoundError } from "../domain/errors/access-not-found-error.ts";
 import { MembershipExistsError } from "../domain/errors/membership-exists-error.ts";
 import type { AccessWriteDeps } from "./access-write-deps.ts";
 import type { NewUserProfile, UserAccessState } from "./ports/driven/user-access-version.ts";
@@ -22,22 +23,32 @@ export type PrincipalState = {
   readonly projection: AccessProjection | null;
   /** The `users` doc state; always null for devices. */
   readonly user: UserAccessState | null;
+  /** The organization exists and is not deleted (read in the same transaction). */
+  readonly tenantLive: boolean;
 };
 
-type Deps = Pick<AccessWriteDeps, "memberships" | "projections" | "users" | "audit" | "clock">;
+type Deps = Pick<AccessWriteDeps, "memberships" | "projections" | "users" | "tenantGuard" | "audit" | "clock">;
 
 type PrincipalRef = { readonly tenantId: TenantId; readonly principal: ProjectionPrincipal };
 
-/** Reads the principal's live grants, projection and user doc inside `tx`. */
-export const readPrincipalState = async (tx: Transaction, deps: Deps, args: PrincipalRef): Promise<PrincipalState> => {
+/**
+ * Reads the principal's live grants, projection and user doc, and whether the organization
+ * still exists, inside `tx`. `tenantCreated` skips the organization read when the
+ * organization is created in this very transaction.
+ */
+export const readPrincipalState = async (tx: Transaction, deps: Deps, args: PrincipalRef & { readonly tenantCreated?: boolean }): Promise<PrincipalState> => {
   const { tenantId, principal } = args;
-  const [live, projection, user] = await Promise.all([
+  const [live, projection, user, tenantLive] = await Promise.all([
     deps.memberships.listOfPrincipal(tx, { tenantId, principalId: principal.id }),
     deps.projections.get(tx, { tenantId, principalId: principal.id }),
     principal.type === "user" ? deps.users.read(tx, UserIdSchema.parse(principal.id)) : Promise.resolve(null),
+    args.tenantCreated === true ? Promise.resolve(true) : deps.tenantGuard.isLive(tx, tenantId),
   ]);
-  return { live, projection, user };
+  return { live, projection, user, tenantLive };
 };
+
+/** The organization was deleted after the caller authorized the change (decision 0030 §3). */
+export const organizationGone = (): AccessNotFoundError => new AccessNotFoundError("organization");
 
 type StateWrite = PrincipalRef & {
   readonly state: PrincipalState;
@@ -85,6 +96,8 @@ export type PrepareGrantArgs = PrincipalRef & {
   readonly actor: AuditActor;
   readonly requestId: string;
   readonly newUser?: NewUserProfile | undefined;
+  /** The organization is created in the same transaction (`createOrganization`). */
+  readonly organizationCreated?: boolean;
 };
 
 /**
@@ -93,8 +106,9 @@ export type PrepareGrantArgs = PrincipalRef & {
  * the membership plus `commit()`, which buffers the membership, the projection, the
  * `accessVersion` bump and the audit entry. Call `commit()` after the caller's own reads.
  */
-export const prepareGrant = async (tx: Transaction, deps: Deps, args: PrepareGrantArgs): Promise<Result<GrantPlan, MembershipExistsError>> => {
-  const state = await readPrincipalState(tx, deps, args);
+export const prepareGrant = async (tx: Transaction, deps: Deps, args: PrepareGrantArgs): Promise<Result<GrantPlan, MembershipExistsError | AccessNotFoundError>> => {
+  const state = await readPrincipalState(tx, deps, { ...args, tenantCreated: args.organizationCreated === true });
+  if (!state.tenantLive) return err(organizationGone());
   const nodeId = nodeIdOf(args.node);
   const existing = state.live.find((grant) => nodeIdOf(grant.node) === nodeId);
   if (existing !== undefined) return err(new MembershipExistsError(existing.id));

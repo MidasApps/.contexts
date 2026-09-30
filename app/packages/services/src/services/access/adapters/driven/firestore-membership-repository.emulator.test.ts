@@ -29,6 +29,7 @@ const deps: AccessWriteDeps = {
   roleReader: adapters.readers.roles,
   projections: adapters.projections,
   users: adapters.users,
+  tenantGuard: adapters.tenantGuard,
   audit: makeRecordAudit({ writer: createInMemoryAuditLogWriter(), clock }),
   unitOfWork: createFirestoreUnitOfWork({ firestore }),
   clock,

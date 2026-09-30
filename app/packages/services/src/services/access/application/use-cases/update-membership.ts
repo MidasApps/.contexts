@@ -8,7 +8,7 @@ import { LastOwnerError } from "../../domain/errors/last-owner-error.ts";
 import { holdsOwner } from "../../domain/role-permissions.ts";
 import type { AccessWriteDeps } from "../access-write-deps.ts";
 import { checkGrantable, type GrantCheckError } from "../grant-checks.ts";
-import { readPrincipalState, writePrincipalState } from "../membership-writes.ts";
+import { organizationGone, readPrincipalState, writePrincipalState } from "../membership-writes.ts";
 import { wouldLoseLastOwner } from "./last-owner-guard.ts";
 
 export type UpdateMembershipCommand = {
@@ -31,6 +31,7 @@ const applyUpdate = async (tx: Transaction, deps: AccessWriteDeps, command: Upda
     readPrincipalState(tx, deps, { tenantId: membership.tenantId, principal }),
     holdsOwner(command.roles) ? Promise.resolve(false) : wouldLoseLastOwner(tx, deps, membership),
   ]);
+  if (!state.tenantLive) return err(organizationGone());
   if (losesOwner) return err(new LastOwnerError(membership.tenantId));
   const now = deps.clock.now().toISOString();
   const next: Membership = { ...membership, roles: [...command.roles], updatedAt: now };

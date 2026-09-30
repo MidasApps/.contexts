@@ -9,7 +9,7 @@ import { LastOwnerError } from "../../domain/errors/last-owner-error.ts";
 import { holdsOwner } from "../../domain/role-permissions.ts";
 import { requirePermission } from "../grant-checks.ts";
 import type { MemberDeps } from "../member-deps.ts";
-import { readPrincipalState, writePrincipalState } from "../membership-writes.ts";
+import { organizationGone, readPrincipalState, writePrincipalState } from "../membership-writes.ts";
 
 export type RemoveMemberCommand = {
   readonly actor: Principal;
@@ -23,12 +23,13 @@ export type RemoveMemberError = AccessDeniedError | AccessNotFoundError | LastOw
 
 export type RemoveMember = (command: RemoveMemberCommand) => Promise<Result<void, RemoveMemberError>>;
 
-type Deps = Pick<MemberDeps, "memberships" | "projections" | "users" | "audit" | "clock" | "unitOfWork" | "syncClaims" | "apiKeys" | "logger">;
+type Deps = Pick<MemberDeps, "memberships" | "projections" | "users" | "tenantGuard" | "audit" | "clock" | "unitOfWork" | "syncClaims" | "apiKeys" | "logger">;
 
 const applyRemoval = async (tx: Transaction, deps: Deps, command: RemoveMemberCommand): Promise<Result<void, RemoveMemberError>> => {
   const { tenantId, userId } = command;
   const principal = { type: "user" as const, id: userId };
   const [state, owners] = await Promise.all([readPrincipalState(tx, deps, { tenantId, principal }), deps.memberships.listOrganizationOwners(tx, tenantId)]);
+  if (!state.tenantLive) return err(organizationGone());
   const grants = state.live.filter((grant) => grant.principalType === "user");
   if (grants.length === 0) return err(new AccessNotFoundError("member"));
   const ownsTenant = grants.some((grant) => grant.node.level === "organization" && holdsOwner(grant.roles));
