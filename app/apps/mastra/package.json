@@ -12,11 +12,13 @@
     "start": "node .mastra/output/index.mjs",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run",
-    "db:init": "node scripts/db-init.ts"
+    "test": "vitest run --project unit",
+    "db:init": "node scripts/db-init.ts",
+    "test:emulators": "vitest run --project emulators --passWithNoTests"
   },
   "dependencies": {
     "@core/agents": "workspace:*",
+    "@core/contracts": "workspace:*",
     "@core/services": "workspace:*",
     "@mastra/core": "catalog:",
     "@mastra/loggers": "catalog:",
@@ -26,6 +28,7 @@
   },
   "devDependencies": {
     "@core/config": "workspace:*",
+    "@mastra/deployer": "catalog:",
     "@types/node": "catalog:",
     "eslint": "catalog:",
     "mastra": "catalog:",

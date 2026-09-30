@@ -1,25 +1,28 @@
 import { Mastra } from "@mastra/core";
 import { PinoLogger } from "@mastra/loggers";
-import { MastraStorageExporter, Observability } from "@mastra/observability";
-import { PostgresStore } from "@mastra/pg";
-import { env } from "../env.ts";
+import { env, processEnvForFirebaseGuard } from "../env.ts";
+import { APP_MODULES } from "../modules.ts";
+import { createAgentRuntime } from "../runtime/create-agent-runtime.ts";
 import { configureMastraProcessLogger } from "./process-log-context.ts";
-import { buildLoggerOptions, buildServerConfig, buildStorageConfig, MASTRA_SERVICE_NAME } from "./mastra-options.ts";
+import { buildLoggerOptions, buildServerConfig } from "./mastra-options.ts";
 
 configureMastraProcessLogger(env);
 
+const runtime = createAgentRuntime({ env, processEnv: processEnvForFirebaseGuard, modules: APP_MODULES });
+
 /**
  * Mastra entry (`mastra dev` / `mastra build` look for this file and this
- * export name). Agents, workflows and the auth provider arrive in SP3; SP0
- * only boots the server with storage, logs and traces.
+ * export name). `server` stays a literal property here: the build extracts
+ * it statically (SP0 spike gotcha); everything else comes from the runtime.
  */
 export const mastra = new Mastra({
-  storage: new PostgresStore(buildStorageConfig(env)),
+  agents: runtime.agents,
+  workflows: runtime.workflows,
+  scorers: runtime.scorers,
+  mcpServers: runtime.mcpServers,
+  storage: runtime.storage,
+  vectors: runtime.vectors,
   logger: new PinoLogger(buildLoggerOptions(env)),
-  // Spans go to Mastra storage (Studio reads them); SensitiveDataFilter is on
-  // by default. OTLP to Cloud Trace is added with the tracing work (spec §10).
-  observability: new Observability({
-    configs: { default: { serviceName: MASTRA_SERVICE_NAME, exporters: [new MastraStorageExporter()] } },
-  }),
-  server: buildServerConfig(env),
+  observability: runtime.observability,
+  server: { ...buildServerConfig(env), auth: runtime.auth, middleware: runtime.middleware, apiRoutes: runtime.apiRoutes },
 });

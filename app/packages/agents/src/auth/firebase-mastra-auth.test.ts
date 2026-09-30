@@ -246,3 +246,21 @@ describe("FirebaseMastraAuth.mapUserToResourceId", () => {
     expect(auth.mapUserToResourceId?.(principal)).toBe("unscoped:member-uid");
   });
 });
+
+describe("FirebaseMastraAuth per-request memo", () => {
+  it("verifies a request once when the context middleware and the route auth both authenticate it", async () => {
+    const { auth, access } = createAuth();
+    const raw = new Request("http://mastra.internal/api/agents/ping/generate", { method: "POST", headers: withBearer("member-token") });
+    const first = await auth.authenticateToken("member-token", raw);
+    const second = await auth.authenticateToken("member-token", { raw, headers: raw.headers, header: (name: string) => raw.headers.get(name) ?? undefined });
+    expect(second).toBe(first);
+    expect(access.verifyCalls).toHaveLength(1);
+  });
+
+  it("never reuses a result across requests", async () => {
+    const { auth, access } = createAuth();
+    await auth.authenticateToken("member-token", mastraRequest({ headers: withBearer("member-token") }));
+    await auth.authenticateToken("member-token", mastraRequest({ headers: withBearer("member-token") }));
+    expect(access.verifyCalls).toHaveLength(2);
+  });
+});

@@ -1,7 +1,22 @@
 # @core/mastra
 
 Mastra server for the agent runtime, with Studio in local dev. Storage is Postgres
-(schema `mastra`). SP0 registers no agents or workflows; they arrive in SP3.
+(schema `mastra`). `src/mastra/index.ts` spreads the parts of `composeAgentRuntime`
+(`@core/agents`) into `new Mastra({...})`; `src/runtime/create-runtime-ports.ts` binds the
+SP1/SP3 services and `src/modules.ts` lists the agent modules (decision 0019).
+
+## Runtime and access
+
+- Every `/api/*` request goes through the route allowlist (other built-in routes answer 404)
+  and the context middleware, which builds the typed `AgentRequestContext` from the
+  principal `FirebaseMastraAuth` verified (Bearer only). Client-sent context keys are dropped.
+- Access decisions are SP1's (`verifyBearer`, `authorize`, `getEffectivePermissions`).
+  Regional settings wait for SP1's `resolveAccessContext` (SP1 Task 12): until then the
+  regional port rejects, so agent requests fail closed with 401.
+- Approvals, usage, knowledge, connectors, secrets and agent settings are fail-closed
+  stand-ins (`src/runtime/unwired-ports.ts`) until their tasks bind them.
+- Agents: `ping` (health check on the fast model role). Try it with
+  `POST /api/agents/ping/generate` + `Authorization: Bearer <ID token>` + `X-Tenant-Id`.
 
 ## When to use
 
@@ -43,7 +58,8 @@ Both steps are idempotent; locally they run without `--confirm-env`
 ## How to test
 
 ```bash
-pnpm -F mastra test
+pnpm -F mastra test                        # unit
+pnpm test:emulators                        # from app/: includes src/mastra/runtime.emulator.test.ts
 pnpm -F mastra lint
 pnpm -F mastra typecheck
 ```

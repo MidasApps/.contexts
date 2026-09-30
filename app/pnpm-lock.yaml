@@ -480,6 +480,9 @@ importers:
       '@core/agents':
         specifier: workspace:*
         version: link:../../packages/agents
+      '@core/contracts':
+        specifier: workspace:*
+        version: link:../../packages/contracts
       '@core/services':
         specifier: workspace:*
         version: link:../../packages/services
@@ -502,6 +505,9 @@ importers:
       '@core/config':
         specifier: workspace:*
         version: link:../../packages/config
+      '@mastra/deployer':
+        specifier: 'catalog:'
+        version: 1.71.0(@hono/node-server@1.19.17(hono@4.13.10))(@mastra/core@1.71.0(@grpc/grpc-js@1.14.5)(ai@7.0.122(zod@4.6.5))(express@5.2.1(supports-color@7.2.0))(supports-color@7.2.0)(zod-to-json-schema@3.25.2(zod@4.6.5))(zod@4.6.5))(supports-color@7.2.0)(zod@4.6.5)
       '@types/node':
         specifier: 'catalog:'
         version: 26.6.3
@@ -590,6 +596,9 @@ importers:
       '@mastra/core':
         specifier: 'catalog:'
         version: 1.71.0(@grpc/grpc-js@1.14.5)(ai@7.0.122(zod@4.6.5))(express@5.2.1(supports-color@7.2.0))(supports-color@7.2.0)(zod-to-json-schema@3.25.2(zod@4.6.5))(zod@4.6.5)
+      '@mastra/observability':
+        specifier: 'catalog:'
+        version: 1.18.1(@mastra/core@1.71.0(@grpc/grpc-js@1.14.5)(ai@7.0.122(zod@4.6.5))(express@5.2.1(supports-color@7.2.0))(supports-color@7.2.0)(zod-to-json-schema@3.25.2(zod@4.6.5))(zod@4.6.5))(zod@4.6.5)
       ai:
         specifier: 'catalog:'
         version: 7.0.122(zod@4.6.5)

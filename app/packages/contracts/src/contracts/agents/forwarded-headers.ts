@@ -15,6 +15,8 @@ export const FORWARDED_HEADERS = {
   nodeTimeZone: "x-node-time-zone",
   currency: "x-currency",
   activeScreen: "x-active-screen",
+  /** Chat conversation id; the Mastra memory thread of the run (SP3 Task 7). */
+  conversationId: "x-conversation-id",
   requestId: "x-request-id",
   traceparent: "traceparent",
 } as const;

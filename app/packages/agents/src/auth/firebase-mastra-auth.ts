@@ -1,5 +1,5 @@
 import { FORWARDED_HEADERS } from "@core/contracts";
-import { MastraAuthProvider, type MastraAuthRequest } from "@mastra/core/server";
+import { getWebRequest, MastraAuthProvider, type MastraAuthRequest } from "@mastra/core/server";
 import type { AccessContext, AccessPort, AccessPrincipal, NodeRef } from "../runtime/runtime-ports.ts";
 import { type AgentPrincipal, buildAgentPrincipal, type ForwardedScope, nodeFromScope, principalIdentity, resourceIdOf } from "./agent-principal.ts";
 import { readBearerToken, readForwardedHeader, readRequestPath, requiresRevocationCheck } from "./bearer-only.ts";
@@ -61,6 +61,9 @@ const limitToKeyScopes = async (access: AccessPort, context: AccessContext, node
 export class FirebaseMastraAuth extends MastraAuthProvider<AgentPrincipal> {
   readonly #access: AccessPort;
   readonly #apiPrefix: string;
+  // One verification per HTTP request: the context middleware and Mastra's route
+  // auth both authenticate it. Keyed by the raw Request, so nothing outlives it.
+  readonly #perRequest = new WeakMap<Request, { readonly token: string; readonly result: Promise<AgentPrincipal | null> }>();
 
   constructor(options: FirebaseMastraAuthOptions) {
     super({ name: "firebase", mapUserToResourceId: resourceIdOf });
@@ -69,7 +72,16 @@ export class FirebaseMastraAuth extends MastraAuthProvider<AgentPrincipal> {
   }
 
   /** @returns `null` (401) unless the header carries this exact Bearer token and SP1 verifies it. */
-  async authenticateToken(token: string, request: MastraAuthRequest): Promise<AgentPrincipal | null> {
+  authenticateToken(token: string, request: MastraAuthRequest): Promise<AgentPrincipal | null> {
+    const raw = getWebRequest(request);
+    const cached = raw === undefined ? undefined : this.#perRequest.get(raw);
+    if (cached?.token === token) return cached.result;
+    const result = this.#authenticate(token, request);
+    if (raw !== undefined) this.#perRequest.set(raw, { token, result });
+    return result;
+  }
+
+  async #authenticate(token: string, request: MastraAuthRequest): Promise<AgentPrincipal | null> {
     const bearer = readBearerToken(request);
     if (bearer === undefined || bearer !== token) return null;
     const principal = await this.#access.verifyBearer({ token, checkRevoked: requiresRevocationCheck(request) });

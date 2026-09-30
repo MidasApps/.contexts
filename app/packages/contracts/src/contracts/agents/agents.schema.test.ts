@@ -77,6 +77,10 @@ describe("FORWARDED_HEADERS", () => {
     expect(new Set(names).size).toBe(names.length);
     for (const name of names) expect(name).toBe(name.toLowerCase());
   });
+
+  it("forwards the conversation id the memory thread is bound to", () => {
+    expect(FORWARDED_HEADERS.conversationId).toBe("x-conversation-id");
+  });
 });
 
 describe("AGENT_PERMISSIONS", () => {

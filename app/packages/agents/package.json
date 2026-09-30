@@ -28,6 +28,7 @@
     "@core/contracts": "workspace:*",
     "@core/services": "workspace:*",
     "@mastra/core": "catalog:",
+    "@mastra/observability": "catalog:",
     "ai": "catalog:",
     "zod": "catalog:"
   },

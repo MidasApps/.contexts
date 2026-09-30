@@ -1,0 +1,54 @@
+import { createFirebaseAdmin, createInMemoryAccessStore, processLogger } from "@core/services";
+import { describe, expect, it } from "vitest";
+import { RegionalSettingsNotWiredError } from "./access-port-binding.ts";
+import { createRuntimePorts } from "./create-runtime-ports.ts";
+import { PortNotWiredError } from "./unwired-ports.ts";
+
+const TENANT = "Jd8sK2lPq0WnR5tYu3bV";
+const MEMBER = { type: "user", uid: "member-uid", mfa: false } as const;
+const ORG = { level: "organization", tenantId: TENANT } as const;
+
+// No emulator host and no credentials: nothing below may reach Firebase or Postgres
+// (access decisions use in-memory SP1 readers; the Firestore ones need the emulator).
+const ports = () =>
+  createRuntimePorts({
+    env: { API_KEY_PREFIX: "core", DATABASE_URL: "postgres://nobody@127.0.0.1:1/none" },
+    firebase: createFirebaseAdmin({ env: { APP_ENV: "local", FIREBASE_PROJECT_ID: "demo-core" }, processEnv: {} }),
+    logger: processLogger,
+  });
+
+describe("createRuntimePorts (default bindings)", () => {
+  it("rejects regional resolution until SP1 exposes it, even with access readers", async () => {
+    const store = createInMemoryAccessStore();
+    store.putOrganization({ id: TENANT });
+    store.putUser("member-uid");
+    store.putGrant({ tenantId: TENANT, principalId: "member-uid", nodeId: TENANT, roles: [{ kind: "system", key: "member" }] });
+    const bound = createRuntimePorts({
+      env: { API_KEY_PREFIX: "core", DATABASE_URL: "postgres://nobody@127.0.0.1:1/none" },
+      firebase: createFirebaseAdmin({ env: { APP_ENV: "local", FIREBASE_PROJECT_ID: "demo-core" }, processEnv: {} }),
+      logger: processLogger,
+      adapters: { accessReaders: store },
+    });
+    await expect(bound.access.resolveAccessContext({ principal: MEMBER, node: ORG })).rejects.toBeInstanceOf(RegionalSettingsNotWiredError);
+    expect(await bound.access.authorize({ principal: MEMBER, permission: "core.chat.use", node: ORG })).toEqual({ allowed: true, requiresApproval: false });
+  });
+
+  it("rejects every port whose service lands later", async () => {
+    const bound = ports();
+    const action = {} as never;
+    await expect(bound.approvals.requestApproval({ principal: MEMBER, node: ORG, permission: "core.chat.use", action })).rejects.toBeInstanceOf(PortNotWiredError);
+    await expect(bound.usage.checkTenantBudget({ tenantId: TENANT })).rejects.toBeInstanceOf(PortNotWiredError);
+    await expect(bound.knowledge.searchChunks({ tenantId: TENANT, namespaces: ["tenant"], embedding: [], topK: 1 })).rejects.toBeInstanceOf(PortNotWiredError);
+    await expect(bound.connectors.listActive({ tenantId: TENANT })).rejects.toBeInstanceOf(PortNotWiredError);
+    await expect(bound.secrets.get("ref")).rejects.toBeInstanceOf(PortNotWiredError);
+    await expect(bound.settings.getAgentSettings({ tenantId: TENANT })).rejects.toBeInstanceOf(PortNotWiredError);
+  });
+
+  it("binds the semantic runner with no registered view, so every view is refused before the database", async () => {
+    const result = await ports().catalog.runSemanticQuery({
+      principal: { tenantId: TENANT, nodeIds: [], permissions: new Set(["core.catalog.query"]) },
+      sql: "SELECT * FROM semantic.anything",
+    });
+    expect(result).toMatchObject({ ok: false, error: { code: "SQL_REJECTED" } });
+  });
+});

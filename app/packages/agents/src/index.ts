@@ -137,3 +137,31 @@ export {
   SCHEMA_FORM_COMPONENT,
 } from "./tools/catalog/render-form.tool.ts";
 export { CATALOG_QUERY_PERMISSION, createQuerySemanticSqlTool, SEMANTIC_QUERY_EXECUTED } from "./tools/sql/query-semantic-sql.tool.ts";
+export {
+  AgentRuntimeContextSchema,
+  buildAgentRequestContext,
+  clearAgentContext,
+  type RequestContextStore,
+  writeAgentContext,
+} from "./context/write-agent-context.ts";
+export {
+  type AgentMiddleware,
+  type AgentMiddlewareContext,
+  type AgentMiddlewareHandler,
+  apiPathPattern,
+  normalizeApiPrefix,
+} from "./auth/agent-middleware.ts";
+export { type ContextAuthenticator, createContextMiddleware, type ContextMiddlewareOptions } from "./auth/context-middleware.ts";
+export { createRouteAllowlistMiddleware, isAllowedRoute } from "./auth/route-allowlist-middleware.ts";
+export {
+  type AgentCapabilityManifest,
+  type AgentDefinition,
+  type AgentFactoryDeps,
+  type AgentModule,
+  AgentModuleError,
+  type AgentModuleErrorCode,
+  defineAgentModule,
+} from "./runtime/agent-module.ts";
+export { composeAgentRuntime, type ComposeAgentRuntimeArgs, type RuntimeParts } from "./runtime/compose-agent-runtime.ts";
+export { PING_AGENT, PING_AGENT_ID } from "./agents/ping-agent.ts";
+export { createObservability, SPAN_CONTEXT_KEYS } from "./observability/create-observability.ts";
