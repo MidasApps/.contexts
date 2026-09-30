@@ -10,11 +10,17 @@ export const MASTRA_SERVICE_NAME = "mastra";
 /** Postgres schema created by infra/postgres/init; Mastra owns every table in it. */
 export const MASTRA_STORAGE_SCHEMA = "mastra";
 
-/** PostgresStore options: Mastra creates and migrates its tables on first use. */
-export const buildStorageConfig = (env: MastraEnv) => ({
+/**
+ * PostgresStore options. With `MASTRA_STORAGE_INIT=skip` (the default outside
+ * local) the server never runs DDL at boot; `pnpm -F @core/mastra db:init`
+ * creates and migrates the tables in deploy with a DDL-capable role (decision 0023).
+ * @param options `init: "force"` is only for that `db:init` step.
+ */
+export const buildStorageConfig = (env: MastraEnv, options: { init?: "env" | "force" } = {}) => ({
   id: "mastra-storage",
   connectionString: env.DATABASE_URL,
   schemaName: MASTRA_STORAGE_SCHEMA,
+  disableInit: options.init !== "force" && env.MASTRA_STORAGE_INIT === "skip",
 });
 
 /**

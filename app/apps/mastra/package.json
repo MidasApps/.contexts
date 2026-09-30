@@ -12,7 +12,8 @@
     "start": "node .mastra/output/index.mjs",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "db:init": "node scripts/db-init.ts"
   },
   "dependencies": {
     "@core/agents": "workspace:*",

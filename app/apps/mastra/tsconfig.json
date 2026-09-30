@@ -10,6 +10,14 @@
     "incremental": true,
     "tsBuildInfoFile": ".tscache/tsbuildinfo"
   },
-  "include": ["src/**/*.ts", "*.ts", "*.js"],
-  "exclude": ["node_modules", ".mastra"]
+  "include": [
+    "src/**/*.ts",
+    "scripts/**/*.ts",
+    "*.ts",
+    "*.js"
+  ],
+  "exclude": [
+    "node_modules",
+    ".mastra"
+  ]
 }

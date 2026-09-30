@@ -20,6 +20,26 @@ pnpm -F mastra build         # .mastra/output (no Studio)
 docker build -f apps/mastra/Dockerfile -t core-mastra .   # from app/
 ```
 
+## Storage and deploy order
+
+Mastra's tables live in schema `mastra`. In `local`, `MASTRA_STORAGE_INIT`
+defaults to `auto` and `PostgresStore` creates them on first use. Outside local it
+is `skip` (`auto` is refused): the server never runs DDL, and the runtime login
+role only gets `mastra_runtime` (DML on schema `mastra`, migration
+`infra/postgres/migrations/0001_mastra_runtime_role.sql`). Deploy order
+(decision 0023):
+
+```bash
+pnpm db:migrate --confirm-env <APP_ENV>                 # from app/, DDL-capable role
+pnpm -F @core/mastra db:init --confirm-env <APP_ENV>    # same role: storage.init() + grants, then exits
+# deploy the image with MASTRA_STORAGE_INIT=skip
+```
+
+Both steps are idempotent; locally they run without `--confirm-env`
+(`pnpm db:migrate && pnpm -F @core/mastra db:init`). `db:init` loads
+`app/.env.local` like `mastra dev` and needs a valid Mastra env (e.g.
+`AI_MODE=fake`, or `real` with the provider keys).
+
 ## How to test
 
 ```bash

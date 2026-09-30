@@ -29,7 +29,22 @@ describe("buildStorageConfig", () => {
       id: "mastra-storage",
       connectionString: "postgresql://app:app@127.0.0.1:5432/app",
       schemaName: "mastra",
+      disableInit: false,
     });
+  });
+
+  it("lets Mastra create its tables in local (MASTRA_STORAGE_INIT defaults to auto)", () => {
+    expect(buildStorageConfig(localEnv).disableInit).toBe(false);
+  });
+
+  it("never runs DDL at boot outside local: db:init creates the tables in deploy", () => {
+    expect(prodEnv.MASTRA_STORAGE_INIT).toBe("skip");
+    expect(buildStorageConfig(prodEnv).disableInit).toBe(true);
+    expect(buildStorageConfig(loadMastraEnv({ ...LOCAL_SOURCE, MASTRA_STORAGE_INIT: "skip" })).disableInit).toBe(true);
+  });
+
+  it("can force init for the db:init step, whatever the env says", () => {
+    expect(buildStorageConfig(prodEnv, { init: "force" }).disableInit).toBe(false);
   });
 });
 
