@@ -115,3 +115,23 @@ export {
   toolFailure,
 } from "./tools/tool-errors.ts";
 export { bindCoreTool, type BoundCoreTool, createToolRegistry, DuplicateToolError, type ToolRegistry } from "./tools/tool-registry.ts";
+export {
+  type AiCatalogReader,
+  type AiEntityDescription,
+  type AiEntityPage,
+  type AiEntitySummary,
+  type AiFieldDescription,
+  createAiCatalogReader,
+  InvalidAiCatalogError,
+  REDACTED,
+} from "./tools/catalog/ai-catalog-reader.ts";
+export { loadBundledAiCatalog } from "./tools/catalog/ai-catalog-source.ts";
+export { createDescribeEntityTool } from "./tools/catalog/describe-entity.tool.ts";
+export { CATALOG_READ_PERMISSION, createListEntitiesTool, MAX_ENTITIES_PAGE } from "./tools/catalog/list-entities.tool.ts";
+export {
+  createRenderFormTool,
+  type FormCommand,
+  type FormCommandCatalog,
+  type RenderFormDeps,
+  SCHEMA_FORM_COMPONENT,
+} from "./tools/catalog/render-form.tool.ts";
