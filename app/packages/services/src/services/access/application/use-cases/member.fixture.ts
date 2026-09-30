@@ -24,6 +24,8 @@ export const makeMemberWorld = () => {
   const accounts = new Map<string, DirectoryAccount>();
   const revoked: { tenantId: string; ownerUid: string }[] = [];
   const notified: string[] = [];
+  const userLocales = new Map<string, string>();
+  const organizationLocales = new Map<string, string>();
   let fill = 0;
   const deps: MemberDeps = {
     ...world.deps,
@@ -39,8 +41,12 @@ export const makeMemberWorld = () => {
       getMany: (uids) =>
         Promise.resolve(new Map(uids.flatMap((uid) => (accounts.has(uid) ? [[uid, { displayName: accounts.get(uid)?.displayName ?? "", email: accounts.get(uid)?.email ?? "" }] as const] : [])))),
       getAccount: (uid) => Promise.resolve(accounts.get(uid) ?? null),
+      getPreferredLocale: (uid) => Promise.resolve(userLocales.get(uid)),
     },
-    organizations: { getName: (tenantId) => Promise.resolve(tenantId === "org-a" || tenantId === "org-b" ? `Name of ${tenantId}` : null) },
+    organizations: {
+      getName: (tenantId) => Promise.resolve(tenantId === "org-a" || tenantId === "org-b" ? `Name of ${tenantId}` : null),
+      getDefaultLocale: (tenantId) => Promise.resolve(organizationLocales.get(tenantId) ?? null),
+    },
     apiKeys: {
       revokeOwnedKeys: ({ tenantId, ownerUid }) => {
         revoked.push({ tenantId, ownerUid });
@@ -55,7 +61,10 @@ export const makeMemberWorld = () => {
   /** Registers an Auth account (verified by default). */
   const account = (uid: string, email: string, options: { verified?: boolean; displayName?: string } = {}) =>
     void accounts.set(uid, { email, displayName: options.displayName ?? uid, emailVerified: options.verified ?? true });
+  /** The preferred locale of a user and the default locale of an organization (accept links). */
+  const locale = (uid: string, tag: string) => void userLocales.set(uid, tag);
+  const organizationLocale = (tenantId: string, tag: string) => void organizationLocales.set(tenantId, tag);
   const tokenOf = (acceptUrl: string): string => acceptUrl.split("#token=")[1] ?? "";
   const uid = (value: string): UserId => UserIdSchema.parse(value);
-  return { ...world, clock, invitations, deps, members: createMemberServices(deps), account, revoked, notified, tokenOf, uid };
+  return { ...world, clock, invitations, deps, members: createMemberServices(deps), account, locale, organizationLocale, revoked, notified, tokenOf, uid };
 };

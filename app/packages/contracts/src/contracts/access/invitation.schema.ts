@@ -84,7 +84,7 @@ export const CreateInvitationInputContract = defineContract(CreateInvitationInpu
 
 export const CreateInvitationResponseSchema = z.object({
   invitation: z.object(InvitationSchema.shape).meta(personal("The created invitation, as later listed.")),
-  acceptUrl: z.url().meta(sensitive("One-time link `<app>/invite#token=<token>`, returned only here.")),
+  acceptUrl: z.url().meta(sensitive("One-time link `<app>/{locale}/invite#token=<token>` in the inviter's locale (else the organization default), returned only here.")),
 });
 export type CreateInvitationResponse = z.infer<typeof CreateInvitationResponseSchema>;
 
@@ -92,7 +92,7 @@ export const CreateInvitationResponseContract = defineContract(CreateInvitationR
   id: "access.CreateInvitationResponse",
   kind: "view",
   description: "Answer of invitation creation with the one-time accept link.",
-  examples: [{ invitation: INVITATION_EXAMPLE, acceptUrl: `https://app.example.com/invite#token=${EXAMPLE_TOKEN}` }],
+  examples: [{ invitation: INVITATION_EXAMPLE, acceptUrl: `https://app.example.com/pt-BR/invite#token=${EXAMPLE_TOKEN}` }],
   pii: "sensitive",
   tenancyScope: "organization",
   relations: [],

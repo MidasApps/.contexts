@@ -1,3 +1,4 @@
+import type { SupportedLocale } from "@core/i18n/locales";
 import { sha256Hex } from "../../shared/crypto/sha256.ts";
 
 /** Injected source of randomness (`crypto.randomBytes` in production, fixed bytes in tests). */
@@ -30,7 +31,9 @@ export const generateInvitationToken = (randomBytes: RandomBytes): string => {
 export const hashInvitationToken = (token: string): string => sha256Hex(token);
 
 /**
- * One-time accept link `${appUrl}/invite#token=<token>`: the fragment never reaches
- * the server, so the token stays out of access logs.
+ * One-time accept link `${appUrl}/{locale}/invite#token=<token>`: the web renders every page
+ * under a supported locale (decision 0012), and the fragment never reaches the server, so the
+ * token stays out of access logs.
  */
-export const buildAcceptUrl = (args: { appUrl: string; token: string }): string => `${args.appUrl.replace(/\/+$/, "")}/invite#token=${args.token}`;
+export const buildAcceptUrl = (args: { appUrl: string; token: string; locale: SupportedLocale }): string =>
+  `${args.appUrl.replace(/\/+$/, "")}/${args.locale}/invite#token=${args.token}`;

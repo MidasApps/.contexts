@@ -7,7 +7,9 @@
     "node": ">=26.0.0 <27"
   },
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./locales": "./src/locales.ts",
+    "./negotiate-locale": "./src/negotiate-locale.ts"
   },
   "scripts": {
     "lint": "eslint .",

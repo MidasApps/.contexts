@@ -8,6 +8,8 @@ import type { DirectoryEntry, UserDirectory } from "../../application/ports/driv
 
 // Only the profile fields; a users doc created by access (status/version only) has no email yet.
 const converter = createContractConverter({ schema: z.object({ email: z.email().optional(), displayName: z.string().optional() }) });
+// Only the preferred locale, leniently: a missing or unreadable one is no preference.
+const localeFields = createContractConverter({ schema: z.object({ preferences: z.object({ locale: z.string().min(1).optional() }).optional().catch(undefined) }) });
 
 // `auth.getUsers` accepts at most 100 identifiers per call.
 const AUTH_BATCH = 100;
@@ -49,6 +51,7 @@ export const createFirebaseUserDirectory = (deps: { firestore: Firestore; auth: 
       const missing = uids.filter((uid) => !found.has(uid));
       return missing.length === 0 ? found : new Map([...found, ...(await fromAuth(missing))]);
     },
+    getPreferredLocale: async (uid) => (await deps.firestore.collection(CORE_COLLECTIONS.users).withConverter(localeFields).doc(uid).get()).data()?.preferences?.locale,
     getAccount: async (uid) => {
       try {
         const record = await deps.auth.getUser(uid);

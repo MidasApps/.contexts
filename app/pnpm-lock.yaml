@@ -883,6 +883,9 @@ importers:
       '@core/contracts':
         specifier: workspace:*
         version: link:../contracts
+      '@core/i18n':
+        specifier: workspace:*
+        version: link:../i18n
       '@google-cloud/bigquery':
         specifier: 'catalog:'
         version: 9.1.0(supports-color@7.2.0)

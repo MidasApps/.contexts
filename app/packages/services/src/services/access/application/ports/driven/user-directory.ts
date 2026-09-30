@@ -15,4 +15,6 @@ export type UserDirectory = {
   readonly getMany: (uids: readonly UserId[]) => Promise<ReadonlyMap<UserId, DirectoryEntry>>;
   /** @returns null when the Auth account does not exist or has no email. */
   readonly getAccount: (uid: UserId) => Promise<DirectoryAccount | null>;
+  /** `preferences.locale` of the users doc; `undefined` when unset or unreadable. */
+  readonly getPreferredLocale: (uid: UserId) => Promise<string | undefined>;
 };

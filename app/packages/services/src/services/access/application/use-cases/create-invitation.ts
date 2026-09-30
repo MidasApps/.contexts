@@ -1,4 +1,7 @@
 import { INVITATION_TTL_DAYS, type CreateInvitationInput, type CreateInvitationResponse, type Invitation, type TenantId, type UserPrincipal } from "@core/contracts";
+// Subpaths, not the root: the root also loads every message catalog.
+import { SOURCE_LOCALE, type SupportedLocale } from "@core/i18n/locales";
+import { negotiateLocale } from "@core/i18n/negotiate-locale";
 import { auditActorOf } from "../../../audit/domain/audit-actor.ts";
 import { err, ok, type Result } from "../../../shared/result/result.ts";
 import type { RequestAccess } from "../../composition.ts";
@@ -21,7 +24,17 @@ export type CreateInvitation = (command: CreateInvitationCommand) => Promise<Res
 
 const DAY_MS = 86_400_000;
 
-type Deps = Pick<MemberDeps, "registry" | "roleReader" | "invitations" | "notifier" | "audit" | "unitOfWork" | "clock" | "randomBytes" | "appUrl" | "logger">;
+type Deps = Pick<MemberDeps, "registry" | "roleReader" | "invitations" | "notifier" | "audit" | "unitOfWork" | "clock" | "randomBytes" | "appUrl" | "logger" | "directory" | "organizations">;
+
+/**
+ * Locale of the accept link (follow-up #32): the inviter's preference, else the organization
+ * default, each matched to a supported web locale (`es-MX` → `es-419`), else the source locale.
+ */
+const linkLocaleOf = async (deps: Deps, args: { inviter: UserPrincipal["uid"]; tenantId: TenantId }): Promise<SupportedLocale> => {
+  const [preferred, organizationDefault] = await Promise.all([deps.directory.getPreferredLocale(args.inviter), deps.organizations.getDefaultLocale(args.tenantId)]);
+  const requested = [preferred, organizationDefault].filter((tag) => tag !== undefined && tag !== null);
+  return negotiateLocale({ requested, fallback: SOURCE_LOCALE });
+};
 
 const notify = async (deps: Deps, args: { invitation: Invitation; acceptUrl: string; requestId: string }): Promise<void> => {
   try {
@@ -34,7 +47,8 @@ const notify = async (deps: Deps, args: { invitation: Invitation; acceptUrl: str
 
 /**
  * Invites an email at a node (SP1 spec §5.3, §6.2): `core.member.invite` at the node and
- * no escalation. Stores only the token's sha256 and returns the one-time accept link.
+ * no escalation. Stores only the token's sha256 and returns the one-time accept link, in the
+ * inviter's locale (`linkLocaleOf`).
  * @throws {AppUrlMissingError} when the server has no `NEXT_PUBLIC_APP_URL` (bug).
  */
 export const makeCreateInvitation =
@@ -68,7 +82,7 @@ export const makeCreateInvitation =
         tx,
       );
     });
-    const acceptUrl = buildAcceptUrl({ appUrl: deps.appUrl, token });
+    const acceptUrl = buildAcceptUrl({ appUrl: deps.appUrl, token, locale: await linkLocaleOf(deps, { inviter: actor.uid, tenantId }) });
     await notify(deps, { invitation, acceptUrl, requestId: command.requestId });
     return ok({ invitation, acceptUrl });
   };

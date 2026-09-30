@@ -15,7 +15,7 @@ Answer of invitation creation with the one-time accept link.
 
 | Field | Required | PII | Description | UI |
 |---|---|---|---|---|
-| `acceptUrl` | yes | `sensitive` | One-time link `<app>/invite#token=<token>`, returned only here. |  |
+| `acceptUrl` | yes | `sensitive` | One-time link `<app>/{locale}/invite#token=<token>` in the inviter's locale (else the organization default), returned only here. |  |
 | `invitation` | yes | `personal` | The created invitation, as later listed. |  |
 
 ## Relations
@@ -48,7 +48,7 @@ _None._
       "createdAt": "2026-09-29T14:30:00.000Z",
       "updatedAt": "2026-09-29T14:30:00.000Z"
     },
-    "acceptUrl": "https://app.example.com/invite#token=Zx9Cv8Bn7Mm6Aa5Ss4Dd3Ff2Gg1Hh0Jj9Kk8Ll7Qq6W"
+    "acceptUrl": "https://app.example.com/pt-BR/invite#token=Zx9Cv8Bn7Mm6Aa5Ss4Dd3Ff2Gg1Hh0Jj9Kk8Ll7Qq6W"
   }
 ]
 ```

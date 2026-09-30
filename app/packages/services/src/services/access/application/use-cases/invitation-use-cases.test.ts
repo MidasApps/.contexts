@@ -36,12 +36,29 @@ describe("createInvitation", () => {
     const world = await setup();
     const { invitation, acceptUrl, token } = await invited(world);
 
-    expect(acceptUrl).toBe(`${APP_URL}/invite#token=${token}`);
+    expect(acceptUrl).toBe(`${APP_URL}/pt-BR/invite#token=${token}`);
     expect(invitation).toMatchObject({ email: "carla@example.com", status: "pending", invitedBy: "owner-1", expiresAt: "2026-10-07T12:00:00.000Z" });
     expect(world.invitations.rowOf(invitation.id)?.tokenHash).toBe(hashInvitationToken(token));
     expect(JSON.stringify(world.invitations.rowOf(invitation.id)?.invitation)).not.toContain(token);
     expect(world.auditLog.entries("tenant").at(-1)).toMatchObject({ action: "INVITATION_CREATED", target: { type: "invitation", id: invitation.id } });
     expect(world.notified).toEqual([acceptUrl]);
+  });
+
+  it("localizes the link to the inviter's supported preference, else the organization default (follow-up #32)", async () => {
+    const world = await setup();
+    world.locale("owner-1", "es-MX");
+    const matched = await invited(world);
+    expect(matched.acceptUrl).toBe(`${APP_URL}/es-419/invite#token=${matched.token}`);
+    expect(world.notified.at(-1)).toBe(matched.acceptUrl);
+
+    world.locale("owner-1", "ja-JP");
+    world.organizationLocale("org-a", "en-US");
+    const unsupported = await invited(world);
+    expect(unsupported.acceptUrl).toBe(`${APP_URL}/en-US/invite#token=${unsupported.token}`);
+
+    world.organizationLocale("org-a", "ja-JP");
+    const fallback = await invited(world);
+    expect(fallback.acceptUrl).toBe(`${APP_URL}/pt-BR/invite#token=${fallback.token}`);
   });
 
   it("refuses roles beyond the inviter's own permissions (escalation)", async () => {

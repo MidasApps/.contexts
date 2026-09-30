@@ -57,12 +57,23 @@ beforeEach(async () => {
 }, 30_000);
 
 describe("invitations routes (emulator)", () => {
+  it("localizes the accept link: the inviter's preference, else the organization default (follow-up #32)", { timeout: 30_000 }, async () => {
+    await firestore.collection(CORE_COLLECTIONS.organizations).doc(tenantId).update({ defaults: { locale: "en-US", timeZone: "America/New_York", currency: "USD" } });
+    const byDefault = await body(await invite());
+    expect(byDefault.data?.acceptUrl).toBe(`${EMULATOR_APP_URL}/en-US/invite#token=${tokenOf(byDefault)}`);
+
+    await firestore.collection(CORE_COLLECTIONS.users).doc("inv-owner").set({ preferences: { locale: "es-MX" } }, { merge: true });
+    const byPreference = await body(await invite("dora@example.com"));
+    expect(byPreference.data?.acceptUrl).toBe(`${EMULATOR_APP_URL}/es-419/invite#token=${tokenOf(byPreference)}`);
+  });
+
   it("creates (201 + accept link), lists without token or hash, previews, and accepts into a grant", { timeout: 30_000 }, async () => {
     const createdResponse = await invite();
     expect(createdResponse.status).toBe(201);
     const created = await body(createdResponse);
     const token = tokenOf(created);
-    expect(created.data?.acceptUrl).toBe(`${EMULATOR_APP_URL}/invite#token=${token}`);
+    // No preference and no organization default: the source locale (follow-up #32).
+    expect(created.data?.acceptUrl).toBe(`${EMULATOR_APP_URL}/pt-BR/invite#token=${token}`);
     expect(createdResponse.headers.get("location")).toBe(`/v1/invitations/${created.data?.invitation?.id}`);
 
     const listed = await harness.call("access.listInvitations", { method: "GET", path: `/v1/organizations/${tenantId}/invitations?status=pending`, as: "inv-owner" });

@@ -55,7 +55,9 @@ export const DEPENDENCY_POLICIES = [
     ],
   },
   { from: { element: { type: "client" } }, allow: [to("client"), to("contracts"), to("i18n")] },
-  { from: { element: { type: "services" } }, allow: [to("services"), to("contracts")] },
+  // i18n is a leaf (it imports nothing of the workspace) and owns the supported locales (decision 0013);
+  // services negotiates the locale of links it builds (decision 0030 A8).
+  { from: { element: { type: "services" } }, allow: [to("services"), to("contracts"), to("i18n")] },
   {
     from: { element: { type: "agents" } },
     allow: [to("agents"), to("contracts"), SERVICES_USE_CASE_ENTRY],

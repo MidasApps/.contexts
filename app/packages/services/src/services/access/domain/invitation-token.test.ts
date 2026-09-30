@@ -27,8 +27,8 @@ describe("invitation token", () => {
     expect(hashInvitationToken(token)).toBe(hash);
   });
 
-  it("puts the token in the fragment of `<app>/invite`, so it never reaches server logs", () => {
-    expect(buildAcceptUrl({ appUrl: "https://app.example.com/", token: "abc" })).toBe("https://app.example.com/invite#token=abc");
-    expect(buildAcceptUrl({ appUrl: "https://app.example.com/base", token: "abc" })).toBe("https://app.example.com/base/invite#token=abc");
+  it("puts the token in the fragment of `<app>/{locale}/invite`, so it never reaches server logs", () => {
+    expect(buildAcceptUrl({ appUrl: "https://app.example.com/", token: "abc", locale: "en-US" })).toBe("https://app.example.com/en-US/invite#token=abc");
+    expect(buildAcceptUrl({ appUrl: "https://app.example.com/base", token: "abc", locale: "pt-BR" })).toBe("https://app.example.com/base/pt-BR/invite#token=abc");
   });
 });

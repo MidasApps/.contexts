@@ -1628,7 +1628,7 @@
       "description": "Answer of invitation creation with the one-time accept link.",
       "examples": [
         {
-          "acceptUrl": "https://app.example.com/invite#token=Zx9Cv8Bn7Mm6Aa5Ss4Dd3Ff2Gg1Hh0Jj9Kk8Ll7Qq6W",
+          "acceptUrl": "https://app.example.com/pt-BR/invite#token=Zx9Cv8Bn7Mm6Aa5Ss4Dd3Ff2Gg1Hh0Jj9Kk8Ll7Qq6W",
           "invitation": {
             "acceptedByUid": null,
             "createdAt": "2026-09-29T14:30:00.000Z",
@@ -1654,7 +1654,7 @@
       ],
       "fields": [
         {
-          "description": "One-time link `<app>/invite#token=<token>`, returned only here.",
+          "description": "One-time link `<app>/{locale}/invite#token=<token>` in the inviter's locale (else the organization default), returned only here.",
           "name": "acceptUrl",
           "pii": "sensitive",
           "required": true
@@ -1672,7 +1672,7 @@
         "description": "Answer of invitation creation with the one-time accept link.",
         "examples": [
           {
-            "acceptUrl": "https://app.example.com/invite#token=Zx9Cv8Bn7Mm6Aa5Ss4Dd3Ff2Gg1Hh0Jj9Kk8Ll7Qq6W",
+            "acceptUrl": "https://app.example.com/pt-BR/invite#token=Zx9Cv8Bn7Mm6Aa5Ss4Dd3Ff2Gg1Hh0Jj9Kk8Ll7Qq6W",
             "invitation": {
               "acceptedByUid": null,
               "createdAt": "2026-09-29T14:30:00.000Z",
@@ -1698,7 +1698,7 @@
         ],
         "properties": {
           "acceptUrl": {
-            "description": "One-time link `<app>/invite#token=<token>`, returned only here.",
+            "description": "One-time link `<app>/{locale}/invite#token=<token>` in the inviter's locale (else the organization default), returned only here.",
             "format": "uri",
             "type": "string",
             "x-pii": "sensitive"

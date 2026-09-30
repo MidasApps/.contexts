@@ -153,3 +153,11 @@ Each item below is a policy choice; the code comments point here.
     page may hold fewer items than its limit.
   - **`GET /v1/me/context`** reads only the regional preferences of the users doc, leniently: a doc without
     `preferences` (or with unreadable ones) resolves with the node's settings instead of answering `500`.
+- **A8 — 2026-09-30 (follow-up #32): invitation links carry a locale.** `createInvitation` builds
+  `<app>/{locale}/invite#token=…` for both the `201` body and the notifier (e-mail), so the invitee opens the
+  page without a locale redirect. The locale is the inviter's `preferences.locale`, else the organization's
+  `defaults.locale`, each matched to a supported web locale with `negotiateLocale` from `@core/i18n` (RFC 4647
+  best fit: `es-MX` → `es-419`), else the source locale `pt-BR`. The invitee's own locale is unknown when the
+  link is made. `@core/services` now depends on `@core/i18n` for that list, through the subpaths `@core/i18n/locales` and `@core/i18n/negotiate-locale` (the root would also load every message catalog), and the workspace import boundaries (spec §3, `packages/config/eslint/boundaries.js`) now allow `services → i18n`: i18n is a leaf that imports nothing of the workspace and owns the supported locales (decision 0013). Both reads are lenient: a users or
+  organizations doc without a readable locale falls back instead of failing the invitation. The SP2 client's
+  `localizeAcceptUrl` returns a link that already carries a supported locale unchanged.
