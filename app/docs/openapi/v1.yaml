@@ -7967,6 +7967,43 @@ components:
           minLength: 1
           type: string
           x-pii: none
+        metadata:
+          additionalProperties: false
+          description: Allowlisted machine facts (hashes, codes, ids, duration); never free text.
+          properties:
+            durationMs:
+              description: How long the attempt took, in milliseconds.
+              maximum: 86400000
+              minimum: 0
+              type: integer
+              x-pii: none
+            errorCode:
+              description: Stable error code of a failed attempt.
+              pattern: ^[A-Z][A-Z0-9_]{0,63}$
+              type: string
+              x-pii: none
+            fingerprint:
+              description: Digest identifying a repeated action (dedup, budgets).
+              pattern: ^[a-f0-9]{16,128}$
+              type: string
+              x-pii: none
+            inputHash:
+              description: Digest of the action input (never the input).
+              pattern: ^[a-f0-9]{16,128}$
+              type: string
+              x-pii: none
+            runId:
+              description: Id of the agent or workflow run.
+              pattern: ^[A-Za-z0-9_-]{1,128}$
+              type: string
+              x-pii: none
+            toolId:
+              description: Id of the agent tool (`core.search`, `mcp:server/tool`).
+              pattern: ^[A-Za-z0-9][A-Za-z0-9_.:/-]{0,127}$
+              type: string
+              x-pii: none
+          type: object
+          x-pii: none
         node:
           description: Node the action happened at, when it has one.
           oneOf:
@@ -8044,10 +8081,12 @@ components:
           type: string
           x-pii: none
         outcome:
-          description: "`denied` records refused attempts."
+          description: success, denied (refused), failed (errored) or pending-approval.
           enum:
             - success
             - denied
+            - failed
+            - pending-approval
           type: string
           x-pii: none
         reason:
@@ -8311,6 +8350,43 @@ components:
           minLength: 1
           type: string
           x-pii: none
+        metadata:
+          additionalProperties: false
+          description: Allowlisted machine facts (hashes, codes, ids, duration); never free text.
+          properties:
+            durationMs:
+              description: How long the attempt took, in milliseconds.
+              maximum: 86400000
+              minimum: 0
+              type: integer
+              x-pii: none
+            errorCode:
+              description: Stable error code of a failed attempt.
+              pattern: ^[A-Z][A-Z0-9_]{0,63}$
+              type: string
+              x-pii: none
+            fingerprint:
+              description: Digest identifying a repeated action (dedup, budgets).
+              pattern: ^[a-f0-9]{16,128}$
+              type: string
+              x-pii: none
+            inputHash:
+              description: Digest of the action input (never the input).
+              pattern: ^[a-f0-9]{16,128}$
+              type: string
+              x-pii: none
+            runId:
+              description: Id of the agent or workflow run.
+              pattern: ^[A-Za-z0-9_-]{1,128}$
+              type: string
+              x-pii: none
+            toolId:
+              description: Id of the agent tool (`core.search`, `mcp:server/tool`).
+              pattern: ^[A-Za-z0-9][A-Za-z0-9_.:/-]{0,127}$
+              type: string
+              x-pii: none
+          type: object
+          x-pii: none
         node:
           description: Node the action happened at, when it has one.
           oneOf:
@@ -8388,10 +8464,12 @@ components:
           type: string
           x-pii: none
         outcome:
-          description: "`denied` records refused attempts."
+          description: success, denied (refused), failed (errored) or pending-approval.
           enum:
             - success
             - denied
+            - failed
+            - pending-approval
           type: string
           x-pii: none
         reason:

@@ -32,6 +32,43 @@ export const AuditTargetSchema = z.object({
   id: z.string().min(1).meta(personal("Id of the affected resource (may be a uid).")),
 });
 
+/**
+ * Result of the audited attempt: `denied` records refused attempts, `failed` attempts that
+ * errored, `pending-approval` actions waiting for a four-eyes decision (SP3 agent tools).
+ */
+export const AuditOutcomeSchema = z.enum(["success", "denied", "failed", "pending-approval"]);
+export type AuditOutcome = z.infer<typeof AuditOutcomeSchema>;
+
+// Hex digests only (sha256 = 64 chars): never the hashed value itself.
+const DigestSchema = z.string().regex(/^[a-f0-9]{16,128}$/, { error: "Expected a lower-case hex digest." });
+
+/**
+ * Machine facts an entry may carry besides its fields: an allowlist of keys with
+ * constrained values (hashes, codes, ids, a duration), so no free text or personal data
+ * fits. Unknown keys are refused, not stripped.
+ */
+export const AuditMetadataSchema = z.strictObject({
+  inputHash: DigestSchema.optional().meta(none("Digest of the action input (never the input).")),
+  fingerprint: DigestSchema.optional().meta(none("Digest identifying a repeated action (dedup, budgets).")),
+  errorCode: z
+    .string()
+    .regex(/^[A-Z][A-Z0-9_]{0,63}$/, { error: "Expected a SCREAMING_SNAKE error code." })
+    .optional()
+    .meta(none("Stable error code of a failed attempt.")),
+  toolId: z
+    .string()
+    .regex(/^[A-Za-z0-9][A-Za-z0-9_.:/-]{0,127}$/, { error: "Expected a tool id." })
+    .optional()
+    .meta(none("Id of the agent tool (`core.search`, `mcp:server/tool`).")),
+  runId: z
+    .string()
+    .regex(/^[A-Za-z0-9_-]{1,128}$/, { error: "Expected a run id." })
+    .optional()
+    .meta(none("Id of the agent or workflow run.")),
+  durationMs: z.int().min(0).max(86_400_000).optional().meta(none("How long the attempt took, in milliseconds.")),
+});
+export type AuditMetadata = z.infer<typeof AuditMetadataSchema>;
+
 /** Fields shared by tenant and platform entries; no email, token, secret or free text but `reason`. */
 const ENTRY_FIELDS = {
   id: AuditLogEntryIdSchema.meta(none("Automatic id of the entry.")),
@@ -40,11 +77,12 @@ const ENTRY_FIELDS = {
   actor: z.object(AuditActorSchema.shape).meta(personal("Who did it.")),
   target: z.object(AuditTargetSchema.shape).meta(personal("What it was done to.")),
   node: tenantNodeRefField("Node the action happened at, when it has one.").optional(),
-  outcome: z.enum(["success", "denied"]).meta(none("`denied` records refused attempts.")),
+  outcome: AuditOutcomeSchema.meta(none("success, denied (refused), failed (errored) or pending-approval.")),
   requestId: z.string().min(1).meta(none("Request id (X-Request-Id) to correlate with logs.")),
   traceId: z.string().min(1).optional().meta(none("Trace id, when tracing is on.")),
   changes: z.array(ChangedFieldSchema).max(100).optional().meta(none("Names of the changed fields; never values.")),
   reason: z.string().trim().min(1).max(500).optional().meta(personal("Reason given by the actor (impersonation, approvals).")),
+  metadata: AuditMetadataSchema.optional().meta(none("Allowlisted machine facts (hashes, codes, ids, duration); never free text.")),
 };
 
 /** Append-only tenant audit entry (`audit-logs`, SP1 spec §6.7). */

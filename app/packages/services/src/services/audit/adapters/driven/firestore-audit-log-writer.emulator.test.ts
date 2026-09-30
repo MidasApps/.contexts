@@ -55,6 +55,13 @@ describe("Firestore audit log writer", () => {
     expect((await business.get()).exists).toBe(true);
   });
 
+  it("stores and reads back the failed outcome with allowlisted metadata", async () => {
+    const failed = entry({ action: "AGENT_TOOL_EXECUTED", outcome: "failed", metadata: { toolId: "core.search", errorCode: "TOOL_TIMEOUT", durationMs: 1200 } });
+    const id = await audit.record(failed);
+    const read = (await tenantLog().withConverter(createContractConverter(AuditLogEntryContract)).doc(id).get()).data();
+    expect(read).toMatchObject({ outcome: "failed", metadata: { toolId: "core.search", errorCode: "TOOL_TIMEOUT", durationMs: 1200 } });
+  });
+
   it("drops the entry when the business transaction fails", async () => {
     await expect(
       runInTransaction(firestore, async (tx) => {

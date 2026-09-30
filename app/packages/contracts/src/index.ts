@@ -345,8 +345,9 @@ export { AUDIT_CONTRACTS } from "./contracts/audit/contracts.ts";
 export { AUDIT_ACTIONS, AuditActionSchema, type AuditAction } from "./contracts/audit/audit-action.schema.ts";
 export {
   AuditActorSchema, AuditActorTypeSchema, AuditLogEntryContract, AuditLogEntryIdSchema, AuditLogEntrySchema,
-  AuditTargetSchema, ChangedFieldSchema, PlatformAuditLogEntryContract, PlatformAuditLogEntrySchema, type AuditActorType,
-  type AuditLogEntry, type AuditLogEntryId, type PlatformAuditLogEntry,
+  AuditMetadataSchema, AuditOutcomeSchema, AuditTargetSchema, ChangedFieldSchema, PlatformAuditLogEntryContract,
+  PlatformAuditLogEntrySchema, type AuditActorType, type AuditLogEntry, type AuditLogEntryId, type AuditMetadata,
+  type AuditOutcome, type PlatformAuditLogEntry,
 } from "./contracts/audit/audit-log-entry.schema.ts";
 export { AuditLogQueryContract, AuditLogQuerySchema, type AuditLogQuery } from "./contracts/audit/audit-log-query.schema.ts";
 export { AUDIT_ENDPOINTS, listAuditLogsEndpoint } from "./contracts/audit/endpoints.ts";

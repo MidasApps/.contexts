@@ -95,6 +95,23 @@ describe("AuditWriter.record", () => {
     expect(writer.entries("tenant")).toEqual([]);
   });
 
+  it("writes allowlisted metadata and the failed / pending-approval outcomes", async () => {
+    const { writer, audit } = setup();
+    await audit.record(tenantEntry({ action: "AGENT_TOOL_EXECUTED", outcome: "failed", metadata: { toolId: "core.search", errorCode: "TOOL_TIMEOUT", durationMs: 30_000 } }));
+    await audit.record(tenantEntry({ action: "AGENT_TOOL_EXECUTED", outcome: "pending-approval", metadata: { inputHash: "b".repeat(64) } }));
+    expect(writer.entries("tenant").map((entry) => [entry.outcome, entry.metadata])).toEqual([
+      ["failed", { toolId: "core.search", errorCode: "TOOL_TIMEOUT", durationMs: 30_000 }],
+      ["pending-approval", { inputHash: "b".repeat(64) }],
+    ]);
+  });
+
+  it("rejects metadata outside the allowlist, and personal keys inside it, without writing", async () => {
+    const { writer, audit } = setup();
+    expect(await rejectionOf(audit.record(tenantEntry({ metadata: { prompt: "x" } })))).toEqual({ code: "AUDIT_ENTRY_INVALID", paths: ["metadata"] });
+    expect(await rejectionOf(audit.record(tenantEntry({ metadata: { userEmail: "a@b.c" } })))).toEqual({ code: "AUDIT_ENTRY_REJECTED", paths: ["metadata.userEmail"] });
+    expect(writer.entries("tenant")).toEqual([]);
+  });
+
   it("rejects an entry the contract refuses, naming paths only", async () => {
     const { audit } = setup();
     const rejection = await rejectionOf(audit.record(tenantEntry({ action: "SOMETHING_ELSE", changes: ["has space"] })));

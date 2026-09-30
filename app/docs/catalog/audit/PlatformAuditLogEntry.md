@@ -20,9 +20,10 @@ An append-only audit record of platform staff actions (impersonation, staff gran
 | `actor` | yes | `personal` | Who did it. |  |
 | `changes` | no | `none` | Names of the changed fields; never values. |  |
 | `id` | yes | `none` | Automatic id of the entry. |  |
+| `metadata` | no | `none` | Allowlisted machine facts (hashes, codes, ids, duration); never free text. |  |
 | `node` | no | `none` | Node the action happened at, when it has one. |  |
 | `occurredAt` | yes | `none` | When the action happened (UTC). |  |
-| `outcome` | yes | `none` | `denied` records refused attempts. |  |
+| `outcome` | yes | `none` | success, denied (refused), failed (errored) or pending-approval. |  |
 | `reason` | no | `personal` | Reason given by the actor (impersonation, approvals). |  |
 | `requestId` | yes | `none` | Request id (X-Request-Id) to correlate with logs. |  |
 | `target` | yes | `personal` | What it was done to. |  |

@@ -56,6 +56,22 @@ describe("AuditLogEntrySchema", () => {
     }
   });
 
+  it("records every outcome the agent runtime needs (success, denied, failed, pending-approval)", () => {
+    for (const outcome of ["success", "denied", "failed", "pending-approval"]) {
+      expect(AuditLogEntrySchema.safeParse({ ...entry, outcome }).success).toBe(true);
+    }
+    expect(AuditLogEntrySchema.safeParse({ ...entry, outcome: "maybe" }).success).toBe(false);
+  });
+
+  it("accepts metadata with allowlisted keys and safe values only", () => {
+    const metadata = { inputHash: "a".repeat(64), errorCode: "TOOL_TIMEOUT", fingerprint: "0f".repeat(16), toolId: "core.search", runId: "run_01K6B0", durationMs: 1250 };
+    expect(AuditLogEntrySchema.parse({ ...entry, metadata }).metadata).toEqual(metadata);
+    expect(AuditLogEntrySchema.safeParse({ ...entry, metadata: { prompt: "summarize the contract" } }).success).toBe(false);
+    expect(AuditLogEntrySchema.safeParse({ ...entry, metadata: { inputHash: "not a hash" } }).success).toBe(false);
+    expect(AuditLogEntrySchema.safeParse({ ...entry, metadata: { errorCode: "free text error" } }).success).toBe(false);
+    expect(AuditLogEntrySchema.safeParse({ ...entry, metadata: { durationMs: -1 } }).success).toBe(false);
+  });
+
   it("requires tenantId on tenant entries; platform entries carry targetTenantId instead", () => {
     expect(AuditLogEntrySchema.safeParse({ ...entry, tenantId: undefined }).success).toBe(false);
     expect(Object.keys(PlatformAuditLogEntrySchema.shape)).not.toContain("tenantId");
