@@ -128,3 +128,44 @@ export {
   type RoleReader,
   type UserStatusRecord,
 } from "./services/access/index.ts";
+// SP1 audit writer, rate limiter and idempotency store (Task 7).
+export {
+  AUDIT_LOG_COLLECTIONS,
+  AUDIT_LOG_SCHEMA_VERSION,
+  AuditEntryRejectedError,
+  createAuditServices,
+  createFirestoreAuditLogWriter,
+  createInMemoryAuditLogWriter,
+  makeRecordAudit,
+  type AuditEntryRejectedCode,
+  type AuditLogAppend,
+  type AuditLogWriter,
+  type AuditRecordInput,
+  type AuditServices,
+  type AuditTransaction,
+  type AuditWriter,
+  type InMemoryAuditLogWriter,
+  type PlatformAuditRecordInput,
+  type TenantAuditRecordInput,
+} from "./services/audit/index.ts";
+export { sha256Hex } from "./services/shared/crypto/sha256.ts";
+export {
+  getRateLimitPolicy,
+  RATE_LIMIT_POLICIES,
+  UnknownRateLimitPolicyError,
+  type RateLimitPolicy,
+  type RateLimitPolicyId,
+} from "./services/shared/rate-limit/rate-limit-policies.ts";
+export { rateLimitBucketId, type RateLimitDecision, type RateLimiter } from "./services/shared/rate-limit/rate-limiter.ts";
+export { createFirestoreRateLimiter, RATE_LIMIT_BUCKETS_COLLECTION } from "./services/shared/rate-limit/firestore-rate-limiter.ts";
+export { createInMemoryRateLimiter } from "./services/shared/rate-limit/in-memory-rate-limiter.ts";
+export { rateLimitedResponse, rateLimitHeaders } from "./services/shared/rate-limit/rate-limit-headers.ts";
+export {
+  idempotencyScopeKey,
+  type IdempotencyBegin,
+  type IdempotencyStore,
+  type StoredResponse,
+} from "./services/shared/idempotency/idempotency-store.ts";
+export { createFirestoreIdempotencyStore, IDEMPOTENCY_RECORDS_COLLECTION } from "./services/shared/idempotency/firestore-idempotency-store.ts";
+export { createInMemoryIdempotencyStore } from "./services/shared/idempotency/in-memory-idempotency-store.ts";
+export { canonicalJson, hashRequest } from "./services/shared/idempotency/request-hash.ts";

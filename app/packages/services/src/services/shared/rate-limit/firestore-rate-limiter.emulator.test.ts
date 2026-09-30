@@ -1,0 +1,58 @@
+import type { Timestamp } from "firebase-admin/firestore";
+import { beforeEach, describe, expect, it } from "vitest";
+import type { Clock } from "../clock/clock.ts";
+import { createFirebaseAdmin } from "../firebase/firebase-admin.ts";
+import { createFirestoreRateLimiter, RATE_LIMIT_BUCKETS_COLLECTION } from "./firestore-rate-limiter.ts";
+import type { RateLimitPolicy } from "./rate-limit-policies.ts";
+import { rateLimitBucketId } from "./rate-limiter.ts";
+
+// Runs inside `firebase emulators:exec`, which exports FIRESTORE_EMULATOR_HOST.
+const { firestore } = createFirebaseAdmin({
+  env: { APP_ENV: "local", FIREBASE_PROJECT_ID: "demo-core" },
+  processEnv: process.env,
+});
+
+const policies: RateLimitPolicy[] = [{ id: "test-five-per-minute", limit: 5, windowMs: 60_000, subject: "ip", counts: "requests" }];
+
+const movableClock = (iso: string) => {
+  let current = Date.parse(iso);
+  const clock: Clock = { now: () => new Date(current) };
+  return {
+    clock,
+    advance: (ms: number) => {
+      current += ms;
+    },
+  };
+};
+
+beforeEach(async () => {
+  await firestore.recursiveDelete(firestore.collection(RATE_LIMIT_BUCKETS_COLLECTION));
+});
+
+describe("Firestore rate limiter", () => {
+  it("stores a hashed bucket with a TTL field and resets it when the window elapses", async () => {
+    const { clock, advance } = movableClock("2026-09-29T12:00:00.000Z");
+    const limiter = createFirestoreRateLimiter({ firestore, clock, policies });
+    const allowed: boolean[] = [];
+    for (let index = 0; index < 6; index += 1) allowed.push((await limiter.consume("test-five-per-minute", "10.0.0.1")).allowed);
+    expect(allowed).toEqual([true, true, true, true, true, false]);
+
+    const stored = (await firestore.collection(RATE_LIMIT_BUCKETS_COLLECTION).doc(rateLimitBucketId("test-five-per-minute", "10.0.0.1")).get()).data();
+    expect(stored).toMatchObject({ policyId: "test-five-per-minute", count: 5 });
+    expect((stored?.["expiresAt"] as Timestamp).toDate().toISOString()).toBe("2026-09-29T12:01:00.000Z");
+    expect(JSON.stringify(stored)).not.toContain("10.0.0.1");
+
+    advance(60_000);
+    expect(await limiter.consume("test-five-per-minute", "10.0.0.1")).toMatchObject({ allowed: true, remaining: 4 });
+    expect((await limiter.peek("test-five-per-minute", "10.0.0.1")).remaining).toBe(4);
+  });
+
+  it("counts concurrent hits exactly", async () => {
+    const { clock } = movableClock("2026-09-29T12:00:00.000Z");
+    const limiter = createFirestoreRateLimiter({ firestore, clock, policies });
+    const results = await Promise.all(Array.from({ length: 8 }, () => limiter.consume("test-five-per-minute", "10.0.0.2")));
+    expect(results.filter((result) => result.allowed)).toHaveLength(5);
+    const stored = await firestore.collection(RATE_LIMIT_BUCKETS_COLLECTION).doc(rateLimitBucketId("test-five-per-minute", "10.0.0.2")).get();
+    expect(stored.get("count")).toBe(5);
+  });
+});
