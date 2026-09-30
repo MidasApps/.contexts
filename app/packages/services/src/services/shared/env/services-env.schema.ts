@@ -57,6 +57,8 @@ const BaseServicesEnvSchema = z.object({
   API_KEY_PREFIX: z.string().regex(/^[a-z]{2,12}$/, { error: "expected 2-12 lower-case letters" }).default("core"),
   ORGANIZATION_SELF_SERVE: BooleanStringSchema.default(true),
   MFA_FACTORS: MfaFactorsSchema.default(["totp"]),
+  // Proxies in front of the app that append X-Forwarded-For entries (decision 0030 §2).
+  TRUSTED_PROXY_HOPS: z.coerce.number().int().min(0).max(5).default(1),
 });
 
 type BaseServicesEnv = z.infer<typeof BaseServicesEnvSchema>;

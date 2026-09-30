@@ -91,7 +91,13 @@ type CoreServerArgs = {
    * `ORGANIZATION_SELF_SERVE` defaults to true (SP1 spec §6.1); `NEXT_PUBLIC_APP_URL` builds
    * invitation links (a server without it refuses to create invitations).
    */
-  env: { readonly API_KEY_PREFIX: string; readonly ORGANIZATION_SELF_SERVE?: boolean; readonly NEXT_PUBLIC_APP_URL?: string };
+  env: {
+    readonly API_KEY_PREFIX: string;
+    readonly ORGANIZATION_SELF_SERVE?: boolean;
+    readonly NEXT_PUBLIC_APP_URL?: string;
+    /** Per-IP rate limits read the client IP behind this many trusted proxies (default 1). */
+    readonly TRUSTED_PROXY_HOPS?: number;
+  };
   firebase: FirebaseAdmin;
   logger: Logger;
   clock?: Clock;
@@ -189,6 +195,7 @@ export const createCoreServer = (args: CoreServerArgs): CoreServer => {
     idempotency: createFirestoreIdempotencyStore({ firestore, clock }),
     verifyBearer,
     apiKeyPrefix: args.env.API_KEY_PREFIX,
+    ...(args.env.TRUSTED_PROXY_HOPS === undefined ? {} : { trustedProxyHops: args.env.TRUSTED_PROXY_HOPS }),
     access: access.core,
     audit,
   };

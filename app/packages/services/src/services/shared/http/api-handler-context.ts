@@ -24,7 +24,7 @@ export type ApiHandlerContext<E extends EndpointDefinition> = {
   /** Access use cases bound to this request's memoized reads (authorize, effective permissions). */
   readonly scope: RequestAccess;
   readonly audit: AuditWriter;
-  /** Rightmost `X-Forwarded-For` entry (see `clientIpOf`). */
+  /** `X-Forwarded-For` entry of the outermost trusted proxy (see `clientIpOf`). */
   readonly clientIp: string;
   readonly logger: Logger;
   /** The raw request, already consumed for its body; for headers only. */

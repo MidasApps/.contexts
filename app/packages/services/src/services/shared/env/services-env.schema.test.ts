@@ -106,6 +106,7 @@ describe("ServicesEnvSchema", () => {
       API_KEY_PREFIX: "core",
       ORGANIZATION_SELF_SERVE: true,
       MFA_FACTORS: ["totp"],
+      TRUSTED_PROXY_HOPS: 1,
     });
   });
 
@@ -117,6 +118,7 @@ describe("ServicesEnvSchema", () => {
       API_KEY_PREFIX: "acme",
       ORGANIZATION_SELF_SERVE: "false",
       MFA_FACTORS: "phone, totp,phone",
+      TRUSTED_PROXY_HOPS: "2",
     };
     expect(loadServicesEnv(source)).toMatchObject({
       SESSION_MAX_AGE_DAYS: 14,
@@ -124,6 +126,7 @@ describe("ServicesEnvSchema", () => {
       API_KEY_PREFIX: "acme",
       ORGANIZATION_SELF_SERVE: false,
       MFA_FACTORS: ["phone", "totp"],
+      TRUSTED_PROXY_HOPS: 2,
     });
   });
 
@@ -135,6 +138,7 @@ describe("ServicesEnvSchema", () => {
       API_KEY_PREFIX: "Core_1",
       ORGANIZATION_SELF_SERVE: "yes",
       MFA_FACTORS: "totp,email",
+      TRUSTED_PROXY_HOPS: "6",
     };
     expect(issuePaths(source)).toEqual([
       "SESSION_MAX_AGE_DAYS",
@@ -142,6 +146,7 @@ describe("ServicesEnvSchema", () => {
       "API_KEY_PREFIX",
       "ORGANIZATION_SELF_SERVE",
       "MFA_FACTORS.1",
+      "TRUSTED_PROXY_HOPS",
     ]);
   });
 

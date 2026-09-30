@@ -14,7 +14,7 @@ import type { ApiHandler, EndpointPrincipal } from "./api-handler-context.ts";
 import { beginIdempotentAttempt, principalKey, replayResponse } from "./api-idempotency.ts";
 import { createRateLimitGate, isCallerFailure, type RateLimitGate } from "./api-rate-limit.ts";
 import { authenticateRequest } from "./authenticate-request.ts";
-import { clientIpOf } from "./client-ip.ts";
+import { clientIpOf, DEFAULT_TRUSTED_PROXY_HOPS } from "./client-ip.ts";
 import { readRequestInput } from "./request-input.ts";
 import { withRouteBoundary, type RouteHandler } from "./route-boundary.ts";
 
@@ -28,6 +28,8 @@ export type ApiRouteDeps = {
   readonly idempotency: IdempotencyStore;
   readonly verifyBearer: VerifyBearer;
   readonly apiKeyPrefix: string;
+  /** `TRUSTED_PROXY_HOPS`: which `X-Forwarded-For` entry is the client IP (default 1). */
+  readonly trustedProxyHops?: number;
   readonly access: { readonly forRequest: () => RequestAccess };
   readonly audit: AuditWriter;
 };
@@ -137,5 +139,5 @@ const runPipeline = async <E extends EndpointDefinition>(run: Pipeline<E>): Prom
  */
 export const withApiRoute = <E extends EndpointDefinition>(endpoint: E, deps: ApiRouteDeps, handler: ApiHandler<E>): RouteHandler =>
   withRouteBoundary({ operation: operationName(endpoint.id), logger: deps.logger }, (request, { requestId }) =>
-    runPipeline({ endpoint, deps, handler, request, requestId, clientIp: clientIpOf(request) }),
+    runPipeline({ endpoint, deps, handler, request, requestId, clientIp: clientIpOf(request, { trustedProxyHops: deps.trustedProxyHops ?? DEFAULT_TRUSTED_PROXY_HOPS }) }),
   );
