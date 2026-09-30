@@ -7,3 +7,6 @@
 - 2026-09-29 | Task 4 complete | commits: 1931a86 | review: pending
 - 2026-09-29 | Task 5 complete | commits: 5d35ef5, ee022d5 | review: pending
 - 2026-09-29 | Task 6 complete | commits: 2559088 | review: pending
+- 2026-09-30 | Review fixes Tasks 4-6 (fail-open gaps) | commits: 8f996ff, 554a9de | review: pending
+- 2026-09-30 | Task 7 complete | commits: 2e22fc5 (coverage-v8), b86f3e8 | review: pending
+- 2026-09-30 | Task 8 complete | commits: 91f2129 | review: pending
