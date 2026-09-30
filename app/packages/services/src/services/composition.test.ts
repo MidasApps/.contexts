@@ -24,7 +24,7 @@ const build = () =>
     firebase,
     logger,
     clock: fixedClock("2026-09-29T12:00:00.000Z"),
-    modules: [{ id: "sample", permissions: [samplePermission] }],
+    modules: [{ id: "sample", permissions: [samplePermission], unitTypes: [{ id: "sample.site", labelKey: "sample.unitTypes.site", allowedParents: ["project"] }] }],
   });
 
 describe("createCoreServer", () => {
@@ -38,6 +38,29 @@ describe("createCoreServer", () => {
     expect(Object.keys(build().routes)).toEqual(
       expect.arrayContaining(["access.listPermissions", "access.listRoles", "access.createRole", "access.getRole", "access.updateRole", "access.deleteRole"]),
     );
+    expect(Object.keys(build().routes)).toEqual(
+      expect.arrayContaining([
+        "tenancy.createOrganization",
+        "tenancy.getOrganization",
+        "tenancy.updateOrganization",
+        "tenancy.deleteOrganization",
+        "tenancy.listProjects",
+        "tenancy.createProject",
+        "tenancy.getProject",
+        "tenancy.updateProject",
+        "tenancy.deleteProject",
+        "tenancy.listUnits",
+        "tenancy.createUnit",
+        "tenancy.getUnit",
+        "tenancy.updateUnit",
+        "tenancy.deleteUnit",
+        "tenancy.listUnitTypes",
+      ]),
+    );
+  });
+
+  it("registers the unit types of the installed modules", () => {
+    expect(build().tenancy.unitTypes.list().map((type) => type.id)).toEqual(["sample.site"]);
   });
 
   it("refuses API keys until their authenticator is wired, without touching Firebase", async () => {

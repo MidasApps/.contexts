@@ -1,6 +1,6 @@
 // Composition root of the core server: builds every adapter once per process and binds the
 // `/v1` pipeline, the access core, the access write side and the audit writer. Apps call it lazily.
-import type { PermissionDefinition } from "@core/contracts";
+import type { PermissionDefinition, UnitTypeDefinition } from "@core/contracts";
 import { createFirestoreAccessAdapters, type FirestoreAccessAdapters } from "./access/adapters/driven/firestore-access-adapters.ts";
 import type { AccessReaders } from "./access/application/ports/driven/access-readers.ts";
 import { makeSyncClaims } from "./access/application/use-cases/sync-claims.ts";
@@ -11,6 +11,7 @@ import { buildCoreRoutes, type CoreRoutes } from "./core-routes.ts";
 import { createFirebaseTokenVerifier } from "./identity/adapters/driven/firebase-token-verifier.ts";
 import { refuseAllApiKeys, type ApiKeyAuthenticator } from "./identity/application/ports/driven/api-key-authenticator.ts";
 import type { TokenVerifier } from "./identity/application/ports/driven/token-verifier.ts";
+import { createFirebaseUserAccountReader } from "./identity/adapters/driven/firebase-user-account-reader.ts";
 import { makeVerifyBearer, type VerifyBearer } from "./identity/application/use-cases/resolve-principal.ts";
 import { systemClock, type Clock } from "./shared/clock/clock.ts";
 import type { FirebaseAdmin } from "./shared/firebase/firebase-admin.ts";
@@ -19,11 +20,18 @@ import type { ApiRouteDeps } from "./shared/http/api-route.ts";
 import { createFirestoreIdempotencyStore } from "./shared/idempotency/firestore-idempotency-store.ts";
 import type { Logger } from "./shared/observability/logger.ts";
 import { createFirestoreRateLimiter } from "./shared/rate-limit/firestore-rate-limiter.ts";
+import { createFirestoreTenancyAdapters, type FirestoreTenancyAdapters } from "./tenancy/adapters/driven/firestore-tenancy-adapters.ts";
+import { createTenancyServices, type TenancyServices } from "./tenancy/composition.ts";
 
 export { createRouteResolver, UnknownEndpointError, type CoreRoutes } from "./core-routes.ts";
 
 /** What a module contributes to the server; a `defineModule` manifest (decision 0015) satisfies it. */
-export type CoreServerModule = { readonly id: string; readonly permissions?: readonly PermissionDefinition[] };
+export type CoreServerModule = {
+  readonly id: string;
+  readonly permissions?: readonly PermissionDefinition[];
+  /** Unit types for tenancy (`createTenancyServices({ unitTypes })`, SP1 Task 10 wires them). */
+  readonly unitTypes?: readonly UnitTypeDefinition[] | undefined;
+};
 
 /** Adapters a caller may replace (tests, and later tasks until their Firestore adapters land). */
 export type CoreServerAdapters = {
@@ -34,6 +42,7 @@ export type CoreServerAdapters = {
   readonly apiKeyAuthenticator?: ApiKeyAuthenticator;
   /** Emulator route tests pass `createFakeTokenVerifier` (the Auth Emulator always checks revocation). */
   readonly tokenVerifier?: TokenVerifier;
+  readonly tenancy?: FirestoreTenancyAdapters;
 };
 
 export type CoreServer = {
@@ -44,13 +53,16 @@ export type CoreServer = {
   readonly access: AccessCore;
   /** Access write side: grants, roles, claims sync (SP1 Task 9). */
   readonly accessServices: AccessServices;
+  /** Organizations, projects, units and regional settings (SP1 Task 10). */
+  readonly tenancy: TenancyServices;
   readonly audit: AuditWriter;
   /** The dependencies every `withApiRoute` of this server shares. */
   readonly pipeline: ApiRouteDeps;
 };
 
 type CoreServerArgs = {
-  env: { readonly API_KEY_PREFIX: string };
+  /** `ORGANIZATION_SELF_SERVE` defaults to true (SP1 spec §6.1). */
+  env: { readonly API_KEY_PREFIX: string; readonly ORGANIZATION_SELF_SERVE?: boolean };
   firebase: FirebaseAdmin;
   logger: Logger;
   clock?: Clock;
@@ -83,18 +95,34 @@ const buildAccess = (args: CoreServerArgs, clock: Clock, audit: AuditWriter) => 
   return { core, services };
 };
 
+const buildTenancy = (args: CoreServerArgs, clock: Clock, audit: AuditWriter, access: AccessServices): TenancyServices => {
+  const { firestore, auth } = args.firebase;
+  return createTenancyServices({
+    unitTypes: (args.modules ?? []).flatMap((module) => module.unitTypes ?? []),
+    ...(args.adapters?.tenancy ?? createFirestoreTenancyAdapters({ firestore })),
+    access,
+    accounts: createFirebaseUserAccountReader({ auth }),
+    audit,
+    unitOfWork: createFirestoreUnitOfWork({ firestore }),
+    clock,
+    selfServe: args.env.ORGANIZATION_SELF_SERVE ?? true,
+  });
+};
+
 /**
  * Builds the core server once per process. Adapters keep references only, so building
  * touches neither Firestore nor Auth.
  * @param env `API_KEY_PREFIX` of the validated services env.
  * @param modules installed modules (their permissions join the registry).
  * @throws {PermissionRegistryError} when module permissions conflict (startup bug).
+ * @throws {UnitTypeRegistryError} when module unit types conflict (startup bug).
  */
 export const createCoreServer = (args: CoreServerArgs): CoreServer => {
   const clock = args.clock ?? systemClock;
   const { firestore, auth } = args.firebase;
   const audit = makeRecordAudit({ writer: createFirestoreAuditLogWriter({ firestore }), clock });
   const access = buildAccess(args, clock, audit);
+  const tenancy = buildTenancy(args, clock, audit, access.services);
   const verifyBearer = makeVerifyBearer({
     tokenVerifier: args.adapters?.tokenVerifier ?? createFirebaseTokenVerifier({ auth }),
     apiKeyAuthenticator: args.adapters?.apiKeyAuthenticator ?? refuseAllApiKeys,
@@ -110,6 +138,6 @@ export const createCoreServer = (args: CoreServerArgs): CoreServer => {
     access: access.core,
     audit,
   };
-  const routes = buildCoreRoutes({ pipeline, access: access.services });
-  return { routes, verifyBearer, access: access.core, accessServices: access.services, audit, pipeline };
+  const routes = buildCoreRoutes({ pipeline, access: access.services, tenancy });
+  return { routes, verifyBearer, access: access.core, accessServices: access.services, tenancy, audit, pipeline };
 };

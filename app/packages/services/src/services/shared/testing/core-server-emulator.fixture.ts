@@ -22,6 +22,16 @@ export const seedActiveUser = async (firestore: Firestore, uid: string): Promise
   await firestore.collection(CORE_COLLECTIONS.users).doc(uid).set({ status: "active", accessVersion: 0, lastContext: {} });
 };
 
+/** Makes sure an Auth Emulator account with an email exists (createOrganization reads its profile). */
+export const ensureAuthUser = async (auth: FirebaseAdmin["auth"], uid: string): Promise<void> => {
+  try {
+    await auth.getUser(uid);
+  } catch {
+    // auth/user-not-found: create it; any other failure resurfaces in createUser.
+    await auth.createUser({ uid, email: `${uid}@example.com`, displayName: uid });
+  }
+};
+
 type CallArgs = { readonly method: string; readonly path: string; readonly as?: string; readonly body?: unknown };
 
 /**
@@ -32,18 +42,18 @@ export const buildEmulatorServer = (args: {
   firebase: FirebaseAdmin;
   uids: readonly string[];
   modules?: readonly CoreServerModule[];
-  build?: (base: Parameters<typeof createCoreServer>[0]) => CoreServer;
-}) => {
+  selfServe?: boolean;
+}): { server: CoreServer; call: (endpointId: string, request: CallArgs) => Promise<Response>; logs: LogRecord[] } => {
   const logs: LogRecord[] = [];
   const tokens = Object.fromEntries(args.uids.map((uid) => [`token-${uid}`, { uid, claims: {}, signInProvider: "password", secondFactor: null }]));
   const base = {
-    env: { API_KEY_PREFIX: "core" },
+    env: { API_KEY_PREFIX: "core", ORGANIZATION_SELF_SERVE: args.selfServe ?? true },
     firebase: args.firebase,
     logger: createLogger({ context: { service: "test", env: "local" }, sink: (record) => logs.push(record) }),
     ...(args.modules === undefined ? {} : { modules: args.modules }),
     adapters: { tokenVerifier: createFakeTokenVerifier({ tokens }) },
   };
-  const server = (args.build ?? createCoreServer)(base);
+  const server = createCoreServer(base);
   const call = async (endpointId: string, request: CallArgs): Promise<Response> => {
     const handler = server.routes[endpointId];
     if (handler === undefined) throw new Error(`no handler for ${endpointId}`);

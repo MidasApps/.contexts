@@ -1,6 +1,11 @@
 import { CORE_ENDPOINTS } from "@core/contracts";
 import { buildRolesRoutes } from "./access/adapters/driving/roles-routes.ts";
 import type { AccessServices } from "./access/composition.ts";
+import { buildOrganizationsRoutes } from "./tenancy/adapters/driving/organizations-routes.ts";
+import { buildProjectsRoutes } from "./tenancy/adapters/driving/projects-routes.ts";
+import { buildUnitTypesRoutes } from "./tenancy/adapters/driving/unit-types-routes.ts";
+import { buildUnitsRoutes } from "./tenancy/adapters/driving/units-routes.ts";
+import type { TenancyServices } from "./tenancy/composition.ts";
 import type { ApiRouteDeps } from "./shared/http/api-route.ts";
 import { errorResponse } from "./shared/http/error-envelope.ts";
 import type { RouteHandler } from "./shared/http/route-boundary.ts";
@@ -11,7 +16,7 @@ import { REQUEST_ID_HEADER, resolveRequestId } from "./shared/observability/requ
 export type CoreRoutes = Readonly<Record<string, RouteHandler>>;
 
 /** What the verticals of the route table need. */
-export type CoreRouteDeps = { readonly pipeline: ApiRouteDeps; readonly access: AccessServices };
+export type CoreRouteDeps = { readonly pipeline: ApiRouteDeps; readonly access: AccessServices; readonly tenancy: TenancyServices };
 
 /**
  * The `/v1` route table. Each vertical (SP1 Tasks 9–18) adds its handlers here with
@@ -20,6 +25,10 @@ export type CoreRouteDeps = { readonly pipeline: ApiRouteDeps; readonly access: 
  */
 export const buildCoreRoutes = (deps: CoreRouteDeps): CoreRoutes => ({
   ...buildRolesRoutes(deps),
+  ...buildOrganizationsRoutes(deps),
+  ...buildProjectsRoutes(deps),
+  ...buildUnitsRoutes(deps),
+  ...buildUnitTypesRoutes(deps),
 });
 
 /** Bug: a route file names an endpoint id that no descriptor declares. */

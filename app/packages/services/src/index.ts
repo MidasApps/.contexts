@@ -165,6 +165,32 @@ export { CORE_COLLECTIONS, CORE_SCHEMA_VERSION } from "./services/shared/firesto
 export { decodeCursor, encodeCursor, type CursorPosition } from "./services/shared/pagination/cursor.ts";
 export { pageMeta, paginateInMemory, type Page, type PageRequest } from "./services/shared/pagination/page.ts";
 export { err, ok, type Result } from "./services/shared/result/result.ts";
+// SP1 tenancy (Task 10): organizations, projects, the unit tree, regional settings.
+export {
+  createFirestoreTenancyAdapters,
+  createInMemoryTenancyStore,
+  createTenancyServices,
+  createUnitTypeRegistry,
+  type FirestoreTenancyAdapters,
+  type InMemoryTenancyStore,
+  InvalidUnitParentError,
+  type InvalidUnitParentReason,
+  MAX_SUBTREE_REWRITE,
+  type OrganizationRepository,
+  type ProjectRepository,
+  resolveRegionalSettings,
+  type ResolveNodeRegionalSettings,
+  SubtreeTooLargeError,
+  type TenancyDeps,
+  TenancyNotFoundError,
+  type TenancyServices,
+  type UnitRepository,
+  type UnitTypeRegistry,
+  UnitTypeRegistryError,
+  UserAccountMissingError,
+} from "./services/tenancy/index.ts";
+export { createFirebaseUserAccountReader } from "./services/identity/adapters/driven/firebase-user-account-reader.ts";
+export type { UserAccountReader } from "./services/identity/application/ports/driven/user-account-reader.ts";
 // SP1 audit writer, rate limiter and idempotency store (Task 7).
 export {
   AUDIT_LOG_COLLECTIONS,

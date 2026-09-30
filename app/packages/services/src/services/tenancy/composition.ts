@@ -1,0 +1,64 @@
+// Composition root of the tenancy context: organizations, projects, the unit tree and
+// regional settings. The unit type registry is built once from the modules' manifests.
+import type { UnitTypeDefinition } from "@core/contracts";
+import type { TenancyDeps } from "./application/tenancy-deps.ts";
+import { makeCreateOrganization, type CreateOrganization } from "./application/use-cases/create-organization.ts";
+import { makeCreateUnit, type CreateUnit } from "./application/use-cases/create-unit.ts";
+import { makeDeleteOrganization, type DeleteOrganization } from "./application/use-cases/delete-organization.ts";
+import { makeGetOrganization, type GetOrganization } from "./application/use-cases/get-organization.ts";
+import { makeListProjects, type ListProjects } from "./application/use-cases/list-projects.ts";
+import { makeListUnits, type ListUnits } from "./application/use-cases/list-units.ts";
+import { makeCreateProject, makeDeleteProject, makeGetProject, makeUpdateProject } from "./application/use-cases/project-use-cases.ts";
+import { makeResolveNodeRegionalSettings, type ResolveNodeRegionalSettings } from "./application/use-cases/resolve-regional-settings.ts";
+import { makeDeleteUnit, makeGetUnit, makeListUnitTypes } from "./application/use-cases/unit-use-cases.ts";
+import { makeUpdateOrganization, type UpdateOrganization } from "./application/use-cases/update-organization.ts";
+import { makeUpdateUnit, type UpdateUnit } from "./application/use-cases/update-unit.ts";
+import { createUnitTypeRegistry, type UnitTypeRegistry } from "./domain/unit-type-registry.ts";
+
+export type TenancyServices = {
+  readonly unitTypes: UnitTypeRegistry;
+  readonly createOrganization: CreateOrganization;
+  readonly getOrganization: GetOrganization;
+  readonly updateOrganization: UpdateOrganization;
+  readonly deleteOrganization: DeleteOrganization;
+  readonly listProjects: ListProjects;
+  readonly createProject: ReturnType<typeof makeCreateProject>;
+  readonly getProject: ReturnType<typeof makeGetProject>;
+  readonly updateProject: ReturnType<typeof makeUpdateProject>;
+  readonly deleteProject: ReturnType<typeof makeDeleteProject>;
+  readonly listUnits: ListUnits;
+  readonly createUnit: CreateUnit;
+  readonly getUnit: ReturnType<typeof makeGetUnit>;
+  readonly updateUnit: UpdateUnit;
+  readonly deleteUnit: ReturnType<typeof makeDeleteUnit>;
+  readonly listUnitTypes: ReturnType<typeof makeListUnitTypes>;
+  readonly resolveRegionalSettings: ResolveNodeRegionalSettings;
+};
+
+/**
+ * Binds the tenancy use cases (SP1 Task 10). SP2 passes the unit types of the installed
+ * modules; the core registers none.
+ * @throws {UnitTypeRegistryError} when the unit types conflict (startup bug).
+ */
+export const createTenancyServices = (args: { unitTypes: readonly UnitTypeDefinition[] } & Omit<TenancyDeps, "unitTypes">): TenancyServices => {
+  const deps: TenancyDeps = { ...args, unitTypes: createUnitTypeRegistry(args.unitTypes) };
+  return {
+    unitTypes: deps.unitTypes,
+    createOrganization: makeCreateOrganization(deps),
+    getOrganization: makeGetOrganization(deps),
+    updateOrganization: makeUpdateOrganization(deps),
+    deleteOrganization: makeDeleteOrganization(deps),
+    listProjects: makeListProjects(deps),
+    createProject: makeCreateProject(deps),
+    getProject: makeGetProject(deps),
+    updateProject: makeUpdateProject(deps),
+    deleteProject: makeDeleteProject(deps),
+    listUnits: makeListUnits(deps),
+    createUnit: makeCreateUnit(deps),
+    getUnit: makeGetUnit(deps),
+    updateUnit: makeUpdateUnit(deps),
+    deleteUnit: makeDeleteUnit(deps),
+    listUnitTypes: makeListUnitTypes(deps),
+    resolveRegionalSettings: makeResolveNodeRegionalSettings(deps),
+  };
+};

@@ -11,6 +11,7 @@ export { UnknownPermissionError } from "./domain/errors/unknown-permission-error
 export { UnknownRoleError } from "./domain/errors/unknown-role-error.ts";
 export { customRoleIdsOf, holdsOwner, resolveRolePermissions, unknownTenantPermissions } from "./domain/role-permissions.ts";
 export type { AccessWriteDeps } from "./application/access-write-deps.ts";
+export { checkGrantable, requireNoEscalation, requirePermission, type GrantCheckError } from "./application/grant-checks.ts";
 export type { GrantPlan, PrepareGrantArgs } from "./application/membership-writes.ts";
 export type { AccessProjectionStore } from "./application/ports/driven/access-projection-writer.ts";
 export { CORE_CLAIM_KEYS, type ClaimsWriter, type CoreClaims } from "./application/ports/driven/claims-writer.ts";
