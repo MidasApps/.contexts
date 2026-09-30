@@ -59,6 +59,13 @@ describe("grantMembership", () => {
     expect(result).toMatchObject({ ok: false, error: { code: "ACCESS_DENIED", reason: "PERMISSION_NOT_GRANTED" } });
   });
 
+  it("refuses a grantee without a users doc (404), so no grant points at nobody", async () => {
+    const world = await setup();
+    const result = await world.services.grantMembership(grantCommand(world, { principal: { type: "user", id: "ghost" } }));
+    expect(result).toMatchObject({ ok: false, error: { code: "NOT_FOUND", resource: "user" } });
+    expect(world.writes.allMemberships().some((m) => m.principalId === "ghost")).toBe(false);
+  });
+
   it("refuses a node outside the route's organization", async () => {
     const world = await setup();
     const result = await world.services.grantMembership(grantCommand(world, { node: nodes.orgB }));

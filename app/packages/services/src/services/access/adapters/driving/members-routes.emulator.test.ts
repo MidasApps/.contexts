@@ -78,6 +78,16 @@ describe("members routes (emulator)", () => {
     expect((await remove("mem-owner", "mem-bruno")).status).toBe(404);
   });
 
+  it("answers 404 to a grant for a user without a users doc", { timeout: 30_000 }, async () => {
+    const response = await harness.call("access.grantMembership", {
+      method: "POST",
+      path: `/v1/organizations/${tenantId}/memberships`,
+      as: "mem-owner",
+      body: { userId: "mem-nobody", node: orgNode, roles: [{ kind: "system", key: "viewer" }] },
+    });
+    expect(response.status).toBe(404);
+  });
+
   it("lists, grants (201), updates (200) and revokes (204) memberships", { timeout: 30_000 }, async () => {
     const granted = await harness.call("access.grantMembership", {
       method: "POST",

@@ -109,6 +109,8 @@ export type PrepareGrantArgs = PrincipalRef & {
 export const prepareGrant = async (tx: Transaction, deps: Deps, args: PrepareGrantArgs): Promise<Result<GrantPlan, MembershipExistsError | AccessNotFoundError>> => {
   const state = await readPrincipalState(tx, deps, { ...args, tenantCreated: args.organizationCreated === true });
   if (!state.tenantLive) return err(organizationGone());
+  // A user grantee must exist (its users doc), unless this grant creates the doc.
+  if (args.principal.type === "user" && state.user === null && args.newUser === undefined) return err(new AccessNotFoundError("user"));
   const nodeId = nodeIdOf(args.node);
   const existing = state.live.find((grant) => nodeIdOf(grant.node) === nodeId);
   if (existing !== undefined) return err(new MembershipExistsError(existing.id));

@@ -64,6 +64,7 @@ const seedTree = async () => {
     firestore.collection(CORE_COLLECTIONS.units).doc("u1").set({ ...alive, projectId: "p1", ancestorIds: [] }),
     firestore.collection(CORE_COLLECTIONS.units).doc("u1a").set({ ...alive, projectId: "p1", ancestorIds: ["u1"] }),
     seedActiveUser(firestore, "u2"),
+    seedActiveUser(firestore, "u3"),
   ]);
 };
 
