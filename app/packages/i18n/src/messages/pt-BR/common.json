@@ -1,0 +1,22 @@
+{
+  "actions": {
+    "save": "Salvar",
+    "cancel": "Cancelar",
+    "close": "Fechar",
+    "confirm": "Confirmar",
+    "continue": "Continuar",
+    "back": "Voltar",
+    "retry": "Tentar novamente",
+    "edit": "Editar",
+    "delete": "Excluir",
+    "create": "Criar"
+  },
+  "states": {
+    "loading": "Carregando…",
+    "saving": "Salvando…",
+    "saved": "Alterações salvas.",
+    "offline": "Você está sem conexão. Algumas ações ficam indisponíveis até a conexão voltar."
+  },
+  "errorWithReference": "Algo deu errado. Referência: {requestId}",
+  "itemCount": "{count, plural, =0 {Nenhum item} one {# item} other {# itens}}"
+}

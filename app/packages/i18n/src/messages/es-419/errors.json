@@ -1,0 +1,22 @@
+{
+  "UNAUTHORIZED": "Tu sesión expiró. Inicia sesión de nuevo para continuar.",
+  "FORBIDDEN": "No tienes permiso para hacer esto.",
+  "NOT_FOUND": "No encontramos lo que buscabas.",
+  "VALIDATION_FAILED": "Algunos campos no son válidos. Revísalos e inténtalo de nuevo.",
+  "CONFLICT": "Otra persona modificó este elemento. Recarga e inténtalo de nuevo.",
+  "RATE_LIMITED": "Demasiados intentos. Espera un momento e inténtalo de nuevo.",
+  "INTERNAL_ERROR": "Algo salió mal de nuestro lado. Inténtalo de nuevo en unos instantes.",
+  "IDEMPOTENCY_KEY_REUSED": "Esta operación ya se envió con otros datos. Recarga e inténtalo de nuevo.",
+  "LAST_OWNER": "La organización necesita al menos un propietario.",
+  "ROLE_IN_USE": "Este rol todavía está asignado a miembros. Quita las asignaciones antes de eliminarlo.",
+  "ESCALATION_FORBIDDEN": "No puedes otorgar permisos que no tienes.",
+  "EMAIL_MISMATCH": "Esta invitación se envió a otro correo. Inicia sesión con la cuenta invitada.",
+  "INVITATION_EXPIRED": "Esta invitación expiró. Pide una nueva.",
+  "INVITATION_ALREADY_USED": "Esta invitación ya se usó.",
+  "INVALID_UNIT_PARENT": "Esta unidad no puede quedar dentro de la unidad elegida.",
+  "SUBTREE_TOO_LARGE": "Esta unidad tiene demasiadas subunidades para moverla de una vez.",
+  "UNKNOWN_PERMISSION": "Uno de los permisos elegidos no existe.",
+  "SELF_APPROVAL_FORBIDDEN": "No puedes aprobar tu propia solicitud.",
+  "MFA_REQUIRED": "Esta acción requiere verificación en dos pasos.",
+  "MEMBERSHIP_EXISTS": "Esta persona ya es miembro."
+}

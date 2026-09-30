@@ -18,6 +18,7 @@
     "test:postgres": "turbo run test:postgres",
     "contracts:catalog": "turbo run contracts:catalog",
     "contracts:check": "turbo run contracts:check",
+    "i18n:check": "turbo run i18n:check",
     "seed:local": "node scripts/seed-local.ts"
   },
   "devDependencies": {

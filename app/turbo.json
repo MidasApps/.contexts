@@ -42,6 +42,8 @@
     // Catalog tasks write and read app/docs, outside any package, so they are never cached.
     "contracts:catalog": { "cache": false },
     "contracts:check": { "cache": false },
+    // Reads packages/i18n and every modules/*/src/messages catalog; cheap, so never cached.
+    "i18n:check": { "cache": false },
     // Started by scripts/dev.ts (root `pnpm dev`), which also runs compose and the emulators.
     "dev": {
       "cache": false,

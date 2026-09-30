@@ -91,6 +91,8 @@ jobs:
         run: pnpm test
       - name: Contracts catalog is up to date
         run: pnpm contracts:check
+      - name: Message catalogs are complete (i18n:check)
+        run: pnpm i18n:check
 
   emulators:
     name: emulator tests

@@ -1,0 +1,22 @@
+{
+  "UNAUTHORIZED": "Your session has expired. Sign in again to continue.",
+  "FORBIDDEN": "You don't have permission to do this.",
+  "NOT_FOUND": "We couldn't find what you were looking for.",
+  "VALIDATION_FAILED": "Some fields are invalid. Review them and try again.",
+  "CONFLICT": "Someone else changed this item. Reload and try again.",
+  "RATE_LIMITED": "Too many attempts. Wait a moment and try again.",
+  "INTERNAL_ERROR": "Something went wrong on our side. Try again in a moment.",
+  "IDEMPOTENCY_KEY_REUSED": "This operation was already sent with different data. Reload and try again.",
+  "LAST_OWNER": "The organization needs at least one owner.",
+  "ROLE_IN_USE": "This role is still assigned to members. Remove the assignments before deleting it.",
+  "ESCALATION_FORBIDDEN": "You can't grant permissions you don't have.",
+  "EMAIL_MISMATCH": "This invitation was sent to a different email. Sign in with the invited account.",
+  "INVITATION_EXPIRED": "This invitation has expired. Ask for a new one.",
+  "INVITATION_ALREADY_USED": "This invitation has already been used.",
+  "INVALID_UNIT_PARENT": "This unit can't be placed inside the chosen unit.",
+  "SUBTREE_TOO_LARGE": "This unit has too many subunits to move at once.",
+  "UNKNOWN_PERMISSION": "One of the chosen permissions doesn't exist.",
+  "SELF_APPROVAL_FORBIDDEN": "You can't approve your own request.",
+  "MFA_REQUIRED": "This action requires two-step verification.",
+  "MEMBERSHIP_EXISTS": "This person is already a member."
+}
