@@ -10,12 +10,6 @@ import {
 } from "@core/agents";
 import { createKnowledgeServices, createPostgresClient, createPostgresKnowledgeRepository, loadServicesEnvWith } from "@core/services";
 
-/**
- * Organization that receives the sample knowledge documents. SP1's organization seed step
- * (not written yet) should pass its organization id instead; the knowledge base only needs
- * a tenant id string (decision 0022).
- */
-export const SEED_KNOWLEDGE_TENANT_ID = "DemoOrgSeed000000001";
 
 /** Two sample Markdown documents of the demo organization (generic, no business domain). */
 export const SAMPLE_KNOWLEDGE_DOCUMENTS = [
@@ -44,10 +38,11 @@ export const SAMPLE_KNOWLEDGE_DOCUMENTS = [
 /**
  * Seeds the knowledge base (SP3 Task 14): runs `catalog-reindex` in-process (platform
  * rows, no caller principal) and indexes the two sample documents for the demo
- * organization. Idempotent: a second run finds every document unchanged.
+ * organization `tenantId` (the id the tenancy step seeded, decision 0022). Idempotent: a
+ * second run finds every document unchanged.
  * @returns a one-line summary for the console.
  */
-export const seedKnowledgeBase = async (deps: KnowledgeIndexingDeps & { readonly aiCatalog?: unknown }): Promise<string> => {
+export const seedKnowledgeBase = async (deps: KnowledgeIndexingDeps & { readonly aiCatalog?: unknown }, tenantId: string): Promise<string> => {
   const reindex = createCatalogReindexWorkflow(deps);
   // No request context: an in-process run carries no caller principal, which the workflow requires.
   const run = await (await reindex.createRun()).start({ inputData: {} });
@@ -56,7 +51,7 @@ export const seedKnowledgeBase = async (deps: KnowledgeIndexingDeps & { readonly
   for (const sample of SAMPLE_KNOWLEDGE_DOCUMENTS) {
     const outcome = await indexDocumentText(deps, {
       document: {
-        tenantId: SEED_KNOWLEDGE_TENANT_ID,
+        tenantId,
         namespace: "tenant",
         source: "upload",
         sourceRef: sample.sourceRef,
@@ -72,7 +67,7 @@ export const seedKnowledgeBase = async (deps: KnowledgeIndexingDeps & { readonly
     if (outcome.status === "indexed") samplesIndexed += 1;
   }
   const { total, indexed, unchanged } = run.result;
-  return `catalog ${total} contracts (${indexed} indexed, ${unchanged} unchanged); samples for ${SEED_KNOWLEDGE_TENANT_ID}: ${samplesIndexed} indexed, ${SAMPLE_KNOWLEDGE_DOCUMENTS.length - samplesIndexed} unchanged`;
+  return `catalog ${total} contracts (${indexed} indexed, ${unchanged} unchanged); samples for ${tenantId}: ${samplesIndexed} indexed, ${SAMPLE_KNOWLEDGE_DOCUMENTS.length - samplesIndexed} unchanged`;
 };
 
 /**

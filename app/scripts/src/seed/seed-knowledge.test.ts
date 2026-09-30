@@ -1,6 +1,8 @@
 import { createFakeEmbeddingModel, FAKE_EMBEDDING_MODEL_ID, type KnowledgeDocumentInput, type KnowledgePort } from "@core/agents";
 import { describe, expect, it } from "vitest";
-import { SAMPLE_KNOWLEDGE_DOCUMENTS, SEED_KNOWLEDGE_TENANT_ID, seedKnowledgeBase } from "./seed-knowledge.ts";
+import { SAMPLE_KNOWLEDGE_DOCUMENTS, seedKnowledgeBase } from "./seed-knowledge.ts";
+
+const SEED_KNOWLEDGE_TENANT_ID = "DemoOrganization0001";
 
 const CATALOG = {
   contracts: [
@@ -35,14 +37,14 @@ describe("seedKnowledgeBase", () => {
   it("indexes the catalog as platform documents and the samples for the demo tenant, then finds everything unchanged", async () => {
     const knowledge = inMemoryKnowledge();
     const deps = { knowledge, embedding: () => createFakeEmbeddingModel(), embeddingModelId: FAKE_EMBEDDING_MODEL_ID, aiCatalog: CATALOG };
-    expect(await seedKnowledgeBase(deps)).toBe(`catalog 2 contracts (2 indexed, 0 unchanged); samples for ${SEED_KNOWLEDGE_TENANT_ID}: 2 indexed, 0 unchanged`);
+    expect(await seedKnowledgeBase(deps, SEED_KNOWLEDGE_TENANT_ID)).toBe(`catalog 2 contracts (2 indexed, 0 unchanged); samples for ${SEED_KNOWLEDGE_TENANT_ID}: 2 indexed, 0 unchanged`);
     expect([...knowledge.documents.values()].map((document) => `${document.tenantId}/${document.namespace}/${document.sourceRef}`)).toEqual([
       "_platform/catalog/example.Note",
       "_platform/catalog/files.StoredFile",
       ...SAMPLE_KNOWLEDGE_DOCUMENTS.map((sample) => `${SEED_KNOWLEDGE_TENANT_ID}/tenant/${sample.sourceRef}`),
     ]);
     expect(knowledge.replaced).toHaveLength(4);
-    expect(await seedKnowledgeBase(deps)).toBe(`catalog 2 contracts (0 indexed, 2 unchanged); samples for ${SEED_KNOWLEDGE_TENANT_ID}: 0 indexed, 2 unchanged`);
+    expect(await seedKnowledgeBase(deps, SEED_KNOWLEDGE_TENANT_ID)).toBe(`catalog 2 contracts (0 indexed, 2 unchanged); samples for ${SEED_KNOWLEDGE_TENANT_ID}: 0 indexed, 2 unchanged`);
     expect(knowledge.replaced).toHaveLength(4);
   });
 });

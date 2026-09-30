@@ -225,6 +225,8 @@ export {
 export { createFirestoreAuditLogServices, type AuditLogServices, type ListAuditLogs } from "./services/audit/index.ts";
 // Re-exported for operator scripts (`pnpm platform:grant-staff`), which depend on services only.
 export { PLATFORM_ROLES, PlatformRoleSchema, UserIdSchema, type PlatformRole } from "@core/contracts";
+// Re-exported for `pnpm seed:local`, which parses the ids it passes to the use cases.
+export { OrganizationIdSchema, ProjectIdSchema, UnitIdSchema } from "@core/contracts";
 export { createFirestoreUnitOfWork, inMemoryUnitOfWork, type UnitOfWork } from "./services/shared/firestore/unit-of-work.ts";
 export { CORE_COLLECTIONS, CORE_SCHEMA_VERSION } from "./services/shared/firestore/collections.ts";
 export { decodeCursor, encodeCursor, type CursorPosition } from "./services/shared/pagination/cursor.ts";

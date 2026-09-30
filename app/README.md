@@ -49,11 +49,49 @@ twice to stop at once. Postgres keeps running (`docker compose stop` stops it).
 The desktop app is opt-in because Rust builds take minutes: `pnpm dev:desktop`.
 
 `pnpm seed:local` (`scripts/seed-local.ts`) is idempotent and refuses to run
-unless `APP_ENV=local`, `FIREBASE_PROJECT_ID` is a `demo-*` project and
-`FIREBASE_AUTH_EMULATOR_HOST` is a loopback address. It creates or resets
-`owner@demo.local` in the Auth Emulator, with password `SEED_OWNER_PASSWORD` or
-the local-only default `demo-owner-password`. Organizations, projects and roles
-arrive with SP1 (`scripts/src/seed/seed-steps.ts` is the extension point).
+unless `APP_ENV=local`, `FIREBASE_PROJECT_ID` is a `demo-*` project and both
+`FIREBASE_AUTH_EMULATOR_HOST` and `FIRESTORE_EMULATOR_HOST` are loopback
+addresses. It writes through the core services (`createCoreServer`), so
+projections, claims and audit entries stay consistent, and a second run reports
+`unchanged` for every Firestore step (accounts are reset to their passwords).
+Steps: `scripts/src/seed/seed-steps.ts`.
+
+| Account | Access | Password (`.env.local`, else the local default) |
+|---|---|---|
+| `owner@demo.local` | owner of "Demo Organization" (active) and "Second Organization" | `SEED_OWNER_PASSWORD` / `demo-owner-password` |
+| `member@demo.local` | `member` on "Project 1" of the demo organization | `SEED_MEMBER_PASSWORD` / `demo-member-password` |
+| `viewer@demo.local` | `viewer` on the demo organization (active) | `SEED_VIEWER_PASSWORD` / `demo-viewer-password` |
+| `invitee@demo.local` | no membership (accepts an invitation in the SP2 e2e) | `SEED_INVITEE_PASSWORD` / `demo-invitee-password` |
+| `staff@demo.local` | platform staff `platform-admin`, SMS factor `+15555550100` | `SEED_STAFF_PASSWORD` / `demo-staff-password` |
+
+The demo organization has "Project 1" and "Project 2"; the second has "Project 1".
+"Project 1" of the demo organization holds "Unit A" and, under it, "Unit A.1",
+of the seed-only unit type `seed.unit` (the core registers no unit type; renames
+and moves of these units need that type registered by an installed module). The
+knowledge base samples go to the demo organization.
+
+### Identity, tenancy and access (SP1)
+
+- Contexts in `packages/services/src/services/`: `identity` (principals, `/v1/me`,
+  sessions, API keys, devices, platform staff and impersonation), `tenancy`
+  (organizations, projects, units, regional settings), `access` (`authorize()`,
+  memberships, roles, projections and claims, invitations, approvals) and `audit`.
+  Model: `docs/decisions/0006-tenancy-and-access-model.md`.
+- Endpoints: every `/v1` route is listed in `docs/openapi/v1.yaml` (generated from
+  the endpoint descriptors in `@core/contracts`). `/v1` accepts only
+  `Authorization: Bearer` (decision 0007).
+- Firestore Security Rules (`firestore.rules`) are defense in depth: clients never
+  write, and read only their own `users` doc, their access projection of the active
+  organization, and the organization, projects and units it makes visible.
+- Platform staff: `pnpm platform:grant-staff -- --project <id> --email <email> --role
+  <platform-admin|platform-support> --confirm <id>` (local: a `demo-*` project and the
+  emulators). Staff routes need MFA; locally MFA is SMS, because the Auth Emulator has
+  no TOTP: sign in, then read the code from the emulator's `verificationCodes`
+  (Emulator UI or `GET /emulator/v1/projects/demo-core/verificationCodes`).
+- Rate limits (Firestore buckets, decision 0009): device redeem 5 failures / 15 min
+  per IP; API key failures 20 / min per IP; desktop exchange 10 / min per IP;
+  active-organization switch and claims sync 10 / min per principal; invitation
+  preview and accept 20 / min per principal. A refusal is `429` with `Retry-After`.
 
 ### Ports
 
@@ -155,7 +193,7 @@ do not import `client`; `agents` reach `services` only through use cases;
   0023 Postgres migrations and Mastra storage init, 0024 semantic SQL guard,
   0025 agent command tools and approvals, 0026 guardrails, budgets and usage
   ledger, 0027 connectors, MCP and web tools, 0028 agent evals gate, 0029 agent
-  memory and skills).
+  memory and skills, 0030 SP1 review hardening).
 - Framework ADRs: `../.contexts/engineering/decisions/`.
 - Design spec: `../docs/superpowers/specs/2026-09-29-agentic-app-core-design.md`.
 - SP0 plan, reports and follow-ups: `../docs/plans/2026-09-29-sp0-app-foundation/`.
