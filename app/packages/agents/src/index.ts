@@ -1,5 +1,35 @@
 // Public API of @core/agents. Explicit named re-exports only (no `export *`).
 export {
+  type AgentPrincipal,
+  buildAgentPrincipal,
+  type ForwardedScope,
+  nodeFromScope,
+  principalIdentity,
+  resourceIdOf,
+  UNSCOPED_RESOURCE_PREFIX,
+} from "./auth/agent-principal.ts";
+export { readBearerToken, readForwardedHeader, readRequestPath, requiresRevocationCheck } from "./auth/bearer-only.ts";
+export { FirebaseMastraAuth, type FirebaseMastraAuthOptions, requiredPermissionFor } from "./auth/firebase-mastra-auth.ts";
+export type {
+  AccessContext,
+  AccessPort,
+  AccessPrincipal,
+  AgentRuntimePorts,
+  ApprovalPort,
+  AuditEntry,
+  AuditPort,
+  AuthorizeDecision,
+  AuthorizeRequest,
+  BudgetCheck,
+  ConnectorsPort,
+  KnowledgePort,
+  NodeRef,
+  RegionalSettings,
+  SecretStore,
+  SettingsPort,
+  UsagePort,
+} from "./runtime/runtime-ports.ts";
+export {
   type AgentModels,
   type CreateModelProviderOptions,
   createModelProvider,

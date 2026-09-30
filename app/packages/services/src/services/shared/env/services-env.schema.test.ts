@@ -54,6 +54,10 @@ describe("ServicesEnvSchema", () => {
     expect(issuePaths(source)).toEqual(["FIREBASE_PROJECT_ID", "FIRESTORE_EMULATOR_HOST"]);
   });
 
+  it("rejects the Auth emulator host in prod, where it would accept unsigned tokens (follow-up 12c)", () => {
+    expect(issuePaths({ ...REMOTE_ENV, APP_ENV: "prod", FIREBASE_AUTH_EMULATOR_HOST: "127.0.0.1:9099" })).toEqual(["FIREBASE_AUTH_EMULATOR_HOST"]);
+  });
+
   it("reports an unparsable DATABASE_URL in local instead of crashing the refinement", () => {
     expect(issuePaths({ ...LOCAL_ENV, DATABASE_URL: "nope" })).toEqual(["DATABASE_URL"]);
   });

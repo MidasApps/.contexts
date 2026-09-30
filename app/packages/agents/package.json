@@ -7,7 +7,8 @@
     "node": ">=26.0.0 <27"
   },
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./testing": "./src/testing/index.ts"
   },
   "scripts": {
     "lint": "eslint .",
@@ -24,12 +25,15 @@
     "@ai-sdk/google-vertex": "catalog:",
     "@ai-sdk/openai": "catalog:",
     "@ai-sdk/provider": "catalog:",
+    "@core/contracts": "workspace:*",
     "@core/services": "workspace:*",
+    "@mastra/core": "catalog:",
     "ai": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {
     "@core/config": "workspace:*",
+    "@mastra/deployer": "catalog:",
     "@types/node": "catalog:",
     "eslint": "catalog:",
     "typescript": "catalog:",
