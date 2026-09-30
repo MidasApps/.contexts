@@ -87,3 +87,28 @@ Each item below is a policy choice; the code comments point here.
   aborts the transaction (fail-closed, `500`). `authorize()` reads are not transactional reads, so a demotion that
   commits while the redeem transaction runs may still let that one redeem through; the window is one transaction,
   and the demoted admin's pending codes stop working afterwards.
+- **A3 — 2026-09-30 (SP1 Task 19, report concern 5 of Tasks 16–18): an interrupted approval stays `approved`.**
+  Execution is at-most-once. A crash between the approve transaction and the execution record leaves the request
+  `approved`, and nothing may run its handler again: the handler may already have acted, and SP1 cannot tell.
+  `approved` is transient, so any request that keeps it is either executing or interrupted.
+  - **Visible now:** `GET /v1/organizations/{organizationId}/approval-requests?status=approved`
+    (`core.approval.read`) lists these requests with `decidedBy`, so an operator can check the action's effect and
+    act by hand. A unit test pins this state: the approval is listed, a second approval answers `409` and the
+    handler ran once.
+  - **Sweep for SP5 (follow-up):** a scheduled job, of the same kind as SP5's workflow scheduler, marks requests
+    that are still `approved` more than 15 minutes after `updatedAt` as `failed`, with `errorCode:
+    EXECUTION_INTERRUPTED`, and writes an `APPROVAL_FAILED` audit entry in one transaction per request. It never
+    re-executes a request. The job reads across tenants (`status == approved`, `updatedAt <`), so it needs a
+    platform-scope composite index `approval-requests status+updatedAt`, declared together with the job.
+  - **Handlers that must not act twice** keep their own idempotency key in the action input (SP3:
+    `runId:toolCallId`), so an operator's manual retry stays safe.
+- **A4 — 2026-09-30 (SP1 Task 19): Security Rules deny impersonated tokens and keep one `get()`.**
+  - An ID token with the `imp` claim reads no document directly. Impersonation is read-only, time-boxed by the
+    session doc and audited per request, and only `/v1` enforces those three checks (SP1 spec §6.6). A direct
+    Firestore read would skip them.
+  - Rules read only the access projection (`get()` of `access/{token.tenantId}_{uid}`). A suspended organization
+    therefore stays readable to its members through direct reads of its organization, projects and units, while
+    `/v1` answers `ORGANIZATION_SUSPENDED`. The cost is the same as a parent check (one more `get()` on every read),
+    and a suspension hides nothing secret from the organization's own members, so we keep the gap. Deleting an
+    organization revokes its projections (`isRevoked`), and project deletes cascade to units (§3), so soft deletes
+    need no second read.

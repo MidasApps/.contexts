@@ -23,3 +23,5 @@
 - 2026-09-30 | Task 16 complete | commits: 694237a | review: pending
 - 2026-09-30 | Task 17 complete | commits: 776b863 | review: pending
 - 2026-09-30 | Task 18 complete | commits: 49c450c | review: pending
+- 2026-09-30 | Task 19 complete (+ interrupted-approval pin, decision 0030 A3/A4) | commits: 3d0e78a, 4b6b0cc, fb326f2 | review: pending
+- 2026-09-30 | Task 20 complete (seed, docs, SP1 gate report reports/sp1-gate.md) | commits: b02a7f3 | review: pending
