@@ -89,14 +89,34 @@ export type AuditEntry = {
 
 export type AuditPort = { readonly record: (entry: AuditEntry) => Promise<void> };
 
-/** Creates an SP1 approval request whose action is the SP3 `agent-command` handler. */
+/**
+ * Creates an SP1 approval request whose action is the SP3 `agent-command` handler.
+ * Rejects when SP1 refuses or fails; the tool pipeline answers `APPROVAL_UNAVAILABLE`.
+ */
 export type ApprovalPort = {
   readonly requestApproval: (input: {
     readonly principal: AccessPrincipal;
     readonly node: NodeRef;
     readonly permission: string;
     readonly action: AgentApprovalRequest;
+    /** Correlation of the agent run (the `APPROVAL_REQUESTED` audit entry carries it). */
+    readonly requestId: string;
   }) => Promise<{ readonly approvalId: string }>;
+};
+
+/**
+ * At-most-once command execution keyed by `runId:toolCallId` (decision 0025, follow-up #26),
+ * shared with the SP1 `agent-command` approval handler. Rejects with a `code` of
+ * `IDEMPOTENCY_KEY_REUSED` or `COMMAND_IN_PROGRESS`, or with whatever `run` threw.
+ */
+export type CommandIdempotencyPort = {
+  readonly runOnce: (command: {
+    readonly tenantId: string;
+    readonly commandId: string;
+    readonly idempotencyKey: string;
+    readonly input: unknown;
+    readonly run: () => Promise<unknown>;
+  }) => Promise<{ readonly output: unknown; readonly replayed: boolean }>;
 };
 
 export type BudgetCheck =
@@ -218,6 +238,7 @@ export type AgentRuntimePorts = {
   readonly access: AccessPort;
   readonly audit: AuditPort;
   readonly approvals: ApprovalPort;
+  readonly commands: CommandIdempotencyPort;
   readonly usage: UsagePort;
   readonly knowledge: KnowledgePort;
   readonly files: FilesPort;

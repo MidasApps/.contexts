@@ -48,10 +48,38 @@ describe("createRuntimePorts (default bindings)", () => {
     expect(await bound.access.authorize({ principal: MEMBER, permission: "core.chat.use", node: ORG })).toEqual({ allowed: true, requiresApproval: false });
   });
 
+  it("binds SP1 approvals: a permission that needs no approval is refused before anything is stored", async () => {
+    const store = createInMemoryAccessStore();
+    store.putOrganization({ id: TENANT });
+    store.putUser("member-uid");
+    store.putGrant({ tenantId: TENANT, principalId: "member-uid", nodeId: TENANT, roles: [{ kind: "system", key: "owner" }] });
+    const bound = createRuntimePorts({
+      env: ENV,
+      firebase: createFirebaseAdmin({ env: { APP_ENV: "local", FIREBASE_PROJECT_ID: "demo-core" }, processEnv: {} }),
+      logger: processLogger,
+      adapters: { accessReaders: store },
+    });
+    const action = {
+      kind: "agent-command",
+      tenantId: TENANT,
+      requestedBy: "member-uid",
+      agentId: "action",
+      toolId: "command.tenancy.CreateProjectInput",
+      commandId: "tenancy.CreateProjectInput",
+      permission: "core.project.create",
+      input: { name: "Launch" },
+      runId: "run-1",
+      toolCallId: "call-1",
+      idempotencyKey: "run-1:call-1",
+      summary: "Create the project",
+      preview: null,
+    } as never;
+    const pending = bound.approvals.requestApproval({ principal: MEMBER, node: ORG, permission: "core.project.create", action, requestId: "01J8Z3K4M5N6P7Q8R9S0T1V2W3" });
+    await expect(pending).rejects.toMatchObject({ code: "APPROVAL_NOT_REQUIRED" });
+  });
+
   it("rejects every port whose service lands later", async () => {
     const bound = ports();
-    const action = {} as never;
-    await expect(bound.approvals.requestApproval({ principal: MEMBER, node: ORG, permission: "core.chat.use", action })).rejects.toBeInstanceOf(PortNotWiredError);
     await expect(bound.settings.getAgentSettings({ tenantId: TENANT })).rejects.toBeInstanceOf(PortNotWiredError);
     await expect(bound.webContent.scrape({ url: "https://docs.example.com", tenantId: TENANT })).rejects.toBeInstanceOf(PortNotWiredError);
   });

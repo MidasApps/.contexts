@@ -28,3 +28,43 @@ The action agent executes module commands (mutations). A mutation triggered by a
 - **Mastra tool `suspend()` for four eyes.** State would live in the agent run snapshot, not in SP1's audited, at-most-once approval store, and approvers would need the chat run.
 - **Tool hooks `beforeToolCall`/`afterToolCall` for authorize/audit.** Two places for the same guard; `defineCoreTool` covers core and module tools in one place.
 - **Model-provided confirmation flag.** Model output never authorizes anything.
+
+## Amendments
+
+- **2026-09-30 — SP1 approvals bound, handler and command idempotency (follow-up #26).**
+  - *Where the handler lives.* SP1 decides approvals in `/v1` (`apps/web`), and the web does
+    not depend on `@core/agents`. The `agent-command` handler is therefore in `@core/services`
+    (`services/agents/application/commands/`), not in `@core/agents` as the plan said. Both
+    `apps/web` (`runtime-routes.ts`, where approvals are decided and the command runs) and
+    `apps/mastra` (`create-runtime-ports.ts`, where SP1's `requestApproval` checks that the kind
+    has a handler) register it with `registerAgentCommandApprovals`; a second registration on
+    the same registry is a no-op.
+  - *Executors.* The handler runs commands through `AgentCommandExecutor`s (command id,
+    permission, input schema, execute). Today there is one, `tenancy.CreateProjectInput` → SP1
+    `createProject`, which mirrors the agent tool `command.tenancy.CreateProjectInput`; module
+    executors join when Task 19 lands. The two definitions of the core command are a known
+    duplication until module command contracts are derived from one source.
+  - *Handler checks* (each refusal throws a SCREAMING_SNAKE code that SP1 audits on
+    `APPROVAL_FAILED`; nothing runs after a failed check): the requester still resolves
+    (`REQUESTER_UNAVAILABLE`) and is the uid the action names (`REQUESTER_MISMATCH`); the
+    action's tenant and permission equal the approved request's (`TENANT_MISMATCH`,
+    `PERMISSION_MISMATCH`); an executor exists for the command with that permission
+    (`UNKNOWN_COMMAND`); SP1 `authorize()` still allows the requester at the request's node
+    (`REQUESTER_FORBIDDEN`); the input parses with the command schema
+    (`COMMAND_INPUT_INVALID`); the use case accepts it (`COMMAND_REFUSED`).
+  - *Port binding.* `ApprovalPort.requestApproval` now carries the run's `requestId`. It maps
+    to SP1 `requestApproval({ principal, input: { node, permission, action: { kind:
+    "agent-command", input: <AgentApprovalRequest>, summary } }, requestId })`; SP1 answers a
+    `Result`, and `ok: false` rejects with SP1's code, so the tool answers
+    `APPROVAL_UNAVAILABLE`; `approvalId` is the stored request's id. A platform node is refused
+    before SP1 is called.
+  - *Idempotency store.* Commands run at most once per `runId:toolCallId` through SP1's
+    `IdempotencyStore` (decision 0009: Firestore `idempotency-records`, 24 h TTL, 60 s in-flight
+    lease; record id `sha256("tenant:<tenantId>:agent-command:<commandId>:<key>")`, result kept
+    as JSON). The Mastra tool pipeline routes every mutation through it (new port
+    `commands`), and the handler uses the same records, so a retried approval or a retried tool
+    call replays the stored result. The same key with another input is
+    `IDEMPOTENCY_KEY_REUSED`; a call while the first still runs is `COMMAND_IN_PROGRESS`; a
+    store failure is `IDEMPOTENCY_UNAVAILABLE` (fail-closed, nothing runs). A replayed tool
+    call is audited again with `replayed: true` in the port metadata (SP1's audit allowlist
+    keeps only the tool id, run id, input hash and error code).

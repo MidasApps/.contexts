@@ -16,7 +16,7 @@ import { CoreToolError, isCoreToolError } from "./tool-errors.ts";
 export const AGENT_TOOL_EXECUTED = "AGENT_TOOL_EXECUTED";
 
 type Outcome = "succeeded" | "failed" | "denied" | "pending-approval";
-type AuditExtras = Readonly<Record<string, string>>;
+type AuditExtras = Readonly<Record<string, string | boolean>>;
 
 const fail = (definition: CoreToolDefinition, code: string, cause?: unknown, details?: CoreToolError["details"]): CoreToolError =>
   new CoreToolError({ code, toolId: definition.id, ...(details === undefined ? {} : { details }) }, cause === undefined ? undefined : { cause });
@@ -95,7 +95,7 @@ const buildApprovalAction = async (definition: CoreToolDefinition, input: Record
 const requestApproval = async (definition: CoreToolDefinition, deps: CoreToolDeps, input: Record<string, unknown>, ctx: CoreToolContext) => {
   try {
     const action = await buildApprovalAction(definition, input, ctx);
-    return await deps.approvals.requestApproval({ principal: ctx.principal, node: ctx.node, permission: definition.permission, action });
+    return await deps.approvals.requestApproval({ principal: ctx.principal, node: ctx.node, permission: definition.permission, action, requestId: ctx.agent.requestId });
   } catch (error: unknown) {
     throw fail(definition, "APPROVAL_UNAVAILABLE", error);
   }
@@ -117,6 +117,25 @@ const executeWithDeadline = async (definition: CoreToolDefinition, deps: CoreToo
   }
 };
 
+// Refusals of the command store keep their code; any other store failure is fail-closed.
+const STORE_REFUSALS = new Set(["IDEMPOTENCY_KEY_REUSED", "COMMAND_IN_PROGRESS"]);
+
+const storeCodeOf = (error: unknown): string => {
+  const code = error instanceof Error && "code" in error ? error.code : undefined;
+  return typeof code === "string" && STORE_REFUSALS.has(code) ? code : "IDEMPOTENCY_UNAVAILABLE";
+};
+
+/** A mutation runs at most once per `runId:toolCallId` (follow-up #26); a replay returns the stored output. */
+const executeOnce = async (definition: CoreToolDefinition, deps: CoreToolDeps, input: Record<string, unknown>, ctx: CoreToolContext, parent?: AbortSignal) => {
+  const run = () => executeWithDeadline(definition, deps, input, ctx, parent);
+  if (definition.kind !== "mutation" || deps.commands === undefined) return { output: await run(), replayed: false };
+  try {
+    return await deps.commands.runOnce({ tenantId: ctx.agent.tenantId, commandId: commandIdOf(definition), idempotencyKey: ctx.idempotencyKey, input, run });
+  } catch (error: unknown) {
+    throw isCoreToolError(error) ? error : fail(definition, storeCodeOf(error), error);
+  }
+};
+
 const parseOutput = (definition: CoreToolDefinition, output: unknown): unknown => {
   const parsed = definition.outputSchema.safeParse(output);
   if (!parsed.success) throw fail(definition, "TOOL_OUTPUT_INVALID", parsed.error);
@@ -125,9 +144,10 @@ const parseOutput = (definition: CoreToolDefinition, output: unknown): unknown =
 
 const executeAndAudit = async (definition: CoreToolDefinition, deps: CoreToolDeps, input: Record<string, unknown>, ctx: CoreToolContext, parent?: AbortSignal) => {
   try {
-    const output = parseOutput(definition, await executeWithDeadline(definition, deps, input, ctx, parent));
-    const extras = definition.audit?.metadata?.(output);
-    await recordAudit({ definition, deps, ctx, input, outcome: "succeeded", ...(extras === undefined ? {} : { extras }) });
+    const { output: raw, replayed } = await executeOnce(definition, deps, input, ctx, parent);
+    const output = parseOutput(definition, raw);
+    const extras = { ...definition.audit?.metadata?.(output), ...(definition.kind === "mutation" ? { replayed } : {}) };
+    await recordAudit({ definition, deps, ctx, input, outcome: "succeeded", extras });
     return output;
   } catch (error: unknown) {
     if (isCoreToolError(error) && error.code !== "AUDIT_UNAVAILABLE") {

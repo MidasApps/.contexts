@@ -16,6 +16,7 @@ export type {
   AccessPrincipal,
   AgentRuntimePorts,
   ApprovalPort,
+  CommandIdempotencyPort,
   AuditEntry,
   AuditPort,
   AuthorizeDecision,

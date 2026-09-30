@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 import { z } from "zod";
 import type { ApprovalPort, AuditPort } from "../runtime/runtime-ports.ts";
 import { buildAgentContextEntries, TEST_REQUEST_ID, TEST_TENANT, TEST_UID } from "../testing/agent-context-fixture.ts";
-import { createFakeAccessPort, createFakeApprovalPort, createFakeAuditPort } from "../testing/fake-ports.ts";
+import { createFakeAccessPort, createFakeApprovalPort, createFakeAuditPort, createFakeCommandIdempotency } from "../testing/fake-ports.ts";
 import { runCoreTool } from "./core-tool-pipeline.ts";
 import { type CoreToolContext, type CoreToolDeps, defineCoreTool, hashToolInput, type ToolCallInfo } from "./define-core-tool.ts";
 import { CoreToolError } from "./tool-errors.ts";
@@ -160,6 +160,7 @@ describe("runCoreTool", () => {
     expect(execute).not.toHaveBeenCalled();
     expect(approvals.requests).toHaveLength(1);
     expect(approvals.requests[0]).toMatchObject({
+      requestId: TEST_REQUEST_ID,
       permission: "example.note.create",
       node: { level: "organization", tenantId: TEST_TENANT },
       action: {
@@ -203,6 +204,35 @@ describe("runCoreTool", () => {
     const { deps } = setup();
     await runCoreTool(recording, deps, { text: "x" }, call());
     expect(keys).toEqual([`${TEST_REQUEST_ID}:call_7`]);
+  });
+
+  describe("command idempotency (follow-up #26)", () => {
+    it("runs a mutation once per runId:toolCallId and replays its stored result", async () => {
+      const execute = vi.fn((input: { text: string }, ctx: CoreToolContext) => createNote.execute(input, ctx));
+      const commands = createFakeCommandIdempotency();
+      const { deps, audit } = setup({ commands });
+      const first = await runCoreTool({ ...createNote, execute }, deps, { text: "hello" }, call());
+      const second = await runCoreTool({ ...createNote, execute }, deps, { text: "hello" }, call());
+      expect(first).toEqual({ noteId: "note-5" });
+      expect(second).toEqual({ noteId: "note-5" });
+      expect(execute).toHaveBeenCalledTimes(1);
+      expect(commands.runs).toEqual([{ tenantId: TEST_TENANT, commandId: "example.CreateNoteCommand", idempotencyKey: `${TEST_REQUEST_ID}:call_7`, input: { text: "hello" } }]);
+      expect(audit.entries.map((entry) => entry.metadata.replayed)).toEqual([false, true]);
+    });
+
+    it("never routes read tools through the store", async () => {
+      const commands = createFakeCommandIdempotency();
+      const { deps } = setup({ commands });
+      await runCoreTool(listNotes, deps, { limit: 1 }, call());
+      expect(commands.runs).toEqual([]);
+    });
+
+    it("keeps the store refusal code and fails closed when the store is down", async () => {
+      const inProgress = { runOnce: () => Promise.reject(Object.assign(new Error("busy"), { code: "COMMAND_IN_PROGRESS" })) };
+      expect((await rejection(runCoreTool(createNote, setup({ commands: inProgress }).deps, { text: "x" }, call()))).code).toBe("COMMAND_IN_PROGRESS");
+      const down = { runOnce: () => Promise.reject(new Error("firestore unavailable")) };
+      expect((await rejection(runCoreTool(createNote, setup({ commands: down }).deps, { text: "x" }, call()))).code).toBe("IDEMPOTENCY_UNAVAILABLE");
+    });
   });
 
   it("stops a tool that exceeds its timeout with TOOL_TIMEOUT", async () => {

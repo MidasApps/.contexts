@@ -15,6 +15,9 @@ export const CORE_TOOL_ERROR_CODES = [
   "TOOL_OUTPUT_INVALID",
   "TOOL_FAILED",
   "TOOL_NOT_FOUND",
+  "IDEMPOTENCY_UNAVAILABLE",
+  "IDEMPOTENCY_KEY_REUSED",
+  "COMMAND_IN_PROGRESS",
 ] as const;
 
 export type CoreToolErrorCode = (typeof CORE_TOOL_ERROR_CODES)[number] | (string & {});
@@ -31,6 +34,9 @@ const SAFE_MESSAGES: Readonly<Record<string, string>> = {
   TOOL_OUTPUT_INVALID: "The tool produced an invalid result.",
   TOOL_FAILED: "The tool failed.",
   TOOL_NOT_FOUND: "No tool is registered with this id.",
+  IDEMPOTENCY_UNAVAILABLE: "The command could not be checked against earlier runs; nothing was changed.",
+  IDEMPOTENCY_KEY_REUSED: "This tool call already ran with another input; nothing was changed.",
+  COMMAND_IN_PROGRESS: "The same command is still running; try again shortly.",
 };
 
 export type CoreToolErrorDetails = Readonly<Record<string, string | number | boolean | readonly string[]>>;

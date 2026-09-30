@@ -387,6 +387,27 @@ export {
   type WorkflowResumeInput,
   type WorkflowStartInput,
 } from "./services/agents/index.ts";
+// SP3 agent commands: the SP1 `agent-command` approval handler and command idempotency (follow-up #26).
+export {
+  AGENT_COMMAND_HANDLER_KIND,
+  AgentCommandError,
+  agentCommandExecutors,
+  CREATE_PROJECT_COMMAND_ID,
+  createAgentCommandApprovalHandler,
+  createCommandIdempotency,
+  createCoreAgentCommandExecutors,
+  defineAgentCommandExecutor,
+  registerAgentCommandApprovals,
+  type AgentCommandApprovalDeps,
+  type AgentCommandErrorCode,
+  type AgentCommandExecution,
+  type AgentCommandExecutor,
+  type AgentCommandExecutors,
+  type AgentCommandExecutorSpec,
+  type CommandIdempotency,
+  type CommandRun,
+  type CommandRunResult,
+} from "./services/agents/index.ts";
 // SP3 knowledge context: documents, chunks and search with tenant row security (Task 12).
 export {
   CHUNKS_V1_DIMENSIONS,

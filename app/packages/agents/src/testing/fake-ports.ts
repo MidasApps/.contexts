@@ -6,6 +6,7 @@ import type {
   AgentRuntimePorts,
   ApprovalPort,
   AuditEntry,
+  CommandIdempotencyPort,
   AuditPort,
   BudgetCheck,
   FilesPort,
@@ -134,6 +135,27 @@ export const createFakeApprovalPort = (): FakeApprovalPort => {
   };
 };
 
+type CommandRun = Parameters<CommandIdempotencyPort["runOnce"]>[0];
+
+export type FakeCommandIdempotency = CommandIdempotencyPort & { readonly runs: Omit<CommandRun, "run">[] };
+
+/** In-memory command idempotency: one result per tenant, command and key (like the SP1 store). */
+export const createFakeCommandIdempotency = (): FakeCommandIdempotency => {
+  const runs: Omit<CommandRun, "run">[] = [];
+  const results = new Map<string, unknown>();
+  return {
+    runs,
+    runOnce: async ({ run, ...command }) => {
+      const key = `${command.tenantId}:${command.commandId}:${command.idempotencyKey}`;
+      if (results.has(key)) return { output: results.get(key), replayed: true };
+      runs.push(command);
+      const output = (await run()) ?? null;
+      results.set(key, output);
+      return { output, replayed: false };
+    },
+  };
+};
+
 export type FakeUsagePort = UsagePort & { readonly calls: LlmCall[] };
 
 export const createFakeUsagePort = (budget: BudgetCheck = { allowed: true, alert: false }): FakeUsagePort => {
@@ -229,6 +251,7 @@ export const createFakeRuntimePorts = (overrides: Partial<AgentRuntimePorts> = {
   access: createFakeAccessPort({}),
   audit: createFakeAuditPort(),
   approvals: createFakeApprovalPort(),
+  commands: createFakeCommandIdempotency(),
   usage: createFakeUsagePort(),
   knowledge: { searchChunks: () => Promise.resolve([]), registerDocument: notWired("registerDocument"), replaceChunks: notWired("replaceChunks") },
   files: createFakeFilesPort(),

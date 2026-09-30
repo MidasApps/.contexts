@@ -3,6 +3,7 @@ import { TenantIdSchema } from "@core/contracts";
 import {
   type AccessReaders,
   type ApiKeyAuthenticator,
+  createCoreAgentCommandExecutors,
   createFirebaseConnectorsServices,
   createFirebaseFilesServices,
   createKnowledgeServices,
@@ -19,11 +20,13 @@ import {
   type Logger,
   type ResolveAccessContext,
   makeRunSemanticQuery,
+  registerAgentCommandApprovals,
   type ServicesEnv,
   systemClock,
 } from "@core/services";
 import { type CoreServerModule, createCoreServer } from "@core/services/composition";
 import { bindAccessPort } from "./access-port-binding.ts";
+import { bindApprovalsPort } from "./approvals-port-binding.ts";
 import { bindAuditPort } from "./audit-port-binding.ts";
 import { bindKnowledgePort } from "./knowledge-port-binding.ts";
 import { bindProjectsPort } from "./projects-port-binding.ts";
@@ -72,7 +75,10 @@ export type RuntimePortsAdapters = {
  * - projects: SP1 `createProject` (the action agent's core command, SP3 Task 20).
  * - connectors and secrets: active tenant connectors (Firestore) and the secret store (Secret
  *   Manager outside local, the emulator collection in local), read server-side only.
- * - approvals, settings, web content: fail-closed until their tasks.
+ * - approvals: SP1 `requestApproval` (kind `agent-command`, whose handler this runtime also
+ *   registers so SP1 accepts the kind); commands: at-most-once execution per
+ *   `runId:toolCallId` over SP1's idempotency store, shared with that handler (follow-up #26).
+ * - settings, web content: fail-closed until their tasks.
  * @param args.modules installed modules (their permissions join SP1's registry).
  */
 export const createRuntimePorts = (args: {
@@ -99,11 +105,19 @@ export const createRuntimePorts = (args: {
   const knowledge = createKnowledgeServices({ repository: createPostgresKnowledgeRepository(sql), embeddingModel: embeddingModelIdOf(args.env) });
   const files = createFirebaseFilesServices({ firebase: args.firebase, env: args.env, logger: args.logger });
   const connectors = createFirebaseConnectorsServices({ firebase: args.firebase, env: args.env, audit: core.audit, clock: systemClock });
+  const commands = registerAgentCommandApprovals({
+    approvals: core.approvals,
+    executors: createCoreAgentCommandExecutors({ tenancy: core.tenancy, access: core.access }),
+    access: core.access,
+    idempotency: core.pipeline.idempotency,
+  });
   return {
     access: bindAccessPort({ verifyBearer: core.verifyBearer, access: core.access, resolveAccessContext: adapters.resolveAccessContext ?? core.resolveAccessContext }),
     audit: bindAuditPort(core.audit),
     catalog: { runSemanticQuery: makeRunSemanticQuery({ views: createSemanticViewRegistry([]), guard: guardSemanticSql, runner }) },
     ...UNWIRED_PORTS,
+    approvals: bindApprovalsPort(core.approvals),
+    commands,
     connectors: { listActive: ({ tenantId }) => connectors.listActiveConnectors({ tenantId: TenantIdSchema.parse(tenantId) }) },
     secrets: { get: (secretRef) => connectors.secrets.get(secretRef) },
     knowledge: bindKnowledgePort(knowledge),

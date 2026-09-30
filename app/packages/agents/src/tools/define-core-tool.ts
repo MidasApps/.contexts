@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 import { type AgentRequestContext, PermissionSchema } from "@core/contracts";
 import { z } from "zod";
 import type { RequestContextReader } from "../context/agent-request-context.ts";
-import type { AccessPort, AccessPrincipal, ApprovalPort, AuditPort, NodeRef } from "../runtime/runtime-ports.ts";
+import type { AccessPort, AccessPrincipal, ApprovalPort, AuditPort, CommandIdempotencyPort, NodeRef } from "../runtime/runtime-ports.ts";
 
 /**
  * `defineCoreTool` (spec §8.1, decisions 0019, 0025): the only way the core
@@ -65,6 +65,8 @@ export type CoreToolDeps = {
   readonly access: AccessPort;
   readonly audit: AuditPort;
   readonly approvals: ApprovalPort;
+  /** At-most-once mutations per `runId:toolCallId`; without it (unit tests) a mutation runs directly. */
+  readonly commands?: CommandIdempotencyPort;
   /** Permission ceiling per agent key; intersected with the context permissions. */
   readonly agentCeilings?: Readonly<Record<string, ReadonlySet<string>>>;
   /** Timer seam for tests; defaults to `AbortSignal.timeout`. */

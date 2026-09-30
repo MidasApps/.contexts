@@ -4,6 +4,7 @@ import {
   buildFilesRoutes,
   buildKnowledgeDocumentsRoutes,
   buildKnowledgeSourcesRoutes,
+  createCoreAgentCommandExecutors,
   createFirebaseAdmin,
   createFirebaseConnectorsServices,
   createFirebaseFilesServices,
@@ -13,6 +14,7 @@ import {
   createPostgresKnowledgeRepository,
   createServerlessIdTokenSource,
   processLogger,
+  registerAgentCommandApprovals,
 } from "@core/services";
 import type { CoreRoutes, CoreServer } from "@core/services/composition";
 
@@ -23,10 +25,18 @@ const UNUSED_SEARCH_MODEL = "web/no-search";
  * `/v1` routes of the SP3 contexts that `createCoreServer` does not build: files (uploads,
  * SP3 Task 13), the knowledge base (documents over Postgres, sources through the Mastra
  * gateway, Task 14) and tenant connectors (Firestore + secret store, Task 21). They share
- * the core server's pipeline, audit writer and Admin SDK app.
+ * the core server's pipeline, audit writer and Admin SDK app. It also registers the SP1
+ * approval handler of kind `agent-command` (decision 0025): approvals are decided here, so the
+ * approved agent command runs here, at most once per `runId:toolCallId`.
  */
 export const buildRuntimeRoutes = async (core: CoreServer): Promise<CoreRoutes> => {
   const { env, processEnvForFirebaseGuard } = await import("@/env");
+  registerAgentCommandApprovals({
+    approvals: core.approvals,
+    executors: createCoreAgentCommandExecutors({ tenancy: core.tenancy, access: core.access }),
+    access: core.access,
+    idempotency: core.pipeline.idempotency,
+  });
   const firebase = createFirebaseAdmin({ env, processEnv: processEnvForFirebaseGuard });
   const files = createFirebaseFilesServices({
     firebase,

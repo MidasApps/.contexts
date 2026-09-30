@@ -149,7 +149,13 @@ const SUPERVISOR_CEILING = ["core.chat.use"];
 // Ceilings are data, known before any tool is bound: every call is capped by its agent's.
 const toolDepsOf = (args: ComposeAgentRuntimeArgs, agents: readonly AgentDefinition[]): CoreToolDeps => {
   const ceilings = [...agents.map((agent) => [agent.id, new Set(agent.ceiling)] as const), [SUPERVISOR_AGENT_ID, new Set(SUPERVISOR_CEILING)] as const];
-  return { access: args.ports.access, audit: args.ports.audit, approvals: args.ports.approvals, agentCeilings: Object.fromEntries(ceilings) };
+  return {
+    access: args.ports.access,
+    audit: args.ports.audit,
+    approvals: args.ports.approvals,
+    commands: args.ports.commands,
+    agentCeilings: Object.fromEntries(ceilings),
+  };
 };
 
 const buildToolRegistry = (args: ComposeAgentRuntimeArgs, toolDeps: CoreToolDeps, models: AgentModels, commands: readonly AgentCommand[]): ToolRegistry => {
