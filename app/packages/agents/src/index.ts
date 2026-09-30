@@ -1,5 +1,35 @@
 // Public API of @core/agents. Explicit named re-exports only (no `export *`).
 export {
+  type AgentModels,
+  type CreateModelProviderOptions,
+  createModelProvider,
+  type ModelFactoryEnv,
+  type TextModelRole,
+} from "./models/model-factory.ts";
+export { estimateCostMicroUsd, MODEL_PRICES, type ModelPrice, PRICES_VERIFIED_AT, type TokenUsage } from "./models/model-prices.ts";
+export {
+  createProviderRegistry,
+  DEFAULT_PROVIDER_FACTORIES,
+  ModelProviderConfigError,
+  type ProviderFactories,
+  type ProviderRegistry,
+  type ProviderSettings,
+} from "./models/provider-registry.ts";
+export { createFakeEmbeddingModel, embedFakeText, FAKE_EMBEDDING_DIMENSIONS } from "./models/fake/fake-embedding-model.ts";
+export { createFakeLanguageModel, type FakeLanguageModelOptions } from "./models/fake/fake-language-model.ts";
+export {
+  createFakeScenarioRegistry,
+  type FakeScenarioRegistry,
+  type FakeScenarioRule,
+  type FakeToolCall,
+  type FakeTurn,
+  type FakeTurnContext,
+  InvalidFakeDirectiveError,
+  parseFakeDirectives,
+} from "./models/fake/fake-scenarios.ts";
+export { buildSilentWav, createFakeSpeechModel, createFakeTranscriptionModel } from "./models/fake/fake-voice-models.ts";
+export {
+  EMBEDDING_DIMENSIONS,
   MODEL_ID_PATTERN,
   MODEL_PROVIDERS,
   MODEL_ROLE_NAMES,

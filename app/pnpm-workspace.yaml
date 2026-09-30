@@ -8,6 +8,11 @@ packages:
 # Exact pins so every package resolves the same version (ADR 0004: latest stable,
 # measured with `npm view` on 2026-09-29; exceptions E2/E3 noted inline).
 catalog:
+  "@ai-sdk/anthropic": 4.0.68 # model factory (decision 0021)
+  "@ai-sdk/google": 4.0.85 # Gemini via AI Studio key
+  "@ai-sdk/google-vertex": 5.0.98 # Gemini via Vertex ADC (GOOGLE_AI_BACKEND=vertex)
+  "@ai-sdk/openai": 4.0.81
+  "@ai-sdk/provider": 4.0.19 # LanguageModelV4 types for the fake models
   "@eslint/js": 9.39.5
   "@firebase/rules-unit-testing": 5.0.2
   "@formatjs/icu-messageformat-parser": 3.5.20 # i18n:check parses ICU messages
@@ -32,6 +37,7 @@ catalog:
   "@types/react-dom": 19.3.0
   "@typescript/typescript6": 6.0.2
   "@vitejs/plugin-react": 6.1.1
+  ai: 7.0.122
   axe-core: 4.13.0
   class-variance-authority: 0.7.1
   clsx: 2.1.1
@@ -114,3 +120,6 @@ minimumReleaseAgeExclude:
   - icu-minify@4.14.8 # dependency of use-intl
   - lucide-react@1.49.0
   - use-intl@4.14.8
+  # SP3 model factory (Task 5): latest @ai-sdk/openai, published 2026-09-29, admitted by
+  # pnpm at install; remove after 2026-10-06 (7 days after the publish).
+  - '@ai-sdk/openai@4.0.81'

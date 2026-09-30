@@ -19,7 +19,13 @@
     "evals:real": "vitest run --project evals-real --passWithNoTests"
   },
   "dependencies": {
+    "@ai-sdk/anthropic": "catalog:",
+    "@ai-sdk/google": "catalog:",
+    "@ai-sdk/google-vertex": "catalog:",
+    "@ai-sdk/openai": "catalog:",
+    "@ai-sdk/provider": "catalog:",
     "@core/services": "workspace:*",
+    "ai": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {

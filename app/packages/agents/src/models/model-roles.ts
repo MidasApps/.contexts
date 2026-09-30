@@ -87,3 +87,6 @@ export const parseModelId = (modelId: string): { provider: ModelProvider; model:
   const separator = modelId.indexOf("/");
   return { provider: modelId.slice(0, separator) as ModelProvider, model: modelId.slice(separator + 1) };
 };
+
+/** One embedding dimension for v1 (`vector(1536)`, decision 0022); a change means `ai.chunks_v2`. */
+export const EMBEDDING_DIMENSIONS = 1536;
