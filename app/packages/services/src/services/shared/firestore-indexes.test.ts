@@ -3,6 +3,7 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
 import { AUDIT_LOG_COLLECTIONS } from "../audit/adapters/driven/firestore-audit-log-writer.ts";
+import { CONNECTORS_COLLECTION } from "../connectors/adapters/driven/firestore-connector-repository.ts";
 import { FILES_COLLECTION } from "../files/adapters/driven/firestore-file-repository.ts";
 import { CORE_COLLECTIONS } from "./firestore/collections.ts";
 import { IDEMPOTENCY_RECORDS_COLLECTION } from "./idempotency/firestore-idempotency-store.ts";
@@ -37,7 +38,7 @@ const declared = new Set(
   ),
 );
 
-/** Composite indexes needed by the Firestore adapters of SP1 Tasks 7–18 (equality-only queries use index merging). */
+/** Composite indexes needed by the Firestore adapters (SP1 Tasks 7–18, SP3 connectors); equality-only queries use index merging. */
 const REQUIRED = [
   signature("access", ["tenantId:ASCENDING", "principalType:ASCENDING", "isRevoked:ASCENDING", "principalId:ASCENDING"]),
   signature("access", ["principalId:ASCENDING", "isRevoked:ASCENDING", "tenantId:ASCENDING"]),
@@ -57,6 +58,7 @@ const REQUIRED = [
   signature("api-keys", ["tenantId:ASCENDING", "createdAt:DESCENDING"]),
   signature("devices", ["tenantId:ASCENDING", "createdAt:DESCENDING"]),
   signature("sessions", ["uid:ASCENDING", "revokedAt:ASCENDING", "createdAt:DESCENDING"]),
+  signature("connectors", ["tenantId:ASCENDING", "createdAt:DESCENDING"]),
 ];
 
 const TTL_COLLECTIONS = [RATE_LIMIT_BUCKETS_COLLECTION, IDEMPOTENCY_RECORDS_COLLECTION, CORE_COLLECTIONS.deviceActivations];
@@ -66,6 +68,7 @@ const KNOWN_COLLECTIONS = new Set<string>([
   RATE_LIMIT_BUCKETS_COLLECTION,
   IDEMPOTENCY_RECORDS_COLLECTION,
   FILES_COLLECTION,
+  CONNECTORS_COLLECTION,
 ]);
 
 describe("firestore.indexes.json", () => {

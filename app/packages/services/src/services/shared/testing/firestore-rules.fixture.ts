@@ -1,5 +1,7 @@
 import type { RulesTestEnvironment } from "@firebase/rules-unit-testing";
 import { AUDIT_LOG_COLLECTIONS } from "../../audit/adapters/driven/firestore-audit-log-writer.ts";
+import { CONNECTORS_COLLECTION } from "../../connectors/adapters/driven/firestore-connector-repository.ts";
+import { LOCAL_SECRETS_COLLECTION } from "../../connectors/adapters/driven/local-secret-store.ts";
 import { FILES_COLLECTION } from "../../files/adapters/driven/firestore-file-repository.ts";
 import { CORE_COLLECTIONS } from "../firestore/collections.ts";
 import { IDEMPOTENCY_RECORDS_COLLECTION } from "../idempotency/firestore-idempotency-store.ts";
@@ -41,6 +43,8 @@ export const UNREADABLE_COLLECTIONS = [
   RATE_LIMIT_BUCKETS_COLLECTION,
   IDEMPOTENCY_RECORDS_COLLECTION,
   FILES_COLLECTION,
+  CONNECTORS_COLLECTION,
+  LOCAL_SECRETS_COLLECTION,
   // Server-only collection of the module settings (decision 0015); denied by the catch-all.
   "module-settings",
 ] as const;
