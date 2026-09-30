@@ -14,6 +14,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run --project unit",
     "db:init": "node scripts/db-init.ts",
+    "evals:seed": "node scripts/seed-eval-datasets.ts",
     "test:emulators": "vitest run --project emulators --passWithNoTests"
   },
   "dependencies": {

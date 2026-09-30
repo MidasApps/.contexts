@@ -188,12 +188,22 @@ const listEntitiesRule: FakeScenarioRule = {
   respond: ({ toolNames }) => ({ toolCalls: [{ toolName: modelToolName(toolNames, "catalog.listEntities") ?? "catalog.listEntities", input: {} }] }),
 };
 
+/** The knowledge agent searches the knowledge base with the request itself (SP3 Task 27 evals). */
+const searchKnowledgeRule: FakeScenarioRule = {
+  id: "knowledge-search",
+  matches: ({ text, toolNames }) => modelToolName(toolNames, "knowledge.searchKnowledge") !== undefined && stripFakeDirectives(text) !== "",
+  respond: ({ text, toolNames }) => ({
+    toolCalls: [{ toolName: modelToolName(toolNames, "knowledge.searchKnowledge") ?? "knowledge.searchKnowledge", input: { query: stripFakeDirectives(text).slice(0, 1000) } }],
+  }),
+};
+
 /**
  * Keyword rules of the core agents in fake mode (spec §5.3, SP3 Task 20). The supervisor
  * delegates: a confirmation → `agent-action`, "create a <record>" / data words →
  * `agent-data`, web words → `agent-web`, a question → `agent-knowledge`. The data agent
  * lists entities or renders the form of the command whose target contract matches the
- * word; the action agent runs the first command tool with the quoted name.
+ * word; the action agent runs the first command tool with the quoted name; the
+ * knowledge agent searches the knowledge base with the request.
  */
 export const coreFakeRules = (commands: readonly FakeCommandRef[]): readonly (readonly [string, FakeScenarioRule])[] => [
   ["assistant", delegation("supervisor-action", "action", CONFIRMED)],
@@ -203,4 +213,5 @@ export const coreFakeRules = (commands: readonly FakeCommandRef[]): readonly (re
   ["data", renderFormRule(commands)],
   ["data", listEntitiesRule],
   ["action", runCommandRule],
+  ["knowledge", searchKnowledgeRule],
 ];

@@ -316,3 +316,27 @@ export {
   TRANSCRIPTION_ROUTE_PATH,
   type VoiceRouteDeps,
 } from "./voice/voice-routes.ts";
+// SP3 scorers, versioned eval sets and dataset seeding (Task 27). The eval harness and
+// runner stay internal: they use test fakes and run only in the `evals` Vitest projects.
+export { type AgentRunView, allToolCalls, sanitizeToolName, type ToolCallView, toolNameMatches, viewAgentRun } from "./scorers/agent-run-view.ts";
+export { CITATIONS_GROUNDED_SCORER_ID, citedIds, createCitationsGroundedScorer, scoreCitationsGrounded } from "./scorers/citations-grounded.scorer.ts";
+export { type CoreScorer, createCoreScorers } from "./scorers/core-scorers.ts";
+export { type EvalGroundTruth, EvalGroundTruthSchema, readGroundTruth } from "./scorers/eval-ground-truth.schema.ts";
+export { createFaithfulnessJudgeScorer, FAITHFULNESS_JUDGE_SCORER_ID, faithfulnessOf, type FaithfulnessVerdict, FaithfulnessVerdictSchema } from "./scorers/faithfulness-judge.scorer.ts";
+export { createFormatComplianceScorer, FORMAT_COMPLIANCE_SCORER_ID, MAX_ANSWER_CHARS, scoreFormatCompliance } from "./scorers/format-compliance.scorer.ts";
+export { createTenantLeakScorer, scoreTenantLeak, TENANT_LEAK_SCORER_ID } from "./scorers/tenant-leak.scorer.ts";
+export { createToolRoutingScorer, scoreToolRouting, TOOL_ROUTING_SCORER_ID } from "./scorers/tool-routing.scorer.ts";
+export {
+  CURRENT_DATASET_VERSION,
+  datasetFileOf,
+  EVAL_AGENT_IDS,
+  type EvalAgentId,
+  type EvalCase,
+  EvalCaseSchema,
+  type EvalDataset,
+  EVALS_DIR,
+  loadEvalDataset,
+  parseEvalDataset,
+} from "./evals/eval-dataset.ts";
+export { type Baseline, BaselineSchema, evaluateGate, type GateResult, loadBaseline, type ScorerGateResult } from "./evals/eval-baseline.ts";
+export { seedEvalDatasets, type SeedOutcome } from "./evals/seed-datasets.ts";

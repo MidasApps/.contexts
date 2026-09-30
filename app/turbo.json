@@ -39,7 +39,8 @@
     "evals": {
       "dependsOn": ["^build"],
       "cache": false,
-      "passThroughEnv": ["AI_*", "DATABASE_URL"]
+      // GITHUB_SHA stamps the eval report (app/.evals, exported to BigQuery by SP5).
+      "passThroughEnv": ["AI_*", "DATABASE_URL", "GITHUB_SHA"]
     },
     "evals:real": {
       "dependsOn": ["^build"],
@@ -49,7 +50,8 @@
         "DATABASE_URL",
         "GOOGLE_*",
         "OPENAI_API_KEY",
-        "ANTHROPIC_API_KEY"
+        "ANTHROPIC_API_KEY",
+        "GITHUB_SHA"
       ]
     },
     "test:e2e": {

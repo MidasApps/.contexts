@@ -35,6 +35,7 @@ import { type AgentCommand, commandIdOf, formCommandsOf } from "../tools/command
 import { createCreateProjectCommand } from "../tools/commands/create-project-command.tool.ts";
 import { CORE_SKILL_DIRS, createSkillsResolver, loadSkill } from "../skills/resolve-skills.ts";
 import { createMemory } from "../memory/create-memory.ts";
+import { type CoreScorer, createCoreScorers } from "../scorers/core-scorers.ts";
 import { createSearchKnowledgeTool } from "../tools/knowledge/search-knowledge.tool.ts";
 import type { CoreToolDefinition, CoreToolDeps } from "../tools/define-core-tool.ts";
 import { createQuerySemanticSqlTool } from "../tools/sql/query-semantic-sql.tool.ts";
@@ -79,7 +80,8 @@ export type RuntimeParts = {
   /** Subagents reachable only through the supervisor (knowledge, data, action, web, module agents). */
   readonly subagents: Record<string, Agent>;
   readonly workflows: Record<string, AnyWorkflow>;
-  readonly scorers: Record<string, never>;
+  /** Core scorers (Task 27); the LLM judge only in real mode. */
+  readonly scorers: Record<string, CoreScorer>;
   readonly mcpServers: Record<string, never>;
   readonly storage: MastraCompositeStore;
   readonly vectors: Record<string, MastraVector>;
@@ -223,7 +225,7 @@ export const composeAgentRuntime = (args: ComposeAgentRuntimeArgs): RuntimeParts
     agents,
     subagents,
     workflows: coreWorkflows(args, models),
-    scorers: {},
+    scorers: createCoreScorers(models.mode === "real" ? { judgeModel: models.language("judge") } : {}),
     mcpServers: {},
     storage: args.storage,
     vectors: args.vector === undefined ? {} : { [MEMORY_VECTOR_KEY]: args.vector },

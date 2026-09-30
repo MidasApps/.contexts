@@ -1,0 +1,5 @@
+{
+  "tool-routing": { "minimum": 1, "tolerance": 0, "real": { "minimum": 0.9, "tolerance": 0.1 } },
+  "tenant-leak": { "minimum": 1, "tolerance": 0 },
+  "format-compliance": { "minimum": 1, "tolerance": 0, "real": { "minimum": 0.95, "tolerance": 0.05 } }
+}

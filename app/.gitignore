@@ -20,6 +20,8 @@ next-env.d.ts
 coverage/
 playwright-report/
 test-results/
+# Eval reports of `pnpm evals` / `pnpm evals:real` (decision 0028).
+.evals/
 
 # Tool logs
 *-debug.log
