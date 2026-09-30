@@ -15,3 +15,7 @@
 - 2026-09-30 | Task 11 complete | commits: e081d3f | review: pending
 - 2026-09-30 | Task 12 complete | commits: 593ec6b | review: pending
 - 2026-09-30 | Review fixes Tasks 7-10 (decision 0030) + SP3 audit outcome/metadata | commits: 4b4a78b, 5272f18, 249785e, 18f9811, 11c2dff, 3d5270a, a365363, 4a3a282 | review: pending
+- 2026-09-30 | Task 13 complete | commits: a9c2d03 | review: pending
+- 2026-09-30 | Task 14 complete | commits: 0522bf2 | review: pending
+- 2026-09-30 | Task 15 complete | commits: 6522df8 | review: pending
+- 2026-09-30 | Controller requests (rate limiter test, upload/knowledge audit actions, UPSTREAM_UNAVAILABLE) | commits: a9343a6, 21cd27d, 77713ff | review: pending
