@@ -27,7 +27,8 @@ const STAFF = ["platform-admin", "platform-support"] as const;
 
 /** The permissions of SP1 spec §5.1 (identity, tenancy, access, audit, platform). */
 export const SP1_PERMISSIONS: readonly PermissionDefinition[] = [
-  tenant("core.organization.read", "read", EVERYONE),
+  // The device role reads its own context (`GET /v1/me/context`) and nothing else (decision 0030 A1).
+  tenant("core.organization.read", "read", [...EVERYONE, "device"]),
   tenant("core.organization.update", "write", ADMINS),
   tenant("core.organization.delete", "write", ["owner"]),
   tenant("core.project.read", "read", EVERYONE),

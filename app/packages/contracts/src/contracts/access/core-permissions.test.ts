@@ -63,6 +63,11 @@ describe("CORE_PERMISSIONS", () => {
     );
   });
 
+  it("gives the device role only what /v1/me/context needs (decision 0030 A1)", () => {
+    const holders = sp1TenantPermissions.filter((permission) => permission.defaultRoles.includes("device")).map((permission) => permission.id);
+    expect(holders).toEqual(["core.organization.read"]);
+  });
+
   it("marks the SP1 reads and writes by the action", () => {
     for (const permission of SP1_PERMISSIONS) {
       const readAction = /\.read$/.test(permission.id);

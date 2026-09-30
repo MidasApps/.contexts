@@ -31,7 +31,7 @@ const createActivation = async (): Promise<string> => {
     method: "POST",
     path: `/v1/organizations/${tenantId}/device-activations`,
     as: "dv-owner",
-    body: { label: "Front desk tablet", node: { level: "organization", tenantId }, roles: [{ kind: "system", key: "viewer" }] },
+    body: { label: "Front desk tablet", node: { level: "organization", tenantId }, roles: [{ kind: "system", key: "device" }] },
   });
   expect(response.status).toBe(201);
   return ((await response.json()) as { data: { code: string } }).data.code;

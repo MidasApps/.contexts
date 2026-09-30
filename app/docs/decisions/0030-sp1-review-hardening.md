@@ -70,3 +70,12 @@ Each item below is a policy choice; the code comments point here.
   record keeps "at most once" and tells the client the resource exists.
 - **Per-unit `moveInProgress` markers** instead of a project lock: every read of the tree would have to check
   ancestors for markers; the project lock is one document and matches the batch scope of a move.
+
+## Amendments
+
+- **A1 — 2026-09-30 (review of SP1 Tasks 13–15): the `device` system role reads its context.** A device granted
+  only the `device` role got `404` from `GET /v1/me/context`, which authorizes `core.organization.read` at the node.
+  `core.organization.read` now lists `device` among its default roles (SP1 spec §5.1 table: owner, admin, member,
+  viewer, **device**); no other core permission does. Modules still give `device` their own permissions. A device
+  granted at a project reads its context there (authorization inherits downwards), never the organization's other
+  projects.
