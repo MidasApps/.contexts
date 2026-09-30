@@ -45,6 +45,10 @@ export const evalModeOf = (processEnv: Readonly<Record<string, string | undefine
 const realEnvOf = (processEnv: Readonly<Record<string, string | undefined>>): ModelFactoryEnv =>
   resolveAgentEnv({ ...AgentEnvSchema.parse(processEnv), APP_ENV: "local" as const, AI_MODE: "real" as const });
 
+/** The model env of an eval run: the fixture env in fake mode, the validated process env in real mode. */
+export const evalEnvOf = (mode: EvalMode, processEnv: Readonly<Record<string, string | undefined>> = {}): ModelFactoryEnv =>
+  mode === "fake" ? SUPERVISOR_TEST_ENV : realEnvOf(processEnv);
+
 export const embedWith = (models: AgentModels) => async (texts: readonly string[]) =>
   (await embedMany({ model: models.embedding(), values: [...texts] })).embeddings;
 
@@ -57,7 +61,7 @@ export const buildEvalHarness = (args: {
   readonly processEnv?: Readonly<Record<string, string | undefined>>;
   readonly knowledge?: (models: AgentModels) => KnowledgePort;
 }): EvalHarness => {
-  const env: ModelFactoryEnv = args.mode === "fake" ? SUPERVISOR_TEST_ENV : realEnvOf(args.processEnv ?? {});
+  const env = evalEnvOf(args.mode, args.processEnv);
   const models = createModelProvider(env);
   const access = createFakeAccessPort({ memberships: [{ tenantId: EVAL_TENANT, uid: "member-uid", permissions: MEMBER_PERMISSIONS }] });
   const ports = createFakeRuntimePorts({
