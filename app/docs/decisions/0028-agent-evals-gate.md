@@ -26,3 +26,22 @@ The SP3 gate requires a minimal versioned eval set per core agent passing in CI 
 - **Downgrade Vitest to 4 for `@mastra/evals`.** Breaks the workspace baseline (ADR 0004) for one package.
 - **Evals as plain unit tests with exact output assertions.** Brittle with real models and hides the score distribution.
 - **Real-model evals in every PR.** Cost, secrets in CI and flaky gates.
+
+## Amendments
+
+- **2026-09-30 — implementation (SP3 Task 27).**
+  - Since Task 20, `knowledge`, `data` and `action` are subagents that the app's Mastra does not
+    serve. The eval harness registers them in its own `Mastra` (`agents` + `subagents` of
+    `composeAgentRuntime`), so `mastra.getAgent(id)` works for every eval set.
+  - The gate runs in memory: fake ports, an eval knowledge corpus with a look-alike second tenant
+    (markers and document ids feed `tenant-leak`), in-memory storage, no memory (single-turn
+    cases need no thread). The CI job needs no Postgres; `pnpm evals:seed` writes the datasets to
+    the Mastra storage for Studio and experiments and never gates.
+  - Baselines accept a `real` band per scorer; fake runs are deterministic, so the fake band is
+    `minimum 1, tolerance 0` today. A leak-detection eval proves the gate fails when the
+    knowledge port drops the tenant filter.
+  - Baselined scorers run in `runEvals` with the floor as threshold, so its verdict matches the
+    gate. Reports (`app/.evals/<agent>.json`, `<agent>.real.json`) carry per-case scores and
+    snake_case `bigqueryRows` for `ai_observability.eval_runs` (SP5).
+  - The fake knowledge agent searches with the request itself (keyword rule), so eval inputs
+    need directives only where no rule applies (`describeEntity`).

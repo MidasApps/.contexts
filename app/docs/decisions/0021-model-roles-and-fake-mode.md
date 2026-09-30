@@ -25,3 +25,17 @@ Agents, guardrail detectors, judges, embeddings and voice need different models.
 - **`ai/test` mocks as the dev fake.** They are test utilities, not scripted scenarios, and are not meant to ship in a runtime package used by dev and e2e.
 - **Model ids hard-coded per agent.** Upgrades and per-environment overrides would need code changes.
 - **Recorded provider responses (cassettes).** Brittle across SDK versions, and they put real content in the repository.
+
+## Amendments
+
+- **2026-09-30 — voice composition (SP3 Task 26).** `createVoice` builds a `CompositeVoice`
+  from the `transcription` and `speech` roles (fake voice models in fake mode). `CompositeVoice`
+  in `@mastra/core` 1.71 wraps only `v2`/`v3` AI SDK models, and the factory's models are `v4`
+  (AI SDK 7), so each role goes through an own `MastraVoice` provider that calls `transcribe` /
+  `generateSpeech` from `ai`. No model configured means `null` (voice off, routes answer 503
+  `FEATURE_UNAVAILABLE`). Realtime stays off: no realtime provider is pinned, the capability is
+  reported as `false` and SP4 may inject a `MastraVoice` realtime provider. The routes
+  `/voice/transcriptions` (≤ 5 MB, ≤ 60 s: WAV header before the model, reported duration after)
+  and `/voice/speech` are custom Mastra routes with `requiresAuth` (FirebaseMastraAuth,
+  `core.chat.use`); Mastra's `bodySizeLimit` does not apply to custom routes, so the handler caps
+  the body itself.
