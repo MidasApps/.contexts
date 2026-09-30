@@ -1,5 +1,5 @@
 import { ApprovalRequestIdSchema, CreateApprovalRequestInputSchema, ImpersonationSessionIdSchema, UserIdSchema, type UserPrincipal } from "@core/contracts";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { nodes } from "./access-write.fixture.ts";
 import { as, buildApprovalWorld, deleteInvoiceInput, tenantId } from "./approval.fixture.ts";
 
@@ -83,6 +83,18 @@ describe("approveRequest", () => {
     expect(world.actions()).toContain("APPROVAL_FAILED");
     expect(await decide(world, "approveRequest", as("owner"), created.id)).toMatchObject({ ok: false, error: { code: "CONFLICT" } });
     expect(world.executions).toHaveLength(1);
+  });
+
+  it("leaves an interrupted execution approved: listed by status for an operator, never re-executed", async () => {
+    const world = await buildApprovalWorld({ hangOnExecute: true });
+    const created = await request(world);
+    void decide(world, "approveRequest", as("admin"), created.id);
+    await vi.waitFor(() => expect(world.executions).toHaveLength(1));
+    const stuck = await world.services.listApprovalRequests({ actor: as("admin"), access: world.access(), tenantId, status: "approved", page: { after: undefined, limit: 20 } });
+    expect(stuck).toMatchObject({ ok: true, data: { items: [{ id: created.id, status: "approved", decidedBy: "admin" }] } });
+    expect(await decide(world, "approveRequest", as("owner"), created.id)).toMatchObject({ ok: false, error: { code: "CONFLICT" } });
+    expect(world.executions).toHaveLength(1);
+    expect(world.actions()).not.toContain("APPROVAL_EXECUTED");
   });
 
   it("treats an expired request as no longer pending (409) and stores it as expired", async () => {

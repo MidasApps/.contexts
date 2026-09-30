@@ -36,7 +36,9 @@ export const deleteInvoiceInput = (input: Record<string, unknown> = { invoiceId:
   action: { kind: "sample-delete-invoice", input, summary: "Delete invoice 42" },
 });
 
-export const buildApprovalWorld = async (options: { failWith?: Error } = {}) => {
+// `hangOnExecute` never settles the handler: the state a crash between approval and the
+// execution record leaves behind (SP1 spec §6.5, decision 0030 A3).
+export const buildApprovalWorld = async (options: { failWith?: Error; hangOnExecute?: boolean } = {}) => {
   let now = new Date(APPROVAL_NOW);
   const clock = { now: () => new Date(now.getTime()) };
   const world = makeAccessWriteWorld();
@@ -56,6 +58,7 @@ export const buildApprovalWorld = async (options: { failWith?: Error } = {}) => 
       inputSchema: z.strictObject({ invoiceId: z.string().min(1) }),
       execute: (input, context) => {
         executions.push({ input, context });
+        if (options.hangOnExecute === true) return new Promise<void>(() => undefined);
         return options.failWith === undefined ? Promise.resolve() : Promise.reject(options.failWith);
       },
     },
