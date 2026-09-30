@@ -149,7 +149,13 @@ do not import `client`; `agents` reach `services` only through use cases;
   0010 dependency audit advisories, 0011 client data and rendering model,
   0012 routing and router port, 0013 i18n, money and time zone, 0014 UI kit
   shadcn atomic, 0015 module contract, 0016 web content security policy,
-  0017 desktop session secure store and testing, 0018 mobile targets deferred).
+  0017 desktop session secure store and testing, 0018 mobile targets deferred,
+  0019 agent runtime layout and request context, 0020 Firebase Mastra auth,
+  0021 model roles and fake mode, 0022 knowledge base tables and embeddings,
+  0023 Postgres migrations and Mastra storage init, 0024 semantic SQL guard,
+  0025 agent command tools and approvals, 0026 guardrails, budgets and usage
+  ledger, 0027 connectors, MCP and web tools, 0028 agent evals gate, 0029 agent
+  memory and skills).
 - Framework ADRs: `../.contexts/engineering/decisions/`.
 - Design spec: `../docs/superpowers/specs/2026-09-29-agentic-app-core-design.md`.
 - SP0 plan, reports and follow-ups: `../docs/plans/2026-09-29-sp0-app-foundation/`.
