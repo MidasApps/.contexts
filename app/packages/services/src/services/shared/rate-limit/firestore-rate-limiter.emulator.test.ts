@@ -59,12 +59,17 @@ describe("Firestore rate limiter", () => {
     expect((await limiter.peek("test-five-per-minute", "10.0.0.2")).remaining).toBe(4);
   });
 
-  // Eight transactions contend on one bucket; the emulator resolves it with lock waits.
-  it("counts concurrent hits exactly", { timeout: 30_000 }, async () => {
+  // limit + 1 transactions contend on one bucket: enough to prove that exactly `limit` pass
+  // and the extra one is refused. The emulator serializes them with lock waits and client
+  // backoff, whose total grows with every extra contender (8 hits took 4-13 s and timed out
+  // under load), so the count stays at the minimum that still overshoots the limit.
+  it("counts concurrent hits exactly", { timeout: 90_000 }, async () => {
     const { clock } = movableClock("2026-09-29T12:00:00.000Z");
     const limiter = createFirestoreRateLimiter({ firestore, clock, policies });
-    const results = await Promise.all(Array.from({ length: 8 }, () => limiter.consume("test-five-per-minute", "10.0.0.2")));
+    const contenders = 6;
+    const results = await Promise.all(Array.from({ length: contenders }, () => limiter.consume("test-five-per-minute", "10.0.0.2")));
     expect(results.filter((result) => result.allowed)).toHaveLength(5);
+    expect(results.filter((result) => !result.allowed)).toHaveLength(contenders - 5);
     const stored = await firestore.collection(RATE_LIMIT_BUCKETS_COLLECTION).doc(rateLimitBucketId("test-five-per-minute", "10.0.0.2")).get();
     expect(stored.get("count")).toBe(5);
   });
