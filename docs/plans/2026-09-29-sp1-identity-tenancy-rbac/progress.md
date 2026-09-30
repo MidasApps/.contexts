@@ -10,3 +10,5 @@
 - 2026-09-30 | Review fixes Tasks 4-6 (fail-open gaps) | commits: 8f996ff, 554a9de | review: pending
 - 2026-09-30 | Task 7 complete | commits: 2e22fc5 (coverage-v8), b86f3e8 | review: pending
 - 2026-09-30 | Task 8 complete | commits: 91f2129 | review: pending
+- 2026-09-30 | Task 9 complete | commits: 0c600de | review: pending
+- 2026-09-30 | Task 10 complete | commits: 5ab6834 | review: pending
