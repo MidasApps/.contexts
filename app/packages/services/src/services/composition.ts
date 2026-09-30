@@ -15,8 +15,9 @@ import { createFirestoreAuditLogWriter } from "./audit/adapters/driven/firestore
 import { makeRecordAudit, type AuditWriter } from "./audit/application/use-cases/record-audit.ts";
 import { buildCoreRoutes, type CoreRoutes } from "./core-routes.ts";
 import { createFirebaseTokenVerifier } from "./identity/adapters/driven/firebase-token-verifier.ts";
-import { refuseAllApiKeys, type ApiKeyAuthenticator } from "./identity/application/ports/driven/api-key-authenticator.ts";
-import { noopApiKeyRevoker, type ApiKeyRevoker } from "./identity/application/ports/driven/api-key-revoker.ts";
+import type { ApiKeyAuthenticator } from "./identity/application/ports/driven/api-key-authenticator.ts";
+import type { ApiKeyRevoker } from "./identity/application/ports/driven/api-key-revoker.ts";
+import { createFirestoreApiKeyServices, type ApiKeyServices } from "./identity/api-key-composition.ts";
 import type { TokenVerifier } from "./identity/application/ports/driven/token-verifier.ts";
 import { createFirebaseAuthAccountReader } from "./identity/adapters/driven/firebase-auth-account-reader.ts";
 import { createFirebaseUserAccountReader } from "./identity/adapters/driven/firebase-user-account-reader.ts";
@@ -58,7 +59,7 @@ export type CoreServerAdapters = {
   /** Emulator route tests pass `createFakeTokenVerifier` (the Auth Emulator always checks revocation). */
   readonly tokenVerifier?: TokenVerifier;
   readonly tenancy?: FirestoreTenancyAdapters;
-  /** Stand-in until the API keys vertical (SP1 Task 14) provides the Firestore revoker. */
+  /** Replaces the Firestore revoker of the API keys vertical (member removal revokes keys). */
   readonly apiKeyRevoker?: ApiKeyRevoker;
   /** The core logs only; an application may deliver invitation links (SP1 spec §6.2). */
   readonly invitationNotifier?: InvitationNotifier;
@@ -82,6 +83,8 @@ export type CoreServer = {
   readonly identity: IdentityServices;
   /** Web and desktop sessions (SP1 Task 13). */
   readonly sessions: SessionServices;
+  /** Scoped API keys (SP1 Task 14): the `service` principal path. */
+  readonly apiKeys: ApiKeyServices;
   /** Server Action bodies for SP2's `(auth)/actions.ts` (decision 0007). */
   readonly sessionActions: SessionActions;
   /** RSC guards for SP2's `(app)` and `/admin` layouts. */
@@ -118,7 +121,7 @@ type CoreServerArgs = {
   adapters?: CoreServerAdapters;
 };
 
-const buildAccess = (args: CoreServerArgs, clock: Clock, audit: AuditWriter) => {
+const buildAccess = (args: CoreServerArgs, clock: Clock, audit: AuditWriter, apiKeys: ApiKeyServices) => {
   const { firestore, auth } = args.firebase;
   const adapters = args.adapters?.access ?? createFirestoreAccessAdapters({ firestore, auth });
   const readers = args.adapters?.accessReaders ?? adapters.readers;
@@ -147,7 +150,7 @@ const buildAccess = (args: CoreServerArgs, clock: Clock, audit: AuditWriter) => 
     directory: adapters.directory,
     organizations: adapters.organizations,
     notifier: args.adapters?.invitationNotifier ?? createNoopInvitationNotifier({ logger: args.logger }),
-    apiKeys: args.adapters?.apiKeyRevoker ?? noopApiKeyRevoker,
+    apiKeys: args.adapters?.apiKeyRevoker ?? apiKeys.revoker,
     randomBytes: args.adapters?.randomBytes ?? randomBytes,
     appUrl: args.env.NEXT_PUBLIC_APP_URL,
     logger: args.logger,
@@ -181,7 +184,15 @@ export const createCoreServer = (args: CoreServerArgs): CoreServer => {
   const clock = args.clock ?? systemClock;
   const { firestore, auth } = args.firebase;
   const audit = makeRecordAudit({ writer: createFirestoreAuditLogWriter({ firestore }), clock });
-  const access = buildAccess(args, clock, audit);
+  const apiKeys = createFirestoreApiKeyServices({
+    firestore,
+    audit,
+    clock,
+    randomBytes: args.adapters?.randomBytes ?? randomBytes,
+    logger: args.logger,
+    apiKeyPrefix: args.env.API_KEY_PREFIX,
+  });
+  const access = buildAccess(args, clock, audit, apiKeys);
   const tenancyAdapters = args.adapters?.tenancy ?? createFirestoreTenancyAdapters({ firestore });
   const tenancy = buildTenancy(args, clock, audit, access.services, tenancyAdapters);
   const identity = createIdentityServices({
@@ -199,7 +210,7 @@ export const createCoreServer = (args: CoreServerArgs): CoreServer => {
   });
   const verifyBearer = makeVerifyBearer({
     tokenVerifier: args.adapters?.tokenVerifier ?? createFirebaseTokenVerifier({ auth }),
-    apiKeyAuthenticator: args.adapters?.apiKeyAuthenticator ?? refuseAllApiKeys,
+    apiKeyAuthenticator: args.adapters?.apiKeyAuthenticator ?? apiKeys.authenticator,
     apiKeyPrefix: args.env.API_KEY_PREFIX,
   });
   const pipeline: ApiRouteDeps = {
@@ -223,7 +234,7 @@ export const createCoreServer = (args: CoreServerArgs): CoreServer => {
     env: args.env,
   });
   const { sessions } = sessionVertical;
-  const routes = buildCoreRoutes({ pipeline, access: access.services, members: access.members, tenancy, identity, sessions });
+  const routes = buildCoreRoutes({ pipeline, access: access.services, members: access.members, tenancy, identity, sessions, apiKeys });
   return {
     routes,
     verifyBearer,
@@ -234,6 +245,7 @@ export const createCoreServer = (args: CoreServerArgs): CoreServer => {
     identity,
     resolveAccessContext: identity.resolveAccessContext,
     sessions,
+    apiKeys,
     sessionActions: sessionVertical.sessionActions,
     sessionGuards: sessionVertical.sessionGuards,
     audit,

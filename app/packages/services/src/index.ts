@@ -205,6 +205,8 @@ export {
   type StaffSessionGuardResult,
   type WebSessionGuardResult,
 } from "./services/identity/index.ts";
+// SP1 scoped API keys (Task 14).
+export { createApiKeyServices, parseApiKey, type ApiKeyServices } from "./services/identity/index.ts";
 export { createFirestoreUnitOfWork, inMemoryUnitOfWork, type UnitOfWork } from "./services/shared/firestore/unit-of-work.ts";
 export { CORE_COLLECTIONS, CORE_SCHEMA_VERSION } from "./services/shared/firestore/collections.ts";
 export { decodeCursor, encodeCursor, type CursorPosition } from "./services/shared/pagination/cursor.ts";

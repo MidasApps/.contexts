@@ -49,3 +49,9 @@ export { createFirebaseSessionVertical, type FirebaseSessionVertical } from "./f
 export { createInMemorySessionRepository, type InMemorySessionRepository } from "./adapters/driven/in-memory-session-repository.ts";
 export { createFakeFirebaseAuth, type FakeFirebaseAuth } from "./adapters/driven/fake-firebase-auth.ts";
 export type { SessionRecord } from "./domain/session-record.schema.ts";
+// Scoped API keys (SP1 Task 14, decision 0008).
+export { createApiKeyServices, createFirestoreApiKeyServices, type ApiKeyServices } from "./api-key-composition.ts";
+export type { ApiKeyDeps } from "./application/api-key-deps.ts";
+export type { ApiKeyRepository, StoredApiKey } from "./application/ports/driven/api-key-repository.ts";
+export { formatApiKey, generateApiKeyParts, parseApiKey, type ApiKeyParts } from "./domain/api-key-format.ts";
+export { createInMemoryApiKeyRepository, type InMemoryApiKeyRepository } from "./adapters/driven/in-memory-api-key-repository.ts";
