@@ -5,6 +5,7 @@ import type { MastraCompositeStore } from "@mastra/core/storage";
 import type { MastraVector } from "@mastra/core/vector";
 import type { Memory } from "@mastra/memory";
 import type { Observability } from "@mastra/observability";
+import { processLogger } from "@core/services";
 import type { AnyWorkflow } from "@mastra/core/workflows";
 import { createActionAgentDefinition } from "../agents/action-agent.ts";
 import { createDataAgentDefinition } from "../agents/data-agent.ts";
@@ -38,6 +39,8 @@ import { createSearchKnowledgeTool } from "../tools/knowledge/search-knowledge.t
 import type { CoreToolDefinition, CoreToolDeps } from "../tools/define-core-tool.ts";
 import { createQuerySemanticSqlTool } from "../tools/sql/query-semantic-sql.tool.ts";
 import { createToolRegistry, type ToolRegistry } from "../tools/tool-registry.ts";
+import { type CoreVoice, createVoice } from "../voice/create-voice.ts";
+import { createVoiceRoutes } from "../voice/voice-routes.ts";
 import { type AgentDefinition, type AgentFactoryDeps, type AgentModule, AgentModuleError } from "./agent-module.ts";
 import type { AgentRuntimePorts } from "./runtime-ports.ts";
 
@@ -86,8 +89,11 @@ export type RuntimeParts = {
   readonly auth: FirebaseMastraAuth;
   /** Route allowlist first, then the context middleware. */
   readonly middleware: AgentMiddleware[];
+  /** Voice routes (`/voice/transcriptions`, `/voice/speech`, Task 26). */
   readonly apiRoutes: ApiRoute[];
   readonly tools: ToolRegistry;
+  /** `CompositeVoice` over the voice roles; `null` when no voice model is configured (SP4 attaches it). */
+  readonly voice: CoreVoice | null;
 };
 
 const dirsOption = (dirs: readonly string[] | undefined) => (dirs === undefined ? {} : { instructionsDirs: dirs });
@@ -212,6 +218,7 @@ export const composeAgentRuntime = (args: ComposeAgentRuntimeArgs): RuntimeParts
   const apiPrefix = args.apiPrefix;
   const auth = new FirebaseMastraAuth({ access: args.ports.access, ...(apiPrefix === undefined ? {} : { apiPrefix }) });
   const prefix = apiPrefix === undefined ? {} : { apiPrefix };
+  const voice = createVoice({ models });
   return {
     agents,
     subagents,
@@ -229,7 +236,8 @@ export const composeAgentRuntime = (args: ComposeAgentRuntimeArgs): RuntimeParts
     }),
     auth,
     middleware: [createRouteAllowlistMiddleware(prefix), createContextMiddleware({ auth, aiMode: args.env.AI_MODE, threadOwnerOf: threadOwnerFromStorage(args.storage), ...prefix })],
-    apiRoutes: [],
+    apiRoutes: createVoiceRoutes({ voice, logger: processLogger }),
     tools,
+    voice,
   };
 };

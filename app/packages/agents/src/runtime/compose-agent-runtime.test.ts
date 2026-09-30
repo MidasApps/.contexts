@@ -68,7 +68,9 @@ describe("composeAgentRuntime", () => {
       "knowledge.searchKnowledge",
       "command.tenancy.CreateProjectInput",
     ]);
-    expect(runtime).toMatchObject({ scorers: {}, mcpServers: {}, vectors: {}, apiRoutes: [] });
+    expect(runtime).toMatchObject({ scorers: {}, mcpServers: {}, vectors: {} });
+    expect(runtime.apiRoutes.map((route) => `${route.method} ${route.path}`)).toEqual(["POST /voice/transcriptions", "POST /voice/speech"]);
+    expect(runtime.voice?.capabilities).toEqual({ transcription: true, speech: true, realtime: false });
     expect(Object.keys(runtime.workflows).sort()).toEqual(["catalog-reindex", "knowledge-ingest"]);
   });
 

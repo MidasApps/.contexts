@@ -301,3 +301,18 @@ export {
 } from "./connectors/mcp/mcp-connector.ts";
 export { assertPublicDatabaseHost, DB_QUERY_PERMISSION, type PostgresConnectorRunner, postgresConnectorTools, runReadOnlyQuery } from "./connectors/db/postgres-readonly-connector.ts";
 export { assertPublicUrl, guardedFetch, isNonPublicAddress, MAX_REDIRECTS, type ResolveHost, UrlGuardError, type UrlGuardReason } from "./tools/web/url-guard.ts";
+// SP3 voice composition and routes (Task 26).
+export { ACCEPTED_AUDIO_TYPES, baseMediaType, sniffAudioMediaType, wavDurationSeconds } from "./voice/audio-format.ts";
+export { AiSdkSpeechVoice, AiSdkTranscriptionVoice, type SynthesizedAudio, synthesizeSpeech, type Transcript, transcribeAudio } from "./voice/ai-sdk-voice.ts";
+export { type CoreVoice, createVoice, type VoiceCapabilities, type VoiceModels, VoiceUnavailableError } from "./voice/create-voice.ts";
+export { MAX_SPEECH_TEXT_CHARS, type SpeechInput, SpeechInputSchema } from "./voice/speech-input.schema.ts";
+export {
+  createVoiceRoutes,
+  handleSpeech,
+  handleTranscription,
+  MAX_AUDIO_BYTES,
+  MAX_AUDIO_SECONDS,
+  SPEECH_ROUTE_PATH,
+  TRANSCRIPTION_ROUTE_PATH,
+  type VoiceRouteDeps,
+} from "./voice/voice-routes.ts";
