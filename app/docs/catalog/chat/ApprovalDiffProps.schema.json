@@ -1,0 +1,63 @@
+{
+  "additionalProperties": false,
+  "description": "What an approved tool call would change, shown before the member decides.",
+  "examples": [
+    {
+      "after": {
+        "name": "Launch"
+      },
+      "before": null,
+      "fields": [
+        "name"
+      ]
+    }
+  ],
+  "properties": {
+    "after": {
+      "additionalProperties": {},
+      "description": "Values after the change.",
+      "propertyNames": {
+        "type": "string"
+      },
+      "type": "object",
+      "x-pii": "personal"
+    },
+    "before": {
+      "anyOf": [
+        {
+          "additionalProperties": {},
+          "propertyNames": {
+            "type": "string"
+          },
+          "type": "object"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Current values; null for a create.",
+      "x-pii": "personal"
+    },
+    "fields": {
+      "description": "Changed fields, in display order.",
+      "items": {
+        "maxLength": 200,
+        "minLength": 1,
+        "type": "string"
+      },
+      "maxItems": 100,
+      "type": "array",
+      "x-pii": "none"
+    }
+  },
+  "required": [
+    "before",
+    "after",
+    "fields"
+  ],
+  "type": "object",
+  "x-kind": "ui-component",
+  "x-pii": "personal",
+  "x-relations": [],
+  "x-tenancyScope": "organization"
+}

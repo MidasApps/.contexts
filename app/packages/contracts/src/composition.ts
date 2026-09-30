@@ -18,6 +18,13 @@ import {
   UpdateConnectorInputContract,
 } from "./contracts/connectors/connector-input.schema.ts";
 import { CONNECTORS_ENDPOINTS } from "./contracts/connectors/endpoints.ts";
+import { CHAT_UI_CONTRACTS } from "./contracts/chat/ui/chat-ui-components.ts";
+import { ChatRequestContract } from "./contracts/conversations/chat-request.schema.ts";
+import { ConversationContract } from "./contracts/conversations/conversation.schema.ts";
+import { ConversationPatchContract } from "./contracts/conversations/conversation-patch.schema.ts";
+import { CONVERSATIONS_ENDPOINTS } from "./contracts/conversations/endpoints.ts";
+import { MessageMetadataContract } from "./contracts/conversations/message-metadata.schema.ts";
+import { ToolApprovalDecisionContract } from "./contracts/conversations/tool-approval-decision.schema.ts";
 import type { ContractDefinition } from "./contracts/contract.ts";
 import { NoteContract } from "./contracts/example/note.schema.ts";
 import { FILES_ENDPOINTS } from "./contracts/files/endpoints.ts";
@@ -39,6 +46,8 @@ import { createContractRegistry, type ContractRegistry } from "./contracts/regis
 import { TENANCY_CONTRACTS } from "./contracts/tenancy/contracts.ts";
 import { TENANCY_ENDPOINTS } from "./contracts/tenancy/endpoints.ts";
 import { SP5_CONTRACTS } from "./contracts/sp5-contracts.ts";
+import { VOICE_ENDPOINTS } from "./contracts/voice/endpoints.ts";
+import { RealtimeSessionContract, SpeechRequestContract, TranscriptionContract } from "./contracts/voice/voice.schema.ts";
 
 /** Every contract of the core; add new contracts here. `example.Note` is removable. */
 export const CORE_CONTRACTS: readonly ContractDefinition[] = [
@@ -70,6 +79,16 @@ export const CORE_CONTRACTS: readonly ContractDefinition[] = [
   FileReadUrlContract,
   // SP5 workflows, prompts, platform console and observability.
   ...SP5_CONTRACTS,
+  // SP4 chat: conversations, generative UI props and voice.
+  ConversationContract,
+  ChatRequestContract,
+  ConversationPatchContract,
+  MessageMetadataContract,
+  ToolApprovalDecisionContract,
+  ...CHAT_UI_CONTRACTS,
+  TranscriptionContract,
+  SpeechRequestContract,
+  RealtimeSessionContract,
 ];
 
 /** Every `/v1` endpoint of the core (SP1 spec §7.3); add descriptors here. */
@@ -84,6 +103,9 @@ export const CORE_ENDPOINTS: readonly EndpointDefinition[] = [
   ...FILES_ENDPOINTS,
   ...KNOWLEDGE_ENDPOINTS,
   ...CONNECTORS_ENDPOINTS,
+  // SP4 chat, conversation history and voice.
+  ...CONVERSATIONS_ENDPOINTS,
+  ...VOICE_ENDPOINTS,
 ];
 
 /** Builds a fresh registry with the core contracts (catalog scripts, apps at startup). */

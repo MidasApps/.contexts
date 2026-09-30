@@ -18,5 +18,6 @@
   "UNKNOWN_PERMISSION": "One of the chosen permissions doesn't exist.",
   "SELF_APPROVAL_FORBIDDEN": "You can't approve your own request.",
   "MFA_REQUIRED": "This action requires two-step verification.",
-  "MEMBERSHIP_EXISTS": "This person is already a member."
+  "MEMBERSHIP_EXISTS": "This person is already a member.",
+  "FEATURE_UNAVAILABLE": "This feature is not available right now."
 }

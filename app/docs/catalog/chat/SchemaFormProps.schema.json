@@ -1,0 +1,57 @@
+{
+  "additionalProperties": false,
+  "description": "A form for a command contract that the member reviews and submits inside the chat.",
+  "examples": [
+    {
+      "commandId": "example.CreateNoteCommand",
+      "contractId": "example.Note",
+      "initialValues": {
+        "title": "Kickoff"
+      },
+      "mode": "create"
+    }
+  ],
+  "properties": {
+    "commandId": {
+      "description": "Command the submitted values feed.",
+      "pattern": "^[a-z][a-z0-9-]*\\.[A-Z][A-Za-z0-9]*$",
+      "type": "string",
+      "x-pii": "none"
+    },
+    "contractId": {
+      "description": "Contract whose schema renders the form.",
+      "pattern": "^[a-z][a-z0-9-]*\\.[A-Z][A-Za-z0-9]*$",
+      "type": "string",
+      "x-pii": "none"
+    },
+    "initialValues": {
+      "additionalProperties": {},
+      "description": "Values proposed by the agent; may hold user data.",
+      "propertyNames": {
+        "type": "string"
+      },
+      "type": "object",
+      "x-pii": "personal"
+    },
+    "mode": {
+      "description": "Create a record or update one.",
+      "enum": [
+        "create",
+        "update"
+      ],
+      "type": "string",
+      "x-pii": "none"
+    }
+  },
+  "required": [
+    "contractId",
+    "commandId",
+    "mode",
+    "initialValues"
+  ],
+  "type": "object",
+  "x-kind": "ui-component",
+  "x-pii": "personal",
+  "x-relations": [],
+  "x-tenancyScope": "organization"
+}

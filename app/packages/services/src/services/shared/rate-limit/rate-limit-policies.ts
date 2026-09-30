@@ -27,6 +27,11 @@ export const RATE_LIMIT_POLICIES = [
   { id: "invitation-preview", limit: 20, windowMs: MINUTE_MS, subject: "principal", counts: "requests" },
   // SP3 core MCP server (Task 24): one MCP message per request; the budget guard caps model spend.
   { id: "mcp-call", limit: 60, windowMs: MINUTE_MS, subject: "principal", counts: "requests" },
+  // SP4 chat (spec §6): 20 turns per minute per user; the 5 concurrent streams per tenant are a
+  // concurrency cap checked by `/v1/chat` itself, not a window.
+  { id: "chat-turn", limit: 20, windowMs: MINUTE_MS, subject: "principal", counts: "requests" },
+  // SP4 voice (spec §4.5): transcriptions, speech and realtime sessions share one budget.
+  { id: "voice-call", limit: 30, windowMs: MINUTE_MS, subject: "principal", counts: "requests" },
 ] as const satisfies readonly RateLimitPolicy[];
 
 export type RateLimitPolicyId = (typeof RATE_LIMIT_POLICIES)[number]["id"];

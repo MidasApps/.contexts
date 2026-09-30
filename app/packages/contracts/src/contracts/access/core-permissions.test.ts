@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { PermissionSchema } from "../primitives/catalog-meta.schema.ts";
 import { AGENT_PERMISSIONS } from "../agents/agent-permissions.ts";
+import { CHAT_PERMISSIONS } from "../conversations/chat-permissions.ts";
 import { CORE_PERMISSIONS, SP1_PERMISSIONS, SP5_PERMISSIONS } from "./core-permissions.ts";
 import { PermissionDefinitionSchema } from "./permission-definition.schema.ts";
 
@@ -37,9 +38,10 @@ describe("CORE_PERMISSIONS", () => {
     );
   });
 
-  it("includes every agent runtime permission (SP3 spec §2.2) unchanged", () => {
-    expect(ids).toEqual([...sp1Ids, ...AGENT_PERMISSIONS.map((permission) => permission.id), ...SP5_PERMISSIONS.map((permission) => permission.id)]);
-    for (const agent of AGENT_PERMISSIONS) expect(CORE_PERMISSIONS.find((permission) => permission.id === agent.id)).toEqual(agent);
+  it("includes every agent runtime (SP3 spec §2.2) and chat (SP4) permission unchanged", () => {
+    const added = [...AGENT_PERMISSIONS, ...CHAT_PERMISSIONS];
+    expect(ids).toEqual([...sp1Ids, ...added.map((permission) => permission.id), ...SP5_PERMISSIONS.map((permission) => permission.id)]);
+    for (const agent of added) expect(CORE_PERMISSIONS.find((permission) => permission.id === agent.id)).toEqual(agent);
   });
 
   it("gives every tenant permission at least one default role, owner included", () => {

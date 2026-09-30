@@ -60,6 +60,12 @@ export const AUDIT_ACTIONS = [
   "CONNECTOR_UPDATED",
   "CONNECTOR_DELETED",
   "CONNECTOR_SECRET_SET",
+  // Chat (SP4 spec §4.1, §4.4, §4.5): approval decisions, conversation deletes and voice calls.
+  "AGENT_TOOL_CALL_APPROVED",
+  "AGENT_TOOL_CALL_DECLINED",
+  "CONVERSATION_DELETED",
+  "VOICE_TRANSCRIBED",
+  "VOICE_SYNTHESIZED",
 ] as const;
 
 export const AuditActionSchema = z.enum(AUDIT_ACTIONS);

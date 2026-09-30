@@ -81,7 +81,12 @@
         "CONNECTOR_CREATED",
         "CONNECTOR_UPDATED",
         "CONNECTOR_DELETED",
-        "CONNECTOR_SECRET_SET"
+        "CONNECTOR_SECRET_SET",
+        "AGENT_TOOL_CALL_APPROVED",
+        "AGENT_TOOL_CALL_DECLINED",
+        "CONVERSATION_DELETED",
+        "VOICE_TRANSCRIBED",
+        "VOICE_SYNTHESIZED"
       ],
       "type": "string",
       "x-pii": "none"
@@ -175,6 +180,12 @@
         "runId": {
           "description": "Id of the agent or workflow run.",
           "pattern": "^[A-Za-z0-9_-]{1,128}$",
+          "type": "string",
+          "x-pii": "none"
+        },
+        "toolCallId": {
+          "description": "Id of the tool call an approval decision answers (SP4).",
+          "pattern": "^[A-Za-z0-9_.:-]{1,200}$",
           "type": "string",
           "x-pii": "none"
         },

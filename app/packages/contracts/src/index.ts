@@ -176,6 +176,75 @@ export {
   updateConnectorEndpoint,
 } from "./contracts/connectors/endpoints.ts";
 export { LlmCallContract, LlmCallSchema, type LlmCall } from "./contracts/usage/llm-call.schema.ts";
+// SP4 chat: conversations, chat requests, generative UI props and voice.
+export {
+  ChatAgentIdSchema,
+  ConversationContract,
+  ConversationIdSchema,
+  ConversationSchema,
+  MAX_SEARCH_TOKENS,
+  MAX_SUMMARY_CHARS,
+  MAX_TITLE_CHARS,
+  type ChatAgentId,
+  type Conversation,
+  type ConversationId,
+} from "./contracts/conversations/conversation.schema.ts";
+export {
+  ChatRequestContract,
+  ChatRequestSchema,
+  ChatTextPartSchema,
+  MAX_APPROVAL_REASON_CHARS,
+  MAX_CHAT_ATTACHMENTS,
+  MAX_CHAT_TEXT_CHARS,
+  ToolApprovalResponsePartSchema,
+  type ChatRequest,
+  type ToolApprovalResponsePart,
+} from "./contracts/conversations/chat-request.schema.ts";
+export { ConversationPatchContract, ConversationPatchSchema, type ConversationPatch } from "./contracts/conversations/conversation-patch.schema.ts";
+export {
+  MessageAttachmentSchema,
+  MessageMetadataContract,
+  MessageMetadataSchema,
+  type MessageAttachment,
+  type MessageMetadata,
+} from "./contracts/conversations/message-metadata.schema.ts";
+export { ToolApprovalDecisionContract, ToolApprovalDecisionSchema, type ToolApprovalDecision } from "./contracts/conversations/tool-approval-decision.schema.ts";
+export { CHAT_PERMISSIONS } from "./contracts/conversations/chat-permissions.ts";
+export {
+  ChatStreamSchema,
+  ChatUiMessageSchema,
+  CONVERSATIONS_ENDPOINTS,
+  deleteConversationEndpoint,
+  getConversationEndpoint,
+  listConversationMessagesEndpoint,
+  listConversationsEndpoint,
+  ListConversationsQuerySchema,
+  resumeChatStreamEndpoint,
+  sendChatMessageEndpoint,
+  stopChatRunEndpoint,
+  summarizeConversationEndpoint,
+  updateConversationEndpoint,
+} from "./contracts/conversations/endpoints.ts";
+export { CHAT_UI_COMPONENTS, CHAT_UI_CONTRACTS } from "./contracts/chat/ui/chat-ui-components.ts";
+export { SchemaFormPropsContract, SchemaFormPropsSchema, type SchemaFormProps } from "./contracts/chat/ui/schema-form.schema.ts";
+export { DataTablePropsContract, DataTablePropsSchema, MAX_TABLE_ROWS, type DataTableProps } from "./contracts/chat/ui/data-table.schema.ts";
+export { ChartPropsContract, ChartPropsSchema, type ChartProps } from "./contracts/chat/ui/chart.schema.ts";
+export { ApprovalDiffPropsContract, ApprovalDiffPropsSchema, type ApprovalDiffProps } from "./contracts/chat/ui/approval-diff.schema.ts";
+export { PickerPropsContract, PickerPropsSchema, type PickerProps } from "./contracts/chat/ui/picker.schema.ts";
+export { ApprovalPendingPropsContract, ApprovalPendingPropsSchema, type ApprovalPendingProps } from "./contracts/chat/ui/approval-pending.schema.ts";
+export {
+  MAX_SPEECH_TEXT_CHARS,
+  RealtimeSessionContract,
+  RealtimeSessionSchema,
+  SpeechRequestContract,
+  SpeechRequestSchema,
+  TranscriptionContract,
+  TranscriptionSchema,
+  type RealtimeSession,
+  type SpeechRequest,
+  type Transcription,
+} from "./contracts/voice/voice.schema.ts";
+export { createRealtimeSessionEndpoint, SpeechAudioSchema, synthesizeSpeechEndpoint, transcribeVoiceEndpoint, VOICE_ENDPOINTS } from "./contracts/voice/endpoints.ts";
 export { UsageSummaryContract, UsageSummarySchema, type UsageSummary } from "./contracts/usage/usage-summary.schema.ts";
 export {
   FileNameSchema,

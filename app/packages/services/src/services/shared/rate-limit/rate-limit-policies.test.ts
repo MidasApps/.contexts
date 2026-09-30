@@ -18,6 +18,8 @@ describe("rate limit policies (decision 0009)", () => {
       "invitation-accept": [20, MINUTE, "principal", "requests"],
       "invitation-preview": [20, MINUTE, "principal", "requests"],
       "mcp-call": [60, MINUTE, "principal", "requests"],
+      "chat-turn": [20, MINUTE, "principal", "requests"],
+      "voice-call": [30, MINUTE, "principal", "requests"],
     });
   });
 

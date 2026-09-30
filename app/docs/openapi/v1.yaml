@@ -238,6 +238,794 @@ paths:
       tags:
         - access
       x-auth: user
+  /v1/chat:
+    post:
+      operationId: chat.sendMessage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/conversations.ChatRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                description: AI SDK UI message stream (text/event-stream) of the assistant's answer.
+                type: string
+                x-pii: personal
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: VALIDATION_FAILED
+          x-error-codes:
+            - VALIDATION_FAILED
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UNAUTHORIZED
+          x-error-codes:
+            - UNAUTHORIZED
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: FORBIDDEN
+          x-error-codes:
+            - FORBIDDEN
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: NOT_FOUND
+          x-error-codes:
+            - NOT_FOUND
+        "409":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: CONFLICT
+          x-error-codes:
+            - CONFLICT
+        "429":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: RATE_LIMITED
+          headers:
+            Retry-After:
+              description: Seconds to wait before retrying.
+              schema:
+                minimum: 0
+                type: integer
+            X-RateLimit-Limit:
+              description: Requests allowed in the window.
+              schema:
+                minimum: 0
+                type: integer
+            X-RateLimit-Remaining:
+              description: Requests left in the window.
+              schema:
+                minimum: 0
+                type: integer
+            X-RateLimit-Reset:
+              description: Unix time (seconds) when the window resets.
+              schema:
+                minimum: 0
+                type: integer
+          x-error-codes:
+            - RATE_LIMITED
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: INTERNAL_ERROR
+          x-error-codes:
+            - INTERNAL_ERROR
+      security:
+        - bearerAuth: []
+      summary: Sends one chat turn and streams the answer as an AI SDK UI message stream (core.conversation.send).
+      tags:
+        - chat
+      x-auth: user
+      x-rate-limit: chat-turn
+  /v1/chat/{conversationId}/stop:
+    post:
+      operationId: chat.stopRun
+      parameters:
+        - description: Conversation id.
+          in: path
+          name: conversationId
+          required: true
+          schema:
+            pattern: ^[A-Za-z0-9_-]{1,128}$
+            type: string
+            x-pii: none
+      responses:
+        "204":
+          description: No Content
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: VALIDATION_FAILED
+          x-error-codes:
+            - VALIDATION_FAILED
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UNAUTHORIZED
+          x-error-codes:
+            - UNAUTHORIZED
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: NOT_FOUND
+          x-error-codes:
+            - NOT_FOUND
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: INTERNAL_ERROR
+          x-error-codes:
+            - INTERNAL_ERROR
+      security:
+        - bearerAuth: []
+      summary: Stops the conversation's active run; the partial answer stays in memory (core.conversation.send).
+      tags:
+        - chat
+      x-auth: user
+  /v1/chat/{conversationId}/stream:
+    get:
+      operationId: chat.resumeStream
+      parameters:
+        - description: Conversation id.
+          in: path
+          name: conversationId
+          required: true
+          schema:
+            pattern: ^[A-Za-z0-9_-]{1,128}$
+            type: string
+            x-pii: none
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                description: AI SDK UI message stream (text/event-stream) of the assistant's answer.
+                type: string
+                x-pii: personal
+          description: OK
+        "204":
+          description: No Content
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: VALIDATION_FAILED
+          x-error-codes:
+            - VALIDATION_FAILED
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UNAUTHORIZED
+          x-error-codes:
+            - UNAUTHORIZED
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: NOT_FOUND
+          x-error-codes:
+            - NOT_FOUND
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: INTERNAL_ERROR
+          x-error-codes:
+            - INTERNAL_ERROR
+      security:
+        - bearerAuth: []
+      summary: Re-attaches to the conversation's active run; 204 when none is streaming (core.conversation.send).
+      tags:
+        - chat
+      x-auth: user
+  /v1/conversations:
+    get:
+      operationId: conversations.list
+      parameters:
+        - description: Organization whose conversations to list.
+          in: query
+          name: organizationId
+          required: true
+          schema:
+            minLength: 1
+            type: string
+            x-pii: none
+        - description: Cursor returned by the previous page.
+          in: query
+          name: cursor
+          required: false
+          schema:
+            maxLength: 500
+            minLength: 1
+            type: string
+            x-pii: none
+        - description: Page size, 1-50 (default 20).
+          in: query
+          name: limit
+          required: false
+          schema:
+            default: 20
+            maximum: 50
+            minimum: 1
+            type: integer
+            x-pii: none
+        - description: true lists archived conversations only (default false).
+          in: query
+          name: archived
+          required: false
+          schema:
+            enum:
+              - "true"
+              - "false"
+            type: string
+            x-pii: none
+        - description: Only pinned (true) or unpinned (false) conversations.
+          in: query
+          name: pinned
+          required: false
+          schema:
+            enum:
+              - "true"
+              - "false"
+            type: string
+            x-pii: none
+        - description: Search words matched against title and summary.
+          in: query
+          name: q
+          required: false
+          schema:
+            maxLength: 200
+            minLength: 1
+            type: string
+            x-pii: personal
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    description: The items of this page.
+                    items:
+                      $ref: "#/components/schemas/conversations.Conversation"
+                    type: array
+                    x-pii: personal
+                  meta:
+                    additionalProperties: false
+                    description: Response metadata.
+                    properties:
+                      page:
+                        additionalProperties: false
+                        description: Pagination state.
+                        properties:
+                          cursor:
+                            anyOf:
+                              - minLength: 1
+                                type: string
+                              - type: "null"
+                            description: Opaque cursor of the next page; null at the end.
+                            x-pii: none
+                          hasMore:
+                            description: Whether another page exists.
+                            type: boolean
+                            x-pii: none
+                          limit:
+                            description: Page size used for this response.
+                            maximum: 100
+                            minimum: 1
+                            type: integer
+                            x-pii: none
+                        required:
+                          - cursor
+                          - hasMore
+                          - limit
+                        type: object
+                        x-pii: none
+                    required:
+                      - page
+                    type: object
+                    x-pii: none
+                required:
+                  - data
+                  - meta
+                type: object
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: VALIDATION_FAILED
+          x-error-codes:
+            - VALIDATION_FAILED
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UNAUTHORIZED
+          x-error-codes:
+            - UNAUTHORIZED
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: FORBIDDEN
+          x-error-codes:
+            - FORBIDDEN
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: INTERNAL_ERROR
+          x-error-codes:
+            - INTERNAL_ERROR
+      security:
+        - bearerAuth: []
+      summary: Lists the caller's conversations, pinned first then most recent (core.conversation.read).
+      tags:
+        - conversations
+      x-auth: user
+  /v1/conversations/{conversationId}:
+    delete:
+      operationId: conversations.delete
+      parameters:
+        - description: Conversation id.
+          in: path
+          name: conversationId
+          required: true
+          schema:
+            pattern: ^[A-Za-z0-9_-]{1,128}$
+            type: string
+            x-pii: none
+      responses:
+        "204":
+          description: No Content
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: VALIDATION_FAILED
+          x-error-codes:
+            - VALIDATION_FAILED
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UNAUTHORIZED
+          x-error-codes:
+            - UNAUTHORIZED
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: NOT_FOUND
+          x-error-codes:
+            - NOT_FOUND
+        "409":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: CONFLICT
+          x-error-codes:
+            - CONFLICT
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: INTERNAL_ERROR
+          x-error-codes:
+            - INTERNAL_ERROR
+      security:
+        - bearerAuth: []
+      summary: "Deletes a conversation: soft delete, its memory thread removed, audited (core.conversation.delete)."
+      tags:
+        - conversations
+      x-auth: user
+    get:
+      operationId: conversations.get
+      parameters:
+        - description: Conversation id.
+          in: path
+          name: conversationId
+          required: true
+          schema:
+            pattern: ^[A-Za-z0-9_-]{1,128}$
+            type: string
+            x-pii: none
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: "#/components/schemas/conversations.Conversation"
+                required:
+                  - data
+                type: object
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: VALIDATION_FAILED
+          x-error-codes:
+            - VALIDATION_FAILED
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UNAUTHORIZED
+          x-error-codes:
+            - UNAUTHORIZED
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: NOT_FOUND
+          x-error-codes:
+            - NOT_FOUND
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: INTERNAL_ERROR
+          x-error-codes:
+            - INTERNAL_ERROR
+      security:
+        - bearerAuth: []
+      summary: Reads one of the caller's conversations (core.conversation.read).
+      tags:
+        - conversations
+      x-auth: user
+    patch:
+      operationId: conversations.update
+      parameters:
+        - description: Conversation id.
+          in: path
+          name: conversationId
+          required: true
+          schema:
+            pattern: ^[A-Za-z0-9_-]{1,128}$
+            type: string
+            x-pii: none
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/conversations.ConversationPatch"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: "#/components/schemas/conversations.Conversation"
+                required:
+                  - data
+                type: object
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: VALIDATION_FAILED
+          x-error-codes:
+            - VALIDATION_FAILED
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UNAUTHORIZED
+          x-error-codes:
+            - UNAUTHORIZED
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: NOT_FOUND
+          x-error-codes:
+            - NOT_FOUND
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: INTERNAL_ERROR
+          x-error-codes:
+            - INTERNAL_ERROR
+      security:
+        - bearerAuth: []
+      summary: Renames, pins or archives one of the caller's conversations (core.conversation.update).
+      tags:
+        - conversations
+      x-auth: user
+  /v1/conversations/{conversationId}/messages:
+    get:
+      operationId: conversations.listMessages
+      parameters:
+        - description: Conversation id.
+          in: path
+          name: conversationId
+          required: true
+          schema:
+            pattern: ^[A-Za-z0-9_-]{1,128}$
+            type: string
+            x-pii: none
+        - description: Cursor returned by the previous page (older messages).
+          in: query
+          name: cursor
+          required: false
+          schema:
+            pattern: ^\d{1,6}$
+            type: string
+            x-pii: none
+        - description: Page size, 1-100 (default 50).
+          in: query
+          name: limit
+          required: false
+          schema:
+            default: 50
+            maximum: 100
+            minimum: 1
+            type: integer
+            x-pii: none
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    description: The items of this page.
+                    items:
+                      additionalProperties: {}
+                      description: A chat message in AI SDK UI message form.
+                      properties:
+                        id:
+                          description: Message id.
+                          minLength: 1
+                          type: string
+                          x-pii: none
+                        parts:
+                          description: Message parts.
+                          items:
+                            additionalProperties: {}
+                            description: A message part.
+                            properties:
+                              type:
+                                description: Part type.
+                                minLength: 1
+                                type: string
+                                x-pii: none
+                            required:
+                              - type
+                            type: object
+                            x-pii: personal
+                          type: array
+                          x-pii: personal
+                        role:
+                          description: Author role.
+                          enum:
+                            - user
+                            - assistant
+                            - system
+                          type: string
+                          x-pii: none
+                      required:
+                        - id
+                        - role
+                        - parts
+                      type: object
+                      x-pii: personal
+                    type: array
+                    x-pii: personal
+                  meta:
+                    additionalProperties: false
+                    description: Response metadata.
+                    properties:
+                      page:
+                        additionalProperties: false
+                        description: Pagination state.
+                        properties:
+                          cursor:
+                            anyOf:
+                              - minLength: 1
+                                type: string
+                              - type: "null"
+                            description: Opaque cursor of the next page; null at the end.
+                            x-pii: none
+                          hasMore:
+                            description: Whether another page exists.
+                            type: boolean
+                            x-pii: none
+                          limit:
+                            description: Page size used for this response.
+                            maximum: 100
+                            minimum: 1
+                            type: integer
+                            x-pii: none
+                        required:
+                          - cursor
+                          - hasMore
+                          - limit
+                        type: object
+                        x-pii: none
+                    required:
+                      - page
+                    type: object
+                    x-pii: none
+                required:
+                  - data
+                  - meta
+                type: object
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: VALIDATION_FAILED
+          x-error-codes:
+            - VALIDATION_FAILED
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UNAUTHORIZED
+          x-error-codes:
+            - UNAUTHORIZED
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: NOT_FOUND
+          x-error-codes:
+            - NOT_FOUND
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: INTERNAL_ERROR
+          x-error-codes:
+            - INTERNAL_ERROR
+      security:
+        - bearerAuth: []
+      summary: Lists a conversation's messages as AI SDK UI messages, newest page first (core.conversation.read).
+      tags:
+        - conversations
+      x-auth: user
+  /v1/conversations/{conversationId}/summary:
+    post:
+      operationId: conversations.summarize
+      parameters:
+        - description: Conversation id.
+          in: path
+          name: conversationId
+          required: true
+          schema:
+            pattern: ^[A-Za-z0-9_-]{1,128}$
+            type: string
+            x-pii: none
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: "#/components/schemas/conversations.Conversation"
+                required:
+                  - data
+                type: object
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: VALIDATION_FAILED
+          x-error-codes:
+            - VALIDATION_FAILED
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UNAUTHORIZED
+          x-error-codes:
+            - UNAUTHORIZED
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: NOT_FOUND
+          x-error-codes:
+            - NOT_FOUND
+        "409":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: CONFLICT
+          x-error-codes:
+            - CONFLICT
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: INTERNAL_ERROR
+          x-error-codes:
+            - INTERNAL_ERROR
+      security:
+        - bearerAuth: []
+      summary: Summarizes the last 100 messages and stores the summary for search (core.conversation.update).
+      tags:
+        - conversations
+      x-auth: user
   /v1/desktop-sessions/exchange:
     post:
       operationId: identity.exchangeDesktopSession
@@ -6193,6 +6981,292 @@ paths:
       tags:
         - tenancy
       x-auth: principal
+  /v1/voice/realtime-sessions:
+    post:
+      operationId: voice.createRealtimeSession
+      parameters:
+        - description: Organization the call is billed to.
+          in: query
+          name: organizationId
+          required: true
+          schema:
+            minLength: 1
+            type: string
+            x-pii: none
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: "#/components/schemas/voice.RealtimeSession"
+                required:
+                  - data
+                type: object
+          description: Created
+          headers:
+            Location:
+              description: URL of the created resource.
+              schema:
+                type: string
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: VALIDATION_FAILED
+          x-error-codes:
+            - VALIDATION_FAILED
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UNAUTHORIZED
+          x-error-codes:
+            - UNAUTHORIZED
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: FORBIDDEN
+          x-error-codes:
+            - FORBIDDEN
+        "429":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: RATE_LIMITED
+          headers:
+            Retry-After:
+              description: Seconds to wait before retrying.
+              schema:
+                minimum: 0
+                type: integer
+            X-RateLimit-Limit:
+              description: Requests allowed in the window.
+              schema:
+                minimum: 0
+                type: integer
+            X-RateLimit-Remaining:
+              description: Requests left in the window.
+              schema:
+                minimum: 0
+                type: integer
+            X-RateLimit-Reset:
+              description: Unix time (seconds) when the window resets.
+              schema:
+                minimum: 0
+                type: integer
+          x-error-codes:
+            - RATE_LIMITED
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: INTERNAL_ERROR
+          x-error-codes:
+            - INTERNAL_ERROR
+      security:
+        - bearerAuth: []
+      summary: Mints an ephemeral realtime voice secret without tools; 503 while the experimental flag is off (core.voice.use).
+      tags:
+        - voice
+      x-auth: user
+      x-rate-limit: voice-call
+  /v1/voice/speech:
+    post:
+      operationId: voice.synthesize
+      parameters:
+        - description: Organization the call is billed to.
+          in: query
+          name: organizationId
+          required: true
+          schema:
+            minLength: 1
+            type: string
+            x-pii: none
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/voice.SpeechRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                description: Synthesized audio bytes (binary).
+                type: string
+                x-pii: personal
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: VALIDATION_FAILED
+          x-error-codes:
+            - VALIDATION_FAILED
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UNAUTHORIZED
+          x-error-codes:
+            - UNAUTHORIZED
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: FORBIDDEN
+          x-error-codes:
+            - FORBIDDEN
+        "429":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: RATE_LIMITED
+          headers:
+            Retry-After:
+              description: Seconds to wait before retrying.
+              schema:
+                minimum: 0
+                type: integer
+            X-RateLimit-Limit:
+              description: Requests allowed in the window.
+              schema:
+                minimum: 0
+                type: integer
+            X-RateLimit-Remaining:
+              description: Requests left in the window.
+              schema:
+                minimum: 0
+                type: integer
+            X-RateLimit-Reset:
+              description: Unix time (seconds) when the window resets.
+              schema:
+                minimum: 0
+                type: integer
+          x-error-codes:
+            - RATE_LIMITED
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: INTERNAL_ERROR
+          x-error-codes:
+            - INTERNAL_ERROR
+      security:
+        - bearerAuth: []
+      summary: Reads text aloud and streams the audio (core.voice.use).
+      tags:
+        - voice
+      x-auth: user
+      x-rate-limit: voice-call
+  /v1/voice/transcriptions:
+    post:
+      operationId: voice.transcribe
+      parameters:
+        - description: Organization the call is billed to.
+          in: query
+          name: organizationId
+          required: true
+          schema:
+            minLength: 1
+            type: string
+            x-pii: none
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: "#/components/schemas/voice.Transcription"
+                required:
+                  - data
+                type: object
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: VALIDATION_FAILED
+          x-error-codes:
+            - VALIDATION_FAILED
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UNAUTHORIZED
+          x-error-codes:
+            - UNAUTHORIZED
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: FORBIDDEN
+          x-error-codes:
+            - FORBIDDEN
+        "429":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: RATE_LIMITED
+          headers:
+            Retry-After:
+              description: Seconds to wait before retrying.
+              schema:
+                minimum: 0
+                type: integer
+            X-RateLimit-Limit:
+              description: Requests allowed in the window.
+              schema:
+                minimum: 0
+                type: integer
+            X-RateLimit-Remaining:
+              description: Requests left in the window.
+              schema:
+                minimum: 0
+                type: integer
+            X-RateLimit-Reset:
+              description: Unix time (seconds) when the window resets.
+              schema:
+                minimum: 0
+                type: integer
+          x-error-codes:
+            - RATE_LIMITED
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: INTERNAL_ERROR
+          x-error-codes:
+            - INTERNAL_ERROR
+      security:
+        - bearerAuth: []
+      summary: Transcribes a push-to-talk recording (multipart field audio, ≤ 5 MB, ≤ 60 s) (core.voice.use).
+      tags:
+        - voice
+      x-auth: user
+      x-rate-limit: voice-call
 components:
   schemas:
     access.AcceptInvitationResponse:
@@ -9217,6 +10291,11 @@ components:
             - CONNECTOR_UPDATED
             - CONNECTOR_DELETED
             - CONNECTOR_SECRET_SET
+            - AGENT_TOOL_CALL_APPROVED
+            - AGENT_TOOL_CALL_DECLINED
+            - CONVERSATION_DELETED
+            - VOICE_TRANSCRIBED
+            - VOICE_SYNTHESIZED
           type: string
           x-pii: none
         actor:
@@ -9293,6 +10372,11 @@ components:
             runId:
               description: Id of the agent or workflow run.
               pattern: ^[A-Za-z0-9_-]{1,128}$
+              type: string
+              x-pii: none
+            toolCallId:
+              description: Id of the tool call an approval decision answers (SP4).
+              pattern: ^[A-Za-z0-9_.:-]{1,200}$
               type: string
               x-pii: none
             toolId:
@@ -9507,6 +10591,11 @@ components:
             - CONNECTOR_UPDATED
             - CONNECTOR_DELETED
             - CONNECTOR_SECRET_SET
+            - AGENT_TOOL_CALL_APPROVED
+            - AGENT_TOOL_CALL_DECLINED
+            - CONVERSATION_DELETED
+            - VOICE_TRANSCRIBED
+            - VOICE_SYNTHESIZED
           type: string
           x-pii: none
         actorId:
@@ -9621,6 +10710,11 @@ components:
             - CONNECTOR_UPDATED
             - CONNECTOR_DELETED
             - CONNECTOR_SECRET_SET
+            - AGENT_TOOL_CALL_APPROVED
+            - AGENT_TOOL_CALL_DECLINED
+            - CONVERSATION_DELETED
+            - VOICE_TRANSCRIBED
+            - VOICE_SYNTHESIZED
           type: string
           x-pii: none
         actor:
@@ -9697,6 +10791,11 @@ components:
             runId:
               description: Id of the agent or workflow run.
               pattern: ^[A-Za-z0-9_-]{1,128}$
+              type: string
+              x-pii: none
+            toolCallId:
+              description: Id of the tool call an approval decision answers (SP4).
+              pattern: ^[A-Za-z0-9_.:-]{1,200}$
               type: string
               x-pii: none
             toolId:
@@ -9845,6 +10944,316 @@ components:
       x-pii: personal
       x-relations: []
       x-tenancyScope: platform
+    chat.ApprovalDiffProps:
+      additionalProperties: false
+      description: What an approved tool call would change, shown before the member decides.
+      examples:
+        - after:
+            name: Launch
+          before: null
+          fields:
+            - name
+      properties:
+        after:
+          additionalProperties: {}
+          description: Values after the change.
+          propertyNames:
+            type: string
+          type: object
+          x-pii: personal
+        before:
+          anyOf:
+            - additionalProperties: {}
+              propertyNames:
+                type: string
+              type: object
+            - type: "null"
+          description: Current values; null for a create.
+          x-pii: personal
+        fields:
+          description: Changed fields, in display order.
+          items:
+            maxLength: 200
+            minLength: 1
+            type: string
+          maxItems: 100
+          type: array
+          x-pii: none
+      required:
+        - before
+        - after
+        - fields
+      type: object
+      x-kind: ui-component
+      x-pii: personal
+      x-relations: []
+      x-tenancyScope: organization
+    chat.ApprovalPendingProps:
+      additionalProperties: false
+      description: A card for an agent action waiting for another member's approval.
+      examples:
+        - approvalId: Ar9oP1lK3jH5gF7dS9aQ
+          summary: Create project Launch
+      properties:
+        approvalId:
+          description: SP1 approval request id.
+          maxLength: 128
+          minLength: 1
+          type: string
+          x-pii: none
+        summary:
+          description: What waits for approval.
+          maxLength: 500
+          minLength: 1
+          type: string
+          x-pii: personal
+      required:
+        - approvalId
+        - summary
+      type: object
+      x-kind: ui-component
+      x-pii: personal
+      x-relations: []
+      x-tenancyScope: organization
+    chat.ChartProps:
+      additionalProperties: false
+      description: A bar, line, area or pie chart of rows an agent tool returned.
+      examples:
+        - kind: bar
+          rows:
+            - month: 2026-08
+              total: 42
+          series:
+            - key: total
+              label: Total
+          x: month
+      properties:
+        kind:
+          description: Chart type.
+          enum:
+            - bar
+            - line
+            - area
+            - pie
+          type: string
+          x-pii: none
+        rows:
+          description: Data rows.
+          items:
+            additionalProperties: {}
+            propertyNames:
+              type: string
+            type: object
+          maxItems: 1000
+          type: array
+          x-pii: personal
+        series:
+          description: Plotted series.
+          items:
+            additionalProperties: false
+            properties:
+              key:
+                description: Row key of the values.
+                maxLength: 100
+                minLength: 1
+                type: string
+                x-pii: none
+              label:
+                description: Legend label.
+                maxLength: 100
+                minLength: 1
+                type: string
+                x-pii: none
+            required:
+              - key
+              - label
+            type: object
+          maxItems: 10
+          minItems: 1
+          type: array
+          x-pii: none
+        x:
+          description: Row key of the category or time axis.
+          maxLength: 100
+          minLength: 1
+          type: string
+          x-pii: none
+      required:
+        - kind
+        - x
+        - series
+        - rows
+      type: object
+      x-kind: ui-component
+      x-pii: personal
+      x-relations: []
+      x-tenancyScope: organization
+    chat.DataTableProps:
+      additionalProperties: false
+      description: A read-only table of records an agent tool returned.
+      examples:
+        - columns:
+            - key: name
+              type: text
+            - key: units
+              labelKey: table.units
+              type: number
+          rows:
+            - name: North
+              units: 12
+          truncated: false
+      properties:
+        columns:
+          description: Columns in display order.
+          items:
+            additionalProperties: false
+            properties:
+              key:
+                description: Row key of the column.
+                maxLength: 100
+                minLength: 1
+                type: string
+                x-pii: none
+              labelKey:
+                description: i18n key of the header; the key itself otherwise.
+                maxLength: 200
+                minLength: 1
+                type: string
+                x-pii: none
+              type:
+                description: How cells are formatted.
+                enum:
+                  - text
+                  - number
+                  - date
+                  - datetime
+                  - boolean
+                  - money
+                type: string
+                x-pii: none
+            required:
+              - key
+              - type
+            type: object
+          maxItems: 50
+          minItems: 1
+          type: array
+          x-pii: none
+        rows:
+          description: Rows; may hold records of people.
+          items:
+            additionalProperties: {}
+            propertyNames:
+              type: string
+            type: object
+          maxItems: 500
+          type: array
+          x-pii: personal
+        truncated:
+          description: Whether more rows exist than shown.
+          type: boolean
+          x-pii: none
+      required:
+        - columns
+        - rows
+        - truncated
+      type: object
+      x-kind: ui-component
+      x-pii: personal
+      x-relations: []
+      x-tenancyScope: organization
+    chat.PickerProps:
+      additionalProperties: false
+      description: A single or multiple choice the member answers inside the chat.
+      examples:
+        - multiple: false
+          options:
+            - label: North
+              value: north
+            - label: South
+              value: south
+      properties:
+        multiple:
+          description: Whether several options may be chosen.
+          type: boolean
+          x-pii: none
+        options:
+          description: Choices.
+          items:
+            additionalProperties: false
+            properties:
+              label:
+                description: Shown label.
+                maxLength: 200
+                minLength: 1
+                type: string
+                x-pii: personal
+              value:
+                description: Value returned to the tool.
+                maxLength: 200
+                minLength: 1
+                type: string
+                x-pii: none
+            required:
+              - value
+              - label
+            type: object
+          maxItems: 50
+          minItems: 1
+          type: array
+          x-pii: personal
+      required:
+        - options
+        - multiple
+      type: object
+      x-kind: ui-component
+      x-pii: personal
+      x-relations: []
+      x-tenancyScope: organization
+    chat.SchemaFormProps:
+      additionalProperties: false
+      description: A form for a command contract that the member reviews and submits inside the chat.
+      examples:
+        - commandId: example.CreateNoteCommand
+          contractId: example.Note
+          initialValues:
+            title: Kickoff
+          mode: create
+      properties:
+        commandId:
+          description: Command the submitted values feed.
+          pattern: ^[a-z][a-z0-9-]*\.[A-Z][A-Za-z0-9]*$
+          type: string
+          x-pii: none
+        contractId:
+          description: Contract whose schema renders the form.
+          pattern: ^[a-z][a-z0-9-]*\.[A-Z][A-Za-z0-9]*$
+          type: string
+          x-pii: none
+        initialValues:
+          additionalProperties: {}
+          description: Values proposed by the agent; may hold user data.
+          propertyNames:
+            type: string
+          type: object
+          x-pii: personal
+        mode:
+          description: Create a record or update one.
+          enum:
+            - create
+            - update
+          type: string
+          x-pii: none
+      required:
+        - contractId
+        - commandId
+        - mode
+        - initialValues
+      type: object
+      x-kind: ui-component
+      x-pii: personal
+      x-relations: []
+      x-tenancyScope: organization
     connectors.Connector:
       description: An external system (OpenAPI, MCP, Postgres or browser) an organization lets its agents use.
       examples:
@@ -10845,6 +12254,399 @@ components:
       x-pii: none
       x-relations: []
       x-tenancyScope: organization
+    conversations.ChatRequest:
+      additionalProperties: false
+      description: "One chat turn: the member's message (or approval responses) sent to the assistant, answered as a UI message stream."
+      examples:
+        - message:
+            id: msg-1
+            parts:
+              - text: Summarize the onboarding guide.
+                type: text
+            role: user
+          organizationId: Jd8sK2lPq0WnR5tYu3bV
+        - conversationId: Cv3xZ5aB7nM9qW1eR2tY
+          message:
+            id: msg-2
+            parts:
+              - approval:
+                  approved: true
+                  id: run-1::call-1
+                state: approval-responded
+                toolCallId: call-1
+                type: tool-command_tenancy_CreateProjectInput
+            role: assistant
+      properties:
+        agentId:
+          description: Chat agent of a new conversation (default assistant).
+          enum:
+            - assistant
+          type: string
+          x-pii: none
+        attachments:
+          description: Ready chat-attachment files of the caller to add to a user turn.
+          items:
+            minLength: 1
+            type: string
+          maxItems: 10
+          type: array
+          x-pii: none
+        conversationId:
+          description: Existing conversation; a new one is created when absent.
+          pattern: ^[A-Za-z0-9_-]{1,128}$
+          type: string
+          x-pii: none
+        message:
+          description: The last message of the chat.
+          oneOf:
+            - additionalProperties: false
+              properties:
+                id:
+                  description: Client message id.
+                  maxLength: 200
+                  minLength: 1
+                  type: string
+                  x-pii: none
+                parts:
+                  description: Text parts of the turn.
+                  items:
+                    additionalProperties: false
+                    properties:
+                      text:
+                        description: What the member wrote.
+                        maxLength: 16000
+                        minLength: 1
+                        type: string
+                        x-pii: personal
+                      type:
+                        const: text
+                        description: Part type.
+                        type: string
+                        x-pii: none
+                    required:
+                      - type
+                      - text
+                    type: object
+                  maxItems: 20
+                  minItems: 1
+                  type: array
+                  x-pii: personal
+                role:
+                  const: user
+                  description: A member turn.
+                  type: string
+                  x-pii: none
+              required:
+                - id
+                - role
+                - parts
+              type: object
+            - additionalProperties: false
+              properties:
+                id:
+                  description: Id of the assistant message that asked for approval.
+                  maxLength: 200
+                  minLength: 1
+                  type: string
+                  x-pii: none
+                parts:
+                  description: Approval responses only.
+                  items:
+                    additionalProperties: false
+                    properties:
+                      approval:
+                        additionalProperties: false
+                        description: The member's decision.
+                        properties:
+                          approved:
+                            description: Whether the member approved the call.
+                            type: boolean
+                            x-pii: none
+                          id:
+                            description: Approval id, <runId>::<toolCallId>.
+                            maxLength: 400
+                            minLength: 1
+                            type: string
+                            x-pii: none
+                          reason:
+                            description: Why the member declined or approved.
+                            maxLength: 500
+                            minLength: 1
+                            type: string
+                            x-pii: personal
+                        required:
+                          - id
+                          - approved
+                        type: object
+                        x-pii: personal
+                      state:
+                        const: approval-responded
+                        description: Only answered approvals are accepted.
+                        type: string
+                        x-pii: none
+                      toolCallId:
+                        description: Tool call the decision answers.
+                        maxLength: 200
+                        minLength: 1
+                        type: string
+                        x-pii: none
+                      toolName:
+                        description: Tool name of a dynamic-tool part.
+                        maxLength: 200
+                        minLength: 1
+                        type: string
+                        x-pii: none
+                      type:
+                        description: Tool part type, tool-<sanitized tool name>.
+                        pattern: ^(?:tool-[A-Za-z0-9_-]{1,128}|dynamic-tool)$
+                        type: string
+                        x-pii: none
+                    required:
+                      - type
+                      - toolCallId
+                      - state
+                      - approval
+                    type: object
+                  maxItems: 20
+                  minItems: 1
+                  type: array
+                  x-pii: personal
+                role:
+                  const: assistant
+                  description: The assistant message carrying the member's approval responses.
+                  type: string
+                  x-pii: none
+              required:
+                - id
+                - role
+                - parts
+              type: object
+          x-pii: personal
+        organizationId:
+          description: Organization of a new conversation.
+          minLength: 1
+          type: string
+          x-pii: none
+        projectId:
+          description: Project of a new conversation; organization level when absent.
+          minLength: 1
+          type: string
+          x-pii: none
+        trigger:
+          description: useChat trigger.
+          enum:
+            - submit-message
+            - regenerate-message
+          type: string
+          x-pii: none
+      required:
+        - message
+      type: object
+      x-kind: command
+      x-permission: core.conversation.send
+      x-pii: personal
+      x-relations: []
+      x-tenancyScope: user
+    conversations.Conversation:
+      additionalProperties: false
+      description: "A chat conversation of a member: title, summary, pin and archive state; the messages live in agent memory."
+      examples:
+        - activeRunId: null
+          activeStreamStartedAt: null
+          agentId: assistant
+          archivedAt: null
+          createdAt: "2026-09-29T14:30:00.000Z"
+          deletedAt: null
+          id: Cv3xZ5aB7nM9qW1eR2tY
+          lastMessageAt: "2026-09-29T15:00:00.000Z"
+          messageCount: 4
+          ownerId: uA1b2C3d4E5f6G7h8I9j
+          pinned: false
+          projectId: null
+          searchTokens:
+            - quarterly
+            - onboarding
+            - plan
+          summary: null
+          tenantId: Jd8sK2lPq0WnR5tYu3bV
+          title: Quarterly onboarding plan
+          titleSource: auto
+          updatedAt: "2026-09-29T15:00:00.000Z"
+      properties:
+        activeRunId:
+          anyOf:
+            - maxLength: 128
+              minLength: 1
+              type: string
+            - type: "null"
+          description: Agent run streaming now; null when idle.
+          x-pii: none
+        activeStreamStartedAt:
+          anyOf:
+            - format: date-time
+              pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z))$
+              type: string
+            - type: "null"
+          description: When the active run started; stale after 15 minutes.
+          x-pii: none
+        agentId:
+          description: Chat agent that answers.
+          enum:
+            - assistant
+          type: string
+          x-pii: none
+        archivedAt:
+          anyOf:
+            - format: date-time
+              pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z))$
+              type: string
+            - type: "null"
+          description: When the owner archived it; null when active.
+          x-pii: none
+        createdAt:
+          description: When the conversation started (UTC).
+          format: date-time
+          pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z))$
+          type: string
+          x-pii: none
+        deletedAt:
+          anyOf:
+            - format: date-time
+              pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z))$
+              type: string
+            - type: "null"
+          description: Soft delete; purged 30 days later.
+          x-pii: none
+        id:
+          description: Firestore automatic id; also the memory thread id.
+          pattern: ^[A-Za-z0-9_-]{1,128}$
+          type: string
+          x-pii: none
+        lastMessageAt:
+          description: When the last turn ended (UTC).
+          format: date-time
+          pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z))$
+          type: string
+          x-pii: none
+        messageCount:
+          description: Turns sent and answered (approximate).
+          maximum: 9007199254740991
+          minimum: 0
+          type: integer
+          x-pii: none
+        ownerId:
+          description: Uid of the member who owns the conversation.
+          minLength: 1
+          type: string
+          x-pii: personal
+        pinned:
+          description: Pinned conversations are listed first.
+          type: boolean
+          x-pii: none
+        projectId:
+          anyOf:
+            - minLength: 1
+              type: string
+            - type: "null"
+          description: Project the conversation runs in; null at organization level.
+          x-pii: none
+        searchTokens:
+          description: Lower-case, accent-folded words of the title and summary, for search.
+          items:
+            maxLength: 64
+            minLength: 1
+            type: string
+          maxItems: 50
+          type: array
+          x-pii: personal
+        summary:
+          anyOf:
+            - maxLength: 2000
+              type: string
+            - type: "null"
+          description: Summary made on request; may mention people.
+          x-pii: personal
+        tenantId:
+          description: Owning organization.
+          minLength: 1
+          type: string
+          x-pii: none
+        title:
+          anyOf:
+            - maxLength: 200
+              type: string
+            - type: "null"
+          description: Title; generated after the first turn or set by the owner.
+          x-pii: personal
+        titleSource:
+          description: auto until the owner renames it.
+          enum:
+            - auto
+            - user
+          type: string
+          x-pii: none
+        updatedAt:
+          description: When the metadata last changed (UTC).
+          format: date-time
+          pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z))$
+          type: string
+          x-pii: none
+      required:
+        - id
+        - tenantId
+        - projectId
+        - ownerId
+        - agentId
+        - title
+        - titleSource
+        - summary
+        - pinned
+        - archivedAt
+        - deletedAt
+        - lastMessageAt
+        - messageCount
+        - activeRunId
+        - activeStreamStartedAt
+        - searchTokens
+        - createdAt
+        - updatedAt
+      type: object
+      x-kind: entity
+      x-permission: core.conversation.read
+      x-pii: personal
+      x-relations:
+        - field: tenantId
+          target: tenancy.Organization
+          type: belongs-to
+      x-tenancyScope: user
+    conversations.ConversationPatch:
+      additionalProperties: false
+      description: Renames, pins or archives one of the member's conversations.
+      examples:
+        - title: Onboarding plan
+        - archived: false
+          pinned: true
+      properties:
+        archived:
+          description: Archive (true) or restore (false).
+          type: boolean
+          x-pii: none
+        pinned:
+          description: Pin or unpin.
+          type: boolean
+          x-pii: none
+        title:
+          description: New title; sets titleSource to user.
+          maxLength: 200
+          minLength: 1
+          type: string
+          x-pii: personal
+      type: object
+      x-kind: command
+      x-permission: core.conversation.update
+      x-pii: personal
+      x-relations: []
+      x-tenancyScope: user
     conversations.MessageFeedback:
       additionalProperties: false
       description: A user's rating of an assistant message; one per message and user.
@@ -10961,6 +12763,134 @@ components:
       x-pii: personal
       x-relations: []
       x-tenancyScope: organization
+    conversations.MessageMetadata:
+      additionalProperties: false
+      description: "Metadata of a chat message: conversation, agent, answer confidence and attachments."
+      examples:
+        - agentId: assistant
+          attachments:
+            - fileId: Fz9sK2lPq0WnR5tYu3bV
+              mediaType: image/png
+              name: diagram.png
+              sizeBytes: 48213
+          confidence: normal
+          conversationId: Cv3xZ5aB7nM9qW1eR2tY
+      properties:
+        agentId:
+          description: Agent that answered.
+          enum:
+            - assistant
+          type: string
+          x-pii: none
+        attachments:
+          description: Files attached to a user message.
+          items:
+            additionalProperties: false
+            properties:
+              fileId:
+                description: Uploaded file id.
+                minLength: 1
+                type: string
+                x-pii: none
+              mediaType:
+                description: Media type detected from the bytes.
+                maxLength: 255
+                minLength: 1
+                type: string
+                x-pii: none
+              name:
+                description: Original file name.
+                maxLength: 255
+                minLength: 1
+                type: string
+                x-pii: personal
+              sizeBytes:
+                description: Size in bytes.
+                maximum: 9007199254740991
+                minimum: 0
+                type: integer
+                x-pii: none
+            required:
+              - fileId
+              - name
+              - mediaType
+              - sizeBytes
+            type: object
+          maxItems: 10
+          type: array
+          x-pii: personal
+        confidence:
+          description: low when the answer is not grounded in its citations.
+          enum:
+            - low
+            - normal
+          type: string
+          x-pii: none
+        conversationId:
+          description: Conversation of the message.
+          pattern: ^[A-Za-z0-9_-]{1,128}$
+          type: string
+          x-pii: none
+      type: object
+      x-kind: view
+      x-pii: personal
+      x-relations: []
+      x-tenancyScope: user
+    conversations.ToolApprovalDecision:
+      additionalProperties: false
+      description: A member's approve or decline of an agent tool call in the chat, audited before the run resumes.
+      examples:
+        - approved: false
+          conversationId: Cv3xZ5aB7nM9qW1eR2tY
+          reason: Wrong project name.
+          runId: run-1
+          toolCallId: call-1
+          toolName: command_tenancy_CreateProjectInput
+      properties:
+        approved:
+          description: Approved (true) or declined (false).
+          type: boolean
+          x-pii: none
+        conversationId:
+          description: Conversation of the run.
+          pattern: ^[A-Za-z0-9_-]{1,128}$
+          type: string
+          x-pii: none
+        reason:
+          description: Reason given by the member.
+          maxLength: 500
+          minLength: 1
+          type: string
+          x-pii: personal
+        runId:
+          description: Agent run that waits for the decision.
+          pattern: ^[A-Za-z0-9_-]{1,128}$
+          type: string
+          x-pii: none
+        toolCallId:
+          description: Tool call decided.
+          maxLength: 200
+          minLength: 1
+          type: string
+          x-pii: none
+        toolName:
+          description: Sanitized tool name the stream carried.
+          maxLength: 200
+          minLength: 1
+          type: string
+          x-pii: none
+      required:
+        - conversationId
+        - runId
+        - toolCallId
+        - toolName
+        - approved
+      type: object
+      x-kind: command
+      x-permission: core.conversation.send
+      x-pii: personal
+      x-relations: []
+      x-tenancyScope: user
     example.Note:
       additionalProperties: false
       description: A free-text note inside an organization. Sample contract; remove it in derived apps.
@@ -15512,6 +17442,107 @@ components:
       x-pii: none
       x-relations: []
       x-tenancyScope: organization
+    voice.RealtimeSession:
+      additionalProperties: false
+      description: A short-lived secret for an optional realtime voice session without tools.
+      examples:
+        - clientSecret: ek_example
+          expiresAt: "2026-09-29T14:31:00.000Z"
+          model: gpt-realtime-2.1
+      properties:
+        clientSecret:
+          description: Ephemeral client secret for the provider's WebRTC endpoint.
+          maxLength: 4096
+          minLength: 1
+          type: string
+          x-pii: sensitive
+        expiresAt:
+          description: When the secret stops working (UTC, at most 60 s ahead).
+          format: date-time
+          pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z))$
+          type: string
+          x-pii: none
+        model:
+          description: Realtime model id.
+          maxLength: 200
+          minLength: 1
+          type: string
+          x-pii: none
+      required:
+        - clientSecret
+        - expiresAt
+        - model
+      type: object
+      x-kind: view
+      x-permission: core.voice.use
+      x-pii: sensitive
+      x-relations: []
+      x-tenancyScope: user
+    voice.SpeechRequest:
+      additionalProperties: false
+      description: Text of an assistant message to read aloud as streamed audio.
+      examples:
+        - text: Here is the summary of the onboarding guide.
+        - text: Done.
+          voice: alloy
+      properties:
+        text:
+          description: Text to read aloud.
+          maxLength: 4000
+          minLength: 1
+          type: string
+          x-pii: personal
+        voice:
+          description: Provider voice id; the default voice otherwise.
+          pattern: ^[A-Za-z0-9_-]{1,64}$
+          type: string
+          x-pii: none
+      required:
+        - text
+      type: object
+      x-kind: command
+      x-permission: core.voice.use
+      x-pii: personal
+      x-relations: []
+      x-tenancyScope: user
+    voice.Transcription:
+      additionalProperties: false
+      description: Text transcribed from a push-to-talk recording, put in the prompt for review.
+      examples:
+        - durationInSeconds: 3.2
+          language: en
+          text: Summarize the onboarding guide.
+      properties:
+        durationInSeconds:
+          anyOf:
+            - minimum: 0
+              type: number
+            - type: "null"
+          description: Audio length, when known.
+          x-pii: none
+        language:
+          anyOf:
+            - maxLength: 35
+              minLength: 1
+              type: string
+            - type: "null"
+          description: Detected language (BCP 47), when the model reports it.
+          x-pii: none
+        text:
+          description: What the member said.
+          maxLength: 20000
+          type: string
+          x-pii: personal
+      required:
+        - text
+        - language
+        - durationInSeconds
+      type: object
+      x-kind: view
+      x-permission: core.voice.use
+      x-pii: personal
+      x-relations: []
+      x-tenancyScope: user
     workflows.CreateScheduleInput:
       additionalProperties: false
       description: Creates a tenant schedule for a schedulable workflow.

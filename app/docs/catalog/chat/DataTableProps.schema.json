@@ -1,0 +1,100 @@
+{
+  "additionalProperties": false,
+  "description": "A read-only table of records an agent tool returned.",
+  "examples": [
+    {
+      "columns": [
+        {
+          "key": "name",
+          "type": "text"
+        },
+        {
+          "key": "units",
+          "labelKey": "table.units",
+          "type": "number"
+        }
+      ],
+      "rows": [
+        {
+          "name": "North",
+          "units": 12
+        }
+      ],
+      "truncated": false
+    }
+  ],
+  "properties": {
+    "columns": {
+      "description": "Columns in display order.",
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "key": {
+            "description": "Row key of the column.",
+            "maxLength": 100,
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "labelKey": {
+            "description": "i18n key of the header; the key itself otherwise.",
+            "maxLength": 200,
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "type": {
+            "description": "How cells are formatted.",
+            "enum": [
+              "text",
+              "number",
+              "date",
+              "datetime",
+              "boolean",
+              "money"
+            ],
+            "type": "string",
+            "x-pii": "none"
+          }
+        },
+        "required": [
+          "key",
+          "type"
+        ],
+        "type": "object"
+      },
+      "maxItems": 50,
+      "minItems": 1,
+      "type": "array",
+      "x-pii": "none"
+    },
+    "rows": {
+      "description": "Rows; may hold records of people.",
+      "items": {
+        "additionalProperties": {},
+        "propertyNames": {
+          "type": "string"
+        },
+        "type": "object"
+      },
+      "maxItems": 500,
+      "type": "array",
+      "x-pii": "personal"
+    },
+    "truncated": {
+      "description": "Whether more rows exist than shown.",
+      "type": "boolean",
+      "x-pii": "none"
+    }
+  },
+  "required": [
+    "columns",
+    "rows",
+    "truncated"
+  ],
+  "type": "object",
+  "x-kind": "ui-component",
+  "x-pii": "personal",
+  "x-relations": [],
+  "x-tenancyScope": "organization"
+}

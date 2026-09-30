@@ -1,4 +1,5 @@
 import { AGENT_PERMISSIONS } from "../agents/agent-permissions.ts";
+import { CHAT_PERMISSIONS } from "../conversations/chat-permissions.ts";
 import type { Permission } from "../primitives/catalog-meta.schema.ts";
 import type { PlatformRole } from "../identity/platform-staff.schema.ts";
 import type { PermissionDefinition, PermissionKind } from "./permission-definition.schema.ts";
@@ -98,11 +99,12 @@ export const SP5_PERMISSIONS: readonly PermissionDefinition[] = [
 
 /**
  * The core permission catalog: SP1 spec §5.1, the permissions of the agent runtime (SP3
- * spec §2.2, `AGENT_PERMISSIONS`) and SP5's. Modules add theirs through the access
- * registry (`createAccessCore({ permissions })`), which rejects duplicates.
+ * spec §2.2, `AGENT_PERMISSIONS`), the chat (SP4, `CHAT_PERMISSIONS`) and SP5's. Modules add
+ * theirs through the access registry (`createAccessCore({ permissions })`), which rejects
+ * duplicates.
  */
 export const CORE_PERMISSIONS: readonly PermissionDefinition[] = [
   ...SP1_PERMISSIONS,
-  ...AGENT_PERMISSIONS.map((permission): PermissionDefinition => ({ ...permission, defaultRoles: [...permission.defaultRoles] })),
+  ...[...AGENT_PERMISSIONS, ...CHAT_PERMISSIONS].map((permission): PermissionDefinition => ({ ...permission, defaultRoles: [...permission.defaultRoles] })),
   ...SP5_PERMISSIONS,
 ];

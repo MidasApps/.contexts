@@ -65,6 +65,11 @@ export const AuditMetadataSchema = z.strictObject({
     .regex(/^[A-Za-z0-9_-]{1,128}$/, { error: "Expected a run id." })
     .optional()
     .meta(none("Id of the agent or workflow run.")),
+  toolCallId: z
+    .string()
+    .regex(/^[A-Za-z0-9_.:-]{1,200}$/, { error: "Expected a tool call id." })
+    .optional()
+    .meta(none("Id of the tool call an approval decision answers (SP4).")),
   durationMs: z.int().min(0).max(86_400_000).optional().meta(none("How long the attempt took, in milliseconds.")),
   endpointId: z
     .string()
