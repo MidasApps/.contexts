@@ -22,6 +22,9 @@
     "@eslint/js": "catalog:",
     "eslint-import-resolver-typescript": "catalog:",
     "eslint-plugin-boundaries": "catalog:",
+    "eslint-plugin-jsx-a11y": "catalog:",
+    "eslint-plugin-react": "catalog:",
+    "eslint-plugin-react-hooks": "catalog:",
     "typescript-eslint": "catalog:"
   },
   "peerDependencies": {
@@ -30,6 +33,7 @@
     "vitest": "catalog:"
   },
   "devDependencies": {
+    "@types/eslint-plugin-jsx-a11y": "catalog:",
     "@types/node": "catalog:",
     "eslint": "catalog:",
     "typescript": "catalog:",

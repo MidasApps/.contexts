@@ -1,4 +1,7 @@
 import js from "@eslint/js";
+import jsxA11y from "eslint-plugin-jsx-a11y";
+import react from "eslint-plugin-react";
+import reactHooks from "eslint-plugin-react-hooks";
 import tseslint from "typescript-eslint";
 import { createBoundariesConfig } from "./boundaries.js";
 
@@ -37,4 +40,28 @@ export const createCoreConfig = ({ tsconfigRootDir, rootPath }) => [
     rules: TYPE_AWARE_RULES,
   },
   ...createBoundariesConfig(rootPath === undefined ? {} : { rootPath }),
+];
+
+const REACT_FILES = ["**/*.{jsx,tsx}"];
+
+/**
+ * `createCoreConfig` plus React rules for UI packages and apps (SP2 spec §12):
+ * eslint-plugin-react (recommended + JSX runtime), eslint-plugin-react-hooks
+ * (recommended, includes the React Compiler rules) and eslint-plugin-jsx-a11y
+ * (recommended). All three accept ESLint 9 (ADR 0004 E3).
+ * @param {{ tsconfigRootDir: string, rootPath?: string }} options
+ * @returns {import("eslint").Linter.Config[]}
+ */
+export const createReactConfig = (options) => [
+  ...createCoreConfig(options),
+  {
+    ...react.configs.flat.recommended,
+    files: REACT_FILES,
+    settings: { react: { version: "detect" } },
+  },
+  { ...react.configs.flat["jsx-runtime"], files: REACT_FILES },
+  { ...reactHooks.configs.flat.recommended, files: ["**/*.{ts,tsx}"] },
+  { ...jsxA11y.flatConfigs.recommended, files: REACT_FILES },
+  // Props are typed with TypeScript; runtime PropTypes are not used.
+  { files: REACT_FILES, rules: { "react/prop-types": "off" } },
 ];

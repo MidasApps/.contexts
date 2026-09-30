@@ -17,35 +17,53 @@ catalog:
   "@mastra/observability": 1.18.1
   "@mastra/pg": 1.27.1
   "@next/eslint-plugin-next": 16.3.7
+  "@tailwindcss/node": 4.3.3 # compiles globals.css in the client token test
+  "@tanstack/react-query": 5.104.0
   "@tanstack/react-router": 1.170.40
   "@tanstack/router-plugin": 1.168.41 # file-based routes (Vite plugin)
   "@tauri-apps/api": 2.12.0 # same minor as the tauri crate (CLI checks it)
   "@tauri-apps/cli": 2.12.0
+  "@testing-library/dom": 10.4.2
+  "@testing-library/react": 16.3.3
+  "@testing-library/user-event": 14.6.7
+  "@types/eslint-plugin-jsx-a11y": 6.10.1 # the plugin ships no types; typechecks packages/config/eslint
   "@types/node": 26.6.3
   "@types/react": 19.3.0
   "@types/react-dom": 19.3.0
   "@typescript/typescript6": 6.0.2
   "@vitejs/plugin-react": 6.1.1
+  axe-core: 4.13.0
+  class-variance-authority: 0.7.1
+  clsx: 2.1.1
   drizzle-kit: 0.31.11 # generates SQL migrations into infra/postgres/migrations (decision 0023)
   drizzle-orm: 0.45.3
   eslint: 9.39.5 # E3: eslint-plugin-react only accepts ^9.7
   eslint-import-resolver-typescript: 4.4.5
   eslint-plugin-boundaries: 7.2.0
   esbuild: 0.28.2 # bundles apps/functions into a self-contained lib/
+  eslint-plugin-jsx-a11y: 6.10.2
+  eslint-plugin-react: 7.37.5 # E3: accepts ESLint ^9.7, not 10
+  eslint-plugin-react-hooks: 7.1.1
   firebase: 12.19.0
   firebase-admin: 14.5.0
   firebase-functions: 7.4.0
   firebase-tools: 15.32.0
+  jsdom: 30.1.1
+  lucide-react: 1.49.0
   mastra: 1.31.3 # CLI; same release train as @mastra/core
   next: 16.3.7
   postgres: 3.4.9
+  radix-ui: 1.6.7 # unified Radix package (shadcn new-york base)
   react: 19.3.0
   react-dom: 19.3.0
   server-only: 0.0.1
+  tailwind-merge: 3.7.0
+  tailwindcss: 4.3.3
   turbo: 2.11.5
   typescript: 7.0.2
   typescript-eslint: 8.71.0 # E2: runs on the TS 6 API via .pnpmfile.cjs
   ulid: 3.0.2
+  use-intl: 4.14.8 # same release as next-intl (web wraps it)
   vite: 8.3.1
   vitest: 5.0.2
   yaml: 2.9.1
@@ -77,8 +95,8 @@ allowBuilds:
 # pnpm 12 holds back releases younger than minimumReleaseAge. Next 16.3.7 is the
 # security release published on 2026-09-29 (spec §16.1), so its packages were
 # admitted explicitly by pnpm; drop these entries once they age past the window.
-# Remove after 2026-10-07 (7 days after the 2026-09-29 publish): every entry
-# below is a Next 16.3.7 package, so they all go together.
+# Remove the Next entries after 2026-10-07 (7 days after the 2026-09-29 publish):
+# they are all Next 16.3.7 packages, so they go together.
 minimumReleaseAgeExclude:
   - '@next/env@16.3.7'
   - '@next/eslint-plugin-next@16.3.7'
@@ -91,3 +109,8 @@ minimumReleaseAgeExclude:
   - '@next/swc-win32-arm64-msvc@16.3.7'
   - '@next/swc-win32-x64-msvc@16.3.7'
   - next@16.3.7
+  # SP2 client (Task 3): latest releases published on 2026-09-29, admitted by pnpm at
+  # install; remove these three after 2026-10-06 (7 days after the publish).
+  - icu-minify@4.14.8 # dependency of use-intl
+  - lucide-react@1.49.0
+  - use-intl@4.14.8

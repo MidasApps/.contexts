@@ -1,0 +1,205 @@
+/*
+ * Design tokens of @core/client (decision 0014): raw tokens from .design-system/DESIGN.md per theme,
+ * then `@theme inline` maps them to Tailwind's theme variables. Components use semantic utilities
+ * only (`bg-primary`, `text-muted-foreground`, `text-blue`), never raw colors.
+ * Apps import this file (`@core/client/styles.css`).
+ */
+@import "tailwindcss";
+
+/* Scan the client sources wherever this stylesheet is imported from (path relative to this file). */
+@source "../../..";
+
+/* next-themes writes data-theme on <html> (attribute="data-theme"). */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+/* Dark is the default: no attribute (before hydration, system dark) renders the dark tokens. */
+:root,
+[data-theme="dark"] {
+  color-scheme: dark;
+  --background: #0a0a0a;
+  --foreground: #fafafa;
+  --card: #171717;
+  --card-foreground: var(--foreground);
+  --popover: #171717;
+  --popover-foreground: var(--foreground);
+  --primary: #e5e5e5;
+  --primary-foreground: #171717;
+  --secondary: #262626;
+  --secondary-foreground: var(--foreground);
+  --muted: #262626;
+  --muted-foreground: #a1a1a1;
+  --accent: #262626;
+  --accent-foreground: var(--foreground);
+  --destructive: #ff6568;
+  --destructive-foreground: #0a0a0a;
+  --border: #ffffff1a;
+  --input: #ffffff26;
+  --ring: #a1a1a1;
+  --status-blue: #478eff;
+  --status-emerald: #2bbb71;
+  --status-amber: #f2823b;
+  --status-cyan: #00b2d1;
+  --status-violet: #a37aff;
+  --chart-1: var(--status-blue);
+  --chart-2: var(--status-emerald);
+  --chart-3: var(--status-amber);
+  --chart-4: var(--status-cyan);
+  --chart-5: var(--status-violet);
+  --sidebar: #171717;
+  --sidebar-foreground: var(--foreground);
+  --sidebar-primary: #1447e6;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: var(--accent);
+  --sidebar-accent-foreground: var(--foreground);
+  --sidebar-border: var(--border);
+  --sidebar-ring: var(--ring);
+}
+
+[data-theme="light"] {
+  color-scheme: light;
+  --background: #ffffff;
+  --foreground: #0a0a0a;
+  --card: #ffffff;
+  --card-foreground: var(--foreground);
+  --popover: #ffffff;
+  --popover-foreground: var(--foreground);
+  --primary: #171717;
+  --primary-foreground: #fafafa;
+  --secondary: #f5f5f5;
+  --secondary-foreground: var(--foreground);
+  --muted: #f5f5f5;
+  --muted-foreground: #737373;
+  --accent: #f5f5f5;
+  --accent-foreground: var(--foreground);
+  --destructive: #e40014;
+  --destructive-foreground: #ffffff;
+  --border: #e5e5e5;
+  --input: #e5e5e5;
+  --ring: #737373;
+  --status-blue: #0766ee;
+  --status-emerald: #009956;
+  --status-amber: #dc6400;
+  --status-cyan: #008ba6;
+  --status-violet: #824ae4;
+  --chart-1: var(--status-blue);
+  --chart-2: var(--status-emerald);
+  --chart-3: var(--status-amber);
+  --chart-4: var(--status-cyan);
+  --chart-5: var(--status-violet);
+  --sidebar: #fafafa;
+  --sidebar-foreground: var(--foreground);
+  --sidebar-primary: #1447e6;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: var(--accent);
+  --sidebar-accent-foreground: var(--foreground);
+  --sidebar-border: var(--border);
+  --sidebar-ring: var(--ring);
+}
+
+/* Theme-independent scales (DESIGN.md "Raios, espaçamento, motion"). */
+:root {
+  --radius: 0.875rem;
+  --component-xs: 4px;
+  --component-sm: 8px;
+  --component-md: 12px;
+  --component-lg: 16px;
+  --layout-sm: 16px;
+  --layout-md: 24px;
+  --layout-lg: 32px;
+  --duration-instant: 0s;
+  --duration-fast: 0.15s;
+  --duration-moderate: 0.3s;
+  --duration-deliberate: 0.7s;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-blue: var(--status-blue);
+  --color-emerald: var(--status-emerald);
+  --color-amber: var(--status-amber);
+  --color-cyan: var(--status-cyan);
+  --color-violet: var(--status-violet);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+
+  --spacing: 0.25rem;
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --default-transition-duration: var(--duration-fast);
+
+  --breakpoint-sm: 40rem;
+  --breakpoint-md: 48rem;
+  --breakpoint-lg: 64rem;
+  --breakpoint-xl: 80rem;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    @apply bg-background font-sans text-foreground antialiased;
+  }
+
+  /* Visible focus everywhere (WCAG 2.4.7 / 2.4.13); components may refine it with ring utilities. */
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+}
+
+/* Reduced motion: token durations collapse and animations/transitions stop (WCAG 2.3.3). */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-fast: 0s;
+    --duration-moderate: 0s;
+    --duration-deliberate: 0s;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}

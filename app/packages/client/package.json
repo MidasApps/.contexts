@@ -1,0 +1,58 @@
+{
+  "name": "@core/client",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=26.0.0 <27"
+  },
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "exports": {
+    "./app-shell": "./src/app-shell/index.ts",
+    "./views/*": "./src/views/*/index.ts",
+    "./shared/ui/*": "./src/shared/ui/*.tsx",
+    "./shared/lib/*": "./src/shared/lib/*/index.ts",
+    "./shared/lib/cn": "./src/shared/lib/cn.ts",
+    "./styles.css": "./src/shared/ui/styles/globals.css"
+  },
+  "imports": {
+    "#/*": "./src/*"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@core/contracts": "workspace:*",
+    "@core/i18n": "workspace:*",
+    "@tanstack/react-query": "catalog:",
+    "class-variance-authority": "catalog:",
+    "clsx": "catalog:",
+    "lucide-react": "catalog:",
+    "radix-ui": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "tailwind-merge": "catalog:",
+    "use-intl": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@core/config": "workspace:*",
+    "@tailwindcss/node": "catalog:",
+    "@testing-library/dom": "catalog:",
+    "@testing-library/react": "catalog:",
+    "@testing-library/user-event": "catalog:",
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "axe-core": "catalog:",
+    "eslint": "catalog:",
+    "jsdom": "catalog:",
+    "tailwindcss": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

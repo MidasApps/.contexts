@@ -1,0 +1,15 @@
+{
+  "extends": "@core/config/tsconfig/bundler.json",
+  "//": "Code imports its own files through package.json `imports` (`#/…` with extensions), which resolve per package in every host (Next, Vite, tsc of the apps). `paths` `@/*` exists only so the shadcn CLI can place files (components.json aliases); ESLint forbids `@/` imports here (decision 0014, Task 3 outcome).",
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "paths": { "@/*": ["./src/*"] },
+    "types": ["node"],
+    "allowJs": true,
+    "checkJs": true,
+    "incremental": true,
+    "tsBuildInfoFile": ".tscache/tsbuildinfo"
+  },
+  "include": ["src/**/*.ts", "src/**/*.tsx", "*.ts", "*.js"],
+  "exclude": ["node_modules"]
+}
