@@ -7,7 +7,8 @@ import { DEFAULT_MASTRA_API_PREFIX } from "./firebase-mastra-auth.ts";
  * pass a plain object.
  */
 export type AgentMiddlewareContext = {
-  readonly req: { readonly raw: Request };
+  /** `raw` is replaced by the context middleware (server-owned tracing options). */
+  readonly req: { raw: Request };
   readonly get: (key: "requestContext") => RequestContextStore;
 };
 

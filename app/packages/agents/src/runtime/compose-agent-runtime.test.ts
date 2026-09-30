@@ -1,11 +1,13 @@
+import { Mastra } from "@mastra/core";
 import { RequestContext } from "@mastra/core/request-context";
 import { InMemoryStore } from "@mastra/core/storage";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { z } from "zod";
 import { PING_AGENT_ID } from "../agents/ping-agent.ts";
 import { FirebaseMastraAuth } from "../auth/firebase-mastra-auth.ts";
+import { TENANT_BUDGET_GUARD_ID } from "../processors/tenant-budget-guard.ts";
 import { buildAgentContextEntries } from "../testing/agent-context-fixture.ts";
-import { createFakeAccessPort, createFakeRuntimePorts } from "../testing/fake-ports.ts";
+import { createFakeAccessPort, createFakeRuntimePorts, createFakeUsagePort } from "../testing/fake-ports.ts";
 import { FIXTURE_AI_CATALOG } from "../tools/catalog/catalog-fixture.ts";
 import { defineCoreTool } from "../tools/define-core-tool.ts";
 import { DuplicateToolError } from "../tools/tool-registry.ts";
@@ -78,6 +80,25 @@ describe("composeAgentRuntime", () => {
     const agent = compose().agents[PING_AGENT_ID];
     const result = await agent?.generate("ping", { requestContext: new RequestContext<unknown>(buildAgentContextEntries()) });
     expect(result?.text.length).toBeGreaterThan(0);
+  });
+
+  it("puts the entry guardrail profile on every core agent", async () => {
+    for (const agent of Object.values(compose().agents)) {
+      const input = (await agent.listConfiguredInputProcessors()).map((processor) => processor.id);
+      const output = (await agent.listConfiguredOutputProcessors()).map((processor) => processor.id);
+      expect(input).toEqual(expect.arrayContaining([TENANT_BUDGET_GUARD_ID, "prompt-injection-detector", "moderation", "token-limiter"]));
+      expect(output).toEqual(expect.arrayContaining(["regex-filter"]));
+    }
+  });
+
+  it("bills the agent and its guardrail detectors in the usage ledger", async () => {
+    const usage = createFakeUsagePort();
+    const access = createFakeAccessPort({ memberships: [{ tenantId: "Jd8sK2lPq0WnR5tYu3bV", uid: "member-uid", permissions: ["core.chat.use"] }] });
+    const runtime = composeAgentRuntime({ env: ENV, ports: createFakeRuntimePorts({ access, usage }), modules: [], storage: new InMemoryStore(), serviceName: "mastra", aiCatalog: FIXTURE_AI_CATALOG });
+    const mastra = new Mastra({ agents: runtime.agents, storage: runtime.storage, observability: runtime.observability });
+    await mastra.getAgent(PING_AGENT_ID).generate("ping", { requestContext: new RequestContext<unknown>(buildAgentContextEntries()) });
+    await vi.waitFor(() => expect(usage.calls.map((call) => call.agentId)).toEqual(expect.arrayContaining([PING_AGENT_ID, "prompt-injection-detector", "moderation"])), { timeout: 5000 });
+    expect(new Set(usage.calls.map((call) => call.tenantId))).toEqual(new Set(["Jd8sK2lPq0WnR5tYu3bV"]));
   });
 
   it("refuses a run without the typed context before the model runs", async () => {

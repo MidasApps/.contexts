@@ -1,5 +1,6 @@
 import type { Agent } from "@mastra/core/agent";
 import type { AgentModels } from "../models/model-factory.ts";
+import type { GuardrailProfile, GuardrailProfileKind } from "../processors/guardrail-profile.ts";
 import type { CoreToolDefinition } from "../tools/define-core-tool.ts";
 import type { ToolRegistry } from "../tools/tool-registry.ts";
 import type { AgentRuntimePorts } from "./runtime-ports.ts";
@@ -15,6 +16,8 @@ export type AgentFactoryDeps = {
   readonly models: AgentModels;
   readonly tools: ToolRegistry;
   readonly ports: AgentRuntimePorts;
+  /** Processor stacks every agent spreads into its options (spec §12, `guardrail-profile.ts`). */
+  readonly guardrails: (kind: GuardrailProfileKind) => GuardrailProfile;
 };
 
 export type AgentDefinition = {

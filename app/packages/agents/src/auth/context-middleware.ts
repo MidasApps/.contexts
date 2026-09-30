@@ -1,6 +1,7 @@
 import { type AgentRequestContext, FORWARDED_HEADERS } from "@core/contracts";
 import { resolveRequestId } from "@core/services";
 import { buildAgentRequestContext, clearAgentContext, writeAgentContext } from "../context/write-agent-context.ts";
+import { withServerTracingOptions } from "../observability/trace-context.ts";
 import type { AccessPrincipal } from "../runtime/runtime-ports.ts";
 import { type AgentMiddleware, apiPathPattern } from "./agent-middleware.ts";
 import type { AgentPrincipal } from "./agent-principal.ts";
@@ -57,13 +58,16 @@ const resolveSnapshot = async (
  * auth, so it authenticates through the same provider (one verification per
  * request). It always clears the keys it owns first: a client-sent
  * `requestContext` never survives. Without a principal or membership it writes
- * nothing and lets the route auth answer 401/403.
+ * nothing and lets the route auth answer 401/403. It also replaces any body
+ * `tracingOptions` with the forwarded `traceparent` (`trace-context.ts`).
  */
 export const createContextMiddleware = (options: ContextMiddlewareOptions): AgentMiddleware => ({
   path: apiPathPattern(options.apiPrefix),
   handler: async (context, next) => {
     const store = context.get("requestContext");
     clearAgentContext(store);
+    // Before authentication, so the route auth sees (and memoizes) the same request object.
+    context.req.raw = await withServerTracingOptions(context.req.raw);
     const snapshot = await resolveSnapshot(options, context.req.raw);
     if (snapshot !== null) writeAgentContext(store, snapshot);
     await next();

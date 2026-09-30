@@ -23,7 +23,9 @@ catalog:
   "@mastra/deployer": 1.71.0 # createNodeServer for the agents auth emulator test (same train as core)
   "@mastra/loggers": 1.3.2
   "@mastra/observability": 1.18.1
+  "@mastra/otel-exporter": 1.4.2 # OTLP span export (Cloud Trace); 1.4.3 needs @mastra/observability 1.18.2 (train bump, follow-up #17)
   "@mastra/pg": 1.27.1
+  "@opentelemetry/exporter-trace-otlp-proto": 0.218.0 # http/protobuf OTLP; @mastra/otel-exporter 1.4.2 peers ^0.218.0 (0.222.0 is outside it)
   "@next/eslint-plugin-next": 16.3.7
   "@tailwindcss/node": 4.3.3 # compiles globals.css in the client token test
   "@tanstack/react-query": 5.104.0

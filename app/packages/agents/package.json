@@ -29,6 +29,8 @@
     "@core/services": "workspace:*",
     "@mastra/core": "catalog:",
     "@mastra/observability": "catalog:",
+    "@mastra/otel-exporter": "catalog:",
+    "@opentelemetry/exporter-trace-otlp-proto": "catalog:",
     "ai": "catalog:",
     "zod": "catalog:"
   },

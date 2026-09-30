@@ -13,7 +13,7 @@ export const PING_AGENT_ID = "ping";
 export const PING_AGENT: AgentDefinition = {
   id: PING_AGENT_ID,
   ceiling: ["core.chat.use", CATALOG_READ_PERMISSION],
-  create: ({ models, tools }) =>
+  create: ({ models, tools, guardrails }) =>
     new Agent({
       id: PING_AGENT_ID,
       name: "Ping",
@@ -24,5 +24,6 @@ export const PING_AGENT: AgentDefinition = {
       model: models.language("fast", { agentId: PING_AGENT_ID }),
       tools: tools.toMastraTools(["catalog.listEntities"]),
       requestContextSchema: AgentRuntimeContextSchema,
+      ...guardrails("entry"),
     }),
 };

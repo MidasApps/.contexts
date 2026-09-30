@@ -57,6 +57,16 @@ export const minimalValueFor = (rawSchema: unknown): unknown => {
 const hasDirective = (text: string, scenario: string): boolean =>
   parseFakeDirectives(text).some((directive) => directive.scenario === scenario);
 
+// Mastra's PIIDetector prompt ends with `Content: "<content>"`; its redaction offsets are relative to that content.
+const PII_CONTENT_MARKER = 'Content: "';
+const detectedContentOf = (text: string): string => {
+  const at = text.lastIndexOf(PII_CONTENT_MARKER);
+  if (at < 0) return text;
+  const start = at + PII_CONTENT_MARKER.length;
+  const end = text.lastIndexOf('"');
+  return end > start ? text.slice(start, end) : text.slice(start);
+};
+
 const detectorVerdict = (keys: ReadonlySet<string>, text: string): Record<string, unknown> | undefined => {
   if (keys.has("category_scores")) {
     return hasDirective(text, "moderation")
@@ -65,7 +75,7 @@ const detectorVerdict = (keys: ReadonlySet<string>, text: string): Record<string
   }
   if (keys.has("categories") && keys.has("detections")) {
     if (!hasDirective(text, "pii")) return undefined;
-    const start = Math.max(0, text.indexOf("[[fake:pii]]"));
+    const start = Math.max(0, detectedContentOf(text).indexOf("[[fake:pii]]"));
     const detection = { type: "email", value: "[[fake:pii]]", confidence: 1, start, end: start + 12, redacted_value: "[EMAIL]" };
     return { categories: [{ type: "email", score: 1 }], detections: [detection] };
   }

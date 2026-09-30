@@ -13,7 +13,8 @@ import { createRouteAllowlistMiddleware } from "../auth/route-allowlist-middlewa
 import { createCatalogReindexWorkflow } from "../knowledge/workflows/catalog-reindex.workflow.ts";
 import { createKnowledgeIngestWorkflow } from "../knowledge/workflows/knowledge-ingest.workflow.ts";
 import { type AgentModels, createModelProvider, embeddingModelIdOf, type ModelFactoryEnv } from "../models/model-factory.ts";
-import { createObservability } from "../observability/create-observability.ts";
+import { createObservability, type ObservabilityEnv } from "../observability/create-observability.ts";
+import { createGuardrailProfile } from "../processors/guardrail-profile.ts";
 import { createAiCatalogReader } from "../tools/catalog/ai-catalog-reader.ts";
 import { loadBundledAiCatalog } from "../tools/catalog/ai-catalog-source.ts";
 import { createDescribeEntityTool } from "../tools/catalog/describe-entity.tool.ts";
@@ -26,7 +27,7 @@ import { type AgentDefinition, type AgentModule, AgentModuleError } from "./agen
 import type { AgentRuntimePorts } from "./runtime-ports.ts";
 
 export type ComposeAgentRuntimeArgs = {
-  readonly env: ModelFactoryEnv;
+  readonly env: ModelFactoryEnv & Pick<ObservabilityEnv, "OTEL_EXPORTER_OTLP_ENDPOINT">;
   readonly ports: AgentRuntimePorts;
   /** `APP_MODULES` of `apps/mastra`, built with `defineAgentModule`. */
   readonly modules: readonly AgentModule[];
@@ -117,7 +118,8 @@ export const composeAgentRuntime = (args: ComposeAgentRuntimeArgs): RuntimeParts
   const definitions = collectAgents(args);
   const models = args.models ?? createModelProvider(args.env);
   const tools = buildToolRegistry(args, definitions, models);
-  const deps = { models, tools, ports: args.ports };
+  const guardrails = (kind: Parameters<typeof createGuardrailProfile>[1]) => createGuardrailProfile({ models, ports: args.ports }, kind);
+  const deps = { models, tools, ports: args.ports, guardrails };
   const agents = Object.fromEntries(definitions.map((definition) => [definition.id, definition.create(deps)]));
   const apiPrefix = args.apiPrefix;
   const auth = new FirebaseMastraAuth({ access: args.ports.access, ...(apiPrefix === undefined ? {} : { apiPrefix }) });
@@ -131,6 +133,7 @@ export const composeAgentRuntime = (args: ComposeAgentRuntimeArgs): RuntimeParts
     vectors: {},
     observability: createObservability({
       serviceName: args.serviceName,
+      env: args.env,
       usage: args.ports.usage,
       ...(args.exporters === undefined ? {} : { exporters: args.exporters }),
     }),

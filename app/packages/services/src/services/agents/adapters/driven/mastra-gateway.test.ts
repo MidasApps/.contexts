@@ -99,11 +99,18 @@ describe("createMastraGateway headers and body", () => {
   it("strips a client requestContext and other server-owned keys from run options", async () => {
     routes.set("POST /api/agents/ping/generate", json(200, { text: "pong" }));
     routes.set("POST /api/agents/ping/stream", json(200, { ok: true }));
-    const options = { requestContext: { tenantId: "Intruder000000000000" }, runId: "client-run", resourceId: "other:uid", threadId: "t", maxSteps: 1 };
+    const options = {
+      requestContext: { tenantId: "Intruder000000000000" },
+      runId: "client-run",
+      resourceId: "other:uid",
+      threadId: "t",
+      tracingOptions: { metadata: { tenantId: "Intruder000000000000" } },
+      maxSteps: 1,
+    };
     await gateway().generate({ scope: SCOPE, agentId: "ping", messages: "ping", options });
     await gateway().stream({ scope: SCOPE, agentId: "ping", messages: [{ role: "user", content: "hi" }], options });
     for (const call of recorded) {
-      expect(JSON.stringify(call.body)).not.toMatch(/Intruder|client-run|other:uid|"threadId"/);
+      expect(JSON.stringify(call.body)).not.toMatch(/Intruder|client-run|other:uid|"threadId"|tracingOptions/);
       expect(call.body).toMatchObject({ runId: SCOPE.requestId, maxSteps: 1 });
     }
   });

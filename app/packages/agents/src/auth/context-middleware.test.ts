@@ -97,4 +97,21 @@ describe("createContextMiddleware", () => {
     expect(access.verifyCalls).toHaveLength(1);
     expect(middleware.path).toBe("/api/*");
   });
+  it("replaces client tracing options with the forwarded traceparent before authenticating", async () => {
+    const { middleware } = setup();
+    const traceparent = "00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01";
+    const raw = new Request("http://mastra.internal/api/agents/ping/stream", {
+      method: "POST",
+      headers: { ...memberHeaders, traceparent, "content-type": "application/json" },
+      body: JSON.stringify({ messages: ["hi"], tracingOptions: { metadata: { tenantId: "Intruder000000000000" } } }),
+    });
+    const context = { req: { raw }, get: () => new RequestContext<unknown>() };
+    await middleware.handler(context, () => Promise.resolve());
+    expect(context.req.raw).not.toBe(raw);
+    expect(await context.req.raw.json()).toEqual({
+      messages: ["hi"],
+      tracingOptions: { traceId: "4bf92f3577b34da6a3ce929d0e0e4736", parentSpanId: "00f067aa0ba902b7" },
+    });
+    expect(context.req.raw.headers.get("authorization")).toBe("Bearer member-token");
+  });
 });

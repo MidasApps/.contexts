@@ -14,8 +14,9 @@ export type MastraConnection = {
   readonly serverlessToken: ServerlessIdTokenSource | null;
 };
 
-// Keys Mastra must derive itself (context middleware, memory scoping, run id = requestId).
-const SERVER_OWNED_KEYS = new Set(["requestContext", "runId", "resourceId", "threadId", "resource", "thread"]);
+// Keys Mastra must derive itself (context middleware, memory scoping, run id = requestId,
+// tracing options from traceparent: caller-set ones could override span metadata).
+const SERVER_OWNED_KEYS = new Set(["requestContext", "runId", "resourceId", "threadId", "resource", "thread", "tracingOptions"]);
 
 /** Run options without the keys only the server may set (the client `requestContext` above all). */
 export const stripServerOwnedKeys = (options: AgentRunOptions | undefined): Record<string, unknown> =>

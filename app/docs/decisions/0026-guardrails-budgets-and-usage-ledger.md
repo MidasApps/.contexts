@@ -52,3 +52,20 @@ Mastra's LLM-backed detectors default to `errorStrategy: 'warn'` (fail-open). `T
   to `PostgresStoreVNext` with its own observability connection, DDL for its signal tables in
   `db:init` and Mastra's own price table; Mastra documents that store for low-volume
   production only. The hard cap and the 80 % alert come from the own ledger.
+- **2026-09-30 — guardrail order and export of spans (SP3 Task 17).** The input stack runs
+  `UnicodeNormalizer` → `TenantBudgetGuard` → `PromptInjectionDetector` → `ModerationProcessor`
+  → tenant PII detector → `TokenLimiterProcessor`: the hard cap comes before the LLM detectors,
+  so a tenant over its cap spends nothing on detection. The tenant PII mode is read from
+  `agent-settings` per run; an unreadable setting means `redact`. `SystemPromptScrubber` checks
+  the final answer only (`processOutputResult`): on the stream it calls the model once per text
+  delta; secret-shaped strings are still redacted on the stream by `RegexFilterProcessor`
+  (`secrets` preset). Profiles: `entry` (every agent a caller reaches directly; today all of
+  them) and `delegated` (normalizer, budget, token limit, regex filter) for supervisor-only
+  subagents from Task 20. Tracing: the observability instance samples every trace and keeps
+  internal spans, because the usage ledger must see every model call, detector calls included
+  (they run in internal spans); storage and OTLP sample 20 % of traces per exporter outside
+  `local`/`dev`, by trace id. Before export, `metadata.resourceId` (`tenantId:uid`) becomes a
+  `sha256:` pseudonym, `metadata.userId` is dropped and the request-context snapshot keeps only
+  the span context keys; OTLP carries no prompts or answers outside `local`/`dev`. Body
+  `tracingOptions` are server-owned: the gateway strips them and the context middleware
+  replaces them with the forwarded `traceparent`.

@@ -22,16 +22,20 @@ export const KNOWLEDGE_AGENT_MAX_STEPS = 6;
 export const createKnowledgeAgentDefinition = (options: { readonly instructionsDirs?: readonly string[] } = {}): AgentDefinition => ({
   id: KNOWLEDGE_AGENT_ID,
   ceiling: ["core.chat.use", KNOWLEDGE_READ_PERMISSION, CATALOG_READ_PERMISSION],
-  create: ({ models, tools }) =>
-    new Agent({
+  create: ({ models, tools, guardrails }) => {
+    // Directly callable until the supervisor (Task 20) is the only entry point: full profile.
+    const profile = guardrails("entry");
+    return new Agent({
       id: KNOWLEDGE_AGENT_ID,
       name: "Knowledge",
       description: "Answers questions about the organization's documents and data catalog from the knowledge base, citing every claim.",
       instructions: loadInstructions(KNOWLEDGE_INSTRUCTIONS, options.instructionsDirs),
       model: models.language("chat", { agentId: KNOWLEDGE_AGENT_ID }),
       tools: tools.toMastraTools([SEARCH_KNOWLEDGE_TOOL_ID]),
-      outputProcessors: [createCitationGuard()],
+      inputProcessors: profile.inputProcessors,
+      outputProcessors: [createCitationGuard(), ...profile.outputProcessors],
       defaultOptions: { maxSteps: KNOWLEDGE_AGENT_MAX_STEPS },
       requestContextSchema: AgentRuntimeContextSchema,
-    }),
+    });
+  },
 });

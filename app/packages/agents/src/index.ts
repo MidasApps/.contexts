@@ -224,3 +224,26 @@ export {
 export { uuidv7 } from "./observability/uuidv7.ts";
 export { type BudgetGuardCode, type BudgetGuardTripwire, createTenantBudgetGuard, TENANT_BUDGET_GUARD_ID } from "./processors/tenant-budget-guard.ts";
 export { TOKEN_COST_CONTROL_ENABLED } from "./processors/guardrail-profile.ts";
+// SP3 guardrail profile and tracing configuration (Task 17).
+export {
+  createGuardrailProfile,
+  DAILY_SOFT_CAP_USD,
+  type GuardrailProfile,
+  type GuardrailProfileDeps,
+  type GuardrailProfileKind,
+  INPUT_TOKEN_LIMIT,
+  PROMPT_INJECTION_THRESHOLD,
+  SYSTEM_PROMPT_SCRUBBER_RESULT_ID,
+  TENANT_PII_DETECTOR_ID,
+} from "./processors/guardrail-profile.ts";
+export {
+  buildExporters,
+  type CreateObservabilityArgs,
+  DEFAULT_SENSITIVE_FIELDS,
+  EXTRA_SENSITIVE_FIELDS,
+  type ObservabilityEnv,
+  REMOTE_TRACE_SAMPLE_RATIO,
+  SENSITIVE_FIELDS,
+} from "./observability/create-observability.ts";
+export { hashResourceId, isTraceSampled, sampleTraces, scrubSpanForExport, type SpanExportPolicy } from "./observability/span-export-policy.ts";
+export { parseTraceparent, type TraceContext, withServerTracingOptions } from "./observability/trace-context.ts";
