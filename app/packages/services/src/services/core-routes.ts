@@ -1,6 +1,8 @@
 import { CORE_ENDPOINTS } from "@core/contracts";
 import { buildApprovalsRoutes } from "./access/adapters/driving/approvals-routes.ts";
 import type { ApprovalServices } from "./access/approval-composition.ts";
+import { buildAuditLogsRoutes } from "./audit/adapters/driving/audit-logs-routes.ts";
+import type { AuditLogServices } from "./audit/composition.ts";
 import { buildInvitationsRoutes } from "./access/adapters/driving/invitations-routes.ts";
 import { buildMembersRoutes } from "./access/adapters/driving/members-routes.ts";
 import { buildMembershipsRoutes } from "./access/adapters/driving/memberships-routes.ts";
@@ -43,6 +45,7 @@ export type CoreRouteDeps = {
   readonly devices: DeviceServices;
   readonly platform: PlatformServices;
   readonly approvals: ApprovalServices;
+  readonly auditLogs: AuditLogServices;
 };
 
 /**
@@ -61,6 +64,7 @@ export const buildCoreRoutes = (deps: CoreRouteDeps): CoreRoutes => ({
   ...buildDevicesRoutes(deps),
   ...buildPlatformRoutes(deps),
   ...buildApprovalsRoutes(deps),
+  ...buildAuditLogsRoutes(deps),
   ...buildOrganizationsRoutes(deps),
   ...buildProjectsRoutes(deps),
   ...buildUnitsRoutes(deps),

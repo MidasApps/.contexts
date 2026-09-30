@@ -14,6 +14,7 @@ import { createMemberServices, type MemberServices } from "./access/member-compo
 import { createFirestoreApprovalServices, type ApprovalServices } from "./access/approval-composition.ts";
 import type { ApprovalActionHandler } from "./access/application/ports/driven/approval-action-handler.ts";
 import { createFirestoreAuditLogWriter } from "./audit/adapters/driven/firestore-audit-log-writer.ts";
+import { createFirestoreAuditLogServices, type AuditLogServices } from "./audit/composition.ts";
 import { makeRecordAudit, type AuditWriter } from "./audit/application/use-cases/record-audit.ts";
 import { buildCoreRoutes, type CoreRoutes } from "./core-routes.ts";
 import { createFirebaseTokenVerifier } from "./identity/adapters/driven/firebase-token-verifier.ts";
@@ -96,6 +97,8 @@ export type CoreServer = {
   readonly platform: PlatformServices;
   /** Four-eyes approval requests (SP1 Task 17); `approvals.handlers.register` is open to SP3 and SP5. */
   readonly approvals: ApprovalServices;
+  /** Tenant audit log listing (SP1 Task 18), the SP5 audit viewer. */
+  readonly auditLogs: AuditLogServices;
   /** Server Action bodies for SP2's `(auth)/actions.ts` (decision 0007). */
   readonly sessionActions: SessionActions;
   /** RSC guards for SP2's `(app)` and `/admin` layouts. */
@@ -238,6 +241,7 @@ export const createCoreServer = (args: CoreServerArgs): CoreServer => {
     clock,
     logger: args.logger,
   });
+  const auditLogs = createFirestoreAuditLogServices({ firestore });
   const verifyBearer = makeVerifyBearer({
     tokenVerifier: args.adapters?.tokenVerifier ?? createFirebaseTokenVerifier({ auth }),
     apiKeyAuthenticator: args.adapters?.apiKeyAuthenticator ?? apiKeys.authenticator,
@@ -276,7 +280,7 @@ export const createCoreServer = (args: CoreServerArgs): CoreServer => {
     randomBytes: args.adapters?.randomBytes ?? randomBytes,
     logger: args.logger,
   });
-  const routes = buildCoreRoutes({ pipeline, access: access.services, members: access.members, tenancy, identity, sessions, apiKeys, devices, platform, approvals });
+  const routes = buildCoreRoutes({ pipeline, access: access.services, members: access.members, tenancy, identity, sessions, apiKeys, devices, platform, approvals, auditLogs });
   return {
     routes,
     verifyBearer,
@@ -291,6 +295,7 @@ export const createCoreServer = (args: CoreServerArgs): CoreServer => {
     devices,
     platform,
     approvals,
+    auditLogs,
     sessionActions: sessionVertical.sessionActions,
     sessionGuards: sessionVertical.sessionGuards,
     audit,

@@ -221,6 +221,8 @@ export {
   type ApprovalServices,
   type RequestApproval,
 } from "./services/access/index.ts";
+// SP1 tenant audit log listing (Task 18): the SP5 audit viewer.
+export { createFirestoreAuditLogServices, type AuditLogServices, type ListAuditLogs } from "./services/audit/index.ts";
 // Re-exported for operator scripts (`pnpm platform:grant-staff`), which depend on services only.
 export { PLATFORM_ROLES, PlatformRoleSchema, UserIdSchema, type PlatformRole } from "@core/contracts";
 export { createFirestoreUnitOfWork, inMemoryUnitOfWork, type UnitOfWork } from "./services/shared/firestore/unit-of-work.ts";

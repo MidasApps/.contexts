@@ -15,3 +15,10 @@ export {
   createFirestoreAuditLogWriter,
 } from "./adapters/driven/firestore-audit-log-writer.ts";
 export { createInMemoryAuditLogWriter, type InMemoryAuditLogWriter } from "./adapters/driven/in-memory-audit-log-writer.ts";
+// Tenant audit log listing (SP1 Task 18).
+export { createFirestoreAuditLogServices, type AuditLogServices } from "./composition.ts";
+export type { AuditLogFilters, AuditLogReader } from "./application/ports/driven/audit-log-reader.ts";
+export { makeListAuditLogs, type ListAuditLogs, type ListAuditLogsCommand } from "./application/use-cases/list-audit-logs.ts";
+export { createFirestoreAuditLogReader } from "./adapters/driven/firestore-audit-log-reader.ts";
+export { createInMemoryAuditLogReader } from "./adapters/driven/in-memory-audit-log-reader.ts";
+export { buildAuditLogsRoutes } from "./adapters/driving/audit-logs-routes.ts";
