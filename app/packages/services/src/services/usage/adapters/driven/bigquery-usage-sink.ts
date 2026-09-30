@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import type { LlmCall } from "@core/contracts";
 import type { UsageSink } from "../../application/ports/usage-sink.ts";
 
@@ -12,7 +13,8 @@ export type BigQueryLlmCallRow = {
   readonly request_id: string | null;
   readonly occurred_at: string;
   readonly tenant_id: string;
-  readonly user_id: string | null;
+  /** SHA-256 hex of the uid (bigquery.md §15 hashed derived column); the raw uid never leaves the ledger. */
+  readonly user_id_hashed: string | null;
   readonly model: string;
   readonly prompt_tokens: number;
   readonly completion_tokens: number;
@@ -37,12 +39,18 @@ export type BigQueryTableLike = {
   ) => Promise<unknown>;
 };
 
+/**
+ * The warehouse joins and counts users by this value only. bigquery.md §15 (PII) wins
+ * over the §14 `user_id` column: the uid is personal data (`LlmCall.userId`, pii personal).
+ */
+export const hashUserId = (userId: string | null): string | null => (userId === null ? null : createHash("sha256").update(userId).digest("hex"));
+
 /** Ledger row → warehouse row. Tool calls and errors are not in the ledger yet: empty array and null. */
 export const toBigQueryRow = (call: LlmCall): BigQueryLlmCallRow => ({
   request_id: call.requestId,
   occurred_at: call.occurredAt,
   tenant_id: call.tenantId,
-  user_id: call.userId,
+  user_id_hashed: hashUserId(call.userId),
   model: call.model,
   prompt_tokens: call.inputTokens,
   completion_tokens: call.outputTokens,

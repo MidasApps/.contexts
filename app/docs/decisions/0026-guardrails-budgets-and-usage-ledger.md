@@ -69,3 +69,9 @@ Mastra's LLM-backed detectors default to `errorStrategy: 'warn'` (fail-open). `T
   the span context keys; OTLP carries no prompts or answers outside `local`/`dev`. Body
   `tracingOptions` are server-owned: the gateway strips them and the context middleware
   replaces them with the forwarded `traceparent`.
+- **2026-09-30 — the warehouse gets a hashed user id (doctrine fix).** The BigQuery sink
+  exports `user_id_hashed` (SHA-256 hex of the uid, `null` for platform jobs) instead of the
+  raw `user_id` of the canonical contracts/bigquery.md §14 table: §15 (PII and governance)
+  prefers hashed derived columns when the analytical use allows it, and counting or joining
+  users by a stable pseudonym is all the usage reports need. The raw uid stays in the
+  Postgres ledger (`usage.llm_calls`, row level security). SP5's table DDL follows this column.

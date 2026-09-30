@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { type LlmCall, LlmCallContract, LlmCallSchema } from "@core/contracts";
 import { describe, expect, it } from "vitest";
 import { type BigQueryTableLike, createBigQueryUsageSink, LLM_CALLS_TABLE } from "./bigquery-usage-sink.ts";
@@ -29,7 +30,7 @@ describe("bigquery usage sink", () => {
       request_id: example.requestId,
       occurred_at: example.occurredAt,
       tenant_id: example.tenantId,
-      user_id: example.userId,
+      user_id_hashed: createHash("sha256").update(example.userId ?? "").digest("hex"),
       model: example.model,
       prompt_tokens: example.inputTokens,
       completion_tokens: example.outputTokens,
@@ -44,6 +45,17 @@ describe("bigquery usage sink", () => {
       agent_id: example.agentId,
       provider: example.provider,
     });
+  });
+
+  it("never exports the raw user id: only its SHA-256 (bigquery.md §15)", async () => {
+    const { table, inserts } = fakeTable();
+    const anonymous = LlmCallSchema.parse({ ...example, userId: null });
+    await createBigQueryUsageSink({ table }).exportCalls([example, anonymous]);
+    const [first, second] = inserts[0]?.[0] ?? [];
+    expect(JSON.stringify(first?.json)).not.toContain(example.userId);
+    expect(first?.json).not.toHaveProperty("user_id");
+    expect(first?.json.user_id_hashed).toMatch(/^[0-9a-f]{64}$/);
+    expect(second?.json.user_id_hashed).toBeNull();
   });
 
   it("uses the ledger row id as insertId so a retried export deduplicates", async () => {
