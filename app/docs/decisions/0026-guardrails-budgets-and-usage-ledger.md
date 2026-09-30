@@ -26,3 +26,29 @@ Mastra's LLM-backed detectors default to `errorStrategy: 'warn'` (fail-open). `T
 - **`TokenCostControl` as the hard cap.** Best-effort and fail-open by design.
 - **Default `errorStrategy: 'warn'`.** A provider hiccup would silently disable injection and moderation checks.
 - **Cost from provider billing exports only.** Arrives a day late and cannot stop a runaway tenant.
+
+## Amendments
+
+- **2026-09-30 — caps in force, ledger identity and the `TokenCostControl` probe (SP3 Task 16).**
+  Caps in force (the single table rules/governance.md asks for; source `usage/domain/budget-policy.ts`):
+
+  | Cap | Plan default | Per tenant | Alert |
+  |---|---|---|---|
+  | Monthly spend | 50 000 000 micro-USD (USD 50) | `usage.tenant_budgets.monthly_micro_usd` | 80 % |
+  | Monthly tokens (input + output, priced or not) | 20 000 000 | `usage.tenant_budgets.monthly_tokens` | 80 % |
+
+  Each cap falls back to the plan default on its own when the stored value is missing, zero,
+  negative, fractional or not a safe integer. Months are UTC calendar months. The ledger rows
+  get a uuidv7 id from the exporter (so a retried batch and the BigQuery `insertId` keep the same
+  identity; duplicates are skipped by `ON CONFLICT (id) DO NOTHING`). Tenant, user and request id
+  of a row come from the span's request-context snapshot, never from span metadata: a caller's
+  `tracingOptions.metadata` overrides metadata keys of the root span (observed in the probe).
+  The runtime reaches the tables only as `usage_runtime` (migration 0007: row level security,
+  `FORCE`, append-only ledger, view with `security_invoker`). The budget check reads the
+  indexed `(tenant_id, occurred_at)` range; the view serves reports. `TokenCostControl`
+  probe (`@mastra/pg` 1.27.1, local Postgres 18): with `PostgresStoreVNext` the cost metrics are
+  recorded and the processor tripped on the second run; it stays off
+  (`TOKEN_COST_CONTROL_ENABLED = false`) because enabling it means swapping the Mastra storage
+  to `PostgresStoreVNext` with its own observability connection, DDL for its signal tables in
+  `db:init` and Mastra's own price table; Mastra documents that store for low-volume
+  production only. The hard cap and the 80 % alert come from the own ledger.

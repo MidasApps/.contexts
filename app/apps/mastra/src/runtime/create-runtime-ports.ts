@@ -8,6 +8,8 @@ import {
   createPostgresClient,
   createPostgresKnowledgeRepository,
   createPostgresSemanticRunner,
+  createPostgresUsageRepository,
+  createUsageServices,
   createSemanticViewRegistry,
   type FilesServices,
   type FirebaseAdmin,
@@ -16,11 +18,13 @@ import {
   type ResolveAccessContext,
   makeRunSemanticQuery,
   type ServicesEnv,
+  systemClock,
 } from "@core/services";
 import { type CoreServerModule, createCoreServer } from "@core/services/composition";
 import { bindAccessPort } from "./access-port-binding.ts";
 import { bindAuditPort } from "./audit-port-binding.ts";
 import { bindKnowledgePort } from "./knowledge-port-binding.ts";
+import { bindUsagePort } from "./usage-port-binding.ts";
 import { UNWIRED_PORTS } from "./unwired-ports.ts";
 
 export type RuntimePortsEnv = Pick<ServicesEnv, "API_KEY_PREFIX" | "DATABASE_URL" | "APP_ENV" | "AI_MODE" | "FIREBASE_STORAGE_EMULATOR_HOST"> & {
@@ -60,7 +64,9 @@ export type RuntimePortsAdapters = {
  *   (row level security, role `knowledge_runtime`), vectors of `embeddingModelIdOf(env)` only.
  * - files: ready uploads of the `files` context (Firestore + `FILES_BUCKET`); knowledge events
  *   are structured log lines until the event bus exists.
- * - approvals, usage, connectors, secrets, settings, web content: fail-closed until their tasks.
+ * - usage: ledger writes and tenant budget checks over `usage.llm_calls` / `usage.tenant_budgets`
+ *   (row level security, role `usage_runtime`).
+ * - approvals, connectors, secrets, settings, web content: fail-closed until their tasks.
  * @param args.modules installed modules (their permissions join SP1's registry).
  */
 export const createRuntimePorts = (args: {
@@ -94,5 +100,6 @@ export const createRuntimePorts = (args: {
     knowledge: bindKnowledgePort(knowledge),
     files: bindFilesPort(files),
     knowledgeEvents: createLogKnowledgeEventPublisher(args.logger),
+    usage: bindUsagePort(createUsageServices({ repository: createPostgresUsageRepository(sql), clock: systemClock })),
   };
 };

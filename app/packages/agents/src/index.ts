@@ -211,3 +211,16 @@ export {
 export { CITATION_GUARD_ID, type CitationConfidence, createCitationGuard, type GuardedAnswer, guardCitations } from "./processors/citation-guard.ts";
 export { createKnowledgeAgentDefinition, KNOWLEDGE_AGENT_ID, KNOWLEDGE_AGENT_MAX_STEPS, KNOWLEDGE_INSTRUCTIONS } from "./agents/knowledge-agent.ts";
 export { InstructionsNotFoundError, loadInstructions, PACKAGE_INSTRUCTIONS_DIR } from "./agents/load-instructions.ts";
+// SP3 usage ledger exporter and tenant budget guard (Task 16).
+export {
+  createUsageLedgerExporter,
+  LEDGER_FLUSH_MS,
+  LEDGER_FLUSH_ROWS,
+  LEDGER_MAX_BUFFERED_ROWS,
+  type LedgerLogger,
+  USAGE_LEDGER_EXPORTER_NAME,
+  type UsageLedgerExporterOptions,
+} from "./observability/usage-ledger-exporter.ts";
+export { uuidv7 } from "./observability/uuidv7.ts";
+export { type BudgetGuardCode, type BudgetGuardTripwire, createTenantBudgetGuard, TENANT_BUDGET_GUARD_ID } from "./processors/tenant-budget-guard.ts";
+export { TOKEN_COST_CONTROL_ENABLED } from "./processors/guardrail-profile.ts";

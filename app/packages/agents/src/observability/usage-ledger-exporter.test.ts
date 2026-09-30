@@ -1,0 +1,158 @@
+import type { LlmCall } from "@core/contracts";
+import { type AnyExportedSpan, SpanType, type TracingEvent, TracingEventType } from "@mastra/core/observability";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { createUsageLedgerExporter, LEDGER_FLUSH_MS, LEDGER_FLUSH_ROWS, type LedgerLogger } from "./usage-ledger-exporter.ts";
+
+const TRACE_ID = "4bf92f3577b34da6a3ce929d0e0e4736";
+const REQUEST_ID = "01J8Z3K4M5N6P7Q8R9S0T1V2W3";
+
+const generationSpan = (overrides: Partial<AnyExportedSpan> = {}, attributes: Record<string, unknown> = {}): AnyExportedSpan =>
+  ({
+    id: "span-1",
+    traceId: TRACE_ID,
+    name: "llm: gemini-3.5-flash",
+    type: SpanType.MODEL_GENERATION,
+    entityType: "agent",
+    entityId: "knowledge",
+    startTime: new Date("2026-09-30T10:00:00.000Z"),
+    endTime: new Date("2026-09-30T10:00:01.250Z"),
+    isEvent: false,
+    isRootSpan: false,
+    // A client-sent tracingOptions.metadata could put any tenant here: the ledger ignores it.
+    metadata: { tenantId: "spoofed-tenant" },
+    requestContext: { tenantId: "tenantA", userId: "uid-1", requestId: REQUEST_ID, principalKind: "user" },
+    attributes: {
+      provider: "google.generative-ai",
+      model: "gemini-3.5-flash",
+      finishReason: "stop",
+      usage: { inputTokens: 1000, outputTokens: 200, inputDetails: { cacheRead: 300 } },
+      ...attributes,
+    },
+    ...overrides,
+  }) as AnyExportedSpan;
+
+const ended = (span: AnyExportedSpan): TracingEvent => ({ type: TracingEventType.SPAN_ENDED, exportedSpan: span });
+
+const recordingLogger = () => {
+  const lines: { level: string; message: string; fields: unknown }[] = [];
+  const logger: LedgerLogger = {
+    warn: (message, fields) => lines.push({ level: "warn", message, fields }),
+    error: (message, fields) => lines.push({ level: "error", message, fields }),
+  };
+  return { logger, lines };
+};
+
+const setup = (recordLlmCalls: (calls: readonly LlmCall[]) => Promise<void> = () => Promise.resolve()) => {
+  const batches: LlmCall[][] = [];
+  const { logger, lines } = recordingLogger();
+  let sequence = 0;
+  const exporter = createUsageLedgerExporter({
+    usage: {
+      recordLlmCalls: async (calls) => {
+        batches.push([...calls]);
+        await recordLlmCalls(calls);
+      },
+    },
+    logger,
+    newId: () => `01928f6e-7b2a-7c3d-9e4f-${(sequence++).toString(16).padStart(12, "0")}`,
+  });
+  return { exporter, batches, lines };
+};
+
+beforeEach(() => {
+  vi.useFakeTimers();
+});
+
+afterEach(() => {
+  vi.useRealTimers();
+});
+
+describe("usage ledger exporter", () => {
+  it("turns an ended model generation span into a ledger row with its cost", async () => {
+    const { exporter, batches } = setup();
+    await exporter.exportTracingEvent(ended(generationSpan()));
+    await exporter.flush();
+    expect(batches).toEqual([
+      [
+        {
+          id: "01928f6e-7b2a-7c3d-9e4f-000000000000",
+          requestId: REQUEST_ID,
+          traceId: TRACE_ID,
+          tenantId: "tenantA",
+          userId: "uid-1",
+          agentId: "knowledge",
+          provider: "google",
+          model: "gemini-3.5-flash",
+          inputTokens: 1000,
+          outputTokens: 200,
+          cachedTokens: 300,
+          // 1000 × 1.5 + 200 × 9 micro-USD per token (1.5 / 9 USD per 1M tokens).
+          costMicroUsd: 3300,
+          latencyMs: 1250,
+          finishReason: "stop",
+          occurredAt: "2026-09-30T10:00:01.250Z",
+        },
+      ],
+    ]);
+  });
+
+  it("stores a null cost and warns once per model when the price is unknown", async () => {
+    const { exporter, batches, lines } = setup();
+    const span = generationSpan({}, { provider: "fake", model: "fake-chat" });
+    await exporter.exportTracingEvent(ended(span));
+    await exporter.exportTracingEvent(ended(span));
+    await exporter.flush();
+    expect(batches[0]?.map((row) => row.costMicroUsd)).toEqual([null, null]);
+    expect(lines).toEqual([{ level: "warn", message: "usage_price_missing", fields: { provider: "fake", model: "fake-chat" } }]);
+  });
+
+  it("ignores other span types and span starts", async () => {
+    const { exporter, batches } = setup();
+    await exporter.exportTracingEvent(ended(generationSpan({ type: SpanType.AGENT_RUN })));
+    await exporter.exportTracingEvent({ type: TracingEventType.SPAN_STARTED, exportedSpan: generationSpan() });
+    await exporter.flush();
+    expect(batches).toEqual([]);
+  });
+
+  it("skips a span whose request context names no tenant, whatever its metadata says", async () => {
+    const { exporter, batches, lines } = setup();
+    await exporter.exportTracingEvent(ended(generationSpan({ requestContext: { userId: "uid-1" } })));
+    await exporter.flush();
+    expect(batches).toEqual([]);
+    expect(lines).toEqual([{ level: "warn", message: "usage_span_without_tenant", fields: { agentId: "knowledge" } }]);
+  });
+
+  it(`flushes as soon as ${LEDGER_FLUSH_ROWS} rows are buffered`, async () => {
+    const { exporter, batches } = setup();
+    for (let index = 0; index < LEDGER_FLUSH_ROWS; index += 1) await exporter.exportTracingEvent(ended(generationSpan()));
+    await vi.advanceTimersByTimeAsync(0);
+    expect(batches.map((batch) => batch.length)).toEqual([LEDGER_FLUSH_ROWS]);
+  });
+
+  it(`flushes a partial buffer within ${LEDGER_FLUSH_MS} ms`, async () => {
+    const { exporter, batches } = setup();
+    await exporter.exportTracingEvent(ended(generationSpan()));
+    await vi.advanceTimersByTimeAsync(LEDGER_FLUSH_MS - 1);
+    expect(batches).toEqual([]);
+    await vi.advanceTimersByTimeAsync(1);
+    expect(batches.map((batch) => batch.length)).toEqual([1]);
+  });
+
+  it("never throws into the agent when the ledger write fails, and retries the rows on the next flush", async () => {
+    let fail = true;
+    const { exporter, batches, lines } = setup(() => (fail ? Promise.reject(new Error("db down")) : Promise.resolve()));
+    await exporter.exportTracingEvent(ended(generationSpan()));
+    await expect(exporter.flush()).resolves.toBeUndefined();
+    expect(lines).toEqual([{ level: "error", message: "usage_ledger_flush_failed", fields: { rowCount: 1, error: "db down" } }]);
+    fail = false;
+    await exporter.flush();
+    expect(batches.map((batch) => batch.map((row) => row.id))).toEqual([["01928f6e-7b2a-7c3d-9e4f-000000000000"], ["01928f6e-7b2a-7c3d-9e4f-000000000000"]]);
+  });
+
+  it("flushes what is left on shutdown", async () => {
+    const { exporter, batches } = setup();
+    await exporter.exportTracingEvent(ended(generationSpan()));
+    await exporter.shutdown();
+    expect(batches.map((batch) => batch.length)).toEqual([1]);
+  });
+});

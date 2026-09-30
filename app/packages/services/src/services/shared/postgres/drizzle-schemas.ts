@@ -7,3 +7,5 @@ import { pgSchema } from "drizzle-orm/pg-core";
  */
 // Knowledge base tables (`ai.documents`, `ai.chunks_v1`; decision 0022).
 export const aiSchema = pgSchema("ai");
+// LLM usage ledger and tenant budgets (`usage.llm_calls`, `usage.tenant_budgets`; decision 0026).
+export const usageSchema = pgSchema("usage");

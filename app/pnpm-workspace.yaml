@@ -17,6 +17,7 @@ catalog:
   "@firebase/rules-unit-testing": 5.0.2
   "@formatjs/icu-messageformat-parser": 3.5.20 # i18n:check parses ICU messages
   "@formatjs/intl-localematcher": 0.9.0 # locale negotiation (RFC 4647 best fit)
+  "@google-cloud/bigquery": 9.1.0 # usage sink to ai_observability.llm_calls (decision 0026)
   "@mastra/client-js": 1.50.0 # /v1 -> Mastra gateway; 1.51.0 requires @mastra/core 1.72.0 (follow-up #17 bumps the train)
   "@mastra/core": 1.71.0
   "@mastra/deployer": 1.71.0 # createNodeServer for the agents auth emulator test (same train as core)

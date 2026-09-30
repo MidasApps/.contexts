@@ -51,7 +51,6 @@ describe("createRuntimePorts (default bindings)", () => {
     const bound = ports();
     const action = {} as never;
     await expect(bound.approvals.requestApproval({ principal: MEMBER, node: ORG, permission: "core.chat.use", action })).rejects.toBeInstanceOf(PortNotWiredError);
-    await expect(bound.usage.checkTenantBudget({ tenantId: TENANT })).rejects.toBeInstanceOf(PortNotWiredError);
     await expect(bound.connectors.listActive({ tenantId: TENANT })).rejects.toBeInstanceOf(PortNotWiredError);
     await expect(bound.secrets.get("ref")).rejects.toBeInstanceOf(PortNotWiredError);
     await expect(bound.settings.getAgentSettings({ tenantId: TENANT })).rejects.toBeInstanceOf(PortNotWiredError);

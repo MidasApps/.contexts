@@ -129,7 +129,11 @@ export const composeAgentRuntime = (args: ComposeAgentRuntimeArgs): RuntimeParts
     mcpServers: {},
     storage: args.storage,
     vectors: {},
-    observability: createObservability({ serviceName: args.serviceName, ...(args.exporters === undefined ? {} : { exporters: args.exporters }) }),
+    observability: createObservability({
+      serviceName: args.serviceName,
+      usage: args.ports.usage,
+      ...(args.exporters === undefined ? {} : { exporters: args.exporters }),
+    }),
     auth,
     middleware: [createRouteAllowlistMiddleware(prefix), createContextMiddleware({ auth, aiMode: args.env.AI_MODE, ...prefix })],
     apiRoutes: [],

@@ -57,6 +57,13 @@ serves the `knowledge-ingest` and `catalog-reindex` workflows; `catalog-reindex`
 refuses HTTP runs and is run in-process (`pnpm seed:local`, deploy scripts).
 `FILES_BUCKET` (required outside local) is the bucket ingestion reads uploads from.
 
+The usage ledger (`usage.llm_calls`, `usage.tenant_budgets`, view `usage.tenant_month_spend`,
+decision 0026) is reached only as `usage_runtime` (0007; row level security, append-only
+ledger); `mastra_runtime` and `web_runtime` may `SET ROLE` to it. Every model call becomes a
+ledger row through the `usage-ledger` exporter, and every agent run is checked against the
+tenant's monthly caps first (tenant budget guard, fail-closed). `USAGE_SINK=bigquery` exports
+to `<BIGQUERY_DATASET_AI_OBSERVABILITY>.llm_calls` from SP5's usage report workflow.
+
 Both steps are idempotent; locally they run without `--confirm-env`
 (`pnpm db:migrate && pnpm -F @core/mastra db:init`). `db:init` loads
 `app/.env.local` like `mastra dev` but reads only the services env
