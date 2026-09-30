@@ -8,6 +8,7 @@ import type { GuardrailProfile, GuardrailProfileKind } from "../processors/guard
 import type { AgentCommand } from "../tools/commands/agent-command.ts";
 import type { CoreToolDefinition } from "../tools/define-core-tool.ts";
 import type { ToolRegistry } from "../tools/tool-registry.ts";
+import type { WebToolsRuntime } from "../tools/web/web-tools-runtime.ts";
 import type { AgentRuntimePorts } from "./runtime-ports.ts";
 
 /**
@@ -33,6 +34,8 @@ export type AgentFactoryDeps = {
   readonly commands: readonly AgentCommand[];
   /** Tools of the run tenant's connectors for an agent kind (OpenAPI, MCP, browser, Postgres). */
   readonly connectorTools: ConnectorToolsResolver;
+  /** Firecrawl clients per tenant and the SSRF guard DNS (the web agent gates its Firecrawl tools on them). */
+  readonly webTools: WebToolsRuntime;
 };
 
 export type AgentDefinition = {

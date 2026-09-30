@@ -40,6 +40,8 @@ import { createSearchKnowledgeTool } from "../tools/knowledge/search-knowledge.t
 import type { CoreToolDefinition, CoreToolDeps } from "../tools/define-core-tool.ts";
 import { createQuerySemanticSqlTool } from "../tools/sql/query-semantic-sql.tool.ts";
 import { createToolRegistry, type ToolRegistry } from "../tools/tool-registry.ts";
+import type { WebClientEnv } from "../tools/web/firecrawl-client.ts";
+import { createFirecrawlTools, createWebToolsRuntime, type WebToolsRuntime } from "../tools/web/web-tools-runtime.ts";
 import { type CoreVoice, createVoice } from "../voice/create-voice.ts";
 import { createVoiceRoutes } from "../voice/voice-routes.ts";
 import { type AgentDefinition, type AgentFactoryDeps, type AgentModule, AgentModuleError } from "./agent-module.ts";
@@ -49,7 +51,9 @@ import type { AgentRuntimePorts } from "./runtime-ports.ts";
 export const MEMORY_VECTOR_KEY = "memory";
 
 export type ComposeAgentRuntimeArgs = {
-  readonly env: ModelFactoryEnv & Pick<ObservabilityEnv, "OTEL_EXPORTER_OTLP_ENDPOINT"> & { readonly AI_MEMORY_OBSERVATIONAL?: boolean };
+  readonly env: ModelFactoryEnv &
+    Pick<ObservabilityEnv, "OTEL_EXPORTER_OTLP_ENDPOINT"> &
+    Pick<WebClientEnv, "FIRECRAWL_API_KEY" | "FIRECRAWL_API_URL"> & { readonly AI_MEMORY_OBSERVATIONAL?: boolean };
   readonly ports: AgentRuntimePorts;
   /** `APP_MODULES` of `apps/mastra`, built with `defineAgentModule`. */
   readonly modules: readonly AgentModule[];
@@ -71,6 +75,8 @@ export type ComposeAgentRuntimeArgs = {
   readonly skillsDirs?: readonly string[];
   /** Test seam: how connectors become tools (defaults fetch specs and connect MCP servers). */
   readonly connectorLoaders?: ConnectorLoaders;
+  /** Test seam: Firecrawl clients and the guard DNS (default: from env and the secret store). */
+  readonly webTools?: WebToolsRuntime;
 };
 
 /** What `new Mastra({...})` receives from the runtime (spec §3.3); `pubsub` arrives with Task 25. */
@@ -114,7 +120,7 @@ const collectCommands = (args: ComposeAgentRuntimeArgs): AgentCommand[] => [
   ...args.modules.flatMap((module) => module.commands ?? []),
 ];
 
-const coreTools = (args: ComposeAgentRuntimeArgs, models: AgentModels, commands: readonly AgentCommand[]): CoreToolDefinition[] => {
+const coreTools = (args: ComposeAgentRuntimeArgs, models: AgentModels, commands: readonly AgentCommand[], web: WebToolsRuntime): CoreToolDefinition[] => {
   const catalog = createAiCatalogReader(args.aiCatalog ?? loadBundledAiCatalog());
   const formCommands = formCommandsOf(commands);
   return [
@@ -123,6 +129,7 @@ const coreTools = (args: ComposeAgentRuntimeArgs, models: AgentModels, commands:
     createRenderFormTool({ catalog, commands: { get: (id) => formCommands.get(id) }, access: args.ports.access }),
     createQuerySemanticSqlTool({ catalog: args.ports.catalog }),
     createSearchKnowledgeTool({ knowledge: args.ports.knowledge, embedding: models.embedding, catalog }),
+    ...createFirecrawlTools(web),
     ...commands.map(({ tool }) => tool),
   ];
 };
@@ -166,9 +173,9 @@ const toolDepsOf = (args: ComposeAgentRuntimeArgs, agents: readonly AgentDefinit
   };
 };
 
-const buildToolRegistry = (args: ComposeAgentRuntimeArgs, toolDeps: CoreToolDeps, models: AgentModels, commands: readonly AgentCommand[]): ToolRegistry => {
+const buildToolRegistry = (args: ComposeAgentRuntimeArgs, toolDeps: CoreToolDeps, models: AgentModels, commands: readonly AgentCommand[], web: WebToolsRuntime): ToolRegistry => {
   const registry = createToolRegistry(toolDeps);
-  for (const tool of [...coreTools(args, models, commands), ...args.modules.flatMap((module) => module.tools ?? [])]) registry.register(tool);
+  for (const tool of [...coreTools(args, models, commands, web), ...args.modules.flatMap((module) => module.tools ?? [])]) registry.register(tool);
   return registry;
 };
 
@@ -200,7 +207,8 @@ export const composeAgentRuntime = (args: ComposeAgentRuntimeArgs): RuntimeParts
   const models = args.models ?? createModelProvider(args.env);
   registerFakeRules(models, commands);
   const toolDeps = toolDepsOf(args, definitions);
-  const tools = buildToolRegistry(args, toolDeps, models, commands);
+  const webTools = args.webTools ?? createWebToolsRuntime({ env: args.env, secrets: args.ports.secrets });
+  const tools = buildToolRegistry(args, toolDeps, models, commands, webTools);
   const connectorTools = createConnectorToolResolver({
     connectors: args.ports.connectors,
     secrets: args.ports.secrets,
@@ -215,7 +223,7 @@ export const composeAgentRuntime = (args: ComposeAgentRuntimeArgs): RuntimeParts
   const tenantSettings = createTenantAgentSettingsReader(args.ports.settings);
   const skillDirs = [...(args.skillsDirs ?? []), ...CORE_SKILL_DIRS];
   const skills = (names: readonly string[]) => createSkillsResolver({ core: names.map((name) => loadSkill(name, skillDirs)), modules: args.modules, settings: tenantSettings });
-  const deps: AgentFactoryDeps = { models, tools, ports: args.ports, guardrails, memory, tenantSettings, skills, commands, connectorTools };
+  const deps: AgentFactoryDeps = { models, tools, ports: args.ports, guardrails, memory, tenantSettings, skills, commands, connectorTools, webTools };
   const { agents, subagents } = buildAgents(definitions, deps, args.instructionsDirs);
   const apiPrefix = args.apiPrefix;
   const auth = new FirebaseMastraAuth({ access: args.ports.access, ...(apiPrefix === undefined ? {} : { apiPrefix }) });

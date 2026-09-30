@@ -47,6 +47,37 @@ describe("web opt-in and tenant subagents", () => {
     expect(await guard(delegationTo("data", SERVER_IDS))).toEqual({ proceed: true, modifiedInstructions: "" });
   });
 
+  describe("Firecrawl tools of the web agent (Task 23)", () => {
+    const webToolIds = async (harness: ReturnType<typeof buildSupervisorHarness>): Promise<string[]> => {
+      const web = harness.runtime.subagents.web;
+      return Object.keys((await web?.listTools({ requestContext: memberContext() })) ?? {}).filter((id) => id.startsWith("web.")).sort();
+    };
+
+    it("offers web.search and web.scrape with the firecrawl opt-in and a key", async () => {
+      const harness = buildSupervisorHarness({ settings: { enabledAgents: ["web"], webTools: { firecrawl: true, browser: false } } });
+      expect(await webToolIds(harness)).toEqual(["web.scrape", "web.search"]);
+    });
+
+    it("searches the web in fake mode and reads fixture results (no network)", { timeout: 30_000 }, async () => {
+      const harness = buildSupervisorHarness({ settings: { enabledAgents: ["web"], webTools: { firecrawl: true, browser: false } } });
+      const result = await harness.runtime.subagents.web?.generate("security overview", { requestContext: memberContext() });
+      const outputs = JSON.stringify(result?.steps);
+      expect(outputs).toContain("https://docs.example.com/security");
+      expect(outputs).toContain("untrusted_web_content");
+    });
+
+    it("offers no Firecrawl tool without the opt-in", async () => {
+      const harness = buildSupervisorHarness({ settings: { enabledAgents: ["web"], webTools: { firecrawl: false, browser: true } } });
+      expect(await webToolIds(harness)).toEqual([]);
+    });
+
+    it("offers no Firecrawl tool when the tenant has no key", async () => {
+      const webTools = { clients: { forTenant: () => Promise.resolve(null) }, resolve: () => Promise.resolve(["93.184.215.14"]) };
+      const harness = buildSupervisorHarness({ settings: { enabledAgents: ["web"], webTools: { firecrawl: true, browser: false } }, webTools });
+      expect(await webToolIds(harness)).toEqual([]);
+    });
+  });
+
   it("offers nothing when the run has no server context", async () => {
     const reader = createTenantAgentSettingsReader(createFakeSettingsPort());
     expect((await reader(new RequestContext<unknown>())).enabledAgents.size).toBe(0);

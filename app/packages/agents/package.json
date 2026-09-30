@@ -35,6 +35,7 @@
     "@mastra/otel-exporter": "catalog:",
     "@opentelemetry/exporter-trace-otlp-proto": "catalog:",
     "ai": "catalog:",
+    "firecrawl": "catalog:",
     "openapi-types": "catalog:",
     "zod": "catalog:"
   },

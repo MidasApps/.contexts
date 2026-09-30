@@ -300,7 +300,7 @@ export {
   type McpTool,
 } from "./connectors/mcp/mcp-connector.ts";
 export { assertPublicDatabaseHost, DB_QUERY_PERMISSION, type PostgresConnectorRunner, postgresConnectorTools, runReadOnlyQuery } from "./connectors/db/postgres-readonly-connector.ts";
-export { assertPublicUrl, guardedFetch, isNonPublicAddress, MAX_REDIRECTS, type ResolveHost, UrlGuardError, type UrlGuardReason } from "./tools/web/url-guard.ts";
+export { assertPublicUrl, guardedFetch, isNonPublicAddress, MAX_REDIRECTS, type ResolveHost, resolveWithDns, UrlGuardError, type UrlGuardReason } from "./tools/web/url-guard.ts";
 // SP3 voice composition and routes (Task 26).
 export { ACCEPTED_AUDIO_TYPES, baseMediaType, sniffAudioMediaType, wavDurationSeconds } from "./voice/audio-format.ts";
 export { AiSdkSpeechVoice, AiSdkTranscriptionVoice, type SynthesizedAudio, synthesizeSpeech, type Transcript, transcribeAudio } from "./voice/ai-sdk-voice.ts";
@@ -340,3 +340,18 @@ export {
 } from "./evals/eval-dataset.ts";
 export { type Baseline, BaselineSchema, evaluateGate, type GateResult, loadBaseline, type ScorerGateResult } from "./evals/eval-baseline.ts";
 export { seedEvalDatasets, type SeedOutcome } from "./evals/seed-datasets.ts";
+// Firecrawl web tools and knowledge URL sources (SP3 Task 23, decision 0027).
+export { createFakeModeResolver, createFakeWebClient, FAKE_WEB_HOSTS, FAKE_WEB_PAGES } from "./tools/web/fake-firecrawl.ts";
+export {
+  createFirecrawlWebClient,
+  createWebClientResolver,
+  firecrawlSecretRefOf,
+  type WebClient,
+  type WebClientEnv,
+  type WebClientResolver,
+  type WebSearchResult,
+} from "./tools/web/firecrawl-client.ts";
+export { createFirecrawlWebContent, WEB_CONTENT_MAX_CHARS, WEB_INGEST_MAX_CHARS, WebToolsUnavailableError, wrapUntrustedWebContent } from "./tools/web/web-content.ts";
+export { createWebScrapeTool, WEB_SCRAPE_TOOL_ID } from "./tools/web/web-scrape.tool.ts";
+export { createWebSearchTool, WEB_SEARCH_TOOL_ID } from "./tools/web/web-search.tool.ts";
+export { createFirecrawlTools, createWebContentPort, createWebToolsRuntime, FIRECRAWL_TOOL_IDS, guardResolverFor, type WebToolsRuntime } from "./tools/web/web-tools-runtime.ts";

@@ -1,6 +1,6 @@
-import type { SettingsPort, WebContentPort } from "@core/agents";
+import type { SettingsPort } from "@core/agents";
 
-export type UnwiredPortName = "settings" | "webContent";
+export type UnwiredPortName = "settings";
 
 /** Bug guard: a port whose service lands in a later task was called; the call rejects, never succeeds. */
 export class PortNotWiredError extends Error {
@@ -17,13 +17,10 @@ export class PortNotWiredError extends Error {
 const reject = (port: UnwiredPortName) => (): Promise<never> => Promise.reject(new PortNotWiredError(port));
 
 /**
- * Fail-closed stand-ins for ports whose services arrive later: agent settings (SP5), web content (Firecrawl, Task 23:
- * URL ingestion fails after its retries until then).
+ * Fail-closed stand-ins for ports whose services arrive later: agent settings (SP5).
  */
 export const UNWIRED_PORTS: {
   readonly settings: SettingsPort;
-  readonly webContent: WebContentPort;
 } = {
   settings: { getAgentSettings: reject("settings") },
-  webContent: { scrape: reject("webContent") },
 };

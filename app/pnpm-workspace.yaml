@@ -66,6 +66,7 @@ catalog:
   firebase-functions: 7.4.0
   firebase-tools: 15.32.0
   file-type: 22.1.1 # magic-byte check of uploads in onObjectFinalized (files context)
+  firecrawl: 4.42.1 # web search/scrape SDK (decision 0027, D3-16; MIT); brings its own zod 3, axios and zod-to-json-schema
   google-auth-library: 11.1.0 # Cloud Run ID token for X-Serverless-Authorization (gateway to Mastra)
   jsdom: 30.1.1
   libpg-query: 18.1.5 # PG 18 parser (WASM) for the semantic SQL guard (decision 0024)
@@ -140,3 +141,6 @@ minimumReleaseAgeExclude:
   # SP3 connectors (Task 22): @mastra/mcp 2.1.1, published 2026-09-29, admitted by pnpm at
   # install; remove after 2026-10-07 (7 days after the publish).
   - '@mastra/mcp@2.1.1'
+  # SP3 web tools (Task 23): firecrawl 4.42.1, published 2026-09-30, admitted by pnpm at
+  # install; remove after 2026-10-07 (7 days after the publish).
+  - firecrawl@4.42.1

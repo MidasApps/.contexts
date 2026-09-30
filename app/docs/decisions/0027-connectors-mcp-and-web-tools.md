@@ -94,3 +94,32 @@ Tenants connect their own APIs (OpenAPI), MCP servers and databases; external cl
     `schema.relation` names from `allowedRelations`), `BEGIN READ ONLY`, 5 s statement timeout,
     100/1000 row cap, the DSN host must resolve to public addresses; permission
     `core.catalog.query`; audited like semantic queries.
+- **2026-09-30 — Firecrawl web tools and URL ingestion (SP3 Task 23).**
+  - *SDK.* `firecrawl` 4.42.1 (MIT; the same SDK as `@mendable/firecrawl-js` 4.42.1, one name
+    kept). It brings its own `zod` 3, `axios` and `zod-to-json-schema`, has no install script,
+    and was admitted through `minimumReleaseAgeExclude` until 2026-10-07. The client always
+    receives the key and API URL explicitly, so the SDK never reads `process.env`; 12 s
+    timeout, one retry. The SDK takes no `AbortSignal`: a cancelled run abandons the call.
+  - *Keys.* Per call, in this order: the tenant's own key in the secret store under
+    `firecrawl-<tenantId>` (SP5 settings will write it), then the platform
+    `FIRECRAWL_API_KEY`; a self-hosted `FIRECRAWL_API_URL` may run without a key. Without any
+    of them the tools are absent and a URL source fails with `WEB_TOOLS_UNAVAILABLE`.
+    `FIRECRAWL_API_URL` must be https outside `local`.
+  - *Tools.* `web.search` (query ≤ 400 chars, 1–5 results, only https result addresses, titles
+    and snippets returned as one wrapped Markdown list) and `web.scrape` (Markdown of the main
+    content, 20 000-char cap with `truncated`), both `defineCoreTool` reads with permission
+    `core.web-tools.use`. Output is wrapped as `<untrusted_web_content source="…">`; a
+    closing tag inside the page text is escaped so the page cannot end the wrapper. The web
+    agent offers them only when `agent-settings.webTools.firecrawl` is on **and** a client
+    resolves for the run's tenant (the tenant comes from the verified context).
+  - *SSRF.* Firecrawl fetches pages from its own network, but a self-hosted Firecrawl runs in
+    ours, so `url-guard` checks the requested URL before the call and the final address
+    Firecrawl reports (after its redirects) before any content is returned.
+  - *Knowledge URL sources.* The `webContent` port (knowledge-ingest workflow) is bound to the
+    same clients and guard (Markdown bounded to 500 000 chars). URL ingestion is an explicit
+    `core.knowledge.write` action, so it needs a key but not the chat opt-in.
+  - *Fake mode.* Fixture pages on `docs.example.com`; the guard's DNS resolves only the fixture
+    hosts to a public test address and keeps real DNS (and its refusals) for every other host.
+  - *Not done.* `extract-text`'s PDF hook is not wired to Firecrawl `parse`: it would send
+    tenant documents to a third party, which needs a compliance decision
+    (`.contexts/business/compliance.md` is still a template).

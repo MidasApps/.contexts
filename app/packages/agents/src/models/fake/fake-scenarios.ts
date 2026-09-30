@@ -197,13 +197,20 @@ const searchKnowledgeRule: FakeScenarioRule = {
   }),
 };
 
+const webSearchRule: FakeScenarioRule = {
+  id: "web-search",
+  matches: ({ toolNames }) => modelToolName(toolNames, "web.search") !== undefined,
+  respond: ({ text, toolNames }) => ({ toolCalls: [{ toolName: modelToolName(toolNames, "web.search") ?? "web.search", input: { query: stripFakeDirectives(text).slice(0, 400), limit: 3 } }] }),
+};
+
 /**
  * Keyword rules of the core agents in fake mode (spec §5.3, SP3 Task 20). The supervisor
  * delegates: a confirmation → `agent-action`, "create a <record>" / data words →
  * `agent-data`, web words → `agent-web`, a question → `agent-knowledge`. The data agent
  * lists entities or renders the form of the command whose target contract matches the
  * word; the action agent runs the first command tool with the quoted name; the
- * knowledge agent searches the knowledge base with the request.
+ * knowledge agent searches the knowledge base with the request; the web agent searches
+ * the web with the message when Firecrawl is offered.
  */
 export const coreFakeRules = (commands: readonly FakeCommandRef[]): readonly (readonly [string, FakeScenarioRule])[] => [
   ["assistant", delegation("supervisor-action", "action", CONFIRMED)],
@@ -214,4 +221,5 @@ export const coreFakeRules = (commands: readonly FakeCommandRef[]): readonly (re
   ["data", listEntitiesRule],
   ["action", runCommandRule],
   ["knowledge", searchKnowledgeRule],
+  ["web", webSearchRule],
 ];

@@ -135,4 +135,10 @@ describe("remote-only requirements", () => {
     expect(issueFields({ ...PROD_SOURCE, MASTRA_STORAGE_INIT: "auto" }, PROD_REAL)).toEqual(["MASTRA_STORAGE_INIT"]);
     expect(load({ MASTRA_STORAGE_INIT: "skip" }).MASTRA_STORAGE_INIT).toBe("skip");
   });
+
+  it("accepts a plain-http Firecrawl URL only in local (a self-hosted Firecrawl on the developer machine)", () => {
+    expect(issueFields({ ...PROD_SOURCE, FIRECRAWL_API_URL: "http://firecrawl.internal.example.com" }, PROD_REAL)).toEqual(["FIRECRAWL_API_URL"]);
+    expect(issueFields({ ...PROD_SOURCE, FIRECRAWL_API_URL: "https://firecrawl.internal.example.com" }, PROD_REAL)).toEqual([]);
+    expect(issueFields({ FIRECRAWL_API_URL: "http://localhost:3002" }, LOCAL_FAKE)).toEqual([]);
+  });
 });

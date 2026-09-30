@@ -1,4 +1,4 @@
-import { type AgentRuntimePorts, embeddingModelIdOf, type FilesPort } from "@core/agents";
+import { type AgentRuntimePorts, createWebContentPort, embeddingModelIdOf, type FilesPort } from "@core/agents";
 import { TenantIdSchema } from "@core/contracts";
 import {
   type AccessReaders,
@@ -38,6 +38,9 @@ export type RuntimePortsEnv = Pick<ServicesEnv, "API_KEY_PREFIX" | "DATABASE_URL
   readonly AI_MODEL_EMBEDDING: string;
   /** Bucket of uploads (files context). */
   readonly FILES_BUCKET: string;
+  /** Platform Firecrawl key and self-hosted API URL (knowledge URL sources, decision 0027). */
+  readonly FIRECRAWL_API_KEY?: string | undefined;
+  readonly FIRECRAWL_API_URL?: string | undefined;
 };
 
 // The files use cases answer `{ code }` errors; the agents port carries the bare code.
@@ -78,7 +81,9 @@ export type RuntimePortsAdapters = {
  * - approvals: SP1 `requestApproval` (kind `agent-command`, whose handler this runtime also
  *   registers so SP1 accepts the kind); commands: at-most-once execution per
  *   `runId:toolCallId` over SP1's idempotency store, shared with that handler (follow-up #26).
- * - settings, web content: fail-closed until their tasks.
+ * - web content: Firecrawl scrape for knowledge URL sources, behind the SSRF guard (fixture
+ *   pages in `AI_MODE=fake`; the tenant key `firecrawl-<tenantId>`, else the platform key).
+ * - settings: fail-closed until SP5.
  * @param args.modules installed modules (their permissions join SP1's registry).
  */
 export const createRuntimePorts = (args: {
@@ -120,6 +125,7 @@ export const createRuntimePorts = (args: {
     commands,
     connectors: { listActive: ({ tenantId }) => connectors.listActiveConnectors({ tenantId: TenantIdSchema.parse(tenantId) }) },
     secrets: { get: (secretRef) => connectors.secrets.get(secretRef) },
+    webContent: createWebContentPort({ env: args.env, secrets: { get: (secretRef) => connectors.secrets.get(secretRef) } }),
     knowledge: bindKnowledgePort(knowledge),
     files: bindFilesPort(files),
     knowledgeEvents: createLogKnowledgeEventPublisher(args.logger),

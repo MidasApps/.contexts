@@ -10,6 +10,7 @@ import { buildAgentContextEntries, TEST_TENANT, TEST_UID } from "../testing/agen
 import { createFakeAccessPort, createFakeRuntimePorts, createFakeSettingsPort } from "../testing/fake-ports.ts";
 import { FIXTURE_AI_CATALOG } from "../tools/catalog/catalog-fixture.ts";
 import { defineCoreTool } from "../tools/define-core-tool.ts";
+import type { WebToolsRuntime } from "../tools/web/web-tools-runtime.ts";
 
 /** Test-only fixtures of the supervisor tests: a fake-mode runtime inside a real `Mastra`. */
 
@@ -32,6 +33,7 @@ export const MEMBER_PERMISSIONS = [
   "core.catalog.query",
   "core.knowledge.read",
   "core.project.create",
+  "core.web-tools.use",
   "example.note.read",
   "example.note.create",
 ];
@@ -61,7 +63,9 @@ export const noteModule = (executed: string[] = []): AgentModule =>
 
 export type SupervisorHarness = { readonly mastra: Mastra; readonly runtime: RuntimeParts; readonly ports: AgentRuntimePorts };
 
-export const buildSupervisorHarness = (args: { settings?: Partial<AgentSettings>; ports?: Partial<AgentRuntimePorts>; modules?: readonly AgentModule[] } = {}): SupervisorHarness => {
+export const buildSupervisorHarness = (
+  args: { settings?: Partial<AgentSettings>; ports?: Partial<AgentRuntimePorts>; modules?: readonly AgentModule[]; webTools?: WebToolsRuntime } = {},
+): SupervisorHarness => {
   const access = createFakeAccessPort({ memberships: [{ tenantId: TEST_TENANT, uid: TEST_UID, permissions: MEMBER_PERMISSIONS }] });
   const ports = createFakeRuntimePorts({ access, settings: createFakeSettingsPort(args.settings), ...args.ports });
   const runtime = composeAgentRuntime({
@@ -71,6 +75,7 @@ export const buildSupervisorHarness = (args: { settings?: Partial<AgentSettings>
     storage: new InMemoryStore(),
     serviceName: "mastra",
     aiCatalog: FIXTURE_AI_CATALOG,
+    ...(args.webTools === undefined ? {} : { webTools: args.webTools }),
   });
   const mastra = new Mastra({ agents: runtime.agents, storage: runtime.storage, observability: runtime.observability });
   return { mastra, runtime, ports };

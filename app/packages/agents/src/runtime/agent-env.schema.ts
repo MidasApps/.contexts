@@ -130,6 +130,8 @@ const remoteOnlyIssues = (env: AgentEnvInput): EnvIssue[] => {
   }
   // The runtime role has no DDL outside local; `db:init` creates Mastra's tables.
   if (env.MASTRA_STORAGE_INIT === "auto") issues.push({ field: "MASTRA_STORAGE_INIT", issue: "SKIP_OUTSIDE_LOCAL" });
+  // A self-hosted Firecrawl receives tenant URLs and keys: TLS outside the developer machine.
+  if (env.FIRECRAWL_API_URL?.startsWith("http:") === true) issues.push({ field: "FIRECRAWL_API_URL", issue: "HTTPS_OUTSIDE_LOCAL" });
   return issues;
 };
 

@@ -66,6 +66,8 @@ describe("composeAgentRuntime", () => {
       "catalog.renderForm",
       "sql.querySemanticSql",
       "knowledge.searchKnowledge",
+      "web.search",
+      "web.scrape",
       "command.tenancy.CreateProjectInput",
     ]);
     expect(runtime).toMatchObject({ mcpServers: {}, vectors: {} });

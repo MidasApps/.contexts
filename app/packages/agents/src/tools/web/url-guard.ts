@@ -33,7 +33,8 @@ export class UrlGuardError extends Error {
 
 export type ResolveHost = (host: string) => Promise<readonly string[]>;
 
-const resolveWithDns: ResolveHost = async (host) => (await lookup(host, { all: true, verbatim: true })).map((entry) => entry.address);
+/** System DNS (`dns.lookup`, all addresses). */
+export const resolveWithDns: ResolveHost = async (host) => (await lookup(host, { all: true, verbatim: true })).map((entry) => entry.address);
 
 // Everything that is not the public internet (IANA special-purpose registries).
 const NON_PUBLIC = new BlockList();

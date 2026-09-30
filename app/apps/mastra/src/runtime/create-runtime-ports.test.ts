@@ -81,7 +81,12 @@ describe("createRuntimePorts (default bindings)", () => {
   it("rejects every port whose service lands later", async () => {
     const bound = ports();
     await expect(bound.settings.getAgentSettings({ tenantId: TENANT })).rejects.toBeInstanceOf(PortNotWiredError);
-    await expect(bound.webContent.scrape({ url: "https://docs.example.com", tenantId: TENANT })).rejects.toBeInstanceOf(PortNotWiredError);
+  });
+
+  it("binds knowledge URL sources to Firecrawl: fixture pages in fake mode, private targets refused", async () => {
+    const bound = ports();
+    expect(await bound.webContent.scrape({ url: "https://docs.example.com/getting-started", tenantId: TENANT })).toMatchObject({ title: "Getting started" });
+    await expect(bound.webContent.scrape({ url: "https://127.0.0.1/", tenantId: TENANT })).rejects.toMatchObject({ code: "URL_REJECTED" });
   });
 
   it("binds the semantic runner with no registered view, so every view is refused before the database", async () => {
