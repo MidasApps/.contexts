@@ -3,6 +3,12 @@ import type { EmbeddingModelV4 } from "@ai-sdk/provider";
 import { EMBEDDING_DIMENSIONS } from "../model-roles.ts";
 import { deferred } from "./deferred.ts";
 
+/**
+ * Model id stored with fake vectors (`embedding_model`): fake and real vectors live in
+ * different spaces, so search never mixes them (decision 0022 amendment of Task 14).
+ */
+export const FAKE_EMBEDDING_MODEL_ID = "fake/fake-embedding";
+
 /** Same dimension as the real embedding role (decision 0022). */
 export const FAKE_EMBEDDING_DIMENSIONS = EMBEDDING_DIMENSIONS;
 

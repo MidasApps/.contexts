@@ -3,12 +3,15 @@ import type { ObservabilityExporter } from "@mastra/core/observability";
 import type { ApiRoute } from "@mastra/core/server";
 import type { MastraCompositeStore } from "@mastra/core/storage";
 import type { Observability } from "@mastra/observability";
+import type { AnyWorkflow } from "@mastra/core/workflows";
 import { PING_AGENT } from "../agents/ping-agent.ts";
 import type { AgentMiddleware } from "../auth/agent-middleware.ts";
 import { createContextMiddleware } from "../auth/context-middleware.ts";
 import { FirebaseMastraAuth } from "../auth/firebase-mastra-auth.ts";
 import { createRouteAllowlistMiddleware } from "../auth/route-allowlist-middleware.ts";
-import { type AgentModels, createModelProvider, type ModelFactoryEnv } from "../models/model-factory.ts";
+import { createCatalogReindexWorkflow } from "../knowledge/workflows/catalog-reindex.workflow.ts";
+import { createKnowledgeIngestWorkflow } from "../knowledge/workflows/knowledge-ingest.workflow.ts";
+import { type AgentModels, createModelProvider, embeddingModelIdOf, type ModelFactoryEnv } from "../models/model-factory.ts";
 import { createObservability } from "../observability/create-observability.ts";
 import { createAiCatalogReader } from "../tools/catalog/ai-catalog-reader.ts";
 import { loadBundledAiCatalog } from "../tools/catalog/ai-catalog-source.ts";
@@ -40,7 +43,7 @@ export type ComposeAgentRuntimeArgs = {
 /** What `new Mastra({...})` receives from the runtime (spec §3.3); `pubsub` arrives with Task 25. */
 export type RuntimeParts = {
   readonly agents: Record<string, Agent>;
-  readonly workflows: Record<string, never>;
+  readonly workflows: Record<string, AnyWorkflow>;
   readonly scorers: Record<string, never>;
   readonly mcpServers: Record<string, never>;
   readonly storage: MastraCompositeStore;
@@ -70,6 +73,20 @@ const collectAgents = (modules: readonly AgentModule[]): AgentDefinition[] => {
   return all;
 };
 
+/** Core workflows (spec §11): knowledge ingestion and the platform catalog reindex. */
+const coreWorkflows = (args: ComposeAgentRuntimeArgs, models: AgentModels): Record<string, AnyWorkflow> => {
+  const indexing = { knowledge: args.ports.knowledge, embedding: models.embedding, embeddingModelId: embeddingModelIdOf(args.env) };
+  const ingest = createKnowledgeIngestWorkflow({
+    ...indexing,
+    access: args.ports.access,
+    files: args.ports.files,
+    webContent: args.ports.webContent,
+    events: args.ports.knowledgeEvents,
+  });
+  const reindex = createCatalogReindexWorkflow({ ...indexing, ...(args.aiCatalog === undefined ? {} : { aiCatalog: args.aiCatalog }) });
+  return { [ingest.id]: ingest, [reindex.id]: reindex };
+};
+
 const buildToolRegistry = (args: ComposeAgentRuntimeArgs, agents: readonly AgentDefinition[]): ToolRegistry => {
   // Ceilings are data, known before any tool is bound: every call is capped by its agent's.
   const agentCeilings = Object.fromEntries(agents.map((agent) => [agent.id, new Set(agent.ceiling)]));
@@ -95,7 +112,7 @@ export const composeAgentRuntime = (args: ComposeAgentRuntimeArgs): RuntimeParts
   const prefix = apiPrefix === undefined ? {} : { apiPrefix };
   return {
     agents,
-    workflows: {},
+    workflows: coreWorkflows(args, models),
     scorers: {},
     mcpServers: {},
     storage: args.storage,

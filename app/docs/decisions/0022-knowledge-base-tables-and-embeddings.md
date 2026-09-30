@@ -54,3 +54,43 @@ The knowledge base needs tenant isolation that holds even if application code fo
   `mastra_runtime` may switch to it (SET, no inherited rights). Search compares only vectors
   of the configured `AI_MODEL_EMBEDDING` (`embedding_model` filter) and drops citations below
   similarity 0.3.
+- **2026-09-30 — ingestion, catalog reindex and `/v1/knowledge` (SP3 Task 14).**
+  - *Workflows* (`@core/agents`, served by Mastra). `knowledge-ingest`: `resolve-source` →
+    `extract-text` → `chunk` → `store` → `embed` → `emit`, `retryConfig { attempts: 3, delay:
+    2000 }`, progress as transient `data-ingest-progress` parts. Every step re-reads the tenant
+    from the typed request context; `resolve-source` authorizes `core.knowledge.write` with
+    SP1 `authorize()`. Expected failures (`CONTEXT_MISSING`, `FORBIDDEN`, `FILE_*`,
+    `UNSUPPORTED_MEDIA`, `EMPTY_CONTENT`) end the run with `status: "failed"` and a code
+    instead of retrying. `store` (upsert by `(tenant_id, source, source_ref)`) runs before
+    `embed`, and `embed` embeds in batches of 64 and replaces the chunks in one transaction, so
+    vectors never enter the workflow snapshot; unchanged content (`content_hash`) skips both.
+    Namespace: `project:<projectId>` when the context has a project, else `tenant`.
+  - *Chunking* is own code (`chunk-document.ts`: recursive Markdown/text splitter, 2000
+    characters, overlap 200), not `@mastra/rag` `MDocument`: `@mastra/rag` 2.6.5 pulls the AWS
+    Bedrock runtime SDK and an alpha reranker client for a pure string function.
+  - *Extraction.* Text, Markdown, CSV and JSON as UTF-8, HTML reduced to text; PDF only through
+    the optional `parsePdf` hook (Firecrawl `parse`, Task 23), else `UNSUPPORTED_MEDIA`. URL
+    sources go through `WebContentPort` (Firecrawl, Task 23; fixtures in tests); until then
+    the Mastra binding rejects and URL runs fail after their retries.
+  - *Embedding model id.* Chunks store `embedding_model = AI_MODEL_EMBEDDING` in real mode and
+    `fake/fake-embedding` in fake mode (`embeddingModelIdOf`), and search filters on the same
+    id, so switching `AI_MODE` never mixes embedding spaces. `embedding_version =
+    v1-chunk2000-d1536`.
+  - *Catalog.* `catalog-reindex` writes one `_platform`/`catalog` document per AI-catalog
+    contract (title = contract id, no examples, no `sensitive` fields, metadata `permission`).
+    It refuses runs that carry a caller principal (`PLATFORM_ONLY`), so only in-process
+    callers (seed, deploy, the SP5 scheduler) write platform rows. `pnpm seed:local` runs it and
+    indexes two sample documents for `DemoOrgSeed000000001` (SP1's organization seed should
+    pass its id).
+  - *Routes.* `GET /v1/organizations/{organizationId}/knowledge/documents` (cursor pages),
+    `GET|DELETE .../knowledge/documents/{documentId}` and `POST .../knowledge/sources`
+    (`core.knowledge.read|delete|write`; 202 `{ data: { runId } }` through the new gateway
+    `launchWorkflow`, which starts the run without waiting). The organization is in the path
+    because row level security needs the tenant before the lookup. A file source must be a
+    ready `knowledge` upload of the organization (404 / 409 `CONFLICT` / 400). No new error
+    code.
+  - *Roles.* Migration `0005` adds `web_runtime` (NOLOGIN) with SET on `knowledge_runtime`;
+    deploy grants it to the web service's database user.
+  - *Events and audit.* `KNOWLEDGE_DOCUMENT_INDEXED` is a structured log line with a ULID
+    `eventId` until the event bus exists. Ingestion and deletes are not audited yet: SP1's
+    `AUDIT_ACTIONS` has no knowledge action.

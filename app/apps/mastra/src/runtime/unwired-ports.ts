@@ -1,6 +1,6 @@
-import type { ApprovalPort, ConnectorsPort, SecretStore, SettingsPort, UsagePort } from "@core/agents";
+import type { ApprovalPort, ConnectorsPort, SecretStore, SettingsPort, UsagePort, WebContentPort } from "@core/agents";
 
-export type UnwiredPortName = "approvals" | "usage" | "connectors" | "secrets" | "settings";
+export type UnwiredPortName = "approvals" | "usage" | "connectors" | "secrets" | "settings" | "webContent";
 
 /** Bug guard: a port whose service lands in a later task was called; the call rejects, never succeeds. */
 export class PortNotWiredError extends Error {
@@ -19,7 +19,8 @@ const reject = (port: UnwiredPortName) => (): Promise<never> => Promise.reject(n
 /**
  * Fail-closed stand-ins for ports whose services arrive later: approvals (SP1
  * Task 17; tools answer `APPROVAL_UNAVAILABLE`), usage and budgets (Task 16),
- * connectors and secrets (Task 21), agent settings.
+ * connectors and secrets (Task 21), agent settings, web content (Firecrawl, Task 23:
+ * URL ingestion fails after its retries until then).
  */
 export const UNWIRED_PORTS: {
   readonly approvals: ApprovalPort;
@@ -27,10 +28,12 @@ export const UNWIRED_PORTS: {
   readonly connectors: ConnectorsPort;
   readonly secrets: SecretStore;
   readonly settings: SettingsPort;
+  readonly webContent: WebContentPort;
 } = {
   approvals: { requestApproval: reject("approvals") },
   usage: { recordLlmCalls: reject("usage"), checkTenantBudget: reject("usage") },
   connectors: { listActive: reject("connectors") },
   secrets: { get: reject("secrets") },
   settings: { getAgentSettings: reject("settings") },
+  webContent: { scrape: reject("webContent") },
 };

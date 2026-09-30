@@ -155,6 +155,16 @@ const deleteDocument = (sql: Sql): KnowledgeRepository["deleteDocument"] => asyn
     return deleted.length > 0;
   });
 
+// Only the tenant's own documents: platform rows are readable in search, not addressable here.
+const getDocument = (sql: Sql): KnowledgeRepository["getDocument"] => async (input) =>
+  withTenantTransaction(sql, { tenantId: input.tenantId, readOnly: true }, async (tx) => {
+    await asRuntime(tx);
+    const rows = await tx<DocumentRow[]>`
+      SELECT ${tx.unsafe(DOCUMENT_COLUMNS)} FROM ai.documents WHERE id = ${input.documentId} AND tenant_id = ${input.tenantId}`;
+    const [row] = rows;
+    return row === undefined ? null : toDocument(row);
+  });
+
 const listDocuments = (sql: Sql): KnowledgeRepository["listDocuments"] => async (input) =>
   withTenantTransaction(sql, { tenantId: input.tenantId, readOnly: true }, async (tx) => {
     await asRuntime(tx);
@@ -181,5 +191,6 @@ export const createPostgresKnowledgeRepository = (sql: Sql): KnowledgeRepository
   replaceChunks: replaceChunks(sql),
   searchChunks: searchChunks(sql),
   deleteDocument: deleteDocument(sql),
+  getDocument: getDocument(sql),
   listDocuments: listDocuments(sql),
 });

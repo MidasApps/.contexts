@@ -13,6 +13,7 @@
     "test:emulators": "vitest run --project emulators"
   },
   "dependencies": {
+    "@core/agents": "workspace:*",
     "@core/services": "workspace:*",
     "drizzle-orm": "catalog:",
     "postgres": "catalog:",

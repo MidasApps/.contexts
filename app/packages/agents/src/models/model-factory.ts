@@ -7,7 +7,7 @@ import type {
 } from "@ai-sdk/provider";
 import { defaultEmbeddingSettingsMiddleware, wrapEmbeddingModel } from "ai";
 import { type AgentEnvInput, type AgentRuntimeFlags, FAKE_MODE_APP_ENVS } from "../runtime/agent-env.schema.ts";
-import { createFakeEmbeddingModel } from "./fake/fake-embedding-model.ts";
+import { createFakeEmbeddingModel, FAKE_EMBEDDING_MODEL_ID } from "./fake/fake-embedding-model.ts";
 import { createFakeLanguageModel } from "./fake/fake-language-model.ts";
 import { createFakeScenarioRegistry, type FakeScenarioRegistry, type FakeScenarioRule } from "./fake/fake-scenarios.ts";
 import { createFakeSpeechModel, createFakeTranscriptionModel } from "./fake/fake-voice-models.ts";
@@ -134,3 +134,11 @@ export const createModelProvider = (env: ModelFactoryEnv, options: CreateModelPr
   if (!FAKE_MODE_APP_ENVS.has(env.APP_ENV)) throw new FakeModeNotAllowedError(env.APP_ENV);
   return createFakeModels(options.scenarios ?? createFakeScenarioRegistry());
 };
+
+/**
+ * Model id stored with (and searched against) knowledge vectors: `AI_MODEL_EMBEDDING`
+ * in real mode, `fake/fake-embedding` in fake mode, so switching `AI_MODE` never
+ * compares vectors of two embedding spaces.
+ */
+export const embeddingModelIdOf = (env: Pick<ModelFactoryEnv, "AI_MODE" | "AI_MODEL_EMBEDDING">): string =>
+  env.AI_MODE === "fake" ? FAKE_EMBEDDING_MODEL_ID : env.AI_MODEL_EMBEDDING;

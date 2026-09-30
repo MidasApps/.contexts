@@ -3,9 +3,12 @@ export {
   createFakeAccessPort,
   createFakeApprovalPort,
   createFakeAuditPort,
+  createFakeFilesPort,
   createFakeRuntimePorts,
   createFakeSettingsPort,
   createFakeUsagePort,
+  createFakeWebContentPort,
+  createRecordingKnowledgeEvents,
   defaultAgentSettings,
   FAKE_REGIONAL,
   type FakeAccessPort,
@@ -14,6 +17,7 @@ export {
   type FakeMembership,
   type FakeUsagePort,
   grantHolderOf,
+  type RecordingKnowledgeEvents,
 } from "./fake-ports.ts";
 export {
   type AgentContextOverrides,

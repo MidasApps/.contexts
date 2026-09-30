@@ -1,4 +1,13 @@
-import type { AgentApprovalRequest, AgentSettings, Citation, Connector, LlmCall } from "@core/contracts";
+import type {
+  AgentApprovalRequest,
+  AgentSettings,
+  Citation,
+  Connector,
+  KnowledgeDocument,
+  KnowledgeDocumentSource,
+  LlmCall,
+  StoredFile,
+} from "@core/contracts";
 import type { RunSemanticQuery } from "@core/services";
 
 /**
@@ -98,7 +107,32 @@ export type UsagePort = {
   readonly checkTenantBudget: (input: { tenantId: string }) => Promise<BudgetCheck>;
 };
 
-/** Knowledge search; tenant and namespaces always come from the server-side context. */
+/** A document to register before its chunks are embedded (SP3 spec §11). */
+export type KnowledgeDocumentInput = {
+  readonly tenantId: string;
+  readonly namespace: string;
+  readonly source: KnowledgeDocumentSource;
+  readonly sourceRef: string;
+  readonly title: string | null;
+  readonly sourceUrl: string | null;
+  readonly mimeType: string | null;
+  /** SHA-256 hex of the extracted text. */
+  readonly contentHash: string;
+  readonly metadata: Readonly<Record<string, string | number | boolean | null>>;
+  readonly createdBy: string | null;
+};
+
+export type KnowledgeChunkInput = {
+  readonly chunkIndex: number;
+  readonly text: string;
+  readonly tokenCount: number;
+  readonly embedding: readonly number[];
+};
+
+/**
+ * Knowledge base (bound to the `knowledge` use cases). Tenant and namespaces always
+ * come from the server-side context; writes reject on a use-case rule violation.
+ */
 export type KnowledgePort = {
   readonly searchChunks: (input: {
     readonly tenantId: string;
@@ -106,6 +140,52 @@ export type KnowledgePort = {
     readonly embedding: readonly number[];
     readonly topK: number;
   }) => Promise<readonly Citation[]>;
+  /** Upserts by `(tenant, source, sourceRef)`; `unchanged` = same content already indexed (skip embedding). */
+  readonly registerDocument: (input: KnowledgeDocumentInput) => Promise<{ readonly document: KnowledgeDocument; readonly unchanged: boolean }>;
+  /** Replaces every chunk of the document in one transaction and marks it `ready`. */
+  readonly replaceChunks: (input: {
+    readonly tenantId: string;
+    readonly documentId: string;
+    readonly embeddingModel: string;
+    readonly embeddingVersion: string;
+    readonly chunks: readonly KnowledgeChunkInput[];
+  }) => Promise<{ readonly chunkCount: number }>;
+};
+
+/** Why a file cannot be read for ingestion; answers like the `files` context. */
+export type FileReadError = "FILE_NOT_FOUND" | "FILE_NOT_READY" | "FILE_PURPOSE_MISMATCH";
+
+/** Validated uploads (SP3 `files` context); only `ready` files of the context tenant are readable. */
+export type FilesPort = {
+  readonly getReadyFile: (input: {
+    readonly tenantId: string;
+    readonly fileId: string;
+    readonly purpose: StoredFile["purpose"];
+  }) => Promise<{ readonly ok: true; readonly data: StoredFile } | { readonly ok: false; readonly error: FileReadError }>;
+  readonly readFileBytes: (input: {
+    readonly tenantId: string;
+    readonly fileId: string;
+    readonly purpose: StoredFile["purpose"];
+  }) => Promise<{ readonly ok: true; readonly data: { readonly file: StoredFile; readonly bytes: Uint8Array } } | { readonly ok: false; readonly error: FileReadError }>;
+};
+
+/** A public web page as Markdown (Firecrawl scrape, SP3 Task 23; fixtures in fake mode). */
+export type WebPage = { readonly url: string; readonly title: string | null; readonly markdown: string };
+
+export type WebContentPort = {
+  /** @throws when the page cannot be fetched; the SSRF guard lives in the adapter (Task 23). */
+  readonly scrape: (input: { readonly url: string; readonly tenantId: string; readonly abortSignal?: AbortSignal }) => Promise<WebPage>;
+};
+
+/** Domain events of the knowledge base; the binding assigns the ULID `eventId`. */
+export type KnowledgeEventsPort = {
+  readonly documentIndexed: (event: {
+    readonly tenantId: string;
+    readonly documentId: string;
+    readonly source: KnowledgeDocumentSource;
+    readonly chunkCount: number;
+    readonly requestId: string | null;
+  }) => Promise<void>;
 };
 
 export type ConnectorsPort = { readonly listActive: (input: { tenantId: string }) => Promise<readonly Connector[]> };
@@ -126,6 +206,9 @@ export type AgentRuntimePorts = {
   readonly approvals: ApprovalPort;
   readonly usage: UsagePort;
   readonly knowledge: KnowledgePort;
+  readonly files: FilesPort;
+  readonly webContent: WebContentPort;
+  readonly knowledgeEvents: KnowledgeEventsPort;
   readonly connectors: ConnectorsPort;
   readonly secrets: SecretStore;
   readonly settings: SettingsPort;

@@ -19,6 +19,7 @@ import { FileReadUrlContract, FileUploadTicketContract } from "./contracts/files
 import { StoredFileContract } from "./contracts/files/stored-file.schema.ts";
 import { CitationContract } from "./contracts/knowledge/citation.schema.ts";
 import { KnowledgeDocumentContract } from "./contracts/knowledge/knowledge-document.schema.ts";
+import { KNOWLEDGE_ENDPOINTS } from "./contracts/knowledge/endpoints.ts";
 import { KnowledgeSourceContract } from "./contracts/knowledge/knowledge-source.schema.ts";
 import { LlmCallContract } from "./contracts/usage/llm-call.schema.ts";
 import { UsageSummaryContract } from "./contracts/usage/usage-summary.schema.ts";
@@ -66,6 +67,7 @@ export const CORE_ENDPOINTS: readonly EndpointDefinition[] = [
   ...AUDIT_ENDPOINTS,
   // SP3 files (uploads) and knowledge base.
   ...FILES_ENDPOINTS,
+  ...KNOWLEDGE_ENDPOINTS,
 ];
 
 /** Builds a fresh registry with the core contracts (catalog scripts, apps at startup). */

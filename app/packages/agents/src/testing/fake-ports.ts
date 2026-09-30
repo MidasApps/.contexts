@@ -8,11 +8,16 @@ import type {
   AuditEntry,
   AuditPort,
   BudgetCheck,
+  FilesPort,
+  KnowledgeEventsPort,
   NodeRef,
   RegionalSettings,
   SettingsPort,
   UsagePort,
+  WebContentPort,
+  WebPage,
 } from "../runtime/runtime-ports.ts";
+import type { StoredFile } from "@core/contracts";
 
 /**
  * In-memory fakes for every runtime port (exported as `@core/agents/testing`).
@@ -158,13 +163,62 @@ export const createFakeSettingsPort = (overrides: Partial<AgentSettings> = {}): 
   getAgentSettings: ({ tenantId }) => Promise.resolve({ ...defaultAgentSettings(tenantId), ...overrides }),
 });
 
+/** Ready files by id, with their bytes; tenant, status and purpose are checked like the `files` context. */
+export const createFakeFilesPort = (files: readonly { readonly file: StoredFile; readonly bytes: Uint8Array }[] = []): FilesPort => {
+  const find = (input: { tenantId: string; fileId: string; purpose: StoredFile["purpose"] }) => {
+    const entry = files.find(({ file }) => file.id === input.fileId && file.tenantId === input.tenantId);
+    if (entry === undefined) return { ok: false as const, error: "FILE_NOT_FOUND" as const };
+    if (entry.file.status !== "ready") return { ok: false as const, error: "FILE_NOT_READY" as const };
+    if (entry.file.purpose !== input.purpose) return { ok: false as const, error: "FILE_PURPOSE_MISMATCH" as const };
+    return { ok: true as const, data: entry };
+  };
+  return {
+    getReadyFile: (input) => {
+      const found = find(input);
+      return Promise.resolve(found.ok ? { ok: true, data: found.data.file } : found);
+    },
+    readFileBytes: (input) => Promise.resolve(find(input)),
+  };
+};
+
+/** Fixture pages by URL (the fake Firecrawl of `AI_MODE=fake`); an unknown URL rejects. */
+export const createFakeWebContentPort = (pages: readonly WebPage[] = []): WebContentPort & { readonly scraped: string[] } => {
+  const scraped: string[] = [];
+  return {
+    scraped,
+    scrape: ({ url }) => {
+      scraped.push(url);
+      const page = pages.find((candidate) => candidate.url === url);
+      return page === undefined ? Promise.reject(new Error(`no fixture page for ${url}`)) : Promise.resolve(page);
+    },
+  };
+};
+
+export type RecordingKnowledgeEvents = KnowledgeEventsPort & { readonly events: Parameters<KnowledgeEventsPort["documentIndexed"]>[0][] };
+
+export const createRecordingKnowledgeEvents = (): RecordingKnowledgeEvents => {
+  const events: Parameters<KnowledgeEventsPort["documentIndexed"]>[0][] = [];
+  return {
+    events,
+    documentIndexed: (event) => {
+      events.push(event);
+      return Promise.resolve();
+    },
+  };
+};
+
+const notWired = (name: string) => () => Promise.reject(new Error(`${name} is not faked in this test`));
+
 /** Every port faked; override any of them per test. */
 export const createFakeRuntimePorts = (overrides: Partial<AgentRuntimePorts> = {}): AgentRuntimePorts => ({
   access: createFakeAccessPort({}),
   audit: createFakeAuditPort(),
   approvals: createFakeApprovalPort(),
   usage: createFakeUsagePort(),
-  knowledge: { searchChunks: () => Promise.resolve([]) },
+  knowledge: { searchChunks: () => Promise.resolve([]), registerDocument: notWired("registerDocument"), replaceChunks: notWired("replaceChunks") },
+  files: createFakeFilesPort(),
+  webContent: createFakeWebContentPort(),
+  knowledgeEvents: createRecordingKnowledgeEvents(),
   connectors: { listActive: () => Promise.resolve([]) },
   secrets: { get: () => Promise.resolve(null) },
   settings: createFakeSettingsPort(),

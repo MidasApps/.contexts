@@ -81,6 +81,12 @@ export const createMastraGateway = (options: MastraGatewayOptions): AgentRuntime
         const run = await client.getWorkflow(input.workflowId).createRun(input.runId === undefined ? {} : { runId: input.runId });
         return { runId: run.runId, result: await run.startAsync({ inputData: { ...input.inputData } }) };
       }),
+    launchWorkflow: (input) =>
+      json(input.scope, async (client) => {
+        const run = await client.getWorkflow(input.workflowId).createRun(input.runId === undefined ? {} : { runId: input.runId });
+        await run.start({ inputData: { ...input.inputData } });
+        return { runId: run.runId };
+      }),
     resumeWorkflow: (input) =>
       json(input.scope, async (client) => {
         const run = await client.getWorkflow(input.workflowId).createRun({ runId: input.runId });

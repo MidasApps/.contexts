@@ -98,6 +98,8 @@ export type AgentRuntimeGateway = {
   readonly approveToolCall: (input: ToolCallDecisionInput) => Promise<GatewayResult<GatewayStream>>;
   readonly declineToolCall: (input: ToolCallDecisionInput & { readonly reason?: string }) => Promise<GatewayResult<GatewayStream>>;
   readonly startWorkflow: (input: WorkflowStartInput) => Promise<GatewayResult<{ readonly runId: string; readonly result: unknown }>>;
+  /** Starts a run without waiting for it (`202` routes such as `POST .../knowledge/sources`). */
+  readonly launchWorkflow: (input: WorkflowStartInput) => Promise<GatewayResult<{ readonly runId: string }>>;
   readonly resumeWorkflow: (input: WorkflowResumeInput) => Promise<GatewayResult<unknown>>;
   readonly streamWorkflow: (input: WorkflowStartInput) => Promise<GatewayResult<GatewayStream>>;
   readonly listThreadMessages: (input: ThreadInput) => Promise<GatewayResult<unknown>>;

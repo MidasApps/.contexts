@@ -869,6 +869,9 @@ importers:
 
   scripts:
     dependencies:
+      '@core/agents':
+        specifier: workspace:*
+        version: link:../packages/agents
       '@core/services':
         specifier: workspace:*
         version: link:../packages/services

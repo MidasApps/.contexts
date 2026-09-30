@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { CHUNKS_V1_DIMENSIONS } from "../../adapters/driven/drizzle-schema.ts";
 import type { ChunkMatch, KnowledgeRepository } from "../ports/knowledge-repository.ts";
 import { makeDeleteDocument } from "./delete-document.ts";
+import { makeGetDocument } from "./get-document.ts";
 import { makeListDocuments } from "./list-documents.ts";
 import { makeRegisterDocument } from "./register-document.ts";
 import { makeReplaceDocumentChunks } from "./replace-document-chunks.ts";
@@ -29,6 +30,10 @@ const fakeRepository = (matches: ChunkMatch[] = []) => {
     deleteDocument: () => {
       calls.push("deleteDocument");
       return Promise.resolve(false);
+    },
+    getDocument: () => {
+      calls.push("getDocument");
+      return Promise.resolve(null);
     },
     listDocuments: () => {
       calls.push("listDocuments");
@@ -113,5 +118,7 @@ describe("deleteDocument and listDocuments", () => {
     expect(calls).toEqual([]);
     expect(await makeDeleteDocument({ repository })({ tenantId: "TenantA", documentId: DOC_ID })).toEqual({ ok: false, error: { code: "DOCUMENT_NOT_FOUND" } });
     expect(await makeListDocuments({ repository })({ tenantId: "TenantA" })).toEqual({ ok: true, data: { documents: [], nextCursor: null } });
+    expect((await makeGetDocument({ repository })({ tenantId: "TenantA", documentId: "nope" })).ok).toBe(false);
+    expect(await makeGetDocument({ repository })({ tenantId: "TenantA", documentId: DOC_ID })).toEqual({ ok: false, error: { code: "DOCUMENT_NOT_FOUND" } });
   });
 });

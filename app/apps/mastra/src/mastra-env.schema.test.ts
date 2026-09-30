@@ -17,6 +17,7 @@ const PROD_ENV = {
   DATABASE_URL: "postgresql://svc@10.0.0.5:5432/app",
   GOOGLE_GENERATIVE_AI_API_KEY: "google-test-key",
   MCP_REQUEST_STATE_KEY: "k".repeat(32),
+  FILES_BUCKET: "acme-prod-files",
 };
 
 describe("loadMastraEnv", () => {
@@ -77,5 +78,11 @@ describe("loadMastraEnv", () => {
       /GOOGLE_GENERATIVE_AI_API_KEY/,
     );
     expect(loadMastraEnv(PROD_ENV)).toMatchObject({ AI_MODE: "real", MASTRA_STORAGE_INIT: "skip" });
+  });
+
+  it("defaults FILES_BUCKET to the demo project's default bucket in local and requires it outside local", () => {
+    expect(loadMastraEnv(LOCAL_ENV).FILES_BUCKET).toBe("demo-core.appspot.com");
+    expect(loadMastraEnv(PROD_ENV).FILES_BUCKET).toBe("acme-prod-files");
+    expect(() => loadMastraEnv({ ...PROD_ENV, FILES_BUCKET: undefined })).toThrow(/FILES_BUCKET \(REQUIRED\)/);
   });
 });

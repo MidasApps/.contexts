@@ -23,7 +23,13 @@ export { makeRequestUpload, UPLOAD_URL_TTL_MS, type RequestUpload, type RequestU
 export { makeGetFile, type GetFile } from "./application/use-cases/get-file.ts";
 export { makeCreateReadUrl, READ_URL_TTL_MS, type CreateReadUrl } from "./application/use-cases/create-read-url.ts";
 export { makeFinalizeUpload, SNIFF_BYTES, type FinalizedObject, type FinalizeOutcome, type FinalizeUpload } from "./application/use-cases/finalize-upload.ts";
-export { makeReadFileBytes, type ReadFileBytes, type ReadFileBytesError } from "./application/use-cases/read-file-bytes.ts";
+export {
+  type GetReadyFile,
+  makeGetReadyFile,
+  makeReadFileBytes,
+  type ReadFileBytes,
+  type ReadFileBytesError,
+} from "./application/use-cases/read-file-bytes.ts";
 export { createFirestoreFileRepository, FILES_COLLECTION } from "./adapters/driven/firestore-file-repository.ts";
 export { createGcsObjectStore, createGcsUrlSigner, filesBucketOf, type StorageBucket } from "./adapters/driven/gcs-signed-url.ts";
 export { createEmulatorUrlSigner, EmulatorSignerOutsideLocalError } from "./adapters/driven/emulator-signed-url.ts";

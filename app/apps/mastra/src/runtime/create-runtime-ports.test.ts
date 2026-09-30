@@ -5,7 +5,14 @@ import { createRuntimePorts } from "./create-runtime-ports.ts";
 import { KnowledgeSearchRejectedError } from "./knowledge-port-binding.ts";
 import { PortNotWiredError } from "./unwired-ports.ts";
 
-const ENV = { API_KEY_PREFIX: "core", DATABASE_URL: "postgres://nobody@127.0.0.1:1/none", AI_MODEL_EMBEDDING: "google/gemini-embedding-2" };
+const ENV = {
+  API_KEY_PREFIX: "core",
+  DATABASE_URL: "postgres://nobody@127.0.0.1:1/none",
+  AI_MODEL_EMBEDDING: "google/gemini-embedding-2",
+  APP_ENV: "local",
+  AI_MODE: "fake",
+  FILES_BUCKET: "demo-core.appspot.com",
+} as const;
 const TENANT = "Jd8sK2lPq0WnR5tYu3bV";
 const MEMBER = { type: "user", uid: "member-uid", mfa: false } as const;
 const ORG = { level: "organization", tenantId: TENANT } as const;
@@ -43,6 +50,7 @@ describe("createRuntimePorts (default bindings)", () => {
     await expect(bound.connectors.listActive({ tenantId: TENANT })).rejects.toBeInstanceOf(PortNotWiredError);
     await expect(bound.secrets.get("ref")).rejects.toBeInstanceOf(PortNotWiredError);
     await expect(bound.settings.getAgentSettings({ tenantId: TENANT })).rejects.toBeInstanceOf(PortNotWiredError);
+    await expect(bound.webContent.scrape({ url: "https://docs.example.com", tenantId: TENANT })).rejects.toBeInstanceOf(PortNotWiredError);
   });
 
   it("binds the semantic runner with no registered view, so every view is refused before the database", async () => {

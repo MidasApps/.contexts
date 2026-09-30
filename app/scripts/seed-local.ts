@@ -20,7 +20,7 @@ const main = async (): Promise<void> => {
   const auth = createAuthEmulatorAdmin({ origin: target.authEmulatorOrigin, projectId: target.projectId });
   print(`project ${target.projectId}, auth emulator ${target.authEmulatorOrigin}`);
   for (const step of LOCAL_SEED_STEPS) {
-    print(`${step.name}: ${await step.run({ target, auth })}`);
+    print(`${step.name}: ${await step.run({ target, auth, processEnv: process.env })}`);
   }
 };
 

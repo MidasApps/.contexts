@@ -73,6 +73,8 @@ export type KnowledgeRepository = {
   }) => Promise<readonly ChunkMatch[]>;
   /** Deletes a document of the tenant and, by cascade, its chunks. @returns whether it existed. */
   readonly deleteDocument: (input: { readonly tenantId: string; readonly documentId: string }) => Promise<boolean>;
+  /** One of the tenant's own documents (platform documents are not addressable); `null` when missing. */
+  readonly getDocument: (input: { readonly tenantId: string; readonly documentId: string }) => Promise<KnowledgeDocument | null>;
   /** The tenant's own documents, newest first (platform documents are not listed). */
   readonly listDocuments: (input: {
     readonly tenantId: string;

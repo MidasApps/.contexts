@@ -235,4 +235,20 @@ describe("createMastraGateway JSON calls", () => {
     expect(await client.deleteThread({ scope: SCOPE, agentId: "ping", threadId: SCOPE.conversationId ?? "" })).toEqual({ ok: true, data: null });
     for (const call of recorded) expect(call.headers.authorization).toBe("Bearer caller-id-token");
   });
+
+  it("launches a workflow run without waiting for its result", async () => {
+    routes.set("POST /api/workflows/knowledge-ingest/create-run", json(200, { runId: "run-2" }));
+    routes.set("POST /api/workflows/knowledge-ingest/start", json(200, { message: "Workflow run started" }));
+    const launched = await gateway().launchWorkflow({ scope: SCOPE, workflowId: "knowledge-ingest", inputData: { source: { kind: "url", url: "https://docs.example.com" } } });
+    expect(launched).toEqual({ ok: true, data: { runId: "run-2" } });
+    const start = recorded.find((call) => call.url.includes("/start"));
+    expect(start?.url).toContain("runId=run-2");
+    expect(start?.body).toMatchObject({ inputData: { source: { kind: "url" } } });
+    expect(JSON.stringify(start?.body)).not.toContain("requestContext");
+  });
+
+  it("maps an upstream 403 of a launch", async () => {
+    routes.set("POST /api/workflows/knowledge-ingest/create-run", json(403, { error: "forbidden" }));
+    expect(await gateway().launchWorkflow({ scope: SCOPE, workflowId: "knowledge-ingest", inputData: {} })).toMatchObject({ ok: false, error: { code: "FORBIDDEN", status: 403 } });
+  });
 });

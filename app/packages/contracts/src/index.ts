@@ -131,6 +131,15 @@ export {
 } from "./contracts/knowledge/knowledge-document.schema.ts";
 export { KnowledgeSourceContract, KnowledgeSourceSchema, type KnowledgeSource } from "./contracts/knowledge/knowledge-source.schema.ts";
 export {
+  addKnowledgeSourceEndpoint,
+  deleteKnowledgeDocumentEndpoint,
+  getKnowledgeDocumentEndpoint,
+  KNOWLEDGE_ENDPOINTS,
+  type KnowledgeIngestionRun,
+  KnowledgeIngestionRunSchema,
+  listKnowledgeDocumentsEndpoint,
+} from "./contracts/knowledge/endpoints.ts";
+export {
   AllowedHostSchema,
   ConnectorContract,
   ConnectorIdSchema,

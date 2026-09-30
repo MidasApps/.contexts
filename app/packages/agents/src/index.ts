@@ -22,6 +22,11 @@ export type {
   AuthorizeRequest,
   BudgetCheck,
   ConnectorsPort,
+  FileReadError,
+  FilesPort,
+  KnowledgeChunkInput,
+  KnowledgeDocumentInput,
+  KnowledgeEventsPort,
   KnowledgePort,
   NodeRef,
   RegionalSettings,
@@ -29,11 +34,14 @@ export type {
   SemanticQueryPort,
   SettingsPort,
   UsagePort,
+  WebContentPort,
+  WebPage,
 } from "./runtime/runtime-ports.ts";
 export {
   type AgentModels,
   type CreateModelProviderOptions,
   createModelProvider,
+  embeddingModelIdOf,
   FakeModeNotAllowedError,
   type ModelFactoryEnv,
   type TextModelRole,
@@ -47,7 +55,7 @@ export {
   type ProviderRegistry,
   type ProviderSettings,
 } from "./models/provider-registry.ts";
-export { createFakeEmbeddingModel, embedFakeText, FAKE_EMBEDDING_DIMENSIONS } from "./models/fake/fake-embedding-model.ts";
+export { createFakeEmbeddingModel, embedFakeText, FAKE_EMBEDDING_DIMENSIONS, FAKE_EMBEDDING_MODEL_ID } from "./models/fake/fake-embedding-model.ts";
 export { createFakeLanguageModel, type FakeLanguageModelOptions } from "./models/fake/fake-language-model.ts";
 export {
   createFakeScenarioRegistry,
@@ -165,3 +173,28 @@ export {
 export { composeAgentRuntime, type ComposeAgentRuntimeArgs, type RuntimeParts } from "./runtime/compose-agent-runtime.ts";
 export { PING_AGENT, PING_AGENT_ID } from "./agents/ping-agent.ts";
 export { createObservability, SPAN_CONTEXT_KEYS } from "./observability/create-observability.ts";
+// SP3 knowledge ingestion (Task 14).
+export { chunkDocument, type ChunkFormat, type ChunkOptions, DEFAULT_CHUNK_OVERLAP, DEFAULT_CHUNK_SIZE, type DocumentChunk, estimateTokens } from "./knowledge/chunk-document.ts";
+export { CITATION_MARKER_PATTERN, citationIdOf, contentHashOf, extractCitationIds } from "./knowledge/citation.ts";
+export { EMBED_BATCH_SIZE, EmbeddingDimensionError, embedChunks, EMBEDDING_VERSION } from "./knowledge/embed-chunks.ts";
+export { type ExtractedText, extractText, type ExtractTextError, type ExtractTextResult, htmlToText, type PdfParser } from "./knowledge/extract-text.ts";
+export { embedAndStoreChunks, indexDocumentText, type IndexOutcome, type KnowledgeIndexingDeps } from "./knowledge/index-document.ts";
+export {
+  createKnowledgeIngestWorkflow,
+  IngestTenantMismatchError,
+  KNOWLEDGE_INGEST_WORKFLOW_ID,
+  KNOWLEDGE_WRITE_PERMISSION,
+  KnowledgeIngestInputSchema,
+  type KnowledgeIngestResult,
+  KnowledgeIngestResultSchema,
+  type KnowledgeWorkflowDeps,
+} from "./knowledge/workflows/knowledge-ingest.workflow.ts";
+export {
+  CATALOG_NAMESPACE,
+  CATALOG_REINDEX_WORKFLOW_ID,
+  type CatalogReindexResult,
+  CatalogReindexResultSchema,
+  createCatalogReindexWorkflow,
+  renderContractDocument,
+} from "./knowledge/workflows/catalog-reindex.workflow.ts";
+export { KnowledgeUseCaseError, knowledgePortFromUseCases } from "./knowledge/knowledge-port-from-use-cases.ts";

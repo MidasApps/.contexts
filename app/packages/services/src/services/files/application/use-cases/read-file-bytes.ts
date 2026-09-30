@@ -12,6 +12,23 @@ export type ReadFileBytes = (input: {
   readonly purpose?: FilePurpose;
 }) => Promise<Result<{ readonly file: StoredFile; readonly bytes: Uint8Array }, ReadFileBytesError>>;
 
+export type GetReadyFile = (input: {
+  readonly tenantId: string;
+  readonly fileId: string;
+  readonly purpose?: FilePurpose;
+}) => Promise<Result<StoredFile, ReadFileBytesError>>;
+
+/** The record of a validated file for server-side readers; same checks as `readFileBytes`, no download. */
+export const makeGetReadyFile =
+  (deps: { readonly files: FileRepository }): GetReadyFile =>
+  async ({ tenantId, fileId, purpose }) => {
+    const file = await deps.files.get(fileId);
+    if (file?.tenantId !== tenantId) return err({ code: "FILE_NOT_FOUND" });
+    if (file.status !== "ready") return err({ code: "FILE_NOT_READY" });
+    if (purpose !== undefined && file.purpose !== purpose) return err({ code: "FILE_PURPOSE_MISMATCH" });
+    return ok(file);
+  };
+
 /**
  * Bytes of a validated file for server-side readers (knowledge ingestion, SP4
  * multimodal chat). A file of another tenant answers like a missing one; only
@@ -19,10 +36,8 @@ export type ReadFileBytes = (input: {
  */
 export const makeReadFileBytes =
   (deps: { readonly files: FileRepository; readonly objects: FileObjectStore }): ReadFileBytes =>
-  async ({ tenantId, fileId, purpose }) => {
-    const file = await deps.files.get(fileId);
-    if (file?.tenantId !== tenantId) return err({ code: "FILE_NOT_FOUND" });
-    if (file.status !== "ready") return err({ code: "FILE_NOT_READY" });
-    if (purpose !== undefined && file.purpose !== purpose) return err({ code: "FILE_PURPOSE_MISMATCH" });
-    return ok({ file, bytes: await deps.objects.readAll(file.storagePath) });
+  async (input) => {
+    const found = await makeGetReadyFile(deps)(input);
+    if (!found.ok) return found;
+    return ok({ file: found.data, bytes: await deps.objects.readAll(found.data.storagePath) });
   };

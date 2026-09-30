@@ -1,5 +1,5 @@
 import { AgentEnvSchema, resolveAgentEnv } from "@core/agents";
-import { loadServicesEnvWith } from "@core/services";
+import { InvalidEnvError, loadServicesEnvWith } from "@core/services";
 import { z } from "zod";
 
 /** Cloud Run caps a request at 60 min; a longer server timeout would never apply. */
@@ -32,6 +32,9 @@ export const MastraOnlyEnvSchema = z.object({
   // allowed there); outside local CORS is off and this list is ignored.
   // prefault: the default is parsed like any input (split, then validated).
   MASTRA_CORS_ORIGINS: OriginListSchema.prefault(DEFAULT_LOCAL_CORS_ORIGINS),
+  // Cloud Storage bucket of uploads read by knowledge ingestion (SP3 files context);
+  // local defaults to the emulator's default bucket, required outside local.
+  FILES_BUCKET: z.string().regex(/^[a-z0-9][a-z0-9._-]{1,220}[a-z0-9]$/, { error: "expected a bucket name" }).optional(),
 });
 
 /** Mastra server variables plus the agent runtime env (spec §15, decision 0021). */
@@ -43,7 +46,11 @@ const MastraEnvSchema = MastraOnlyEnvSchema.extend(AgentEnvSchema.shape);
  * provider keys in real mode, remote-only requirements).
  * @throws {InvalidEnvError} naming each invalid variable, never its value.
  */
-export const loadMastraEnv = (source: Record<string, string | undefined>) =>
-  resolveAgentEnv(loadServicesEnvWith(MastraEnvSchema, source));
+export const loadMastraEnv = (source: Record<string, string | undefined>) => {
+  const env = resolveAgentEnv(loadServicesEnvWith(MastraEnvSchema, source));
+  if (env.FILES_BUCKET !== undefined) return { ...env, FILES_BUCKET: env.FILES_BUCKET };
+  if (env.APP_ENV !== "local") throw new InvalidEnvError([{ field: "FILES_BUCKET", issue: "REQUIRED" }]);
+  return { ...env, FILES_BUCKET: `${env.FIREBASE_PROJECT_ID}.appspot.com` };
+};
 
 export type MastraEnv = ReturnType<typeof loadMastraEnv>;

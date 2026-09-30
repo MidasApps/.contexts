@@ -27,6 +27,7 @@ describe("configureMastraProcessLogger", () => {
       DATABASE_URL: "postgresql://svc@10.0.0.5:5432/app",
       GOOGLE_GENERATIVE_AI_API_KEY: "google-test-key",
       MCP_REQUEST_STATE_KEY: "k".repeat(32),
+      FILES_BUCKET: "acme-staging-files",
     });
 
     configureMastraProcessLogger(env);

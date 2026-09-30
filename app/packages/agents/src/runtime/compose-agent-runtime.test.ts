@@ -56,7 +56,8 @@ describe("composeAgentRuntime", () => {
     expect(runtime.auth).toBeInstanceOf(FirebaseMastraAuth);
     expect(runtime.middleware.map((entry) => entry.path)).toEqual(["/api/*", "/api/*"]);
     expect(runtime.tools.ids()).toEqual(["catalog.listEntities", "catalog.describeEntity", "sql.querySemanticSql"]);
-    expect(runtime).toMatchObject({ workflows: {}, scorers: {}, mcpServers: {}, vectors: {}, apiRoutes: [] });
+    expect(runtime).toMatchObject({ scorers: {}, mcpServers: {}, vectors: {}, apiRoutes: [] });
+    expect(Object.keys(runtime.workflows).sort()).toEqual(["catalog-reindex", "knowledge-ingest"]);
   });
 
   it("registers module tools and agents", () => {

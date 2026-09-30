@@ -36,6 +36,13 @@
       "when": 1790748221367,
       "tag": "0004_knowledge_runtime_role",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1790752402536,
+      "tag": "0005_knowledge_web_runtime_role",
+      "breakpoints": true
     }
   ]
 }

@@ -11,7 +11,7 @@ import type { DetectContentType, FileEventPublisher, FileObjectStore, FileReposi
 import { type CreateReadUrl, makeCreateReadUrl } from "./application/use-cases/create-read-url.ts";
 import { type FinalizeUpload, makeFinalizeUpload } from "./application/use-cases/finalize-upload.ts";
 import { type GetFile, makeGetFile } from "./application/use-cases/get-file.ts";
-import { makeReadFileBytes, type ReadFileBytes } from "./application/use-cases/read-file-bytes.ts";
+import { type GetReadyFile, makeGetReadyFile, makeReadFileBytes, type ReadFileBytes } from "./application/use-cases/read-file-bytes.ts";
 import { makeRequestUpload, type RequestUpload } from "./application/use-cases/request-upload.ts";
 
 export type FilesServices = {
@@ -20,6 +20,7 @@ export type FilesServices = {
   readonly createReadUrl: CreateReadUrl;
   readonly finalizeUpload: FinalizeUpload;
   readonly readFileBytes: ReadFileBytes;
+  readonly getReadyFile: GetReadyFile;
 };
 
 export type FilesAdapters = {
@@ -43,6 +44,7 @@ export const createFilesServices = (adapters: FilesAdapters): FilesServices => {
     createReadUrl: makeCreateReadUrl({ files, signer, clock }),
     finalizeUpload: makeFinalizeUpload({ files, objects, detect, events: adapters.events, clock, logger: adapters.logger }),
     readFileBytes: makeReadFileBytes({ files, objects }),
+    getReadyFile: makeGetReadyFile({ files }),
   };
 };
 

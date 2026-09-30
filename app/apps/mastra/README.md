@@ -50,6 +50,13 @@ pnpm -F @core/mastra db:init --confirm-env <APP_ENV>    # same role: storage.ini
 # deploy the image with MASTRA_STORAGE_INIT=skip
 ```
 
+The knowledge base (`ai.documents`, `ai.chunks_v1`, decision 0022) is reached only as
+`knowledge_runtime` (row level security); `mastra_runtime` (0004) and `web_runtime`
+(0005, grant it to the web service's database user) may `SET ROLE` to it. Mastra
+serves the `knowledge-ingest` and `catalog-reindex` workflows; `catalog-reindex`
+refuses HTTP runs and is run in-process (`pnpm seed:local`, deploy scripts).
+`FILES_BUCKET` (required outside local) is the bucket ingestion reads uploads from.
+
 Both steps are idempotent; locally they run without `--confirm-env`
 (`pnpm db:migrate && pnpm -F @core/mastra db:init`). `db:init` loads
 `app/.env.local` like `mastra dev` but reads only the services env
