@@ -1,4 +1,4 @@
-import type { AccessServices } from "../../access/composition.ts";
+import type { AccessCore, AccessServices } from "../../access/composition.ts";
 import type { RandomBytes } from "../../access/domain/invitation-token.ts";
 import type { AuditWriter } from "../../audit/application/use-cases/record-audit.ts";
 import type { Clock } from "../../shared/clock/clock.ts";
@@ -15,6 +15,8 @@ export type DeviceDeps = {
   readonly activations: DeviceActivationRepository;
   /** Grant checks and grant writes of the access context (the only one that decides permissions). */
   readonly access: Pick<AccessServices, "checkGrantable" | "prepareGrant" | "prepareRevokeAllGrants">;
+  /** Fresh request scopes for checks without a caller (redeem re-checks the creator, decision 0030 A2). */
+  readonly accessCore: Pick<AccessCore, "forRequest">;
   readonly customTokens: CustomTokenIssuer;
   readonly authUsers: AuthUserAdmin;
   readonly audit: AuditWriter;

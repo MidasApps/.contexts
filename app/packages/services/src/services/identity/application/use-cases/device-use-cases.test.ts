@@ -1,6 +1,6 @@
 import { OrganizationIdSchema, type CreateDeviceActivationInput } from "@core/contracts";
 import { describe, expect, it } from "vitest";
-import { nodes } from "../../../access/application/use-cases/access-write.fixture.ts";
+import { nodes, user } from "../../../access/application/use-cases/access-write.fixture.ts";
 import { buildDeviceWorld } from "./device.fixture.ts";
 
 const tenantId = OrganizationIdSchema.parse("org-a");
@@ -42,6 +42,18 @@ describe("device activations", () => {
     expect(world.writes.allMemberships().filter((grant) => grant.principalId === deviceId)).toMatchObject([{ principalType: "device", node: nodes.p1, deletedAt: null }]);
     expect(world.auth.accounts()).toEqual([deviceId]);
     expect(await world.devices.redeemDeviceActivation({ code, requestId: "r" })).toMatchObject({ ok: false, error: { code: "UNAUTHORIZED" } });
+  });
+
+  it("refuses a code whose creating admin can no longer grant its roles at the node (decision 0030 A2)", async () => {
+    const world = await buildDeviceWorld();
+    const code = await world.activationCode();
+    const adminGrant = world.writes.allMemberships().find((grant) => grant.principalId === "admin" && grant.deletedAt === null);
+    if (adminGrant === undefined) throw new Error("admin grant missing");
+    const revoked = await world.services.revokeMembership({ actor: user("owner"), access: world.access(), membershipId: adminGrant.id, requestId: "r" });
+    expect(revoked.ok).toBe(true);
+    expect(await world.devices.redeemDeviceActivation({ code, requestId: "r" })).toMatchObject({ ok: false, error: { code: "UNAUTHORIZED", reason: "CREATOR_CANNOT_GRANT" } });
+    expect(world.writes.allMemberships().filter((grant) => grant.principalType === "device")).toEqual([]);
+    expect(world.auth.accounts()).toEqual([]);
   });
 
   it("refuses an expired code and an unknown or malformed one", async () => {

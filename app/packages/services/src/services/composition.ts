@@ -240,6 +240,7 @@ export const createCoreServer = (args: CoreServerArgs): CoreServer => {
   const devices = createFirestoreDeviceServices({
     firestore,
     access: access.services,
+    accessCore: access.core,
     customTokens: sessionVertical.customTokens,
     authUsers: sessionVertical.authUsers,
     audit,

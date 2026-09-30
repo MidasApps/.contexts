@@ -79,3 +79,11 @@ Each item below is a policy choice; the code comments point here.
   viewer, **device**); no other core permission does. Modules still give `device` their own permissions. A device
   granted at a project reads its context there (authorization inherits downwards), never the organization's other
   projects.
+- **A2 — 2026-09-30 (same review): redeeming a device activation re-checks its creator.** Like an invitation, an
+  activation must not outlive its creator's right to grant it. Inside the redeem transaction, after re-reading the
+  activation, `checkGrantable` runs for the creator (`core.device.create` at the activation's node, custom roles live,
+  roles within the creator's current permissions) on a fresh request scope, so every transaction attempt re-reads
+  the grants. A denial refuses the code with the same `401` (logged reason `CREATOR_CANNOT_GRANT`); a reader error
+  aborts the transaction (fail-closed, `500`). `authorize()` reads are not transactional reads, so a demotion that
+  commits while the redeem transaction runs may still let that one redeem through; the window is one transaction,
+  and the demoted admin's pending codes stop working afterwards.

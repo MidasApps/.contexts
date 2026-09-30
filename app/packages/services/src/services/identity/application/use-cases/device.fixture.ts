@@ -32,6 +32,7 @@ export const buildDeviceWorld = async () => {
     devices: deviceRows,
     activations,
     access,
+    accessCore: world.core,
     customTokens: auth.customTokens,
     authUsers: auth.authUsers,
     audit,
