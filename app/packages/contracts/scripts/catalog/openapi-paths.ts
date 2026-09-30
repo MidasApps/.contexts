@@ -79,7 +79,8 @@ const buildParameters = (endpoint: EndpointDefinition, contractIds: ReadonlySet<
 const collectErrorCodes = (endpoint: EndpointDefinition): Map<number, string[]> => {
   const codes = new Map<number, Set<string>>();
   const add = (status: number, code: string) => codes.set(status, (codes.get(status) ?? new Set()).add(code));
-  if (endpoint.params || endpoint.query || endpoint.body) add(400, "VALIDATION_FAILED");
+  // The Idempotency-Key header is validated too (ULID), so it also answers 400.
+  if (endpoint.params || endpoint.query || endpoint.body || endpoint.idempotency) add(400, "VALIDATION_FAILED");
   if (endpoint.auth !== "none") add(401, "UNAUTHORIZED");
   if (endpoint.idempotency) add(409, "IDEMPOTENCY_KEY_REUSED");
   if (endpoint.rateLimit) add(429, "RATE_LIMITED");
@@ -91,15 +92,34 @@ const collectErrorCodes = (endpoint: EndpointDefinition): Map<number, string[]> 
 
 const jsonContent = (schema: JsonRecord): JsonRecord => ({ [JSON_CONTENT]: { schema } });
 
+const header = (description: string, schema: JsonRecord): JsonRecord => ({ description, schema });
+
+/** Response headers of contracts/api.md §11.2 that a status always carries. */
+const RESPONSE_HEADERS: Readonly<Record<string, JsonRecord>> = {
+  201: { Location: header("URL of the created resource.", { type: "string" }) },
+  429: {
+    "Retry-After": header("Seconds to wait before retrying.", { type: "integer", minimum: 0 }),
+    "X-RateLimit-Limit": header("Requests allowed in the window.", { type: "integer", minimum: 0 }),
+    "X-RateLimit-Remaining": header("Requests left in the window.", { type: "integer", minimum: 0 }),
+    "X-RateLimit-Reset": header("Unix time (seconds) when the window resets.", { type: "integer", minimum: 0 }),
+  },
+};
+
+const withHeaders = (status: string, response: JsonRecord): JsonRecord => {
+  const headers = RESPONSE_HEADERS[status];
+  return headers === undefined ? response : { ...response, headers };
+};
+
 const buildResponses = (endpoint: EndpointDefinition, contractIds: ReadonlySet<string>): JsonRecord => {
   const success = Object.entries(endpoint.responses).map(([status, schema]): [string, JsonRecord] => {
     if (schema === null || schema === undefined) return [status, { description: "No Content" }];
-    return [status, { description: SUCCESS_TEXT[status] ?? "Success", content: jsonContent(toOperationSchema(schema, "output", contractIds)) }];
+    const content = jsonContent(toOperationSchema(schema, "output", contractIds));
+    return [status, withHeaders(status, { description: SUCCESS_TEXT[status] ?? "Success", content })];
   });
   const errorRef = { $ref: componentRef(ErrorEnvelopeContract.id) };
   const failures = [...collectErrorCodes(endpoint)].map(([status, codes]): [string, JsonRecord] => [
     String(status),
-    { description: codes.join(", "), "x-error-codes": codes, content: jsonContent(errorRef) },
+    withHeaders(String(status), { description: codes.join(", "), "x-error-codes": codes, content: jsonContent(errorRef) }),
   ]);
   return Object.fromEntries([...success, ...failures]);
 };

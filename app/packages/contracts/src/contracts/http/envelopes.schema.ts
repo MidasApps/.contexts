@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { defineContract } from "../contract.ts";
+import { inspectSchema } from "../field-meta-rules.ts";
 
 /** Stable error code, SCREAMING_SNAKE (contracts/api.md §6.1); clients program against it. */
 export const ErrorCodeSchema = z.string().regex(/^[A-Z][A-Z0-9]*(?:_[A-Z0-9]+)*$/, {
@@ -49,17 +50,17 @@ export const ErrorEnvelopeContract = defineContract(ErrorEnvelopeSchema, {
 
 /** `meta.page` of a cursor-paginated list (contracts/api.md §9.1). */
 export const PageMetaSchema = z.object({
-  cursor: z.string().min(1).nullable().meta({ description: "Opaque cursor of the next page; null at the end." }),
-  hasMore: z.boolean().meta({ description: "Whether another page exists." }),
-  limit: z.int().min(1).max(100).meta({ description: "Page size used for this response." }),
+  cursor: z.string().min(1).nullable().meta(none("Opaque cursor of the next page; null at the end.")),
+  hasMore: z.boolean().meta(none("Whether another page exists.")),
+  limit: z.int().min(1).max(100).meta(none("Page size used for this response.")),
 });
 export type PageMeta = z.infer<typeof PageMetaSchema>;
 
 /** Query of every list endpoint: `?cursor=…&limit=20` (max 100). Extend it with filters. */
 export const PageQuerySchema = z.object({
-  cursor: z.string().min(1).optional().meta({ description: "Cursor returned by the previous page." }),
+  cursor: z.string().min(1).optional().meta(none("Cursor returned by the previous page.")),
   // Query strings are text: coerce, then enforce an integer in range.
-  limit: z.coerce.number().int().min(1).max(100).default(20).meta({ description: "Page size, 1-100 (default 20)." }),
+  limit: z.coerce.number().int().min(1).max(100).default(20).meta(none("Page size, 1-100 (default 20).")),
 });
 export type PageQuery = z.infer<typeof PageQuerySchema>;
 
@@ -77,6 +78,7 @@ export const dataEnvelope = <Schema extends z.ZodType>(schema: Schema) =>
  */
 export const listEnvelope = <Schema extends z.ZodType>(schema: Schema) =>
   z.object({
-    data: z.array(schema).meta({ description: "The items of this page." }),
-    meta: z.object({ page: PageMetaSchema.meta({ description: "Pagination state." }) }).meta({ description: "Response metadata." }),
+    // The list is as personal as its items (decision 0005: a field covers what it nests).
+    data: z.array(schema).meta({ description: "The items of this page.", pii: inspectSchema(schema).maxPii }),
+    meta: z.object({ page: PageMetaSchema.meta(none("Pagination state.")) }).meta(none("Response metadata.")),
   });

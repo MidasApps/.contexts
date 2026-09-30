@@ -1,11 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
+import { inspectSchema } from "../field-meta-rules.ts";
 import {
   dataEnvelope,
   ErrorCodeSchema,
   ErrorEnvelopeContract,
   ErrorEnvelopeSchema,
   listEnvelope,
+  PageMetaSchema,
   PageQuerySchema,
 } from "./envelopes.schema.ts";
 
@@ -84,5 +86,14 @@ describe("PageQuerySchema", () => {
 
   it("rejects an empty cursor", () => {
     expect(PageQuerySchema.safeParse({ cursor: "" }).success).toBe(false);
+  });
+});
+
+describe("field meta of the shared envelopes", () => {
+  it("gives every field of PageMeta, PageQuery and listEnvelope a description and pii", () => {
+    const Item = z.object({ name: z.string().meta({ description: "Name.", pii: "none" }) });
+    for (const schema of [PageMetaSchema, PageQuerySchema, listEnvelope(Item)]) {
+      expect(inspectSchema(schema)).toEqual({ problems: [], maxPii: "none" });
+    }
   });
 });

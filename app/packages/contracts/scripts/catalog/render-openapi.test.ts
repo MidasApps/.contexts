@@ -59,12 +59,22 @@ const redeem = defineEndpoint({
   summary: "Redeems a code.",
 });
 
+const syncClaims = defineEndpoint({
+  id: "identity.syncClaims",
+  method: "POST",
+  path: "/v1/me/claims/sync",
+  auth: "user",
+  responses: { 204: null },
+  idempotency: "optional",
+  summary: "Syncs claims.",
+});
+
 const buildFixture = (contracts = [ProjectContract, ErrorEnvelopeContract]) => {
   const registered = createContractRegistry(contracts).listContracts();
   return buildOpenApiDocument({
     schemas: buildJsonSchemas(registered),
     contracts: registered,
-    endpoints: [listProjects, createProject, redeem],
+    endpoints: [listProjects, createProject, redeem, syncClaims],
   });
 };
 
@@ -73,7 +83,7 @@ type Operation = {
   security: unknown[];
   parameters?: { name: string; in: string; required: boolean; schema: JsonRecord; description?: string }[];
   requestBody?: { required: boolean; content: Record<string, { schema: JsonRecord }> };
-  responses: Record<string, { description: string; content?: Record<string, { schema: JsonRecord }> }>;
+  responses: Record<string, { description: string; headers?: Record<string, JsonRecord>; content?: Record<string, { schema: JsonRecord }> }>;
 };
 
 const operation = (document: JsonRecord, path: string, method: string): Operation => {
@@ -91,6 +101,7 @@ describe("buildOpenApiDocument", () => {
     const document = buildFixture();
     expect(Object.keys(document["paths"] as JsonRecord)).toEqual([
       "/v1/device-activations/redeem",
+      "/v1/me/claims/sync",
       "/v1/organizations/{organizationId}/projects",
     ]);
     expect(operation(document, "/v1/organizations/{organizationId}/projects", "get").operationId).toBe("tenancy.listProjects");
@@ -129,6 +140,23 @@ describe("buildOpenApiDocument", () => {
     expect(Object.keys(create.responses)).toEqual(["201", "400", "401", "403", "409", "429", "500"]);
     expect(create.responses["403"]?.description).toBe("ESCALATION_FORBIDDEN, FORBIDDEN");
     expect(jsonSchemaOf(create.responses["403"])).toEqual({ $ref: "#/components/schemas/http.ErrorEnvelope" });
+  });
+
+  it("answers 400 VALIDATION_FAILED for an Idempotency-Key even without params or body", () => {
+    const sync = operation(buildFixture(), "/v1/me/claims/sync", "post");
+    expect(sync.responses["400"]?.description).toBe("VALIDATION_FAILED");
+  });
+
+  it("documents Location on 201 and the rate limit headers on 429 (api.md §11.2)", () => {
+    const create = operation(buildFixture(), "/v1/organizations/{organizationId}/projects", "post");
+    expect(Object.keys(create.responses["201"]?.headers ?? {})).toEqual(["Location"]);
+    expect(Object.keys(create.responses["429"]?.headers ?? {})).toEqual([
+      "Retry-After",
+      "X-RateLimit-Limit",
+      "X-RateLimit-Remaining",
+      "X-RateLimit-Reset",
+    ]);
+    expect(create.responses["400"]?.headers).toBeUndefined();
   });
 
   it("marks public endpoints without security and 204 without content", () => {
