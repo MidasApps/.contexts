@@ -9,6 +9,8 @@ Plan: `docs/plans/2026-09-29-sp4-chat.md`. Branch `feat/agentic-app-core-sp0`. D
 | 0 | `29751d9` | `docs(chat): record chat decisions` |
 | 1 | `dc881da` | `docs(chat): record durable chat stream spike` |
 | 2 | `c1e4f37` | `feat(agents): add durable chat routes for the ai sdk ui stream` |
+| 2 (fix) | `9ed2980` | `fix(agents): end chat observe at a pending approval` |
+| Report | `b408392` | `docs(chat): report sp4 tasks 0 to 2` |
 
 I built them in the scratch worktree `wt-sp4-t0`, starting from `4cec94e`. I rebased them onto
 the SP3 commit `9331591` (`feat(agents): expose core mcp server through v1`), then replayed them
@@ -199,3 +201,22 @@ emulators (same scratch config) → mastra 2 files, 12 passed (with the SP3 MCP 
 8. **`/v1` must still audit approval decisions (Task 5).** Mastra runs the tool pipeline after
    an approval, and that pipeline audits `AGENT_TOOL_EXECUTED`. The approve and decline decision
    itself is audited only by `/v1`.
+9. **Fixed after review (`9ed2980`): observe no longer hangs on a pending approval.**
+   - **The bug.** The run state was set only when the `POST` stream ended. When a client
+     disconnected before the approval request, the run stayed `running`. Observe then replayed up
+     to the approval and waited for ever.
+   - **The fix.** Observe ends its stream after the approval and its preview, and marks the run
+     `suspended`. The stream tap reports states as chunks pass. Observe answers 204 once the run
+     has left the durable run registry. It was replayed on top of `fa30169`.
+   - **Tests.** A new unit test covers the case: it timed out on `c1e4f37` (red) and passes now.
+   - **Verification.** Agents: 53 files, 436 passed. Mastra: typecheck and tests clean. Mastra
+     emulators: 12 passed.
+10. **The chat body cap comes after the middleware reads the body.** The context middleware runs
+    `withServerTracingOptions` on every JSON `POST` under `/chat/*`, and that call parses the
+    whole body. The route's 140 MiB cap therefore applies only after the middleware has buffered
+    it. `/v1` is the trust boundary (Bearer, strict schema, ≤ 10 attachments), so this is a
+    defense-in-depth gap only. Add a `content-length` check in the middleware for `/chat/*`
+    later.
+11. **The approval preview is authorized without an agent ceiling** (`agentId: ""`), so it is
+    checked against the caller's permissions only. It reads data and runs nothing. The call
+    itself is still capped by the action agent's ceiling when it runs.
