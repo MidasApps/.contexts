@@ -29,7 +29,7 @@ export {
 } from "./services/shared/http/cors.ts";
 export { type ErrorDetail, type ErrorEnvelope, errorResponse } from "./services/shared/http/error-envelope.ts";
 export { type RouteContext, type RouteHandler, withRouteBoundary } from "./services/shared/http/route-boundary.ts";
-export { configureProcessLogger, readProcessLogContext } from "./services/shared/observability/process-logger.ts";
+export { configureProcessLogger, processLogger, readProcessLogContext } from "./services/shared/observability/process-logger.ts";
 export {
   REQUEST_ID_HEADER,
   resolveRequestId,
@@ -169,3 +169,27 @@ export {
 export { createFirestoreIdempotencyStore, IDEMPOTENCY_RECORDS_COLLECTION } from "./services/shared/idempotency/firestore-idempotency-store.ts";
 export { createInMemoryIdempotencyStore } from "./services/shared/idempotency/in-memory-idempotency-store.ts";
 export { canonicalJson, hashRequest } from "./services/shared/idempotency/request-hash.ts";
+// SP1 /v1 pipeline and principal resolution (Task 8).
+export {
+  createFakeTokenVerifier,
+  createFirebaseTokenVerifier,
+  isApiKeyCredential,
+  makeResolvePrincipal,
+  makeVerifyBearer,
+  mapTokenToPrincipal,
+  parseBearer,
+  refuseAllApiKeys,
+  requiresRevocationCheck,
+  type ApiKeyAuthenticator,
+  type FakeTokenVerifier,
+  type ResolvePrincipal,
+  type ResolvePrincipalDeps,
+  type TokenVerifier,
+  type VerifiedToken,
+  type VerifyBearer,
+} from "./services/identity/index.ts";
+export { operationName, withApiRoute, type ApiRouteDeps } from "./services/shared/http/api-route.ts";
+export type { ApiHandler, ApiHandlerContext, EndpointPrincipal } from "./services/shared/http/api-handler-context.ts";
+export { apiError, dataResponse, type DomainErrorMapping, mapDomainError, noContentResponse } from "./services/shared/http/api-errors.ts";
+export { matchPathParams } from "./services/shared/http/path-params.ts";
+export { clientIpOf } from "./services/shared/http/client-ip.ts";
