@@ -6,7 +6,7 @@ import {
   type RulesTestContext,
   type RulesTestEnvironment,
 } from "@firebase/rules-unit-testing";
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 // Runs inside `firebase emulators:exec`, which exports the emulator hosts;
 // rules-unit-testing discovers them from FIRESTORE_EMULATOR_HOST and
@@ -26,20 +26,17 @@ beforeAll(async () => {
     firestore: { rules: readRules("firestore.rules") },
     storage: { rules: readRules("storage.rules") },
   });
-});
-
-afterAll(async () => {
-  await testEnv.cleanup();
-});
-
-beforeEach(async () => {
-  await testEnv.clearFirestore();
-  await testEnv.clearStorage();
-  // Seed with rules disabled so reads target data that actually exists.
+  // Seed with rules disabled so reads target data that actually exists. No clear: other
+  // packages' emulator tests (the Storage trigger of @core/functions) run in parallel on the
+  // same emulators, and every write under test is denied, so the seed never changes.
   await testEnv.withSecurityRulesDisabled(async (admin) => {
     await admin.firestore().doc(SEEDED_DOC).set({ tenantId: "org-1", name: "Org 1" });
     await admin.storage().ref(SEEDED_OBJECT).putString("seed");
   });
+});
+
+afterAll(async () => {
+  await testEnv.cleanup();
 });
 
 const contexts: Array<[string, () => RulesTestContext]> = [

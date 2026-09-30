@@ -1,12 +1,101 @@
 rules_version = '2';
 
-// Deny by default: clients get no direct access until a collection gets its own
-// match block with tenant checks (contracts/firebase-firestore.md §7, §19).
-// Server code uses the Admin SDK, which bypasses these rules.
+// Defense in depth for direct client reads (SP1 spec §5.5, decision 0006 §5).
+// - Clients never write: every mutation goes through `/v1` (Admin SDK, which bypasses these rules).
+// - Reads are allowed only for the caller's own profile, the caller's access projection of the
+//   active tenant (`token.tenantId`), and the organization, projects and units of that tenant that
+//   the projection makes visible. One `get()` per evaluation: the access doc.
+// - Impersonated tokens (`imp` claim) read nothing directly: impersonation is read-only, time-boxed
+//   and audited per request, which only `/v1` enforces (SP1 spec §6.6).
+// - Rules are not filters: client queries must constrain `tenantId == token.tenantId` and
+//   `deletedAt == null`; project and unit queries of non-org-wide members fetch by id.
+// - Known limit: a suspended organization stays readable by its members here (the status needs a
+//   second `get()`); `/v1` denies it (`ORGANIZATION_SUSPENDED`). Project deletes cascade to their
+//   units (decision 0030 §3), so no parent check is needed for units.
+// Helpers below are the extension point for SP3–SP5 realtime reads.
 service cloud.firestore {
   match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isImpersonated() {
+      return request.auth.token.get('imp', null) != null;
+    }
+
+    // Signed in, not impersonated, with a string `tenantId` claim (the active organization).
+    function hasActiveTenant() {
+      return isSignedIn() && !isImpersonated() && request.auth.token.get('tenantId', null) is string;
+    }
+
+    function activeTenant() {
+      return request.auth.token.tenantId;
+    }
+
+    function accessPath() {
+      return /databases/$(database)/documents/access/$(activeTenant() + '_' + request.auth.uid);
+    }
+
+    // The caller's access projection of the active tenant (`access/{tenantId}_{uid}`).
+    function accessDoc() {
+      return get(accessPath()).data;
+    }
+
+    // Member of tenant `t`: `t` is the active tenant and its access projection exists, not revoked.
+    function isMember(t) {
+      return hasActiveTenant() && t == activeTenant() && exists(accessPath()) && accessDoc().isRevoked == false;
+    }
+
+    function notDeleted() {
+      return resource.data.get('deletedAt', null) == null;
+    }
+
+    function inActiveTenant() {
+      return hasActiveTenant() && resource.data.tenantId == activeTenant();
+    }
+
+    function canSeeProject() {
+      let access = accessDoc();
+      return access.orgWide == true || resource.id in access.visibleProjectIds;
+    }
+
+    function canSeeUnit() {
+      let access = accessDoc();
+      return access.orgWide == true
+        || resource.data.projectId in access.projectIds
+        || resource.data.ancestorIds.concat([resource.id]).hasAny(access.unitIds);
+    }
+
+    // Deny by default: a collection without its own match block is server-only
+    // (contracts/firebase-firestore.md §7, §19).
     match /{document=**} {
       allow read, write: if false;
+    }
+
+    match /users/{uid} {
+      allow read: if isSignedIn() && !isImpersonated() && request.auth.uid == uid;
+      allow write: if false;
+    }
+
+    match /access/{accessId} {
+      allow read: if hasActiveTenant() && accessId == activeTenant() + '_' + request.auth.uid;
+      allow write: if false;
+    }
+
+    match /organizations/{orgId} {
+      allow read: if isMember(orgId) && notDeleted();
+      allow write: if false;
+    }
+
+    match /projects/{projectId} {
+      allow read: if inActiveTenant() && notDeleted() && isMember(resource.data.tenantId) && canSeeProject();
+      allow write: if false;
+    }
+
+    match /units/{unitId} {
+      allow read: if inActiveTenant() && notDeleted() && isMember(resource.data.tenantId) && canSeeUnit();
+      allow write: if false;
     }
 
     // Uploaded file records (SP3 files context): written by the Admin SDK only; clients
