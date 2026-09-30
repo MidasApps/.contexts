@@ -144,7 +144,9 @@ do not import `client`; `agents` reach `services` only through use cases;
 
 - App decisions: `docs/decisions/` (0001 OpenAPI generation, 0002 process log
   context, 0003 public liveness endpoint, 0004 Functions env files, 0005 contract
-  pii semantics).
+  pii semantics, 0006 tenancy and access model, 0007 authentication sessions,
+  0008 API keys and device activation, 0009 rate limiting and idempotency store,
+  0010 dependency audit advisories).
 - Framework ADRs: `../.contexts/engineering/decisions/`.
 - Design spec: `../docs/superpowers/specs/2026-09-29-agentic-app-core-design.md`.
 - SP0 plan, reports and follow-ups: `../docs/plans/2026-09-29-sp0-app-foundation/`.
