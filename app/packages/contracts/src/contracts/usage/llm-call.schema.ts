@@ -46,7 +46,7 @@ export const LlmCallContract = defineContract(LlmCallSchema, {
       inputTokens: 1200,
       outputTokens: 350,
       cachedTokens: 0,
-      costMicroUsd: 1500,
+      costMicroUsd: 4950,
       latencyMs: 820,
       finishReason: "stop",
       occurredAt: "2026-09-29T14:30:00.000Z",

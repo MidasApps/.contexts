@@ -1,3 +1,4 @@
+import { LlmCallContract } from "@core/contracts";
 import { describe, expect, it } from "vitest";
 import { estimateCostMicroUsd, MODEL_PRICES, PRICES_VERIFIED_AT } from "./model-prices.ts";
 
@@ -16,5 +17,13 @@ describe("estimateCostMicroUsd", () => {
 
   it("records when prices were checked", () => {
     expect(PRICES_VERIFIED_AT).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+  });
+});
+
+describe("usage.LlmCall catalog example", () => {
+  it("carries the cost the price table gives for its tokens", () => {
+    for (const example of LlmCallContract.meta.examples.map((value) => LlmCallContract.schema.parse(value))) {
+      expect(example.costMicroUsd).toBe(estimateCostMicroUsd(`${example.provider}/${example.model}`, example));
+    }
   });
 });
