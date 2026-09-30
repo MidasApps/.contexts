@@ -11,9 +11,9 @@ import type { Transaction } from "firebase-admin/firestore";
 import type { AccessWriteDeps } from "./application/access-write-deps.ts";
 import { prepareGrant, prepareRevokeAllGrants, type PrepareGrantArgs } from "./application/membership-writes.ts";
 import { checkGrantable, type GrantCheckError } from "./application/grant-checks.ts";
-import { requireOrganizationMember } from "./application/organization-membership.ts";
+import { listLiveGrantNodes, requireOrganizationMember } from "./application/organization-membership.ts";
 import type { AccessDeniedError } from "./domain/errors/access-denied-error.ts";
-import type { Permission, Principal, RoleRef, TenantId, TenantNodeRef, UserPrincipal } from "@core/contracts";
+import type { MyGrant, Permission, Principal, RoleRef, TenantId, TenantNodeRef, UserPrincipal } from "@core/contracts";
 import type { Result } from "../shared/result/result.ts";
 import type { ProjectionPrincipal } from "./domain/access-projection.ts";
 import type { AccessProjectionStore } from "./application/ports/driven/access-projection-writer.ts";
@@ -80,6 +80,8 @@ export type AccessServices = {
   readonly checkGrantable: (args: { access: RequestAccess; actor: Principal; permission: Permission; node: TenantNodeRef; roles: readonly RoleRef[] }) => Promise<Result<void, GrantCheckError>>;
   /** Live member anywhere in the organization's tree, from the grants (`PUT /v1/me/active-organization`, decision 0030 A5). */
   readonly requireOrganizationMember: (args: { access: RequestAccess; actor: UserPrincipal; tenantId: TenantId }) => Promise<Result<void, AccessDeniedError>>;
+  /** The caller's live grant nodes in an organization, widest first (`GET /v1/me/grants`, decision 0030 A7). */
+  readonly listLiveGrantNodes: (args: { access: RequestAccess; actor: UserPrincipal; tenantId: TenantId }) => Promise<Result<MyGrant[], AccessDeniedError>>;
   /** The projection read model (tenancy lists visible projects and revokes on organization delete). */
   readonly projections: AccessProjectionStore;
   readonly registry: PermissionRegistry;
@@ -103,6 +105,7 @@ export const createAccessServices = (deps: AccessWriteDeps): AccessServices => (
   prepareRevokeAllGrants: (tx, args) => prepareRevokeAllGrants(tx, deps, args),
   checkGrantable: (args) => checkGrantable(deps, args),
   requireOrganizationMember: (args) => requireOrganizationMember(deps, args),
+  listLiveGrantNodes: (args) => listLiveGrantNodes(deps, args),
   projections: deps.projections,
   registry: deps.registry,
 });

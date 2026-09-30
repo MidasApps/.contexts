@@ -3,6 +3,7 @@
 import type { SyncClaims } from "../access/application/use-cases/sync-claims.ts";
 import type { MeDeps } from "./application/me-deps.ts";
 import { makeGetMe, type GetMe } from "./application/use-cases/get-me.ts";
+import { makeListMyGrants, type ListMyGrants } from "./application/use-cases/list-my-grants.ts";
 import { makeListMyOrganizations, type ListMyOrganizations } from "./application/use-cases/list-my-organizations.ts";
 import {
   makeLoadAccessContext,
@@ -20,6 +21,8 @@ export type IdentityServices = {
   /** Rewrites the caller's claims from the source (`POST /v1/me/claims/sync`). */
   readonly syncClaims: SyncClaims;
   readonly listMyOrganizations: ListMyOrganizations;
+  /** `GET /v1/me/grants`: the caller's live grant nodes in an organization. */
+  readonly listMyGrants: ListMyGrants;
   /** `GET /v1/me/context`, inside the request's scope. */
   readonly loadAccessContext: LoadAccessContext;
   /** SP3 hook (SP1 spec §10): a fresh request scope per call. */
@@ -33,6 +36,7 @@ export const createIdentityServices = (deps: MeDeps): IdentityServices => ({
   setActiveOrganization: makeSetActiveOrganization(deps),
   syncClaims: deps.syncClaims,
   listMyOrganizations: makeListMyOrganizations(deps),
+  listMyGrants: makeListMyGrants(deps),
   loadAccessContext: makeLoadAccessContext(deps),
   resolveAccessContext: makeResolveAccessContext(deps),
 });

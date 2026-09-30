@@ -137,3 +137,19 @@ Each item below is a policy choice; the code comments point here.
   before the modules' types: `core.unit` (label `common.unitTypes.unit`, allowed under `project` and under
   `core.unit`). `core` is a reserved module id, so no module can redeclare it. The seed uses `core.unit` and
   installs no module. `GET /v1/unit-types` lists it for every app.
+- **A7 — 2026-09-30 (follow-up #33 and SP1 follow-ups report concerns 2–3): the caller's grant nodes, and lists
+  that agree with them.**
+  - **`GET /v1/me/grants?organizationId=…`** (`identity.listMyGrants`, contract `access.MyGrant`) lists the live
+    nodes where the signed-in user holds grants in that organization: `{ node, roles }`, one item per node with
+    the roles of its grants merged, widest first (organization, project, unit), cursor-paged. A node counts
+    when `getEffectivePermissions` accepts it there, the same check as A5 (`listLiveGrantNodes` in the access
+    context, at most 50 nodes), so a grant on a deleted project or unit is skipped. It is self-only: it reads
+    the caller's own grants and needs no permission. Without any live node it answers like the switch: `404`,
+    or `403` for a suspended organization or a disabled user. The client uses it to land a member whose
+    organization-level context is `404` on its widest node, a unit included.
+  - **`GET /v1/me/organizations`** now keeps an organization only while the caller passes
+    `requireOrganizationMember` there; a suspended organization stays listed (switching answers `403`). The
+    access projection stays live for a grant whose project was deleted since, so it no longer decides alone. A
+    page may hold fewer items than its limit.
+  - **`GET /v1/me/context`** reads only the regional preferences of the users doc, leniently: a doc without
+    `preferences` (or with unreadable ones) resolves with the node's settings instead of answering `500`.

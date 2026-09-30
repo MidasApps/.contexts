@@ -19,6 +19,7 @@ import {
 } from "./invitation.schema.ts";
 import { MemberContract } from "./member.schema.ts";
 import { MembershipContract } from "./membership.schema.ts";
+import { MyGrantContract } from "./my-grant.schema.ts";
 import { PermissionDefinitionContract } from "./permission-definition.schema.ts";
 import { RoleRefContract } from "./role-ref.schema.ts";
 import { RoleContract } from "./role.schema.ts";
@@ -37,6 +38,7 @@ export const ACCESS_CONTRACTS: readonly ContractDefinition[] = [
   MemberContract,
   AccessProjectionContract,
   AccessContextContract,
+  MyGrantContract,
   InvitationContract,
   CreateInvitationInputContract,
   CreateInvitationResponseContract,

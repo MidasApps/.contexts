@@ -120,6 +120,43 @@ describe("me routes (emulator)", () => {
     expect(afterDelete).toEqual([]);
   });
 
+  it("lists the grant nodes of a unit-only member (GET /me/grants, follow-up #33)", { timeout: 30_000 }, async () => {
+    const organizationId = OrganizationIdSchema.parse(await createOrganization("Units only"));
+    const project = await harness.call("tenancy.createProject", { method: "POST", path: `/v1/organizations/${organizationId}/projects`, as: "me-founder", body: { name: "Alpha" } });
+    const projectId = (await body(project)).data?.id ?? "";
+    const unit = await harness.call("tenancy.createUnit", { method: "POST", path: `/v1/projects/${projectId}/units`, as: "me-founder", body: { name: "Room", type: "core.unit", parentUnitId: null } });
+    const unitId = (await body(unit)).data?.id ?? "";
+    expect(unit.status).toBe(201);
+    expect((await harness.call("identity.getMe", { method: "GET", path: "/v1/me", as: "me-member" })).status).toBe(200);
+    const unitNode = { level: "unit", tenantId: organizationId, projectId, unitId };
+    await firestore.runTransaction(async (tx) => {
+      const plan = await harness.server.accessServices.prepareGrant(tx, {
+        tenantId: organizationId,
+        principal: { type: "user", id: "me-member" },
+        node: unitNode as never,
+        roles: [{ kind: "system", key: "member" }],
+        grantedBy: UserIdSchema.parse("seed"),
+        actor: { type: "system", id: "system" },
+        requestId: "seed",
+      });
+      if (!plan.ok) throw plan.error;
+      await plan.data.commit();
+    });
+
+    const grants = await harness.call("identity.listMyGrants", { method: "GET", path: `/v1/me/grants?organizationId=${organizationId}`, as: "me-member" });
+    expect(grants.status).toBe(200);
+    expect(await grants.json()).toEqual({
+      data: [{ node: unitNode, roles: [{ kind: "system", key: "member" }] }],
+      meta: { page: { cursor: null, hasMore: false, limit: 20 } },
+    });
+    // The founder sees only its own organization grant; an outsider gets 404; the query is validated.
+    const founder = (await body(await harness.call("identity.listMyGrants", { method: "GET", path: `/v1/me/grants?organizationId=${organizationId}`, as: "me-founder" }))).data as unknown as { node: { level: string } }[];
+    expect(founder.map((grant) => grant.node.level)).toEqual(["organization"]);
+    await seedActiveUser(firestore, "me-outsider");
+    expect((await harness.call("identity.listMyGrants", { method: "GET", path: `/v1/me/grants?organizationId=${organizationId}`, as: "me-outsider" })).status).toBe(404);
+    expect((await harness.call("identity.listMyGrants", { method: "GET", path: "/v1/me/grants", as: "me-member" })).status).toBe(400);
+  });
+
   it("answers 429 with Retry-After on the 11th switch in a minute", { timeout: 60_000 }, async () => {
     const organizationId = await createOrganization("Busy");
     for (let attempt = 1; attempt <= 10; attempt += 1) expect((await switchTo(organizationId)).status).toBe(204);

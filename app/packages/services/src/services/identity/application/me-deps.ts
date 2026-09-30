@@ -19,8 +19,8 @@ export type MeDeps = {
   /** A fresh request scope per `resolveAccessContext` call (SP3 calls it outside `/v1`). */
   readonly access: AccessCore;
   readonly projections: Pick<AccessProjectionStore, "listOfPrincipal">;
-  /** Membership check of `PUT /v1/me/active-organization` (decision 0030 A5). */
-  readonly membership: Pick<AccessServices, "requireOrganizationMember">;
+  /** Membership check of `PUT /v1/me/active-organization` and the grant nodes of `GET /v1/me/grants` (decision 0030 A5, A7). */
+  readonly membership: Pick<AccessServices, "requireOrganizationMember" | "listLiveGrantNodes">;
   readonly syncClaims: SyncClaims;
   readonly organizations: Pick<OrganizationRepository, "get">;
   readonly loadNode: LoadNode;

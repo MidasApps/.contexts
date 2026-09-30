@@ -1,6 +1,7 @@
 import {
   getAccessContextEndpoint,
   getMeEndpoint,
+  listMyGrantsEndpoint,
   listMyOrganizationsEndpoint,
   setActiveOrganizationEndpoint,
   syncClaimsEndpoint,
@@ -40,7 +41,7 @@ const accessContextView = ({ context, details }: AccessContextResolution): Acces
 
 /**
  * `/v1/me*` handlers (SP1 spec §7.3): `GET|PATCH /me`, `PUT /me/active-organization`,
- * `POST /me/claims/sync`, `GET /me/organizations`, `GET /me/context`.
+ * `POST /me/claims/sync`, `GET /me/organizations`, `GET /me/grants`, `GET /me/context`.
  */
 export const buildMeRoutes = (deps: { pipeline: ApiRouteDeps; identity: IdentityServices }): Record<string, RouteHandler> => {
   const { pipeline, identity } = deps;
@@ -65,6 +66,12 @@ export const buildMeRoutes = (deps: { pipeline: ApiRouteDeps; identity: Identity
       const page = pageRequestOf(input.query);
       if (page === null) return invalidCursorResponse(requestId);
       return listResponse(await identity.listMyOrganizations({ actor: principal, access: scope, page }), page.limit);
+    }),
+    [listMyGrantsEndpoint.id]: withApiRoute(listMyGrantsEndpoint, pipeline, async ({ principal, input, scope, requestId }) => {
+      const page = pageRequestOf(input.query);
+      if (page === null) return invalidCursorResponse(requestId);
+      const result = await identity.listMyGrants({ actor: principal, access: scope, organizationId: input.query.organizationId, page });
+      return result.ok ? listResponse(result.data, page.limit) : meErrorResponse(result.error, requestId);
     }),
     [getAccessContextEndpoint.id]: withApiRoute(getAccessContextEndpoint, pipeline, async ({ principal, input, scope, requestId }) => {
       const result = await identity.loadAccessContext({ principal, node: nodeOf(input.query), access: scope });

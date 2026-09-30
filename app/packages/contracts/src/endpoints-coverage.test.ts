@@ -10,6 +10,8 @@ const SP1_ROUTES = [
   "POST /v1/me/claims/sync",
   "GET /v1/me/organizations",
   "GET /v1/me/context",
+  // Not in the spec table: decision 0030 A7 (follow-up #33).
+  "GET /v1/me/grants",
   "GET /v1/me/sessions",
   "DELETE /v1/me/sessions/{sessionId}",
   "POST /v1/me/sessions/revoke-all",

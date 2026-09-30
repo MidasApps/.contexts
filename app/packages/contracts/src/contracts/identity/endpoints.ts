@@ -2,6 +2,7 @@
 // devices and activations, API keys, platform impersonation).
 import { z } from "zod";
 import { AccessContextQuerySchema, AccessContextSchema } from "../access/access-context.schema.ts";
+import { MyGrantSchema, MyGrantsQuerySchema } from "../access/my-grant.schema.ts";
 import { none } from "../field-docs.ts";
 import { defineEndpoint, type EndpointDefinition } from "../http/endpoint.ts";
 import { dataEnvelope, listEnvelope, PageQuerySchema } from "../http/envelopes.schema.ts";
@@ -91,6 +92,17 @@ export const getAccessContextEndpoint = defineEndpoint({
   responses: { 200: dataEnvelope(AccessContextSchema) },
   errors: { 404: NOT_FOUND },
   summary: "Resolves effective permissions and regional settings at a node (core.organization.read).",
+});
+
+export const listMyGrantsEndpoint = defineEndpoint({
+  id: "identity.listMyGrants",
+  method: "GET",
+  path: "/v1/me/grants",
+  auth: "user",
+  query: MyGrantsQuerySchema,
+  responses: { 200: listEnvelope(MyGrantSchema) },
+  errors: { 403: FORBIDDEN, 404: NOT_FOUND },
+  summary: "Lists the live nodes where the signed-in user holds grants in an organization, widest first.",
 });
 
 export const listSessionsEndpoint = defineEndpoint({
@@ -257,6 +269,7 @@ export const IDENTITY_ENDPOINTS: readonly EndpointDefinition[] = [
   syncClaimsEndpoint,
   listMyOrganizationsEndpoint,
   getAccessContextEndpoint,
+  listMyGrantsEndpoint,
   listSessionsEndpoint,
   revokeSessionEndpoint,
   revokeAllSessionsEndpoint,

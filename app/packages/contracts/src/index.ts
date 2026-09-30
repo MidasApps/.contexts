@@ -372,7 +372,7 @@ export {
   updateMeEndpoint,
 } from "./contracts/identity/endpoints.ts";
 export {
-  createDeviceActivationEndpoint, endImpersonationEndpoint, getAccessContextEndpoint, redeemDeviceActivationEndpoint,
+  createDeviceActivationEndpoint, endImpersonationEndpoint, getAccessContextEndpoint, listMyGrantsEndpoint, redeemDeviceActivationEndpoint,
   startImpersonationEndpoint,
 } from "./contracts/identity/endpoints.ts";
 export {
@@ -417,6 +417,9 @@ export {
 export {
   AccessContextContract, AccessContextQuerySchema, AccessContextSchema, type AccessContext, type AccessContextQuery,
 } from "./contracts/access/access-context.schema.ts";
+export {
+  MyGrantContract, MyGrantSchema, MyGrantsQuerySchema, type MyGrant, type MyGrantsQuery,
+} from "./contracts/access/my-grant.schema.ts";
 export {
   AcceptInvitationResponseContract, AcceptInvitationResponseSchema, CreateInvitationInputContract,
   CreateInvitationInputSchema, CreateInvitationResponseContract, CreateInvitationResponseSchema, INVITATION_TTL_DAYS,
