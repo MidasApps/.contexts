@@ -79,7 +79,8 @@ export type AgentEnv = Omit<AgentEnvInput, ResolvedKeys> & {
 /** Local-only request state key: not a secret, only valid where APP_ENV=local. */
 export const LOCAL_MCP_REQUEST_STATE_KEY = "local-only-mcp-request-state-key-not-a-secret";
 const MIN_MCP_REQUEST_STATE_KEY_BYTES = 32;
-const FAKE_MODE_ENVS = new Set<AgentRuntimeFlags["APP_ENV"]>(["local", "dev"]);
+/** The only APP_ENVs where `AI_MODE=fake` may run (decision 0021). */
+export const FAKE_MODE_APP_ENVS: ReadonlySet<AgentRuntimeFlags["APP_ENV"]> = new Set(["local", "dev"]);
 
 type ProviderKey =
   | "GOOGLE_GENERATIVE_AI_API_KEY"
@@ -134,7 +135,7 @@ const remoteOnlyIssues = (env: AgentEnvInput): EnvIssue[] => {
 
 /** Rules that depend on APP_ENV and AI_MODE; returns names and codes, never values. */
 export const findAgentEnvIssues = (env: AgentEnvInput & AgentRuntimeFlags): EnvIssue[] => [
-  ...(env.AI_MODE === "fake" && !FAKE_MODE_ENVS.has(env.APP_ENV)
+  ...(env.AI_MODE === "fake" && !FAKE_MODE_APP_ENVS.has(env.APP_ENV)
     ? [{ field: "AI_MODE", issue: "FAKE_ONLY_IN_LOCAL_OR_DEV" }]
     : []),
   ...(env.AI_MODE === "real" ? missingProviderKeys(env) : []),

@@ -6,7 +6,7 @@ import type {
   TranscriptionModelV4,
 } from "@ai-sdk/provider";
 import { defaultEmbeddingSettingsMiddleware, wrapEmbeddingModel } from "ai";
-import type { AgentEnvInput, AgentRuntimeFlags } from "../runtime/agent-env.schema.ts";
+import { type AgentEnvInput, type AgentRuntimeFlags, FAKE_MODE_APP_ENVS } from "../runtime/agent-env.schema.ts";
 import { createFakeEmbeddingModel } from "./fake/fake-embedding-model.ts";
 import { createFakeLanguageModel } from "./fake/fake-language-model.ts";
 import { createFakeScenarioRegistry, type FakeScenarioRegistry, type FakeScenarioRule } from "./fake/fake-scenarios.ts";
@@ -21,7 +21,7 @@ type ModelEnvKeys =
   | `AI_MODEL_${"CHAT" | "FAST" | "REASONING" | "JUDGE" | "EMBEDDING" | "TRANSCRIPTION" | "SPEECH"}`
   | `AI_MODEL_${"CHAT" | "FAST" | "REASONING" | "JUDGE" | "EMBEDDING"}_FALLBACK`;
 
-export type ModelFactoryEnv = Pick<AgentRuntimeFlags, "AI_MODE"> &
+export type ModelFactoryEnv = AgentRuntimeFlags &
   ProviderEnv &
   Pick<AgentEnvInput, Exclude<ModelEnvKeys, `${string}_FALLBACK`>> &
   Partial<Pick<AgentEnvInput, Extract<ModelEnvKeys, `${string}_FALLBACK`>>>;
@@ -47,6 +47,18 @@ export type CreateModelProviderOptions = {
   readonly providerFactories?: ProviderFactories;
   readonly scenarios?: FakeScenarioRegistry;
 };
+
+/** Fake models outside local/dev: the env check was bypassed (defence in depth, decision 0021). */
+export class FakeModeNotAllowedError extends Error {
+  readonly code = "FAKE_MODE_NOT_ALLOWED";
+  readonly appEnv: AgentRuntimeFlags["APP_ENV"];
+
+  constructor(appEnv: AgentRuntimeFlags["APP_ENV"]) {
+    super(`AI_MODE=fake is not allowed in APP_ENV=${appEnv}`);
+    this.name = "FakeModeNotAllowedError";
+    this.appEnv = appEnv;
+  }
+}
 
 const EMBEDDING_PROVIDER_OPTIONS: SharedV4ProviderOptions = {
   google: { outputDimensionality: EMBEDDING_DIMENSIONS },
@@ -115,8 +127,10 @@ const createRealModels = (env: ModelFactoryEnv, registry: ProviderRegistry): Age
  * Model access for agents, processors, memory and voice (spec §5, decision 0021).
  * Fake mode builds only the deterministic fakes; real mode builds AI SDK
  * providers lazily with keys from the validated env.
+ * @throws {FakeModeNotAllowedError} for `AI_MODE=fake` outside local/dev.
  */
-export const createModelProvider = (env: ModelFactoryEnv, options: CreateModelProviderOptions = {}): AgentModels =>
-  env.AI_MODE === "fake"
-    ? createFakeModels(options.scenarios ?? createFakeScenarioRegistry())
-    : createRealModels(env, createProviderRegistry(env, options.providerFactories));
+export const createModelProvider = (env: ModelFactoryEnv, options: CreateModelProviderOptions = {}): AgentModels => {
+  if (env.AI_MODE === "real") return createRealModels(env, createProviderRegistry(env, options.providerFactories));
+  if (!FAKE_MODE_APP_ENVS.has(env.APP_ENV)) throw new FakeModeNotAllowedError(env.APP_ENV);
+  return createFakeModels(options.scenarios ?? createFakeScenarioRegistry());
+};

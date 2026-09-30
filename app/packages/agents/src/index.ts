@@ -33,6 +33,7 @@ export {
   type AgentModels,
   type CreateModelProviderOptions,
   createModelProvider,
+  FakeModeNotAllowedError,
   type ModelFactoryEnv,
   type TextModelRole,
 } from "./models/model-factory.ts";
@@ -75,6 +76,7 @@ export {
   type AgentEnvInput,
   AgentEnvSchema,
   type AgentRuntimeFlags,
+  FAKE_MODE_APP_ENVS,
   findAgentEnvIssues,
   LOCAL_MCP_REQUEST_STATE_KEY,
   providerKeysFor,

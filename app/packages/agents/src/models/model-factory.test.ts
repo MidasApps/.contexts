@@ -1,9 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { createModelProvider, type ModelFactoryEnv } from "./model-factory.ts";
+import { createModelProvider, FakeModeNotAllowedError, type ModelFactoryEnv } from "./model-factory.ts";
 import type { ProviderFactories, ProviderSettings } from "./provider-registry.ts";
 import type { ModelProvider } from "./model-roles.ts";
 
 const baseEnv: ModelFactoryEnv = {
+  APP_ENV: "local",
   AI_MODE: "fake",
   AI_MODEL_CHAT: "google/gemini-3.5-flash",
   AI_MODEL_FAST: "google/gemini-3.5-flash-lite",
@@ -35,6 +36,16 @@ const recordingFactories = (calls: FactoryCall[]): ProviderFactories => {
 };
 
 describe("createModelProvider in fake mode", () => {
+  it.each(["staging", "prod"] as const)("refuses fake models in %s even if the env check was skipped", (APP_ENV) => {
+    const calls: FactoryCall[] = [];
+    expect(() => createModelProvider({ ...baseEnv, APP_ENV }, { providerFactories: recordingFactories(calls) })).toThrow(FakeModeNotAllowedError);
+    expect(calls).toEqual([]);
+  });
+
+  it("allows fake models in dev", () => {
+    expect(createModelProvider({ ...baseEnv, APP_ENV: "dev" }).mode).toBe("fake");
+  });
+
   it("never constructs a real provider", async () => {
     const calls: FactoryCall[] = [];
     const models = createModelProvider(baseEnv, { providerFactories: recordingFactories(calls) });
