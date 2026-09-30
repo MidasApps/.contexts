@@ -1,0 +1,25 @@
+{
+  "additionalProperties": false,
+  "description": "Answer of POST /v1/invitations/accept.",
+  "examples": [
+    {
+      "organizationId": "Jd8sK2lPq0WnR5tYu3bV"
+    }
+  ],
+  "properties": {
+    "organizationId": {
+      "description": "Organization the caller just joined.",
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    }
+  },
+  "required": [
+    "organizationId"
+  ],
+  "type": "object",
+  "x-kind": "view",
+  "x-pii": "none",
+  "x-relations": [],
+  "x-tenancyScope": "user"
+}

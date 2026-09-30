@@ -1,0 +1,93 @@
+{
+  "additionalProperties": false,
+  "description": "A registered permission with its kind, scope and default roles (GET /v1/permissions).",
+  "examples": [
+    {
+      "defaultRoles": [
+        "owner",
+        "admin",
+        "member",
+        "viewer"
+      ],
+      "descriptionKey": "permissions.core.project.read",
+      "id": "core.project.read",
+      "kind": "read",
+      "scope": "tenant"
+    }
+  ],
+  "properties": {
+    "defaultRoles": {
+      "description": "System roles (tenant) or staff roles (platform) that hold it by default.",
+      "items": {
+        "anyOf": [
+          {
+            "enum": [
+              "owner",
+              "admin",
+              "member",
+              "viewer",
+              "device"
+            ],
+            "type": "string"
+          },
+          {
+            "enum": [
+              "platform-admin",
+              "platform-support"
+            ],
+            "type": "string"
+          }
+        ]
+      },
+      "type": "array",
+      "x-pii": "none"
+    },
+    "descriptionKey": {
+      "description": "i18n key describing the permission.",
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "id": {
+      "description": "Permission id, `<module>.<resource>.<action>`.",
+      "pattern": "^[a-z][a-z0-9-]*\\.[a-z][a-z0-9-]*\\.[a-z][a-z0-9-]*$",
+      "type": "string",
+      "x-pii": "none"
+    },
+    "kind": {
+      "description": "`read` or `write`; impersonation may only use `read`.",
+      "enum": [
+        "read",
+        "write"
+      ],
+      "type": "string",
+      "x-pii": "none"
+    },
+    "requiresApproval": {
+      "description": "Actions under this permission need a four-eyes approval.",
+      "type": "boolean",
+      "x-pii": "none"
+    },
+    "scope": {
+      "description": "`tenant` (checked at organization/project/unit) or `platform` (staff).",
+      "enum": [
+        "tenant",
+        "platform"
+      ],
+      "type": "string",
+      "x-pii": "none"
+    }
+  },
+  "required": [
+    "id",
+    "descriptionKey",
+    "kind",
+    "scope",
+    "defaultRoles"
+  ],
+  "type": "object",
+  "x-kind": "view",
+  "x-pii": "none",
+  "x-relations": [],
+  "x-tenancyScope": "platform"
+}

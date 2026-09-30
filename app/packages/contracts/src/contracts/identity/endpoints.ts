@@ -1,9 +1,12 @@
-// Identity `/v1` descriptors (SP1 spec §7.3: me, sessions, desktop sessions, devices, API keys).
+// Identity `/v1` descriptors (SP1 spec §7.3: me, access context, sessions, desktop sessions,
+// devices and activations, API keys, platform impersonation).
 import { z } from "zod";
+import { AccessContextQuerySchema, AccessContextSchema } from "../access/access-context.schema.ts";
 import { none } from "../field-docs.ts";
 import { defineEndpoint, type EndpointDefinition } from "../http/endpoint.ts";
 import { dataEnvelope, listEnvelope, PageQuerySchema } from "../http/envelopes.schema.ts";
 import { OrganizationParamsSchema } from "../tenancy/endpoints.ts";
+import { OrganizationSchema } from "../tenancy/organization.schema.ts";
 import { SetActiveOrganizationInputSchema } from "./active-organization-input.schema.ts";
 import { ApiKeySchema, CreateApiKeyInputSchema, CreateApiKeyResponseSchema } from "./api-key.schema.ts";
 import {
@@ -11,12 +14,18 @@ import {
   ExchangeDesktopSessionInputSchema,
   ExchangeDesktopSessionResponseSchema,
 } from "./desktop-session.schema.ts";
+import {
+  CreateDeviceActivationInputSchema,
+  CreateDeviceActivationResponseSchema,
+  RedeemDeviceActivationInputSchema,
+  RedeemDeviceActivationResponseSchema,
+} from "./device-activation.schema.ts";
 import { DeviceSchema } from "./device.schema.ts";
-import { ApiKeyIdSchema, DeviceIdSchema, SessionIdSchema } from "./ids.schema.ts";
+import { ApiKeyIdSchema, DeviceIdSchema, ImpersonationSessionIdSchema, SessionIdSchema } from "./ids.schema.ts";
+import { StartImpersonationInputSchema, StartImpersonationResponseSchema } from "./impersonation-session.schema.ts";
 import { MeSchema } from "./me.schema.ts";
 import { SessionSummarySchema } from "./session.schema.ts";
 import { UpdateMeInputSchema } from "./update-me-input.schema.ts";
-import { OrganizationSchema } from "../tenancy/organization.schema.ts";
 
 const NOT_FOUND = ["NOT_FOUND"] as const;
 const FORBIDDEN = ["FORBIDDEN"] as const;
@@ -71,6 +80,17 @@ export const listMyOrganizationsEndpoint = defineEndpoint({
   query: PageQuerySchema,
   responses: { 200: listEnvelope(OrganizationSchema) },
   summary: "Lists the organizations where the signed-in user holds any grant.",
+});
+
+export const getAccessContextEndpoint = defineEndpoint({
+  id: "identity.getAccessContext",
+  method: "GET",
+  path: "/v1/me/context",
+  auth: "principal",
+  query: AccessContextQuerySchema,
+  responses: { 200: dataEnvelope(AccessContextSchema) },
+  errors: { 404: NOT_FOUND },
+  summary: "Resolves effective permissions and regional settings at a node (core.organization.read).",
 });
 
 export const listSessionsEndpoint = defineEndpoint({
@@ -147,6 +167,31 @@ export const revokeDeviceEndpoint = defineEndpoint({
   summary: "Revokes a device: grants removed, tokens revoked, Auth user disabled (core.device.revoke).",
 });
 
+export const createDeviceActivationEndpoint = defineEndpoint({
+  id: "identity.createDeviceActivation",
+  method: "POST",
+  path: "/v1/organizations/{organizationId}/device-activations",
+  auth: "user",
+  params: OrganizationParamsSchema,
+  body: CreateDeviceActivationInputSchema,
+  responses: { 201: dataEnvelope(CreateDeviceActivationResponseSchema) },
+  errors: { 403: [...FORBIDDEN, "ESCALATION_FORBIDDEN"], 404: NOT_FOUND },
+  idempotency: "optional",
+  summary: "Creates a one-time device activation code (core.device.create).",
+});
+
+export const redeemDeviceActivationEndpoint = defineEndpoint({
+  id: "identity.redeemDeviceActivation",
+  method: "POST",
+  path: "/v1/device-activations/redeem",
+  auth: "none",
+  body: RedeemDeviceActivationInputSchema,
+  responses: { 200: dataEnvelope(RedeemDeviceActivationResponseSchema) },
+  errors: { 401: UNAUTHORIZED },
+  rateLimit: "device-redeem",
+  summary: "Redeems an activation code: creates the device and returns its custom token.",
+});
+
 export const listApiKeysEndpoint = defineEndpoint({
   id: "identity.listApiKeys",
   method: "GET",
@@ -183,12 +228,35 @@ export const revokeApiKeyEndpoint = defineEndpoint({
   summary: "Revokes an API key (core.api-key.revoke).",
 });
 
+export const startImpersonationEndpoint = defineEndpoint({
+  id: "identity.startImpersonation",
+  method: "POST",
+  path: "/v1/platform/impersonation-sessions",
+  auth: "user",
+  body: StartImpersonationInputSchema,
+  responses: { 201: dataEnvelope(StartImpersonationResponseSchema) },
+  errors: { 403: ["FORBIDDEN", "MFA_REQUIRED"], 404: NOT_FOUND },
+  summary: "Starts read-only, time-boxed impersonation of a user (platform.user.impersonate with MFA).",
+});
+
+export const endImpersonationEndpoint = defineEndpoint({
+  id: "identity.endImpersonation",
+  method: "POST",
+  path: "/v1/platform/impersonation-sessions/{sessionId}/end",
+  auth: "user",
+  params: z.object({ sessionId: ImpersonationSessionIdSchema.meta(none("Impersonation session id.")) }),
+  responses: { 204: null },
+  errors: { 403: ["FORBIDDEN", "MFA_REQUIRED"], 404: NOT_FOUND },
+  summary: "Ends an impersonation session early.",
+});
+
 export const IDENTITY_ENDPOINTS: readonly EndpointDefinition[] = [
   getMeEndpoint,
   updateMeEndpoint,
   setActiveOrganizationEndpoint,
   syncClaimsEndpoint,
   listMyOrganizationsEndpoint,
+  getAccessContextEndpoint,
   listSessionsEndpoint,
   revokeSessionEndpoint,
   revokeAllSessionsEndpoint,
@@ -196,7 +264,11 @@ export const IDENTITY_ENDPOINTS: readonly EndpointDefinition[] = [
   exchangeDesktopSessionEndpoint,
   listDevicesEndpoint,
   revokeDeviceEndpoint,
+  createDeviceActivationEndpoint,
+  redeemDeviceActivationEndpoint,
   listApiKeysEndpoint,
   createApiKeyEndpoint,
   revokeApiKeyEndpoint,
+  startImpersonationEndpoint,
+  endImpersonationEndpoint,
 ];

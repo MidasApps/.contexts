@@ -1,10 +1,14 @@
 // Composition root of @core/contracts: the only place that registers contracts
 // and endpoints (rule `development`: module side effects live in composition.ts,
 // and only run when a caller invokes the function).
+import { ACCESS_CONTRACTS } from "./contracts/access/contracts.ts";
+import { ACCESS_ENDPOINTS } from "./contracts/access/endpoints.ts";
 import { AgentRequestContextContract } from "./contracts/agents/agent-request-context.schema.ts";
 import { AgentSettingsContract } from "./contracts/agents/agent-settings.schema.ts";
 import { AgentApprovalRequestContract } from "./contracts/agents/approval-request.schema.ts";
 import { ToolUiContract } from "./contracts/agents/tool-ui.schema.ts";
+import { AUDIT_CONTRACTS } from "./contracts/audit/contracts.ts";
+import { AUDIT_ENDPOINTS } from "./contracts/audit/endpoints.ts";
 import { ConnectorContract } from "./contracts/connectors/connector.schema.ts";
 import { ConnectorToolPolicyContract } from "./contracts/connectors/connector-tool-policy.schema.ts";
 import type { ContractDefinition } from "./contracts/contract.ts";
@@ -32,6 +36,8 @@ export const CORE_CONTRACTS: readonly ContractDefinition[] = [
   // SP1 identity, tenancy and access.
   ...TENANCY_CONTRACTS,
   ...IDENTITY_CONTRACTS,
+  ...ACCESS_CONTRACTS,
+  ...AUDIT_CONTRACTS,
   // SP3 agent runtime.
   AgentRequestContextContract,
   AgentSettingsContract,
@@ -49,7 +55,12 @@ export const CORE_CONTRACTS: readonly ContractDefinition[] = [
 ];
 
 /** Every `/v1` endpoint of the core (SP1 spec §7.3); add descriptors here. */
-export const CORE_ENDPOINTS: readonly EndpointDefinition[] = [...TENANCY_ENDPOINTS, ...IDENTITY_ENDPOINTS];
+export const CORE_ENDPOINTS: readonly EndpointDefinition[] = [
+  ...TENANCY_ENDPOINTS,
+  ...IDENTITY_ENDPOINTS,
+  ...ACCESS_ENDPOINTS,
+  ...AUDIT_ENDPOINTS,
+];
 
 /** Builds a fresh registry with the core contracts (catalog scripts, apps at startup). */
 export const composeCoreContracts = (extra: readonly ContractDefinition[] = []): ContractRegistry =>

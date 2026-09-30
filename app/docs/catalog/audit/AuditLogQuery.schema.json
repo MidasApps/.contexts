@@ -1,0 +1,103 @@
+{
+  "additionalProperties": false,
+  "description": "Filters and page of the organization audit log (core.audit-log.read).",
+  "examples": [
+    {
+      "action": "MEMBERSHIP_GRANTED",
+      "limit": 50,
+      "occurredAfter": "2026-09-01T00:00:00.000Z"
+    }
+  ],
+  "properties": {
+    "action": {
+      "description": "Only entries of this action.",
+      "enum": [
+        "ORGANIZATION_CREATED",
+        "ORGANIZATION_UPDATED",
+        "ORGANIZATION_DELETED",
+        "PROJECT_CREATED",
+        "PROJECT_UPDATED",
+        "PROJECT_DELETED",
+        "UNIT_CREATED",
+        "UNIT_UPDATED",
+        "UNIT_MOVED",
+        "UNIT_DELETED",
+        "ROLE_CREATED",
+        "ROLE_UPDATED",
+        "ROLE_DELETED",
+        "MEMBERSHIP_GRANTED",
+        "MEMBERSHIP_UPDATED",
+        "MEMBERSHIP_REVOKED",
+        "MEMBER_REMOVED",
+        "INVITATION_CREATED",
+        "INVITATION_ACCEPTED",
+        "INVITATION_REVOKED",
+        "API_KEY_CREATED",
+        "API_KEY_REVOKED",
+        "DEVICE_ACTIVATION_CREATED",
+        "DEVICE_ACTIVATED",
+        "DEVICE_REVOKED",
+        "ACTIVE_ORGANIZATION_CHANGED",
+        "SESSION_REVOKED",
+        "ALL_SESSIONS_REVOKED",
+        "DESKTOP_SESSION_REUSE_DETECTED",
+        "IMPERSONATION_STARTED",
+        "IMPERSONATION_ENDED",
+        "IMPERSONATED_REQUEST_SERVED",
+        "IMPERSONATED_WRITE_DENIED",
+        "APPROVAL_REQUESTED",
+        "APPROVAL_APPROVED",
+        "APPROVAL_REJECTED",
+        "APPROVAL_EXECUTED",
+        "APPROVAL_FAILED",
+        "PLATFORM_STAFF_GRANTED",
+        "PLATFORM_ACCESS_DENIED"
+      ],
+      "type": "string",
+      "x-pii": "none"
+    },
+    "actorId": {
+      "description": "Only entries by this actor id.",
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "personal"
+    },
+    "cursor": {
+      "description": "Cursor returned by the previous page.",
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "limit": {
+      "default": 20,
+      "description": "Page size, 1-100 (default 20).",
+      "maximum": 100,
+      "minimum": 1,
+      "type": "integer",
+      "x-pii": "none"
+    },
+    "occurredAfter": {
+      "description": "Only entries after this instant (UTC, exclusive).",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+      "type": "string",
+      "x-pii": "none"
+    },
+    "occurredBefore": {
+      "description": "Only entries before this instant (UTC, exclusive).",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+      "type": "string",
+      "x-pii": "none"
+    }
+  },
+  "required": [
+    "limit"
+  ],
+  "type": "object",
+  "x-kind": "query",
+  "x-permission": "core.audit-log.read",
+  "x-pii": "personal",
+  "x-relations": [],
+  "x-tenancyScope": "organization"
+}

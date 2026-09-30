@@ -1,0 +1,300 @@
+{
+  "additionalProperties": false,
+  "description": "An append-only audit record of platform staff actions (impersonation, staff grants).",
+  "examples": [
+    {
+      "action": "IMPERSONATION_STARTED",
+      "actor": {
+        "id": "uZ9y8X7w6V5u4T3s2R1q",
+        "type": "user"
+      },
+      "id": "Al6mN8bV0cX2zL4kJ6hG",
+      "node": {
+        "level": "organization",
+        "tenantId": "Jd8sK2lPq0WnR5tYu3bV"
+      },
+      "occurredAt": "2026-09-29T15:00:00.000Z",
+      "outcome": "success",
+      "reason": "Ticket 4821: user cannot see project Launch.",
+      "requestId": "01J8Z3K4M5N6P7Q8R9S0T1V2W3",
+      "target": {
+        "id": "uA1b2C3d4E5f6G7h8I9j",
+        "type": "user"
+      },
+      "targetTenantId": "Jd8sK2lPq0WnR5tYu3bV"
+    }
+  ],
+  "properties": {
+    "action": {
+      "description": "What happened, SCREAMING_SNAKE past tense.",
+      "enum": [
+        "ORGANIZATION_CREATED",
+        "ORGANIZATION_UPDATED",
+        "ORGANIZATION_DELETED",
+        "PROJECT_CREATED",
+        "PROJECT_UPDATED",
+        "PROJECT_DELETED",
+        "UNIT_CREATED",
+        "UNIT_UPDATED",
+        "UNIT_MOVED",
+        "UNIT_DELETED",
+        "ROLE_CREATED",
+        "ROLE_UPDATED",
+        "ROLE_DELETED",
+        "MEMBERSHIP_GRANTED",
+        "MEMBERSHIP_UPDATED",
+        "MEMBERSHIP_REVOKED",
+        "MEMBER_REMOVED",
+        "INVITATION_CREATED",
+        "INVITATION_ACCEPTED",
+        "INVITATION_REVOKED",
+        "API_KEY_CREATED",
+        "API_KEY_REVOKED",
+        "DEVICE_ACTIVATION_CREATED",
+        "DEVICE_ACTIVATED",
+        "DEVICE_REVOKED",
+        "ACTIVE_ORGANIZATION_CHANGED",
+        "SESSION_REVOKED",
+        "ALL_SESSIONS_REVOKED",
+        "DESKTOP_SESSION_REUSE_DETECTED",
+        "IMPERSONATION_STARTED",
+        "IMPERSONATION_ENDED",
+        "IMPERSONATED_REQUEST_SERVED",
+        "IMPERSONATED_WRITE_DENIED",
+        "APPROVAL_REQUESTED",
+        "APPROVAL_APPROVED",
+        "APPROVAL_REJECTED",
+        "APPROVAL_EXECUTED",
+        "APPROVAL_FAILED",
+        "PLATFORM_STAFF_GRANTED",
+        "PLATFORM_ACCESS_DENIED"
+      ],
+      "type": "string",
+      "x-pii": "none"
+    },
+    "actor": {
+      "additionalProperties": false,
+      "description": "Who did it.",
+      "properties": {
+        "id": {
+          "description": "Uid, device id, API key id or `system`.",
+          "minLength": 1,
+          "type": "string",
+          "x-pii": "personal"
+        },
+        "onBehalfOf": {
+          "description": "Staff uid when the actor was impersonated.",
+          "minLength": 1,
+          "type": "string",
+          "x-pii": "personal"
+        },
+        "type": {
+          "description": "Principal type, or `system` for automated writes.",
+          "enum": [
+            "user",
+            "device",
+            "service",
+            "system"
+          ],
+          "type": "string",
+          "x-pii": "none"
+        }
+      },
+      "required": [
+        "type",
+        "id"
+      ],
+      "type": "object",
+      "x-pii": "personal"
+    },
+    "changes": {
+      "description": "Names of the changed fields; never values.",
+      "items": {
+        "pattern": "^[A-Za-z][A-Za-z0-9]*(?:\\.[A-Za-z][A-Za-z0-9]*)*$",
+        "type": "string"
+      },
+      "maxItems": 100,
+      "type": "array",
+      "x-pii": "none"
+    },
+    "id": {
+      "description": "Automatic id of the entry.",
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "node": {
+      "description": "Node the action happened at, when it has one.",
+      "oneOf": [
+        {
+          "additionalProperties": false,
+          "properties": {
+            "level": {
+              "const": "organization",
+              "description": "Level of the node.",
+              "type": "string",
+              "x-pii": "none"
+            },
+            "tenantId": {
+              "description": "Organization (tenant) of the node.",
+              "minLength": 1,
+              "type": "string",
+              "x-pii": "none"
+            }
+          },
+          "required": [
+            "level",
+            "tenantId"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "level": {
+              "const": "project",
+              "description": "Level of the node.",
+              "type": "string",
+              "x-pii": "none"
+            },
+            "projectId": {
+              "description": "Project of the node.",
+              "minLength": 1,
+              "type": "string",
+              "x-pii": "none"
+            },
+            "tenantId": {
+              "description": "Organization (tenant) of the node.",
+              "minLength": 1,
+              "type": "string",
+              "x-pii": "none"
+            }
+          },
+          "required": [
+            "level",
+            "tenantId",
+            "projectId"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "level": {
+              "const": "unit",
+              "description": "Level of the node.",
+              "type": "string",
+              "x-pii": "none"
+            },
+            "projectId": {
+              "description": "Project of the node.",
+              "minLength": 1,
+              "type": "string",
+              "x-pii": "none"
+            },
+            "tenantId": {
+              "description": "Organization (tenant) of the node.",
+              "minLength": 1,
+              "type": "string",
+              "x-pii": "none"
+            },
+            "unitId": {
+              "description": "Unit of the node.",
+              "minLength": 1,
+              "type": "string",
+              "x-pii": "none"
+            }
+          },
+          "required": [
+            "level",
+            "tenantId",
+            "projectId",
+            "unitId"
+          ],
+          "type": "object"
+        }
+      ],
+      "x-pii": "none"
+    },
+    "occurredAt": {
+      "description": "When the action happened (UTC).",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+      "type": "string",
+      "x-pii": "none"
+    },
+    "outcome": {
+      "description": "`denied` records refused attempts.",
+      "enum": [
+        "success",
+        "denied"
+      ],
+      "type": "string",
+      "x-pii": "none"
+    },
+    "reason": {
+      "description": "Reason given by the actor (impersonation, approvals).",
+      "maxLength": 500,
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "personal"
+    },
+    "requestId": {
+      "description": "Request id (X-Request-Id) to correlate with logs.",
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "target": {
+      "additionalProperties": false,
+      "description": "What it was done to.",
+      "properties": {
+        "id": {
+          "description": "Id of the affected resource (may be a uid).",
+          "minLength": 1,
+          "type": "string",
+          "x-pii": "personal"
+        },
+        "type": {
+          "description": "Kind of the affected resource, kebab-case (`organization`, `api-key`).",
+          "pattern": "^[a-z][a-z0-9-]*$",
+          "type": "string",
+          "x-pii": "none"
+        }
+      },
+      "required": [
+        "type",
+        "id"
+      ],
+      "type": "object",
+      "x-pii": "personal"
+    },
+    "targetTenantId": {
+      "description": "Organization the staff action touched, when any.",
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "traceId": {
+      "description": "Trace id, when tracing is on.",
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    }
+  },
+  "required": [
+    "id",
+    "occurredAt",
+    "action",
+    "actor",
+    "target",
+    "outcome",
+    "requestId"
+  ],
+  "type": "object",
+  "x-kind": "entity",
+  "x-permission": "platform.audit-log.read",
+  "x-pii": "personal",
+  "x-relations": [],
+  "x-tenancyScope": "platform"
+}

@@ -261,6 +261,85 @@ export {
   revokeApiKeyEndpoint, revokeDeviceEndpoint, revokeSessionEndpoint, setActiveOrganizationEndpoint, syncClaimsEndpoint,
   updateMeEndpoint,
 } from "./contracts/identity/endpoints.ts";
+export {
+  createDeviceActivationEndpoint, endImpersonationEndpoint, getAccessContextEndpoint, redeemDeviceActivationEndpoint,
+  startImpersonationEndpoint,
+} from "./contracts/identity/endpoints.ts";
+export {
+  CreateDeviceActivationInputContract, CreateDeviceActivationInputSchema, CreateDeviceActivationResponseContract,
+  CreateDeviceActivationResponseSchema, DEVICE_ACTIVATION_TTL_MINUTES, DeviceActivationCodeInputSchema,
+  DeviceActivationCodeSchema, RedeemDeviceActivationInputContract, RedeemDeviceActivationInputSchema,
+  RedeemDeviceActivationResponseContract, RedeemDeviceActivationResponseSchema, type CreateDeviceActivationInput,
+  type CreateDeviceActivationResponse, type RedeemDeviceActivationInput, type RedeemDeviceActivationResponse,
+} from "./contracts/identity/device-activation.schema.ts";
+// SP1 access.
+export { ACCESS_CONTRACTS } from "./contracts/access/contracts.ts";
+export { OWNER_ONLY_PERMISSION, SYSTEM_ROLE_KEYS, SystemRoleKeySchema, type SystemRoleKey } from "./contracts/access/system-roles.ts";
+export {
+  PermissionDefinitionContract, PermissionDefinitionSchema, PermissionKindSchema, PermissionScopeSchema,
+  type PermissionDefinition, type PermissionKind, type PermissionScope,
+} from "./contracts/access/permission-definition.schema.ts";
+export { CORE_PERMISSIONS } from "./contracts/access/core-permissions.ts";
+export {
+  MAX_ROLES_PER_GRANT, RoleIdSchema, RoleRefContract, RoleRefListSchema, RoleRefSchema, roleRefKey, roleRefsField,
+  type RoleId, type RoleRef,
+} from "./contracts/access/role-ref.schema.ts";
+export {
+  MAX_ROLE_PERMISSIONS, ROLE_EXAMPLE, RoleContract, RoleDescriptionSchema, RoleNameSchema, rolePermissionsField, RoleSchema,
+  type Role,
+} from "./contracts/access/role.schema.ts";
+export { CreateRoleInputContract, CreateRoleInputSchema, type CreateRoleInput } from "./contracts/access/create-role-input.schema.ts";
+export { UpdateRoleInputContract, UpdateRoleInputSchema, type UpdateRoleInput } from "./contracts/access/update-role-input.schema.ts";
+export {
+  GrantPrincipalTypeSchema, MEMBERSHIP_EXAMPLE, MembershipContract, MembershipIdSchema, MembershipSchema,
+  type GrantPrincipalType, type Membership, type MembershipId,
+} from "./contracts/access/membership.schema.ts";
+export {
+  GrantMembershipInputContract, GrantMembershipInputSchema, type GrantMembershipInput,
+} from "./contracts/access/grant-membership-input.schema.ts";
+export {
+  UpdateMembershipInputContract, UpdateMembershipInputSchema, type UpdateMembershipInput,
+} from "./contracts/access/update-membership-input.schema.ts";
+export { MemberContract, MemberSchema, type Member } from "./contracts/access/member.schema.ts";
+export {
+  AccessProjectionContract, accessProjectionId, AccessProjectionSchema, type AccessProjection,
+} from "./contracts/access/access-projection.schema.ts";
+export {
+  AccessContextContract, AccessContextQuerySchema, AccessContextSchema, type AccessContext, type AccessContextQuery,
+} from "./contracts/access/access-context.schema.ts";
+export {
+  AcceptInvitationResponseContract, AcceptInvitationResponseSchema, CreateInvitationInputContract,
+  CreateInvitationInputSchema, CreateInvitationResponseContract, CreateInvitationResponseSchema, INVITATION_TTL_DAYS,
+  InvitationContract, InvitationIdSchema, InvitationPreviewContract, InvitationPreviewSchema, InvitationSchema,
+  InvitationStatusSchema, InvitationTokenInputContract, InvitationTokenInputSchema, InvitationTokenSchema,
+  type AcceptInvitationResponse, type CreateInvitationInput, type CreateInvitationResponse, type Invitation,
+  type InvitationId, type InvitationPreview, type InvitationStatus, type InvitationTokenInput,
+} from "./contracts/access/invitation.schema.ts";
+export {
+  APPROVAL_STATUSES, APPROVAL_TTL_DAYS, ApprovalActionKindSchema, ApprovalRequestContract, ApprovalRequesterSchema,
+  ApprovalRequestIdSchema, ApprovalRequestSchema, ApprovalStatusSchema, CreateApprovalRequestInputContract,
+  CreateApprovalRequestInputSchema, DecideApprovalRequestInputContract, DecideApprovalRequestInputSchema,
+  type ApprovalRequest, type ApprovalRequestId, type ApprovalStatus, type CreateApprovalRequestInput,
+  type DecideApprovalRequestInput,
+} from "./contracts/access/approval-request.schema.ts";
+export {
+  ACCESS_ENDPOINTS, acceptInvitationEndpoint, approveApprovalRequestEndpoint, createApprovalRequestEndpoint,
+  createInvitationEndpoint, createRoleEndpoint, deleteRoleEndpoint, getRoleEndpoint, grantMembershipEndpoint,
+  listApprovalRequestsEndpoint, listInvitationsEndpoint, listMembersEndpoint, listMembershipsEndpoint,
+  listPermissionsEndpoint, listRolesEndpoint, previewInvitationEndpoint, rejectApprovalRequestEndpoint,
+  removeMemberEndpoint, revokeInvitationEndpoint, revokeMembershipEndpoint, updateMembershipEndpoint, updateRoleEndpoint,
+} from "./contracts/access/endpoints.ts";
+// SP1 audit.
+export { AUDIT_CONTRACTS } from "./contracts/audit/contracts.ts";
+export { AUDIT_ACTIONS, AuditActionSchema, type AuditAction } from "./contracts/audit/audit-action.schema.ts";
+export {
+  AuditActorSchema, AuditActorTypeSchema, AuditLogEntryContract, AuditLogEntryIdSchema, AuditLogEntrySchema,
+  AuditTargetSchema, ChangedFieldSchema, PlatformAuditLogEntryContract, PlatformAuditLogEntrySchema, type AuditActorType,
+  type AuditLogEntry, type AuditLogEntryId, type PlatformAuditLogEntry,
+} from "./contracts/audit/audit-log-entry.schema.ts";
+export { AuditLogQueryContract, AuditLogQuerySchema, type AuditLogQuery } from "./contracts/audit/audit-log-query.schema.ts";
+export { AUDIT_ENDPOINTS, listAuditLogsEndpoint } from "./contracts/audit/endpoints.ts";
+export { CORE_ERROR_CODES, CoreErrorCodeSchema, type CoreErrorCode } from "./contracts/http/error-codes.ts";
 export { none, personal, sensitive, type FieldDocs } from "./contracts/field-docs.ts";
 export { HAS_ANY_FIELD_ERROR, hasAnyField, hasUniqueItems } from "./contracts/primitives/refinements.ts";
 // Removable sample contract (keeps the catalog non-empty).

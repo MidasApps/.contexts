@@ -1,0 +1,47 @@
+{
+  "additionalProperties": false,
+  "description": "Changes a custom role (core.role.update); every holder's access changes with it.",
+  "examples": [
+    {
+      "name": "Project maintainer"
+    },
+    {
+      "permissions": [
+        "core.project.read",
+        "core.unit.read"
+      ]
+    }
+  ],
+  "properties": {
+    "description": {
+      "description": "New description.",
+      "maxLength": 500,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "name": {
+      "description": "New display name.",
+      "maxLength": 80,
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "permissions": {
+      "description": "New permission set; replaces the old one.",
+      "items": {
+        "pattern": "^[a-z][a-z0-9-]*\\.[a-z][a-z0-9-]*\\.[a-z][a-z0-9-]*$",
+        "type": "string"
+      },
+      "maxItems": 200,
+      "minItems": 1,
+      "type": "array",
+      "x-pii": "none"
+    }
+  },
+  "type": "object",
+  "x-kind": "command",
+  "x-permission": "core.role.update",
+  "x-pii": "none",
+  "x-relations": [],
+  "x-tenancyScope": "organization"
+}

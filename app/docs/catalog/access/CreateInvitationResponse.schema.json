@@ -1,0 +1,292 @@
+{
+  "additionalProperties": false,
+  "description": "Answer of invitation creation with the one-time accept link.",
+  "examples": [
+    {
+      "acceptUrl": "https://app.example.com/invite#token=Zx9Cv8Bn7Mm6Aa5Ss4Dd3Ff2Gg1Hh0Jj9Kk8Ll7Qq6W",
+      "invitation": {
+        "acceptedByUid": null,
+        "createdAt": "2026-09-29T14:30:00.000Z",
+        "email": "carla@example.com",
+        "expiresAt": "2026-10-06T14:30:00.000Z",
+        "id": "Iv7cX9zA1sD3fG5hJ7kL",
+        "invitedBy": "uA1b2C3d4E5f6G7h8I9j",
+        "node": {
+          "level": "organization",
+          "tenantId": "Jd8sK2lPq0WnR5tYu3bV"
+        },
+        "roles": [
+          {
+            "key": "member",
+            "kind": "system"
+          }
+        ],
+        "status": "pending",
+        "tenantId": "Jd8sK2lPq0WnR5tYu3bV",
+        "updatedAt": "2026-09-29T14:30:00.000Z"
+      }
+    }
+  ],
+  "properties": {
+    "acceptUrl": {
+      "description": "One-time link `<app>/invite#token=<token>`, returned only here.",
+      "format": "uri",
+      "type": "string",
+      "x-pii": "sensitive"
+    },
+    "invitation": {
+      "additionalProperties": false,
+      "description": "The created invitation, as later listed.",
+      "properties": {
+        "acceptedByUid": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "User who accepted it; null until then.",
+          "x-pii": "personal"
+        },
+        "createdAt": {
+          "description": "When the invitation was created (UTC).",
+          "format": "date-time",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+          "type": "string",
+          "x-pii": "none"
+        },
+        "email": {
+          "description": "Invited email; accepting requires the same verified email.",
+          "format": "email",
+          "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$",
+          "type": "string",
+          "x-pii": "personal"
+        },
+        "expiresAt": {
+          "description": "When the invitation stops working (UTC), 7 days after creation.",
+          "format": "date-time",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+          "type": "string",
+          "x-pii": "none"
+        },
+        "id": {
+          "description": "Automatic id of the invitation.",
+          "minLength": 1,
+          "type": "string",
+          "x-pii": "none"
+        },
+        "invitedBy": {
+          "description": "User who sent the invitation.",
+          "minLength": 1,
+          "type": "string",
+          "x-pii": "personal"
+        },
+        "node": {
+          "description": "Node the invitee will be granted at.",
+          "oneOf": [
+            {
+              "additionalProperties": false,
+              "properties": {
+                "level": {
+                  "const": "organization",
+                  "description": "Level of the node.",
+                  "type": "string",
+                  "x-pii": "none"
+                },
+                "tenantId": {
+                  "description": "Organization (tenant) of the node.",
+                  "minLength": 1,
+                  "type": "string",
+                  "x-pii": "none"
+                }
+              },
+              "required": [
+                "level",
+                "tenantId"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "level": {
+                  "const": "project",
+                  "description": "Level of the node.",
+                  "type": "string",
+                  "x-pii": "none"
+                },
+                "projectId": {
+                  "description": "Project of the node.",
+                  "minLength": 1,
+                  "type": "string",
+                  "x-pii": "none"
+                },
+                "tenantId": {
+                  "description": "Organization (tenant) of the node.",
+                  "minLength": 1,
+                  "type": "string",
+                  "x-pii": "none"
+                }
+              },
+              "required": [
+                "level",
+                "tenantId",
+                "projectId"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "level": {
+                  "const": "unit",
+                  "description": "Level of the node.",
+                  "type": "string",
+                  "x-pii": "none"
+                },
+                "projectId": {
+                  "description": "Project of the node.",
+                  "minLength": 1,
+                  "type": "string",
+                  "x-pii": "none"
+                },
+                "tenantId": {
+                  "description": "Organization (tenant) of the node.",
+                  "minLength": 1,
+                  "type": "string",
+                  "x-pii": "none"
+                },
+                "unitId": {
+                  "description": "Unit of the node.",
+                  "minLength": 1,
+                  "type": "string",
+                  "x-pii": "none"
+                }
+              },
+              "required": [
+                "level",
+                "tenantId",
+                "projectId",
+                "unitId"
+              ],
+              "type": "object"
+            }
+          ],
+          "x-pii": "none"
+        },
+        "roles": {
+          "description": "Roles the invitee will get (no escalation).",
+          "items": {
+            "oneOf": [
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "key": {
+                    "description": "System role key.",
+                    "enum": [
+                      "owner",
+                      "admin",
+                      "member",
+                      "viewer",
+                      "device"
+                    ],
+                    "type": "string",
+                    "x-pii": "none"
+                  },
+                  "kind": {
+                    "const": "system",
+                    "description": "A system role of every organization.",
+                    "type": "string",
+                    "x-pii": "none"
+                  }
+                },
+                "required": [
+                  "kind",
+                  "key"
+                ],
+                "type": "object"
+              },
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "kind": {
+                    "const": "custom",
+                    "description": "A custom role of this organization.",
+                    "type": "string",
+                    "x-pii": "none"
+                  },
+                  "roleId": {
+                    "description": "Id of the custom role.",
+                    "minLength": 1,
+                    "type": "string",
+                    "x-pii": "none"
+                  }
+                },
+                "required": [
+                  "kind",
+                  "roleId"
+                ],
+                "type": "object"
+              }
+            ]
+          },
+          "maxItems": 10,
+          "minItems": 1,
+          "type": "array",
+          "x-pii": "none"
+        },
+        "status": {
+          "description": "pending, accepted, revoked or expired.",
+          "enum": [
+            "pending",
+            "accepted",
+            "revoked",
+            "expired"
+          ],
+          "type": "string",
+          "x-pii": "none"
+        },
+        "tenantId": {
+          "description": "Organization the invitation is for.",
+          "minLength": 1,
+          "type": "string",
+          "x-pii": "none"
+        },
+        "updatedAt": {
+          "description": "When the invitation last changed (UTC).",
+          "format": "date-time",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+          "type": "string",
+          "x-pii": "none"
+        }
+      },
+      "required": [
+        "id",
+        "tenantId",
+        "email",
+        "node",
+        "roles",
+        "status",
+        "expiresAt",
+        "invitedBy",
+        "acceptedByUid",
+        "createdAt",
+        "updatedAt"
+      ],
+      "type": "object",
+      "x-pii": "personal"
+    }
+  },
+  "required": [
+    "invitation",
+    "acceptUrl"
+  ],
+  "type": "object",
+  "x-kind": "view",
+  "x-pii": "sensitive",
+  "x-relations": [],
+  "x-tenancyScope": "organization"
+}

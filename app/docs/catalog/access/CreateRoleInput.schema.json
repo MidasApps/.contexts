@@ -1,0 +1,55 @@
+{
+  "additionalProperties": false,
+  "description": "Creates a custom role (core.role.create); unknown permissions answer 422 UNKNOWN_PERMISSION.",
+  "examples": [
+    {
+      "description": "Edits projects and units, cannot manage members.",
+      "name": "Project editor",
+      "permissions": [
+        "core.project.read",
+        "core.project.update",
+        "core.unit.read",
+        "core.unit.create",
+        "core.unit.update"
+      ]
+    }
+  ],
+  "properties": {
+    "description": {
+      "default": "",
+      "description": "What the role is for.",
+      "maxLength": 500,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "name": {
+      "description": "Display name of the role.",
+      "maxLength": 80,
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "permissions": {
+      "description": "Tenant permissions to grant; each must be held by the caller (no escalation).",
+      "items": {
+        "pattern": "^[a-z][a-z0-9-]*\\.[a-z][a-z0-9-]*\\.[a-z][a-z0-9-]*$",
+        "type": "string"
+      },
+      "maxItems": 200,
+      "minItems": 1,
+      "type": "array",
+      "x-pii": "none"
+    }
+  },
+  "required": [
+    "name",
+    "description",
+    "permissions"
+  ],
+  "type": "object",
+  "x-kind": "command",
+  "x-permission": "core.role.create",
+  "x-pii": "none",
+  "x-relations": [],
+  "x-tenancyScope": "organization"
+}

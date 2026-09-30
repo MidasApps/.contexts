@@ -1,0 +1,26 @@
+{
+  "additionalProperties": false,
+  "description": "Redeems an activation code (no auth; 5 failures per 15 min per IP).",
+  "examples": [
+    {
+      "code": "7kq2-m9xa"
+    }
+  ],
+  "properties": {
+    "code": {
+      "description": "Activation code as typed on the device.",
+      "maxLength": 16,
+      "minLength": 8,
+      "type": "string",
+      "x-pii": "sensitive"
+    }
+  },
+  "required": [
+    "code"
+  ],
+  "type": "object",
+  "x-kind": "command",
+  "x-pii": "sensitive",
+  "x-relations": [],
+  "x-tenancyScope": "organization"
+}

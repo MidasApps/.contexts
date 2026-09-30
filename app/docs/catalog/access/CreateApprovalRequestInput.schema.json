@@ -1,0 +1,167 @@
+{
+  "additionalProperties": false,
+  "description": "Asks for approval of an action; the caller must hold its permission at the node.",
+  "examples": [
+    {
+      "action": {
+        "input": {
+          "invoiceId": "Iq2wE4rT6yU8iO0pA1sD"
+        },
+        "kind": "sample-delete-invoice",
+        "summary": "Delete invoice 42"
+      },
+      "node": {
+        "level": "project",
+        "projectId": "Pq4rS6tU8vW0xY2zA1bC",
+        "tenantId": "Jd8sK2lPq0WnR5tYu3bV"
+      },
+      "permission": "sample.invoice.delete"
+    }
+  ],
+  "properties": {
+    "action": {
+      "additionalProperties": false,
+      "description": "The action to run once approved.",
+      "properties": {
+        "input": {
+          "additionalProperties": {},
+          "description": "Action input; the handler's schema validates it.",
+          "propertyNames": {
+            "type": "string"
+          },
+          "type": "object",
+          "x-pii": "personal"
+        },
+        "kind": {
+          "description": "Handler that validates and executes the action.",
+          "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+          "type": "string",
+          "x-pii": "none"
+        },
+        "summary": {
+          "description": "Human-readable summary shown to approvers.",
+          "maxLength": 500,
+          "minLength": 1,
+          "type": "string",
+          "x-pii": "personal"
+        }
+      },
+      "required": [
+        "kind",
+        "input",
+        "summary"
+      ],
+      "type": "object",
+      "x-pii": "personal"
+    },
+    "node": {
+      "description": "Node where the action will run.",
+      "oneOf": [
+        {
+          "additionalProperties": false,
+          "properties": {
+            "level": {
+              "const": "organization",
+              "description": "Level of the node.",
+              "type": "string",
+              "x-pii": "none"
+            },
+            "tenantId": {
+              "description": "Organization (tenant) of the node.",
+              "minLength": 1,
+              "type": "string",
+              "x-pii": "none"
+            }
+          },
+          "required": [
+            "level",
+            "tenantId"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "level": {
+              "const": "project",
+              "description": "Level of the node.",
+              "type": "string",
+              "x-pii": "none"
+            },
+            "projectId": {
+              "description": "Project of the node.",
+              "minLength": 1,
+              "type": "string",
+              "x-pii": "none"
+            },
+            "tenantId": {
+              "description": "Organization (tenant) of the node.",
+              "minLength": 1,
+              "type": "string",
+              "x-pii": "none"
+            }
+          },
+          "required": [
+            "level",
+            "tenantId",
+            "projectId"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "level": {
+              "const": "unit",
+              "description": "Level of the node.",
+              "type": "string",
+              "x-pii": "none"
+            },
+            "projectId": {
+              "description": "Project of the node.",
+              "minLength": 1,
+              "type": "string",
+              "x-pii": "none"
+            },
+            "tenantId": {
+              "description": "Organization (tenant) of the node.",
+              "minLength": 1,
+              "type": "string",
+              "x-pii": "none"
+            },
+            "unitId": {
+              "description": "Unit of the node.",
+              "minLength": 1,
+              "type": "string",
+              "x-pii": "none"
+            }
+          },
+          "required": [
+            "level",
+            "tenantId",
+            "projectId",
+            "unitId"
+          ],
+          "type": "object"
+        }
+      ],
+      "x-pii": "none"
+    },
+    "permission": {
+      "description": "Permission of the action; it must require approval.",
+      "pattern": "^[a-z][a-z0-9-]*\\.[a-z][a-z0-9-]*\\.[a-z][a-z0-9-]*$",
+      "type": "string",
+      "x-pii": "none"
+    }
+  },
+  "required": [
+    "node",
+    "permission",
+    "action"
+  ],
+  "type": "object",
+  "x-kind": "command",
+  "x-pii": "personal",
+  "x-relations": [],
+  "x-tenancyScope": "organization"
+}

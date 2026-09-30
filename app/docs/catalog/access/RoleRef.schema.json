@@ -1,0 +1,69 @@
+{
+  "description": "Reference to a system role (owner, admin, member, viewer, device) or a custom role.",
+  "examples": [
+    {
+      "key": "admin",
+      "kind": "system"
+    },
+    {
+      "kind": "custom",
+      "roleId": "Rl3kJ5hG7fD9sA1qW2eR"
+    }
+  ],
+  "oneOf": [
+    {
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "description": "System role key.",
+          "enum": [
+            "owner",
+            "admin",
+            "member",
+            "viewer",
+            "device"
+          ],
+          "type": "string",
+          "x-pii": "none"
+        },
+        "kind": {
+          "const": "system",
+          "description": "A system role of every organization.",
+          "type": "string",
+          "x-pii": "none"
+        }
+      },
+      "required": [
+        "kind",
+        "key"
+      ],
+      "type": "object"
+    },
+    {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "custom",
+          "description": "A custom role of this organization.",
+          "type": "string",
+          "x-pii": "none"
+        },
+        "roleId": {
+          "description": "Id of the custom role.",
+          "minLength": 1,
+          "type": "string",
+          "x-pii": "none"
+        }
+      },
+      "required": [
+        "kind",
+        "roleId"
+      ],
+      "type": "object"
+    }
+  ],
+  "x-kind": "view",
+  "x-pii": "none",
+  "x-relations": [],
+  "x-tenancyScope": "organization"
+}

@@ -1,0 +1,193 @@
+{
+  "additionalProperties": false,
+  "description": "Invites an email to the organization (core.member.invite).",
+  "examples": [
+    {
+      "email": "carla@example.com",
+      "node": {
+        "level": "organization",
+        "tenantId": "Jd8sK2lPq0WnR5tYu3bV"
+      },
+      "roles": [
+        {
+          "key": "member",
+          "kind": "system"
+        }
+      ]
+    }
+  ],
+  "properties": {
+    "email": {
+      "description": "Email to invite.",
+      "format": "email",
+      "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$",
+      "type": "string",
+      "x-pii": "personal"
+    },
+    "node": {
+      "description": "Node the invitee will be granted at.",
+      "oneOf": [
+        {
+          "additionalProperties": false,
+          "properties": {
+            "level": {
+              "const": "organization",
+              "description": "Level of the node.",
+              "type": "string",
+              "x-pii": "none"
+            },
+            "tenantId": {
+              "description": "Organization (tenant) of the node.",
+              "minLength": 1,
+              "type": "string",
+              "x-pii": "none"
+            }
+          },
+          "required": [
+            "level",
+            "tenantId"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "level": {
+              "const": "project",
+              "description": "Level of the node.",
+              "type": "string",
+              "x-pii": "none"
+            },
+            "projectId": {
+              "description": "Project of the node.",
+              "minLength": 1,
+              "type": "string",
+              "x-pii": "none"
+            },
+            "tenantId": {
+              "description": "Organization (tenant) of the node.",
+              "minLength": 1,
+              "type": "string",
+              "x-pii": "none"
+            }
+          },
+          "required": [
+            "level",
+            "tenantId",
+            "projectId"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "level": {
+              "const": "unit",
+              "description": "Level of the node.",
+              "type": "string",
+              "x-pii": "none"
+            },
+            "projectId": {
+              "description": "Project of the node.",
+              "minLength": 1,
+              "type": "string",
+              "x-pii": "none"
+            },
+            "tenantId": {
+              "description": "Organization (tenant) of the node.",
+              "minLength": 1,
+              "type": "string",
+              "x-pii": "none"
+            },
+            "unitId": {
+              "description": "Unit of the node.",
+              "minLength": 1,
+              "type": "string",
+              "x-pii": "none"
+            }
+          },
+          "required": [
+            "level",
+            "tenantId",
+            "projectId",
+            "unitId"
+          ],
+          "type": "object"
+        }
+      ],
+      "x-pii": "none"
+    },
+    "roles": {
+      "description": "Roles the invitee will get (no escalation).",
+      "items": {
+        "oneOf": [
+          {
+            "additionalProperties": false,
+            "properties": {
+              "key": {
+                "description": "System role key.",
+                "enum": [
+                  "owner",
+                  "admin",
+                  "member",
+                  "viewer",
+                  "device"
+                ],
+                "type": "string",
+                "x-pii": "none"
+              },
+              "kind": {
+                "const": "system",
+                "description": "A system role of every organization.",
+                "type": "string",
+                "x-pii": "none"
+              }
+            },
+            "required": [
+              "kind",
+              "key"
+            ],
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "kind": {
+                "const": "custom",
+                "description": "A custom role of this organization.",
+                "type": "string",
+                "x-pii": "none"
+              },
+              "roleId": {
+                "description": "Id of the custom role.",
+                "minLength": 1,
+                "type": "string",
+                "x-pii": "none"
+              }
+            },
+            "required": [
+              "kind",
+              "roleId"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "maxItems": 10,
+      "minItems": 1,
+      "type": "array",
+      "x-pii": "none"
+    }
+  },
+  "required": [
+    "email",
+    "node",
+    "roles"
+  ],
+  "type": "object",
+  "x-kind": "command",
+  "x-permission": "core.member.invite",
+  "x-pii": "personal",
+  "x-relations": [],
+  "x-tenancyScope": "organization"
+}

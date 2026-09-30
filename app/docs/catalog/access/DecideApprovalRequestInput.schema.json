@@ -1,0 +1,25 @@
+{
+  "additionalProperties": false,
+  "description": "Approves or rejects a request (core.approval.decide plus the action's permission).",
+  "examples": [
+    {},
+    {
+      "reason": "Confirmed with finance."
+    }
+  ],
+  "properties": {
+    "reason": {
+      "description": "Optional reason, shown to the requester and audited.",
+      "maxLength": 500,
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "personal"
+    }
+  },
+  "type": "object",
+  "x-kind": "command",
+  "x-permission": "core.approval.decide",
+  "x-pii": "personal",
+  "x-relations": [],
+  "x-tenancyScope": "organization"
+}

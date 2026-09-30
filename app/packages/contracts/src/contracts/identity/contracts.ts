@@ -7,6 +7,12 @@ import {
   ExchangeDesktopSessionInputContract,
   ExchangeDesktopSessionResponseContract,
 } from "./desktop-session.schema.ts";
+import {
+  CreateDeviceActivationInputContract,
+  CreateDeviceActivationResponseContract,
+  RedeemDeviceActivationInputContract,
+  RedeemDeviceActivationResponseContract,
+} from "./device-activation.schema.ts";
 import { DeviceContract } from "./device.schema.ts";
 import {
   ImpersonationSessionContract,
@@ -33,6 +39,10 @@ export const IDENTITY_CONTRACTS: readonly ContractDefinition[] = [
   ExchangeDesktopSessionInputContract,
   ExchangeDesktopSessionResponseContract,
   DeviceContract,
+  CreateDeviceActivationInputContract,
+  CreateDeviceActivationResponseContract,
+  RedeemDeviceActivationInputContract,
+  RedeemDeviceActivationResponseContract,
   ApiKeyContract,
   CreateApiKeyInputContract,
   CreateApiKeyResponseContract,

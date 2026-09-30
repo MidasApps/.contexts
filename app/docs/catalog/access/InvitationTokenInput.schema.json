@@ -1,0 +1,25 @@
+{
+  "additionalProperties": false,
+  "description": "Token of an invitation link, sent to preview or accept it (Bearer required).",
+  "examples": [
+    {
+      "token": "Zx9Cv8Bn7Mm6Aa5Ss4Dd3Ff2Gg1Hh0Jj9Kk8Ll7Qq6W"
+    }
+  ],
+  "properties": {
+    "token": {
+      "description": "Token from the `#token=` fragment of the accept link.",
+      "pattern": "^[A-Za-z0-9_-]{43}$",
+      "type": "string",
+      "x-pii": "sensitive"
+    }
+  },
+  "required": [
+    "token"
+  ],
+  "type": "object",
+  "x-kind": "command",
+  "x-pii": "sensitive",
+  "x-relations": [],
+  "x-tenancyScope": "user"
+}

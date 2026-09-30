@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { composeCoreContracts, composeCoreEndpoints, CORE_CONTRACTS, CORE_ENDPOINTS } from "./composition.ts";
+import { ACCESS_CONTRACTS } from "./contracts/access/contracts.ts";
+import { AUDIT_CONTRACTS } from "./contracts/audit/contracts.ts";
 import { IDENTITY_CONTRACTS } from "./contracts/identity/contracts.ts";
 import { TENANCY_CONTRACTS } from "./contracts/tenancy/contracts.ts";
 import { inspectSchema } from "./contracts/field-meta-rules.ts";
@@ -8,7 +10,7 @@ describe("composeCoreContracts", () => {
   it("registers every core contract in a fresh registry, sorted by id", () => {
     const ids = composeCoreContracts().listContracts().map((contract) => contract.id);
     expect(ids).toEqual([...CORE_CONTRACTS.map((contract) => contract.id)].sort());
-    expect(ids).toEqual(expect.arrayContaining([...TENANCY_CONTRACTS, ...IDENTITY_CONTRACTS].map((contract) => contract.id)));
+    expect(ids).toEqual(expect.arrayContaining([...TENANCY_CONTRACTS, ...IDENTITY_CONTRACTS, ...ACCESS_CONTRACTS, ...AUDIT_CONTRACTS].map((contract) => contract.id)));
     expect(ids).toEqual(expect.arrayContaining([
       "agents.AgentRequestContext",
       "agents.AgentSettings",
