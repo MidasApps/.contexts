@@ -42,11 +42,11 @@ export const nodes = {
 
 export const principals = {
   user: (uid: string, mfa = false): Principal => ({ type: "user", uid: UserIdSchema.parse(uid), mfa }),
-  impersonated: (uid: string, sessionId: string): Principal => ({
+  impersonated: (uid: string, sessionId: string, staffUid = "staff-support"): Principal => ({
     type: "user",
     uid: UserIdSchema.parse(uid),
     mfa: false,
-    impersonation: { sessionId: ImpersonationSessionIdSchema.parse(sessionId), staffUid: UserIdSchema.parse("staff-support") },
+    impersonation: { sessionId: ImpersonationSessionIdSchema.parse(sessionId), staffUid: UserIdSchema.parse(staffUid) },
   }),
   device: (deviceId: string, tenantId = "org-a"): Principal => ({ type: "device", deviceId: DeviceIdSchema.parse(deviceId), tenantId: tenant(tenantId) }),
   service: (apiKeyId: string, ownerUid = "owner-a", tenantId = "org-a"): Principal => ({
@@ -91,6 +91,7 @@ const seedUsers = (store: InMemoryAccessStore): void => {
   for (const uid of ["owner-a", "viewer-p1", "editor-u1", "member-u1a", "multi", "odd-role", "gone-role", "deleted-grant"]) store.putUser(uid);
   for (const uid of ["staff-admin", "staff-support", "staff-off", "suspended-owner", "orphan-owner"]) store.putUser(uid);
   store.putUser("disabled", "disabled");
+  store.putUser("staff-disabled", "disabled");
   const grant = (principalId: string, tenantId: string, nodeId: string, key: "owner" | "member" | "viewer" | "device") =>
     store.putGrant({ tenantId, principalId, nodeId, roles: [{ kind: "system", key }] });
   const custom = (principalId: string, nodeId: string, roleId: string) =>
@@ -140,15 +141,19 @@ const seedApiKeys = (store: InMemoryAccessStore): void => {
   key("key-orphan", { ownerUid: UserIdSchema.parse("orphan-owner") });
   key("key-viewer", { ownerUid: UserIdSchema.parse("viewer-p1") });
   key("key-disabled-owner", { ownerUid: UserIdSchema.parse("disabled"), node: nodes.orgA });
+  key("key-bad-expiry", { expiresAt: "not-a-date" });
+  key("key-foreign-node", { node: nodes.pb });
 };
 
 const seedStaff = (store: InMemoryAccessStore): void => {
   store.putPlatformStaff("staff-admin", { role: "platform-admin", isActive: true });
   store.putPlatformStaff("staff-support", { role: "platform-support", isActive: true });
   store.putPlatformStaff("staff-off", { role: "platform-admin", isActive: false });
-  const session = (id: string, targetUid: string, overrides: { expiresAt?: string; endedAt?: string | null; tenantId?: string } = {}) =>
+  store.putPlatformStaff("staff-disabled", { role: "platform-support", isActive: true });
+  type SessionOverrides = { expiresAt?: string; endedAt?: string | null; tenantId?: string; staffUid?: string };
+  const session = (id: string, targetUid: string, overrides: SessionOverrides = {}) =>
     store.putImpersonationSession(id, {
-      staffUid: UserIdSchema.parse("staff-support"),
+      staffUid: UserIdSchema.parse(overrides.staffUid ?? "staff-support"),
       targetUid: UserIdSchema.parse(targetUid),
       tenantId: tenant(overrides.tenantId ?? "org-a"),
       expiresAt: overrides.expiresAt ?? "2026-09-29T13:00:00.000Z",
@@ -159,6 +164,10 @@ const seedStaff = (store: InMemoryAccessStore): void => {
   session("imp-ended", "owner-a", { endedAt: "2026-09-29T11:30:00.000Z" });
   session("imp-other-tenant", "owner-a", { tenantId: "org-b" });
   session("imp-other-target", "viewer-p1");
+  session("imp-bad-expiry", "owner-a", { expiresAt: "not-a-date" });
+  session("imp-by-staff-off", "owner-a", { staffUid: "staff-off" });
+  session("imp-by-disabled-staff", "owner-a", { staffUid: "staff-disabled" });
+  session("imp-by-non-staff", "owner-a", { staffUid: "viewer-p1" });
 };
 
 export type AccessWorld = { store: InMemoryAccessStore; registry: PermissionRegistry; clock: ReturnType<typeof fixedClock> };

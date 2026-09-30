@@ -2,6 +2,7 @@ import type { Permission, Principal, TenantNodeRef, UserId } from "@core/contrac
 import { isAtOrBefore, type Clock } from "../../shared/clock/clock.ts";
 import type { DenyReason } from "../domain/authorization.ts";
 import { isNodeWithin, type NodeChain } from "../domain/node-chain.ts";
+import type { PermissionRegistry } from "../domain/permission-registry.ts";
 import type { AccessReaders } from "./ports/driven/access-readers.ts";
 import type { ApiKeyStatusRecord } from "./ports/driven/principal-status-reader.ts";
 
@@ -18,7 +19,9 @@ export type TenantSubject = {
 
 export type SubjectResult = { readonly ok: true; readonly subject: TenantSubject } | { readonly ok: false; readonly reason: DenyReason };
 
-type SubjectArgs = { node: TenantNodeRef; chain: NodeChain; readers: AccessReaders; clock: Clock };
+type SubjectArgs = { node: TenantNodeRef; chain: NodeChain; readers: AccessReaders; clock: Clock; registry: PermissionRegistry };
+
+const IMPERSONATE_PERMISSION: Permission = "platform.user.impersonate";
 
 const denied = (reason: DenyReason): SubjectResult => ({ ok: false, reason });
 
@@ -26,19 +29,36 @@ const denied = (reason: DenyReason): SubjectResult => ({ ok: false, reason });
 const isUserActive = async (readers: AccessReaders, uid: UserId): Promise<boolean> =>
   (await readers.principals.getUser(uid))?.status === "active";
 
-const resolveUser = async (principal: Extract<Principal, { type: "user" }>, args: SubjectArgs): Promise<SubjectResult> => {
-  if (!(await isUserActive(args.readers, principal.uid))) return denied("PRINCIPAL_INACTIVE");
-  if (principal.impersonation === undefined) return { ok: true, subject: { principalId: principal.uid, readOnly: false } };
-  const session = await args.readers.principals.getImpersonationSession(principal.impersonation.sessionId);
-  // One reason for every unusable session: expired, ended, unknown, or issued for another user or tenant.
-  const usable =
+type Impersonation = NonNullable<Extract<Principal, { type: "user" }>["impersonation"]>;
+
+// The staff member must still be allowed to impersonate on every request, not only when the session started.
+const canStaffImpersonate = async (args: SubjectArgs, staffUid: UserId): Promise<boolean> => {
+  const staff = await args.readers.principals.getPlatformStaff(staffUid);
+  if (staff === null || !staff.isActive) return false;
+  if (!args.registry.permissionsForPlatformRole(staff.role).has(IMPERSONATE_PERMISSION)) return false;
+  return isUserActive(args.readers, staffUid);
+};
+
+// One reason for every unusable session: expired, ended, unknown, issued for another user or
+// tenant, or held by staff who lost the right to impersonate.
+const isImpersonationUsable = async (targetUid: UserId, impersonation: Impersonation, args: SubjectArgs): Promise<boolean> => {
+  const session = await args.readers.principals.getImpersonationSession(impersonation.sessionId);
+  const sessionOpen =
     session !== null &&
     session.endedAt === null &&
     !isAtOrBefore(session.expiresAt, args.clock.now()) &&
-    session.targetUid === principal.uid &&
-    session.staffUid === principal.impersonation.staffUid &&
+    session.targetUid === targetUid &&
+    session.staffUid === impersonation.staffUid &&
     session.tenantId === args.node.tenantId;
-  return usable ? { ok: true, subject: { principalId: principal.uid, readOnly: true } } : denied("IMPERSONATION_EXPIRED");
+  return sessionOpen && (await canStaffImpersonate(args, impersonation.staffUid));
+};
+
+const resolveUser = async (principal: Extract<Principal, { type: "user" }>, args: SubjectArgs): Promise<SubjectResult> => {
+  if (!(await isUserActive(args.readers, principal.uid))) return denied("PRINCIPAL_INACTIVE");
+  if (principal.impersonation === undefined) return { ok: true, subject: { principalId: principal.uid, readOnly: false } };
+  return (await isImpersonationUsable(principal.uid, principal.impersonation, args))
+    ? { ok: true, subject: { principalId: principal.uid, readOnly: true } }
+    : denied("IMPERSONATION_EXPIRED");
 };
 
 const resolveDevice = async (principal: Extract<Principal, { type: "device" }>, args: SubjectArgs): Promise<SubjectResult> => {
@@ -55,7 +75,9 @@ const resolveService = async (principal: Extract<Principal, { type: "service" }>
   const key = await args.readers.principals.getApiKey(principal.apiKeyId);
   if (!matchesKey(principal, key)) return denied("PRINCIPAL_INACTIVE");
   if (isAtOrBefore(key.expiresAt, args.clock.now())) return denied("KEY_EXPIRED");
-  if (!isNodeWithin({ inner: args.chain, outer: key.node })) return denied("OUTSIDE_KEY_SCOPE");
+  // A key acts only inside its own tenant, even if its stored node were written with another one.
+  const sameTenant = args.node.tenantId === principal.tenantId && key.node.tenantId === key.tenantId;
+  if (!sameTenant || !isNodeWithin({ inner: args.chain, outer: key.node })) return denied("OUTSIDE_KEY_SCOPE");
   if (!(await isUserActive(args.readers, key.ownerUid))) return denied("PRINCIPAL_INACTIVE");
   return { ok: true, subject: { principalId: key.ownerUid, scopes: new Set(key.scopes), readOnly: false } };
 };

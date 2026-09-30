@@ -169,6 +169,15 @@ describe("authorize: service principal (API key)", () => {
     expect(await reasonOf(service("key-disabled-owner", "disabled"), "core.project.read", nodes.p1)).toBe("PRINCIPAL_INACTIVE");
   });
 
+  it("denies a key whose expiry cannot be parsed (fail-closed)", async () => {
+    expect(await reasonOf(service("key-bad-expiry"), "core.project.read", nodes.p1)).toBe("KEY_EXPIRED");
+  });
+
+  it("denies a node of another tenant, even inside a key node stored with the wrong tenant", async () => {
+    expect(await reasonOf(service("key-foreign-node"), "core.project.read", nodes.pb)).toBe("OUTSIDE_KEY_SCOPE");
+    expect(await reasonOf(service("key-1"), "core.project.read", nodes.pb)).toBe("OUTSIDE_KEY_SCOPE");
+  });
+
   it("denies a key whose claims do not match the stored key", async () => {
     expect(await reasonOf(service("key-1", "viewer-p1"), "core.project.read", nodes.p1)).toBe("PRINCIPAL_INACTIVE");
     expect(await reasonOf(service("key-1", "owner-a", "org-b"), "core.project.read", nodes.p1)).toBe("PRINCIPAL_INACTIVE");
@@ -217,6 +226,22 @@ describe("authorize: impersonation (read-only, time-boxed)", () => {
     expect(await reasonOf(impersonated("owner-a", "imp-missing"), "core.project.read", nodes.p1)).toBe("IMPERSONATION_EXPIRED");
     expect(await reasonOf(impersonated("owner-a", "imp-other-tenant"), "core.project.read", nodes.p1)).toBe("IMPERSONATION_EXPIRED");
     expect(await reasonOf(impersonated("owner-a", "imp-other-target"), "core.project.read", nodes.p1)).toBe("IMPERSONATION_EXPIRED");
+  });
+
+  it("denies a session whose expiry cannot be parsed (fail-closed)", async () => {
+    expect(await reasonOf(impersonated("owner-a", "imp-bad-expiry"), "core.project.read", nodes.p1)).toBe("IMPERSONATION_EXPIRED");
+  });
+
+  it("denies when the staff member is no longer active staff or no longer an active user", async () => {
+    expect(await reasonOf(impersonated("owner-a", "imp-by-staff-off", "staff-off"), "core.project.read", nodes.p1)).toBe(
+      "IMPERSONATION_EXPIRED",
+    );
+    expect(await reasonOf(impersonated("owner-a", "imp-by-disabled-staff", "staff-disabled"), "core.project.read", nodes.p1)).toBe(
+      "IMPERSONATION_EXPIRED",
+    );
+    expect(await reasonOf(impersonated("owner-a", "imp-by-non-staff", "viewer-p1"), "core.project.read", nodes.p1)).toBe(
+      "IMPERSONATION_EXPIRED",
+    );
   });
 
   it("never grants platform permissions through impersonation", async () => {

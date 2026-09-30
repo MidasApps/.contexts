@@ -13,5 +13,8 @@ export const fixedClock = (iso: string): Clock => {
   return { now: () => new Date(instant.getTime()) };
 };
 
-/** Whether an ISO 8601 instant is at or before `now` (expired). */
-export const isAtOrBefore = (iso: string, now: Date): boolean => Date.parse(iso) <= now.getTime();
+/**
+ * Whether an ISO 8601 instant is at or before `now` (expired). An unparsable
+ * instant counts as passed, so a corrupt expiry never keeps access open.
+ */
+export const isAtOrBefore = (iso: string, now: Date): boolean => !(Date.parse(iso) > now.getTime());

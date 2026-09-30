@@ -37,7 +37,13 @@ export const loadTenantAccess = async (args: {
   if (chain === null) return deniedAccess("NODE_NOT_FOUND");
   const chainIssue = checkNodeChain(node, chain);
   if (chainIssue !== null) return deniedAccess(chainIssue);
-  const resolved = await resolveTenantSubject(principal, { node, chain, readers: deps.readers, clock: deps.clock });
+  const resolved = await resolveTenantSubject(principal, {
+    node,
+    chain,
+    readers: deps.readers,
+    clock: deps.clock,
+    registry: deps.registry,
+  });
   if (!resolved.ok) return resolved;
   const precheckIssue = args.precheck?.(resolved.subject) ?? null;
   if (precheckIssue !== null) return deniedAccess(precheckIssue);
