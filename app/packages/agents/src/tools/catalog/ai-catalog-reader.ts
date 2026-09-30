@@ -4,13 +4,17 @@ import { z } from "zod";
  * Reads the AI catalog (`docs/catalog/catalog.ai.json`, spec §8.2, decision
  * 0005) and applies the visibility rules the catalog tools rely on:
  * - a contract with a `permission` is visible only to principals holding it;
- *   one without a permission (shared core shapes) is visible to every member;
+ *   one without a permission (shared core shapes) only to holders of
+ *   `core.catalog.read` (decision 0024, amendment 2026-09-30);
  * - `sensitive` fields never reach the model (the generator already drops
- *   them; the reader drops them again as defence in depth);
+ *   them; the reader drops them again, and their example keys, as defence in depth);
  * - `personal` fields are described, but their example values are redacted.
  */
 
 export const REDACTED = "[redacted]";
+
+/** Permission that makes contracts without their own `permission` visible. */
+export const CATALOG_READ_PERMISSION = "core.catalog.read";
 
 const PiiSchema = z.enum(["none", "personal", "sensitive"]);
 
@@ -81,8 +85,9 @@ export class InvalidAiCatalogError extends Error {
   }
 }
 
+// Fail-closed: a contract that names no permission still needs the catalog read grant.
 const isVisible = (entry: AiCatalogEntry, permissions: ReadonlySet<string>): boolean =>
-  entry.permission === undefined || permissions.has(entry.permission);
+  permissions.has(entry.permission ?? CATALOG_READ_PERMISSION);
 
 const summarize = (entry: AiCatalogEntry): AiEntitySummary => ({
   id: entry.id,
@@ -104,12 +109,22 @@ const describeField = (field: z.infer<typeof AiCatalogFieldSchema>): AiFieldDesc
   };
 };
 
-/** Example with every non-`none` field value replaced (unknown keys are redacted too). */
-const redactExample = (example: Record<string, unknown>, publicFields: ReadonlySet<string>): Record<string, unknown> =>
-  Object.fromEntries(Object.entries(example).map(([key, value]) => [key, publicFields.has(key) ? value : REDACTED]));
+/** Example with every non-`none` value replaced (unknown keys too) and `sensitive` keys dropped. */
+const redactExample = (
+  example: Record<string, unknown>,
+  fields: { readonly public: ReadonlySet<string>; readonly sensitive: ReadonlySet<string> },
+): Record<string, unknown> =>
+  Object.fromEntries(
+    Object.entries(example)
+      .filter(([key]) => !fields.sensitive.has(key))
+      .map(([key, value]) => [key, fields.public.has(key) ? value : REDACTED]),
+  );
+
+const fieldNamesWith = (entry: AiCatalogEntry, pii: z.infer<typeof PiiSchema>): ReadonlySet<string> =>
+  new Set(entry.fields.filter((field) => field.pii === pii).map((field) => field.name));
 
 const describeEntry = (entry: AiCatalogEntry): AiEntityDescription => {
-  const publicFields = new Set(entry.fields.filter((field) => field.pii === "none").map((field) => field.name));
+  const fields = { public: fieldNamesWith(entry, "none"), sensitive: fieldNamesWith(entry, "sensitive") };
   return {
     ...summarize(entry),
     pii: entry.pii,
@@ -117,7 +132,7 @@ const describeEntry = (entry: AiCatalogEntry): AiEntityDescription => {
     ...(entry.permission === undefined ? {} : { permission: entry.permission }),
     fields: entry.fields.flatMap((field) => describeField(field) ?? []),
     relations: entry.relations,
-    examples: entry.examples.map((example) => redactExample(example, publicFields)),
+    examples: entry.examples.map((example) => redactExample(example, fields)),
   };
 };
 

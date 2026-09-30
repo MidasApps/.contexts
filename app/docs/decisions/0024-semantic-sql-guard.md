@@ -29,3 +29,16 @@ The data agent answers questions over tenant data with SQL written by a model. M
 - **Regex or keyword blacklist.** Comments, unicode escapes and nested constructs bypass it.
 - **Text-to-structured-query DSL instead of SQL.** Loses expressiveness the models handle well and still needs a runner.
 - **Trusting a `tenant_id` predicate written by the model.** The tenant comes only from the server setting; literals are neither needed nor trusted.
+
+## Amendments
+
+- **2026-09-30 — catalog tools are fail-closed for contracts without a `permission`.** The
+  data catalog tools of spec §8.2 (`catalog.listEntities`, `catalog.describeEntity`,
+  `catalog.renderForm`) share this decision's permission model (view → contract →
+  permission). A contract whose catalog entry names a `permission` is listed and described
+  only to principals holding it. A contract with no `permission` (shared core shapes) is
+  listed and described only to principals holding `core.catalog.read`, instead of to every
+  member. No catalog answer ever includes a `sensitive` field: the generator drops them, and
+  `ai-catalog-reader.ts` drops them again together with their keys in examples; `personal`
+  values stay redacted. Visibility uses the effective context permissions (principal ∩ agent
+  ceiling), so an agent without `core.catalog.read` in its ceiling sees no shared shape.

@@ -1,8 +1,8 @@
 import { z } from "zod";
 import { defineCoreTool } from "../define-core-tool.ts";
-import type { AiCatalogReader } from "./ai-catalog-reader.ts";
+import { type AiCatalogReader, CATALOG_READ_PERMISSION } from "./ai-catalog-reader.ts";
 
-export const CATALOG_READ_PERMISSION = "core.catalog.read";
+export { CATALOG_READ_PERMISSION };
 export const MAX_ENTITIES_PAGE = 50;
 
 const EntitySummarySchema = z.strictObject({ id: z.string(), name: z.string(), context: z.string(), kind: z.string(), description: z.string() });

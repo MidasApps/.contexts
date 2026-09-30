@@ -4,12 +4,27 @@ import { loadBundledAiCatalog } from "./ai-catalog-source.ts";
 import { FIXTURE_AI_CATALOG } from "./catalog-fixture.ts";
 
 const reader = createAiCatalogReader(FIXTURE_AI_CATALOG);
-const MEMBER = new Set(["example.note.read", "example.note.create"]);
+const MEMBER = new Set(["core.catalog.read", "example.note.read", "example.note.create"]);
 
 describe("createAiCatalogReader.list", () => {
   it("hides contracts whose permission the principal lacks and keeps those without one", () => {
     const ids = reader.list({ permissions: MEMBER, limit: 50 }).entities.map((entity) => entity.id);
     expect(ids).toEqual(["example.CreateNoteCommand", "example.Note", "tenancy.Organization"]);
+  });
+
+  it("lists contracts without a permission only to holders of core.catalog.read (decision 0024 amendment)", () => {
+    const withoutCatalogRead = new Set(["example.note.read", "example.note.create"]);
+    const ids = reader.list({ permissions: withoutCatalogRead, limit: 50 }).entities.map((entity) => entity.id);
+    expect(ids).toEqual(["example.CreateNoteCommand", "example.Note"]);
+    expect(reader.describe({ id: "tenancy.Organization", permissions: withoutCatalogRead })).toBeUndefined();
+    expect(reader.describe({ id: "tenancy.Organization", permissions: new Set(["core.catalog.read"]) })?.id).toBe("tenancy.Organization");
+  });
+
+  it("never describes sensitive fields or values of a contract without a permission", () => {
+    const organization = reader.describe({ id: "tenancy.Organization", permissions: new Set(["core.catalog.read"]) });
+    expect(organization?.fields.map((field) => field.name)).toEqual(["id"]);
+    expect(organization?.examples).toEqual([{ id: "Jd8sK2lPq0WnR5tYu3bV" }]);
+    expect(JSON.stringify(organization)).not.toMatch(/s3cr3t|billingSecret/);
   });
 
   it("filters by kind and by a case-insensitive query over id, name and description", () => {
