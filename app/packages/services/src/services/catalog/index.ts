@@ -5,7 +5,7 @@ export {
   DEFAULT_STATEMENT_TIMEOUT_MS,
   SEMANTIC_READER_ROLE,
 } from "./adapters/driven/postgres-semantic-runner.ts";
-export { guardSemanticSql, MAX_SQL_LENGTH, wrapWithLimit } from "./adapters/driven/sql-guard.ts";
+export { guardConnectorSql, guardSemanticSql, MAX_SQL_LENGTH, wrapWithLimit } from "./adapters/driven/sql-guard.ts";
 export type {
   GuardedSql,
   SemanticQueryRows,

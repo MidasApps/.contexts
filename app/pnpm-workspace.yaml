@@ -19,10 +19,13 @@ catalog:
   "@formatjs/intl-localematcher": 0.9.0 # locale negotiation (RFC 4647 best fit)
   "@google-cloud/bigquery": 9.1.0 # usage sink to ai_observability.llm_calls (decision 0026)
   "@google-cloud/secret-manager": 7.1.1 # connector secrets outside local (decision 0027, Apache-2.0)
+  "@apidevtools/swagger-parser": 13.1.0 # OpenAPI connectors: parse + dereference 3.0/3.1 (decision 0027, MIT)
+  "openapi-types": 12.1.3 # peer of swagger-parser (types only, MIT)
   "@mastra/client-js": 1.50.0 # /v1 -> Mastra gateway; 1.51.0 requires @mastra/core 1.72.0 (follow-up #17 bumps the train)
   "@mastra/core": 1.71.0
   "@mastra/deployer": 1.71.0 # createNodeServer for the agents auth emulator test (same train as core)
   "@mastra/loggers": 1.3.2
+  "@mastra/mcp": 2.1.1 # MCP client connectors (allowedHosts, approval) and the core MCP server; peer @mastra/core >=1.68 (Apache-2.0)
   "@mastra/memory": 1.32.1 # agent memory; 1.33.0 belongs to the @mastra/core 1.72.0 train (follow-up #17)
   "@mastra/observability": 1.18.1
   "@mastra/otel-exporter": 1.4.2 # OTLP span export (Cloud Trace); 1.4.3 needs @mastra/observability 1.18.2 (train bump, follow-up #17)
@@ -134,3 +137,4 @@ minimumReleaseAgeExclude:
   # SP3 model factory (Task 5): latest @ai-sdk/openai, published 2026-09-29, admitted by
   # pnpm at install; remove after 2026-10-06 (7 days after the publish).
   - '@ai-sdk/openai@4.0.81'
+  - '@mastra/mcp@2.1.1'

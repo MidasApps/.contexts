@@ -33,7 +33,8 @@ describe("catalog-reindex workflow (Postgres, fake embeddings)", () => {
     expect(catalogDocs.map((document) => document.source_ref).sort()).toEqual(catalog.contracts.map((contract) => contract.id).sort());
     expect(catalogDocs.every((document) => document.namespace === "catalog" && document.status === "ready" && document.title === document.source_ref)).toBe(true);
     expect(await run()).toEqual({ status: "done", total: catalog.contracts.length, indexed: 0, unchanged: catalog.contracts.length, code: null });
-  });
+    // Two full runs over every AI-catalog contract (about 100 documents): above the default 5 s on a busy machine.
+  }, 60_000);
 
   it("is readable by any tenant in the catalog namespace", async () => {
     const [embedding] = (await world.embedding().doEmbed({ values: ["uploaded file validated by content"] })).embeddings;

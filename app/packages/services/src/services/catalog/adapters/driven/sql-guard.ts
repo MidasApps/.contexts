@@ -37,7 +37,13 @@ const ALLOWED_VALUE_FUNCTIONS = new Set(["SVFOP_CURRENT_DATE", "SVFOP_CURRENT_TI
 
 type Node = Record<string, unknown>;
 type Rejection = { reason: SqlRejectionReason; detail?: string };
-type WalkState = { readonly allowedViews: ReadonlySet<string>; readonly cteNames: ReadonlySet<string>; readonly paramCount: number };
+type WalkState = {
+  readonly allowedViews: ReadonlySet<string>;
+  readonly cteNames: ReadonlySet<string>;
+  readonly paramCount: number;
+  /** Connector mode: qualified `schema.relation` names instead of `semantic.<view>`. */
+  readonly allowedRelations?: ReadonlySet<string>;
+};
 
 const asNode = (value: unknown): Node => (value !== null && typeof value === "object" ? (value as Node) : {});
 const stringsOf = (list: unknown): string[] =>
@@ -57,6 +63,10 @@ const checkRangeVar = (body: Node, state: WalkState): Rejection | undefined => {
   const schemaname = textOf(body.schemaname);
   if (body.catalogname !== undefined) return { reason: "SCHEMA_NOT_ALLOWED", detail: textOf(body.catalogname) ?? "" };
   if (schemaname === undefined) return state.cteNames.has(relname) ? undefined : { reason: "SCHEMA_NOT_ALLOWED", detail: relname };
+  if (state.allowedRelations !== undefined) {
+    const qualified = `${schemaname}.${relname}`;
+    return state.allowedRelations.has(qualified) ? undefined : { reason: "VIEW_NOT_ALLOWED", detail: qualified };
+  }
   if (schemaname !== SEMANTIC_SCHEMA) return { reason: "SCHEMA_NOT_ALLOWED", detail: schemaname };
   return state.allowedViews.has(relname) ? undefined : { reason: "VIEW_NOT_ALLOWED", detail: relname };
 };
@@ -155,16 +165,25 @@ const singleStatement = async (sql: string): Promise<ParsedStatement | Rejection
  * Checks one AI-written statement against the allowlist.
  * @returns the statement text (without a trailing `;`) and its fingerprint, or the rejection reason.
  */
-export const guardSemanticSql: SemanticSqlGuard = async ({ sql, allowedViews, paramCount }) => {
+const guardWith = async (sql: string, state: Omit<WalkState, "cteNames">): ReturnType<SemanticSqlGuard> => {
   if (sql.length > MAX_SQL_LENGTH) return { ok: false, error: { code: "SQL_REJECTED", reason: "TOO_LONG" } };
   const parsed = await singleStatement(sql);
   if ("reason" in parsed) return { ok: false, error: { code: "SQL_REJECTED", ...parsed } };
-  const rejection = walk(parsed.stmt, { allowedViews, cteNames: collectCteNames(parsed.stmt), paramCount });
+  const rejection = walk(parsed.stmt, { ...state, cteNames: collectCteNames(parsed.stmt) });
   if (rejection !== undefined) return { ok: false, error: { code: "SQL_REJECTED", ...rejection } };
   const { fingerprint } = await loadParser();
   const guarded: GuardedSql = { sql: parsed.text, fingerprint: await fingerprint(parsed.text) };
   return { ok: true, data: guarded };
 };
+
+export const guardSemanticSql: SemanticSqlGuard = ({ sql, allowedViews, paramCount }) => guardWith(sql, { allowedViews, paramCount });
+
+/**
+ * The same allowlist for a tenant-owned database connector (decision 0027): relations are
+ * `schema.relation` names from the connector's `allowedRelations`; `semantic` is not implied.
+ */
+export const guardConnectorSql = (input: { readonly sql: string; readonly allowedRelations: ReadonlySet<string>; readonly paramCount: number }): ReturnType<SemanticSqlGuard> =>
+  guardWith(input.sql, { allowedViews: new Set(), allowedRelations: input.allowedRelations, paramCount: input.paramCount });
 
 /**
  * Wraps a guarded statement with the row cap. The newlines end any trailing

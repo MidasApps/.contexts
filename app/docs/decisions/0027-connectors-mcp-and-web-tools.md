@@ -55,3 +55,42 @@ Tenants connect their own APIs (OpenAPI), MCP servers and databases; external cl
     `tenantId + createdAt desc`; Security Rules deny every client on `connectors` and
     `local-secrets`. The Mastra runtime reads active connectors and secrets through the
     `connectors` and `secrets` ports (server-side, tenant from the verified context).
+- **2026-09-30 — connector tools, MCP client and SSRF guard (SP3 Task 22).**
+  - *SSRF guard* (`tools/web/url-guard.ts`): https, default port, no credentials, a DNS name
+    (no IP literal, no single-label, `.localhost` or `.internal` host), inside `allowedHosts`
+    when the caller has one, and every resolved address public (loopback, private, link-local
+    incl. `169.254.169.254`, CGNAT, unique-local, multicast and IPv4-mapped forms refused;
+    DNS errors fail closed). `guardedFetch` follows redirects by hand, checking every hop,
+    at most 5.
+  - *Per-run tools, not body toolsets.* Clients cannot send `toolsets` (server-owned run
+    options, Task 20), so agents resolve connector tools in their dynamic `tools` from the
+    verified context: supervisor = read tools (OpenAPI GET/HEAD, MCP tools in
+    `toolPolicy.readOnly`), action = every OpenAPI and MCP tool, data = Postgres query tools,
+    web = browser MCP tools and only with `agent-settings.webTools.browser`. A tenant's
+    connectors load once per 5 minutes (secrets read server-side); eviction disconnects MCP
+    clients; a connector that fails to load is left out of the run.
+  - *OpenAPI* (`@apidevtools/swagger-parser` 13.1.0, `openapi-types` 12.1.3 as its peer):
+    JSON specs only (fetched through the guard, 15 s, 2 MB), validated and dereferenced with
+    `resolve.external: false`; any `$ref` left unresolved is refused (the parser would fetch it
+    outside the guard). One `defineCoreTool` per allowed `operationId` (`api.<connector>.<op>`),
+    input `{ path, query, body }` strict, built with `z.fromJSONSchema` (present in Zod 4.6.5, no
+    ajv needed). Requests only to the first `servers` URL (https inside `allowedHosts`), auth
+    header from the secret, 15 s, 100 KB cap, answer wrapped as `<untrusted_api_response>`.
+    These tools run the core pipeline (SP1 authorize, audit of mutations, timeout); their
+    permission is `core.chat.use`: an admin enabled the connector and its allowlist
+    (`core.connector.write`), and every mutation still asks the user.
+  - *MCP client* (`@mastra/mcp` 2.1.1; peer `@mastra/core >=1.68`): one `MCPClient` per
+    connector (`id` `<tenantId>:<connectorId>`), Streamable HTTP with `allowedHosts` plus our
+    guard as its `fetch`, Bearer from the secret, 30 s; tools filtered by `toolPolicy.allow`;
+    `requireToolApproval` answers per call: no approval only for `readOnly` tools of `mcp`
+    connectors, always for `browser`. `listToolsetsWithErrors` is used so a server that fails
+    is an error, not an empty toolset. MCP tools do not run the core pipeline (no per-call SP1
+    authorize or audit); their gates are the admin-owned connector, the allowlist, the tenant
+    from the context and the user's approval. stdio is only a local developer override
+    (`McpStdioOverride`, refused outside `local`); stored connectors are https only. OAuth
+    (`MCPOAuthClientProvider`) is not wired yet: `auth: "oauth"` connectors connect without a
+    token until a later task stores OAuth tokens through the secret store.
+  - *Postgres read-only connector*: `guardConnectorSql` (the semantic guard with qualified
+    `schema.relation` names from `allowedRelations`), `BEGIN READ ONLY`, 5 s statement timeout,
+    100/1000 row cap, the DSN host must resolve to public addresses; permission
+    `core.catalog.query`; audited like semantic queries.

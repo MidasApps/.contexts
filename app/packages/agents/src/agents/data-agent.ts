@@ -24,7 +24,7 @@ export const createDataAgentDefinition = (options: { readonly instructionsDirs?:
   id: DATA_AGENT_ID,
   role: "subagent",
   ceiling: ["core.chat.use", CATALOG_READ_PERMISSION, CATALOG_QUERY_PERMISSION],
-  create: ({ models, tools, guardrails, skills }) => {
+  create: ({ models, tools, guardrails, skills, connectorTools }) => {
     const profile = guardrails("delegated");
     return new Agent({
       id: DATA_AGENT_ID,
@@ -33,7 +33,8 @@ export const createDataAgentDefinition = (options: { readonly instructionsDirs?:
         "Explains which data the organization has, describes record types, answers questions with read-only SQL over semantic views and shows forms to create or change records.",
       instructions: loadInstructions(DATA_INSTRUCTIONS, options.instructionsDirs),
       model: models.language("chat", { agentId: DATA_AGENT_ID }),
-      tools: tools.toMastraTools(DATA_AGENT_TOOLS),
+      // Static data tools plus the tenant's Postgres connectors (resolved per run from the server context).
+      tools: async ({ requestContext }) => ({ ...tools.toMastraTools(DATA_AGENT_TOOLS), ...(await connectorTools(requestContext, "data")) }),
       skills: skills([CORE_SKILLS.dataCatalog]),
       // Old tool payloads (catalog dumps, query rows) leave the history; the current turn keeps them.
       inputProcessors: [...profile.inputProcessors, new ToolCallFilter()],

@@ -331,6 +331,7 @@ export {
   createSemanticViewRegistry,
   DEFAULT_SEMANTIC_LIMIT,
   DEFAULT_STATEMENT_TIMEOUT_MS,
+  guardConnectorSql,
   guardSemanticSql,
   InvalidSemanticViewError,
   makeRunSemanticQuery,

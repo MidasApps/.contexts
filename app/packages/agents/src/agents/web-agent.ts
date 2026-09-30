@@ -19,14 +19,15 @@ export const createWebAgentDefinition = (options: { readonly instructionsDirs?: 
   id: WEB_AGENT_ID,
   role: "subagent",
   ceiling: ["core.chat.use", WEB_TOOLS_PERMISSION],
-  create: ({ models, guardrails }) =>
+  create: ({ models, guardrails, tenantSettings, connectorTools }) =>
     new Agent({
       id: WEB_AGENT_ID,
       name: "Web",
       description: "Researches public web pages and summarizes them with their addresses; browser actions ask the user for approval.",
       instructions: loadInstructions(WEB_INSTRUCTIONS, options.instructionsDirs),
       model: models.language("chat", { agentId: WEB_AGENT_ID }),
-      tools: {},
+      // Browser connectors only with the tenant's browser opt-in; Firecrawl tools join in Task 23.
+      tools: async ({ requestContext }) => ((await tenantSettings(requestContext)).webTools.browser ? connectorTools(requestContext, "web") : {}),
       defaultOptions: { maxSteps: SUBAGENT_MAX_STEPS },
       requestContextSchema: AgentRuntimeContextSchema,
       ...guardrails("delegated"),

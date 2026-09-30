@@ -13,6 +13,7 @@ import { PING_AGENT } from "../agents/ping-agent.ts";
 import { createSupervisorAgent, SUPERVISOR_AGENT_ID } from "../agents/supervisor-agent.ts";
 import { createTenantAgentSettingsReader } from "../agents/tenant-agent-settings.ts";
 import { createWebAgentDefinition } from "../agents/web-agent.ts";
+import { type ConnectorLoaders, createConnectorToolResolver, defaultConnectorLoaders } from "../connectors/connector-registry.ts";
 import type { AgentMiddleware } from "../auth/agent-middleware.ts";
 import { createContextMiddleware } from "../auth/context-middleware.ts";
 import { FirebaseMastraAuth } from "../auth/firebase-mastra-auth.ts";
@@ -34,7 +35,7 @@ import { createCreateProjectCommand } from "../tools/commands/create-project-com
 import { CORE_SKILL_DIRS, createSkillsResolver, loadSkill } from "../skills/resolve-skills.ts";
 import { createMemory } from "../memory/create-memory.ts";
 import { createSearchKnowledgeTool } from "../tools/knowledge/search-knowledge.tool.ts";
-import type { CoreToolDefinition } from "../tools/define-core-tool.ts";
+import type { CoreToolDefinition, CoreToolDeps } from "../tools/define-core-tool.ts";
 import { createQuerySemanticSqlTool } from "../tools/sql/query-semantic-sql.tool.ts";
 import { createToolRegistry, type ToolRegistry } from "../tools/tool-registry.ts";
 import { type AgentDefinition, type AgentFactoryDeps, type AgentModule, AgentModuleError } from "./agent-module.ts";
@@ -64,6 +65,8 @@ export type ComposeAgentRuntimeArgs = {
   readonly instructionsDirs?: readonly string[];
   /** Directories tried first for core skills (`<dir>/<name>/SKILL.md`, the bundled copy). */
   readonly skillsDirs?: readonly string[];
+  /** Test seam: how connectors become tools (defaults fetch specs and connect MCP servers). */
+  readonly connectorLoaders?: ConnectorLoaders;
 };
 
 /** What `new Mastra({...})` receives from the runtime (spec §3.3); `pubsub` arrives with Task 25. */
@@ -143,10 +146,14 @@ const coreWorkflows = (args: ComposeAgentRuntimeArgs, models: AgentModels): Reco
 /** The supervisor calls no core tool itself; its subagents' calls are capped by their own ceilings. */
 const SUPERVISOR_CEILING = ["core.chat.use"];
 
-const buildToolRegistry = (args: ComposeAgentRuntimeArgs, agents: readonly AgentDefinition[], models: AgentModels, commands: readonly AgentCommand[]): ToolRegistry => {
-  // Ceilings are data, known before any tool is bound: every call is capped by its agent's.
+// Ceilings are data, known before any tool is bound: every call is capped by its agent's.
+const toolDepsOf = (args: ComposeAgentRuntimeArgs, agents: readonly AgentDefinition[]): CoreToolDeps => {
   const ceilings = [...agents.map((agent) => [agent.id, new Set(agent.ceiling)] as const), [SUPERVISOR_AGENT_ID, new Set(SUPERVISOR_CEILING)] as const];
-  const registry = createToolRegistry({ access: args.ports.access, audit: args.ports.audit, approvals: args.ports.approvals, agentCeilings: Object.fromEntries(ceilings) });
+  return { access: args.ports.access, audit: args.ports.audit, approvals: args.ports.approvals, agentCeilings: Object.fromEntries(ceilings) };
+};
+
+const buildToolRegistry = (args: ComposeAgentRuntimeArgs, toolDeps: CoreToolDeps, models: AgentModels, commands: readonly AgentCommand[]): ToolRegistry => {
+  const registry = createToolRegistry(toolDeps);
   for (const tool of [...coreTools(args, models, commands), ...args.modules.flatMap((module) => module.tools ?? [])]) registry.register(tool);
   return registry;
 };
@@ -178,7 +185,14 @@ export const composeAgentRuntime = (args: ComposeAgentRuntimeArgs): RuntimeParts
   const definitions = collectAgents(args, commands);
   const models = args.models ?? createModelProvider(args.env);
   registerFakeRules(models, commands);
-  const tools = buildToolRegistry(args, definitions, models, commands);
+  const toolDeps = toolDepsOf(args, definitions);
+  const tools = buildToolRegistry(args, toolDeps, models, commands);
+  const connectorTools = createConnectorToolResolver({
+    connectors: args.ports.connectors,
+    secrets: args.ports.secrets,
+    toolDeps,
+    loaders: args.connectorLoaders ?? defaultConnectorLoaders(args.env.APP_ENV),
+  });
   const guardrails = (kind: Parameters<typeof createGuardrailProfile>[1]) => createGuardrailProfile({ models, ports: args.ports }, kind);
   const memory =
     args.vector === undefined
@@ -187,7 +201,7 @@ export const composeAgentRuntime = (args: ComposeAgentRuntimeArgs): RuntimeParts
   const tenantSettings = createTenantAgentSettingsReader(args.ports.settings);
   const skillDirs = [...(args.skillsDirs ?? []), ...CORE_SKILL_DIRS];
   const skills = (names: readonly string[]) => createSkillsResolver({ core: names.map((name) => loadSkill(name, skillDirs)), modules: args.modules, settings: tenantSettings });
-  const deps: AgentFactoryDeps = { models, tools, ports: args.ports, guardrails, memory, tenantSettings, skills, commands };
+  const deps: AgentFactoryDeps = { models, tools, ports: args.ports, guardrails, memory, tenantSettings, skills, commands, connectorTools };
   const { agents, subagents } = buildAgents(definitions, deps, args.instructionsDirs);
   const apiPrefix = args.apiPrefix;
   const auth = new FirebaseMastraAuth({ access: args.ports.access, ...(apiPrefix === undefined ? {} : { apiPrefix }) });

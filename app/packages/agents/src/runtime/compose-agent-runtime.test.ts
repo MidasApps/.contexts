@@ -2,6 +2,7 @@ import { Mastra } from "@mastra/core";
 import { RequestContext } from "@mastra/core/request-context";
 import { InMemoryStore } from "@mastra/core/storage";
 import type { MastraVector } from "@mastra/core/vector";
+import { ConnectorSchema } from "@core/contracts";
 import { describe, expect, it, vi } from "vitest";
 import { z } from "zod";
 import { PING_AGENT_ID } from "../agents/ping-agent.ts";
@@ -164,5 +165,41 @@ describe("defineAgentModule", () => {
     expect(() => defineAgentModule({ id: "sample", manifest: { id: "sample", tools: [{ id: "sample.missing" }] } })).toThrow(/UNKNOWN_CAPABILITY_REF/);
     expect(() => defineAgentModule({ id: "sample", manifest: { id: "sample" }, tools: [echoTool("sample.echo")] })).toThrow(/MANIFEST_MISMATCH/);
     expect(defineAgentModule({ id: "sample", manifest: { id: "sample", tools: [{ id: "sample.echo" }] }, tools: [echoTool("sample.echo")] }).id).toBe("sample");
+  });
+});
+
+describe("connector tools in the composed agents", () => {
+  it("adds the tenant's connector tools per run to the supervisor and the action agent", async () => {
+    const connector = ConnectorSchema.parse({
+      id: "Cn4sK2lPq0WnR5tYu3bV",
+      tenantId: "Jd8sK2lPq0WnR5tYu3bV",
+      name: "issues-api",
+      type: "openapi",
+      status: "active",
+      secretRef: null,
+      toolPolicy: { allow: ["listIssues", "createIssue"], readOnly: ["listIssues"] },
+      config: { specUrl: "https://api.example.com/openapi.json", allowedHosts: ["api.example.com"], auth: "none", apiKeyHeader: null },
+      createdBy: "uA1b2C3d4E5f6G7h8I9j",
+      createdAt: "2026-09-30T12:00:00.000Z",
+      updatedAt: "2026-09-30T12:00:00.000Z",
+    });
+    const connectorTool = (id: string, kind: "read" | "mutation") => ({ ...echoTool(id), kind, permission: "core.chat.use" });
+    const runtime = composeAgentRuntime({
+      env: ENV,
+      ports: createFakeRuntimePorts({ connectors: { listActive: () => Promise.resolve([connector]) } }),
+      modules: [],
+      storage: new InMemoryStore(),
+      serviceName: "mastra",
+      aiCatalog: FIXTURE_AI_CATALOG,
+      connectorLoaders: {
+        openApiTools: () => Promise.resolve([connectorTool("api.issues-api.listIssues", "read"), connectorTool("api.issues-api.createIssue", "mutation")]),
+        mcpToolset: () => Promise.reject(new Error("unused")),
+        postgresTools: () => [],
+      },
+    });
+    const requestContext = new RequestContext<unknown>(buildAgentContextEntries());
+    expect(Object.keys(await runtime.agents.assistant?.listTools({ requestContext }) ?? {})).toEqual(["api.issues-api.listIssues"]);
+    const actionTools = Object.keys((await runtime.subagents.action?.listTools({ requestContext })) ?? {});
+    expect(actionTools).toEqual(expect.arrayContaining(["command.tenancy.CreateProjectInput", "api.issues-api.createIssue", "api.issues-api.listIssues"]));
   });
 });

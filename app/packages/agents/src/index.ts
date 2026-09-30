@@ -276,3 +276,27 @@ export { CORE_SKILL_DIRS, CORE_SKILLS, createSkillsResolver, isModuleEnabled, lo
 export { type AgentCommand, commandIdOf, formCommandsOf } from "./tools/commands/agent-command.ts";
 export { CREATE_PROJECT_PERMISSION, createCreateProjectCommand } from "./tools/commands/create-project-command.tool.ts";
 export { coreFakeRules, type FakeCommandRef } from "./models/fake/fake-scenarios.ts";
+// SP3 OpenAPI, MCP client, browser and Postgres connectors; SSRF guard (Task 22).
+export {
+  CONNECTOR_CACHE_TTL_MS,
+  type ConnectorAgentKind,
+  type ConnectorLoaders,
+  type ConnectorTool,
+  type ConnectorToolsResolver,
+  createConnectorToolResolver,
+  defaultConnectorLoaders,
+} from "./connectors/connector-registry.ts";
+export { API_TIMEOUT_MS, CONNECTOR_TOOL_PERMISSION, MAX_RESPONSE_BYTES, OpenApiResultSchema, openApiToolId, openApiToTools, type OpenApiToolOptions } from "./connectors/openapi/openapi-to-tools.ts";
+export { dereferenceOpenApi, loadOpenApiDocument, MAX_SPEC_BYTES, OpenApiConnectorError, type OpenApiDocument } from "./connectors/openapi/openapi-document.ts";
+export {
+  createMcpConnectorClient,
+  loadMcpConnectorToolset,
+  MCP_TIMEOUT_MS,
+  McpConnectorError,
+  type McpConnectorOptions,
+  type McpConnectorToolset,
+  type McpStdioOverride,
+  type McpTool,
+} from "./connectors/mcp/mcp-connector.ts";
+export { assertPublicDatabaseHost, DB_QUERY_PERMISSION, type PostgresConnectorRunner, postgresConnectorTools, runReadOnlyQuery } from "./connectors/db/postgres-readonly-connector.ts";
+export { assertPublicUrl, guardedFetch, isNonPublicAddress, MAX_REDIRECTS, type ResolveHost, UrlGuardError, type UrlGuardReason } from "./tools/web/url-guard.ts";

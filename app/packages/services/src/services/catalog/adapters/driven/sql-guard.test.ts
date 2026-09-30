@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { guardSemanticSql } from "./sql-guard.ts";
+import { guardConnectorSql, guardSemanticSql } from "./sql-guard.ts";
 
 const ALLOWED = new Set(["example_notes", "example_tags"]);
 
@@ -83,5 +83,21 @@ describe("guardSemanticSql rejects everything else", () => {
 
   it("rejects input longer than the size cap before parsing", async () => {
     expect(await reasonOf(`SELECT id FROM semantic.example_notes WHERE text = '${"x".repeat(20_000)}'`)).toBe("TOO_LONG");
+  });
+});
+
+describe("connector sql guard", () => {
+  const relations = new Set(["public.orders_summary"]);
+  const connectorReason = async (sql: string): Promise<string> => {
+    const result = await guardConnectorSql({ sql, allowedRelations: relations, paramCount: 1 });
+    return result.ok ? "ACCEPTED" : result.error.reason;
+  };
+
+  it("accepts the connector's qualified relations only", async () => {
+    expect(await connectorReason("SELECT count(*) FROM public.orders_summary WHERE status = $1")).toBe("ACCEPTED");
+    expect(await connectorReason("SELECT * FROM public.users")).toBe("VIEW_NOT_ALLOWED");
+    expect(await connectorReason("SELECT * FROM semantic.example_notes")).toBe("VIEW_NOT_ALLOWED");
+    expect(await connectorReason("SELECT * FROM orders_summary")).toBe("SCHEMA_NOT_ALLOWED");
+    expect(await connectorReason("DELETE FROM public.orders_summary")).toBe("NOT_A_SELECT");
   });
 });

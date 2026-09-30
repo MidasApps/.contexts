@@ -25,14 +25,17 @@
     "@ai-sdk/google-vertex": "catalog:",
     "@ai-sdk/openai": "catalog:",
     "@ai-sdk/provider": "catalog:",
+    "@apidevtools/swagger-parser": "catalog:",
     "@core/contracts": "workspace:*",
     "@core/services": "workspace:*",
     "@mastra/core": "catalog:",
+    "@mastra/mcp": "catalog:",
     "@mastra/memory": "catalog:",
     "@mastra/observability": "catalog:",
     "@mastra/otel-exporter": "catalog:",
     "@opentelemetry/exporter-trace-otlp-proto": "catalog:",
     "ai": "catalog:",
+    "openapi-types": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {

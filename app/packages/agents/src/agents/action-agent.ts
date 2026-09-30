@@ -25,14 +25,17 @@ export const createActionAgentDefinition = (options: {
   id: ACTION_AGENT_ID,
   role: "subagent",
   ceiling: actionCeilingOf(options.commands),
-  create: ({ models, tools, guardrails, skills }) =>
+  create: ({ models, tools, guardrails, skills, connectorTools }) =>
     new Agent({
       id: ACTION_AGENT_ID,
       name: "Action",
       description: "Runs a command that creates or changes the organization's data after the user confirmed it; every command asks the user for approval first.",
       instructions: loadInstructions(ACTION_INSTRUCTIONS, options.instructionsDirs),
       model: models.language("reasoning", { agentId: ACTION_AGENT_ID }),
-      tools: tools.toMastraTools(options.commands.map(({ tool }) => tool.id)),
+      tools: async ({ requestContext }) => ({
+        ...tools.toMastraTools(options.commands.map(({ tool }) => tool.id)),
+        ...(await connectorTools(requestContext, "action")),
+      }),
       skills: skills([CORE_SKILLS.safeActions]),
       defaultOptions: { maxSteps: SUBAGENT_MAX_STEPS },
       requestContextSchema: AgentRuntimeContextSchema,

@@ -2,6 +2,7 @@ import type { Agent } from "@mastra/core/agent";
 import type { AgentSkillsResolver, InlineSkill } from "@mastra/core/skills";
 import type { Memory } from "@mastra/memory";
 import type { TenantAgentSettingsReader } from "../agents/tenant-agent-settings.ts";
+import type { ConnectorToolsResolver } from "../connectors/connector-registry.ts";
 import type { AgentModels } from "../models/model-factory.ts";
 import type { GuardrailProfile, GuardrailProfileKind } from "../processors/guardrail-profile.ts";
 import type { AgentCommand } from "../tools/commands/agent-command.ts";
@@ -30,6 +31,8 @@ export type AgentFactoryDeps = {
   readonly skills: (coreSkills: readonly string[]) => AgentSkillsResolver;
   /** Commands of the core and of the modules (the action agent's tools). */
   readonly commands: readonly AgentCommand[];
+  /** Tools of the run tenant's connectors for an agent kind (OpenAPI, MCP, browser, Postgres). */
+  readonly connectorTools: ConnectorToolsResolver;
 };
 
 export type AgentDefinition = {
