@@ -137,4 +137,6 @@ minimumReleaseAgeExclude:
   # SP3 model factory (Task 5): latest @ai-sdk/openai, published 2026-09-29, admitted by
   # pnpm at install; remove after 2026-10-06 (7 days after the publish).
   - '@ai-sdk/openai@4.0.81'
+  # SP3 connectors (Task 22): @mastra/mcp 2.1.1, published 2026-09-29, admitted by pnpm at
+  # install; remove after 2026-10-07 (7 days after the publish).
   - '@mastra/mcp@2.1.1'
