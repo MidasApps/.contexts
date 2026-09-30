@@ -1,0 +1,93 @@
+{
+  "additionalProperties": false,
+  "description": "A user's rating of an assistant message; one per message and user.",
+  "examples": [
+    {
+      "conversationId": "Cv1aB2cD3eF4gH5iJ6kL",
+      "createdAt": "2026-09-29T14:30:00.000Z",
+      "messageId": "msg_01J8Z3K4M5",
+      "rating": "up",
+      "tenantId": "Jd8sK2lPq0WnR5tYu3bV",
+      "updatedAt": "2026-09-29T14:30:00.000Z",
+      "userId": "uA1b2C3d4E5f6G7h8I9j"
+    }
+  ],
+  "properties": {
+    "comment": {
+      "description": "Optional comment of the user.",
+      "maxLength": 1000,
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "personal"
+    },
+    "conversationId": {
+      "description": "Conversation of the message.",
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "createdAt": {
+      "description": "First rating (UTC).",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+      "type": "string",
+      "x-pii": "none"
+    },
+    "messageId": {
+      "description": "Assistant message rated.",
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "rating": {
+      "description": "Thumbs up or down.",
+      "enum": [
+        "up",
+        "down"
+      ],
+      "type": "string",
+      "x-pii": "none"
+    },
+    "tenantId": {
+      "description": "Organization.",
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "updatedAt": {
+      "description": "Last change (UTC).",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+      "type": "string",
+      "x-pii": "none"
+    },
+    "userId": {
+      "description": "User who rated.",
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "personal"
+    }
+  },
+  "required": [
+    "conversationId",
+    "tenantId",
+    "userId",
+    "messageId",
+    "rating",
+    "createdAt",
+    "updatedAt"
+  ],
+  "type": "object",
+  "x-kind": "entity",
+  "x-permission": "core.chat.use",
+  "x-pii": "personal",
+  "x-relations": [
+    {
+      "field": "tenantId",
+      "target": "tenancy.Organization",
+      "type": "belongs-to"
+    }
+  ],
+  "x-tenancyScope": "organization"
+}

@@ -1,0 +1,84 @@
+{
+  "additionalProperties": false,
+  "description": "Platform overview for staff: organizations, active users, cost, guardrail and approval rates, eval status.",
+  "examples": [
+    {
+      "activeUsers7d": 87,
+      "approvalRate": 0.92,
+      "costMtdMicroUsd": 12500000,
+      "evalStatus": "passed",
+      "generatedAt": "2026-09-30T12:00:00.000Z",
+      "organizations": 12,
+      "tripwireRate": 0.01
+    }
+  ],
+  "properties": {
+    "activeUsers7d": {
+      "description": "Distinct users with activity in the last 7 days.",
+      "maximum": 9007199254740991,
+      "minimum": 0,
+      "type": "integer",
+      "x-pii": "none"
+    },
+    "approvalRate": {
+      "description": "Share of settled approval requests approved in the last 7 days.",
+      "maximum": 1,
+      "minimum": 0,
+      "type": "number",
+      "x-pii": "none"
+    },
+    "costMtdMicroUsd": {
+      "description": "Model cost month to date, all tenants, in micro-USD.",
+      "maximum": 9007199254740991,
+      "minimum": 0,
+      "type": "integer",
+      "x-pii": "none"
+    },
+    "evalStatus": {
+      "description": "Verdict of the latest eval gate run.",
+      "enum": [
+        "passed",
+        "failed",
+        "unknown"
+      ],
+      "type": "string",
+      "x-pii": "none"
+    },
+    "generatedAt": {
+      "description": "When the numbers were computed (UTC).",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+      "type": "string",
+      "x-pii": "none"
+    },
+    "organizations": {
+      "description": "Active organizations.",
+      "maximum": 9007199254740991,
+      "minimum": 0,
+      "type": "integer",
+      "x-pii": "none"
+    },
+    "tripwireRate": {
+      "description": "Share of agent runs stopped by a guardrail in the last 7 days.",
+      "maximum": 1,
+      "minimum": 0,
+      "type": "number",
+      "x-pii": "none"
+    }
+  },
+  "required": [
+    "organizations",
+    "activeUsers7d",
+    "costMtdMicroUsd",
+    "tripwireRate",
+    "approvalRate",
+    "evalStatus",
+    "generatedAt"
+  ],
+  "type": "object",
+  "x-kind": "view",
+  "x-permission": "platform.usage.read",
+  "x-pii": "none",
+  "x-relations": [],
+  "x-tenancyScope": "platform"
+}

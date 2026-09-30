@@ -120,13 +120,22 @@ describe("permissionsForPlatformRole", () => {
 
   it("gives platform-admin every platform permission", () => {
     expect(registry.permissionsForPlatformRole("platform-admin")).toEqual(
-      new Set(["platform.organization.read", "platform.user.read", "platform.audit-log.read", "platform.user.impersonate", "platform.staff.manage"]),
+      new Set([
+        "platform.organization.read", "platform.user.read", "platform.audit-log.read", "platform.user.impersonate", "platform.staff.manage",
+        // SP5 spec §2.1.
+        "platform.plan.manage", "platform.organization.update", "platform.agent.manage", "platform.prompt.manage", "platform.connector.read",
+        "platform.eval.manage", "platform.trace.read", "platform.usage.read", "platform.workflow.manage", "platform.flag.manage",
+      ]),
     );
   });
 
-  it("gives platform-support reads and impersonation only", () => {
+  it("gives platform-support reads and impersonation only (SP1 and SP5)", () => {
     expect(registry.permissionsForPlatformRole("platform-support")).toEqual(
-      new Set(["platform.organization.read", "platform.user.read", "platform.audit-log.read", "platform.user.impersonate"]),
+      new Set([
+        "platform.organization.read", "platform.user.read", "platform.audit-log.read", "platform.user.impersonate",
+        // SP5 platform reads.
+        "platform.connector.read", "platform.trace.read", "platform.usage.read",
+      ]),
     );
   });
 });

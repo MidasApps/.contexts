@@ -386,3 +386,57 @@ export { none, personal, sensitive, type FieldDocs } from "./contracts/field-doc
 export { HAS_ANY_FIELD_ERROR, hasAnyField, hasUniqueItems } from "./contracts/primitives/refinements.ts";
 // Removable sample contract (keeps the catalog non-empty).
 export { NoteContract, NoteIdSchema, NoteSchema, type Note, type NoteId } from "./contracts/example/note.schema.ts";
+// SP5 workflows, prompts, platform console and observability.
+export { SP5_CONTRACTS } from "./contracts/sp5-contracts.ts";
+export { SP5_PERMISSIONS } from "./contracts/access/core-permissions.ts";
+export {
+  HUMAN_APPROVAL_DECISIONS, HumanApprovalDecisionSchema, HumanApprovalResumeContract, HumanApprovalResumeSchema,
+  HumanApprovalSuspendSchema, WORKFLOW_RESUME_ACTION_KIND, WorkflowIdSchema, WorkflowResumeActionInputContract,
+  WorkflowResumeActionInputSchema, type HumanApprovalDecision, type HumanApprovalResume, type HumanApprovalSuspend,
+  type WorkflowResumeActionInput,
+} from "./contracts/workflows/human-approval-resume.schema.ts";
+export {
+  CreateScheduleInputContract, CreateScheduleInputSchema, CronExpressionSchema, ScheduleContract, ScheduleSchema,
+  ScheduleSlugSchema, ScheduleStatusSchema, UpdateScheduleInputContract, UpdateScheduleInputSchema,
+  type CreateScheduleInput, type Schedule, type ScheduleStatus, type UpdateScheduleInput,
+} from "./contracts/workflows/schedule.schema.ts";
+export {
+  StartWorkflowRunInputContract, StartWorkflowRunInputSchema, WORKFLOW_RUN_STATUSES, WorkflowRunContract, WorkflowRunSchema,
+  WorkflowRunStatusSchema, type StartWorkflowRunInput, type WorkflowRun, type WorkflowRunStatus,
+} from "./contracts/workflows/workflow-run.schema.ts";
+export {
+  WORKFLOW_EVENT_TYPES, WorkflowEventContract, WorkflowEventSchema, WorkflowEventTypeSchema, type WorkflowEvent,
+} from "./contracts/workflows/workflow-event.schema.ts";
+export {
+  CreatePromptVersionInputContract, CreatePromptVersionInputSchema, PromptScopeSchema, PromptVersionContract,
+  PromptVersionIdSchema, PromptVersionSchema, type CreatePromptVersionInput, type PromptScope, type PromptVersion,
+  type PromptVersionId,
+} from "./contracts/agents/prompt-version.schema.ts";
+export {
+  ActivatePromptVersionInputContract, ActivatePromptVersionInputSchema, PromptActivationContract, PromptActivationSchema,
+  type ActivatePromptVersionInput, type PromptActivation,
+} from "./contracts/agents/prompt-activation.schema.ts";
+export {
+  PlanContract, PlanIdSchema, PlanLimitsSchema, PlanSchema, UpsertPlanInputContract, UpsertPlanInputSchema,
+  type Plan, type PlanId, type PlanLimits, type UpsertPlanInput,
+} from "./contracts/platform/plan.schema.ts";
+export {
+  FeatureFlagContract, FeatureFlagDefinitionContract, FeatureFlagDefinitionSchema, FeatureFlagKeySchema,
+  FeatureFlagKindSchema, FeatureFlagSchema, SetFeatureFlagValueInputContract, SetFeatureFlagValueInputSchema,
+  type FeatureFlag, type FeatureFlagDefinition, type FeatureFlagKind, type SetFeatureFlagValueInput,
+} from "./contracts/platform/feature-flag.schema.ts";
+export { AdminOverviewContract, AdminOverviewSchema, type AdminOverview } from "./contracts/platform/admin-overview.schema.ts";
+export {
+  SpanIdSchema, TraceIdSchema, TraceStatusSchema, TraceSummaryContract, TraceSummarySchema, type TraceSummary,
+} from "./contracts/observability/trace-summary.schema.ts";
+export {
+  TraceDetailContract, TraceDetailSchema, TraceSpanSchema, type TraceDetail, type TraceSpan,
+} from "./contracts/observability/trace-detail.schema.ts";
+export {
+  EvalExperimentSummaryContract, EvalExperimentSummarySchema, type EvalExperimentSummary,
+} from "./contracts/observability/eval-experiment-summary.schema.ts";
+export { UsageDailyRollupContract, UsageDailyRollupSchema, type UsageDailyRollup } from "./contracts/usage/usage-daily-rollup.schema.ts";
+export {
+  MessageFeedbackContract, MessageFeedbackInputContract, MessageFeedbackInputSchema, MessageFeedbackSchema,
+  MessageRatingSchema, type MessageFeedback, type MessageFeedbackInput,
+} from "./contracts/conversations/message-feedback.schema.ts";

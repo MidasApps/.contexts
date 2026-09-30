@@ -63,12 +63,46 @@ export const SP1_PERMISSIONS: readonly PermissionDefinition[] = [
   platform("platform.staff.manage", "write", ["platform-admin"]),
 ];
 
+const PLATFORM_ADMIN = ["platform-admin"] as const;
+
 /**
- * The core permission catalog: SP1 spec §5.1 plus the permissions of the agent
- * runtime (SP3 spec §2.2, `AGENT_PERMISSIONS`). Modules add theirs through the access
+ * The permissions of SP5 spec §2.1 (workflows, schedules, traces, evals, prompts, flags and
+ * the staff console). `core.workflow-run.approve-demo` is the four-eyes action of the core
+ * `approval-demo` workflow (decision 0036); platform reads also go to support staff.
+ */
+export const SP5_PERMISSIONS: readonly PermissionDefinition[] = [
+  tenant("core.workflow-run.read", "read", MEMBERS),
+  tenant("core.workflow-run.start", "write", MEMBERS),
+  tenant("core.workflow-run.cancel", "write", ADMINS),
+  { ...tenant("core.workflow-run.approve-demo", "write", MEMBERS), requiresApproval: true },
+  tenant("core.schedule.read", "read", ADMINS),
+  tenant("core.schedule.write", "write", ADMINS),
+  tenant("core.trace.read", "read", ADMINS),
+  tenant("core.eval.read", "read", ADMINS),
+  tenant("core.eval.write", "write", ADMINS),
+  tenant("core.prompt.read", "read", ADMINS),
+  tenant("core.prompt.write", "write", ADMINS),
+  tenant("core.flag.read", "read", ADMINS),
+  tenant("core.flag.write", "write", ADMINS),
+  platform("platform.plan.manage", "write", PLATFORM_ADMIN),
+  platform("platform.organization.update", "write", PLATFORM_ADMIN),
+  platform("platform.agent.manage", "write", PLATFORM_ADMIN),
+  platform("platform.prompt.manage", "write", PLATFORM_ADMIN),
+  platform("platform.connector.read", "read", STAFF),
+  platform("platform.eval.manage", "write", PLATFORM_ADMIN),
+  platform("platform.trace.read", "read", STAFF),
+  platform("platform.usage.read", "read", STAFF),
+  platform("platform.workflow.manage", "write", PLATFORM_ADMIN),
+  platform("platform.flag.manage", "write", PLATFORM_ADMIN),
+];
+
+/**
+ * The core permission catalog: SP1 spec §5.1, the permissions of the agent runtime (SP3
+ * spec §2.2, `AGENT_PERMISSIONS`) and SP5's. Modules add theirs through the access
  * registry (`createAccessCore({ permissions })`), which rejects duplicates.
  */
 export const CORE_PERMISSIONS: readonly PermissionDefinition[] = [
   ...SP1_PERMISSIONS,
   ...AGENT_PERMISSIONS.map((permission): PermissionDefinition => ({ ...permission, defaultRoles: [...permission.defaultRoles] })),
+  ...SP5_PERMISSIONS,
 ];

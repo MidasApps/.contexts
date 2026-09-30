@@ -1,0 +1,153 @@
+{
+  "additionalProperties": false,
+  "description": "An immutable version of an agent prompt (platform instructions or a tenant addendum).",
+  "examples": [
+    {
+      "agentId": "assistant",
+      "body": "You are the assistant of the workspace. Answer in the user's language.",
+      "bodySha256": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "createdAt": "2026-09-29T14:30:00.000Z",
+      "createdBy": "uA1b2C3d4E5f6G7h8I9j",
+      "evalExperimentId": "exp_01J8Z3K4M5",
+      "evalVerdict": "passed",
+      "id": "01927f3c-8b4a-7d2e-9f10-3a4b5c6d7e8f",
+      "note": "Shorter greeting.",
+      "scope": "platform",
+      "tenantId": null,
+      "version": 2
+    }
+  ],
+  "properties": {
+    "agentId": {
+      "description": "Agent the prompt belongs to.",
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "body": {
+      "description": "Prompt text; may mention people or internal policies.",
+      "maxLength": 50000,
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "personal"
+    },
+    "bodySha256": {
+      "description": "SHA-256 hex of the body.",
+      "pattern": "^[0-9a-f]{64}$",
+      "type": "string",
+      "x-pii": "none"
+    },
+    "createdAt": {
+      "description": "When the version was written (UTC).",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+      "type": "string",
+      "x-pii": "none"
+    },
+    "createdBy": {
+      "description": "Author.",
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "personal"
+    },
+    "evalExperimentId": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Experiment that evaluated this version.",
+      "x-pii": "none"
+    },
+    "evalVerdict": {
+      "anyOf": [
+        {
+          "enum": [
+            "passed",
+            "failed"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Verdict of that experiment.",
+      "x-pii": "none"
+    },
+    "id": {
+      "description": "uuidv7 of the version.",
+      "format": "uuid",
+      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+      "type": "string",
+      "x-pii": "none"
+    },
+    "note": {
+      "anyOf": [
+        {
+          "maxLength": 500,
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Author's note about the change.",
+      "x-pii": "personal"
+    },
+    "scope": {
+      "description": "`platform` or `tenant`.",
+      "enum": [
+        "platform",
+        "tenant"
+      ],
+      "type": "string",
+      "x-pii": "none"
+    },
+    "tenantId": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Organization of a tenant addendum; null for platform scope.",
+      "x-pii": "none"
+    },
+    "version": {
+      "description": "1-based version number per agent, scope and tenant.",
+      "exclusiveMinimum": 0,
+      "maximum": 9007199254740991,
+      "type": "integer",
+      "x-pii": "none"
+    }
+  },
+  "required": [
+    "id",
+    "agentId",
+    "scope",
+    "tenantId",
+    "version",
+    "body",
+    "bodySha256",
+    "note",
+    "evalExperimentId",
+    "evalVerdict",
+    "createdBy",
+    "createdAt"
+  ],
+  "type": "object",
+  "x-kind": "entity",
+  "x-permission": "core.prompt.read",
+  "x-pii": "personal",
+  "x-relations": [],
+  "x-tenancyScope": "platform"
+}

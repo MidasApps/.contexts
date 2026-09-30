@@ -49,7 +49,10 @@ describe("getEffectivePermissions", () => {
   it("returns the staff role's platform permissions only with MFA", async () => {
     expect(await effective(user("staff-support", true), nodes.platform)).toEqual([
       "platform.audit-log.read",
+      "platform.connector.read",
       "platform.organization.read",
+      "platform.trace.read",
+      "platform.usage.read",
       "platform.user.impersonate",
       "platform.user.read",
     ]);

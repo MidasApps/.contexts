@@ -1,0 +1,106 @@
+{
+  "additionalProperties": false,
+  "description": "A feature flag with its effective value and expiry status.",
+  "examples": [
+    {
+      "createdAt": "2026-09-30T00:00:00.000Z",
+      "default": false,
+      "expired": false,
+      "expiresAt": "2027-09-30T00:00:00.000Z",
+      "key": "ai.kill-switch",
+      "kind": "kill-switch",
+      "owner": "platform-team",
+      "reason": "Stops every agent and chat run during an incident.",
+      "tenantOverride": null,
+      "value": false
+    }
+  ],
+  "properties": {
+    "createdAt": {
+      "description": "When the flag was introduced (UTC).",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+      "type": "string",
+      "x-pii": "none"
+    },
+    "default": {
+      "description": "Value when no environment or tenant value is set.",
+      "type": "boolean",
+      "x-pii": "none"
+    },
+    "expired": {
+      "description": "True once expiresAt has passed; shown as a warning.",
+      "type": "boolean",
+      "x-pii": "none"
+    },
+    "expiresAt": {
+      "description": "When the flag must be removed or renewed (UTC); after createdAt.",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+      "type": "string",
+      "x-pii": "none"
+    },
+    "key": {
+      "description": "Flag key.",
+      "maxLength": 80,
+      "pattern": "^[a-z][a-z0-9-]*(?:\\.[a-z0-9-]+)+$",
+      "type": "string",
+      "x-pii": "none"
+    },
+    "kind": {
+      "description": "`kill-switch`, `rollout` or `ops`.",
+      "enum": [
+        "kill-switch",
+        "rollout",
+        "ops"
+      ],
+      "type": "string",
+      "x-pii": "none"
+    },
+    "owner": {
+      "description": "Team or role that owns the flag (governance).",
+      "maxLength": 120,
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "reason": {
+      "description": "Why the flag exists.",
+      "maxLength": 500,
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "tenantOverride": {
+      "description": "Tenant override, null when none.",
+      "type": [
+        "boolean",
+        "null"
+      ],
+      "x-pii": "none"
+    },
+    "value": {
+      "description": "Effective value in this environment (and tenant, when asked).",
+      "type": "boolean",
+      "x-pii": "none"
+    }
+  },
+  "required": [
+    "key",
+    "owner",
+    "reason",
+    "kind",
+    "default",
+    "createdAt",
+    "expiresAt",
+    "value",
+    "tenantOverride",
+    "expired"
+  ],
+  "type": "object",
+  "x-kind": "view",
+  "x-permission": "core.flag.read",
+  "x-pii": "none",
+  "x-relations": [],
+  "x-tenancyScope": "platform"
+}

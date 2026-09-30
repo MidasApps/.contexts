@@ -4146,6 +4146,91 @@
     },
     {
       "context": "agents",
+      "description": "Activates a prompt version (eval-gated; staff may force with a reason).",
+      "examples": [
+        {
+          "versionId": "01927f3c-8b4a-7d2e-9f10-3a4b5c6d7e8f"
+        },
+        {
+          "force": true,
+          "reason": "Eval dataset is being rebuilt.",
+          "versionId": "01927f3c-8b4a-7d2e-9f10-3a4b5c6d7e8f"
+        }
+      ],
+      "fields": [
+        {
+          "description": "Staff only: activate without a passing eval.",
+          "name": "force",
+          "pii": "none",
+          "required": false
+        },
+        {
+          "description": "Required with force; kept on the activation.",
+          "name": "reason",
+          "pii": "personal",
+          "required": false
+        },
+        {
+          "description": "Version to activate.",
+          "name": "versionId",
+          "pii": "none",
+          "required": true
+        }
+      ],
+      "id": "agents.ActivatePromptVersionInput",
+      "jsonSchema": {
+        "additionalProperties": false,
+        "description": "Activates a prompt version (eval-gated; staff may force with a reason).",
+        "examples": [
+          {
+            "versionId": "01927f3c-8b4a-7d2e-9f10-3a4b5c6d7e8f"
+          },
+          {
+            "force": true,
+            "reason": "Eval dataset is being rebuilt.",
+            "versionId": "01927f3c-8b4a-7d2e-9f10-3a4b5c6d7e8f"
+          }
+        ],
+        "properties": {
+          "force": {
+            "description": "Staff only: activate without a passing eval.",
+            "type": "boolean",
+            "x-pii": "none"
+          },
+          "reason": {
+            "description": "Required with force; kept on the activation.",
+            "maxLength": 500,
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "personal"
+          },
+          "versionId": {
+            "description": "Version to activate.",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "type": "string",
+            "x-pii": "none"
+          }
+        },
+        "required": [
+          "versionId"
+        ],
+        "type": "object",
+        "x-kind": "command",
+        "x-permission": "core.prompt.write",
+        "x-pii": "personal",
+        "x-relations": [],
+        "x-tenancyScope": "organization"
+      },
+      "kind": "command",
+      "name": "ActivatePromptVersionInput",
+      "permission": "core.prompt.write",
+      "pii": "personal",
+      "relations": [],
+      "tenancyScope": "organization"
+    },
+    {
+      "context": "agents",
       "description": "Per-run context every agent, tool and workflow reads: tenant, caller, effective permissions and regional settings.",
       "examples": [
         {
@@ -4928,6 +5013,516 @@
       "pii": "personal",
       "relations": [],
       "tenancyScope": "organization"
+    },
+    {
+      "context": "agents",
+      "description": "Writes a new prompt version; nothing is ever updated in place.",
+      "examples": [
+        {
+          "body": "Always cite the knowledge base documents you used.",
+          "note": "Tenant policy on citations."
+        }
+      ],
+      "fields": [
+        {
+          "description": "Prompt text of the new version.",
+          "name": "body",
+          "pii": "personal",
+          "required": true
+        },
+        {
+          "description": "Why the prompt changes.",
+          "name": "note",
+          "pii": "personal",
+          "required": false
+        }
+      ],
+      "id": "agents.CreatePromptVersionInput",
+      "jsonSchema": {
+        "additionalProperties": false,
+        "description": "Writes a new prompt version; nothing is ever updated in place.",
+        "examples": [
+          {
+            "body": "Always cite the knowledge base documents you used.",
+            "note": "Tenant policy on citations."
+          }
+        ],
+        "properties": {
+          "body": {
+            "description": "Prompt text of the new version.",
+            "maxLength": 50000,
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "personal"
+          },
+          "note": {
+            "description": "Why the prompt changes.",
+            "maxLength": 500,
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "personal"
+          }
+        },
+        "required": [
+          "body"
+        ],
+        "type": "object",
+        "x-kind": "command",
+        "x-permission": "core.prompt.write",
+        "x-pii": "personal",
+        "x-relations": [],
+        "x-tenancyScope": "organization"
+      },
+      "kind": "command",
+      "name": "CreatePromptVersionInput",
+      "permission": "core.prompt.write",
+      "pii": "personal",
+      "relations": [],
+      "tenancyScope": "organization"
+    },
+    {
+      "context": "agents",
+      "description": "Makes a prompt version active; a rollback is a new activation of an older version.",
+      "examples": [
+        {
+          "activatedAt": "2026-09-29T15:00:00.000Z",
+          "activatedBy": "uA1b2C3d4E5f6G7h8I9j",
+          "agentId": "assistant",
+          "forced": false,
+          "id": "01927f3d-1a2b-7c3d-8e4f-5a6b7c8d9e0f",
+          "reason": null,
+          "scope": "platform",
+          "tenantId": null,
+          "versionId": "01927f3c-8b4a-7d2e-9f10-3a4b5c6d7e8f"
+        }
+      ],
+      "fields": [
+        {
+          "description": "When (UTC).",
+          "name": "activatedAt",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Who activated it.",
+          "name": "activatedBy",
+          "pii": "personal",
+          "required": true
+        },
+        {
+          "description": "Agent.",
+          "name": "agentId",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "True when staff activated without a passing eval.",
+          "name": "forced",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "uuidv7 of the activation.",
+          "name": "id",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Reason of a forced activation or a rollback.",
+          "name": "reason",
+          "pii": "personal",
+          "required": true
+        },
+        {
+          "description": "`platform` or `tenant`.",
+          "name": "scope",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Organization of a tenant addendum; null for platform scope.",
+          "name": "tenantId",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Version made active.",
+          "name": "versionId",
+          "pii": "none",
+          "required": true
+        }
+      ],
+      "id": "agents.PromptActivation",
+      "jsonSchema": {
+        "additionalProperties": false,
+        "description": "Makes a prompt version active; a rollback is a new activation of an older version.",
+        "examples": [
+          {
+            "activatedAt": "2026-09-29T15:00:00.000Z",
+            "activatedBy": "uA1b2C3d4E5f6G7h8I9j",
+            "agentId": "assistant",
+            "forced": false,
+            "id": "01927f3d-1a2b-7c3d-8e4f-5a6b7c8d9e0f",
+            "reason": null,
+            "scope": "platform",
+            "tenantId": null,
+            "versionId": "01927f3c-8b4a-7d2e-9f10-3a4b5c6d7e8f"
+          }
+        ],
+        "properties": {
+          "activatedAt": {
+            "description": "When (UTC).",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "type": "string",
+            "x-pii": "none"
+          },
+          "activatedBy": {
+            "description": "Who activated it.",
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "personal"
+          },
+          "agentId": {
+            "description": "Agent.",
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "forced": {
+            "description": "True when staff activated without a passing eval.",
+            "type": "boolean",
+            "x-pii": "none"
+          },
+          "id": {
+            "description": "uuidv7 of the activation.",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "type": "string",
+            "x-pii": "none"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "maxLength": 500,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Reason of a forced activation or a rollback.",
+            "x-pii": "personal"
+          },
+          "scope": {
+            "description": "`platform` or `tenant`.",
+            "enum": [
+              "platform",
+              "tenant"
+            ],
+            "type": "string",
+            "x-pii": "none"
+          },
+          "tenantId": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Organization of a tenant addendum; null for platform scope.",
+            "x-pii": "none"
+          },
+          "versionId": {
+            "description": "Version made active.",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "type": "string",
+            "x-pii": "none"
+          }
+        },
+        "required": [
+          "id",
+          "agentId",
+          "scope",
+          "tenantId",
+          "versionId",
+          "forced",
+          "reason",
+          "activatedBy",
+          "activatedAt"
+        ],
+        "type": "object",
+        "x-kind": "entity",
+        "x-permission": "core.prompt.read",
+        "x-pii": "personal",
+        "x-relations": [],
+        "x-tenancyScope": "platform"
+      },
+      "kind": "entity",
+      "name": "PromptActivation",
+      "permission": "core.prompt.read",
+      "pii": "personal",
+      "relations": [],
+      "tenancyScope": "platform"
+    },
+    {
+      "context": "agents",
+      "description": "An immutable version of an agent prompt (platform instructions or a tenant addendum).",
+      "examples": [
+        {
+          "agentId": "assistant",
+          "body": "You are the assistant of the workspace. Answer in the user's language.",
+          "bodySha256": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+          "createdAt": "2026-09-29T14:30:00.000Z",
+          "createdBy": "uA1b2C3d4E5f6G7h8I9j",
+          "evalExperimentId": "exp_01J8Z3K4M5",
+          "evalVerdict": "passed",
+          "id": "01927f3c-8b4a-7d2e-9f10-3a4b5c6d7e8f",
+          "note": "Shorter greeting.",
+          "scope": "platform",
+          "tenantId": null,
+          "version": 2
+        }
+      ],
+      "fields": [
+        {
+          "description": "Agent the prompt belongs to.",
+          "name": "agentId",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Prompt text; may mention people or internal policies.",
+          "name": "body",
+          "pii": "personal",
+          "required": true
+        },
+        {
+          "description": "SHA-256 hex of the body.",
+          "name": "bodySha256",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "When the version was written (UTC).",
+          "name": "createdAt",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Author.",
+          "name": "createdBy",
+          "pii": "personal",
+          "required": true
+        },
+        {
+          "description": "Experiment that evaluated this version.",
+          "name": "evalExperimentId",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Verdict of that experiment.",
+          "name": "evalVerdict",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "uuidv7 of the version.",
+          "name": "id",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Author's note about the change.",
+          "name": "note",
+          "pii": "personal",
+          "required": true
+        },
+        {
+          "description": "`platform` or `tenant`.",
+          "name": "scope",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Organization of a tenant addendum; null for platform scope.",
+          "name": "tenantId",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "1-based version number per agent, scope and tenant.",
+          "name": "version",
+          "pii": "none",
+          "required": true
+        }
+      ],
+      "id": "agents.PromptVersion",
+      "jsonSchema": {
+        "additionalProperties": false,
+        "description": "An immutable version of an agent prompt (platform instructions or a tenant addendum).",
+        "examples": [
+          {
+            "agentId": "assistant",
+            "body": "You are the assistant of the workspace. Answer in the user's language.",
+            "bodySha256": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+            "createdAt": "2026-09-29T14:30:00.000Z",
+            "createdBy": "uA1b2C3d4E5f6G7h8I9j",
+            "evalExperimentId": "exp_01J8Z3K4M5",
+            "evalVerdict": "passed",
+            "id": "01927f3c-8b4a-7d2e-9f10-3a4b5c6d7e8f",
+            "note": "Shorter greeting.",
+            "scope": "platform",
+            "tenantId": null,
+            "version": 2
+          }
+        ],
+        "properties": {
+          "agentId": {
+            "description": "Agent the prompt belongs to.",
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "body": {
+            "description": "Prompt text; may mention people or internal policies.",
+            "maxLength": 50000,
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "personal"
+          },
+          "bodySha256": {
+            "description": "SHA-256 hex of the body.",
+            "pattern": "^[0-9a-f]{64}$",
+            "type": "string",
+            "x-pii": "none"
+          },
+          "createdAt": {
+            "description": "When the version was written (UTC).",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "type": "string",
+            "x-pii": "none"
+          },
+          "createdBy": {
+            "description": "Author.",
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "personal"
+          },
+          "evalExperimentId": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Experiment that evaluated this version.",
+            "x-pii": "none"
+          },
+          "evalVerdict": {
+            "anyOf": [
+              {
+                "enum": [
+                  "passed",
+                  "failed"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Verdict of that experiment.",
+            "x-pii": "none"
+          },
+          "id": {
+            "description": "uuidv7 of the version.",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+            "type": "string",
+            "x-pii": "none"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "maxLength": 500,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Author's note about the change.",
+            "x-pii": "personal"
+          },
+          "scope": {
+            "description": "`platform` or `tenant`.",
+            "enum": [
+              "platform",
+              "tenant"
+            ],
+            "type": "string",
+            "x-pii": "none"
+          },
+          "tenantId": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Organization of a tenant addendum; null for platform scope.",
+            "x-pii": "none"
+          },
+          "version": {
+            "description": "1-based version number per agent, scope and tenant.",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991,
+            "type": "integer",
+            "x-pii": "none"
+          }
+        },
+        "required": [
+          "id",
+          "agentId",
+          "scope",
+          "tenantId",
+          "version",
+          "body",
+          "bodySha256",
+          "note",
+          "evalExperimentId",
+          "evalVerdict",
+          "createdBy",
+          "createdAt"
+        ],
+        "type": "object",
+        "x-kind": "entity",
+        "x-permission": "core.prompt.read",
+        "x-pii": "personal",
+        "x-relations": [],
+        "x-tenancyScope": "platform"
+      },
+      "kind": "entity",
+      "name": "PromptVersion",
+      "permission": "core.prompt.read",
+      "pii": "personal",
+      "relations": [],
+      "tenancyScope": "platform"
     },
     {
       "context": "agents",
@@ -7697,6 +8292,274 @@
       "name": "UpdateConnectorInput",
       "permission": "core.connector.write",
       "pii": "none",
+      "relations": [],
+      "tenancyScope": "organization"
+    },
+    {
+      "context": "conversations",
+      "description": "A user's rating of an assistant message; one per message and user.",
+      "examples": [
+        {
+          "conversationId": "Cv1aB2cD3eF4gH5iJ6kL",
+          "createdAt": "2026-09-29T14:30:00.000Z",
+          "messageId": "msg_01J8Z3K4M5",
+          "rating": "up",
+          "tenantId": "Jd8sK2lPq0WnR5tYu3bV",
+          "updatedAt": "2026-09-29T14:30:00.000Z",
+          "userId": "uA1b2C3d4E5f6G7h8I9j"
+        }
+      ],
+      "fields": [
+        {
+          "description": "Optional comment of the user.",
+          "name": "comment",
+          "pii": "personal",
+          "required": false
+        },
+        {
+          "description": "Conversation of the message.",
+          "name": "conversationId",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "First rating (UTC).",
+          "name": "createdAt",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Assistant message rated.",
+          "name": "messageId",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Thumbs up or down.",
+          "name": "rating",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Organization.",
+          "name": "tenantId",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Last change (UTC).",
+          "name": "updatedAt",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "User who rated.",
+          "name": "userId",
+          "pii": "personal",
+          "required": true
+        }
+      ],
+      "id": "conversations.MessageFeedback",
+      "jsonSchema": {
+        "additionalProperties": false,
+        "description": "A user's rating of an assistant message; one per message and user.",
+        "examples": [
+          {
+            "conversationId": "Cv1aB2cD3eF4gH5iJ6kL",
+            "createdAt": "2026-09-29T14:30:00.000Z",
+            "messageId": "msg_01J8Z3K4M5",
+            "rating": "up",
+            "tenantId": "Jd8sK2lPq0WnR5tYu3bV",
+            "updatedAt": "2026-09-29T14:30:00.000Z",
+            "userId": "uA1b2C3d4E5f6G7h8I9j"
+          }
+        ],
+        "properties": {
+          "comment": {
+            "description": "Optional comment of the user.",
+            "maxLength": 1000,
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "personal"
+          },
+          "conversationId": {
+            "description": "Conversation of the message.",
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "createdAt": {
+            "description": "First rating (UTC).",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "type": "string",
+            "x-pii": "none"
+          },
+          "messageId": {
+            "description": "Assistant message rated.",
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "rating": {
+            "description": "Thumbs up or down.",
+            "enum": [
+              "up",
+              "down"
+            ],
+            "type": "string",
+            "x-pii": "none"
+          },
+          "tenantId": {
+            "description": "Organization.",
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "updatedAt": {
+            "description": "Last change (UTC).",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "type": "string",
+            "x-pii": "none"
+          },
+          "userId": {
+            "description": "User who rated.",
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "personal"
+          }
+        },
+        "required": [
+          "conversationId",
+          "tenantId",
+          "userId",
+          "messageId",
+          "rating",
+          "createdAt",
+          "updatedAt"
+        ],
+        "type": "object",
+        "x-kind": "entity",
+        "x-permission": "core.chat.use",
+        "x-pii": "personal",
+        "x-relations": [
+          {
+            "field": "tenantId",
+            "target": "tenancy.Organization",
+            "type": "belongs-to"
+          }
+        ],
+        "x-tenancyScope": "organization"
+      },
+      "kind": "entity",
+      "name": "MessageFeedback",
+      "permission": "core.chat.use",
+      "pii": "personal",
+      "relations": [
+        {
+          "field": "tenantId",
+          "target": "tenancy.Organization",
+          "type": "belongs-to"
+        }
+      ],
+      "tenancyScope": "organization"
+    },
+    {
+      "context": "conversations",
+      "description": "Rates an assistant message with thumbs up or down and an optional comment.",
+      "examples": [
+        {
+          "addToDataset": true,
+          "comment": "The answer cited the wrong document.",
+          "messageId": "msg_01J8Z3K4M5",
+          "rating": "down"
+        }
+      ],
+      "fields": [
+        {
+          "description": "Also add the turn to the tenant dataset `feedback`.",
+          "name": "addToDataset",
+          "pii": "none",
+          "required": false
+        },
+        {
+          "description": "Optional comment of the user.",
+          "name": "comment",
+          "pii": "personal",
+          "required": false
+        },
+        {
+          "description": "Assistant message rated.",
+          "name": "messageId",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Thumbs up or down.",
+          "name": "rating",
+          "pii": "none",
+          "required": true
+        }
+      ],
+      "id": "conversations.MessageFeedbackInput",
+      "jsonSchema": {
+        "additionalProperties": false,
+        "description": "Rates an assistant message with thumbs up or down and an optional comment.",
+        "examples": [
+          {
+            "addToDataset": true,
+            "comment": "The answer cited the wrong document.",
+            "messageId": "msg_01J8Z3K4M5",
+            "rating": "down"
+          }
+        ],
+        "properties": {
+          "addToDataset": {
+            "description": "Also add the turn to the tenant dataset `feedback`.",
+            "type": "boolean",
+            "x-pii": "none"
+          },
+          "comment": {
+            "description": "Optional comment of the user.",
+            "maxLength": 1000,
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "personal"
+          },
+          "messageId": {
+            "description": "Assistant message rated.",
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "rating": {
+            "description": "Thumbs up or down.",
+            "enum": [
+              "up",
+              "down"
+            ],
+            "type": "string",
+            "x-pii": "none"
+          }
+        },
+        "required": [
+          "messageId",
+          "rating"
+        ],
+        "type": "object",
+        "x-kind": "command",
+        "x-permission": "core.chat.use",
+        "x-pii": "personal",
+        "x-relations": [],
+        "x-tenancyScope": "organization"
+      },
+      "kind": "command",
+      "name": "MessageFeedbackInput",
+      "permission": "core.chat.use",
+      "pii": "personal",
       "relations": [],
       "tenancyScope": "organization"
     },
@@ -12560,6 +13423,1773 @@
       "tenancyScope": "organization"
     },
     {
+      "context": "observability",
+      "description": "An eval experiment of an agent on a dataset, with scores per scorer and the gate verdict.",
+      "examples": [
+        {
+          "agentId": "assistant",
+          "datasetId": "assistant.v1",
+          "experimentId": "exp_01J8Z3K4M5",
+          "finishedAt": "2026-09-30T12:03:00.000Z",
+          "itemCount": 18,
+          "promptVersionId": null,
+          "scores": [
+            {
+              "baseline": 0.9,
+              "mean": 0.94,
+              "scorer": "tool-routing"
+            }
+          ],
+          "startedAt": "2026-09-30T12:00:00.000Z",
+          "status": "completed",
+          "verdict": "passed"
+        }
+      ],
+      "fields": [
+        {
+          "description": "Agent under test.",
+          "name": "agentId",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Dataset the experiment ran on.",
+          "name": "datasetId",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Experiment id.",
+          "name": "experimentId",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "End (UTC); null while running.",
+          "name": "finishedAt",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Dataset items evaluated.",
+          "name": "itemCount",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Candidate prompt version, when the experiment gates an activation.",
+          "name": "promptVersionId",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Mean score per scorer against the baseline floor.",
+          "name": "scores",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Start (UTC).",
+          "name": "startedAt",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Experiment status.",
+          "name": "status",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Gate verdict: every scorer at or above its baseline.",
+          "name": "verdict",
+          "pii": "none",
+          "required": true
+        }
+      ],
+      "id": "observability.EvalExperimentSummary",
+      "jsonSchema": {
+        "additionalProperties": false,
+        "description": "An eval experiment of an agent on a dataset, with scores per scorer and the gate verdict.",
+        "examples": [
+          {
+            "agentId": "assistant",
+            "datasetId": "assistant.v1",
+            "experimentId": "exp_01J8Z3K4M5",
+            "finishedAt": "2026-09-30T12:03:00.000Z",
+            "itemCount": 18,
+            "promptVersionId": null,
+            "scores": [
+              {
+                "baseline": 0.9,
+                "mean": 0.94,
+                "scorer": "tool-routing"
+              }
+            ],
+            "startedAt": "2026-09-30T12:00:00.000Z",
+            "status": "completed",
+            "verdict": "passed"
+          }
+        ],
+        "properties": {
+          "agentId": {
+            "description": "Agent under test.",
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "datasetId": {
+            "description": "Dataset the experiment ran on.",
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "experimentId": {
+            "description": "Experiment id.",
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "finishedAt": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "End (UTC); null while running.",
+            "x-pii": "none"
+          },
+          "itemCount": {
+            "description": "Dataset items evaluated.",
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer",
+            "x-pii": "none"
+          },
+          "promptVersionId": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Candidate prompt version, when the experiment gates an activation.",
+            "x-pii": "none"
+          },
+          "scores": {
+            "description": "Mean score per scorer against the baseline floor.",
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "baseline": {
+                  "anyOf": [
+                    {
+                      "description": "Baseline floor.",
+                      "maximum": 1,
+                      "minimum": 0,
+                      "type": "number",
+                      "x-pii": "none"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "mean": {
+                  "description": "Mean score.",
+                  "maximum": 1,
+                  "minimum": 0,
+                  "type": "number",
+                  "x-pii": "none"
+                },
+                "scorer": {
+                  "description": "Scorer id.",
+                  "minLength": 1,
+                  "type": "string",
+                  "x-pii": "none"
+                }
+              },
+              "required": [
+                "scorer",
+                "mean",
+                "baseline"
+              ],
+              "type": "object"
+            },
+            "type": "array",
+            "x-pii": "none"
+          },
+          "startedAt": {
+            "description": "Start (UTC).",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "type": "string",
+            "x-pii": "none"
+          },
+          "status": {
+            "description": "Experiment status.",
+            "enum": [
+              "pending",
+              "running",
+              "completed",
+              "failed"
+            ],
+            "type": "string",
+            "x-pii": "none"
+          },
+          "verdict": {
+            "description": "Gate verdict: every scorer at or above its baseline.",
+            "enum": [
+              "passed",
+              "failed",
+              "pending"
+            ],
+            "type": "string",
+            "x-pii": "none"
+          }
+        },
+        "required": [
+          "experimentId",
+          "datasetId",
+          "agentId",
+          "promptVersionId",
+          "status",
+          "itemCount",
+          "scores",
+          "verdict",
+          "startedAt",
+          "finishedAt"
+        ],
+        "type": "object",
+        "x-kind": "view",
+        "x-permission": "core.eval.read",
+        "x-pii": "none",
+        "x-relations": [],
+        "x-tenancyScope": "organization"
+      },
+      "kind": "view",
+      "name": "EvalExperimentSummary",
+      "permission": "core.eval.read",
+      "pii": "none",
+      "relations": [],
+      "tenancyScope": "organization"
+    },
+    {
+      "context": "observability",
+      "description": "A trace with its span tree, tokens, cost and redacted inputs and outputs.",
+      "examples": [
+        {
+          "spans": [
+            {
+              "costMicroUsd": 900,
+              "durationMs": 2400,
+              "input": null,
+              "inputTokens": 1800,
+              "model": null,
+              "name": "agent run: assistant",
+              "output": null,
+              "outputTokens": 350,
+              "parentSpanId": null,
+              "spanId": "00f067aa0ba902b7",
+              "startedAt": "2026-09-30T12:00:00.000Z",
+              "status": "ok",
+              "type": "agent_run"
+            }
+          ],
+          "summary": {
+            "agentId": "assistant",
+            "costMicroUsd": 900,
+            "durationMs": 2400,
+            "inputTokens": 1800,
+            "name": "agent run: assistant",
+            "outputTokens": 350,
+            "spanCount": 7,
+            "startedAt": "2026-09-30T12:00:00.000Z",
+            "status": "ok",
+            "tenantId": "Jd8sK2lPq0WnR5tYu3bV",
+            "traceId": "4bf92f3577b34da6a3ce929d0e0e4736",
+            "workflowId": null
+          }
+        }
+      ],
+      "fields": [
+        {
+          "description": "Spans, parents before children.",
+          "name": "spans",
+          "pii": "personal",
+          "required": true
+        },
+        {
+          "description": "The trace as listed.",
+          "name": "summary",
+          "pii": "none",
+          "required": true
+        }
+      ],
+      "id": "observability.TraceDetail",
+      "jsonSchema": {
+        "additionalProperties": false,
+        "description": "A trace with its span tree, tokens, cost and redacted inputs and outputs.",
+        "examples": [
+          {
+            "spans": [
+              {
+                "costMicroUsd": 900,
+                "durationMs": 2400,
+                "input": null,
+                "inputTokens": 1800,
+                "model": null,
+                "name": "agent run: assistant",
+                "output": null,
+                "outputTokens": 350,
+                "parentSpanId": null,
+                "spanId": "00f067aa0ba902b7",
+                "startedAt": "2026-09-30T12:00:00.000Z",
+                "status": "ok",
+                "type": "agent_run"
+              }
+            ],
+            "summary": {
+              "agentId": "assistant",
+              "costMicroUsd": 900,
+              "durationMs": 2400,
+              "inputTokens": 1800,
+              "name": "agent run: assistant",
+              "outputTokens": 350,
+              "spanCount": 7,
+              "startedAt": "2026-09-30T12:00:00.000Z",
+              "status": "ok",
+              "tenantId": "Jd8sK2lPq0WnR5tYu3bV",
+              "traceId": "4bf92f3577b34da6a3ce929d0e0e4736",
+              "workflowId": null
+            }
+          }
+        ],
+        "properties": {
+          "spans": {
+            "description": "Spans, parents before children.",
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "costMicroUsd": {
+                  "anyOf": [
+                    {
+                      "maximum": 9007199254740991,
+                      "minimum": 0,
+                      "type": "integer"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "description": "Cost in micro-USD; null when a model price is unknown.",
+                  "x-pii": "none"
+                },
+                "durationMs": {
+                  "anyOf": [
+                    {
+                      "maximum": 9007199254740991,
+                      "minimum": 0,
+                      "type": "integer"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "description": "Duration in milliseconds; null while running.",
+                  "x-pii": "none"
+                },
+                "input": {
+                  "anyOf": [
+                    {},
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "description": "Redacted span input.",
+                  "x-pii": "personal"
+                },
+                "inputTokens": {
+                  "description": "Prompt tokens.",
+                  "maximum": 9007199254740991,
+                  "minimum": 0,
+                  "type": "integer",
+                  "x-pii": "none"
+                },
+                "model": {
+                  "anyOf": [
+                    {
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "description": "Model of a generation span.",
+                  "x-pii": "none"
+                },
+                "name": {
+                  "description": "Span name (operation).",
+                  "maxLength": 200,
+                  "minLength": 1,
+                  "type": "string",
+                  "x-pii": "none"
+                },
+                "output": {
+                  "anyOf": [
+                    {},
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "description": "Redacted span output.",
+                  "x-pii": "personal"
+                },
+                "outputTokens": {
+                  "description": "Completion tokens.",
+                  "maximum": 9007199254740991,
+                  "minimum": 0,
+                  "type": "integer",
+                  "x-pii": "none"
+                },
+                "parentSpanId": {
+                  "anyOf": [
+                    {
+                      "pattern": "^[0-9a-f]{16}$",
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "description": "Parent span; null for the root.",
+                  "x-pii": "none"
+                },
+                "spanId": {
+                  "description": "Span id.",
+                  "pattern": "^[0-9a-f]{16}$",
+                  "type": "string",
+                  "x-pii": "none"
+                },
+                "startedAt": {
+                  "description": "Start (UTC).",
+                  "format": "date-time",
+                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                  "type": "string",
+                  "x-pii": "none"
+                },
+                "status": {
+                  "description": "Span status.",
+                  "enum": [
+                    "ok",
+                    "error"
+                  ],
+                  "type": "string",
+                  "x-pii": "none"
+                },
+                "type": {
+                  "description": "Mastra span type (agent_run, model_generation, tool_call, workflow_step, ...).",
+                  "maxLength": 60,
+                  "minLength": 1,
+                  "type": "string",
+                  "x-pii": "none"
+                }
+              },
+              "required": [
+                "spanId",
+                "parentSpanId",
+                "name",
+                "type",
+                "status",
+                "model",
+                "input",
+                "output",
+                "startedAt",
+                "durationMs",
+                "inputTokens",
+                "outputTokens",
+                "costMicroUsd"
+              ],
+              "type": "object"
+            },
+            "maxItems": 2000,
+            "type": "array",
+            "x-pii": "personal"
+          },
+          "summary": {
+            "additionalProperties": false,
+            "description": "The trace as listed.",
+            "properties": {
+              "agentId": {
+                "anyOf": [
+                  {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "description": "Agent of the root span, if any.",
+                "x-pii": "none"
+              },
+              "costMicroUsd": {
+                "anyOf": [
+                  {
+                    "maximum": 9007199254740991,
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "description": "Cost in micro-USD; null when a model price is unknown.",
+                "x-pii": "none"
+              },
+              "durationMs": {
+                "anyOf": [
+                  {
+                    "maximum": 9007199254740991,
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "description": "Duration in milliseconds; null while running.",
+                "x-pii": "none"
+              },
+              "inputTokens": {
+                "description": "Prompt tokens.",
+                "maximum": 9007199254740991,
+                "minimum": 0,
+                "type": "integer",
+                "x-pii": "none"
+              },
+              "name": {
+                "description": "Root span name (agent or workflow run).",
+                "maxLength": 200,
+                "minLength": 1,
+                "type": "string",
+                "x-pii": "none"
+              },
+              "outputTokens": {
+                "description": "Completion tokens.",
+                "maximum": 9007199254740991,
+                "minimum": 0,
+                "type": "integer",
+                "x-pii": "none"
+              },
+              "spanCount": {
+                "description": "Number of spans.",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991,
+                "type": "integer",
+                "x-pii": "none"
+              },
+              "startedAt": {
+                "description": "Start (UTC).",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                "type": "string",
+                "x-pii": "none"
+              },
+              "status": {
+                "description": "`error` when any span failed.",
+                "enum": [
+                  "ok",
+                  "error"
+                ],
+                "type": "string",
+                "x-pii": "none"
+              },
+              "tenantId": {
+                "anyOf": [
+                  {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "description": "Organization of the trace; null for platform jobs.",
+                "x-pii": "none"
+              },
+              "traceId": {
+                "description": "Trace id.",
+                "pattern": "^[0-9a-f]{32}$",
+                "type": "string",
+                "x-pii": "none"
+              },
+              "workflowId": {
+                "anyOf": [
+                  {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "description": "Workflow of the root span, if any.",
+                "x-pii": "none"
+              }
+            },
+            "required": [
+              "traceId",
+              "tenantId",
+              "name",
+              "agentId",
+              "workflowId",
+              "status",
+              "spanCount",
+              "startedAt",
+              "durationMs",
+              "inputTokens",
+              "outputTokens",
+              "costMicroUsd"
+            ],
+            "type": "object",
+            "x-pii": "none"
+          }
+        },
+        "required": [
+          "summary",
+          "spans"
+        ],
+        "type": "object",
+        "x-kind": "view",
+        "x-permission": "core.trace.read",
+        "x-pii": "personal",
+        "x-relations": [],
+        "x-tenancyScope": "organization"
+      },
+      "kind": "view",
+      "name": "TraceDetail",
+      "permission": "core.trace.read",
+      "pii": "personal",
+      "relations": [],
+      "tenancyScope": "organization"
+    },
+    {
+      "context": "observability",
+      "description": "A trace of an agent or workflow run with its tokens, cost and status.",
+      "examples": [
+        {
+          "agentId": "assistant",
+          "costMicroUsd": 900,
+          "durationMs": 2400,
+          "inputTokens": 1800,
+          "name": "agent run: assistant",
+          "outputTokens": 350,
+          "spanCount": 7,
+          "startedAt": "2026-09-30T12:00:00.000Z",
+          "status": "ok",
+          "tenantId": "Jd8sK2lPq0WnR5tYu3bV",
+          "traceId": "4bf92f3577b34da6a3ce929d0e0e4736",
+          "workflowId": null
+        }
+      ],
+      "fields": [
+        {
+          "description": "Agent of the root span, if any.",
+          "name": "agentId",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Cost in micro-USD; null when a model price is unknown.",
+          "name": "costMicroUsd",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Duration in milliseconds; null while running.",
+          "name": "durationMs",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Prompt tokens.",
+          "name": "inputTokens",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Root span name (agent or workflow run).",
+          "name": "name",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Completion tokens.",
+          "name": "outputTokens",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Number of spans.",
+          "name": "spanCount",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Start (UTC).",
+          "name": "startedAt",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "`error` when any span failed.",
+          "name": "status",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Organization of the trace; null for platform jobs.",
+          "name": "tenantId",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Trace id.",
+          "name": "traceId",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Workflow of the root span, if any.",
+          "name": "workflowId",
+          "pii": "none",
+          "required": true
+        }
+      ],
+      "id": "observability.TraceSummary",
+      "jsonSchema": {
+        "additionalProperties": false,
+        "description": "A trace of an agent or workflow run with its tokens, cost and status.",
+        "examples": [
+          {
+            "agentId": "assistant",
+            "costMicroUsd": 900,
+            "durationMs": 2400,
+            "inputTokens": 1800,
+            "name": "agent run: assistant",
+            "outputTokens": 350,
+            "spanCount": 7,
+            "startedAt": "2026-09-30T12:00:00.000Z",
+            "status": "ok",
+            "tenantId": "Jd8sK2lPq0WnR5tYu3bV",
+            "traceId": "4bf92f3577b34da6a3ce929d0e0e4736",
+            "workflowId": null
+          }
+        ],
+        "properties": {
+          "agentId": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Agent of the root span, if any.",
+            "x-pii": "none"
+          },
+          "costMicroUsd": {
+            "anyOf": [
+              {
+                "maximum": 9007199254740991,
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Cost in micro-USD; null when a model price is unknown.",
+            "x-pii": "none"
+          },
+          "durationMs": {
+            "anyOf": [
+              {
+                "maximum": 9007199254740991,
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Duration in milliseconds; null while running.",
+            "x-pii": "none"
+          },
+          "inputTokens": {
+            "description": "Prompt tokens.",
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer",
+            "x-pii": "none"
+          },
+          "name": {
+            "description": "Root span name (agent or workflow run).",
+            "maxLength": 200,
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "outputTokens": {
+            "description": "Completion tokens.",
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer",
+            "x-pii": "none"
+          },
+          "spanCount": {
+            "description": "Number of spans.",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991,
+            "type": "integer",
+            "x-pii": "none"
+          },
+          "startedAt": {
+            "description": "Start (UTC).",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "type": "string",
+            "x-pii": "none"
+          },
+          "status": {
+            "description": "`error` when any span failed.",
+            "enum": [
+              "ok",
+              "error"
+            ],
+            "type": "string",
+            "x-pii": "none"
+          },
+          "tenantId": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Organization of the trace; null for platform jobs.",
+            "x-pii": "none"
+          },
+          "traceId": {
+            "description": "Trace id.",
+            "pattern": "^[0-9a-f]{32}$",
+            "type": "string",
+            "x-pii": "none"
+          },
+          "workflowId": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Workflow of the root span, if any.",
+            "x-pii": "none"
+          }
+        },
+        "required": [
+          "traceId",
+          "tenantId",
+          "name",
+          "agentId",
+          "workflowId",
+          "status",
+          "spanCount",
+          "startedAt",
+          "durationMs",
+          "inputTokens",
+          "outputTokens",
+          "costMicroUsd"
+        ],
+        "type": "object",
+        "x-kind": "view",
+        "x-permission": "core.trace.read",
+        "x-pii": "none",
+        "x-relations": [],
+        "x-tenancyScope": "organization"
+      },
+      "kind": "view",
+      "name": "TraceSummary",
+      "permission": "core.trace.read",
+      "pii": "none",
+      "relations": [],
+      "tenancyScope": "organization"
+    },
+    {
+      "context": "platform",
+      "description": "Platform overview for staff: organizations, active users, cost, guardrail and approval rates, eval status.",
+      "examples": [
+        {
+          "activeUsers7d": 87,
+          "approvalRate": 0.92,
+          "costMtdMicroUsd": 12500000,
+          "evalStatus": "passed",
+          "generatedAt": "2026-09-30T12:00:00.000Z",
+          "organizations": 12,
+          "tripwireRate": 0.01
+        }
+      ],
+      "fields": [
+        {
+          "description": "Distinct users with activity in the last 7 days.",
+          "name": "activeUsers7d",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Share of settled approval requests approved in the last 7 days.",
+          "name": "approvalRate",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Model cost month to date, all tenants, in micro-USD.",
+          "name": "costMtdMicroUsd",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Verdict of the latest eval gate run.",
+          "name": "evalStatus",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "When the numbers were computed (UTC).",
+          "name": "generatedAt",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Active organizations.",
+          "name": "organizations",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Share of agent runs stopped by a guardrail in the last 7 days.",
+          "name": "tripwireRate",
+          "pii": "none",
+          "required": true
+        }
+      ],
+      "id": "platform.AdminOverview",
+      "jsonSchema": {
+        "additionalProperties": false,
+        "description": "Platform overview for staff: organizations, active users, cost, guardrail and approval rates, eval status.",
+        "examples": [
+          {
+            "activeUsers7d": 87,
+            "approvalRate": 0.92,
+            "costMtdMicroUsd": 12500000,
+            "evalStatus": "passed",
+            "generatedAt": "2026-09-30T12:00:00.000Z",
+            "organizations": 12,
+            "tripwireRate": 0.01
+          }
+        ],
+        "properties": {
+          "activeUsers7d": {
+            "description": "Distinct users with activity in the last 7 days.",
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer",
+            "x-pii": "none"
+          },
+          "approvalRate": {
+            "description": "Share of settled approval requests approved in the last 7 days.",
+            "maximum": 1,
+            "minimum": 0,
+            "type": "number",
+            "x-pii": "none"
+          },
+          "costMtdMicroUsd": {
+            "description": "Model cost month to date, all tenants, in micro-USD.",
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer",
+            "x-pii": "none"
+          },
+          "evalStatus": {
+            "description": "Verdict of the latest eval gate run.",
+            "enum": [
+              "passed",
+              "failed",
+              "unknown"
+            ],
+            "type": "string",
+            "x-pii": "none"
+          },
+          "generatedAt": {
+            "description": "When the numbers were computed (UTC).",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "type": "string",
+            "x-pii": "none"
+          },
+          "organizations": {
+            "description": "Active organizations.",
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer",
+            "x-pii": "none"
+          },
+          "tripwireRate": {
+            "description": "Share of agent runs stopped by a guardrail in the last 7 days.",
+            "maximum": 1,
+            "minimum": 0,
+            "type": "number",
+            "x-pii": "none"
+          }
+        },
+        "required": [
+          "organizations",
+          "activeUsers7d",
+          "costMtdMicroUsd",
+          "tripwireRate",
+          "approvalRate",
+          "evalStatus",
+          "generatedAt"
+        ],
+        "type": "object",
+        "x-kind": "view",
+        "x-permission": "platform.usage.read",
+        "x-pii": "none",
+        "x-relations": [],
+        "x-tenancyScope": "platform"
+      },
+      "kind": "view",
+      "name": "AdminOverview",
+      "permission": "platform.usage.read",
+      "pii": "none",
+      "relations": [],
+      "tenancyScope": "platform"
+    },
+    {
+      "context": "platform",
+      "description": "A feature flag with its effective value and expiry status.",
+      "examples": [
+        {
+          "createdAt": "2026-09-30T00:00:00.000Z",
+          "default": false,
+          "expired": false,
+          "expiresAt": "2027-09-30T00:00:00.000Z",
+          "key": "ai.kill-switch",
+          "kind": "kill-switch",
+          "owner": "platform-team",
+          "reason": "Stops every agent and chat run during an incident.",
+          "tenantOverride": null,
+          "value": false
+        }
+      ],
+      "fields": [
+        {
+          "description": "When the flag was introduced (UTC).",
+          "name": "createdAt",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Value when no environment or tenant value is set.",
+          "name": "default",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "True once expiresAt has passed; shown as a warning.",
+          "name": "expired",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "When the flag must be removed or renewed (UTC); after createdAt.",
+          "name": "expiresAt",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Flag key.",
+          "name": "key",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "`kill-switch`, `rollout` or `ops`.",
+          "name": "kind",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Team or role that owns the flag (governance).",
+          "name": "owner",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Why the flag exists.",
+          "name": "reason",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Tenant override, null when none.",
+          "name": "tenantOverride",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Effective value in this environment (and tenant, when asked).",
+          "name": "value",
+          "pii": "none",
+          "required": true
+        }
+      ],
+      "id": "platform.FeatureFlag",
+      "jsonSchema": {
+        "additionalProperties": false,
+        "description": "A feature flag with its effective value and expiry status.",
+        "examples": [
+          {
+            "createdAt": "2026-09-30T00:00:00.000Z",
+            "default": false,
+            "expired": false,
+            "expiresAt": "2027-09-30T00:00:00.000Z",
+            "key": "ai.kill-switch",
+            "kind": "kill-switch",
+            "owner": "platform-team",
+            "reason": "Stops every agent and chat run during an incident.",
+            "tenantOverride": null,
+            "value": false
+          }
+        ],
+        "properties": {
+          "createdAt": {
+            "description": "When the flag was introduced (UTC).",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "type": "string",
+            "x-pii": "none"
+          },
+          "default": {
+            "description": "Value when no environment or tenant value is set.",
+            "type": "boolean",
+            "x-pii": "none"
+          },
+          "expired": {
+            "description": "True once expiresAt has passed; shown as a warning.",
+            "type": "boolean",
+            "x-pii": "none"
+          },
+          "expiresAt": {
+            "description": "When the flag must be removed or renewed (UTC); after createdAt.",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "type": "string",
+            "x-pii": "none"
+          },
+          "key": {
+            "description": "Flag key.",
+            "maxLength": 80,
+            "pattern": "^[a-z][a-z0-9-]*(?:\\.[a-z0-9-]+)+$",
+            "type": "string",
+            "x-pii": "none"
+          },
+          "kind": {
+            "description": "`kill-switch`, `rollout` or `ops`.",
+            "enum": [
+              "kill-switch",
+              "rollout",
+              "ops"
+            ],
+            "type": "string",
+            "x-pii": "none"
+          },
+          "owner": {
+            "description": "Team or role that owns the flag (governance).",
+            "maxLength": 120,
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "reason": {
+            "description": "Why the flag exists.",
+            "maxLength": 500,
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "tenantOverride": {
+            "description": "Tenant override, null when none.",
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "x-pii": "none"
+          },
+          "value": {
+            "description": "Effective value in this environment (and tenant, when asked).",
+            "type": "boolean",
+            "x-pii": "none"
+          }
+        },
+        "required": [
+          "key",
+          "owner",
+          "reason",
+          "kind",
+          "default",
+          "createdAt",
+          "expiresAt",
+          "value",
+          "tenantOverride",
+          "expired"
+        ],
+        "type": "object",
+        "x-kind": "view",
+        "x-permission": "core.flag.read",
+        "x-pii": "none",
+        "x-relations": [],
+        "x-tenancyScope": "platform"
+      },
+      "kind": "view",
+      "name": "FeatureFlag",
+      "permission": "core.flag.read",
+      "pii": "none",
+      "relations": [],
+      "tenancyScope": "platform"
+    },
+    {
+      "context": "platform",
+      "description": "A feature flag declared in the code registry, with owner, reason, kind and expiry.",
+      "examples": [
+        {
+          "createdAt": "2026-09-30T00:00:00.000Z",
+          "default": false,
+          "expiresAt": "2027-09-30T00:00:00.000Z",
+          "key": "ai.kill-switch",
+          "kind": "kill-switch",
+          "owner": "platform-team",
+          "reason": "Stops every agent and chat run during an incident."
+        }
+      ],
+      "fields": [
+        {
+          "description": "When the flag was introduced (UTC).",
+          "name": "createdAt",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Value when no environment or tenant value is set.",
+          "name": "default",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "When the flag must be removed or renewed (UTC); after createdAt.",
+          "name": "expiresAt",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Flag key.",
+          "name": "key",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "`kill-switch`, `rollout` or `ops`.",
+          "name": "kind",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Team or role that owns the flag (governance).",
+          "name": "owner",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Why the flag exists.",
+          "name": "reason",
+          "pii": "none",
+          "required": true
+        }
+      ],
+      "id": "platform.FeatureFlagDefinition",
+      "jsonSchema": {
+        "additionalProperties": false,
+        "description": "A feature flag declared in the code registry, with owner, reason, kind and expiry.",
+        "examples": [
+          {
+            "createdAt": "2026-09-30T00:00:00.000Z",
+            "default": false,
+            "expiresAt": "2027-09-30T00:00:00.000Z",
+            "key": "ai.kill-switch",
+            "kind": "kill-switch",
+            "owner": "platform-team",
+            "reason": "Stops every agent and chat run during an incident."
+          }
+        ],
+        "properties": {
+          "createdAt": {
+            "description": "When the flag was introduced (UTC).",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "type": "string",
+            "x-pii": "none"
+          },
+          "default": {
+            "description": "Value when no environment or tenant value is set.",
+            "type": "boolean",
+            "x-pii": "none"
+          },
+          "expiresAt": {
+            "description": "When the flag must be removed or renewed (UTC); after createdAt.",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "type": "string",
+            "x-pii": "none"
+          },
+          "key": {
+            "description": "Flag key.",
+            "maxLength": 80,
+            "pattern": "^[a-z][a-z0-9-]*(?:\\.[a-z0-9-]+)+$",
+            "type": "string",
+            "x-pii": "none"
+          },
+          "kind": {
+            "description": "`kill-switch`, `rollout` or `ops`.",
+            "enum": [
+              "kill-switch",
+              "rollout",
+              "ops"
+            ],
+            "type": "string",
+            "x-pii": "none"
+          },
+          "owner": {
+            "description": "Team or role that owns the flag (governance).",
+            "maxLength": 120,
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "reason": {
+            "description": "Why the flag exists.",
+            "maxLength": 500,
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          }
+        },
+        "required": [
+          "key",
+          "owner",
+          "reason",
+          "kind",
+          "default",
+          "createdAt",
+          "expiresAt"
+        ],
+        "type": "object",
+        "x-kind": "entity",
+        "x-permission": "platform.flag.manage",
+        "x-pii": "none",
+        "x-relations": [],
+        "x-tenancyScope": "platform"
+      },
+      "kind": "entity",
+      "name": "FeatureFlagDefinition",
+      "permission": "platform.flag.manage",
+      "pii": "none",
+      "relations": [],
+      "tenancyScope": "platform"
+    },
+    {
+      "context": "platform",
+      "description": "A plan with the spend, token and connector limits it grants to organizations.",
+      "examples": [
+        {
+          "createdAt": "2026-09-29T14:30:00.000Z",
+          "id": "Pl1aB2cD3eF4gH5iJ6kL",
+          "limits": {
+            "features": [
+              "web-tools"
+            ],
+            "maxConnectors": 5,
+            "monthlyMicroUsd": 50000000,
+            "monthlyTokens": 20000000
+          },
+          "name": "Standard",
+          "updatedAt": "2026-09-29T14:30:00.000Z"
+        }
+      ],
+      "fields": [
+        {
+          "description": "When the plan was created (UTC).",
+          "name": "createdAt",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Automatic id of the plan.",
+          "name": "id",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Limits the plan grants.",
+          "name": "limits",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Display name of the plan.",
+          "name": "name",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "When the plan last changed (UTC).",
+          "name": "updatedAt",
+          "pii": "none",
+          "required": true
+        }
+      ],
+      "id": "platform.Plan",
+      "jsonSchema": {
+        "additionalProperties": false,
+        "description": "A plan with the spend, token and connector limits it grants to organizations.",
+        "examples": [
+          {
+            "createdAt": "2026-09-29T14:30:00.000Z",
+            "id": "Pl1aB2cD3eF4gH5iJ6kL",
+            "limits": {
+              "features": [
+                "web-tools"
+              ],
+              "maxConnectors": 5,
+              "monthlyMicroUsd": 50000000,
+              "monthlyTokens": 20000000
+            },
+            "name": "Standard",
+            "updatedAt": "2026-09-29T14:30:00.000Z"
+          }
+        ],
+        "properties": {
+          "createdAt": {
+            "description": "When the plan was created (UTC).",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "type": "string",
+            "x-pii": "none"
+          },
+          "id": {
+            "description": "Automatic id of the plan.",
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "limits": {
+            "additionalProperties": false,
+            "description": "Limits the plan grants.",
+            "properties": {
+              "features": {
+                "description": "Feature keys the plan includes.",
+                "items": {
+                  "pattern": "^[a-z][a-z0-9-]*(?:\\.[a-z0-9-]+)*$",
+                  "type": "string"
+                },
+                "maxItems": 50,
+                "type": "array",
+                "x-pii": "none"
+              },
+              "maxConnectors": {
+                "description": "Most connectors an organization may configure.",
+                "maximum": 9007199254740991,
+                "minimum": 0,
+                "type": "integer",
+                "x-pii": "none"
+              },
+              "monthlyMicroUsd": {
+                "description": "Monthly model spend cap in micro-USD.",
+                "maximum": 9007199254740991,
+                "minimum": 0,
+                "type": "integer",
+                "x-pii": "none"
+              },
+              "monthlyTokens": {
+                "description": "Monthly model token cap.",
+                "maximum": 9007199254740991,
+                "minimum": 0,
+                "type": "integer",
+                "x-pii": "none"
+              }
+            },
+            "required": [
+              "monthlyMicroUsd",
+              "monthlyTokens",
+              "maxConnectors",
+              "features"
+            ],
+            "type": "object",
+            "x-pii": "none"
+          },
+          "name": {
+            "description": "Display name of the plan.",
+            "maxLength": 80,
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "updatedAt": {
+            "description": "When the plan last changed (UTC).",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "type": "string",
+            "x-pii": "none"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "limits",
+          "createdAt",
+          "updatedAt"
+        ],
+        "type": "object",
+        "x-kind": "entity",
+        "x-permission": "platform.plan.manage",
+        "x-pii": "none",
+        "x-relations": [],
+        "x-tenancyScope": "platform"
+      },
+      "kind": "entity",
+      "name": "Plan",
+      "permission": "platform.plan.manage",
+      "pii": "none",
+      "relations": [],
+      "tenancyScope": "platform"
+    },
+    {
+      "context": "platform",
+      "description": "Sets a flag value for the environment or overrides it for one organization.",
+      "examples": [
+        {
+          "value": true
+        },
+        {
+          "tenantId": "Jd8sK2lPq0WnR5tYu3bV",
+          "value": false
+        }
+      ],
+      "fields": [
+        {
+          "description": "Organization to override; omitted = the environment value (staff only).",
+          "name": "tenantId",
+          "pii": "none",
+          "required": false
+        },
+        {
+          "description": "New value.",
+          "name": "value",
+          "pii": "none",
+          "required": true
+        }
+      ],
+      "id": "platform.SetFeatureFlagValueInput",
+      "jsonSchema": {
+        "additionalProperties": false,
+        "description": "Sets a flag value for the environment or overrides it for one organization.",
+        "examples": [
+          {
+            "value": true
+          },
+          {
+            "tenantId": "Jd8sK2lPq0WnR5tYu3bV",
+            "value": false
+          }
+        ],
+        "properties": {
+          "tenantId": {
+            "description": "Organization to override; omitted = the environment value (staff only).",
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "value": {
+            "description": "New value.",
+            "type": "boolean",
+            "x-pii": "none"
+          }
+        },
+        "required": [
+          "value"
+        ],
+        "type": "object",
+        "x-kind": "command",
+        "x-permission": "platform.flag.manage",
+        "x-pii": "none",
+        "x-relations": [],
+        "x-tenancyScope": "platform"
+      },
+      "kind": "command",
+      "name": "SetFeatureFlagValueInput",
+      "permission": "platform.flag.manage",
+      "pii": "none",
+      "relations": [],
+      "tenancyScope": "platform"
+    },
+    {
+      "context": "platform",
+      "description": "Creates or replaces a plan (staff).",
+      "examples": [
+        {
+          "limits": {
+            "features": [
+              "web-tools"
+            ],
+            "maxConnectors": 5,
+            "monthlyMicroUsd": 50000000,
+            "monthlyTokens": 20000000
+          },
+          "name": "Standard"
+        }
+      ],
+      "fields": [
+        {
+          "description": "Limits the plan grants.",
+          "name": "limits",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Display name of the plan.",
+          "name": "name",
+          "pii": "none",
+          "required": true
+        }
+      ],
+      "id": "platform.UpsertPlanInput",
+      "jsonSchema": {
+        "additionalProperties": false,
+        "description": "Creates or replaces a plan (staff).",
+        "examples": [
+          {
+            "limits": {
+              "features": [
+                "web-tools"
+              ],
+              "maxConnectors": 5,
+              "monthlyMicroUsd": 50000000,
+              "monthlyTokens": 20000000
+            },
+            "name": "Standard"
+          }
+        ],
+        "properties": {
+          "limits": {
+            "additionalProperties": false,
+            "description": "Limits the plan grants.",
+            "properties": {
+              "features": {
+                "description": "Feature keys the plan includes.",
+                "items": {
+                  "pattern": "^[a-z][a-z0-9-]*(?:\\.[a-z0-9-]+)*$",
+                  "type": "string"
+                },
+                "maxItems": 50,
+                "type": "array",
+                "x-pii": "none"
+              },
+              "maxConnectors": {
+                "description": "Most connectors an organization may configure.",
+                "maximum": 9007199254740991,
+                "minimum": 0,
+                "type": "integer",
+                "x-pii": "none"
+              },
+              "monthlyMicroUsd": {
+                "description": "Monthly model spend cap in micro-USD.",
+                "maximum": 9007199254740991,
+                "minimum": 0,
+                "type": "integer",
+                "x-pii": "none"
+              },
+              "monthlyTokens": {
+                "description": "Monthly model token cap.",
+                "maximum": 9007199254740991,
+                "minimum": 0,
+                "type": "integer",
+                "x-pii": "none"
+              }
+            },
+            "required": [
+              "monthlyMicroUsd",
+              "monthlyTokens",
+              "maxConnectors",
+              "features"
+            ],
+            "type": "object",
+            "x-pii": "none"
+          },
+          "name": {
+            "description": "Display name of the plan.",
+            "maxLength": 80,
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          }
+        },
+        "required": [
+          "name",
+          "limits"
+        ],
+        "type": "object",
+        "x-kind": "command",
+        "x-permission": "platform.plan.manage",
+        "x-pii": "none",
+        "x-relations": [],
+        "x-tenancyScope": "platform"
+      },
+      "kind": "command",
+      "name": "UpsertPlanInput",
+      "permission": "platform.plan.manage",
+      "pii": "none",
+      "relations": [],
+      "tenancyScope": "platform"
+    },
+    {
       "context": "tenancy",
       "description": "Creates an organization; the caller becomes its owner (self-serve flag, SP1 spec §6.1).",
       "examples": [
@@ -14660,6 +17290,178 @@
     },
     {
       "context": "usage",
+      "description": "Daily model usage and cost of an organization per model and agent.",
+      "examples": [
+        {
+          "agentId": "assistant",
+          "calls": 42,
+          "costMicroUsd": 61000,
+          "day": "2026-09-30",
+          "inputTokens": 50000,
+          "model": "gemini-3.5-flash",
+          "outputTokens": 12000,
+          "tenantId": "Jd8sK2lPq0WnR5tYu3bV"
+        }
+      ],
+      "fields": [
+        {
+          "description": "Agent that made the calls.",
+          "name": "agentId",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Model calls.",
+          "name": "calls",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Known cost in micro-USD.",
+          "name": "costMicroUsd",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Calendar day in UTC, YYYY-MM-DD.",
+          "name": "day",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Prompt tokens.",
+          "name": "inputTokens",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Provider model id.",
+          "name": "model",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Completion tokens.",
+          "name": "outputTokens",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Organization.",
+          "name": "tenantId",
+          "pii": "none",
+          "required": true
+        }
+      ],
+      "id": "usage.UsageDailyRollup",
+      "jsonSchema": {
+        "additionalProperties": false,
+        "description": "Daily model usage and cost of an organization per model and agent.",
+        "examples": [
+          {
+            "agentId": "assistant",
+            "calls": 42,
+            "costMicroUsd": 61000,
+            "day": "2026-09-30",
+            "inputTokens": 50000,
+            "model": "gemini-3.5-flash",
+            "outputTokens": 12000,
+            "tenantId": "Jd8sK2lPq0WnR5tYu3bV"
+          }
+        ],
+        "properties": {
+          "agentId": {
+            "description": "Agent that made the calls.",
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "calls": {
+            "description": "Model calls.",
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer",
+            "x-pii": "none"
+          },
+          "costMicroUsd": {
+            "description": "Known cost in micro-USD.",
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer",
+            "x-pii": "none"
+          },
+          "day": {
+            "description": "Calendar day in UTC, YYYY-MM-DD.",
+            "format": "date",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+            "type": "string",
+            "x-pii": "none"
+          },
+          "inputTokens": {
+            "description": "Prompt tokens.",
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer",
+            "x-pii": "none"
+          },
+          "model": {
+            "description": "Provider model id.",
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "outputTokens": {
+            "description": "Completion tokens.",
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer",
+            "x-pii": "none"
+          },
+          "tenantId": {
+            "description": "Organization.",
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          }
+        },
+        "required": [
+          "tenantId",
+          "day",
+          "model",
+          "agentId",
+          "calls",
+          "inputTokens",
+          "outputTokens",
+          "costMicroUsd"
+        ],
+        "type": "object",
+        "x-kind": "view",
+        "x-permission": "core.usage.read",
+        "x-pii": "none",
+        "x-relations": [
+          {
+            "field": "tenantId",
+            "target": "tenancy.Organization",
+            "type": "belongs-to"
+          }
+        ],
+        "x-tenancyScope": "organization"
+      },
+      "kind": "view",
+      "name": "UsageDailyRollup",
+      "permission": "core.usage.read",
+      "pii": "none",
+      "relations": [
+        {
+          "field": "tenantId",
+          "target": "tenancy.Organization",
+          "type": "belongs-to"
+        }
+      ],
+      "tenancyScope": "organization"
+    },
+    {
+      "context": "usage",
       "description": "Month-to-date model usage and cost of an organization compared with its budget caps.",
       "examples": [
         {
@@ -14954,6 +17756,1062 @@
       "permission": "core.usage.read",
       "pii": "none",
       "relations": [],
+      "tenancyScope": "organization"
+    },
+    {
+      "context": "workflows",
+      "description": "Creates a tenant schedule for a schedulable workflow.",
+      "examples": [
+        {
+          "cron": "0 9 * * *",
+          "inputData": {},
+          "slug": "daily-usage",
+          "timezone": "America/Sao_Paulo",
+          "workflowId": "usage-report"
+        }
+      ],
+      "fields": [
+        {
+          "description": "5-field cron expression; at least 15 minutes between fires.",
+          "name": "cron",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Workflow input; validated by the workflow's own schema on the server.",
+          "name": "inputData",
+          "pii": "personal",
+          "required": false
+        },
+        {
+          "description": "Unique per organization; part of the schedule id.",
+          "name": "slug",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "IANA time zone of the cron expression; required.",
+          "name": "timezone",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Workflow to schedule; it must be schedulable.",
+          "name": "workflowId",
+          "pii": "none",
+          "required": true
+        }
+      ],
+      "id": "workflows.CreateScheduleInput",
+      "jsonSchema": {
+        "additionalProperties": false,
+        "description": "Creates a tenant schedule for a schedulable workflow.",
+        "examples": [
+          {
+            "cron": "0 9 * * *",
+            "inputData": {},
+            "slug": "daily-usage",
+            "timezone": "America/Sao_Paulo",
+            "workflowId": "usage-report"
+          }
+        ],
+        "properties": {
+          "cron": {
+            "description": "5-field cron expression; at least 15 minutes between fires.",
+            "maxLength": 120,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "inputData": {
+            "additionalProperties": {},
+            "description": "Workflow input; validated by the workflow's own schema on the server.",
+            "propertyNames": {
+              "type": "string"
+            },
+            "type": "object",
+            "x-pii": "personal"
+          },
+          "slug": {
+            "description": "Unique per organization; part of the schedule id.",
+            "maxLength": 60,
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+            "type": "string",
+            "x-pii": "none"
+          },
+          "timezone": {
+            "description": "IANA time zone of the cron expression; required.",
+            "type": "string",
+            "x-pii": "none"
+          },
+          "workflowId": {
+            "description": "Workflow to schedule; it must be schedulable.",
+            "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+            "type": "string",
+            "x-pii": "none"
+          }
+        },
+        "required": [
+          "workflowId",
+          "slug",
+          "cron",
+          "timezone"
+        ],
+        "type": "object",
+        "x-kind": "command",
+        "x-permission": "core.schedule.write",
+        "x-pii": "personal",
+        "x-relations": [],
+        "x-tenancyScope": "organization"
+      },
+      "kind": "command",
+      "name": "CreateScheduleInput",
+      "permission": "core.schedule.write",
+      "pii": "personal",
+      "relations": [],
+      "tenancyScope": "organization"
+    },
+    {
+      "context": "workflows",
+      "description": "Data a suspended human-approval step resumes with; checked against the stored approval request.",
+      "examples": [
+        {
+          "decidedBy": "uA1b2C3d4E5f6G7h8I9j",
+          "decision": "approved"
+        },
+        {
+          "decidedBy": "uA1b2C3d4E5f6G7h8I9j",
+          "decision": "rejected",
+          "reason": "Wrong project."
+        },
+        {
+          "decision": "expired"
+        }
+      ],
+      "fields": [
+        {
+          "description": "Uid of the approver or rejecter, when a person decided.",
+          "name": "decidedBy",
+          "pii": "personal",
+          "required": false
+        },
+        {
+          "description": "How the approval request was settled.",
+          "name": "decision",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Reason given with the decision.",
+          "name": "reason",
+          "pii": "personal",
+          "required": false
+        }
+      ],
+      "id": "workflows.HumanApprovalResume",
+      "jsonSchema": {
+        "additionalProperties": false,
+        "description": "Data a suspended human-approval step resumes with; checked against the stored approval request.",
+        "examples": [
+          {
+            "decidedBy": "uA1b2C3d4E5f6G7h8I9j",
+            "decision": "approved"
+          },
+          {
+            "decidedBy": "uA1b2C3d4E5f6G7h8I9j",
+            "decision": "rejected",
+            "reason": "Wrong project."
+          },
+          {
+            "decision": "expired"
+          }
+        ],
+        "properties": {
+          "decidedBy": {
+            "description": "Uid of the approver or rejecter, when a person decided.",
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "personal"
+          },
+          "decision": {
+            "description": "How the approval request was settled.",
+            "enum": [
+              "approved",
+              "rejected",
+              "expired",
+              "cancelled"
+            ],
+            "type": "string",
+            "x-pii": "none"
+          },
+          "reason": {
+            "description": "Reason given with the decision.",
+            "maxLength": 500,
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "personal"
+          }
+        },
+        "required": [
+          "decision"
+        ],
+        "type": "object",
+        "x-kind": "command",
+        "x-pii": "personal",
+        "x-relations": [],
+        "x-tenancyScope": "organization"
+      },
+      "kind": "command",
+      "name": "HumanApprovalResume",
+      "pii": "personal",
+      "relations": [],
+      "tenancyScope": "organization"
+    },
+    {
+      "context": "workflows",
+      "description": "A tenant schedule that starts a schedulable workflow on a cron expression in an IANA time zone.",
+      "examples": [
+        {
+          "createdAt": "2026-09-29T14:30:00.000Z",
+          "createdBy": "uA1b2C3d4E5f6G7h8I9j",
+          "cron": "0 9 * * *",
+          "id": "schedule_Jd8sK2lPq0WnR5tYu3bV_daily-usage",
+          "inputData": {},
+          "lastFireAt": null,
+          "nextFireAt": "2026-09-30T12:00:00.000Z",
+          "status": "active",
+          "tenantId": "Jd8sK2lPq0WnR5tYu3bV",
+          "timezone": "America/Sao_Paulo",
+          "updatedAt": "2026-09-29T14:30:00.000Z",
+          "workflowId": "usage-report"
+        }
+      ],
+      "fields": [
+        {
+          "description": "When the schedule was created (UTC).",
+          "name": "createdAt",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Creator; every run re-authorizes this user.",
+          "name": "createdBy",
+          "pii": "personal",
+          "required": true
+        },
+        {
+          "description": "5-field cron expression, evaluated in `timezone`.",
+          "name": "cron",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "`schedule_<tenantId>_<slug>`.",
+          "name": "id",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Workflow input; validated by the workflow's own schema on the server.",
+          "name": "inputData",
+          "pii": "personal",
+          "required": true
+        },
+        {
+          "description": "Last fire (UTC); null before the first.",
+          "name": "lastFireAt",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Next fire (UTC); null while paused.",
+          "name": "nextFireAt",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "`paused` schedules do not fire.",
+          "name": "status",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Organization that owns the schedule.",
+          "name": "tenantId",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "IANA time zone of the cron expression.",
+          "name": "timezone",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "When the schedule last changed (UTC).",
+          "name": "updatedAt",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Scheduled workflow.",
+          "name": "workflowId",
+          "pii": "none",
+          "required": true
+        }
+      ],
+      "id": "workflows.Schedule",
+      "jsonSchema": {
+        "additionalProperties": false,
+        "description": "A tenant schedule that starts a schedulable workflow on a cron expression in an IANA time zone.",
+        "examples": [
+          {
+            "createdAt": "2026-09-29T14:30:00.000Z",
+            "createdBy": "uA1b2C3d4E5f6G7h8I9j",
+            "cron": "0 9 * * *",
+            "id": "schedule_Jd8sK2lPq0WnR5tYu3bV_daily-usage",
+            "inputData": {},
+            "lastFireAt": null,
+            "nextFireAt": "2026-09-30T12:00:00.000Z",
+            "status": "active",
+            "tenantId": "Jd8sK2lPq0WnR5tYu3bV",
+            "timezone": "America/Sao_Paulo",
+            "updatedAt": "2026-09-29T14:30:00.000Z",
+            "workflowId": "usage-report"
+          }
+        ],
+        "properties": {
+          "createdAt": {
+            "description": "When the schedule was created (UTC).",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "type": "string",
+            "x-pii": "none"
+          },
+          "createdBy": {
+            "description": "Creator; every run re-authorizes this user.",
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "personal"
+          },
+          "cron": {
+            "description": "5-field cron expression, evaluated in `timezone`.",
+            "maxLength": 120,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "id": {
+            "description": "`schedule_<tenantId>_<slug>`.",
+            "pattern": "^schedule_[A-Za-z0-9]+_[a-z0-9-]+$",
+            "type": "string",
+            "x-pii": "none"
+          },
+          "inputData": {
+            "additionalProperties": {},
+            "description": "Workflow input; validated by the workflow's own schema on the server.",
+            "propertyNames": {
+              "type": "string"
+            },
+            "type": "object",
+            "x-pii": "personal"
+          },
+          "lastFireAt": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Last fire (UTC); null before the first.",
+            "x-pii": "none"
+          },
+          "nextFireAt": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Next fire (UTC); null while paused.",
+            "x-pii": "none"
+          },
+          "status": {
+            "description": "`paused` schedules do not fire.",
+            "enum": [
+              "active",
+              "paused"
+            ],
+            "type": "string",
+            "x-pii": "none"
+          },
+          "tenantId": {
+            "description": "Organization that owns the schedule.",
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "timezone": {
+            "description": "IANA time zone of the cron expression.",
+            "type": "string",
+            "x-pii": "none"
+          },
+          "updatedAt": {
+            "description": "When the schedule last changed (UTC).",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "type": "string",
+            "x-pii": "none"
+          },
+          "workflowId": {
+            "description": "Scheduled workflow.",
+            "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+            "type": "string",
+            "x-pii": "none"
+          }
+        },
+        "required": [
+          "id",
+          "tenantId",
+          "workflowId",
+          "cron",
+          "timezone",
+          "inputData",
+          "status",
+          "nextFireAt",
+          "lastFireAt",
+          "createdBy",
+          "createdAt",
+          "updatedAt"
+        ],
+        "type": "object",
+        "x-kind": "entity",
+        "x-permission": "core.schedule.read",
+        "x-pii": "personal",
+        "x-relations": [
+          {
+            "field": "tenantId",
+            "target": "tenancy.Organization",
+            "type": "belongs-to"
+          }
+        ],
+        "x-tenancyScope": "organization"
+      },
+      "kind": "entity",
+      "name": "Schedule",
+      "permission": "core.schedule.read",
+      "pii": "personal",
+      "relations": [
+        {
+          "field": "tenantId",
+          "target": "tenancy.Organization",
+          "type": "belongs-to"
+        }
+      ],
+      "tenancyScope": "organization"
+    },
+    {
+      "context": "workflows",
+      "description": "Starts a run of a startable workflow in the active organization.",
+      "examples": [
+        {
+          "inputData": {
+            "body": "Call about the invoice.",
+            "title": "Supplier follow-up"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "description": "Workflow input; validated by the workflow's own schema on the server.",
+          "name": "inputData",
+          "pii": "personal",
+          "required": true
+        }
+      ],
+      "id": "workflows.StartWorkflowRunInput",
+      "jsonSchema": {
+        "additionalProperties": false,
+        "description": "Starts a run of a startable workflow in the active organization.",
+        "examples": [
+          {
+            "inputData": {
+              "body": "Call about the invoice.",
+              "title": "Supplier follow-up"
+            }
+          }
+        ],
+        "properties": {
+          "inputData": {
+            "additionalProperties": {},
+            "description": "Workflow input; validated by the workflow's own schema on the server.",
+            "propertyNames": {
+              "type": "string"
+            },
+            "type": "object",
+            "x-pii": "personal"
+          }
+        },
+        "required": [
+          "inputData"
+        ],
+        "type": "object",
+        "x-kind": "command",
+        "x-permission": "core.workflow-run.start",
+        "x-pii": "personal",
+        "x-relations": [],
+        "x-tenancyScope": "organization"
+      },
+      "kind": "command",
+      "name": "StartWorkflowRunInput",
+      "permission": "core.workflow-run.start",
+      "pii": "personal",
+      "relations": [],
+      "tenancyScope": "organization"
+    },
+    {
+      "context": "workflows",
+      "description": "Changes the cron expression, time zone or input of a tenant schedule.",
+      "examples": [
+        {
+          "cron": "30 8 * * 1-5",
+          "timezone": "America/New_York"
+        }
+      ],
+      "fields": [
+        {
+          "description": "New cron expression.",
+          "name": "cron",
+          "pii": "none",
+          "required": false
+        },
+        {
+          "description": "Workflow input; validated by the workflow's own schema on the server.",
+          "name": "inputData",
+          "pii": "personal",
+          "required": false
+        },
+        {
+          "description": "New IANA time zone.",
+          "name": "timezone",
+          "pii": "none",
+          "required": false
+        }
+      ],
+      "id": "workflows.UpdateScheduleInput",
+      "jsonSchema": {
+        "additionalProperties": false,
+        "description": "Changes the cron expression, time zone or input of a tenant schedule.",
+        "examples": [
+          {
+            "cron": "30 8 * * 1-5",
+            "timezone": "America/New_York"
+          }
+        ],
+        "properties": {
+          "cron": {
+            "description": "New cron expression.",
+            "maxLength": 120,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "inputData": {
+            "additionalProperties": {},
+            "description": "Workflow input; validated by the workflow's own schema on the server.",
+            "propertyNames": {
+              "type": "string"
+            },
+            "type": "object",
+            "x-pii": "personal"
+          },
+          "timezone": {
+            "description": "New IANA time zone.",
+            "type": "string",
+            "x-pii": "none"
+          }
+        },
+        "type": "object",
+        "x-kind": "command",
+        "x-permission": "core.schedule.write",
+        "x-pii": "personal",
+        "x-relations": [],
+        "x-tenancyScope": "organization"
+      },
+      "kind": "command",
+      "name": "UpdateScheduleInput",
+      "permission": "core.schedule.write",
+      "pii": "personal",
+      "relations": [],
+      "tenancyScope": "organization"
+    },
+    {
+      "context": "workflows",
+      "description": "A progress event of a workflow run, streamed as server-sent events.",
+      "examples": [
+        {
+          "index": 0,
+          "occurredAt": "2026-09-30T12:00:00.000Z",
+          "status": "running",
+          "stepId": null,
+          "type": "workflow-start"
+        },
+        {
+          "index": 3,
+          "occurredAt": "2026-09-30T12:00:01.000Z",
+          "status": "suspended",
+          "stepId": "request-human-approval",
+          "type": "workflow-step-suspended"
+        }
+      ],
+      "fields": [
+        {
+          "description": "Position in the run's stream; the SSE `id`, used by `Last-Event-Id`.",
+          "name": "index",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "When the event was emitted (UTC).",
+          "name": "occurredAt",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Step output, redacted by the workflow schema's pii meta.",
+          "name": "output",
+          "pii": "personal",
+          "required": false
+        },
+        {
+          "description": "Step or run status carried by the event.",
+          "name": "status",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Step the event is about; null for run-level events.",
+          "name": "stepId",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Mastra event type.",
+          "name": "type",
+          "pii": "none",
+          "required": true
+        }
+      ],
+      "id": "workflows.WorkflowEvent",
+      "jsonSchema": {
+        "additionalProperties": false,
+        "description": "A progress event of a workflow run, streamed as server-sent events.",
+        "examples": [
+          {
+            "index": 0,
+            "occurredAt": "2026-09-30T12:00:00.000Z",
+            "status": "running",
+            "stepId": null,
+            "type": "workflow-start"
+          },
+          {
+            "index": 3,
+            "occurredAt": "2026-09-30T12:00:01.000Z",
+            "status": "suspended",
+            "stepId": "request-human-approval",
+            "type": "workflow-step-suspended"
+          }
+        ],
+        "properties": {
+          "index": {
+            "description": "Position in the run's stream; the SSE `id`, used by `Last-Event-Id`.",
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer",
+            "x-pii": "none"
+          },
+          "occurredAt": {
+            "description": "When the event was emitted (UTC).",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "type": "string",
+            "x-pii": "none"
+          },
+          "output": {
+            "description": "Step output, redacted by the workflow schema's pii meta.",
+            "x-pii": "personal"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "enum": [
+                  "pending",
+                  "running",
+                  "waiting",
+                  "suspended",
+                  "paused",
+                  "success",
+                  "failed",
+                  "canceled",
+                  "tripwire"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Step or run status carried by the event.",
+            "x-pii": "none"
+          },
+          "stepId": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Step the event is about; null for run-level events.",
+            "x-pii": "none"
+          },
+          "type": {
+            "description": "Mastra event type.",
+            "enum": [
+              "workflow-start",
+              "workflow-step-start",
+              "workflow-step-output",
+              "workflow-step-progress",
+              "workflow-step-result",
+              "workflow-step-suspended",
+              "workflow-finish",
+              "workflow-canceled"
+            ],
+            "type": "string",
+            "x-pii": "none"
+          }
+        },
+        "required": [
+          "index",
+          "type",
+          "stepId",
+          "status",
+          "occurredAt"
+        ],
+        "type": "object",
+        "x-kind": "event",
+        "x-permission": "core.workflow-run.read",
+        "x-pii": "personal",
+        "x-relations": [],
+        "x-tenancyScope": "organization"
+      },
+      "kind": "event",
+      "name": "WorkflowEvent",
+      "permission": "core.workflow-run.read",
+      "pii": "personal",
+      "relations": [],
+      "tenancyScope": "organization"
+    },
+    {
+      "context": "workflows",
+      "description": "Input of an approval action that resumes a suspended workflow run once the request is settled.",
+      "examples": [
+        {
+          "runId": "01J8Z3K4M5N6P7Q8R9S0T1V2W3",
+          "stepId": "request-human-approval",
+          "workflowId": "approval-demo"
+        }
+      ],
+      "fields": [
+        {
+          "description": "Suspended run.",
+          "name": "runId",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Step the run is suspended on.",
+          "name": "stepId",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Workflow of the suspended run.",
+          "name": "workflowId",
+          "pii": "none",
+          "required": true
+        }
+      ],
+      "id": "workflows.WorkflowResumeActionInput",
+      "jsonSchema": {
+        "additionalProperties": false,
+        "description": "Input of an approval action that resumes a suspended workflow run once the request is settled.",
+        "examples": [
+          {
+            "runId": "01J8Z3K4M5N6P7Q8R9S0T1V2W3",
+            "stepId": "request-human-approval",
+            "workflowId": "approval-demo"
+          }
+        ],
+        "properties": {
+          "runId": {
+            "description": "Suspended run.",
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "stepId": {
+            "description": "Step the run is suspended on.",
+            "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+            "type": "string",
+            "x-pii": "none"
+          },
+          "workflowId": {
+            "description": "Workflow of the suspended run.",
+            "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+            "type": "string",
+            "x-pii": "none"
+          }
+        },
+        "required": [
+          "workflowId",
+          "runId",
+          "stepId"
+        ],
+        "type": "object",
+        "x-kind": "command",
+        "x-pii": "none",
+        "x-relations": [],
+        "x-tenancyScope": "organization"
+      },
+      "kind": "command",
+      "name": "WorkflowResumeActionInput",
+      "pii": "none",
+      "relations": [],
+      "tenancyScope": "organization"
+    },
+    {
+      "context": "workflows",
+      "description": "A run of a workflow in an organization, with its status and what it waits for.",
+      "examples": [
+        {
+          "approvalRequestId": "Ar9oP1lK3jH5gF7dS9aQ",
+          "createdAt": "2026-09-29T14:30:00.000Z",
+          "runId": "01J8Z3K4M5N6P7Q8R9S0T1V2W3",
+          "scheduleId": null,
+          "startedBy": "uA1b2C3d4E5f6G7h8I9j",
+          "status": "suspended",
+          "tenantId": "Jd8sK2lPq0WnR5tYu3bV",
+          "updatedAt": "2026-09-29T15:00:00.000Z",
+          "workflowId": "approval-demo"
+        }
+      ],
+      "fields": [
+        {
+          "description": "Approval request a suspended run waits for, if any.",
+          "name": "approvalRequestId",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "When the run started (UTC).",
+          "name": "createdAt",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Run id.",
+          "name": "runId",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Schedule that started the run, if any.",
+          "name": "scheduleId",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "User who started the run; null for platform schedules.",
+          "name": "startedBy",
+          "pii": "personal",
+          "required": true
+        },
+        {
+          "description": "Run status.",
+          "name": "status",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Organization the run belongs to.",
+          "name": "tenantId",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "When the run last changed (UTC).",
+          "name": "updatedAt",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Workflow of the run.",
+          "name": "workflowId",
+          "pii": "none",
+          "required": true
+        }
+      ],
+      "id": "workflows.WorkflowRun",
+      "jsonSchema": {
+        "additionalProperties": false,
+        "description": "A run of a workflow in an organization, with its status and what it waits for.",
+        "examples": [
+          {
+            "approvalRequestId": "Ar9oP1lK3jH5gF7dS9aQ",
+            "createdAt": "2026-09-29T14:30:00.000Z",
+            "runId": "01J8Z3K4M5N6P7Q8R9S0T1V2W3",
+            "scheduleId": null,
+            "startedBy": "uA1b2C3d4E5f6G7h8I9j",
+            "status": "suspended",
+            "tenantId": "Jd8sK2lPq0WnR5tYu3bV",
+            "updatedAt": "2026-09-29T15:00:00.000Z",
+            "workflowId": "approval-demo"
+          }
+        ],
+        "properties": {
+          "approvalRequestId": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Approval request a suspended run waits for, if any.",
+            "x-pii": "none"
+          },
+          "createdAt": {
+            "description": "When the run started (UTC).",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "type": "string",
+            "x-pii": "none"
+          },
+          "runId": {
+            "description": "Run id.",
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "scheduleId": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Schedule that started the run, if any.",
+            "x-pii": "none"
+          },
+          "startedBy": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "User who started the run; null for platform schedules.",
+            "x-pii": "personal"
+          },
+          "status": {
+            "description": "Run status.",
+            "enum": [
+              "pending",
+              "running",
+              "waiting",
+              "suspended",
+              "paused",
+              "success",
+              "failed",
+              "canceled",
+              "tripwire"
+            ],
+            "type": "string",
+            "x-pii": "none"
+          },
+          "tenantId": {
+            "description": "Organization the run belongs to.",
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "updatedAt": {
+            "description": "When the run last changed (UTC).",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "type": "string",
+            "x-pii": "none"
+          },
+          "workflowId": {
+            "description": "Workflow of the run.",
+            "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+            "type": "string",
+            "x-pii": "none"
+          }
+        },
+        "required": [
+          "runId",
+          "workflowId",
+          "tenantId",
+          "status",
+          "startedBy",
+          "scheduleId",
+          "approvalRequestId",
+          "createdAt",
+          "updatedAt"
+        ],
+        "type": "object",
+        "x-kind": "view",
+        "x-permission": "core.workflow-run.read",
+        "x-pii": "personal",
+        "x-relations": [
+          {
+            "field": "tenantId",
+            "target": "tenancy.Organization",
+            "type": "belongs-to"
+          }
+        ],
+        "x-tenancyScope": "organization"
+      },
+      "kind": "view",
+      "name": "WorkflowRun",
+      "permission": "core.workflow-run.read",
+      "pii": "personal",
+      "relations": [
+        {
+          "field": "tenantId",
+          "target": "tenancy.Organization",
+          "type": "belongs-to"
+        }
+      ],
       "tenancyScope": "organization"
     }
   ]

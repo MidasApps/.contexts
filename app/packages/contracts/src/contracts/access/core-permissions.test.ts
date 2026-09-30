@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { PermissionSchema } from "../primitives/catalog-meta.schema.ts";
 import { AGENT_PERMISSIONS } from "../agents/agent-permissions.ts";
-import { CORE_PERMISSIONS, SP1_PERMISSIONS } from "./core-permissions.ts";
+import { CORE_PERMISSIONS, SP1_PERMISSIONS, SP5_PERMISSIONS } from "./core-permissions.ts";
 import { PermissionDefinitionSchema } from "./permission-definition.schema.ts";
 
 const ids = CORE_PERMISSIONS.map((permission) => permission.id);
@@ -38,7 +38,7 @@ describe("CORE_PERMISSIONS", () => {
   });
 
   it("includes every agent runtime permission (SP3 spec §2.2) unchanged", () => {
-    expect(ids).toEqual([...sp1Ids, ...AGENT_PERMISSIONS.map((permission) => permission.id)]);
+    expect(ids).toEqual([...sp1Ids, ...AGENT_PERMISSIONS.map((permission) => permission.id), ...SP5_PERMISSIONS.map((permission) => permission.id)]);
     for (const agent of AGENT_PERMISSIONS) expect(CORE_PERMISSIONS.find((permission) => permission.id === agent.id)).toEqual(agent);
   });
 
@@ -80,6 +80,43 @@ describe("CORE_PERMISSIONS", () => {
     for (const permission of tenantPermissions) expect(permission.id.startsWith("core.")).toBe(true);
     expect(rolesOf("platform.staff.manage")).toEqual(["platform-admin"]);
     expect(rolesOf("platform.user.impersonate")).toEqual(["platform-admin", "platform-support"]);
+  });
+});
+
+describe("SP5_PERMISSIONS (SP5 spec §2.1)", () => {
+  const sp5 = (id: string) => SP5_PERMISSIONS.find((permission) => permission.id === id);
+
+  it("adds the tenant and platform permissions of the spec", () => {
+    expect(SP5_PERMISSIONS.map((permission) => permission.id).sort()).toEqual(
+      [
+        "core.workflow-run.read", "core.workflow-run.start", "core.workflow-run.cancel", "core.workflow-run.approve-demo",
+        "core.schedule.read", "core.schedule.write", "core.trace.read", "core.eval.read", "core.eval.write",
+        "core.prompt.read", "core.prompt.write", "core.flag.read", "core.flag.write",
+        "platform.plan.manage", "platform.organization.update", "platform.agent.manage", "platform.prompt.manage",
+        "platform.connector.read", "platform.eval.manage", "platform.trace.read", "platform.usage.read",
+        "platform.workflow.manage", "platform.flag.manage",
+      ].sort(),
+    );
+  });
+
+  it("lets members read and start runs, and admins cancel them and manage schedules", () => {
+    expect(sp5("core.workflow-run.read")?.defaultRoles).toEqual(["owner", "admin", "member"]);
+    expect(sp5("core.workflow-run.start")?.defaultRoles).toEqual(["owner", "admin", "member"]);
+    expect(sp5("core.workflow-run.cancel")?.defaultRoles).toEqual(["owner", "admin"]);
+    expect(sp5("core.schedule.write")?.defaultRoles).toEqual(["owner", "admin"]);
+  });
+
+  it("makes the approval-demo action a four-eyes permission (decision 0036)", () => {
+    expect(sp5("core.workflow-run.approve-demo")).toMatchObject({ kind: "write", requiresApproval: true, defaultRoles: ["owner", "admin", "member"] });
+    expect(SP5_PERMISSIONS.filter((permission) => permission.requiresApproval === true).map((permission) => permission.id)).toEqual(["core.workflow-run.approve-demo"]);
+  });
+
+  it("gives platform reads to support and platform writes to platform-admin only", () => {
+    for (const permission of SP5_PERMISSIONS.filter((p) => p.scope === "platform")) {
+      const reads = permission.id.endsWith(".read");
+      expect(permission.kind).toBe(reads ? "read" : "write");
+      expect(permission.defaultRoles).toEqual(reads ? ["platform-admin", "platform-support"] : ["platform-admin"]);
+    }
   });
 });
 

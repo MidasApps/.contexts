@@ -1,0 +1,42 @@
+{
+  "additionalProperties": false,
+  "description": "Input of an approval action that resumes a suspended workflow run once the request is settled.",
+  "examples": [
+    {
+      "runId": "01J8Z3K4M5N6P7Q8R9S0T1V2W3",
+      "stepId": "request-human-approval",
+      "workflowId": "approval-demo"
+    }
+  ],
+  "properties": {
+    "runId": {
+      "description": "Suspended run.",
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "stepId": {
+      "description": "Step the run is suspended on.",
+      "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+      "type": "string",
+      "x-pii": "none"
+    },
+    "workflowId": {
+      "description": "Workflow of the suspended run.",
+      "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+      "type": "string",
+      "x-pii": "none"
+    }
+  },
+  "required": [
+    "workflowId",
+    "runId",
+    "stepId"
+  ],
+  "type": "object",
+  "x-kind": "command",
+  "x-pii": "none",
+  "x-relations": [],
+  "x-tenancyScope": "organization"
+}

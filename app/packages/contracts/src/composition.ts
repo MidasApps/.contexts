@@ -38,6 +38,7 @@ import { IDENTITY_ENDPOINTS } from "./contracts/identity/endpoints.ts";
 import { createContractRegistry, type ContractRegistry } from "./contracts/registry.ts";
 import { TENANCY_CONTRACTS } from "./contracts/tenancy/contracts.ts";
 import { TENANCY_ENDPOINTS } from "./contracts/tenancy/endpoints.ts";
+import { SP5_CONTRACTS } from "./contracts/sp5-contracts.ts";
 
 /** Every contract of the core; add new contracts here. `example.Note` is removable. */
 export const CORE_CONTRACTS: readonly ContractDefinition[] = [
@@ -67,6 +68,8 @@ export const CORE_CONTRACTS: readonly ContractDefinition[] = [
   StoredFileContract,
   FileUploadTicketContract,
   FileReadUrlContract,
+  // SP5 workflows, prompts, platform console and observability.
+  ...SP5_CONTRACTS,
 ];
 
 /** Every `/v1` endpoint of the core (SP1 spec §7.3); add descriptors here. */

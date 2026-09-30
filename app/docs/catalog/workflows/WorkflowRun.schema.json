@@ -1,0 +1,130 @@
+{
+  "additionalProperties": false,
+  "description": "A run of a workflow in an organization, with its status and what it waits for.",
+  "examples": [
+    {
+      "approvalRequestId": "Ar9oP1lK3jH5gF7dS9aQ",
+      "createdAt": "2026-09-29T14:30:00.000Z",
+      "runId": "01J8Z3K4M5N6P7Q8R9S0T1V2W3",
+      "scheduleId": null,
+      "startedBy": "uA1b2C3d4E5f6G7h8I9j",
+      "status": "suspended",
+      "tenantId": "Jd8sK2lPq0WnR5tYu3bV",
+      "updatedAt": "2026-09-29T15:00:00.000Z",
+      "workflowId": "approval-demo"
+    }
+  ],
+  "properties": {
+    "approvalRequestId": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Approval request a suspended run waits for, if any.",
+      "x-pii": "none"
+    },
+    "createdAt": {
+      "description": "When the run started (UTC).",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+      "type": "string",
+      "x-pii": "none"
+    },
+    "runId": {
+      "description": "Run id.",
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "scheduleId": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Schedule that started the run, if any.",
+      "x-pii": "none"
+    },
+    "startedBy": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "User who started the run; null for platform schedules.",
+      "x-pii": "personal"
+    },
+    "status": {
+      "description": "Run status.",
+      "enum": [
+        "pending",
+        "running",
+        "waiting",
+        "suspended",
+        "paused",
+        "success",
+        "failed",
+        "canceled",
+        "tripwire"
+      ],
+      "type": "string",
+      "x-pii": "none"
+    },
+    "tenantId": {
+      "description": "Organization the run belongs to.",
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "updatedAt": {
+      "description": "When the run last changed (UTC).",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+      "type": "string",
+      "x-pii": "none"
+    },
+    "workflowId": {
+      "description": "Workflow of the run.",
+      "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+      "type": "string",
+      "x-pii": "none"
+    }
+  },
+  "required": [
+    "runId",
+    "workflowId",
+    "tenantId",
+    "status",
+    "startedBy",
+    "scheduleId",
+    "approvalRequestId",
+    "createdAt",
+    "updatedAt"
+  ],
+  "type": "object",
+  "x-kind": "view",
+  "x-permission": "core.workflow-run.read",
+  "x-pii": "personal",
+  "x-relations": [
+    {
+      "field": "tenantId",
+      "target": "tenancy.Organization",
+      "type": "belongs-to"
+    }
+  ],
+  "x-tenancyScope": "organization"
+}

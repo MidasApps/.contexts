@@ -1,0 +1,52 @@
+{
+  "additionalProperties": false,
+  "description": "Data a suspended human-approval step resumes with; checked against the stored approval request.",
+  "examples": [
+    {
+      "decidedBy": "uA1b2C3d4E5f6G7h8I9j",
+      "decision": "approved"
+    },
+    {
+      "decidedBy": "uA1b2C3d4E5f6G7h8I9j",
+      "decision": "rejected",
+      "reason": "Wrong project."
+    },
+    {
+      "decision": "expired"
+    }
+  ],
+  "properties": {
+    "decidedBy": {
+      "description": "Uid of the approver or rejecter, when a person decided.",
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "personal"
+    },
+    "decision": {
+      "description": "How the approval request was settled.",
+      "enum": [
+        "approved",
+        "rejected",
+        "expired",
+        "cancelled"
+      ],
+      "type": "string",
+      "x-pii": "none"
+    },
+    "reason": {
+      "description": "Reason given with the decision.",
+      "maxLength": 500,
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "personal"
+    }
+  },
+  "required": [
+    "decision"
+  ],
+  "type": "object",
+  "x-kind": "command",
+  "x-pii": "personal",
+  "x-relations": [],
+  "x-tenancyScope": "organization"
+}

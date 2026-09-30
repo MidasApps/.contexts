@@ -1,0 +1,110 @@
+{
+  "additionalProperties": false,
+  "description": "Makes a prompt version active; a rollback is a new activation of an older version.",
+  "examples": [
+    {
+      "activatedAt": "2026-09-29T15:00:00.000Z",
+      "activatedBy": "uA1b2C3d4E5f6G7h8I9j",
+      "agentId": "assistant",
+      "forced": false,
+      "id": "01927f3d-1a2b-7c3d-8e4f-5a6b7c8d9e0f",
+      "reason": null,
+      "scope": "platform",
+      "tenantId": null,
+      "versionId": "01927f3c-8b4a-7d2e-9f10-3a4b5c6d7e8f"
+    }
+  ],
+  "properties": {
+    "activatedAt": {
+      "description": "When (UTC).",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+      "type": "string",
+      "x-pii": "none"
+    },
+    "activatedBy": {
+      "description": "Who activated it.",
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "personal"
+    },
+    "agentId": {
+      "description": "Agent.",
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "forced": {
+      "description": "True when staff activated without a passing eval.",
+      "type": "boolean",
+      "x-pii": "none"
+    },
+    "id": {
+      "description": "uuidv7 of the activation.",
+      "format": "uuid",
+      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+      "type": "string",
+      "x-pii": "none"
+    },
+    "reason": {
+      "anyOf": [
+        {
+          "maxLength": 500,
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Reason of a forced activation or a rollback.",
+      "x-pii": "personal"
+    },
+    "scope": {
+      "description": "`platform` or `tenant`.",
+      "enum": [
+        "platform",
+        "tenant"
+      ],
+      "type": "string",
+      "x-pii": "none"
+    },
+    "tenantId": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Organization of a tenant addendum; null for platform scope.",
+      "x-pii": "none"
+    },
+    "versionId": {
+      "description": "Version made active.",
+      "format": "uuid",
+      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+      "type": "string",
+      "x-pii": "none"
+    }
+  },
+  "required": [
+    "id",
+    "agentId",
+    "scope",
+    "tenantId",
+    "versionId",
+    "forced",
+    "reason",
+    "activatedBy",
+    "activatedAt"
+  ],
+  "type": "object",
+  "x-kind": "entity",
+  "x-permission": "core.prompt.read",
+  "x-pii": "personal",
+  "x-relations": [],
+  "x-tenancyScope": "platform"
+}

@@ -1,0 +1,35 @@
+{
+  "additionalProperties": false,
+  "description": "Sets a flag value for the environment or overrides it for one organization.",
+  "examples": [
+    {
+      "value": true
+    },
+    {
+      "tenantId": "Jd8sK2lPq0WnR5tYu3bV",
+      "value": false
+    }
+  ],
+  "properties": {
+    "tenantId": {
+      "description": "Organization to override; omitted = the environment value (staff only).",
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "value": {
+      "description": "New value.",
+      "type": "boolean",
+      "x-pii": "none"
+    }
+  },
+  "required": [
+    "value"
+  ],
+  "type": "object",
+  "x-kind": "command",
+  "x-permission": "platform.flag.manage",
+  "x-pii": "none",
+  "x-relations": [],
+  "x-tenancyScope": "platform"
+}
