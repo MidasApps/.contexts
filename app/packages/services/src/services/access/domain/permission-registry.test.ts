@@ -106,7 +106,8 @@ describe("permissionsForSystemRole", () => {
     expect(registry.permissionsForSystemRole("viewer")).toEqual(new Set(["core.organization.read", "core.project.read", "core.unit.read"]));
     expect(registry.permissionsForSystemRole("member").has("core.member.read")).toBe(true);
     expect(registry.permissionsForSystemRole("member").has("core.member.invite")).toBe(false);
-    expect(registry.permissionsForSystemRole("device")).toEqual(new Set(["sample.invoice.read"]));
+    // Decision 0030 A1: the device role reads its own organization context.
+    expect(registry.permissionsForSystemRole("device")).toEqual(new Set(["core.organization.read", "sample.invoice.read"]));
   });
 
   it("never gives a platform permission to a system role", () => {
