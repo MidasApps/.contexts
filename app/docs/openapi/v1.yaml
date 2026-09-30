@@ -1560,8 +1560,9 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/http.ErrorEnvelope"
-          description: FORBIDDEN
+          description: ESCALATION_FORBIDDEN, FORBIDDEN
           x-error-codes:
+            - ESCALATION_FORBIDDEN
             - FORBIDDEN
         "404":
           content:
@@ -1589,7 +1590,7 @@ paths:
             - INTERNAL_ERROR
       security:
         - bearerAuth: []
-      summary: Revokes a grant (core.member.remove).
+      summary: Revokes a grant (core.member.remove; the grant's permissions within the caller's).
       tags:
         - access
       x-auth: user
@@ -1674,7 +1675,7 @@ paths:
             - INTERNAL_ERROR
       security:
         - bearerAuth: []
-      summary: Replaces the roles of a grant (core.member.update).
+      summary: Replaces the roles of a grant (core.member.update; old and new roles within the caller's).
       tags:
         - access
       x-auth: user
@@ -3229,8 +3230,9 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/http.ErrorEnvelope"
-          description: FORBIDDEN
+          description: ESCALATION_FORBIDDEN, FORBIDDEN
           x-error-codes:
+            - ESCALATION_FORBIDDEN
             - FORBIDDEN
         "404":
           content:
@@ -3258,7 +3260,7 @@ paths:
             - INTERNAL_ERROR
       security:
         - bearerAuth: []
-      summary: "Removes a member: every grant and every API key they own there (core.member.remove)."
+      summary: "Removes a member: every grant and every API key they own there (core.member.remove; the member's permissions within the caller's)."
       tags:
         - access
       x-auth: user

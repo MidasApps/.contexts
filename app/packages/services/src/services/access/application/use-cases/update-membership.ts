@@ -7,7 +7,7 @@ import { AccessNotFoundError } from "../../domain/errors/access-not-found-error.
 import { LastOwnerError } from "../../domain/errors/last-owner-error.ts";
 import { holdsOwner } from "../../domain/role-permissions.ts";
 import type { AccessWriteDeps } from "../access-write-deps.ts";
-import { checkGrantable, type GrantCheckError } from "../grant-checks.ts";
+import { checkGrantable, requireWithinActor, type GrantCheckError } from "../grant-checks.ts";
 import { organizationGone, readPrincipalState, writePrincipalState } from "../membership-writes.ts";
 import { wouldLoseLastOwner } from "./last-owner-guard.ts";
 
@@ -68,6 +68,8 @@ export const makeUpdateMembership =
     if (current === null) return err(new AccessNotFoundError("membership"));
     const grantable = await checkGrantable(deps, { ...command, permission: "core.member.update", node: current.node });
     if (!grantable.ok) return grantable;
+    const within = await requireWithinActor(deps, { ...command, grants: [current] });
+    if (!within.ok) return within;
     const updated = await deps.unitOfWork.run((tx) => applyUpdate(tx, deps, command));
     if (updated.ok && updated.data.principalType === "user") await deps.syncClaims(UserIdSchema.parse(updated.data.principalId));
     return updated;

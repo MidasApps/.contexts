@@ -5,9 +5,10 @@ import { err, ok, type Result } from "../../../shared/result/result.ts";
 import type { RequestAccess } from "../../composition.ts";
 import type { AccessDeniedError } from "../../domain/errors/access-denied-error.ts";
 import { AccessNotFoundError } from "../../domain/errors/access-not-found-error.ts";
+import type { EscalationForbiddenError } from "../../domain/errors/escalation-forbidden-error.ts";
 import { LastOwnerError } from "../../domain/errors/last-owner-error.ts";
 import { holdsOwner } from "../../domain/role-permissions.ts";
-import { requirePermission } from "../grant-checks.ts";
+import { requirePermission, requireWithinActor } from "../grant-checks.ts";
 import type { MemberDeps } from "../member-deps.ts";
 import { organizationGone, readPrincipalState, writePrincipalState } from "../membership-writes.ts";
 
@@ -19,11 +20,14 @@ export type RemoveMemberCommand = {
   readonly requestId: string;
 };
 
-export type RemoveMemberError = AccessDeniedError | AccessNotFoundError | LastOwnerError;
+export type RemoveMemberError = AccessDeniedError | AccessNotFoundError | LastOwnerError | EscalationForbiddenError;
 
 export type RemoveMember = (command: RemoveMemberCommand) => Promise<Result<void, RemoveMemberError>>;
 
-type Deps = Pick<MemberDeps, "memberships" | "projections" | "users" | "tenantGuard" | "audit" | "clock" | "unitOfWork" | "syncClaims" | "apiKeys" | "logger">;
+// A member holds one grant per node; more than this many is not a real tenant shape.
+const MAX_GRANTS_CHECKED = 100;
+
+type Deps = Pick<MemberDeps, "memberships" | "projections" | "users" | "tenantGuard" | "audit" | "clock" | "unitOfWork" | "syncClaims" | "apiKeys" | "logger" | "registry" | "roleReader">;
 
 const applyRemoval = async (tx: Transaction, deps: Deps, command: RemoveMemberCommand): Promise<Result<void, RemoveMemberError>> => {
   const { tenantId, userId } = command;
@@ -66,6 +70,10 @@ export const makeRemoveMember =
   async (command) => {
     const allowed = await requirePermission({ ...command, permission: "core.member.remove", node: { level: "organization", tenantId: command.tenantId } });
     if (!allowed.ok) return allowed;
+    // Owner hierarchy: every grant of the member must be within the actor's own permissions.
+    const grants = await deps.memberships.list({ tenantId: command.tenantId, principalId: command.userId, page: { after: undefined, limit: MAX_GRANTS_CHECKED } });
+    const within = await requireWithinActor(deps, { ...command, grants: grants.items });
+    if (!within.ok) return within;
     const removed = await deps.unitOfWork.run((tx) => applyRemoval(tx, deps, command));
     if (!removed.ok) return removed;
     await revokeOwnedKeys(deps, command);

@@ -38,6 +38,25 @@ export const requireNoEscalation = async (args: {
 export type GrantCheckError = AccessDeniedError | EscalationForbiddenError | UnknownRoleError;
 
 /**
+ * Owner hierarchy (decision 0030 §6): changing, revoking or removing an existing grant
+ * requires the grant's current permissions ⊆ effective(actor, grant node), so an admin
+ * cannot demote or remove an owner. Custom roles deleted since do not count.
+ */
+export const requireWithinActor = async (
+  deps: Pick<AccessWriteDeps, "registry" | "roleReader">,
+  args: { access: RequestAccess; actor: Principal; grants: readonly { readonly node: TenantNodeRef; readonly roles: readonly RoleRef[] }[] },
+): Promise<Result<void, AccessDeniedError | EscalationForbiddenError>> => {
+  for (const grant of args.grants) {
+    const roleIds = customRoleIdsOf(grant.roles);
+    const customRoles = roleIds.length === 0 ? [] : await deps.roleReader.getRoles({ tenantId: grant.node.tenantId, roleIds });
+    const held = resolveRolePermissions({ roles: grant.roles, customRoles, tenantId: grant.node.tenantId, registry: deps.registry });
+    const within = await requireNoEscalation({ access: args.access, actor: args.actor, node: grant.node, requested: held.permissions });
+    if (!within.ok) return within;
+  }
+  return ok(undefined);
+};
+
+/**
  * Checks that the actor may grant `roles` at `node`: `permission` there, every custom
  * role live in the node's tenant, and the roles' permissions within the actor's own.
  */

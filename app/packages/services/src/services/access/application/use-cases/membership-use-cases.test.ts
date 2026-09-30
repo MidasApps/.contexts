@@ -104,6 +104,30 @@ describe("updateMembership", () => {
     expect(result.ok).toBe(true);
   });
 
+  it("refuses an admin changing or revoking an owner's grant (owner hierarchy), allows an owner", async () => {
+    const world = await setup();
+    const second = await world.grant("owner-2", nodes.orgA, [system("owner")]);
+    await world.grant("admin-1", nodes.orgA, [system("admin")]);
+    const asAdmin = { actor: user("admin-1"), requestId: REQUEST_ID };
+
+    const demoted = await world.services.updateMembership({ ...asAdmin, access: world.access(), membershipId: second.id, roles: [system("viewer")] });
+    const revoked = await world.services.revokeMembership({ ...asAdmin, access: world.access(), membershipId: second.id });
+    expect(demoted).toMatchObject({ ok: false, error: { code: "ESCALATION_FORBIDDEN" } });
+    expect(revoked).toMatchObject({ ok: false, error: { code: "ESCALATION_FORBIDDEN" } });
+    expect(world.writes.allMemberships().find((m) => m.id === second.id)).toMatchObject({ roles: [system("owner")], deletedAt: null });
+
+    const byOwner = await world.services.revokeMembership({ actor: user("owner-1"), access: world.access(), membershipId: second.id, requestId: REQUEST_ID });
+    expect(byOwner.ok).toBe(true);
+  });
+
+  it("lets an admin change the grant of a member", async () => {
+    const world = await setup();
+    await world.grant("admin-1", nodes.orgA, [system("admin")]);
+    const member = await world.grant("member-1", nodes.p1, [system("member")]);
+    const result = await world.services.updateMembership({ actor: user("admin-1"), access: world.access(), membershipId: member.id, roles: [system("viewer")], requestId: REQUEST_ID });
+    expect(result.ok).toBe(true);
+  });
+
   it("answers not found for a missing membership", async () => {
     const world = await setup();
     const result = await world.services.updateMembership({ actor: user("owner-1"), access: world.access(), membershipId: MembershipIdSchema.parse("nope"), roles: [system("viewer")], requestId: REQUEST_ID });

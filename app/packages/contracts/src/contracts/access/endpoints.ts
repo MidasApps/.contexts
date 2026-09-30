@@ -129,8 +129,8 @@ export const removeMemberEndpoint = defineEndpoint({
   auth: "user",
   params: OrganizationParamsSchema.extend({ userId: UserIdSchema.meta(none("Uid of the member.")) }),
   responses: { 204: null },
-  errors: { 403: FORBIDDEN, 404: NOT_FOUND, 422: ["LAST_OWNER"] },
-  summary: "Removes a member: every grant and every API key they own there (core.member.remove).",
+  errors: { 403: NO_ESCALATION, 404: NOT_FOUND, 422: ["LAST_OWNER"] },
+  summary: "Removes a member: every grant and every API key they own there (core.member.remove; the member's permissions within the caller's).",
 });
 
 export const listMembershipsEndpoint = defineEndpoint({
@@ -169,7 +169,7 @@ export const updateMembershipEndpoint = defineEndpoint({
   body: UpdateMembershipInputSchema,
   responses: { 200: dataEnvelope(MembershipSchema) },
   errors: { 403: NO_ESCALATION, 404: NOT_FOUND, 422: ["LAST_OWNER"] },
-  summary: "Replaces the roles of a grant (core.member.update).",
+  summary: "Replaces the roles of a grant (core.member.update; old and new roles within the caller's).",
 });
 
 export const revokeMembershipEndpoint = defineEndpoint({
@@ -179,8 +179,8 @@ export const revokeMembershipEndpoint = defineEndpoint({
   auth: "user",
   params: membershipParams,
   responses: { 204: null },
-  errors: { 403: FORBIDDEN, 404: NOT_FOUND, 422: ["LAST_OWNER"] },
-  summary: "Revokes a grant (core.member.remove).",
+  errors: { 403: NO_ESCALATION, 404: NOT_FOUND, 422: ["LAST_OWNER"] },
+  summary: "Revokes a grant (core.member.remove; the grant's permissions within the caller's).",
 });
 
 export const listInvitationsEndpoint = defineEndpoint({

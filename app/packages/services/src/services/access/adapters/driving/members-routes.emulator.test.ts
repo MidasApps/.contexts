@@ -57,6 +57,13 @@ describe("members routes (emulator)", () => {
     expect((await harness.call("access.listMembers", { method: "GET", path: `/v1/organizations/${tenantId}/members`, as: "mem-viewer" })).status).toBe(403);
   });
 
+  it("answers 403 ESCALATION_FORBIDDEN to an admin removing an owner", { timeout: 30_000 }, async () => {
+    await seedGrant("mem-bruno", orgNode, [{ kind: "system", key: "admin" }]);
+    const refused = await remove("mem-bruno", "mem-owner");
+    expect(refused.status).toBe(403);
+    expect((await body(refused)).error?.code).toBe("ESCALATION_FORBIDDEN");
+  });
+
   it("answers 422 LAST_OWNER when the only owner would go", { timeout: 30_000 }, async () => {
     const response = await remove("mem-owner", "mem-owner");
     expect(response.status).toBe(422);

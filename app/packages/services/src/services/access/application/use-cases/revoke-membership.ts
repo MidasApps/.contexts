@@ -4,10 +4,11 @@ import { auditActorOf } from "../../../audit/domain/audit-actor.ts";
 import { err, ok, type Result } from "../../../shared/result/result.ts";
 import type { RequestAccess } from "../../composition.ts";
 import type { AccessDeniedError } from "../../domain/errors/access-denied-error.ts";
+import type { EscalationForbiddenError } from "../../domain/errors/escalation-forbidden-error.ts";
 import { AccessNotFoundError } from "../../domain/errors/access-not-found-error.ts";
 import { LastOwnerError } from "../../domain/errors/last-owner-error.ts";
 import type { AccessWriteDeps } from "../access-write-deps.ts";
-import { requirePermission } from "../grant-checks.ts";
+import { requirePermission, requireWithinActor } from "../grant-checks.ts";
 import { organizationGone, readPrincipalState, writePrincipalState } from "../membership-writes.ts";
 import { wouldLoseLastOwner } from "./last-owner-guard.ts";
 
@@ -18,7 +19,7 @@ export type RevokeMembershipCommand = {
   readonly requestId: string;
 };
 
-export type RevokeMembershipError = AccessDeniedError | AccessNotFoundError | LastOwnerError;
+export type RevokeMembershipError = AccessDeniedError | AccessNotFoundError | LastOwnerError | EscalationForbiddenError;
 
 export type RevokeMembership = (command: RevokeMembershipCommand) => Promise<Result<void, RevokeMembershipError>>;
 
@@ -65,6 +66,8 @@ export const makeRevokeMembership =
     if (current === null) return err(new AccessNotFoundError("membership"));
     const allowed = await requirePermission({ ...command, permission: "core.member.remove", node: current.node });
     if (!allowed.ok) return allowed;
+    const within = await requireWithinActor(deps, { ...command, grants: [current] });
+    if (!within.ok) return within;
     const revoked = await deps.unitOfWork.run((tx) => applyRevoke(tx, deps, command));
     if (revoked.ok && current.principalType === "user") await deps.syncClaims(UserIdSchema.parse(current.principalId));
     return revoked;

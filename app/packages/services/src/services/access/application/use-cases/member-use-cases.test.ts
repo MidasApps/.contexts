@@ -59,6 +59,14 @@ describe("removeMember", () => {
     expect(world.revoked).toEqual([]);
   });
 
+  it("refuses an admin removing an owner (owner hierarchy)", async () => {
+    const world = await setup();
+    await world.grant("owner-2", nodes.orgA, [system("owner")]);
+    await world.grant("admin-1", nodes.orgA, [system("admin")]);
+    expect(await remove(world, "admin-1", "owner-2")).toMatchObject({ ok: false, error: { code: "ESCALATION_FORBIDDEN" } });
+    expect(await remove(world, "admin-1", "bruno")).toMatchObject({ ok: true });
+  });
+
   it("lets an owner leave once another owner exists", async () => {
     const world = await setup();
     await world.grant("owner-2", nodes.orgA, [system("owner")]);
