@@ -40,7 +40,7 @@ export const createCoreSeedAdapter = (args: { server: CoreServer; firebase: Fire
     ensureProfile: async (uid) => {
       unwrap(await server.identity.getMe({ actor: actorOf(uid) }), "profile");
     },
-    listOrganizations: async (uid) => (await server.identity.listMyOrganizations({ actor: actorOf(uid), page: PAGE })).items.map(named),
+    listOrganizations: async (uid) => (await server.identity.listMyOrganizations({ actor: actorOf(uid), access: server.access.forRequest(), page: PAGE })).items.map(named),
     createOrganization: async ({ uid, name }) => named(unwrap(await server.tenancy.createOrganization({ ...scope(uid), input: { name, defaults: SEED_DEFAULTS } }), "organization")),
     listProjects: async ({ uid, organizationId }) =>
       unwrap(await server.tenancy.listProjects({ ...scope(uid), tenantId: OrganizationIdSchema.parse(organizationId), page: PAGE }), "project list").items.map(named),

@@ -29,7 +29,7 @@ describe("setActiveOrganization for members below the organization (decision 003
     const world = await setup("pat");
     await world.grant("pat", world.nodes.project, viewer);
 
-    const listed = await world.identity.listMyOrganizations({ actor: userOf("pat"), page: PAGE });
+    const listed = await world.identity.listMyOrganizations({ actor: userOf("pat"), access: world.access(), page: PAGE });
     expect(listed.items.map((organization) => organization.name)).toEqual(["Shared"]);
     expect(await world.switchTo()).toEqual({ ok: true, data: undefined });
     expect(world.users.userOf("pat")?.lastContext).toEqual({ organizationId: world.organization.id });

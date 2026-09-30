@@ -112,6 +112,12 @@ describe("me routes (emulator)", () => {
 
     await seedActiveUser(firestore, "me-outsider");
     expect((await switchTo(organizationId, "me-outsider")).status).toBe(404);
+
+    // Its only grant now sits on a deleted project: the organization is no longer listed.
+    const deleted = await harness.call("tenancy.deleteProject", { method: "DELETE", path: `/v1/projects/${projectId}`, as: "me-founder" });
+    expect(deleted.status).toBe(204);
+    const afterDelete = (await body(await harness.call("identity.listMyOrganizations", { method: "GET", path: "/v1/me/organizations", as: "me-member" }))).data as unknown as unknown[];
+    expect(afterDelete).toEqual([]);
   });
 
   it("answers 429 with Retry-After on the 11th switch in a minute", { timeout: 60_000 }, async () => {

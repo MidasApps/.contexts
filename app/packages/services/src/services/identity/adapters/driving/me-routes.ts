@@ -61,10 +61,10 @@ export const buildMeRoutes = (deps: { pipeline: ApiRouteDeps; identity: Identity
       // syncClaims logged the failure (`claims_sync_failed`); the client may retry.
       return (await identity.syncClaims(principal.uid)) ? noContentResponse() : apiError(500, "INTERNAL_ERROR", requestId);
     }),
-    [listMyOrganizationsEndpoint.id]: withApiRoute(listMyOrganizationsEndpoint, pipeline, async ({ principal, input, requestId }) => {
+    [listMyOrganizationsEndpoint.id]: withApiRoute(listMyOrganizationsEndpoint, pipeline, async ({ principal, input, scope, requestId }) => {
       const page = pageRequestOf(input.query);
       if (page === null) return invalidCursorResponse(requestId);
-      return listResponse(await identity.listMyOrganizations({ actor: principal, page }), page.limit);
+      return listResponse(await identity.listMyOrganizations({ actor: principal, access: scope, page }), page.limit);
     }),
     [getAccessContextEndpoint.id]: withApiRoute(getAccessContextEndpoint, pipeline, async ({ principal, input, scope, requestId }) => {
       const result = await identity.loadAccessContext({ principal, node: nodeOf(input.query), access: scope });

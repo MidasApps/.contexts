@@ -63,7 +63,7 @@ describe("setActiveOrganization and listMyOrganizations", () => {
     expect(switched.ok).toBe(true);
     expect(world.users.userOf("owner")?.lastContext).toEqual({ organizationId: first.id });
     expect(world.auditLog.entries("tenant").at(-1)).toMatchObject({ action: "ACTIVE_ORGANIZATION_CHANGED", tenantId: first.id, target: { type: "user", id: "owner" } });
-    const listed = await world.identity.listMyOrganizations({ actor: userOf("owner"), page: { after: undefined, limit: 10 } });
+    const listed = await world.identity.listMyOrganizations({ actor: userOf("owner"), access: world.access(), page: { after: undefined, limit: 10 } });
     expect(listed.items.map((organization) => organization.name).sort()).toEqual(["First", "Second"]);
     expect(second.id).not.toBe(first.id);
   });
