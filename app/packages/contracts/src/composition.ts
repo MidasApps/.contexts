@@ -13,7 +13,9 @@ import { ConnectorContract } from "./contracts/connectors/connector.schema.ts";
 import { ConnectorToolPolicyContract } from "./contracts/connectors/connector-tool-policy.schema.ts";
 import type { ContractDefinition } from "./contracts/contract.ts";
 import { NoteContract } from "./contracts/example/note.schema.ts";
+import { FILES_ENDPOINTS } from "./contracts/files/endpoints.ts";
 import { FileUploadRequestContract } from "./contracts/files/file-upload-request.schema.ts";
+import { FileReadUrlContract, FileUploadTicketContract } from "./contracts/files/file-upload-ticket.schema.ts";
 import { StoredFileContract } from "./contracts/files/stored-file.schema.ts";
 import { CitationContract } from "./contracts/knowledge/citation.schema.ts";
 import { KnowledgeDocumentContract } from "./contracts/knowledge/knowledge-document.schema.ts";
@@ -52,6 +54,8 @@ export const CORE_CONTRACTS: readonly ContractDefinition[] = [
   UsageSummaryContract,
   FileUploadRequestContract,
   StoredFileContract,
+  FileUploadTicketContract,
+  FileReadUrlContract,
 ];
 
 /** Every `/v1` endpoint of the core (SP1 spec §7.3); add descriptors here. */
@@ -60,6 +64,8 @@ export const CORE_ENDPOINTS: readonly EndpointDefinition[] = [
   ...IDENTITY_ENDPOINTS,
   ...ACCESS_ENDPOINTS,
   ...AUDIT_ENDPOINTS,
+  // SP3 files (uploads) and knowledge base.
+  ...FILES_ENDPOINTS,
 ];
 
 /** Builds a fresh registry with the core contracts (catalog scripts, apps at startup). */

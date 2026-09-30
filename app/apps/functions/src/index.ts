@@ -2,7 +2,9 @@ import { createLogger } from "@core/services";
 import { setGlobalOptions } from "firebase-functions/v2";
 import { write } from "firebase-functions/logger";
 import { onRequest } from "firebase-functions/v2/https";
-import { env } from "./env.ts";
+import { onObjectFinalized } from "firebase-functions/v2/storage";
+import { env, processEnvForFirebaseGuard } from "./env.ts";
+import { makeOnFileFinalized } from "./files/on-file-finalized.ts";
 import { DEFAULT_MAX_INSTANCES, FUNCTIONS_REGION } from "./functions-options.ts";
 import { makeHealthzHandler } from "./healthz-handler.ts";
 import { serveWebHandler } from "./http/express-web-bridge.ts";
@@ -23,4 +25,15 @@ const logger = createLogger({
 export const healthz = onRequest(
   { invoker: "public", memory: "256MiB", timeoutSeconds: 10, concurrency: 80 },
   serveWebHandler({ operation: "healthz", logger }, makeHealthzHandler({ logger })),
+);
+
+/**
+ * Upload validation (SP3 Task 13, umbrella §16.2): magic bytes and size of every object
+ * under `tenants/{tenantId}/files/{fileId}` of the files bucket (`FILES_BUCKET`, else the
+ * default bucket). Retries are on: the handler is idempotent and throws only on
+ * infrastructure errors. The bucket must be in (or cover) `FUNCTIONS_REGION`.
+ */
+export const onFileFinalized = onObjectFinalized(
+  { ...(env.FILES_BUCKET === undefined ? {} : { bucket: env.FILES_BUCKET }), memory: "512MiB", timeoutSeconds: 60, retry: true },
+  makeOnFileFinalized({ env, processEnv: processEnvForFirebaseGuard, logger }),
 );

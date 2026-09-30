@@ -7,3 +7,9 @@ import { loadFunctionsEnv } from "./functions-env.schema.ts";
  * `.env.<projectId>` files in `apps/functions` (firebase.json `configDir`).
  */
 export const env = loadFunctionsEnv(process.env);
+
+/**
+ * Raw `process.env`, for the Firebase Admin emulator guard only: firebase-admin reads
+ * `*_EMULATOR_HOST` itself, so the guard inspects the same source (#12c).
+ */
+export const processEnvForFirebaseGuard: Record<string, string | undefined> = process.env;

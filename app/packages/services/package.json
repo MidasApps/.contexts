@@ -23,6 +23,7 @@
     "@core/contracts": "workspace:*",
     "@mastra/client-js": "catalog:",
     "drizzle-orm": "catalog:",
+    "file-type": "catalog:",
     "firebase-admin": "catalog:",
     "google-auth-library": "catalog:",
     "libpg-query": "catalog:",

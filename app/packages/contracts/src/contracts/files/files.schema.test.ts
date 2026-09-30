@@ -1,9 +1,10 @@
 import { describe, expect, expectTypeOf, it } from "vitest";
 import type { TenantId } from "../primitives/ids.schema.ts";
 import { FileUploadRequestContract, FileUploadRequestSchema } from "./file-upload-request.schema.ts";
+import { FileReadUrlContract, FileUploadTicketContract, UploadInstructionsSchema } from "./file-upload-ticket.schema.ts";
 import { StoredFileContract, StoredFileSchema, type StoredFile } from "./stored-file.schema.ts";
 
-const contracts = [FileUploadRequestContract, StoredFileContract];
+const contracts = [FileUploadRequestContract, StoredFileContract, FileUploadTicketContract, FileReadUrlContract];
 
 describe("file contracts", () => {
   it.each(contracts.map((contract) => [contract.id, contract] as const))("%s: every example parses", (_id, contract) => {
@@ -49,5 +50,13 @@ describe("StoredFileSchema", () => {
 
   it("requires the storage path to match the tenant and id", () => {
     expect(StoredFileSchema.safeParse({ ...example, storagePath: "tenants/other/files/x" }).success).toBe(false);
+  });
+});
+
+describe("UploadInstructionsSchema", () => {
+  it("accepts only PUT (signed URL) and POST (local emulator)", () => {
+    const base = { url: "https://storage.googleapis.com/b/o", headers: {}, expiresAt: "2026-09-29T14:45:00.000Z" };
+    expect(UploadInstructionsSchema.safeParse({ ...base, method: "PUT" }).success).toBe(true);
+    expect(UploadInstructionsSchema.safeParse({ ...base, method: "GET" }).success).toBe(false);
   });
 });

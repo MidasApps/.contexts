@@ -1,4 +1,3 @@
-import { fingerprint, parse } from "libpg-query";
 import type { GuardedSql, SemanticSqlGuard, SqlRejectionReason } from "../../application/ports/driven/semantic-sql-ports.ts";
 import { SEMANTIC_SCHEMA } from "../../domain/semantic-view.ts";
 
@@ -130,7 +129,13 @@ const collectCteNames = (value: unknown, names: Set<string> = new Set()): Set<st
 
 type ParsedStatement = { readonly stmt: Node; readonly text: string };
 
+// Loaded on first use: the WASM parser initializes when its module is evaluated, so a
+// bundle that never runs a semantic query (the Functions codebase imports the services
+// barrel) must not evaluate it, nor ship its .wasm file.
+const loadParser = () => import("libpg-query");
+
 const singleStatement = async (sql: string): Promise<ParsedStatement | Rejection> => {
+  const { parse } = await loadParser();
   let stmts: Node[];
   try {
     stmts = ((await parse(sql)) as { stmts?: Node[] }).stmts ?? [];
@@ -156,6 +161,7 @@ export const guardSemanticSql: SemanticSqlGuard = async ({ sql, allowedViews, pa
   if ("reason" in parsed) return { ok: false, error: { code: "SQL_REJECTED", ...parsed } };
   const rejection = walk(parsed.stmt, { allowedViews, cteNames: collectCteNames(parsed.stmt), paramCount });
   if (rejection !== undefined) return { ok: false, error: { code: "SQL_REJECTED", ...rejection } };
+  const { fingerprint } = await loadParser();
   const guarded: GuardedSql = { sql: parsed.text, fingerprint: await fingerprint(parsed.text) };
   return { ok: true, data: guarded };
 };

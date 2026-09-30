@@ -19,6 +19,9 @@ export const WebOnlyEnvSchema = z.object({
   MASTRA_URL: z.url().optional(),
   // Cloud Run audience of the Mastra service for X-Serverless-Authorization; required outside local.
   MASTRA_AUDIENCE: z.url().optional(),
+  // Cloud Storage bucket of uploads (SP3 files context); local defaults to the emulator's
+  // default bucket of the demo project, required outside local.
+  FILES_BUCKET: z.string().regex(/^[a-z0-9][a-z0-9._-]{1,220}[a-z0-9]$/, { error: "expected a bucket name" }).optional(),
 });
 
 type WebOnlyEnv = z.infer<typeof WebOnlyEnvSchema>;
@@ -30,6 +33,7 @@ const remoteIssues = (env: WebOnlyEnv): EnvIssue[] => [
   ...(env.MASTRA_URL === undefined ? [{ field: "MASTRA_URL", issue: "REQUIRED" }] : []),
   ...(env.MASTRA_URL !== undefined && !env.MASTRA_URL.startsWith("https://") ? [{ field: "MASTRA_URL", issue: "HTTPS_REQUIRED" }] : []),
   ...(env.MASTRA_AUDIENCE === undefined ? [{ field: "MASTRA_AUDIENCE", issue: "REQUIRED" }] : []),
+  ...(env.FILES_BUCKET === undefined ? [{ field: "FILES_BUCKET", issue: "REQUIRED" }] : []),
 ];
 
 /**
@@ -40,11 +44,18 @@ const remoteIssues = (env: WebOnlyEnv): EnvIssue[] => [
 export const loadWebEnv = (source: Record<string, string | undefined>) => {
   const env = loadServicesEnvWith(WebOnlyEnvSchema, source);
   if (env.APP_ENV === "local") {
-    return { ...env, CORS_ALLOWED_ORIGINS: env.CORS_ALLOWED_ORIGINS ?? LOCAL_CORS_ALLOWED_ORIGINS, MASTRA_URL: env.MASTRA_URL ?? LOCAL_MASTRA_URL };
+    return {
+      ...env,
+      CORS_ALLOWED_ORIGINS: env.CORS_ALLOWED_ORIGINS ?? LOCAL_CORS_ALLOWED_ORIGINS,
+      MASTRA_URL: env.MASTRA_URL ?? LOCAL_MASTRA_URL,
+      FILES_BUCKET: env.FILES_BUCKET ?? `${env.FIREBASE_PROJECT_ID}.appspot.com`,
+    };
   }
   const issues = remoteIssues(env);
-  if (issues.length > 0 || env.CORS_ALLOWED_ORIGINS === undefined || env.MASTRA_URL === undefined) throw new InvalidEnvError(issues);
-  return { ...env, CORS_ALLOWED_ORIGINS: env.CORS_ALLOWED_ORIGINS, MASTRA_URL: env.MASTRA_URL };
+  if (issues.length > 0 || env.CORS_ALLOWED_ORIGINS === undefined || env.MASTRA_URL === undefined || env.FILES_BUCKET === undefined) {
+    throw new InvalidEnvError(issues);
+  }
+  return { ...env, CORS_ALLOWED_ORIGINS: env.CORS_ALLOWED_ORIGINS, MASTRA_URL: env.MASTRA_URL, FILES_BUCKET: env.FILES_BUCKET };
 };
 
 export type WebEnv = ReturnType<typeof loadWebEnv>;

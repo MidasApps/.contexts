@@ -157,6 +157,17 @@ export {
   type FileUploadRequest,
 } from "./contracts/files/file-upload-request.schema.ts";
 export { FileIdSchema, StoredFileContract, StoredFileSchema, type FileId, type StoredFile } from "./contracts/files/stored-file.schema.ts";
+export {
+  FileReadUrlContract,
+  FileReadUrlSchema,
+  FileUploadTicketContract,
+  FileUploadTicketSchema,
+  UploadInstructionsSchema,
+  type FileReadUrl,
+  type FileUploadTicket,
+  type UploadInstructions,
+} from "./contracts/files/file-upload-ticket.schema.ts";
+export { FILES_ENDPOINTS, getFileEndpoint, getFileReadUrlEndpoint, requestFileUploadEndpoint } from "./contracts/files/endpoints.ts";
 // SP1 tenancy.
 export { TENANCY_CONTRACTS } from "./contracts/tenancy/contracts.ts";
 export {

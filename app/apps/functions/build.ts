@@ -41,6 +41,12 @@ const resolveInstalledVersions = async (names: string[]): Promise<Record<string,
   return Object.fromEntries(entries);
 };
 
+// Bundled CommonJS dependencies (google-auth-library, libpg-query's loader) call
+// `require("child_process")` / `require("node:fs")` at runtime; an ESM bundle has no
+// `require`, so esbuild's shim throws "Dynamic require ... is not supported". The
+// banner gives the bundle a real `require` bound to its own URL.
+const REQUIRE_BANNER = 'import { createRequire as __coreCreateRequire } from "node:module"; const require = __coreCreateRequire(import.meta.url);';
+
 const bundleOptions = (externals: string[]): BuildOptions => ({
   entryPoints: [path.join(PACKAGE_DIR, "src/index.ts")],
   outfile: path.join(OUT_DIR, "index.js"),
@@ -49,6 +55,7 @@ const bundleOptions = (externals: string[]): BuildOptions => ({
   format: "esm",
   target: `node${DEPLOY_NODE_MAJOR}`,
   sourcemap: true,
+  banner: { js: REQUIRE_BANNER },
   external: externals.flatMap((name) => [name, `${name}/*`]),
   logLevel: "warning",
 });

@@ -1,0 +1,89 @@
+{
+  "additionalProperties": false,
+  "description": "A pending upload: the file id and the short-lived signed URL the client sends the bytes to.",
+  "examples": [
+    {
+      "fileId": "Fz9sK2lPq0WnR5tYu3bV",
+      "upload": {
+        "expiresAt": "2026-09-29T14:45:00.000Z",
+        "headers": {
+          "content-type": "text/markdown",
+          "x-goog-content-length-range": "0,18432"
+        },
+        "method": "PUT",
+        "url": "https://storage.googleapis.com/core-files/tenants/Jd8sK2lPq0WnR5tYu3bV/files/Fz9sK2lPq0WnR5tYu3bV?X-Goog-Signature=abc"
+      }
+    }
+  ],
+  "properties": {
+    "fileId": {
+      "description": "Id of the pending file; poll GET /v1/files/{fileId} until it is ready or rejected.",
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "upload": {
+      "additionalProperties": false,
+      "description": "How to send the bytes.",
+      "properties": {
+        "expiresAt": {
+          "description": "When the upload URL stops working (UTC).",
+          "format": "date-time",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+          "type": "string",
+          "x-pii": "none"
+        },
+        "headers": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Headers the upload must carry exactly (Content-Type, x-goog-content-length-range).",
+          "propertyNames": {
+            "type": "string"
+          },
+          "type": "object",
+          "x-pii": "none"
+        },
+        "method": {
+          "description": "HTTP method of the upload: PUT for a signed URL; POST only for the local Storage Emulator.",
+          "enum": [
+            "PUT",
+            "POST"
+          ],
+          "type": "string",
+          "x-pii": "none"
+        },
+        "url": {
+          "description": "Short-lived upload URL; it grants write access to one object only.",
+          "format": "uri",
+          "type": "string",
+          "x-pii": "none"
+        }
+      },
+      "required": [
+        "method",
+        "url",
+        "headers",
+        "expiresAt"
+      ],
+      "type": "object",
+      "x-pii": "none"
+    }
+  },
+  "required": [
+    "fileId",
+    "upload"
+  ],
+  "type": "object",
+  "x-kind": "view",
+  "x-permission": "core.file.upload",
+  "x-pii": "none",
+  "x-relations": [
+    {
+      "field": "fileId",
+      "target": "files.StoredFile",
+      "type": "references"
+    }
+  ],
+  "x-tenancyScope": "organization"
+}

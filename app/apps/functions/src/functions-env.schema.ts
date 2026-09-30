@@ -19,9 +19,17 @@ const EMULATOR_HOST_KEYS = [
   "PUBSUB_EMULATOR_HOST",
 ] as const;
 
+// Cloud Storage bucket names (lowercase, digits, dots, dashes, underscores).
+const BucketNameSchema = z.string().regex(/^[a-z0-9][a-z0-9._-]{1,220}[a-z0-9]$/, { error: "expected a bucket name" });
+
 export const FunctionsEnvSchema = z
   .object({
     APP_ENV: ServicesEnvSchema.shape.APP_ENV,
+    // Set by the Functions runtime and the emulator (never in a .env file); the Admin SDK
+    // of the files trigger targets this project.
+    GCLOUD_PROJECT: z.string().min(1).optional(),
+    // Bucket of uploads (files context); unset = the project's default bucket.
+    FILES_BUCKET: BucketNameSchema.optional(),
     FIREBASE_AUTH_EMULATOR_HOST: EmulatorHostSchema,
     FIRESTORE_EMULATOR_HOST: EmulatorHostSchema,
     FIREBASE_STORAGE_EMULATOR_HOST: EmulatorHostSchema,
@@ -34,7 +42,11 @@ export const FunctionsEnvSchema = z
       if (env[key]) ctx.addIssue({ code: "custom", path: [key], message: "emulators are local only" });
     }
   })
-  .transform(({ APP_ENV }) => ({ APP_ENV }));
+  .transform(({ APP_ENV, GCLOUD_PROJECT, FILES_BUCKET }) => ({
+    APP_ENV,
+    ...(GCLOUD_PROJECT === undefined ? {} : { GCLOUD_PROJECT }),
+    ...(FILES_BUCKET === undefined ? {} : { FILES_BUCKET }),
+  }));
 
 export type FunctionsEnv = z.infer<typeof FunctionsEnvSchema>;
 

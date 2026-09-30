@@ -1,7 +1,10 @@
 # @core/functions
 
 Firebase Functions Gen 2 codebase (`nodejs24`, ADR 0004 E1) for events, jobs and
-webhooks. SP0 ships only `healthz`, a public liveness probe.
+webhooks: `healthz` (public liveness probe) and `onFileFinalized` (SP3 Task 13: magic-byte
+and size validation of uploads under `tenants/{tenantId}/files/{fileId}`, decision 0019
+amendment). `FILES_BUCKET` in `.env.<projectId>` selects the bucket (unset = default
+bucket, which must be in or cover `southamerica-east1`).
 
 ## When to use
 

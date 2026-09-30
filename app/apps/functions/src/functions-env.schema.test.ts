@@ -33,9 +33,15 @@ describe("loadFunctionsEnv", () => {
     expect(loadFunctionsEnv({ APP_ENV: "staging", FIRESTORE_EMULATOR_HOST: "" })).toEqual({ APP_ENV: "staging" });
   });
 
-  it("ignores variables the Functions runtime injects", () => {
+  it("keeps GCLOUD_PROJECT and ignores the other variables the Functions runtime injects", () => {
     expect(loadFunctionsEnv({ APP_ENV: "local", GCLOUD_PROJECT: "demo-core", K_SERVICE: "healthz" })).toEqual({
       APP_ENV: "local",
+      GCLOUD_PROJECT: "demo-core",
     });
+  });
+
+  it("reads an optional files bucket and rejects a malformed one", () => {
+    expect(loadFunctionsEnv({ APP_ENV: "staging", FILES_BUCKET: "core-files-staging" })).toEqual({ APP_ENV: "staging", FILES_BUCKET: "core-files-staging" });
+    expect(() => loadFunctionsEnv({ APP_ENV: "staging", FILES_BUCKET: "Bad Bucket" })).toThrow(/FILES_BUCKET/);
   });
 });

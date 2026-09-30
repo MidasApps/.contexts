@@ -18,6 +18,7 @@ const REMOTE_ENV = {
   NEXT_PUBLIC_APP_URL: "https://staging.example.com",
   MASTRA_URL: "https://mastra-staging.a.run.app",
   MASTRA_AUDIENCE: "https://mastra-staging.a.run.app",
+  FILES_BUCKET: "core-staging-files",
 };
 
 describe("loadWebEnv", () => {
@@ -71,5 +72,11 @@ describe("loadWebEnv", () => {
     expect(() => loadWebEnv(withoutMastra)).toThrow(/MASTRA_URL \(REQUIRED\).*MASTRA_AUDIENCE \(REQUIRED\)/);
     expect(() => loadWebEnv({ ...REMOTE_ENV, CORS_ALLOWED_ORIGINS: "", MASTRA_URL: "http://mastra.internal" })).toThrow(/MASTRA_URL \(HTTPS_REQUIRED\)/);
     expect(loadWebEnv({ ...REMOTE_ENV, CORS_ALLOWED_ORIGINS: "" }).MASTRA_URL).toBe("https://mastra-staging.a.run.app");
+  });
+
+  it("defaults FILES_BUCKET to the demo project's default bucket in local and requires it outside local", () => {
+    expect(loadWebEnv(LOCAL_ENV).FILES_BUCKET).toBe("demo-core.appspot.com");
+    expect(() => loadWebEnv({ ...REMOTE_ENV, CORS_ALLOWED_ORIGINS: "", FILES_BUCKET: undefined })).toThrow(/FILES_BUCKET \(REQUIRED\)/);
+    expect(loadWebEnv({ ...REMOTE_ENV, CORS_ALLOWED_ORIGINS: "" }).FILES_BUCKET).toBe("core-staging-files");
   });
 });
