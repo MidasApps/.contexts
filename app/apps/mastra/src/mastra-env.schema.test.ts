@@ -8,13 +8,22 @@ const LOCAL_ENV = {
   DATABASE_URL: "postgresql://app:app@127.0.0.1:5432/app",
   FIREBASE_AUTH_EMULATOR_HOST: "127.0.0.1:9099",
   FIRESTORE_EMULATOR_HOST: "127.0.0.1:8080",
+  AI_MODE: "fake",
+};
+
+const PROD_ENV = {
+  APP_ENV: "prod",
+  FIREBASE_PROJECT_ID: "acme-prod",
+  DATABASE_URL: "postgresql://svc@10.0.0.5:5432/app",
+  GOOGLE_GENERATIVE_AI_API_KEY: "google-test-key",
+  MCP_REQUEST_STATE_KEY: "k".repeat(32),
 };
 
 describe("loadMastraEnv", () => {
   it("defaults to Mastra's local dev server: localhost:4111, info logs, 15 min timeout", () => {
     expect(loadMastraEnv(LOCAL_ENV)).toMatchObject({
       APP_ENV: "local",
-      AI_MODE: "real",
+      AI_MODE: "fake",
       MASTRA_HOST: "localhost",
       PORT: 4111,
       LOG_LEVEL: "info",
@@ -49,5 +58,24 @@ describe("loadMastraEnv", () => {
     expect(load).toThrow(InvalidEnvError);
     expect(load).toThrow(/DATABASE_URL.*PORT.*LOG_LEVEL/);
     expect(load).not.toThrow(/s3cr3t/);
+  });
+
+  it("composes the agent env: model roles and local storage init", () => {
+    expect(loadMastraEnv(LOCAL_ENV)).toMatchObject({
+      AI_MODEL_CHAT: "google/gemini-3.5-flash",
+      AI_MODEL_EMBEDDING: "google/gemini-embedding-001",
+      MASTRA_STORAGE_INIT: "auto",
+    });
+  });
+
+  it("refuses AI_MODE=fake in prod", () => {
+    expect(() => loadMastraEnv({ ...PROD_ENV, AI_MODE: "fake" })).toThrow(/AI_MODE \(FAKE_ONLY_IN_LOCAL_OR_DEV\)/);
+  });
+
+  it("requires the text-role provider key in real mode and skips storage init remotely", () => {
+    expect(() => loadMastraEnv({ ...PROD_ENV, GOOGLE_GENERATIVE_AI_API_KEY: "" })).toThrow(
+      /GOOGLE_GENERATIVE_AI_API_KEY/,
+    );
+    expect(loadMastraEnv(PROD_ENV)).toMatchObject({ AI_MODE: "real", MASTRA_STORAGE_INIT: "skip" });
   });
 });

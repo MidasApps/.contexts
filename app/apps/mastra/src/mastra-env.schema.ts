@@ -1,3 +1,4 @@
+import { AgentEnvSchema, resolveAgentEnv } from "@core/agents";
 import { loadServicesEnvWith } from "@core/services";
 import { z } from "zod";
 
@@ -33,11 +34,16 @@ export const MastraOnlyEnvSchema = z.object({
   MASTRA_CORS_ORIGINS: OriginListSchema.prefault(DEFAULT_LOCAL_CORS_ORIGINS),
 });
 
+/** Mastra server variables plus the agent runtime env (spec §15, decision 0021). */
+const MastraEnvSchema = MastraOnlyEnvSchema.extend(AgentEnvSchema.shape);
+
 /**
- * Parses the Mastra server env once at boot (fail-fast by design).
+ * Parses the Mastra server env once at boot (fail-fast by design), then applies
+ * the agent rules that depend on APP_ENV and AI_MODE (fake only in local/dev,
+ * provider keys in real mode, remote-only requirements).
  * @throws {InvalidEnvError} naming each invalid variable, never its value.
  */
 export const loadMastraEnv = (source: Record<string, string | undefined>) =>
-  loadServicesEnvWith(MastraOnlyEnvSchema, source);
+  resolveAgentEnv(loadServicesEnvWith(MastraEnvSchema, source));
 
 export type MastraEnv = ReturnType<typeof loadMastraEnv>;

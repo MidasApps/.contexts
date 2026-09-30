@@ -8,11 +8,14 @@ const LOCAL_SOURCE = {
   DATABASE_URL: "postgresql://app:app@127.0.0.1:5432/app",
   FIREBASE_AUTH_EMULATOR_HOST: "127.0.0.1:9099",
   FIRESTORE_EMULATOR_HOST: "127.0.0.1:8080",
+  AI_MODE: "fake",
 };
 const PROD_SOURCE = {
   APP_ENV: "prod",
   FIREBASE_PROJECT_ID: "acme-prod",
   DATABASE_URL: "postgresql://svc@10.0.0.5:5432/app",
+  GOOGLE_GENERATIVE_AI_API_KEY: "google-test-key",
+  MCP_REQUEST_STATE_KEY: "k".repeat(32),
   MASTRA_HOST: "0.0.0.0",
   PORT: "8081",
 };

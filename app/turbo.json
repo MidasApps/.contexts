@@ -35,6 +35,23 @@
       "cache": false,
       "passThroughEnv": ["DATABASE_URL"]
     },
+    // Agent eval sets (packages/agents): fake models in CI, real ones opt-in.
+    "evals": {
+      "dependsOn": ["^build"],
+      "cache": false,
+      "passThroughEnv": ["AI_*", "DATABASE_URL"]
+    },
+    "evals:real": {
+      "dependsOn": ["^build"],
+      "cache": false,
+      "passThroughEnv": [
+        "AI_*",
+        "DATABASE_URL",
+        "GOOGLE_*",
+        "OPENAI_API_KEY",
+        "ANTHROPIC_API_KEY"
+      ]
+    },
     "test:e2e": {
       "dependsOn": ["build"],
       "cache": false
