@@ -143,6 +143,20 @@ describe("Mastra runtime composition (Auth Emulator)", () => {
     expect((await generate({ authorization: `Bearer ${member.idToken}` })).status).toBe(403);
   });
 
+  it("serves the assistant supervisor, which delegates a question to the knowledge subagent", async () => {
+    // The supervisor owns the conversation memory, so a run names its conversation (SP4 always does).
+    const headers = { "content-type": "application/json", "x-conversation-id": `conv-${Date.now()}`, ...memberHeaders() };
+    const body = { messages: "What is our onboarding policy?", maxSteps: 50 };
+    const response = await fetch(`${baseUrl}/api/agents/assistant/generate`, { method: "POST", headers, body: JSON.stringify(body) });
+    expect(response.status).toBe(200);
+    const answer = JSON.stringify(await response.json());
+    expect(answer).toContain("agent-knowledge");
+    expect(answer).not.toContain("Delegation Rejected");
+    // Subagents are reachable only through the supervisor.
+    const direct = await fetch(`${baseUrl}/api/agents/knowledge/generate`, { method: "POST", headers: { "content-type": "application/json", ...memberHeaders() }, body: JSON.stringify({ messages: "hi" }) });
+    expect(direct.status).toBe(404);
+  }, 60_000);
+
   it("closes built-in routes the core does not serve", async () => {
     const response = await fetch(`${baseUrl}/api/vectors/x`, { headers: memberHeaders() });
     expect(response.status).toBe(404);

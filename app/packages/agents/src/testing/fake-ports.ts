@@ -11,6 +11,7 @@ import type {
   FilesPort,
   KnowledgeEventsPort,
   NodeRef,
+  ProjectsPort,
   RegionalSettings,
   SettingsPort,
   UsagePort,
@@ -207,6 +208,20 @@ export const createRecordingKnowledgeEvents = (): RecordingKnowledgeEvents => {
   };
 };
 
+export type FakeProjectsPort = ProjectsPort & { readonly created: Parameters<ProjectsPort["createProject"]>[0][] };
+
+/** Records every created project; ids are `project-<n>`. */
+export const createFakeProjectsPort = (): FakeProjectsPort => {
+  const created: Parameters<ProjectsPort["createProject"]>[0][] = [];
+  return {
+    created,
+    createProject: (input) => {
+      created.push(input);
+      return Promise.resolve({ ok: true, data: { projectId: `project-${created.length}`, name: input.input.name } });
+    },
+  };
+};
+
 const notWired = (name: string) => () => Promise.reject(new Error(`${name} is not faked in this test`));
 
 /** Every port faked; override any of them per test. */
@@ -223,5 +238,6 @@ export const createFakeRuntimePorts = (overrides: Partial<AgentRuntimePorts> = {
   secrets: { get: () => Promise.resolve(null) },
   settings: createFakeSettingsPort(),
   catalog: { runSemanticQuery: () => Promise.resolve({ ok: false, error: { code: "CONNECTOR_DISABLED" } }) },
+  projects: createFakeProjectsPort(),
   ...overrides,
 });

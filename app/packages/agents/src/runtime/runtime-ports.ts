@@ -2,6 +2,7 @@ import type {
   AgentApprovalRequest,
   AgentSettings,
   Citation,
+  CreateProjectInput,
   Connector,
   KnowledgeDocument,
   KnowledgeDocumentSource,
@@ -198,6 +199,19 @@ export type SecretStore = {
 /** SP3 `catalog` context: read-only SQL over semantic views (bound to `makeRunSemanticQuery`). */
 export type SemanticQueryPort = { readonly runSemanticQuery: RunSemanticQuery };
 
+/**
+ * SP1 tenancy commands the core action agent runs (SP3 Task 20; module commands arrive
+ * with Task 19). The binding calls the same use case as `/v1`, which authorizes again.
+ */
+export type ProjectsPort = {
+  readonly createProject: (input: {
+    readonly principal: AccessPrincipal;
+    readonly tenantId: string;
+    readonly requestId: string;
+    readonly input: CreateProjectInput;
+  }) => Promise<{ readonly ok: true; readonly data: { readonly projectId: string; readonly name: string } } | { readonly ok: false; readonly error: "FORBIDDEN" }>;
+};
+
 export type SettingsPort = { readonly getAgentSettings: (input: { tenantId: string }) => Promise<AgentSettings> };
 
 export type AgentRuntimePorts = {
@@ -213,4 +227,5 @@ export type AgentRuntimePorts = {
   readonly secrets: SecretStore;
   readonly settings: SettingsPort;
   readonly catalog: SemanticQueryPort;
+  readonly projects: ProjectsPort;
 };

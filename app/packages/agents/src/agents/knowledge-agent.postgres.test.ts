@@ -48,7 +48,7 @@ afterAll(async () => {
 
 describe("knowledge agent (fake model, Postgres knowledge base)", () => {
   it("searches the knowledge base and answers with kb citations from the retrieved set", async () => {
-    const agent = runtime.agents[KNOWLEDGE_AGENT_ID];
+    const agent = runtime.subagents[KNOWLEDGE_AGENT_ID];
     const result = await agent?.generate(directive("who approves the invitation of new members"), { requestContext: context() });
     const retrieved = extractCitationIds(JSON.stringify(result?.toolResults ?? []));
     expect(retrieved.length).toBeGreaterThan(0);
@@ -58,7 +58,7 @@ describe("knowledge agent (fake model, Postgres knowledge base)", () => {
   });
 
   it("never returns another tenant's passages", async () => {
-    const agent = runtime.agents[KNOWLEDGE_AGENT_ID];
+    const agent = runtime.subagents[KNOWLEDGE_AGENT_ID];
     const other = new RequestContext<unknown>(buildAgentContextEntries({ tenantId: "kbOtherTenant0000001", permissions: PERMISSIONS }));
     const result = await agent?.generate(directive("owner approves the invitation"), { requestContext: other });
     expect(extractCitationIds(JSON.stringify(result?.toolResults ?? []))).toEqual([]);

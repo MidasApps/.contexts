@@ -44,16 +44,39 @@ const readJsonObject = async (request: Request): Promise<Record<string, unknown>
 };
 
 /**
- * The request with server-owned tracing options: a JSON body loses any
- * client `tracingOptions` and gains `{ traceId, parentSpanId }` from a valid
- * `traceparent`. Any other request is returned as is.
+ * Run options only the agent definitions set (SP3 Task 20): a caller cannot raise the
+ * step cap, replace instructions or tools, or switch tool approval off.
+ */
+export const SERVER_OWNED_RUN_OPTIONS: ReadonlySet<string> = new Set([
+  "tracingOptions",
+  "maxSteps",
+  "stopWhen",
+  "instructions",
+  "system",
+  "toolsets",
+  "clientTools",
+  "activeTools",
+  "toolChoice",
+  "requireToolApproval",
+  "delegation",
+  "inputProcessors",
+  "outputProcessors",
+  "modelSettings",
+  "providerOptions",
+]);
+
+/**
+ * The request with server-owned run options: a JSON body loses any client
+ * `tracingOptions` (and every other `SERVER_OWNED_RUN_OPTIONS` key) and gains
+ * `{ traceId, parentSpanId }` from a valid `traceparent`. Any other request is returned as is.
  */
 export const withServerTracingOptions = async (request: Request): Promise<Request> => {
   const body = await readJsonObject(request);
   if (body === null) return request;
   const trace = parseTraceparent(request.headers.get(FORWARDED_HEADERS.traceparent));
-  if (!("tracingOptions" in body) && trace === null) return request;
-  const rest = Object.fromEntries(Object.entries(body).filter(([key]) => key !== "tracingOptions"));
+  const owned = Object.keys(body).some((key) => SERVER_OWNED_RUN_OPTIONS.has(key));
+  if (!owned && trace === null) return request;
+  const rest = Object.fromEntries(Object.entries(body).filter(([key]) => !SERVER_OWNED_RUN_OPTIONS.has(key)));
   const next = trace === null ? rest : { ...rest, tracingOptions: { traceId: trace.traceId, parentSpanId: trace.parentSpanId } };
   const headers = new Headers(request.headers);
   headers.delete("content-length");

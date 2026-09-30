@@ -136,3 +136,71 @@ export const readStreamDelay = (text: string): number | null => {
   const delay = slow.args.delayMs;
   return typeof delay === "number" && delay >= 0 ? delay : 25;
 };
+
+/** A command as the fake data and action agents see it (from `formCommandsOf`). */
+export type FakeCommandRef = { readonly toolId: string; readonly commandId: string; readonly targetContractId: string };
+
+const QUESTION = /\?|^\s*(what|how|who|when|where|why|which|is|are|does|do|can)\b/i;
+const CONFIRMED = /\b(confirm|confirmed|submit|go ahead)\b/i;
+const CREATE_WORD = /\b(?:create|add|new)\s+(?:a|an|the)?\s*([a-z][a-z-]*)/i;
+const NAMED = /named\s+"([^"]{1,120})"/i;
+
+/** Mastra sends tool names to the model sanitized (`catalog.renderForm` → `catalog_renderForm`). */
+const modelToolName = (toolNames: readonly string[], toolId: string): string | undefined =>
+  toolNames.find((name) => name === toolId || name === toolId.replace(/[^A-Za-z0-9_-]/g, "_"));
+
+const delegation = (id: string, agentKey: string, pattern: RegExp): FakeScenarioRule => ({
+  id,
+  matches: ({ text, toolNames }) => toolNames.includes(`agent-${agentKey}`) && pattern.test(stripFakeDirectives(text)),
+  respond: ({ text }) => ({ toolCalls: [{ toolName: `agent-${agentKey}`, input: { prompt: stripFakeDirectives(text) } }] }),
+});
+
+const contractName = (contractId: string): string => (contractId.split(".").at(-1) ?? contractId).toLowerCase();
+
+const renderFormRule = (commands: readonly FakeCommandRef[]): FakeScenarioRule => {
+  const commandFor = (text: string) => {
+    const word = CREATE_WORD.exec(text)?.[1]?.toLowerCase();
+    return commands.find((command) => word !== undefined && contractName(command.targetContractId) === word);
+  };
+  return {
+    id: "data-render-form",
+    matches: ({ text, toolNames }) => modelToolName(toolNames, "catalog.renderForm") !== undefined && commandFor(text) !== undefined,
+    respond: ({ text, toolNames }) => {
+      const command = commandFor(text);
+      const input = { contractId: command?.targetContractId, mode: "create", commandId: command?.commandId };
+      return { toolCalls: [{ toolName: modelToolName(toolNames, "catalog.renderForm") ?? "catalog.renderForm", input }] };
+    },
+  };
+};
+
+const runCommandRule: FakeScenarioRule = {
+  id: "action-run-command",
+  matches: ({ text, toolNames }) => NAMED.test(text) && toolNames.some((name) => /^command[._]/.test(name)),
+  respond: ({ text, toolNames }) => {
+    const toolName = toolNames.find((name) => /^command[._]/.test(name)) ?? "";
+    return { toolCalls: [{ toolName, input: { name: NAMED.exec(text)?.[1] ?? "" } }] };
+  },
+};
+
+const listEntitiesRule: FakeScenarioRule = {
+  id: "data-list-entities",
+  matches: ({ text, toolNames }) => modelToolName(toolNames, "catalog.listEntities") !== undefined && /\b(entities|which data)\b/i.test(text),
+  respond: ({ toolNames }) => ({ toolCalls: [{ toolName: modelToolName(toolNames, "catalog.listEntities") ?? "catalog.listEntities", input: {} }] }),
+};
+
+/**
+ * Keyword rules of the core agents in fake mode (spec §5.3, SP3 Task 20). The supervisor
+ * delegates: a confirmation → `agent-action`, "create a <record>" / data words →
+ * `agent-data`, web words → `agent-web`, a question → `agent-knowledge`. The data agent
+ * lists entities or renders the form of the command whose target contract matches the
+ * word; the action agent runs the first command tool with the quoted name.
+ */
+export const coreFakeRules = (commands: readonly FakeCommandRef[]): readonly (readonly [string, FakeScenarioRule])[] => [
+  ["assistant", delegation("supervisor-action", "action", CONFIRMED)],
+  ["assistant", delegation("supervisor-data", "data", /\b(create|add|new|entities|which data|query)\b/i)],
+  ["assistant", delegation("supervisor-web", "web", /\b(web|online|internet)\b/i)],
+  ["assistant", delegation("supervisor-knowledge", "knowledge", QUESTION)],
+  ["data", renderFormRule(commands)],
+  ["data", listEntitiesRule],
+  ["action", runCommandRule],
+];

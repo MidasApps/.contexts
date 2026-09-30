@@ -40,3 +40,11 @@ Memory must be bounded (`stacks/ai/mastra-sdk.md`: `lastMessages` always capped)
   answers 403 first; a failed lookup answers 503 (fail-closed). Observational Memory, when
   enabled, uses the `fast` role and resource scope. No agent attaches the memory yet: the
   supervisor of Task 20 does (`AgentFactoryDeps.memory`).
+- **2026-09-30 — skills attached (SP3 Task 20).** Each `SKILL.md` is loaded at boot with
+  `validateSkillContent` and attached as an inline skill (`createSkill`): `data-catalog` on
+  `data`, `knowledge-citations` on `knowledge`, `safe-actions` on `action`; module skills
+  (named `<module>-<skill>`) join an agent only in tenants whose `enabledAgents` names the
+  module or one of its agents. `apps/mastra` copies `packages/agents/skills` next to the
+  bundle (`public/skills`). The supervisor attaches the memory; subagents have none of their
+  own. Mastra sends tool names to the model sanitized (`catalog.listEntities` becomes
+  `catalog_listEntities`) once an agent has skills; stream chunks carry the sanitized name.

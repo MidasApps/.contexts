@@ -32,6 +32,7 @@ export type {
   RegionalSettings,
   SecretStore,
   SemanticQueryPort,
+  ProjectsPort,
   SettingsPort,
   UsagePort,
   WebContentPort,
@@ -246,7 +247,7 @@ export {
   SENSITIVE_FIELDS,
 } from "./observability/create-observability.ts";
 export { hashResourceId, isTraceSampled, sampleTraces, scrubSpanForExport, type SpanExportPolicy } from "./observability/span-export-policy.ts";
-export { parseTraceparent, type TraceContext, withServerTracingOptions } from "./observability/trace-context.ts";
+export { parseTraceparent, SERVER_OWNED_RUN_OPTIONS, type TraceContext, withServerTracingOptions } from "./observability/trace-context.ts";
 // SP3 memory with tenant-scoped resources (Task 18).
 export {
   createMemory,
@@ -259,3 +260,19 @@ export {
 } from "./memory/create-memory.ts";
 export { type MastraEmbeddingModelV3, toEmbeddingModelV3 } from "./memory/embedding-model-v3.ts";
 export { type WorkingMemory, WorkingMemorySchema } from "./memory/working-memory.schema.ts";
+// SP3 supervisor, data, action and web subagents with skills (Task 20).
+export { createDelegationGuard, createSupervisorAgent, SUPERVISOR_AGENT_ID, SUPERVISOR_INSTRUCTIONS, SUPERVISOR_MAX_STEPS } from "./agents/supervisor-agent.ts";
+export { createDataAgentDefinition, DATA_AGENT_ID, DATA_AGENT_TOOLS, DATA_INSTRUCTIONS, SUBAGENT_MAX_STEPS } from "./agents/data-agent.ts";
+export { ACTION_AGENT_ID, ACTION_INSTRUCTIONS, actionCeilingOf, createActionAgentDefinition } from "./agents/action-agent.ts";
+export { createWebAgentDefinition, WEB_AGENT_ID, WEB_INSTRUCTIONS, WEB_TOOLS_PERMISSION } from "./agents/web-agent.ts";
+export {
+  createTenantAgentSettingsReader,
+  DEFAULT_ENABLED_SUBAGENTS,
+  type TenantAgentSettings,
+  type TenantAgentSettingsReader,
+  WEB_AGENT_KEY,
+} from "./agents/tenant-agent-settings.ts";
+export { CORE_SKILL_DIRS, CORE_SKILLS, createSkillsResolver, isModuleEnabled, loadSkill, SkillLoadError, skillFromContent } from "./skills/resolve-skills.ts";
+export { type AgentCommand, commandIdOf, formCommandsOf } from "./tools/commands/agent-command.ts";
+export { CREATE_PROJECT_PERMISSION, createCreateProjectCommand } from "./tools/commands/create-project-command.tool.ts";
+export { coreFakeRules, type FakeCommandRef } from "./models/fake/fake-scenarios.ts";

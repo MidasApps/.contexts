@@ -56,6 +56,7 @@ const memoryAgentModule = defineAgentModule({
   agents: [
     {
       id: AGENT_ID,
+      role: "entry",
       ceiling: ["core.chat.use"],
       create: ({ models, memory }) =>
         new Agent({

@@ -1,6 +1,7 @@
 import { Mastra } from "@mastra/core";
 import { RequestContext } from "@mastra/core/request-context";
 import { InMemoryStore } from "@mastra/core/storage";
+import type { MastraVector } from "@mastra/core/vector";
 import { describe, expect, it, vi } from "vitest";
 import { z } from "zod";
 import { PING_AGENT_ID } from "../agents/ping-agent.ts";
@@ -52,12 +53,20 @@ const echoTool = (id: string) =>
   });
 
 describe("composeAgentRuntime", () => {
-  it("returns the ping agent, the auth provider, both middlewares and the core tools", () => {
+  it("returns the entry agents, the subagents, the auth provider, both middlewares and the core tools", () => {
     const runtime = compose();
-    expect(Object.keys(runtime.agents)).toEqual([PING_AGENT_ID, "knowledge"]);
+    expect(Object.keys(runtime.agents)).toEqual([PING_AGENT_ID, "assistant"]);
+    expect(Object.keys(runtime.subagents)).toEqual(["knowledge", "data", "action", "web"]);
     expect(runtime.auth).toBeInstanceOf(FirebaseMastraAuth);
     expect(runtime.middleware.map((entry) => entry.path)).toEqual(["/api/*", "/api/*"]);
-    expect(runtime.tools.ids()).toEqual(["catalog.listEntities", "catalog.describeEntity", "sql.querySemanticSql", "knowledge.searchKnowledge"]);
+    expect(runtime.tools.ids()).toEqual([
+      "catalog.listEntities",
+      "catalog.describeEntity",
+      "catalog.renderForm",
+      "sql.querySemanticSql",
+      "knowledge.searchKnowledge",
+      "command.tenancy.CreateProjectInput",
+    ]);
     expect(runtime).toMatchObject({ scorers: {}, mcpServers: {}, vectors: {}, apiRoutes: [] });
     expect(Object.keys(runtime.workflows).sort()).toEqual(["catalog-reindex", "knowledge-ingest"]);
   });
@@ -82,13 +91,40 @@ describe("composeAgentRuntime", () => {
     expect(result?.text.length).toBeGreaterThan(0);
   });
 
-  it("puts the entry guardrail profile on every core agent", async () => {
-    for (const agent of Object.values(compose().agents)) {
+  it("puts the entry guardrail profile on every entry agent and the delegated one on subagents", async () => {
+    const runtime = compose();
+    for (const agent of Object.values(runtime.agents)) {
       const input = (await agent.listConfiguredInputProcessors()).map((processor) => processor.id);
       const output = (await agent.listConfiguredOutputProcessors()).map((processor) => processor.id);
       expect(input).toEqual(expect.arrayContaining([TENANT_BUDGET_GUARD_ID, "prompt-injection-detector", "moderation", "token-limiter"]));
       expect(output).toEqual(expect.arrayContaining(["regex-filter"]));
     }
+    for (const agent of Object.values(runtime.subagents)) {
+      const input = (await agent.listConfiguredInputProcessors()).map((processor) => processor.id);
+      expect(input).toEqual(expect.arrayContaining([TENANT_BUDGET_GUARD_ID, "token-limiter"]));
+      expect(input).not.toContain("prompt-injection-detector");
+    }
+  });
+
+  it("attaches the tenant-scoped memory to the supervisor only", () => {
+    const runtime = composeAgentRuntime({
+      env: ENV,
+      ports: createFakeRuntimePorts(),
+      modules: [],
+      storage: new InMemoryStore(),
+      vector: { id: "stub-vector" } as unknown as MastraVector,
+      serviceName: "mastra",
+      aiCatalog: FIXTURE_AI_CATALOG,
+    });
+    expect(runtime.agents.assistant?.hasOwnMemory()).toBe(true);
+    expect(Object.values(runtime.subagents).some((agent) => agent.hasOwnMemory())).toBe(false);
+  });
+
+  it("keeps module agents behind the supervisor unless they declare the entry role", () => {
+    const helper = { id: "sample-helper", ceiling: [], create: () => compose().agents[PING_AGENT_ID] as never };
+    const runtime = compose([defineAgentModule({ id: "sample", agents: [helper] })]);
+    expect(Object.keys(runtime.subagents)).toContain("sample-helper");
+    expect(Object.keys(runtime.agents)).not.toContain("sample-helper");
   });
 
   it("bills the agent and its guardrail detectors in the usage ledger", async () => {

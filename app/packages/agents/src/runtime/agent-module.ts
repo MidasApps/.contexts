@@ -1,7 +1,10 @@
 import type { Agent } from "@mastra/core/agent";
+import type { AgentSkillsResolver, InlineSkill } from "@mastra/core/skills";
 import type { Memory } from "@mastra/memory";
+import type { TenantAgentSettingsReader } from "../agents/tenant-agent-settings.ts";
 import type { AgentModels } from "../models/model-factory.ts";
 import type { GuardrailProfile, GuardrailProfileKind } from "../processors/guardrail-profile.ts";
+import type { AgentCommand } from "../tools/commands/agent-command.ts";
 import type { CoreToolDefinition } from "../tools/define-core-tool.ts";
 import type { ToolRegistry } from "../tools/tool-registry.ts";
 import type { AgentRuntimePorts } from "./runtime-ports.ts";
@@ -21,6 +24,12 @@ export type AgentFactoryDeps = {
   readonly guardrails: (kind: GuardrailProfileKind) => GuardrailProfile;
   /** Tenant-scoped memory (`create-memory.ts`); `undefined` when the runtime has no vector store. */
   readonly memory: Memory | undefined;
+  /** Tenant `agent-settings` of the run (enabled subagents, web opt-ins), read once per run. */
+  readonly tenantSettings: TenantAgentSettingsReader;
+  /** The `skills` option: the named core skills plus the skills of the tenant's enabled modules. */
+  readonly skills: (coreSkills: readonly string[]) => AgentSkillsResolver;
+  /** Commands of the core and of the modules (the action agent's tools). */
+  readonly commands: readonly AgentCommand[];
 };
 
 export type AgentDefinition = {
@@ -28,6 +37,12 @@ export type AgentDefinition = {
   readonly id: string;
   /** Permissions the agent may ever use: tool calls run with context permissions ∩ ceiling. */
   readonly ceiling: readonly string[];
+  /**
+   * `entry`: registered in Mastra and reachable by callers (entry guardrails).
+   * `subagent` (default for module agents): reachable only through the supervisor, and only
+   * in tenants whose `agent-settings.enabledAgents` lists its id.
+   */
+  readonly role?: "entry" | "subagent";
   readonly create: (deps: AgentFactoryDeps) => Agent;
 };
 
@@ -44,6 +59,10 @@ export type AgentModule = {
   readonly manifest?: AgentCapabilityManifest;
   readonly agents?: readonly AgentDefinition[];
   readonly tools?: readonly CoreToolDefinition[];
+  /** Mutation tools `command.<module>.<Command>` of the action agent, with their target contract. */
+  readonly commands?: readonly AgentCommand[];
+  /** Agent Skills (`skillFromContent` / `createSkill`), named `<module>-<skill>`; shown only to tenants that enabled the module. */
+  readonly skills?: readonly InlineSkill[];
 };
 
 export type AgentModuleErrorCode = "INVALID_MODULE_ID" | "UNPREFIXED_CAPABILITY" | "DUPLICATE_CAPABILITY" | "UNKNOWN_CAPABILITY_REF" | "MANIFEST_MISMATCH";
@@ -89,6 +108,17 @@ const checkManifest = (module: AgentModule, kind: "agents" | "tools", implemente
   if (unnamed !== undefined) throw new AgentModuleError({ code: "MANIFEST_MISMATCH", moduleId: module.id, capabilityId: unnamed });
 };
 
+// Commands are mutations named after their module's command contract (`command.<module>.<Name>`).
+const checkCommands = (module: AgentModule): void => {
+  const seen = new Set<string>();
+  for (const { tool } of module.commands ?? []) {
+    const named = tool.id.startsWith(`command.${module.id}.`) && tool.kind === "mutation";
+    if (!named) throw new AgentModuleError({ code: "UNPREFIXED_CAPABILITY", moduleId: module.id, capabilityId: tool.id });
+    if (seen.has(tool.id)) throw new AgentModuleError({ code: "DUPLICATE_CAPABILITY", moduleId: module.id, capabilityId: tool.id });
+    seen.add(tool.id);
+  }
+};
+
 /**
  * Declares a module's agent capabilities; validated at boot.
  * @throws {AgentModuleError} for an invalid or reserved id, an unprefixed or
@@ -105,5 +135,7 @@ export const defineAgentModule = (module: AgentModule): AgentModule => {
   checkCapabilities(module.id, toolIds);
   checkManifest(module, "agents", agentIds);
   checkManifest(module, "tools", toolIds);
+  checkCommands(module);
+  checkCapabilities(module.id, (module.skills ?? []).map((skill) => skill.name));
   return module;
 };

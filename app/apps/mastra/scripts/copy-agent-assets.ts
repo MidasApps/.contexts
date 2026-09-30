@@ -1,15 +1,22 @@
 // Runs before `mastra build`: copies the versioned agent instructions of @core/agents
-// (packages/agents/src/agents/instructions/*.md) into src/mastra/public/instructions.
+// (packages/agents/src/agents/instructions/*.md) into src/mastra/public/instructions and
+// the core Agent Skills (packages/agents/skills/<name>/SKILL.md) into src/mastra/public/skills.
 // `mastra build` inlines the agent code into .mastra/output and copies `public/` next to
-// it, so `loadInstructions` (which reads `<bundle dir>/instructions`) finds them there.
-// The copy is generated (gitignored); the package folder stays the source of truth.
+// it, so `loadInstructions` (`<bundle dir>/instructions`) and `loadSkill` (`<bundle dir>/skills`)
+// find them there. The copies are generated (gitignored); the package folders stay the source of truth.
 import { cpSync, rmSync } from "node:fs";
 import path from "node:path";
 
 const APP_DIR = path.resolve(import.meta.dirname, "..");
-const SOURCE = path.resolve(APP_DIR, "../../packages/agents/src/agents/instructions");
-const TARGET = path.join(APP_DIR, "src/mastra/public/instructions");
+const ASSETS = [
+  { source: "../../packages/agents/src/agents/instructions", target: "src/mastra/public/instructions" },
+  { source: "../../packages/agents/skills", target: "src/mastra/public/skills" },
+];
 
-rmSync(TARGET, { recursive: true, force: true });
-cpSync(SOURCE, TARGET, { recursive: true });
-process.stdout.write(`[copy-agent-assets] ${path.relative(APP_DIR, SOURCE)} -> ${path.relative(APP_DIR, TARGET)}\n`);
+for (const asset of ASSETS) {
+  const source = path.resolve(APP_DIR, asset.source);
+  const target = path.join(APP_DIR, asset.target);
+  rmSync(target, { recursive: true, force: true });
+  cpSync(source, target, { recursive: true });
+  process.stdout.write(`[copy-agent-assets] ${path.relative(APP_DIR, source)} -> ${path.relative(APP_DIR, target)}\n`);
+}

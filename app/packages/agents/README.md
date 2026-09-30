@@ -19,6 +19,13 @@ auth provider. `apps/mastra` composes it; the package never imports a module or
   `knowledge` agent (decision 0022 amendments). Agent instructions live in
   `src/agents/instructions/<agent>.v<N>.md`; core skills in `skills/<name>/SKILL.md`.
 
+- Agents (SP3 Task 20): `assistant` is the supervisor and the only chat entry point; it
+  delegates to the `knowledge`, `data`, `action` and `web` subagents the tenant enabled
+  (`agent-settings.enabledAgents`; `web` also needs a web-tool opt-in). Subagents are not
+  served by Mastra directly. Commands of the action agent are `AgentModule.commands`
+  (`{ tool, targetContractId }`) plus the core `command.tenancy.CreateProjectInput`.
+  Skills attach per agent (`src/skills/resolve-skills.ts`, decision 0029 amendment).
+
 ## How to test
 
 ```bash

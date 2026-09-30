@@ -62,3 +62,26 @@ SP3 adds agents, tools, skills, workflows, memory, knowledge and connectors. Mas
   - *Functions bundle.* The services barrel pulls CommonJS code that calls `require` and the
     `libpg-query` WASM loader; `build.ts` adds a `createRequire` banner and the SQL guard now
     imports `libpg-query` lazily, so the Functions codebase loads without evaluating it.
+- **2026-09-30 — supervisor, subagents and core command (SP3 Task 20).**
+  - *Entry and subagents.* Mastra serves only entry agents: `assistant` (the supervisor) and
+    `ping`. `knowledge`, `data`, `action`, `web` and module agents (`AgentDefinition.role`,
+    default `subagent` for modules) exist only inside the supervisor, so every caller passes
+    the `entry` guardrails once and subagents run the `delegated` profile. A module agent that
+    must be reachable directly declares `role: "entry"`.
+  - *Tenant subagents.* The supervisor's `agents` option is a function of the request context:
+    it offers the subagents of `agent-settings.enabledAgents`, and `web` only with a web-tool
+    opt-in. Settings are read once per run; while the settings port is unreadable (it is not
+    bound until SP5) the core defaults apply: `knowledge`, `data`, `action`, never `web` or a
+    module agent. `onDelegationStart` checks the same settings on the server, refuses memory
+    ids other than the run's own (a subagent inherits the supervisor memory under
+    `<resourceId>-<agent>`) and drops model-written instruction overrides.
+  - *Server-owned run options.* The context middleware removes `maxSteps`, `stopWhen`,
+    `instructions`, `system`, `toolsets`, `clientTools`, `activeTools`, `toolChoice`,
+    `requireToolApproval`, `delegation`, processors, `modelSettings` and `providerOptions`
+    from run bodies (with `tracingOptions`), so the step caps (8 / 6) and tool approval hold.
+  - *Memory needs a conversation.* The supervisor owns the memory, so a supervisor run needs
+    `X-Conversation-Id` (SP4 always sends it); a run without it fails inside Mastra.
+  - *Core command.* Until Task 19 derives commands from module contracts, the action agent
+    has one core command, `command.tenancy.CreateProjectInput` (SP1 `createProject` through a
+    `projects` port, permission `core.project.create`). `AgentModule.commands` carries module
+    commands as `{ tool, targetContractId }`; `catalog.renderForm` resolves forms from them.

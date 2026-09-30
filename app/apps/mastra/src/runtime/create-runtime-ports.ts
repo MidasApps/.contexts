@@ -24,6 +24,7 @@ import { type CoreServerModule, createCoreServer } from "@core/services/composit
 import { bindAccessPort } from "./access-port-binding.ts";
 import { bindAuditPort } from "./audit-port-binding.ts";
 import { bindKnowledgePort } from "./knowledge-port-binding.ts";
+import { bindProjectsPort } from "./projects-port-binding.ts";
 import { bindUsagePort } from "./usage-port-binding.ts";
 import { UNWIRED_PORTS } from "./unwired-ports.ts";
 
@@ -66,6 +67,7 @@ export type RuntimePortsAdapters = {
  *   are structured log lines until the event bus exists.
  * - usage: ledger writes and tenant budget checks over `usage.llm_calls` / `usage.tenant_budgets`
  *   (row level security, role `usage_runtime`).
+ * - projects: SP1 `createProject` (the action agent's core command, SP3 Task 20).
  * - approvals, connectors, secrets, settings, web content: fail-closed until their tasks.
  * @param args.modules installed modules (their permissions join SP1's registry).
  */
@@ -101,5 +103,6 @@ export const createRuntimePorts = (args: {
     files: bindFilesPort(files),
     knowledgeEvents: createLogKnowledgeEventPublisher(args.logger),
     usage: bindUsagePort(createUsageServices({ repository: createPostgresUsageRepository(sql), clock: systemClock })),
+    projects: bindProjectsPort({ tenancy: core.tenancy, access: core.access }),
   };
 };

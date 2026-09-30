@@ -15,8 +15,11 @@ SP1/SP3 services and `src/modules.ts` lists the agent modules (decision 0019).
   regional port rejects, so agent requests fail closed with 401.
 - Approvals, usage, knowledge, connectors, secrets and agent settings are fail-closed
   stand-ins (`src/runtime/unwired-ports.ts`) until their tasks bind them.
-- Agents: `ping` (health check on the fast model role). Try it with
-  `POST /api/agents/ping/generate` + `Authorization: Bearer <ID token>` + `X-Tenant-Id`.
+- Agents: `assistant` (supervisor over the knowledge, data, action and web subagents;
+  send `X-Conversation-Id`, the supervisor owns the conversation memory) and `ping`
+  (health check on the fast model role). Try them with `POST /api/agents/<id>/generate`
+  + `Authorization: Bearer <ID token>` + `X-Tenant-Id`. `pnpm build` copies the agent
+  instructions and skills of `@core/agents` into `src/mastra/public/`.
 
 ## When to use
 
