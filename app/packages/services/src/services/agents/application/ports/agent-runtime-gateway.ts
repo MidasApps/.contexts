@@ -48,7 +48,12 @@ export type GatewayError = {
 export type GatewayResult<T> = { readonly ok: true; readonly data: T } | { readonly ok: false; readonly error: GatewayError };
 
 /** An upstream stream handed to `/v1` as is (SSE or chunked JSON). */
-export type GatewayStream = { readonly body: ReadableStream<Uint8Array>; readonly contentType: string };
+export type GatewayStream = {
+  readonly body: ReadableStream<Uint8Array>;
+  readonly contentType: string;
+  /** Conversation Mastra created because the call named none (`X-Conversation-Id` of the answer, follow-up #24). */
+  readonly conversationId?: string;
+};
 
 /**
  * Run options forwarded to Mastra (`maxSteps`, `toolChoice`, ...). `requestContext`,

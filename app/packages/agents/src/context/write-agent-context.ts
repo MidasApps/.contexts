@@ -2,6 +2,7 @@ import { type AgentRequestContext, AgentRequestContextSchema, PrincipalSchema } 
 import { MASTRA_RESOURCE_ID_KEY, MASTRA_THREAD_ID_KEY } from "@mastra/core/request-context";
 import { z } from "zod";
 import { type AgentPrincipal, resourceIdOf } from "../auth/agent-principal.ts";
+import { CONVERSATION_ID_PATTERN } from "../auth/conversation-id.ts";
 import type { AccessPrincipal } from "../runtime/runtime-ports.ts";
 import { AGENT_CONTEXT_KEYS, AGENT_PRINCIPAL_KEY } from "./agent-request-context.ts";
 
@@ -26,9 +27,6 @@ export type RequestContextStore = {
 export const AgentRuntimeContextSchema = z
   .looseObject({ ...AgentRequestContextSchema.def.shape, [AGENT_PRINCIPAL_KEY]: PrincipalSchema })
   .refine((context) => context.organizationId === context.tenantId, { error: "organizationId must equal tenantId.", path: ["organizationId"] });
-
-// Thread ids become storage keys; never accept separators or dots from a header.
-const CONVERSATION_ID_PATTERN = /^[A-Za-z0-9_-]{1,128}$/;
 
 const optionalEntries = (principal: AgentPrincipal, conversationId: string | undefined) => ({
   ...(principal.projectId === undefined ? {} : { projectId: principal.projectId }),

@@ -157,6 +157,17 @@ describe("Mastra runtime composition (Auth Emulator)", () => {
     expect(direct.status).toBe(404);
   }, 60_000);
 
+  it("creates a conversation owned by the caller when a supervisor run names none (follow-up #24)", async () => {
+    const headers = { "content-type": "application/json", ...memberHeaders() };
+    const response = await fetch(`${baseUrl}/api/agents/assistant/generate`, { method: "POST", headers, body: JSON.stringify({ messages: "What is our onboarding policy?" }) });
+    expect(response.status).toBe(200);
+    const conversationId = response.headers.get("x-conversation-id");
+    expect(conversationId).toMatch(/^[A-Za-z0-9]{20}$/);
+    const memory = await storage.getStore("memory");
+    const thread = await memory?.getThreadById({ threadId: conversationId ?? "" });
+    expect(thread?.resourceId).toBe(`${TENANT}:${member.uid}`);
+  }, 60_000);
+
   it("closes built-in routes the core does not serve", async () => {
     const response = await fetch(`${baseUrl}/api/vectors/x`, { headers: memberHeaders() });
     expect(response.status).toBe(404);

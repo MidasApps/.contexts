@@ -116,6 +116,11 @@ export const postForStream = (args: {
       await response.body?.cancel();
       throw new UpstreamStatusError(response.ok ? 502 : response.status, response.headers.get("retry-after"));
     }
-    return { body: response.body, contentType: response.headers.get("content-type") ?? "application/octet-stream" };
+    const conversationId = response.headers.get(FORWARDED_HEADERS.conversationId);
+    return {
+      body: response.body,
+      contentType: response.headers.get("content-type") ?? "application/octet-stream",
+      ...(conversationId === null ? {} : { conversationId }),
+    };
   });
 };

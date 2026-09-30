@@ -85,3 +85,22 @@ SP3 adds agents, tools, skills, workflows, memory, knowledge and connectors. Mas
     has one core command, `command.tenancy.CreateProjectInput` (SP1 `createProject` through a
     `projects` port, permission `core.project.create`). `AgentModule.commands` carries module
     commands as `{ tool, targetContractId }`; `catalog.renderForm` resolves forms from them.
+- **2026-09-30 — a run without a conversation (follow-up #24).**
+  - *Auto-create, not 400.* A `POST <prefix>/agents/<id>/generate|stream` or an MCP server
+    call (`<prefix>/mcp/<id>/mcp`) without `X-Conversation-Id` gets a new conversation id from
+    the context middleware: 20 characters of the Firestore id alphabet (the shape of an
+    automatic id). It names no thread yet, so the run creates the thread under the caller's
+    own resource (`tenantId:uid`); nobody else can reach it (thread ownership check). API
+    clients and MCP callers therefore never need to invent an id, and a supervisor run no
+    longer fails with 500.
+  - *Returned to the caller.* The middleware sets `X-Conversation-Id` on the answer before the
+    run starts, so streamed answers carry it too; the `/v1` gateway exposes it as
+    `GatewayStream.conversationId`. A caller that wants to continue the conversation sends it
+    back.
+  - *Not for other routes.* Tool approval and decline resume the run they belong to, and
+    memory routes name their thread in the path; none of them gets a new thread.
+  - *Malformed ids.* A forwarded `X-Conversation-Id` outside `[A-Za-z0-9_-]{1,128}` answers
+    400 (`{ error }`, mapped to `VALIDATION_FAILED` by the gateway) instead of running without
+    memory.
+  - *Rejected.* Answering 400 `VALIDATION_FAILED` when the header is missing: every API client
+    and the MCP `ask_assistant` tool would have to create ids the server can create safely.

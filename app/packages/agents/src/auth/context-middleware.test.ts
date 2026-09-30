@@ -57,6 +57,62 @@ describe("createContextMiddleware", () => {
     expect(store.get(MASTRA_THREAD_ID_KEY)).toBe("Cv3sK2lPq0WnR5tYu3bV");
   });
 
+  describe("conversation of a run (follow-up #24)", () => {
+    const runWith = async (url: string, headers: Record<string, string>) => {
+      const { middleware } = setup();
+      const store = new RequestContext<unknown>();
+      const raw = new Request(url, { method: "POST", headers });
+      const sent: Record<string, string> = {};
+      let nextCalled = false;
+      const header = (name: string, value: string) => {
+        sent[name] = value;
+      };
+      const response = await middleware.handler({ req: { raw }, get: () => store, header }, () => {
+        nextCalled = true;
+        return Promise.resolve();
+      });
+      return { store, sent, response, nextCalled };
+    };
+
+    it("creates a conversation owned by the caller when a run names none, and returns its id", async () => {
+      const { store, sent, nextCalled } = await runWith("http://mastra.internal/api/agents/assistant/generate", memberHeaders);
+      expect(nextCalled).toBe(true);
+      const created = store.get("conversationId");
+      expect(created).toMatch(/^[A-Za-z0-9]{20}$/);
+      expect(store.get(MASTRA_THREAD_ID_KEY)).toBe(created);
+      expect(store.get(MASTRA_RESOURCE_ID_KEY)).toBe(`${TENANT}:member-uid`);
+      expect(sent).toEqual({ "x-conversation-id": created });
+    });
+
+    it("creates one for an MCP server call too, but never for approvals or memory reads", async () => {
+      expect((await runWith("http://mastra.internal/api/mcp/core/mcp", memberHeaders)).store.get(MASTRA_THREAD_ID_KEY)).toMatch(/^[A-Za-z0-9]{20}$/);
+      for (const url of ["http://mastra.internal/api/agents/assistant/approve-tool-call", "http://mastra.internal/api/memory/threads"]) {
+        const { store, sent } = await runWith(url, memberHeaders);
+        expect(store.get(MASTRA_THREAD_ID_KEY)).toBeUndefined();
+        expect(sent).toEqual({});
+      }
+    });
+
+    it("keeps a forwarded conversation id and sends no header", async () => {
+      const { store, sent } = await runWith("http://mastra.internal/api/agents/assistant/stream", { ...memberHeaders, "x-conversation-id": "Cv3sK2lPq0WnR5tYu3bV" });
+      expect(store.get(MASTRA_THREAD_ID_KEY)).toBe("Cv3sK2lPq0WnR5tYu3bV");
+      expect(sent).toEqual({});
+    });
+
+    it("answers 400 for a malformed conversation id instead of running without memory", async () => {
+      const { response, nextCalled } = await runWith("http://mastra.internal/api/agents/assistant/generate", { ...memberHeaders, "x-conversation-id": "../other/thread" });
+      expect(response?.status).toBe(400);
+      expect(await response?.json()).toEqual({ error: "Invalid conversation id" });
+      expect(nextCalled).toBe(false);
+    });
+
+    it("creates nothing for an unauthenticated run (Mastra answers 401)", async () => {
+      const { store, sent } = await runWith("http://mastra.internal/api/agents/assistant/generate", { "x-tenant-id": TENANT });
+      expect([...store.keys()]).toEqual([]);
+      expect(sent).toEqual({});
+    });
+  });
+
   it("replaces a malformed request id with a fresh ULID", async () => {
     const { store } = await run({ ...memberHeaders, "x-request-id": "not a ulid" });
     expect(store.get("requestId")).toMatch(/^[0-9A-HJKMNP-TV-Z]{26}$/);

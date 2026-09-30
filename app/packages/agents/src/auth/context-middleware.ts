@@ -7,6 +7,7 @@ import type { AccessPrincipal } from "../runtime/runtime-ports.ts";
 import { type AgentMiddleware, apiPathPattern } from "./agent-middleware.ts";
 import type { AgentPrincipal } from "./agent-principal.ts";
 import { readBearerToken } from "./bearer-only.ts";
+import { CONVERSATION_ID_PATTERN, newConversationId, startsConversationRun } from "./conversation-id.ts";
 import { checkThreadAccess, type ThreadAccess, threadIdsOfRequest, type ThreadOwnerLookup } from "./thread-ownership.ts";
 
 /** What the middleware needs from `FirebaseMastraAuth` (memoized per request there). */
@@ -40,20 +41,32 @@ const authenticate = async (auth: ContextAuthenticator, request: Request): Promi
   }
 };
 
-const resolveSnapshot = async (
-  options: ContextMiddlewareOptions,
-  request: Request,
-): Promise<{ context: AgentRequestContext; principal: AccessPrincipal } | null> => {
+type Snapshot = { context: AgentRequestContext; principal: AccessPrincipal; createdConversationId?: string };
+
+/**
+ * The conversation of the request: the forwarded id, or a new one when the request starts
+ * a run that needs a memory thread (follow-up #24). A fresh id names no thread yet, so the
+ * run creates it under the caller's own resource (`tenantId:uid`).
+ */
+const conversationOf = (options: ContextMiddlewareOptions, request: Request): { id?: string; created: boolean } | "malformed" => {
+  const forwarded = readHeader(request, FORWARDED_HEADERS.conversationId);
+  if (forwarded !== undefined) return CONVERSATION_ID_PATTERN.test(forwarded) ? { id: forwarded, created: false } : "malformed";
+  return startsConversationRun(request, options.apiPrefix) ? { id: newConversationId(), created: true } : { created: false };
+};
+
+const resolveSnapshot = async (options: ContextMiddlewareOptions, request: Request): Promise<Snapshot | "malformed" | null> => {
   const principal = await authenticate(options.auth, request);
   if (principal === null) return null;
-  const conversationId = readHeader(request, FORWARDED_HEADERS.conversationId);
+  const conversation = conversationOf(options, request);
+  if (conversation === "malformed") return "malformed";
   const context = buildAgentRequestContext({
     principal,
     requestId: resolveRequestId(readHeader(request, FORWARDED_HEADERS.requestId)),
     aiMode: options.aiMode,
-    ...(conversationId === undefined ? {} : { conversationId }),
+    ...(conversation.id === undefined ? {} : { conversationId: conversation.id }),
   });
-  return context === null ? null : { context, principal: principal.principal };
+  if (context === null) return null;
+  return { context, principal: principal.principal, ...(conversation.created && conversation.id !== undefined ? { createdConversationId: conversation.id } : {}) };
 };
 
 const REFUSALS: Record<Exclude<ThreadAccess, "allowed">, { status: number; error: string }> = {
@@ -80,7 +93,8 @@ const refuseForeignThread = async (options: ContextMiddlewareOptions, request: R
  * `requestContext` never survives. Without a principal or membership it writes
  * nothing and lets the route auth answer 401/403. It also replaces any body
  * `tracingOptions` with the forwarded `traceparent` (`trace-context.ts`), and answers
- * 403 for a memory thread of another resource (`thread-ownership.ts`).
+ * 403 for a memory thread of another resource (`thread-ownership.ts`). A run without a
+ * conversation gets a new one, returned in `X-Conversation-Id`; a malformed id answers 400.
  */
 export const createContextMiddleware = (options: ContextMiddlewareOptions): AgentMiddleware => ({
   path: apiPathPattern(options.apiPrefix),
@@ -90,8 +104,11 @@ export const createContextMiddleware = (options: ContextMiddlewareOptions): Agen
     // Before authentication, so the route auth sees (and memoizes) the same request object.
     context.req.raw = await withServerTracingOptions(context.req.raw);
     const snapshot = await resolveSnapshot(options, context.req.raw);
+    if (snapshot === "malformed") return Response.json({ error: "Invalid conversation id" }, { status: 400 });
     if (snapshot !== null) {
       writeAgentContext(store, snapshot);
+      // Before `next()`: Hono folds headers set here into streamed answers too.
+      if (snapshot.createdConversationId !== undefined) context.header?.(FORWARDED_HEADERS.conversationId, snapshot.createdConversationId);
       const refusal = await refuseForeignThread(options, context.req.raw, store.get(MASTRA_RESOURCE_ID_KEY));
       if (refusal !== undefined) return refusal;
     }

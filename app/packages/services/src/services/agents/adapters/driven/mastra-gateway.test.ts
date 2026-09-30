@@ -187,6 +187,18 @@ describe("createMastraGateway streams", () => {
     if (!result.ok) throw new Error("expected a stream");
     expect(result.data.contentType).toBe("text/event-stream");
     expect(await readText(result.data.body)).toContain('"finish"');
+    expect(result.data.conversationId).toBeUndefined();
+  });
+
+  it("returns the conversation Mastra created for a run that named none (follow-up #24)", async () => {
+    routes.set("POST /api/agents/assistant/stream", (_request, response) => {
+      response.writeHead(200, { "content-type": "text/event-stream", "x-conversation-id": "Nw4sK2lPq0WnR5tYu3bV" }).end("data: {}\n\n");
+    });
+    const withoutConversation: AgentCallScope = { bearer: SCOPE.bearer, tenantId: SCOPE.tenantId, regional: SCOPE.regional, requestId: SCOPE.requestId };
+    const result = await gateway().stream({ scope: withoutConversation, agentId: "assistant", messages: "hi" });
+    if (!result.ok) throw new Error("expected a stream");
+    expect(recorded[0]?.headers["x-conversation-id"]).toBeUndefined();
+    expect(result.data.conversationId).toBe("Nw4sK2lPq0WnR5tYu3bV");
   });
 
   it("propagates the caller's abort to Mastra (the upstream request is closed)", async () => {

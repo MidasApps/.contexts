@@ -10,6 +10,8 @@ export type AgentMiddlewareContext = {
   /** `raw` is replaced by the context middleware (server-owned tracing options). */
   readonly req: { raw: Request };
   readonly get: (key: "requestContext") => RequestContextStore;
+  /** Sets a response header (Hono `c.header`); set before `next()` so streamed answers carry it too. */
+  readonly header?: (name: string, value: string) => void;
 };
 
 export type AgentMiddlewareHandler = (context: AgentMiddlewareContext, next: () => Promise<void>) => Promise<Response | void>;
