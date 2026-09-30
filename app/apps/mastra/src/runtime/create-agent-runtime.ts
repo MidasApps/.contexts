@@ -1,14 +1,16 @@
 import { type AgentModule, composeAgentRuntime, type RuntimeParts } from "@core/agents";
 import { createFirebaseAdmin, type FirebaseAdmin, processLogger } from "@core/services";
 import type { MastraCompositeStore } from "@mastra/core/storage";
-import { PostgresStore } from "@mastra/pg";
-import { buildStorageConfig, MASTRA_SERVICE_NAME } from "../mastra/mastra-options.ts";
+import type { MastraVector } from "@mastra/core/vector";
+import { PgVector, PostgresStore } from "@mastra/pg";
+import { buildMemoryVectorConfig, buildStorageConfig, MASTRA_SERVICE_NAME } from "../mastra/mastra-options.ts";
 import type { MastraEnv } from "../mastra-env.schema.ts";
 import { createRuntimePorts, type RuntimePortsAdapters } from "./create-runtime-ports.ts";
 
 export type AgentRuntimeOverrides = {
   readonly firebase?: FirebaseAdmin;
   readonly storage?: MastraCompositeStore;
+  readonly vector?: MastraVector;
   readonly adapters?: RuntimePortsAdapters;
   readonly observability?: Parameters<typeof composeAgentRuntime>[0]["exporters"];
 };
@@ -33,6 +35,7 @@ export const createAgentRuntime = (args: {
     ports,
     modules: args.modules,
     storage: overrides.storage ?? new PostgresStore(buildStorageConfig(env)),
+    vector: overrides.vector ?? new PgVector(buildMemoryVectorConfig(env)),
     serviceName: MASTRA_SERVICE_NAME,
     ...(overrides.observability === undefined ? {} : { exporters: overrides.observability }),
   });

@@ -28,6 +28,7 @@
     "@core/contracts": "workspace:*",
     "@core/services": "workspace:*",
     "@mastra/core": "catalog:",
+    "@mastra/memory": "catalog:",
     "@mastra/observability": "catalog:",
     "@mastra/otel-exporter": "catalog:",
     "@opentelemetry/exporter-trace-otlp-proto": "catalog:",
@@ -37,6 +38,7 @@
   "devDependencies": {
     "@core/config": "workspace:*",
     "@mastra/deployer": "catalog:",
+    "@mastra/pg": "catalog:",
     "@types/node": "catalog:",
     "eslint": "catalog:",
     "typescript": "catalog:",

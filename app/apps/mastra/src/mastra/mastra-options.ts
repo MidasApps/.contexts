@@ -28,6 +28,22 @@ export const buildStorageConfig = (
 });
 
 /**
+ * Memory vectors (`PgVector`, decision 0029): schema `mastra`, like the storage. With
+ * `MASTRA_STORAGE_INIT=skip` it never runs DDL; `db:init` creates the `memory_messages`
+ * index (the runtime role has no CREATE on the schema).
+ * @param options `init: "force"` is only for that `db:init` step.
+ */
+export const buildMemoryVectorConfig = (
+  env: Pick<MastraEnv, "DATABASE_URL"> & Partial<Pick<MastraEnv, "MASTRA_STORAGE_INIT">>,
+  options: { init?: "env" | "force" } = {},
+) => ({
+  id: "mastra-memory-vector",
+  connectionString: env.DATABASE_URL,
+  schemaName: MASTRA_STORAGE_SCHEMA,
+  disableInit: options.init !== "force" && env.MASTRA_STORAGE_INIT === "skip",
+});
+
+/**
  * CORS: outside local, Mastra is private and only the `/v1` API calls it
  * server to server, so CORS is off (spec §16.3). In local, an explicit
  * allowlist: Studio's own origin plus `MASTRA_CORS_ORIGINS`, never `*`.

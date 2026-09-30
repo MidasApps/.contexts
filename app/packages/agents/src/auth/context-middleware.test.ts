@@ -5,6 +5,7 @@ import type { AccessPrincipal } from "../runtime/runtime-ports.ts";
 import { createFakeAccessPort } from "../testing/fake-ports.ts";
 import { createContextMiddleware } from "./context-middleware.ts";
 import { FirebaseMastraAuth } from "./firebase-mastra-auth.ts";
+import type { ThreadOwnerLookup } from "./thread-ownership.ts";
 
 const TENANT = "Jd8sK2lPq0WnR5tYu3bV";
 const REQUEST_ID = "01J8Z3K4M5N6P7Q8R9S0T1V2W3";
@@ -113,5 +114,43 @@ describe("createContextMiddleware", () => {
       tracingOptions: { traceId: "4bf92f3577b34da6a3ce929d0e0e4736", parentSpanId: "00f067aa0ba902b7" },
     });
     expect(context.req.raw.headers.get("authorization")).toBe("Bearer member-token");
+  });
+  describe("memory thread ownership", () => {
+    const withOwner = async (lookup: ThreadOwnerLookup, url: string, extraHeaders: Record<string, string> = {}) => {
+      const { access } = setup();
+      const middleware = createContextMiddleware({ auth: new FirebaseMastraAuth({ access }), aiMode: "fake", threadOwnerOf: lookup });
+      const raw = new Request(url, { method: "POST", headers: { ...memberHeaders, ...extraHeaders } });
+      let nextCalled = false;
+      const response = await middleware.handler({ req: { raw }, get: () => new RequestContext<unknown>() }, () => {
+        nextCalled = true;
+        return Promise.resolve();
+      });
+      return { response, nextCalled };
+    };
+    const RUN_URL = "http://mastra.internal/api/agents/ping/generate";
+    const ownResource = `${TENANT}:member-uid`;
+
+    it("refuses with 403 a conversation that belongs to another resource, before the run", async () => {
+      const { response, nextCalled } = await withOwner(() => Promise.resolve("OtherTenant000000000:member-uid"), RUN_URL, { "x-conversation-id": "Cv3sK2lPq0WnR5tYu3bV" });
+      expect(response?.status).toBe(403);
+      expect(await response?.json()).toEqual({ error: "Forbidden" });
+      expect(nextCalled).toBe(false);
+    });
+
+    it("checks a thread named in a memory route path too", async () => {
+      const { response } = await withOwner(() => Promise.resolve("OtherTenant000000000:member-uid"), "http://mastra.internal/api/memory/threads/Cv3sK2lPq0WnR5tYu3bV/messages");
+      expect(response?.status).toBe(403);
+    });
+
+    it("lets the owner and a new thread through", async () => {
+      expect((await withOwner(() => Promise.resolve(ownResource), RUN_URL, { "x-conversation-id": "Cv3sK2lPq0WnR5tYu3bV" })).nextCalled).toBe(true);
+      expect((await withOwner(() => Promise.resolve(null), RUN_URL, { "x-conversation-id": "NewThread00000000000" })).nextCalled).toBe(true);
+    });
+
+    it("fails closed with 503 when the owner cannot be read", async () => {
+      const { response, nextCalled } = await withOwner(() => Promise.reject(new Error("db down")), RUN_URL, { "x-conversation-id": "Cv3sK2lPq0WnR5tYu3bV" });
+      expect(response?.status).toBe(503);
+      expect(nextCalled).toBe(false);
+    });
   });
 });

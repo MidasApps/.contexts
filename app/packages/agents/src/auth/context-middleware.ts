@@ -1,4 +1,5 @@
 import { type AgentRequestContext, FORWARDED_HEADERS } from "@core/contracts";
+import { MASTRA_RESOURCE_ID_KEY } from "@mastra/core/request-context";
 import { resolveRequestId } from "@core/services";
 import { buildAgentRequestContext, clearAgentContext, writeAgentContext } from "../context/write-agent-context.ts";
 import { withServerTracingOptions } from "../observability/trace-context.ts";
@@ -6,6 +7,7 @@ import type { AccessPrincipal } from "../runtime/runtime-ports.ts";
 import { type AgentMiddleware, apiPathPattern } from "./agent-middleware.ts";
 import type { AgentPrincipal } from "./agent-principal.ts";
 import { readBearerToken } from "./bearer-only.ts";
+import { checkThreadAccess, type ThreadAccess, threadIdsOfRequest, type ThreadOwnerLookup } from "./thread-ownership.ts";
 
 /** What the middleware needs from `FirebaseMastraAuth` (memoized per request there). */
 export type ContextAuthenticator = {
@@ -17,6 +19,8 @@ export type ContextMiddlewareOptions = {
   readonly aiMode: AgentRequestContext["aiMode"];
   /** Mastra `server.apiPrefix` (default `/api`). */
   readonly apiPrefix?: string;
+  /** Memory thread owners; without it thread ownership is left to Mastra. */
+  readonly threadOwnerOf?: ThreadOwnerLookup;
 };
 
 const readHeader = (request: Request, name: string): string | undefined => {
@@ -52,6 +56,22 @@ const resolveSnapshot = async (
   return context === null ? null : { context, principal: principal.principal };
 };
 
+const REFUSALS: Record<Exclude<ThreadAccess, "allowed">, { status: number; error: string }> = {
+  forbidden: { status: 403, error: "Forbidden" },
+  unavailable: { status: 503, error: "Service unavailable" },
+};
+
+// A thread of another resource (tenant:uid) is refused before the run (Mastra would fail it with 500).
+const refuseForeignThread = async (options: ContextMiddlewareOptions, request: Request, resourceId: unknown): Promise<Response | undefined> => {
+  if (options.threadOwnerOf === undefined || typeof resourceId !== "string") return undefined;
+  const threadIds = threadIdsOfRequest({ path: new URL(request.url).pathname, conversationId: readHeader(request, FORWARDED_HEADERS.conversationId) });
+  if (threadIds.length === 0) return undefined;
+  const access = await checkThreadAccess({ lookup: options.threadOwnerOf, threadIds, resourceId });
+  if (access === "allowed") return undefined;
+  const refusal = REFUSALS[access];
+  return Response.json({ error: refusal.error }, { status: refusal.status });
+};
+
 /**
  * Mastra server middleware (spec §4.3, decision 0019) that turns the verified
  * principal into the typed `AgentRequestContext`. It runs before Mastra's route
@@ -59,7 +79,8 @@ const resolveSnapshot = async (
  * request). It always clears the keys it owns first: a client-sent
  * `requestContext` never survives. Without a principal or membership it writes
  * nothing and lets the route auth answer 401/403. It also replaces any body
- * `tracingOptions` with the forwarded `traceparent` (`trace-context.ts`).
+ * `tracingOptions` with the forwarded `traceparent` (`trace-context.ts`), and answers
+ * 403 for a memory thread of another resource (`thread-ownership.ts`).
  */
 export const createContextMiddleware = (options: ContextMiddlewareOptions): AgentMiddleware => ({
   path: apiPathPattern(options.apiPrefix),
@@ -69,7 +90,11 @@ export const createContextMiddleware = (options: ContextMiddlewareOptions): Agen
     // Before authentication, so the route auth sees (and memoizes) the same request object.
     context.req.raw = await withServerTracingOptions(context.req.raw);
     const snapshot = await resolveSnapshot(options, context.req.raw);
-    if (snapshot !== null) writeAgentContext(store, snapshot);
+    if (snapshot !== null) {
+      writeAgentContext(store, snapshot);
+      const refusal = await refuseForeignThread(options, context.req.raw, store.get(MASTRA_RESOURCE_ID_KEY));
+      if (refusal !== undefined) return refusal;
+    }
     await next();
     return undefined;
   },

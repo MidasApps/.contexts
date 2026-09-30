@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { loadMastraEnv, type MastraEnv } from "../mastra-env.schema.ts";
-import { buildLoggerOptions, buildServerConfig, buildStorageConfig, createTimestampMixin } from "./mastra-options.ts";
+import { buildLoggerOptions, buildMemoryVectorConfig, buildServerConfig, buildStorageConfig, createTimestampMixin } from "./mastra-options.ts";
 
 const LOCAL_SOURCE = {
   APP_ENV: "local",
@@ -46,6 +46,19 @@ describe("buildStorageConfig", () => {
 
   it("can force init for the db:init step, whatever the env says", () => {
     expect(buildStorageConfig(prodEnv, { init: "force" }).disableInit).toBe(false);
+  });
+});
+
+describe("buildMemoryVectorConfig", () => {
+  it("keeps memory vectors in schema mastra and creates the index only in local or db:init", () => {
+    expect(buildMemoryVectorConfig(localEnv)).toEqual({
+      id: "mastra-memory-vector",
+      connectionString: "postgresql://app:app@127.0.0.1:5432/app",
+      schemaName: "mastra",
+      disableInit: false,
+    });
+    expect(buildMemoryVectorConfig(prodEnv).disableInit).toBe(true);
+    expect(buildMemoryVectorConfig(prodEnv, { init: "force" }).disableInit).toBe(false);
   });
 });
 

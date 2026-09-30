@@ -46,7 +46,7 @@ role only gets `mastra_runtime` (DML on schema `mastra`, migration
 
 ```bash
 pnpm db:migrate --confirm-env <APP_ENV>                 # from app/, DDL-capable role
-pnpm -F @core/mastra db:init --confirm-env <APP_ENV>    # same role: storage.init() + grants, then exits
+pnpm -F @core/mastra db:init --confirm-env <APP_ENV>    # same role: storage.init(), memory vector index, grants, then exits
 # deploy the image with MASTRA_STORAGE_INIT=skip
 ```
 
@@ -56,6 +56,13 @@ The knowledge base (`ai.documents`, `ai.chunks_v1`, decision 0022) is reached on
 serves the `knowledge-ingest` and `catalog-reindex` workflows; `catalog-reindex`
 refuses HTTP runs and is run in-process (`pnpm seed:local`, deploy scripts).
 `FILES_BUCKET` (required outside local) is the bucket ingestion reads uploads from.
+
+Agent memory (decision 0029) keeps threads, messages and working memory in schema `mastra`
+and message vectors in the `PgVector` index `memory_messages` (1536 dimensions, same schema).
+`db:init` creates that index, because the runtime role cannot; with `MASTRA_STORAGE_INIT=skip`
+the vector store never runs DDL. Memory is scoped to the resource `tenantId:uid` (set by the
+context middleware), so one person in two organizations has two memories; a request that
+names a thread of another resource gets 403 before the run.
 
 The usage ledger (`usage.llm_calls`, `usage.tenant_budgets`, view `usage.tenant_month_spend`,
 decision 0026) is reached only as `usage_runtime` (0007; row level security, append-only

@@ -206,6 +206,9 @@ catalogs:
     '@mastra/loggers':
       specifier: 1.3.2
       version: 1.3.2
+    '@mastra/memory':
+      specifier: 1.32.1
+      version: 1.32.1
     '@mastra/observability':
       specifier: 1.18.1
       version: 1.18.1
@@ -614,6 +617,9 @@ importers:
       '@mastra/core':
         specifier: 'catalog:'
         version: 1.71.0(@grpc/grpc-js@1.14.5)(ai@7.0.122(zod@4.6.5))(express@5.2.1(supports-color@7.2.0))(supports-color@7.2.0)(zod-to-json-schema@3.25.2(zod@4.6.5))(zod@4.6.5)
+      '@mastra/memory':
+        specifier: 'catalog:'
+        version: 1.32.1(@mastra/core@1.71.0(@grpc/grpc-js@1.14.5)(ai@7.0.122(zod@4.6.5))(express@5.2.1(supports-color@7.2.0))(supports-color@7.2.0)(zod-to-json-schema@3.25.2(zod@4.6.5))(zod@4.6.5))(supports-color@7.2.0)
       '@mastra/observability':
         specifier: 'catalog:'
         version: 1.18.1(@mastra/core@1.71.0(@grpc/grpc-js@1.14.5)(ai@7.0.122(zod@4.6.5))(express@5.2.1(supports-color@7.2.0))(supports-color@7.2.0)(zod-to-json-schema@3.25.2(zod@4.6.5))(zod@4.6.5))(zod@4.6.5)
@@ -636,6 +642,9 @@ importers:
       '@mastra/deployer':
         specifier: 'catalog:'
         version: 1.71.0(@hono/node-server@1.19.17(hono@4.13.10))(@mastra/core@1.71.0(@grpc/grpc-js@1.14.5)(ai@7.0.122(zod@4.6.5))(express@5.2.1(supports-color@7.2.0))(supports-color@7.2.0)(zod-to-json-schema@3.25.2(zod@4.6.5))(zod@4.6.5))(supports-color@7.2.0)(zod@4.6.5)
+      '@mastra/pg':
+        specifier: 'catalog:'
+        version: 1.27.1(@mastra/core@1.71.0(@grpc/grpc-js@1.14.5)(ai@7.0.122(zod@4.6.5))(express@5.2.1(supports-color@7.2.0))(supports-color@7.2.0)(zod-to-json-schema@3.25.2(zod@4.6.5))(zod@4.6.5))
       '@types/node':
         specifier: 'catalog:'
         version: 26.6.3
@@ -2627,6 +2636,12 @@ packages:
     engines: {node: '>=22.13.0'}
     peerDependencies:
       '@mastra/core': '>=1.0.0-0 <2.0.0-0'
+
+  '@mastra/memory@1.32.1':
+    resolution: {integrity: sha512-+6S/3rCFCmjCWwFCow6YPpfL2lrcZ8gzGPGYOorRS/Iw/xgq1mD9iNgzFjj0/mNPP7xVbsPcm2iS9439d4h9AQ==}
+    engines: {node: '>=22.13.0'}
+    peerDependencies:
+      '@mastra/core': '>=1.4.1-0 <2.0.0-0'
 
   '@mastra/observability@1.18.1':
     resolution: {integrity: sha512-6D4I9LBzU7PQ9woqobc7NeLLqZcNeX2fHBJzUUclWh3a1x7RG32Ybimd9JP8oSvYhNZmfn1Rusnwq+s16JdwGQ==}
@@ -7487,6 +7502,11 @@ packages:
     resolution: {integrity: sha512-+Mc8UaAebFzgV+KpI5n7DasuuQCHA89dmwm7JXw3TV43ukfNQ9DnBH3Mdb2g/I4Fdxc26pwimBWvjIw0UAILSQ==}
     hasBin: true
 
+  needle@2.9.1:
+    resolution: {integrity: sha512-6R9fqJ5Zcmf+uYaFgdIHmLwNldn5HbK8L5ybn7Uz+ylX/rnOsSp1AHcvQSrCaFN+qNM1wpymHqD7mVasEOlHGQ==}
+    engines: {node: '>= 4.4.x'}
+    hasBin: true
+
   negotiator@0.6.3:
     resolution: {integrity: sha512-+EUsqGPLsM+j/zdChZjsnX51g4XrHFOIXwfnCVPGlQk/k5giakcKsuxCObBRu6DSm9opw/O6slWbJdghQM4bBg==}
     engines: {node: '>= 0.6'}
@@ -7899,6 +7919,9 @@ packages:
     resolution: {integrity: sha512-HzMy3Geq23nVALD/M2LliU+F+M+gVNsvkQWWqeBZ8HDiCgzo6YPJ/Omrmtq24EFrIsk0a3EkQGEd7bDOo+IhGA==}
     engines: {node: '>=18'}
 
+  probe-image-size@7.4.0:
+    resolution: {integrity: sha512-cdEprVtZxV+awMde9X+4jILBFYh4CARxVrQaMl4wY4YcPWbul9jntXrIW95NInBDyJwcVUP3U0T6yukN8rMBaQ==}
+
   proc-log@7.0.0:
     resolution: {integrity: sha512-FYgfaA69XZ93zaXLoMNQ+ViDXGGBgR8aLh03txzcFhV+9xOXx7+8DLCULrKKpR9+GsH9ZfHm82aSUPpozX0Ztg==}
     engines: {node: ^22.22.2 || ^24.15.0 || >=26.0.0}
@@ -8237,6 +8260,10 @@ packages:
   safer-buffer@2.1.2:
     resolution: {integrity: sha512-YZo3K82SD7Riyi0E1EQPojLz7kpepnSQI9IyPbHHg1XXXevb5dJI7tpyN2ADxGcQbHG7vcyRHk0cbwqcQriUtg==}
 
+  sax@1.6.1:
+    resolution: {integrity: sha512-42tBVwLWnaQvW5zc4HbZrTuWccECCZfBi92FDuwtqxasH+JbPB3/FOKb1m222K42R4WxuxzzMsTswfzgtSu64Q==}
+    engines: {node: '>=11.0.0'}
+
   saxes@6.0.0:
     resolution: {integrity: sha512-xAg7SOnEhrm5zI3puOOKyy1OMcMlIJZYNJY7xLBwSze0UjhPLnWfj2GF2EpT0jmzaJKIWKHLsaSSajf35bcYnA==}
     engines: {node: '>=v12.22.7'}
@@ -8428,6 +8455,9 @@ packages:
 
   stream-json@3.7.0:
     resolution: {integrity: sha512-rCSBdcBP/bPk6T8QFcxAj1MSzAuc5i49cYW6IE7sYObNEPccBJIUiL6fU9c9BWt40aJK0siVynLX7lWaW8alXw==}
+
+  stream-parser@0.3.1:
+    resolution: {integrity: sha512-bJ/HgKq41nlKvlhccD5kaCr/P+Hu0wPNKPJOH7en+YrJu/9EgqUF+88w5Jb6KNcjOFMhfX4B2asfeAtIGuHObQ==}
 
   stream-shift@1.0.3:
     resolution: {integrity: sha512-76ORR0DO1o1hlKwTbi/DM3EXWGf3ZJYO8cXX5RJwnul2DEg2oyoZyjLNoQM8WsvZiFKCRfC1O0J7iCvie3RZmQ==}
@@ -11009,6 +11039,20 @@ snapshots:
       '@mastra/core': 1.71.0(@grpc/grpc-js@1.14.5)(ai@7.0.122(zod@4.6.5))(express@5.2.1(supports-color@7.2.0))(supports-color@7.2.0)(zod-to-json-schema@3.25.2(zod@4.6.5))(zod@4.6.5)
       pino: 10.3.1
       pino-pretty: 13.1.3
+
+  '@mastra/memory@1.32.1(@mastra/core@1.71.0(@grpc/grpc-js@1.14.5)(ai@7.0.122(zod@4.6.5))(express@5.2.1(supports-color@7.2.0))(supports-color@7.2.0)(zod-to-json-schema@3.25.2(zod@4.6.5))(zod@4.6.5))(supports-color@7.2.0)':
+    dependencies:
+      '@mastra/core': 1.71.0(@grpc/grpc-js@1.14.5)(ai@7.0.122(zod@4.6.5))(express@5.2.1(supports-color@7.2.0))(supports-color@7.2.0)(zod-to-json-schema@3.25.2(zod@4.6.5))(zod@4.6.5)
+      '@mastra/schema-compat': 1.3.11(zod@4.6.5)
+      async-mutex: 0.5.0
+      diff: 8.0.4
+      json-schema: 0.4.0
+      lru-cache: 11.5.3
+      probe-image-size: 7.4.0(supports-color@7.2.0)
+      xxhash-wasm: 1.1.0
+      zod: 4.6.5
+    transitivePeerDependencies:
+      - supports-color
 
   '@mastra/observability@1.18.1(@mastra/core@1.71.0(@grpc/grpc-js@1.14.5)(ai@7.0.122(zod@4.6.5))(express@5.2.1(supports-color@7.2.0))(supports-color@7.2.0)(zod-to-json-schema@3.25.2(zod@4.6.5))(zod@4.6.5))(zod@4.6.5)':
     dependencies:
@@ -16301,6 +16345,14 @@ snapshots:
       railroad-diagrams: 1.0.0
       randexp: 0.4.6
 
+  needle@2.9.1(supports-color@7.2.0):
+    dependencies:
+      debug: 3.2.7(supports-color@7.2.0)
+      iconv-lite: 0.4.24
+      sax: 1.6.1
+    transitivePeerDependencies:
+      - supports-color
+
   negotiator@0.6.3: {}
 
   negotiator@0.6.4: {}
@@ -16732,6 +16784,14 @@ snapshots:
   pretty-ms@9.3.1:
     dependencies:
       parse-ms: 4.0.0
+
+  probe-image-size@7.4.0(supports-color@7.2.0):
+    dependencies:
+      lodash.merge: 4.6.2
+      needle: 2.9.1(supports-color@7.2.0)
+      stream-parser: 0.3.1(supports-color@7.2.0)
+    transitivePeerDependencies:
+      - supports-color
 
   proc-log@7.0.0:
     optional: true
@@ -17221,6 +17281,8 @@ snapshots:
 
   safer-buffer@2.1.2: {}
 
+  sax@1.6.1: {}
+
   saxes@6.0.0:
     dependencies:
       xmlchars: 2.2.0
@@ -17477,6 +17539,12 @@ snapshots:
   stream-json@3.7.0:
     dependencies:
       stream-chain: 4.2.6
+
+  stream-parser@0.3.1(supports-color@7.2.0):
+    dependencies:
+      debug: 2.6.9(supports-color@7.2.0)
+    transitivePeerDependencies:
+      - supports-color
 
   stream-shift@1.0.3: {}
 

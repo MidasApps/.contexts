@@ -1,11 +1,14 @@
 // `pnpm -F @core/mastra db:init`: creates and migrates Mastra's tables in schema
-// `mastra` with init forced on, then exits (decision 0023, SP0 follow-up #1).
+// `mastra` with init forced on, plus the memory vector index `memory_messages`
+// (decision 0029: the runtime role cannot create it), then exits (decision 0023,
+// SP0 follow-up #1).
 // Deploy order: `pnpm db:migrate` -> this step (same DDL-capable role) -> deploy
 // with MASTRA_STORAGE_INIT=skip. Idempotent: safe to run on every deploy.
 import { existsSync } from "node:fs";
 import path from "node:path";
-import { PostgresStore } from "@mastra/pg";
-import { buildStorageConfig } from "../src/mastra/mastra-options.ts";
+import { MEMORY_VECTOR_DIMENSIONS, MEMORY_VECTOR_INDEX } from "@core/agents";
+import { PgVector, PostgresStore } from "@mastra/pg";
+import { buildMemoryVectorConfig, buildStorageConfig } from "../src/mastra/mastra-options.ts";
 import { assertStorageInitConfirmed, loadStorageInitEnv, MASTRA_RUNTIME_GRANTS_SQL } from "../src/storage/storage-init-target.ts";
 
 const ENV_FILE = path.resolve(import.meta.dirname, "../../../.env.local");
@@ -21,11 +24,15 @@ const main = async (): Promise<void> => {
   const env = loadStorageInitEnv(process.env);
   assertStorageInitConfirmed(env.APP_ENV, process.argv.slice(2));
   const store = new PostgresStore(buildStorageConfig(env, { init: "force" }));
+  const vector = new PgVector(buildMemoryVectorConfig(env, { init: "force" }));
   try {
     await store.init();
+    // Same parameters as Memory.createEmbeddingIndex, so the runtime finds it and never runs DDL.
+    await vector.createIndex({ indexName: MEMORY_VECTOR_INDEX, dimension: MEMORY_VECTOR_DIMENSIONS, metric: "cosine", metadataIndexes: ["thread_id", "resource_id"] });
     await store.db.none(MASTRA_RUNTIME_GRANTS_SQL);
     print(`mastra storage ready (APP_ENV=${env.APP_ENV})`);
   } finally {
+    await vector.disconnect();
     await store.close();
   }
 };

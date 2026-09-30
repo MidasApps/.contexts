@@ -1,4 +1,5 @@
 import type { Agent } from "@mastra/core/agent";
+import type { Memory } from "@mastra/memory";
 import type { AgentModels } from "../models/model-factory.ts";
 import type { GuardrailProfile, GuardrailProfileKind } from "../processors/guardrail-profile.ts";
 import type { CoreToolDefinition } from "../tools/define-core-tool.ts";
@@ -18,6 +19,8 @@ export type AgentFactoryDeps = {
   readonly ports: AgentRuntimePorts;
   /** Processor stacks every agent spreads into its options (spec §12, `guardrail-profile.ts`). */
   readonly guardrails: (kind: GuardrailProfileKind) => GuardrailProfile;
+  /** Tenant-scoped memory (`create-memory.ts`); `undefined` when the runtime has no vector store. */
+  readonly memory: Memory | undefined;
 };
 
 export type AgentDefinition = {

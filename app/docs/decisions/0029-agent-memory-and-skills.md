@@ -25,3 +25,18 @@ Memory must be bounded (`stacks/ai/mastra-sdk.md`: `lastMessages` always capped)
 - **Thread-scoped recall only.** Loses useful context across a user's conversations inside the same tenant.
 - **Observational Memory on by default.** Unmeasured cost and quality; the default model would be picked implicitly.
 - **Workspace-based skills.** Adds file-write and delete tools the agents must not have.
+
+## Amendments
+
+- **2026-09-30 — memory wiring and thread ownership (SP3 Task 18).** `createMemory` builds one
+  `Memory` per runtime (`@mastra/memory` 1.32.1) over the Mastra storage and a `PgVector` in schema
+  `mastra` (index `memory_messages`, 1536 dimensions, metadata indexes on `thread_id` and
+  `resource_id`). The runtime role has no CREATE on the schema, so `db:init` creates the index
+  with the same parameters Memory uses, and the vector store gets `disableInit` outside local.
+  `@mastra/memory` embeds only with AI SDK v2/v3 embedding models, so memory receives a v3 view
+  of the factory's v4 embedder (same model, same vectors). Mastra refuses a thread of another
+  resource only inside the run (a 500 on `generate`), so the context middleware looks up the
+  owner of every thread a request names (`X-Conversation-Id`, `/memory/threads/:threadId`) and
+  answers 403 first; a failed lookup answers 503 (fail-closed). Observational Memory, when
+  enabled, uses the `fast` role and resource scope. No agent attaches the memory yet: the
+  supervisor of Task 20 does (`AgentFactoryDeps.memory`).

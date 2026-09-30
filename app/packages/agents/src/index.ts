@@ -170,7 +170,7 @@ export {
   type AgentModuleErrorCode,
   defineAgentModule,
 } from "./runtime/agent-module.ts";
-export { composeAgentRuntime, type ComposeAgentRuntimeArgs, type RuntimeParts } from "./runtime/compose-agent-runtime.ts";
+export { composeAgentRuntime, type ComposeAgentRuntimeArgs, MEMORY_VECTOR_KEY, type RuntimeParts } from "./runtime/compose-agent-runtime.ts";
 export { PING_AGENT, PING_AGENT_ID } from "./agents/ping-agent.ts";
 export { createObservability, SPAN_CONTEXT_KEYS } from "./observability/create-observability.ts";
 // SP3 knowledge ingestion (Task 14).
@@ -247,3 +247,15 @@ export {
 } from "./observability/create-observability.ts";
 export { hashResourceId, isTraceSampled, sampleTraces, scrubSpanForExport, type SpanExportPolicy } from "./observability/span-export-policy.ts";
 export { parseTraceparent, type TraceContext, withServerTracingOptions } from "./observability/trace-context.ts";
+// SP3 memory with tenant-scoped resources (Task 18).
+export {
+  createMemory,
+  type CreateMemoryArgs,
+  MEMORY_LAST_MESSAGES,
+  MEMORY_RECALL_MESSAGE_RANGE,
+  MEMORY_RECALL_TOP_K,
+  MEMORY_VECTOR_DIMENSIONS,
+  MEMORY_VECTOR_INDEX,
+} from "./memory/create-memory.ts";
+export { type MastraEmbeddingModelV3, toEmbeddingModelV3 } from "./memory/embedding-model-v3.ts";
+export { type WorkingMemory, WorkingMemorySchema } from "./memory/working-memory.schema.ts";

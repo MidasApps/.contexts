@@ -2,6 +2,8 @@ import type { Agent } from "@mastra/core/agent";
 import type { ObservabilityExporter } from "@mastra/core/observability";
 import type { ApiRoute } from "@mastra/core/server";
 import type { MastraCompositeStore } from "@mastra/core/storage";
+import type { MastraVector } from "@mastra/core/vector";
+import type { Memory } from "@mastra/memory";
 import type { Observability } from "@mastra/observability";
 import type { AnyWorkflow } from "@mastra/core/workflows";
 import { createKnowledgeAgentDefinition } from "../agents/knowledge-agent.ts";
@@ -10,6 +12,7 @@ import type { AgentMiddleware } from "../auth/agent-middleware.ts";
 import { createContextMiddleware } from "../auth/context-middleware.ts";
 import { FirebaseMastraAuth } from "../auth/firebase-mastra-auth.ts";
 import { createRouteAllowlistMiddleware } from "../auth/route-allowlist-middleware.ts";
+import { threadOwnerFromStorage } from "../auth/thread-ownership.ts";
 import { createCatalogReindexWorkflow } from "../knowledge/workflows/catalog-reindex.workflow.ts";
 import { createKnowledgeIngestWorkflow } from "../knowledge/workflows/knowledge-ingest.workflow.ts";
 import { type AgentModels, createModelProvider, embeddingModelIdOf, type ModelFactoryEnv } from "../models/model-factory.ts";
@@ -19,6 +22,7 @@ import { createAiCatalogReader } from "../tools/catalog/ai-catalog-reader.ts";
 import { loadBundledAiCatalog } from "../tools/catalog/ai-catalog-source.ts";
 import { createDescribeEntityTool } from "../tools/catalog/describe-entity.tool.ts";
 import { createListEntitiesTool } from "../tools/catalog/list-entities.tool.ts";
+import { createMemory } from "../memory/create-memory.ts";
 import { createSearchKnowledgeTool } from "../tools/knowledge/search-knowledge.tool.ts";
 import type { CoreToolDefinition } from "../tools/define-core-tool.ts";
 import { createQuerySemanticSqlTool } from "../tools/sql/query-semantic-sql.tool.ts";
@@ -26,13 +30,18 @@ import { createToolRegistry, type ToolRegistry } from "../tools/tool-registry.ts
 import { type AgentDefinition, type AgentModule, AgentModuleError } from "./agent-module.ts";
 import type { AgentRuntimePorts } from "./runtime-ports.ts";
 
+/** Key of the memory vector store in `new Mastra({ vectors })`. */
+export const MEMORY_VECTOR_KEY = "memory";
+
 export type ComposeAgentRuntimeArgs = {
-  readonly env: ModelFactoryEnv & Pick<ObservabilityEnv, "OTEL_EXPORTER_OTLP_ENDPOINT">;
+  readonly env: ModelFactoryEnv & Pick<ObservabilityEnv, "OTEL_EXPORTER_OTLP_ENDPOINT"> & { readonly AI_MEMORY_OBSERVATIONAL?: boolean };
   readonly ports: AgentRuntimePorts;
   /** `APP_MODULES` of `apps/mastra`, built with `defineAgentModule`. */
   readonly modules: readonly AgentModule[];
   /** Mastra storage (PostgresStore in the app; in-memory in tests). */
   readonly storage: MastraCompositeStore;
+  /** Memory vectors (`PgVector` on schema `mastra` in the app); without it no memory is built. */
+  readonly vector?: MastraVector;
   /** `service` of logs and traces. */
   readonly serviceName: string;
   /** Mastra `server.apiPrefix` (default `/api`). */
@@ -52,7 +61,9 @@ export type RuntimeParts = {
   readonly scorers: Record<string, never>;
   readonly mcpServers: Record<string, never>;
   readonly storage: MastraCompositeStore;
-  readonly vectors: Record<string, never>;
+  readonly vectors: Record<string, MastraVector>;
+  /** Tenant-scoped memory for the chat agents (Task 20 attaches it to the supervisor). */
+  readonly memory: Memory | undefined;
   readonly observability: Observability;
   readonly auth: FirebaseMastraAuth;
   /** Route allowlist first, then the context middleware. */
@@ -119,7 +130,11 @@ export const composeAgentRuntime = (args: ComposeAgentRuntimeArgs): RuntimeParts
   const models = args.models ?? createModelProvider(args.env);
   const tools = buildToolRegistry(args, definitions, models);
   const guardrails = (kind: Parameters<typeof createGuardrailProfile>[1]) => createGuardrailProfile({ models, ports: args.ports }, kind);
-  const deps = { models, tools, ports: args.ports, guardrails };
+  const memory =
+    args.vector === undefined
+      ? undefined
+      : createMemory({ storage: args.storage, vector: args.vector, models, env: { AI_MEMORY_OBSERVATIONAL: args.env.AI_MEMORY_OBSERVATIONAL ?? false } });
+  const deps = { models, tools, ports: args.ports, guardrails, memory };
   const agents = Object.fromEntries(definitions.map((definition) => [definition.id, definition.create(deps)]));
   const apiPrefix = args.apiPrefix;
   const auth = new FirebaseMastraAuth({ access: args.ports.access, ...(apiPrefix === undefined ? {} : { apiPrefix }) });
@@ -130,7 +145,8 @@ export const composeAgentRuntime = (args: ComposeAgentRuntimeArgs): RuntimeParts
     scorers: {},
     mcpServers: {},
     storage: args.storage,
-    vectors: {},
+    vectors: args.vector === undefined ? {} : { [MEMORY_VECTOR_KEY]: args.vector },
+    memory,
     observability: createObservability({
       serviceName: args.serviceName,
       env: args.env,
@@ -138,7 +154,7 @@ export const composeAgentRuntime = (args: ComposeAgentRuntimeArgs): RuntimeParts
       ...(args.exporters === undefined ? {} : { exporters: args.exporters }),
     }),
     auth,
-    middleware: [createRouteAllowlistMiddleware(prefix), createContextMiddleware({ auth, aiMode: args.env.AI_MODE, ...prefix })],
+    middleware: [createRouteAllowlistMiddleware(prefix), createContextMiddleware({ auth, aiMode: args.env.AI_MODE, threadOwnerOf: threadOwnerFromStorage(args.storage), ...prefix })],
     apiRoutes: [],
     tools,
   };
