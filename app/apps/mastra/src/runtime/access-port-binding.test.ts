@@ -1,14 +1,22 @@
-import type { AccessPrincipal, RegionalSettings } from "@core/agents";
-import { createAccessCore, createFakeTokenVerifier, createInMemoryAccessStore, fixedClock, makeVerifyBearer, refuseAllApiKeys } from "@core/services";
+import type { AccessPrincipal } from "@core/agents";
+import {
+  createAccessCore,
+  createFakeTokenVerifier,
+  createInMemoryAccessStore,
+  fixedClock,
+  makeVerifyBearer,
+  refuseAllApiKeys,
+  type ResolveAccessContext,
+} from "@core/services";
 import { describe, expect, it } from "vitest";
-import { bindAccessPort, RegionalSettingsNotWiredError, type RegionalSettingsResolver, UNWIRED_REGIONAL_SETTINGS } from "./access-port-binding.ts";
+import { bindAccessPort } from "./access-port-binding.ts";
 
 const TENANT = "org-a";
 const MEMBER: AccessPrincipal = { type: "user", uid: "member-uid", mfa: false };
-const REGIONAL: RegionalSettings = { locale: "pt-BR", displayTimeZone: "America/Sao_Paulo", nodeTimeZone: "America/Manaus", currency: "BRL" };
+const REGIONAL = { locale: "pt-BR", displayTimeZone: "America/Sao_Paulo", nodeTimeZone: "America/Manaus", currency: "BRL" };
 const ORG = { level: "organization", tenantId: TENANT } as const;
 
-const setup = (regional: RegionalSettingsResolver = () => Promise.resolve<RegionalSettings | null>(REGIONAL)) => {
+const setup = (resolveAccessContext?: ResolveAccessContext) => {
   const store = createInMemoryAccessStore();
   store.putOrganization({ id: TENANT });
   store.putProject({ id: "p1", tenantId: TENANT });
@@ -21,38 +29,50 @@ const setup = (regional: RegionalSettingsResolver = () => Promise.resolve<Region
   });
   const access = createAccessCore({ readers: store, clock: fixedClock("2026-09-30T12:00:00.000Z") });
   const verifyBearer = makeVerifyBearer({ tokenVerifier, apiKeyAuthenticator: refuseAllApiKeys, apiKeyPrefix: "core" });
-  return bindAccessPort({ verifyBearer, access, regional });
+  const calls: Parameters<ResolveAccessContext>[0][] = [];
+  // SP1-shaped fake: members of TENANT get their sorted effective permissions and REGIONAL.
+  const fake: ResolveAccessContext = async (input) => {
+    calls.push(input);
+    if (input.node.level === "platform" || input.node.tenantId !== TENANT) return null;
+    const effective = await access.forRequest().getEffectivePermissions(input);
+    if (!effective.ok) return null;
+    const projectId = input.node.level === "organization" ? {} : { projectId: input.node.projectId };
+    return { tenantId: input.node.tenantId, ...projectId, principal: input.principal, permissions: [...effective.permissions].sort(), regional: REGIONAL };
+  };
+  return { port: bindAccessPort({ verifyBearer, access, resolveAccessContext: resolveAccessContext ?? fake }), calls };
 };
 
 describe("bindAccessPort", () => {
   it("verifies with SP1 and honours checkRevoked", async () => {
-    const port = setup();
+    const { port } = setup();
     expect(await port.verifyBearer({ token: "member-token", checkRevoked: false })).toMatchObject({ type: "user", uid: "member-uid" });
     expect(await port.verifyBearer({ token: "member-token", checkRevoked: true })).toBeNull();
     expect(await port.verifyBearer({ token: "garbage", checkRevoked: false })).toBeNull();
   });
 
-  it("resolves the access context of a member from SP1 effective permissions and regional settings", async () => {
-    const context = await setup().resolveAccessContext({ principal: MEMBER, node: { level: "project", tenantId: TENANT, projectId: "p1" } });
+  it("resolves the access context through SP1 resolveAccessContext with branded principal and node", async () => {
+    const { port, calls } = setup();
+    const context = await port.resolveAccessContext({ principal: MEMBER, node: { level: "project", tenantId: TENANT, projectId: "p1" } });
     expect(context).toMatchObject({ tenantId: TENANT, projectId: "p1", principal: MEMBER, regional: REGIONAL });
     expect(context?.permissions).toContain("core.chat.use");
-    expect(context?.permissions).toEqual([...(context?.permissions ?? [])].sort());
+    expect(context).not.toHaveProperty("unitId");
+    expect(calls).toEqual([{ principal: MEMBER, node: { level: "project", tenantId: TENANT, projectId: "p1" } }]);
   });
 
-  it("answers null for a non-member, an unknown node or the platform node", async () => {
-    const port = setup();
+  it("answers null when SP1 answers null (non-member, unknown node, platform)", async () => {
+    const { port } = setup();
     expect(await port.resolveAccessContext({ principal: { type: "user", uid: "outsider-uid", mfa: false }, node: ORG })).toBeNull();
     expect(await port.resolveAccessContext({ principal: MEMBER, node: { level: "organization", tenantId: "org-missing" } })).toBeNull();
     expect(await port.resolveAccessContext({ principal: MEMBER, node: { level: "platform" } })).toBeNull();
   });
 
-  it("answers null when the node has no regional settings, and rejects while they are unwired", async () => {
-    expect(await setup(() => Promise.resolve(null)).resolveAccessContext({ principal: MEMBER, node: ORG })).toBeNull();
-    await expect(setup(UNWIRED_REGIONAL_SETTINGS).resolveAccessContext({ principal: MEMBER, node: ORG })).rejects.toBeInstanceOf(RegionalSettingsNotWiredError);
+  it("propagates an SP1 failure (never resolves a context on error)", async () => {
+    const { port } = setup(() => Promise.reject(new Error("firestore unavailable")));
+    await expect(port.resolveAccessContext({ principal: MEMBER, node: ORG })).rejects.toThrow("firestore unavailable");
   });
 
   it("authorizes through SP1 with the agent ceiling", async () => {
-    const port = setup();
+    const { port } = setup();
     expect(await port.authorize({ principal: MEMBER, permission: "core.chat.use", node: ORG })).toEqual({ allowed: true, requiresApproval: false });
     expect(await port.authorize({ principal: MEMBER, permission: "core.chat.use", node: ORG, ceiling: new Set(["core.catalog.read"]) })).toEqual({
       allowed: false,
@@ -62,7 +82,7 @@ describe("bindAccessPort", () => {
   });
 
   it("returns effective permissions, empty when SP1 denies", async () => {
-    const port = setup();
+    const { port } = setup();
     expect((await port.getEffectivePermissions({ principal: MEMBER, node: ORG, ceiling: new Set(["core.chat.use"]) })).has("core.chat.use")).toBe(true);
     expect((await port.getEffectivePermissions({ principal: { type: "user", uid: "outsider-uid", mfa: false }, node: ORG })).size).toBe(0);
   });

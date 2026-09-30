@@ -1,7 +1,7 @@
 import { createServer } from "node:net";
 import type { RegionalSettings } from "@core/agents";
 import { RoleIdSchema } from "@core/contracts";
-import { createFirebaseAdmin, createInMemoryAccessStore } from "@core/services";
+import { createAccessCore, createFirebaseAdmin, createInMemoryAccessStore, type ResolveAccessContext } from "@core/services";
 import { Mastra } from "@mastra/core/mastra";
 import { InMemoryStore } from "@mastra/core/storage";
 import { createNodeServer } from "@mastra/deployer/server";
@@ -16,6 +16,18 @@ import { createAgentRuntime } from "../runtime/create-agent-runtime.ts";
 const TENANT = "EmuTenant0000000002";
 const REQUEST_ID = "01J8Z3K4M5N6P7Q8R9S0T1V2W3";
 const REGIONAL: RegionalSettings = { locale: "pt-BR", displayTimeZone: "America/Sao_Paulo", nodeTimeZone: "America/Manaus", currency: "BRL" };
+
+// SP1's resolveAccessContext over the same in-memory readers (the Firestore tenancy loader
+// would need seeded organizations): effective permissions, fixed regional settings.
+const resolveFromReaders = (readers: ReturnType<typeof createInMemoryAccessStore>): ResolveAccessContext => {
+  const access = createAccessCore({ readers });
+  return async ({ principal, node }) => {
+    if (node.level === "platform") return null;
+    const effective = await access.forRequest().getEffectivePermissions({ principal, node });
+    if (!effective.ok || effective.permissions.size === 0) return null;
+    return { tenantId: node.tenantId, principal, permissions: [...effective.permissions].sort(), regional: REGIONAL };
+  };
+};
 
 const env = loadMastraEnv({
   APP_ENV: "local",
@@ -72,7 +84,7 @@ beforeAll(async () => {
     overrides: {
       firebase: createFirebaseAdmin({ env, processEnv: process.env }),
       storage,
-      adapters: { accessReaders: readers, regional: () => Promise.resolve(REGIONAL) },
+      adapters: { accessReaders: readers, resolveAccessContext: resolveFromReaders(readers) },
     },
   });
   const port = await freePort();

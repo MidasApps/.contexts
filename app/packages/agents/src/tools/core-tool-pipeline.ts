@@ -63,7 +63,7 @@ const recordAudit = async (args: {
 }): Promise<void> => {
   const { definition, deps, ctx, input, outcome, extras } = args;
   if (!shouldAudit(definition)) return;
-  const metadata = { toolId: definition.id, permission: definition.permission, agentId: ctx.agentId, inputHash: hashToolInput(input), outcome, ...extras };
+  const metadata = { toolId: definition.id, permission: definition.permission, agentId: ctx.agentId, runId: ctx.runId, inputHash: hashToolInput(input), outcome, ...extras };
   try {
     await deps.audit.record({ action: definition.audit?.action ?? AGENT_TOOL_EXECUTED, tenantId: ctx.agent.tenantId, actor: ctx.principal, metadata, requestId: ctx.agent.requestId });
   } catch (error: unknown) {

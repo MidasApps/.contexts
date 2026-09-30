@@ -1,6 +1,5 @@
 import { createFirebaseAdmin, createInMemoryAccessStore, processLogger } from "@core/services";
 import { describe, expect, it } from "vitest";
-import { RegionalSettingsNotWiredError } from "./access-port-binding.ts";
 import { createRuntimePorts } from "./create-runtime-ports.ts";
 import { KnowledgeSearchRejectedError } from "./knowledge-port-binding.ts";
 import { PortNotWiredError } from "./unwired-ports.ts";
@@ -16,6 +15,7 @@ const ENV = {
 const TENANT = "Jd8sK2lPq0WnR5tYu3bV";
 const MEMBER = { type: "user", uid: "member-uid", mfa: false } as const;
 const ORG = { level: "organization", tenantId: TENANT } as const;
+const REGIONAL = { locale: "pt-BR", displayTimeZone: "America/Sao_Paulo", nodeTimeZone: "America/Sao_Paulo", currency: "BRL" } as never;
 
 // No emulator host and no credentials: nothing below may reach Firebase or Postgres
 // (access decisions use in-memory SP1 readers; the Firestore ones need the emulator).
@@ -27,7 +27,7 @@ const ports = () =>
   });
 
 describe("createRuntimePorts (default bindings)", () => {
-  it("rejects regional resolution until SP1 exposes it, even with access readers", async () => {
+  it("binds SP1 resolveAccessContext (overridable in tests) next to SP1 authorize", async () => {
     const store = createInMemoryAccessStore();
     store.putOrganization({ id: TENANT });
     store.putUser("member-uid");
@@ -36,9 +36,14 @@ describe("createRuntimePorts (default bindings)", () => {
       env: ENV,
       firebase: createFirebaseAdmin({ env: { APP_ENV: "local", FIREBASE_PROJECT_ID: "demo-core" }, processEnv: {} }),
       logger: processLogger,
-      adapters: { accessReaders: store },
+      adapters: {
+        accessReaders: store,
+        resolveAccessContext: ({ principal, node }) =>
+          Promise.resolve(node.level === "organization" ? { tenantId: node.tenantId, principal, permissions: ["core.chat.use"], regional: REGIONAL } : null),
+      },
     });
-    await expect(bound.access.resolveAccessContext({ principal: MEMBER, node: ORG })).rejects.toBeInstanceOf(RegionalSettingsNotWiredError);
+    expect(await bound.access.resolveAccessContext({ principal: MEMBER, node: ORG })).toEqual({ tenantId: TENANT, principal: MEMBER, permissions: ["core.chat.use"], regional: REGIONAL });
+    expect(await bound.access.resolveAccessContext({ principal: MEMBER, node: { level: "platform" } })).toBeNull();
     expect(await bound.access.authorize({ principal: MEMBER, permission: "core.chat.use", node: ORG })).toEqual({ allowed: true, requiresApproval: false });
   });
 

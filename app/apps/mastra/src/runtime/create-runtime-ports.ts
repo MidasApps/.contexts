@@ -13,11 +13,12 @@ import {
   type FirebaseAdmin,
   guardSemanticSql,
   type Logger,
+  type ResolveAccessContext,
   makeRunSemanticQuery,
   type ServicesEnv,
 } from "@core/services";
 import { type CoreServerModule, createCoreServer } from "@core/services/composition";
-import { bindAccessPort, type RegionalSettingsResolver, UNWIRED_REGIONAL_SETTINGS } from "./access-port-binding.ts";
+import { bindAccessPort } from "./access-port-binding.ts";
 import { bindAuditPort } from "./audit-port-binding.ts";
 import { bindKnowledgePort } from "./knowledge-port-binding.ts";
 import { UNWIRED_PORTS } from "./unwired-ports.ts";
@@ -41,19 +42,18 @@ const bindFilesPort = (files: Pick<FilesServices, "getReadyFile" | "readFileByte
   },
 });
 
-/** SP1 adapters that are not wired in `createCoreServer` yet (tests pass in-memory ones). */
+/** Adapter overrides for tests (in-memory SP1 readers, a resolver without Firestore). */
 export type RuntimePortsAdapters = {
   readonly accessReaders?: AccessReaders;
   readonly apiKeyAuthenticator?: ApiKeyAuthenticator;
-  readonly regional?: RegionalSettingsResolver;
+  readonly resolveAccessContext?: ResolveAccessContext;
 };
 
 /**
  * Binds `AgentRuntimePorts` to SP1/SP3 services (spec §3.3, decision 0019).
  * - access: `createCoreServer().verifyBearer` + access core (Firestore readers,
- *   SP1 Task 9); `resolveAccessContext` is an interim adapter over
- *   `getEffectivePermissions` + `regional` until SP1 Task 12 exports it. Until
- *   then the regional port rejects, so every agent request fails closed (401), never opens.
+ *   SP1 Task 9) and SP1's `resolveAccessContext` (`CoreServer.resolveAccessContext`,
+ *   SP1 Task 12): permissions and regional settings at the node, `null` fails closed.
  * - audit: SP1 `AuditWriter` (Firestore `audit-logs`), mapped in `bindAuditPort`.
  * - catalog: `makeRunSemanticQuery` over Postgres (no semantic view is registered yet).
  * - knowledge: search, register and replace chunks over `ai.documents` / `ai.chunks_v1`
@@ -87,7 +87,7 @@ export const createRuntimePorts = (args: {
   const knowledge = createKnowledgeServices({ repository: createPostgresKnowledgeRepository(sql), embeddingModel: embeddingModelIdOf(args.env) });
   const files = createFirebaseFilesServices({ firebase: args.firebase, env: args.env, logger: args.logger });
   return {
-    access: bindAccessPort({ verifyBearer: core.verifyBearer, access: core.access, regional: adapters.regional ?? UNWIRED_REGIONAL_SETTINGS }),
+    access: bindAccessPort({ verifyBearer: core.verifyBearer, access: core.access, resolveAccessContext: adapters.resolveAccessContext ?? core.resolveAccessContext }),
     audit: bindAuditPort(core.audit),
     catalog: { runSemanticQuery: makeRunSemanticQuery({ views: createSemanticViewRegistry([]), guard: guardSemanticSql, runner }) },
     ...UNWIRED_PORTS,
