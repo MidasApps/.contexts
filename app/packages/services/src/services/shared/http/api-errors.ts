@@ -12,6 +12,7 @@ const MESSAGES: Readonly<Record<string, string>> = {
   IDEMPOTENCY_KEY_REUSED: "This Idempotency-Key was already used with a different request.",
   IDEMPOTENCY_REQUEST_IN_PROGRESS: "A request with this Idempotency-Key is still in progress.",
   MFA_REQUIRED: "Multi-factor authentication is required.",
+  UPSTREAM_UNAVAILABLE: "A service this request depends on is unavailable.",
 };
 const FALLBACK_MESSAGE = "The request could not be completed.";
 

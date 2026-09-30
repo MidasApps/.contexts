@@ -28,6 +28,8 @@ export const CORE_ERROR_CODES = [
   "MEMBERSHIP_EXISTS",
   "UNKNOWN_APPROVAL_ACTION",
   "APPROVAL_NOT_REQUIRED",
+  // 502/503: a service the core calls (Mastra, a model provider) did not answer.
+  "UPSTREAM_UNAVAILABLE",
 ] as const;
 
 export const CoreErrorCodeSchema = z.enum(CORE_ERROR_CODES);
