@@ -82,3 +82,36 @@ export {
   providerKeysFor,
   resolveAgentEnv,
 } from "./runtime/agent-env.schema.ts";
+export {
+  AGENT_CONTEXT_KEYS,
+  AGENT_PRINCIPAL_KEY,
+  type AgentContextSnapshot,
+  nodeOfContext,
+  readAgentContext,
+  type ReadAgentContextResult,
+  type RequestContextReader,
+} from "./context/agent-request-context.ts";
+export { AGENT_TOOL_EXECUTED, runCoreTool } from "./tools/core-tool-pipeline.ts";
+export {
+  type CoreToolContext,
+  type CoreToolDefinition,
+  type CoreToolDeps,
+  type CoreToolKind,
+  type CoreToolPreview,
+  DEFAULT_TIMEOUT_MS,
+  defineCoreTool,
+  hashToolInput,
+  InvalidToolDefinitionError,
+  type PendingApprovalResult,
+  PendingApprovalResultSchema,
+  type ToolCallInfo,
+} from "./tools/define-core-tool.ts";
+export {
+  CORE_TOOL_ERROR_CODES,
+  CoreToolError,
+  type CoreToolErrorCode,
+  type CoreToolErrorDetails,
+  isCoreToolError,
+  toolFailure,
+} from "./tools/tool-errors.ts";
+export { bindCoreTool, type BoundCoreTool, createToolRegistry, DuplicateToolError, type ToolRegistry } from "./tools/tool-registry.ts";

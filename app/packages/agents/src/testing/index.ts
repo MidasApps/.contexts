@@ -15,3 +15,10 @@ export {
   type FakeUsagePort,
   grantHolderOf,
 } from "./fake-ports.ts";
+export {
+  type AgentContextOverrides,
+  buildAgentContextEntries,
+  TEST_REQUEST_ID,
+  TEST_TENANT,
+  TEST_UID,
+} from "./agent-context-fixture.ts";
