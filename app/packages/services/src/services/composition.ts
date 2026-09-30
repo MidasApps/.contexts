@@ -11,6 +11,8 @@ import { makeSyncClaims } from "./access/application/use-cases/sync-claims.ts";
 import { createAccessCore, createAccessServices, type AccessCore, type AccessServices } from "./access/composition.ts";
 import type { RandomBytes } from "./access/domain/invitation-token.ts";
 import { createMemberServices, type MemberServices } from "./access/member-composition.ts";
+import { createFirestoreApprovalServices, type ApprovalServices } from "./access/approval-composition.ts";
+import type { ApprovalActionHandler } from "./access/application/ports/driven/approval-action-handler.ts";
 import { createFirestoreAuditLogWriter } from "./audit/adapters/driven/firestore-audit-log-writer.ts";
 import { makeRecordAudit, type AuditWriter } from "./audit/application/use-cases/record-audit.ts";
 import { buildCoreRoutes, type CoreRoutes } from "./core-routes.ts";
@@ -92,6 +94,8 @@ export type CoreServer = {
   readonly devices: DeviceServices;
   /** Platform staff and read-only impersonation (SP1 Task 16); `grantPlatformStaff` is operator tooling only. */
   readonly platform: PlatformServices;
+  /** Four-eyes approval requests (SP1 Task 17); `approvals.handlers.register` is open to SP3 and SP5. */
+  readonly approvals: ApprovalServices;
   /** Server Action bodies for SP2's `(auth)/actions.ts` (decision 0007). */
   readonly sessionActions: SessionActions;
   /** RSC guards for SP2's `(app)` and `/admin` layouts. */
@@ -125,6 +129,8 @@ type CoreServerArgs = {
   logger: Logger;
   clock?: Clock;
   modules?: readonly CoreServerModule[];
+  /** Approval handlers known at startup; later ones register on `approvals.handlers`. */
+  approvalHandlers?: readonly ApprovalActionHandler[];
   adapters?: CoreServerAdapters;
 };
 
@@ -223,6 +229,15 @@ export const createCoreServer = (args: CoreServerArgs): CoreServer => {
     clock,
     logger: args.logger,
   });
+  const approvals = createFirestoreApprovalServices({
+    firestore,
+    handlers: args.approvalHandlers,
+    accessCore: access.core,
+    principals: access.readers.principals,
+    audit,
+    clock,
+    logger: args.logger,
+  });
   const verifyBearer = makeVerifyBearer({
     tokenVerifier: args.adapters?.tokenVerifier ?? createFirebaseTokenVerifier({ auth }),
     apiKeyAuthenticator: args.adapters?.apiKeyAuthenticator ?? apiKeys.authenticator,
@@ -261,7 +276,7 @@ export const createCoreServer = (args: CoreServerArgs): CoreServer => {
     randomBytes: args.adapters?.randomBytes ?? randomBytes,
     logger: args.logger,
   });
-  const routes = buildCoreRoutes({ pipeline, access: access.services, members: access.members, tenancy, identity, sessions, apiKeys, devices, platform });
+  const routes = buildCoreRoutes({ pipeline, access: access.services, members: access.members, tenancy, identity, sessions, apiKeys, devices, platform, approvals });
   return {
     routes,
     verifyBearer,
@@ -275,6 +290,7 @@ export const createCoreServer = (args: CoreServerArgs): CoreServer => {
     apiKeys,
     devices,
     platform,
+    approvals,
     sessionActions: sessionVertical.sessionActions,
     sessionGuards: sessionVertical.sessionGuards,
     audit,

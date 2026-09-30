@@ -26,6 +26,34 @@ export { createFirestoreAccessAdapters, type FirestoreAccessAdapters } from "./a
 export { ClaimsTooLargeError, MAX_CLAIMS_BYTES } from "./adapters/driven/firebase-claims-writer.ts";
 export { createInMemoryAccessWriteStore, type InMemoryAccessWriteStore } from "./adapters/driven/in-memory-access-write-store.ts";
 export { accessErrorResponse } from "./adapters/driving/access-error-response.ts";
+// Four-eyes approval requests (SP1 Task 17): SP3 tool approvals, SP5 workflow HITL and inbox.
+export { createApprovalServices, createFirestoreApprovalServices, type ApprovalServices } from "./approval-composition.ts";
+export type { ApprovalDeps } from "./application/approval-deps.ts";
+export {
+  ApprovalHandlerRegistryError,
+  createApprovalHandlerRegistry,
+  type ApprovalHandlerRegistry,
+  type ApprovalHandlerRegistryErrorCode,
+  type RegisteredApprovalHandler,
+} from "./application/approval-handler-registry.ts";
+export type { ApprovalActionContext, ApprovalActionHandler } from "./application/ports/driven/approval-action-handler.ts";
+export type { ApprovalRequestRepository, ApprovalStatusChange } from "./application/ports/driven/approval-request-repository.ts";
+export type { RequestApproval, RequestApprovalCommand, RequestApprovalError } from "./application/use-cases/request-approval.ts";
+export type { ApproveRequest } from "./application/use-cases/approve-request.ts";
+export type { RejectRequest } from "./application/use-cases/reject-request.ts";
+export type { ListApprovalRequests, ListApprovalRequestsCommand } from "./application/use-cases/list-approval-requests.ts";
+export type { DecideCommand, DecisionError } from "./application/approval-decision.ts";
+export { approvalView, effectiveApprovalStatus, nextApprovalStatus, type ApprovalTransition } from "./domain/approval-state.ts";
+export { SelfApprovalForbiddenError } from "./domain/errors/self-approval-forbidden-error.ts";
+export {
+  ApprovalInputInvalidError,
+  ApprovalNotFoundError,
+  ApprovalNotPendingError,
+  ApprovalNotRequiredError,
+  UnknownApprovalActionError,
+} from "./domain/errors/approval-errors.ts";
+export { createFirestoreApprovalRequestRepository } from "./adapters/driven/firestore-approval-request-repository.ts";
+export { createInMemoryApprovalRequestRepository, type InMemoryApprovalRequestRepository } from "./adapters/driven/in-memory-approval-request-repository.ts";
 // Members and invitations (SP1 Task 11).
 export { createMemberServices, type MemberServices } from "./member-composition.ts";
 export { AppUrlMissingError, type MemberDeps } from "./application/member-deps.ts";

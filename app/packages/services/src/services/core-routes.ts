@@ -1,4 +1,6 @@
 import { CORE_ENDPOINTS } from "@core/contracts";
+import { buildApprovalsRoutes } from "./access/adapters/driving/approvals-routes.ts";
+import type { ApprovalServices } from "./access/approval-composition.ts";
 import { buildInvitationsRoutes } from "./access/adapters/driving/invitations-routes.ts";
 import { buildMembersRoutes } from "./access/adapters/driving/members-routes.ts";
 import { buildMembershipsRoutes } from "./access/adapters/driving/memberships-routes.ts";
@@ -40,6 +42,7 @@ export type CoreRouteDeps = {
   readonly apiKeys: ApiKeyServices;
   readonly devices: DeviceServices;
   readonly platform: PlatformServices;
+  readonly approvals: ApprovalServices;
 };
 
 /**
@@ -57,6 +60,7 @@ export const buildCoreRoutes = (deps: CoreRouteDeps): CoreRoutes => ({
   ...buildApiKeysRoutes(deps),
   ...buildDevicesRoutes(deps),
   ...buildPlatformRoutes(deps),
+  ...buildApprovalsRoutes(deps),
   ...buildOrganizationsRoutes(deps),
   ...buildProjectsRoutes(deps),
   ...buildUnitsRoutes(deps),

@@ -18,6 +18,7 @@ export const CORE_COLLECTIONS = {
   deviceActivations: "device-activations",
   apiKeys: "api-keys",
   impersonationSessions: "impersonation-sessions",
+  approvalRequests: "approval-requests",
   sessions: "sessions",
 } as const;
 
