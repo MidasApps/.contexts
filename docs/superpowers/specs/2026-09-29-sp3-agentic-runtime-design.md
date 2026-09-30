@@ -5,7 +5,7 @@
 - **Origin prompt:** `docs/prompts/2026-09-29-agentic-app-core-harness.md` items 1, 2, 5, 6, 7, 8, 13 and "Contratos de dados"
 - **Plan:** `docs/plans/2026-09-29-sp3-agentic-runtime.md`
 - **Constraints:** `docs/plans/execution-constraints.md` (framework `.contexts/` + `.claude/` read-only)
-- **Prerequisites:** SP0 done; SP1 (identity, tenancy, RBAC) and SP2 (app shell, `modules/example`, `defineModule()`) merged with their gates green. SP3 consumes their interfaces exactly as the umbrella §4/§6 names them and isolates them behind ports so a naming drift is fixed in one adapter.
+- **Prerequisites:** SP0 done; SP1 (identity, tenancy, RBAC) and SP2 (app shell, `modules/example`, `defineModule()`) merged with their gates green. SP3 consumes their interfaces as their specs name them (§2.1) and isolates them behind ports so a naming drift is fixed in one adapter.
 
 ## 1. Scope and gate
 
@@ -19,9 +19,9 @@ Mastra auth provider and the `/v1 → Mastra` gateway.
 set per core agent passing in CI; a test proving memory and knowledge isolation between
 tenants. Everything runs offline; real provider keys are optional.
 
-Out of scope here: chat UI and `/v1/chat` (SP4); generic approval workflow, schedules,
-`/admin` and `/settings` pages (SP5). SP3 defines the ports SP5 implements (approval
-requests) and fails closed until then.
+Out of scope here: chat UI and `/v1/chat` (SP4); workflow HITL, schedules, `/admin` and
+`/settings` pages (SP5). Four-eyes approval of agent mutations uses SP1's approval requests
+with an SP3 handler (`agent-command`), so it works from SP3 on.
 
 ## 2. Facts this design relies on (verified 2026-09-29)
 
@@ -98,6 +98,36 @@ Mastra 1.71 facts (docs at mastra.ai/llms.txt + installed `.d.ts`):
 - AI SDK 7: `MockLanguageModelV4`, `MockEmbeddingModelV4`, `MockSpeechModelV4`,
   `MockTranscriptionModelV4`, `simulateReadableStream` in `ai/test`; stream `finish` uses
   `finishReason: { unified, raw }`.
+
+### 2.1 Interfaces consumed from SP1 and SP2 (their specs, 2026-09-29)
+
+- SP1 (`docs/superpowers/specs/2026-09-29-sp1-identity-tenancy-rbac-design.md` §5, §6, §10):
+  `authorize({ principal, permission, node: NodeRef, ceiling? }) → { allowed, requiresApproval } | { allowed: false, reason }`
+  (fail-closed; `NodeRef` levels platform/organization/project/unit with `unitId`);
+  `getEffectivePermissions({ principal, node, ceiling? })`; `resolveAccessContext({ principal, node })`
+  → `{ tenantId, projectId?, unitId?, principal, permissions, regional: { locale, displayTimeZone, nodeTimeZone, currency } }`;
+  `verifyBearer()`; `AuditWriter.record(entry, tx?)` (actions SCREAMING_SNAKE past tense);
+  `approval-requests` + `ApprovalActionHandler` registry (`{ kind, inputSchema, execute }`,
+  four eyes, at-most-once); core permissions live in `CORE_PERMISSIONS`
+  (`packages/contracts/src/contracts/access/core-permissions.ts`) with the `core.` prefix.
+- SP2 (`docs/superpowers/specs/2026-09-29-sp2-app-shell-ui-design.md` §6, §7): `defineModule()` in
+  `@core/contracts` (data-only manifest; `agents?/tools?/workflows?/skills?: CapabilityRef[]`,
+  "SP3 extends"); installed modules listed only in `apps/web/src/modules.ts` and
+  `apps/desktop/src/modules.ts` (SP3 adds `apps/mastra/src/modules.ts`); `modules/example`
+  (`@core/module-example`, permissions `example.item.read|write`; "module contracts join the
+  catalog in SP3"); `SchemaForm`, `DataTable`; Playwright in `apps/web/e2e`.
+- The manifest `CapabilityRef`s name capabilities; the implementations come from the
+  module's server entry `defineAgentModule(...)` (agents, tools, commands, skills,
+  workflows) and are matched by id at composition (unknown ref → boot error).
+
+### 2.2 Permissions added by SP3 (to `CORE_PERMISSIONS`)
+
+`core.chat.use` (member+), `core.mcp.use` (owner, admin; API keys), `core.web-tools.use`
+(member+), `core.knowledge.read` (member+), `core.knowledge.write|delete` (owner, admin),
+`core.catalog.read` (member+), `core.catalog.query` (member+), `core.connector.read|write`
+(owner, admin), `core.agent-settings.read|update` (owner, admin), `core.usage.read` (owner,
+admin), `core.file.upload` (member+). Example module (SP3 Task 19): `example.note.read`,
+`example.note.create`, `example.note.archive` (`requiresApproval: true`).
 
 ## 3. Package layout
 
@@ -182,7 +212,7 @@ Boundaries (umbrella §3, enforced by `eslint-plugin-boundaries` in `@core/confi
 | `usage` | Postgres `usage.llm_calls`, `usage.tenant_budgets`, view `usage.tenant_month_spend`; use cases `recordLlmCall`, `checkTenantBudget`, `getUsageSummary`; BigQuery sink port |
 | `catalog` (new) | semantic view registry + `runSemanticQuery` use case (read-only runner) |
 | `agents` (new) | `agent-settings` per tenant (enable, web opt-ins, guardrail levels, budget); `MastraGateway` driven adapter (`/v1` → Mastra) |
-| `audit` | consumed from SP1 (`recordAuditEvent`) — SP3 adds event names only |
+| `audit` | consumed from SP1 (`AuditWriter.record`) — SP3 adds action names only |
 
 Adding `files`, `catalog` and `agents` to the umbrella §3 context list is recorded as a
 decision (D3-17).
@@ -218,8 +248,8 @@ Mastra. It uses `@mastra/client-js` for typed calls and raw `fetch` for streams,
 |---|---|
 | `Authorization` | `Bearer <Firebase ID token of the caller>` (or the service API key, see §9) |
 | `X-Serverless-Authorization` | Google-signed ID token for the Mastra Cloud Run audience (outside `local`; `google-auth-library` `getIdTokenClient`) |
-| `X-Tenant-Id`, `X-Project-Id`, `X-Node-Id` | active org/project/unit resolved by `/v1` from SP1 access context |
-| `X-Locale`, `X-Time-Zone`, `X-Currency` | resolved preferences (umbrella §6 order) |
+| `X-Tenant-Id`, `X-Project-Id`, `X-Unit-Id` | active org/project/unit resolved by `/v1` from SP1 `resolveAccessContext` |
+| `X-Locale`, `X-Time-Zone`, `X-Node-Time-Zone`, `X-Currency` | SP1 `regional` (`locale`, `displayTimeZone`, `nodeTimeZone`, `currency`) |
 | `X-Active-Screen` | optional route id of the UI screen (≤ 200 chars) |
 | `X-Request-Id`, `traceparent` | correlation (ULID; W3C trace context) |
 
@@ -236,13 +266,14 @@ mapped to the `api.md` §6 envelope (`UNAUTHENTICATED`, `FORBIDDEN`, `NOT_FOUND`
   follow-up 12b). Verifies with `verifyIdToken(token, checkRevoked)` where `checkRevoked`
   is `true` for mutations and agent runs with mutation tools (all POSTs) and `false` for
   GETs (§16.2; unit-tested with a fake verifier, follow-up 12e). Service API keys
-  (`sk_…` prefix) go to SP1 `verifyApiKey` instead. Then resolves the principal:
-  `{ kind: 'user'|'service', uid, tenantId, projectId?, nodeId?, permissions: Set,
-  locale, timeZone, currency, activeScreen? }` using SP1's access context (fail-closed: a
+  (prefixed keys) are verified by the same SP1 `verifyBearer()` path (API key principal). Then resolves the principal:
+  `{ kind: 'user'|'service', uid, tenantId, projectId?, unitId?, permissions: Set,
+  locale, displayTimeZone, nodeTimeZone, currency, activeScreen? }` using SP1
+  `verifyBearer()` + `resolveAccessContext({ principal, node })` (fail-closed: a
   missing membership yields a principal with no permissions, so `authorizeUser` returns
   false → 403; an invalid token yields `null` → 401).
 - `authorizeUser(principal)`: true only when the tenant membership exists and the principal
-  holds `agents.chat.use` (or `agents.mcp.use` for the MCP route).
+  holds `core.chat.use` (or `core.mcp.use` for the MCP route).
 - `mapUserToResourceId` passed through `super({ mapUserToResourceId })` (follow-up 12a):
   `${tenantId}:${uid}`.
 - Env: `FIREBASE_AUTH_EMULATOR_HOST` outside `local` is already rejected by
@@ -254,9 +285,9 @@ Contract `agents.AgentRequestContext` (`@core/contracts/src/contracts/agents/age
 kind `settings`, pii `personal`):
 
 ```
-tenantId, projectId?, nodeId?, userId, principalKind ('user'|'service'),
+tenantId, projectId?, unitId?, userId, principalKind ('user'|'service'),
 permissions: string[] (effective = principal ∩ agent ceiling, computed server-side),
-locale, timeZone, currency, activeScreen?, requestId, conversationId?,
+locale, displayTimeZone, nodeTimeZone, currency, activeScreen?, requestId, conversationId?,
 organizationId (= tenantId; key read by TokenCostControl), aiMode ('real'|'fake')
 ```
 
@@ -329,11 +360,11 @@ embedder.
 
 | Agent (key) | Role | Tools / subagents | Permission ceiling |
 |---|---|---|---|
-| `assistant` (supervisor) | entry point; plans, delegates, answers | subagents `knowledge`, `data`, `action`, `web` (only when tenant opted in) + tool `askUser`-style clarification via text | `agents.chat.use` |
-| `knowledge` | answers from the KB with citations | `searchKnowledge` | `knowledge.document.read` |
-| `data` | explains data structure, queries, renders forms | `listEntities`, `describeEntity`, `renderForm`, `querySemanticSql` | `catalog.entity.read`, `catalog.query.run` |
+| `assistant` (supervisor) | entry point; plans, delegates, answers | subagents `knowledge`, `data`, `action`, `web` (only when tenant opted in) + tool `askUser`-style clarification via text | `core.chat.use` |
+| `knowledge` | answers from the KB with citations | `searchKnowledge` | `core.knowledge.read` |
+| `data` | explains data structure, queries, renders forms | `listEntities`, `describeEntity`, `renderForm`, `querySemanticSql` | `core.catalog.read`, `core.catalog.query` |
 | `action` | executes contract commands after confirmation | command tools from modules (`command.<contractId>`) | union of command permissions declared by modules |
-| `web` | web research | `webSearch`, `webScrape`, browser MCP toolset | `agents.web.use` |
+| `web` | web research | `webSearch`, `webScrape`, browser MCP toolset | `core.web-tools.use` |
 
 Rules:
 - Every agent has `description`, versioned `instructions` (`instructions/<agent>.v<N>.md`,
@@ -379,11 +410,13 @@ defineCoreTool({
 
 The wrapper: validates input (strict) and output; reads the typed context (missing key →
 error, never a default tenant); calls `authorize({ principal, permission, resource: { tenantId,
-projectId, nodeId } })`; for `kind: 'mutation'` sets `requireApproval: true` (user
+projectId, unitId } })` (SP1 `NodeRef`, with `ceiling` = agent ceiling); for `kind: 'mutation'` sets `requireApproval: true` (user
 confirmation is always required, umbrella §16.4), and when SP1 flags the permission as
-`requiresApproval`, calls `ApprovalPort.requestApproval()` instead of executing (four eyes,
-SP5; the SP3 adapter returns `{ status: 'unavailable' }` → tool result `APPROVAL_UNAVAILABLE`,
-nothing executes); records an audit event (`agents.tool.executed`, with tool id,
+`requiresApproval` (`AuthorizeDecision.requiresApproval`), creates an SP1 approval request
+(`approval-requests`, action kind `agent-command`, handler registered by SP3 in SP1's
+`ApprovalActionHandler` registry) instead of executing, and returns `{ status:
+'pending-approval', approvalId }` (four eyes; SP1 executes at most once after an approver
+decides; an unregistered handler makes the request fail closed); records an audit event (`AGENT_TOOL_EXECUTED`, with tool id,
 permission, input hash, outcome) for every mutation and for SQL queries; opens a span
 `gen_ai.tool.name`; enforces a per-call timeout (read 15 s, mutation 30 s) and propagates
 `abortSignal`. Errors are typed (`code` SCREAMING_SNAKE) and returned to the model as tool
@@ -425,7 +458,7 @@ Pipeline (`sql-guard.ts` + `semantic-sql-runner.ts`, use case `runSemanticQuery`
    by `app.tenant_id`/`app.node_ids`; a missing setting returns zero rows (umbrella §16.4).
 5. Result `{ columns, rows, rowCount, truncated }`, cells that map to `personal` fields are
    returned only to principals with the contract read permission; audit event
-   `catalog.query.executed` with the SQL fingerprint.
+   `SEMANTIC_QUERY_EXECUTED` with the SQL fingerprint.
 
 The runtime user can `SET ROLE semantic_reader` (granted `semantic_reader` to the app role).
 Views are generated by `pnpm contracts:catalog` (SP0 artifact "views SQL semânticas") into
@@ -560,7 +593,7 @@ RLS: FORCE; policy tenant_id = current_setting('app.tenant_id', true) OR tenant_
   knowledge agent has no valid citation (SP4 shows "sem certeza").
 - `/v1/knowledge/documents` (list, get, delete), `/v1/knowledge/sources` (`POST` with
   `{ kind: 'file', fileId } | { kind: 'url', url }` → 202 `{ data: { runId } }`),
-  permissions `knowledge.document.read|write|delete`.
+  permissions `core.knowledge.read|write|delete`.
 
 ## 12. Guardrails, budgets and usage
 
@@ -634,7 +667,7 @@ report workflow. Metrics: `ai_tokens_total{model,direction}`, `ai_cost_micro_usd
 | `.network()` / `networkRoute` | not adopted: deprecated (D12) |
 | Structured output (`structuredOutput`) | adopted in workflows steps and scorers |
 | Tool approval (`requireApproval`, approve/decline) | adopted (§8.1); SP4 UI |
-| Tool `suspend`/`resumeStream`, `askUserTool` | `suspend` adopted for four-eyes pending (SP5); `askUserTool` not adopted (clarification is plain text) |
+| Tool `suspend`/`resumeStream`, `askUserTool` | not adopted in tools: four eyes goes through SP1 approval requests; workflow `suspend` is used by SP5's `requestHumanApproval` step; `askUserTool` not adopted (clarification is plain text) |
 | Tool hooks `beforeToolCall`/`afterToolCall` | not adopted: authorize/audit/span live in `defineCoreTool`, one place for core and module tools |
 | `writer.custom` data parts | adopted for workflow progress and generative UI (SP4) |
 | Background tasks (`background` tools) | not adopted in v1: long work runs as workflows |
@@ -698,7 +731,7 @@ Web (`/v1`): `MASTRA_URL`, `MASTRA_AUDIENCE` (remote). `.env.example` gets place
 | D3-08 | `tenant_id text` in Postgres (Firestore ids) and reserved `_platform` tenant; deviation from contracts/pgvector.md `uuid`. |
 | D3-09 | Drizzle ORM + drizzle-kit SQL migrations in `app/infra/postgres/migrations`, `pnpm db:migrate`; Mastra schema via explicit `storage.init()` step and `disableInit` outside local (follow-up 1). |
 | D3-10 | Semantic SQL guard with `libpg-query` AST, view/function allowlist, read-only txn, 5 s, LIMIT 100/1000, RLS settings; BigQuery fail-closed with recorded isolation design. |
-| D3-11 | Contract-derived command tools: user confirmation always; `requiresApproval` → four-eyes through `ApprovalPort` (fail-closed until SP5); idempotency key `runId:toolCallId`. |
+| D3-11 | Contract-derived command tools: user confirmation always; `requiresApproval` → SP1 approval request with the `agent-command` handler (four eyes, at-most-once execution by SP1); idempotency key `runId:toolCallId`. |
 | D3-12 | Guardrail profile with `errorStrategy: 'strict'`; own `TenantBudgetGuard` as hard cap; `TokenCostControl` only as soft signal when metrics exist. |
 | D3-13 | Usage ledger via observability exporter into `usage.llm_calls`; BigQuery via `UsageSink`; price table with verification date. |
 | D3-14 | Connectors in Firestore, secrets via `SecretStore` (Secret Manager / local emulator adapter); OpenAPI tools with host allowlist; MCP client with `allowedHosts` + approval by default; stdio only local. |

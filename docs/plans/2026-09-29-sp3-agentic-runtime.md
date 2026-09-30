@@ -158,6 +158,7 @@ Playwright 1.63.0, `@mastra/core` 1.71.0, `mastra` 1.31.3, `@mastra/memory` 1.32
 - Create in `.../connectors/`: `connector.schema.ts` (discriminated by `type`; no secret fields), `connector-tool-policy.schema.ts`
 - Create in `.../usage/`: `llm-call.schema.ts` (view kind, `costMicroUsd` bigint as integer), `usage-summary.schema.ts`
 - Create in `.../files/`: `file-upload-request.schema.ts`, `stored-file.schema.ts`
+- Modify: `app/packages/contracts/src/contracts/access/core-permissions.ts` (SP1 file): add the SP3 permissions of spec §2.2 with kinds and default roles
 - Modify: `src/composition.ts`, `src/index.ts`; run `pnpm contracts:catalog`
 - Test: one `*.schema.test.ts` per folder (valid example parses; tenant id branded; strict objects reject extra keys)
 
@@ -191,8 +192,8 @@ Playwright 1.63.0, `@mastra/core` 1.71.0, `mastra` 1.31.3, `@mastra/memory` 1.32
 
 **Files:**
 - Create: `app/packages/agents/src/auth/{firebase-mastra-auth.ts,bearer-only.ts,agent-principal.ts}`
-- Create: `app/packages/agents/src/runtime/runtime-ports.ts` (`AccessPort { resolvePrincipal, authorize, verifyApiKey }`, `AuditPort`, `ApprovalPort`, `UsagePort`, `KnowledgePort`, `ConnectorsPort`, `SecretStore`, `SettingsPort`) and `src/testing/fake-ports.ts`
-- Test: `firebase-mastra-auth.test.ts` with a fake verifier: `?apiKey=` without header → null (401); header Bearer → principal; GET uses `checkRevoked=false`, POST `true`; member without `agents.chat.use` → `authorizeUser` false; `mapUserToResourceId` set via `super()` returns `tenantId:uid` (instance property check); `sk_` token routed to `verifyApiKey`
+- Create: `app/packages/agents/src/runtime/runtime-ports.ts` (`AccessPort { verifyBearer, resolveAccessContext, authorize, getEffectivePermissions }` mirroring SP1 spec §5.2/§10, `AuditPort` (SP1 `AuditWriter`), `ApprovalPort` (SP1 approval requests), `UsagePort`, `KnowledgePort`, `ConnectorsPort`, `SecretStore`, `SettingsPort`) and `src/testing/fake-ports.ts`
+- Test: `firebase-mastra-auth.test.ts` with a fake verifier: `?apiKey=` without header → null (401); header Bearer → principal; GET uses `checkRevoked=false`, POST `true`; member without `core.chat.use` → `authorizeUser` false; `mapUserToResourceId` set via `super()` returns `tenantId:uid` (instance property check); API-key bearer yields a `service` principal through `verifyBearer`
 - Test: `app/packages/services/src/services/shared/env/services-env.schema.test.ts` (add case: `FIREBASE_AUTH_EMULATOR_HOST` with `APP_ENV=prod` rejected — 12c regression)
 - Test: `firebase-mastra-auth.emulator.test.ts` (Auth Emulator user + fake membership port: 200/401/403 through a Mastra `createNodeServer` like the SP0 probe, but with the committed provider)
 
@@ -242,7 +243,7 @@ Playwright 1.63.0, `@mastra/core` 1.71.0, `mastra` 1.31.3, `@mastra/memory` 1.32
 
 **Files:**
 - Create: `app/packages/agents/src/tools/{define-core-tool.ts,tool-registry.ts,tool-errors.ts}`
-- Test: `define-core-tool.test.ts` with fake ports: input non-strict key rejected; missing context key → `CONTEXT_MISSING` (no execute); `authorize` deny → `FORBIDDEN` (no execute); mutation → `requireApproval: true`; permission with `requiresApproval` → `ApprovalPort.requestApproval` called and fake adapter `unavailable` → `APPROVAL_UNAVAILABLE`; audit recorded for mutation with input hash (no raw input); timeout → `TOOL_TIMEOUT`; output schema violation → `TOOL_OUTPUT_INVALID`
+- Test: `define-core-tool.test.ts` with fake ports: input non-strict key rejected; missing context key → `CONTEXT_MISSING` (no execute); `authorize` deny → `FORBIDDEN` (no execute); mutation → `requireApproval: true`; decision with `requiresApproval: true` → `ApprovalPort.requestApproval` called (kind `agent-command`), nothing executed, result `{ status: 'pending-approval', approvalId }`; approval port error → `APPROVAL_UNAVAILABLE` (fail-closed); audit recorded for mutation with input hash (no raw input); timeout → `TOOL_TIMEOUT`; output schema violation → `TOOL_OUTPUT_INVALID`
 
 **Interfaces:** Produces `defineCoreTool`, `CoreToolDefinition`, `createToolRegistry`.
 
@@ -393,8 +394,10 @@ Playwright 1.63.0, `@mastra/core` 1.71.0, `mastra` 1.31.3, `@mastra/memory` 1.32
 
 **Files:**
 - Create: `app/packages/agents/src/tools/commands/command-tools.ts` (from `AgentModule.commands`; boot error when a command contract lacks `permission` or `kind !== 'command'`; idempotency key `runId:toolCallId`)
-- Create in `app/modules/example/`: command contract `example.CreateNoteCommand` (in the module's contracts folder, registered through the module manifest), use case `createNote` (Firestore `notes` with `tenantId`, authorize `example.note.create`, audit), `preview` (before `null`, after = note), and the `defineAgentModule({ id: 'example', commands: [...] })` export consumed by `apps/mastra/src/modules.ts`
-- Test: `command-tools.test.ts` (tool schema equals contract schema; execute calls handler with principal + idempotency key; second call with same key returns first result), `create-note.emulator.test.ts` (authorized user creates note; unauthorized → 403; audit event written)
+- Create in `app/modules/example/`: permissions `example.note.read`, `example.note.create`, `example.note.archive` (`requiresApproval: true`) added to the SP2 manifest; command contracts `example.CreateNoteCommand` and `example.ArchiveNoteCommand` (module contracts folder); use cases `createNote` / `archiveNote` (Firestore `notes` with `tenantId`; `authorize`; `AuditWriter`), `preview` functions, and the server entry `defineAgentModule({ id: 'example', commands: [...] })` consumed by `apps/mastra/src/modules.ts`
+- Create: `app/packages/agents/src/approvals/agent-command-approval-handler.ts` (SP1 `ApprovalActionHandler` kind `agent-command`: re-authorizes the requester, runs the command use case with the stored idempotency key) registered in `apps/web` and `apps/mastra` composition (wherever SP1 decides approvals)
+- Modify: catalog generation to include installed module contracts (SP2 follow-up "module contracts join the catalog in SP3"): a workspace-level list `app/catalog.modules.ts` (module contract exports) read by `pnpm contracts:catalog`; `contracts` package itself still imports no module
+- Test: `command-tools.test.ts` (tool schema equals contract schema; execute calls handler with principal + idempotency key; second call with same key returns first result; archive → pending approval request, executed by the handler only after a different member approves through SP1), `create-note.emulator.test.ts` (authorized user creates note; unauthorized → 403; audit event written)
 
 - [ ] Steps: read → failing tests → implement → PASS → `pnpm contracts:catalog` → progress → commit `feat(agents): derive mutation tools from command contracts`
 
@@ -423,7 +426,7 @@ Playwright 1.63.0, `@mastra/core` 1.71.0, `mastra` 1.31.3, `@mastra/memory` 1.32
 - Create: `app/packages/services/src/services/connectors/{application/use-cases/{create-connector.ts,update-connector.ts,delete-connector.ts,list-connectors.ts,set-connector-secret.ts},adapters/driven/{firestore-connector-repository.ts,secret-manager-store.ts,local-secret-store.ts},adapters/driving/connectors-route-handler.ts}`
 - Create: `app/apps/web/src/app/v1/connectors/**/route.ts` (list/create; get/patch/delete; `PUT /v1/connectors/{id}/secret` write-only, 204)
 - Modify: `app/firestore.rules` (deny client access to `connectors` and `local-secrets`), `app/firestore.indexes.json` (`tenantId`+`createdAt`)
-- Test: route handler tests (permissions `connectors.connector.read|write`; secret never returned; `allowedHosts` required for mcp/openapi; https only), `local-secret-store.test.ts` (refused outside local), emulator repository test
+- Test: route handler tests (permissions `core.connector.read|write`; secret never returned; `allowedHosts` required for mcp/openapi; https only), `local-secret-store.test.ts` (refused outside local), emulator repository test
 
 - [ ] Steps: read → failing tests → implement → PASS → progress → commit `feat(connectors): add tenant connectors with secret store`
 
@@ -461,7 +464,7 @@ Playwright 1.63.0, `@mastra/core` 1.71.0, `mastra` 1.31.3, `@mastra/memory` 1.32
 
 **Files:**
 - Create: `app/packages/agents/src/mcp-server/core-mcp-server.ts` (tools read-only, `agents: { assistant }`, resources = catalog entries filtered per principal, `requestState.key`)
-- Create: `app/packages/services/src/services/agents/adapters/driving/mcp-route-handler.ts` + `app/apps/web/src/app/v1/mcp/route.ts` (auth API key or Bearer → `agents.mcp.use` → gateway `callMcp`; rate limit per key)
+- Create: `app/packages/services/src/services/agents/adapters/driving/mcp-route-handler.ts` + `app/apps/web/src/app/v1/mcp/route.ts` (auth API key or Bearer → `core.mcp.use` → gateway `callMcp`; rate limit per key)
 - Test: `core-mcp-server.test.ts` (tool list; resource filtered), `mcp-route-handler.test.ts` (no auth 401; key without permission 403; happy path proxies), integration with `MCPClient` against the in-process server (`listTools` includes `ask_assistant`)
 
 - [ ] Steps: read → failing tests → implement → PASS → progress → commit `feat(agents): expose core mcp server through v1`
