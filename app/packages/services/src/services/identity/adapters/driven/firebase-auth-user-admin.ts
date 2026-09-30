@@ -14,7 +14,14 @@ export const createFirebaseAuthUserAdmin = (deps: { auth: Pick<Auth, "getUser" |
       throw err;
     }
   },
-  revokeRefreshTokens: (uid) => deps.auth.revokeRefreshTokens(uid),
+  revokeRefreshTokens: async (uid) => {
+    try {
+      await deps.auth.revokeRefreshTokens(uid);
+    } catch (err: unknown) {
+      // No account means no tokens to revoke.
+      if (!isUserNotFound(err)) throw err;
+    }
+  },
   createAccount: async (uid, { displayName }) => {
     await deps.auth.createUser({ uid, displayName });
   },

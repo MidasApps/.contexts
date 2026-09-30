@@ -29,6 +29,7 @@ export type PrincipalState = {
 
 type Deps = Pick<AccessWriteDeps, "memberships" | "projections" | "users" | "tenantGuard" | "audit" | "clock">;
 
+
 type PrincipalRef = { readonly tenantId: TenantId; readonly principal: ProjectionPrincipal };
 
 /**
@@ -135,4 +136,23 @@ export const prepareGrant = async (tx: Transaction, deps: Deps, args: PrepareGra
     );
   };
   return ok({ membership, commit });
+};
+
+export type RevokeAllPlan = { readonly revoked: number; readonly commit: () => void };
+
+/**
+ * Read phase of revoking every live grant of a principal in a tenant (device revocation):
+ * `commit()` soft-deletes the grants and rebuilds the projection as revoked. Call it after
+ * the caller's own reads. A deleted organization has nothing left to revoke.
+ */
+export const prepareRevokeAllGrants = async (tx: Transaction, deps: Deps, args: PrincipalRef & { readonly actorId: string }): Promise<RevokeAllPlan> => {
+  const state = await readPrincipalState(tx, deps, args);
+  const now = deps.clock.now().toISOString();
+  return {
+    revoked: state.live.length,
+    commit: () => {
+      for (const grant of state.live) deps.memberships.softDelete(tx, { id: grant.id, deletedAt: now, actorId: args.actorId });
+      writePrincipalState(tx, deps, { ...args, state, grants: [], now });
+    },
+  };
 };

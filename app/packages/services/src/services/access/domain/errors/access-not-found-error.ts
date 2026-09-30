@@ -1,6 +1,6 @@
-export type AccessResource = "role" | "membership" | "member" | "invitation" | "organization" | "user";
+export type AccessResource = "role" | "membership" | "member" | "invitation" | "organization" | "user" | "device";
 
-/** A role, membership, member, invitation, organization or user does not exist (or is gone) → 404 NOT_FOUND. */
+/** A role, membership, member, invitation, organization, user or device does not exist (or is gone) → 404 NOT_FOUND. */
 export class AccessNotFoundError extends Error {
   readonly code = "NOT_FOUND";
   readonly resource: AccessResource;

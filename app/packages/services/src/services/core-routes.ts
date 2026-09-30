@@ -7,6 +7,8 @@ import type { AccessServices } from "./access/composition.ts";
 import type { MemberServices } from "./access/member-composition.ts";
 import { buildMeRoutes } from "./identity/adapters/driving/me-routes.ts";
 import { buildApiKeysRoutes } from "./identity/adapters/driving/api-keys-routes.ts";
+import { buildDevicesRoutes } from "./identity/adapters/driving/devices-routes.ts";
+import type { DeviceServices } from "./identity/device-composition.ts";
 import { buildSessionsRoutes } from "./identity/adapters/driving/sessions-routes.ts";
 import type { ApiKeyServices } from "./identity/api-key-composition.ts";
 import type { IdentityServices } from "./identity/composition.ts";
@@ -34,6 +36,7 @@ export type CoreRouteDeps = {
   readonly identity: IdentityServices;
   readonly sessions: SessionServices;
   readonly apiKeys: ApiKeyServices;
+  readonly devices: DeviceServices;
 };
 
 /**
@@ -49,6 +52,7 @@ export const buildCoreRoutes = (deps: CoreRouteDeps): CoreRoutes => ({
   ...buildMeRoutes(deps),
   ...buildSessionsRoutes(deps),
   ...buildApiKeysRoutes(deps),
+  ...buildDevicesRoutes(deps),
   ...buildOrganizationsRoutes(deps),
   ...buildProjectsRoutes(deps),
   ...buildUnitsRoutes(deps),

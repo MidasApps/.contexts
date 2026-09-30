@@ -18,6 +18,7 @@ import { createFirebaseTokenVerifier } from "./identity/adapters/driven/firebase
 import type { ApiKeyAuthenticator } from "./identity/application/ports/driven/api-key-authenticator.ts";
 import type { ApiKeyRevoker } from "./identity/application/ports/driven/api-key-revoker.ts";
 import { createFirestoreApiKeyServices, type ApiKeyServices } from "./identity/api-key-composition.ts";
+import { createFirestoreDeviceServices, type DeviceServices } from "./identity/device-composition.ts";
 import type { TokenVerifier } from "./identity/application/ports/driven/token-verifier.ts";
 import { createFirebaseAuthAccountReader } from "./identity/adapters/driven/firebase-auth-account-reader.ts";
 import { createFirebaseUserAccountReader } from "./identity/adapters/driven/firebase-user-account-reader.ts";
@@ -85,6 +86,8 @@ export type CoreServer = {
   readonly sessions: SessionServices;
   /** Scoped API keys (SP1 Task 14): the `service` principal path. */
   readonly apiKeys: ApiKeyServices;
+  /** Device activations and devices (SP1 Task 15): the `device` principal path. */
+  readonly devices: DeviceServices;
   /** Server Action bodies for SP2's `(auth)/actions.ts` (decision 0007). */
   readonly sessionActions: SessionActions;
   /** RSC guards for SP2's `(app)` and `/admin` layouts. */
@@ -234,7 +237,17 @@ export const createCoreServer = (args: CoreServerArgs): CoreServer => {
     env: args.env,
   });
   const { sessions } = sessionVertical;
-  const routes = buildCoreRoutes({ pipeline, access: access.services, members: access.members, tenancy, identity, sessions, apiKeys });
+  const devices = createFirestoreDeviceServices({
+    firestore,
+    access: access.services,
+    customTokens: sessionVertical.customTokens,
+    authUsers: sessionVertical.authUsers,
+    audit,
+    clock,
+    randomBytes: args.adapters?.randomBytes ?? randomBytes,
+    logger: args.logger,
+  });
+  const routes = buildCoreRoutes({ pipeline, access: access.services, members: access.members, tenancy, identity, sessions, apiKeys, devices });
   return {
     routes,
     verifyBearer,
@@ -246,6 +259,7 @@ export const createCoreServer = (args: CoreServerArgs): CoreServer => {
     resolveAccessContext: identity.resolveAccessContext,
     sessions,
     apiKeys,
+    devices,
     sessionActions: sessionVertical.sessionActions,
     sessionGuards: sessionVertical.sessionGuards,
     audit,

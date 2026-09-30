@@ -55,3 +55,8 @@ export type { ApiKeyDeps } from "./application/api-key-deps.ts";
 export type { ApiKeyRepository, StoredApiKey } from "./application/ports/driven/api-key-repository.ts";
 export { formatApiKey, generateApiKeyParts, parseApiKey, type ApiKeyParts } from "./domain/api-key-format.ts";
 export { createInMemoryApiKeyRepository, type InMemoryApiKeyRepository } from "./adapters/driven/in-memory-api-key-repository.ts";
+// Device activations and devices (SP1 Task 15, decision 0008).
+export { createDeviceServices, createFirestoreDeviceServices, type DeviceServices } from "./device-composition.ts";
+export type { DeviceDeps } from "./application/device-deps.ts";
+export { generateActivationCode, hashActivationCode, normalizeActivationCode } from "./domain/activation-code.ts";
+export { createInMemoryDeviceActivationRepository, createInMemoryDeviceRepository } from "./adapters/driven/in-memory-device-repositories.ts";

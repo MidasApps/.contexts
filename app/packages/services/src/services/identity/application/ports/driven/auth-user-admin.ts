@@ -9,7 +9,7 @@ export type AuthUserState = {
 export type AuthUserAdmin = {
   /** @returns null when the account does not exist. */
   readonly getState: (uid: string) => Promise<AuthUserState | null>;
-  /** Invalidates every refresh token, ID token and session cookie of the uid. */
+  /** Invalidates every refresh token, ID token and session cookie of the uid; a missing account is ignored. */
   readonly revokeRefreshTokens: (uid: string) => Promise<void>;
   /** Creates an account without credentials (devices sign in with custom tokens). */
   readonly createAccount: (uid: string, args: { displayName: string }) => Promise<void>;

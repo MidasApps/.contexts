@@ -9,7 +9,11 @@ import { makeAuthorize } from "./application/use-cases/authorize.ts";
 import { makeGetEffectivePermissions } from "./application/use-cases/get-effective-permissions.ts";
 import type { Transaction } from "firebase-admin/firestore";
 import type { AccessWriteDeps } from "./application/access-write-deps.ts";
-import { prepareGrant, type PrepareGrantArgs } from "./application/membership-writes.ts";
+import { prepareGrant, prepareRevokeAllGrants, type PrepareGrantArgs } from "./application/membership-writes.ts";
+import { checkGrantable, type GrantCheckError } from "./application/grant-checks.ts";
+import type { Permission, Principal, RoleRef, TenantId, TenantNodeRef } from "@core/contracts";
+import type { Result } from "../shared/result/result.ts";
+import type { ProjectionPrincipal } from "./domain/access-projection.ts";
 import type { AccessProjectionStore } from "./application/ports/driven/access-projection-writer.ts";
 import { makeCreateRole, type CreateRole } from "./application/use-cases/create-role.ts";
 import { makeDeleteRole, type DeleteRole } from "./application/use-cases/delete-role.ts";
@@ -68,6 +72,10 @@ export type AccessServices = {
   readonly syncClaims: SyncClaims;
   /** Grant inside another context's transaction (`createOrganization`'s owner grant). */
   readonly prepareGrant: (tx: Transaction, args: PrepareGrantArgs) => ReturnType<typeof prepareGrant>;
+  /** Revoke every grant of a principal inside another context's transaction (device revocation). */
+  readonly prepareRevokeAllGrants: (tx: Transaction, args: { tenantId: TenantId; principal: ProjectionPrincipal; actorId: string }) => ReturnType<typeof prepareRevokeAllGrants>;
+  /** Grant checks for other contexts (device activations): permission at the node, live roles, no escalation. */
+  readonly checkGrantable: (args: { access: RequestAccess; actor: Principal; permission: Permission; node: TenantNodeRef; roles: readonly RoleRef[] }) => Promise<Result<void, GrantCheckError>>;
   /** The projection read model (tenancy lists visible projects and revokes on organization delete). */
   readonly projections: AccessProjectionStore;
   readonly registry: PermissionRegistry;
@@ -88,6 +96,8 @@ export const createAccessServices = (deps: AccessWriteDeps): AccessServices => (
   deleteRole: makeDeleteRole(deps),
   syncClaims: deps.syncClaims,
   prepareGrant: (tx, args) => prepareGrant(tx, deps, args),
+  prepareRevokeAllGrants: (tx, args) => prepareRevokeAllGrants(tx, deps, args),
+  checkGrantable: (args) => checkGrantable(deps, args),
   projections: deps.projections,
   registry: deps.registry,
 });
