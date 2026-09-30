@@ -41,3 +41,16 @@ The knowledge base needs tenant isolation that holds even if application code fo
   `gemini-embedding-001` must never share `ai.chunks_v1` or memory vectors with one using
   `gemini-embedding-2`; changing the model once data exists means `ai.chunks_v2`. Price: $0.20
   per 1M text input tokens (pricing page, updated 2026-09-24), now in `model-prices.ts`.
+- **2026-09-30 — write policies and runtime role (SP3 Task 12).** The D3-07 policy is split so
+  a tenant can read `_platform` rows but never write them: `*_tenant_rows` (`FOR ALL`, `USING`
+  and `WITH CHECK tenant_id = current_setting('app.tenant_id', true)`) and `*_platform_read`
+  (`FOR SELECT`, `tenant_id = '_platform'`). Platform content is written only with
+  `app.tenant_id = '_platform'` (catalog and module ingestion). Tenant documents use the
+  `tenant` and `project:*` namespaces; `_platform` documents use `catalog` and `module:*`
+  (checked by the use cases). `ai.chunks_v1` references `ai.documents(id, tenant_id)`, so a
+  chunk can never point at another tenant's document. Every repository transaction runs as
+  `SET LOCAL ROLE knowledge_runtime` (NOLOGIN, NOBYPASSRLS, DML on the two tables only;
+  migration `0004`), so the policies hold even when the login role could bypass them;
+  `mastra_runtime` may switch to it (SET, no inherited rights). Search compares only vectors
+  of the configured `AI_MODEL_EMBEDDING` (`embedding_model` filter) and drops citations below
+  similarity 0.3.

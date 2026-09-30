@@ -1,6 +1,6 @@
-import type { ApprovalPort, ConnectorsPort, KnowledgePort, SecretStore, SettingsPort, UsagePort } from "@core/agents";
+import type { ApprovalPort, ConnectorsPort, SecretStore, SettingsPort, UsagePort } from "@core/agents";
 
-export type UnwiredPortName = "approvals" | "usage" | "knowledge" | "connectors" | "secrets" | "settings";
+export type UnwiredPortName = "approvals" | "usage" | "connectors" | "secrets" | "settings";
 
 /** Bug guard: a port whose service lands in a later task was called; the call rejects, never succeeds. */
 export class PortNotWiredError extends Error {
@@ -19,19 +19,17 @@ const reject = (port: UnwiredPortName) => (): Promise<never> => Promise.reject(n
 /**
  * Fail-closed stand-ins for ports whose services arrive later: approvals (SP1
  * Task 17; tools answer `APPROVAL_UNAVAILABLE`), usage and budgets (Task 16),
- * knowledge (Tasks 12/15), connectors and secrets (Task 21), agent settings.
+ * connectors and secrets (Task 21), agent settings.
  */
 export const UNWIRED_PORTS: {
   readonly approvals: ApprovalPort;
   readonly usage: UsagePort;
-  readonly knowledge: KnowledgePort;
   readonly connectors: ConnectorsPort;
   readonly secrets: SecretStore;
   readonly settings: SettingsPort;
 } = {
   approvals: { requestApproval: reject("approvals") },
   usage: { recordLlmCalls: reject("usage"), checkTenantBudget: reject("usage") },
-  knowledge: { searchChunks: reject("knowledge") },
   connectors: { listActive: reject("connectors") },
   secrets: { get: reject("secrets") },
   settings: { getAgentSettings: reject("settings") },

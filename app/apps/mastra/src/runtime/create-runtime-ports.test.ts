@@ -2,8 +2,10 @@ import { createFirebaseAdmin, createInMemoryAccessStore, processLogger } from "@
 import { describe, expect, it } from "vitest";
 import { RegionalSettingsNotWiredError } from "./access-port-binding.ts";
 import { createRuntimePorts } from "./create-runtime-ports.ts";
+import { KnowledgeSearchRejectedError } from "./knowledge-port-binding.ts";
 import { PortNotWiredError } from "./unwired-ports.ts";
 
+const ENV = { API_KEY_PREFIX: "core", DATABASE_URL: "postgres://nobody@127.0.0.1:1/none", AI_MODEL_EMBEDDING: "google/gemini-embedding-2" };
 const TENANT = "Jd8sK2lPq0WnR5tYu3bV";
 const MEMBER = { type: "user", uid: "member-uid", mfa: false } as const;
 const ORG = { level: "organization", tenantId: TENANT } as const;
@@ -12,7 +14,7 @@ const ORG = { level: "organization", tenantId: TENANT } as const;
 // (access decisions use in-memory SP1 readers; the Firestore ones need the emulator).
 const ports = () =>
   createRuntimePorts({
-    env: { API_KEY_PREFIX: "core", DATABASE_URL: "postgres://nobody@127.0.0.1:1/none" },
+    env: ENV,
     firebase: createFirebaseAdmin({ env: { APP_ENV: "local", FIREBASE_PROJECT_ID: "demo-core" }, processEnv: {} }),
     logger: processLogger,
   });
@@ -24,7 +26,7 @@ describe("createRuntimePorts (default bindings)", () => {
     store.putUser("member-uid");
     store.putGrant({ tenantId: TENANT, principalId: "member-uid", nodeId: TENANT, roles: [{ kind: "system", key: "member" }] });
     const bound = createRuntimePorts({
-      env: { API_KEY_PREFIX: "core", DATABASE_URL: "postgres://nobody@127.0.0.1:1/none" },
+      env: ENV,
       firebase: createFirebaseAdmin({ env: { APP_ENV: "local", FIREBASE_PROJECT_ID: "demo-core" }, processEnv: {} }),
       logger: processLogger,
       adapters: { accessReaders: store },
@@ -38,7 +40,6 @@ describe("createRuntimePorts (default bindings)", () => {
     const action = {} as never;
     await expect(bound.approvals.requestApproval({ principal: MEMBER, node: ORG, permission: "core.chat.use", action })).rejects.toBeInstanceOf(PortNotWiredError);
     await expect(bound.usage.checkTenantBudget({ tenantId: TENANT })).rejects.toBeInstanceOf(PortNotWiredError);
-    await expect(bound.knowledge.searchChunks({ tenantId: TENANT, namespaces: ["tenant"], embedding: [], topK: 1 })).rejects.toBeInstanceOf(PortNotWiredError);
     await expect(bound.connectors.listActive({ tenantId: TENANT })).rejects.toBeInstanceOf(PortNotWiredError);
     await expect(bound.secrets.get("ref")).rejects.toBeInstanceOf(PortNotWiredError);
     await expect(bound.settings.getAgentSettings({ tenantId: TENANT })).rejects.toBeInstanceOf(PortNotWiredError);
@@ -50,5 +51,11 @@ describe("createRuntimePorts (default bindings)", () => {
       sql: "SELECT * FROM semantic.anything",
     });
     expect(result).toMatchObject({ ok: false, error: { code: "SQL_REJECTED" } });
+  });
+
+  it("binds knowledge search to the use case, which rejects a bad vector before the database", async () => {
+    await expect(ports().knowledge.searchChunks({ tenantId: TENANT, namespaces: ["tenant"], embedding: [1, 2], topK: 1 })).rejects.toBeInstanceOf(
+      KnowledgeSearchRejectedError,
+    );
   });
 });

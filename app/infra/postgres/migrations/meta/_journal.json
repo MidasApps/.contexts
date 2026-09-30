@@ -22,6 +22,20 @@
       "when": 1790744264403,
       "tag": "0002_semantic_reader_grants",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1790748211400,
+      "tag": "0003_knowledge_tables",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1790748221367,
+      "tag": "0004_knowledge_runtime_role",
+      "breakpoints": true
     }
   ]
 }
