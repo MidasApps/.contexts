@@ -2,7 +2,7 @@ import type { App, AppOptions } from "firebase-admin/app";
 import type { Auth } from "firebase-admin/auth";
 import type { Firestore } from "firebase-admin/firestore";
 import { describe, expect, it } from "vitest";
-import { createFirebaseAdmin, EmulatorOutsideLocalError, type FirebaseAdminSdk } from "./firebase-admin.ts";
+import { createFirebaseAdmin, EmulatorOutsideLocalError, type FirebaseAdminSdk, FirebaseProjectMismatchError } from "./firebase-admin.ts";
 
 const LOCAL_ENV = { APP_ENV: "local", FIREBASE_PROJECT_ID: "demo-core" } as const;
 const PROD_ENV = { APP_ENV: "prod", FIREBASE_PROJECT_ID: "acme-prod" } as const;
@@ -73,5 +73,13 @@ describe("createFirebaseAdmin", () => {
     const admin = createFirebaseAdmin({ env: LOCAL_ENV, processEnv: EMULATOR_HOSTS, sdk });
     expect(admin.app).toBe(existing);
     expect(initialized).toEqual([]);
+  });
+
+  it("refuses to reuse an app initialized for another project", () => {
+    const existing: App = { name: "core-services", options: { projectId: "other-project" } };
+    const { sdk } = makeFakeSdk([existing]);
+    const create = () => createFirebaseAdmin({ env: LOCAL_ENV, processEnv: {}, sdk });
+    expect(create).toThrow(FirebaseProjectMismatchError);
+    expect(create).toThrow(/demo-core/);
   });
 });

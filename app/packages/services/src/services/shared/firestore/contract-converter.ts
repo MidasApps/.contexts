@@ -7,7 +7,7 @@ import {
 } from "firebase-admin/firestore";
 import type { z } from "zod";
 import { CorruptDocumentError } from "./corrupt-document-error.ts";
-import { listDateTimePaths, mapAtPaths } from "./date-time-paths.ts";
+import { type FieldPath, listDateTimePaths, mapAtPaths } from "./date-time-paths.ts";
 
 const ID_FIELD = "id";
 
@@ -54,4 +54,37 @@ export const createContractConverter = <Schema extends z.ZodType<DocumentData>>(
       throw new CorruptDocumentError({ documentPath: snapshot.ref.path, issuePaths });
     },
   };
+};
+
+const FIELD_SEPARATOR = ".";
+
+/** Date-time paths below a patch key: `[["endsAt"]]` for key `window` when `window.endsAt` is a date-time. */
+const pathsBelowKey = (key: string, dateTimePaths: readonly FieldPath[]): FieldPath[] => {
+  const segments = key.split(FIELD_SEPARATOR);
+  return dateTimePaths
+    .filter((path) => path.length >= segments.length && segments.every((segment, index) => path[index] === segment))
+    .map((path) => path.slice(segments.length));
+};
+
+/**
+ * Converts a patch for `DocumentReference.update()` / `Transaction.update()`, which
+ * never run the converter's `toFirestore`: ISO date-time values at the contract's
+ * date-time paths become `Timestamp`, so `update()` stores the same types as `set()`.
+ *
+ * Keys are top-level field names or dotted paths (`"window.endsAt"`); sentinels such
+ * as `FieldValue.serverTimestamp()` or `FieldValue.delete()` pass through.
+ * Limits: `FieldPath` objects as keys and `FieldValue.arrayUnion(...)` elements are
+ * not converted (build those values with `Timestamp` yourself), and the patch is not
+ * validated (use cases validate their input at the boundary).
+ * @example
+ *   await ref.update(toFirestoreUpdate(SampleContract, { name: "B", "window.endsAt": "2026-10-01T00:00:00.000Z" }));
+ */
+export const toFirestoreUpdate = <Schema extends z.ZodType<DocumentData>>(
+  contract: ContractDefinition<Schema>,
+  patch: Readonly<Record<string, unknown>>,
+): DocumentData => {
+  const dateTimePaths = listDateTimePaths(contract.schema);
+  return Object.fromEntries(
+    Object.entries(patch).map(([key, value]) => [key, mapAtPaths(value, pathsBelowKey(key, dateTimePaths), isoToTimestamp)]),
+  );
 };

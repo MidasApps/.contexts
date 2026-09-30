@@ -39,8 +39,9 @@ export {
   EmulatorOutsideLocalError,
   type FirebaseAdmin,
   type FirebaseAdminSdk,
+  FirebaseProjectMismatchError,
 } from "./services/shared/firebase/firebase-admin.ts";
-export { createContractConverter } from "./services/shared/firestore/contract-converter.ts";
+export { createContractConverter, toFirestoreUpdate } from "./services/shared/firestore/contract-converter.ts";
 export { CorruptDocumentError } from "./services/shared/firestore/corrupt-document-error.ts";
 export {
   type CreateAuditFields,

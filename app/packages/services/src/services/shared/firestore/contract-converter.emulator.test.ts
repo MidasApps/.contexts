@@ -1,9 +1,9 @@
 import { defineContract, firestoreIdSchema, IsoDateTimeSchema, TenantIdSchema } from "@core/contracts";
-import { type DocumentData, Timestamp } from "firebase-admin/firestore";
+import { type DocumentData, FieldValue, Timestamp } from "firebase-admin/firestore";
 import { beforeEach, describe, expect, it } from "vitest";
 import { z } from "zod";
 import { createFirebaseAdmin } from "../firebase/firebase-admin.ts";
-import { createContractConverter } from "./contract-converter.ts";
+import { createContractConverter, toFirestoreUpdate } from "./contract-converter.ts";
 import { CorruptDocumentError } from "./corrupt-document-error.ts";
 
 // Runs inside `firebase emulators:exec`, which exports FIRESTORE_EMULATOR_HOST.
@@ -120,5 +120,42 @@ describe("createContractConverter", () => {
     expect(error.documentPath).toBe(`${COLLECTION}/${ref.id}`);
     expect(error.issuePaths).toEqual(["name", "occurredAt"]);
     expect(error.message).not.toMatch(/ana@example\.com|987654321/);
+  });
+});
+
+describe("toFirestoreUpdate", () => {
+  it("stores ISO date-times of an update() patch as Timestamps, by field or dotted path", async () => {
+    const ref = converted().doc();
+    await ref.set(SampleSchema.parse({ ...SAMPLE, id: ref.id }));
+
+    await collection()
+      .doc(ref.id)
+      .update(
+        toFirestoreUpdate(SampleContract, {
+          name: "Renamed",
+          occurredAt: "2026-10-02T10:00:00.000Z",
+          "window.endsAt": "2026-10-03T00:00:00.000Z",
+          checkpoints: ["2026-10-04T00:00:00.000Z"],
+          deletedAt: FieldValue.serverTimestamp(),
+        }),
+      );
+
+    const raw = (await collection().doc(ref.id).get()).data() ?? {};
+    expect(readPath(raw, "occurredAt")).toBeInstanceOf(Timestamp);
+    expect(readPath(raw, "window", "endsAt")).toBeInstanceOf(Timestamp);
+    expect(readPath(raw, "checkpoints", "0")).toBeInstanceOf(Timestamp);
+    expect(readPath(raw, "deletedAt")).toBeInstanceOf(Timestamp);
+    expect((await ref.get()).data()).toMatchObject({
+      name: "Renamed",
+      occurredAt: "2026-10-02T10:00:00.000Z",
+      window: { endsAt: "2026-10-03T00:00:00.000Z", label: "launch" },
+      checkpoints: ["2026-10-04T00:00:00.000Z"],
+    });
+  });
+
+  it("converts date-times nested in an object value and leaves other keys untouched", () => {
+    const patch = toFirestoreUpdate(SampleContract, { window: { endsAt: "2026-10-03T00:00:00.000Z", label: "x" }, name: "2026-10-03T00:00:00.000Z" });
+    expect(readPath(patch, "window", "endsAt")).toBeInstanceOf(Timestamp);
+    expect(patch["name"]).toBe("2026-10-03T00:00:00.000Z");
   });
 });

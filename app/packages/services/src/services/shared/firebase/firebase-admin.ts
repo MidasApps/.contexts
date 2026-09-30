@@ -35,6 +35,20 @@ export class EmulatorOutsideLocalError extends Error {
   }
 }
 
+/**
+ * Bug/misconfiguration: the app reused under our name was initialized for another
+ * project (e.g. a hot reload after `FIREBASE_PROJECT_ID` changed), so its clients
+ * would read and write the wrong project.
+ */
+export class FirebaseProjectMismatchError extends Error {
+  readonly code = "FIREBASE_PROJECT_MISMATCH";
+
+  constructor(args: { expected: string; actual: string | undefined }) {
+    super(`firebase app "${APP_NAME}" targets ${args.actual ?? "(no project)"}, expected ${args.expected}`);
+    this.name = "FirebaseProjectMismatchError";
+  }
+}
+
 const findEmulatorHosts = (processEnv: Record<string, string | undefined>): string[] =>
   Object.entries(processEnv)
     .filter(([key, value]) => EMULATOR_HOST_KEY.test(key) && value !== undefined && value !== "")
@@ -47,6 +61,7 @@ const findEmulatorHosts = (processEnv: Record<string, string | undefined>): stri
  * sees the keys it declares, while firebase-admin reads any `*_EMULATOR_HOST`.
  * @param processEnv the raw `process.env`, inspected for emulator hosts only.
  * @throws {EmulatorOutsideLocalError} when an emulator host is set and `APP_ENV !== "local"`.
+ * @throws {FirebaseProjectMismatchError} when the reused app targets another project.
  */
 export const createFirebaseAdmin = (args: {
   env: Pick<ServicesEnv, "APP_ENV" | "FIREBASE_PROJECT_ID">;
@@ -58,8 +73,10 @@ export const createFirebaseAdmin = (args: {
     const hosts = findEmulatorHosts(processEnv);
     if (hosts.length > 0) throw new EmulatorOutsideLocalError(hosts);
   }
-  const app =
-    sdk.getApps().find((candidate) => candidate.name === APP_NAME) ??
-    sdk.initializeApp({ projectId: env.FIREBASE_PROJECT_ID }, APP_NAME);
+  const existing = sdk.getApps().find((candidate) => candidate.name === APP_NAME);
+  if (existing !== undefined && existing.options.projectId !== env.FIREBASE_PROJECT_ID) {
+    throw new FirebaseProjectMismatchError({ expected: env.FIREBASE_PROJECT_ID, actual: existing.options.projectId });
+  }
+  const app = existing ?? sdk.initializeApp({ projectId: env.FIREBASE_PROJECT_ID }, APP_NAME);
   return { app, auth: sdk.getAuth(app), firestore: sdk.getFirestore(app) };
 };
