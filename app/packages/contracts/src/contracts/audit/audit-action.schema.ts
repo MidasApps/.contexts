@@ -50,6 +50,11 @@ export const AUDIT_ACTIONS = [
   "AGENT_TOOL_EXECUTED",
   "SEMANTIC_QUERY_EXECUTED",
   "KNOWLEDGE_DOCUMENT_INDEXED",
+  "KNOWLEDGE_DOCUMENT_INGESTED",
+  "KNOWLEDGE_DOCUMENT_DELETED",
+  // Uploads (SP3 files context): an accepted object, or one refused by the magic-bytes check.
+  "FILE_UPLOADED",
+  "FILE_REJECTED",
 ] as const;
 
 export const AuditActionSchema = z.enum(AUDIT_ACTIONS);

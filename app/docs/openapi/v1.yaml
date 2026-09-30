@@ -8306,6 +8306,10 @@ components:
             - AGENT_TOOL_EXECUTED
             - SEMANTIC_QUERY_EXECUTED
             - KNOWLEDGE_DOCUMENT_INDEXED
+            - KNOWLEDGE_DOCUMENT_INGESTED
+            - KNOWLEDGE_DOCUMENT_DELETED
+            - FILE_UPLOADED
+            - FILE_REJECTED
           type: string
           x-pii: none
         actor:
@@ -8583,6 +8587,10 @@ components:
             - AGENT_TOOL_EXECUTED
             - SEMANTIC_QUERY_EXECUTED
             - KNOWLEDGE_DOCUMENT_INDEXED
+            - KNOWLEDGE_DOCUMENT_INGESTED
+            - KNOWLEDGE_DOCUMENT_DELETED
+            - FILE_UPLOADED
+            - FILE_REJECTED
           type: string
           x-pii: none
         actorId:
@@ -8689,6 +8697,10 @@ components:
             - AGENT_TOOL_EXECUTED
             - SEMANTIC_QUERY_EXECUTED
             - KNOWLEDGE_DOCUMENT_INDEXED
+            - KNOWLEDGE_DOCUMENT_INGESTED
+            - KNOWLEDGE_DOCUMENT_DELETED
+            - FILE_UPLOADED
+            - FILE_REJECTED
           type: string
           x-pii: none
         actor:

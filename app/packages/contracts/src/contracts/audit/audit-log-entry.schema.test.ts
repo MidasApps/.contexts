@@ -56,6 +56,12 @@ describe("AuditLogEntrySchema", () => {
     }
   });
 
+  it("accepts the knowledge and file actions SP3 audits (ingested, deleted, uploaded, rejected)", () => {
+    for (const action of ["KNOWLEDGE_DOCUMENT_INGESTED", "KNOWLEDGE_DOCUMENT_DELETED", "FILE_UPLOADED", "FILE_REJECTED"]) {
+      expect(AuditLogEntrySchema.safeParse({ ...entry, action }).success).toBe(true);
+    }
+  });
+
   it("records every outcome the agent runtime needs (success, denied, failed, pending-approval)", () => {
     for (const outcome of ["success", "denied", "failed", "pending-approval"]) {
       expect(AuditLogEntrySchema.safeParse({ ...entry, outcome }).success).toBe(true);
