@@ -67,7 +67,10 @@
         "APPROVAL_EXECUTED",
         "APPROVAL_FAILED",
         "PLATFORM_STAFF_GRANTED",
-        "PLATFORM_ACCESS_DENIED"
+        "PLATFORM_ACCESS_DENIED",
+        "AGENT_TOOL_EXECUTED",
+        "SEMANTIC_QUERY_EXECUTED",
+        "KNOWLEDGE_DOCUMENT_INDEXED"
       ],
       "type": "string",
       "x-pii": "none"

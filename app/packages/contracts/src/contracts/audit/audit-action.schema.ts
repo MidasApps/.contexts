@@ -46,6 +46,10 @@ export const AUDIT_ACTIONS = [
   "APPROVAL_FAILED",
   "PLATFORM_STAFF_GRANTED",
   "PLATFORM_ACCESS_DENIED",
+  // Agent runtime (SP3 spec §8.1, §8.3, §11): SP3 adds action names only, the writer stays SP1's.
+  "AGENT_TOOL_EXECUTED",
+  "SEMANTIC_QUERY_EXECUTED",
+  "KNOWLEDGE_DOCUMENT_INDEXED",
 ] as const;
 
 export const AuditActionSchema = z.enum(AUDIT_ACTIONS);

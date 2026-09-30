@@ -1,92 +1,102 @@
 // Composition root of the core server: builds every adapter once per process and binds the
-// `/v1` pipeline, the access core and the audit writer (SP1 Task 8). Apps call it lazily.
+// `/v1` pipeline, the access core, the access write side and the audit writer. Apps call it lazily.
 import type { PermissionDefinition } from "@core/contracts";
-import { createAccessCore, type AccessCore } from "./access/composition.ts";
+import { createFirestoreAccessAdapters, type FirestoreAccessAdapters } from "./access/adapters/driven/firestore-access-adapters.ts";
 import type { AccessReaders } from "./access/application/ports/driven/access-readers.ts";
+import { makeSyncClaims } from "./access/application/use-cases/sync-claims.ts";
+import { createAccessCore, createAccessServices, type AccessCore, type AccessServices } from "./access/composition.ts";
 import { createFirestoreAuditLogWriter } from "./audit/adapters/driven/firestore-audit-log-writer.ts";
 import { makeRecordAudit, type AuditWriter } from "./audit/application/use-cases/record-audit.ts";
 import { buildCoreRoutes, type CoreRoutes } from "./core-routes.ts";
-
-export { createRouteResolver, UnknownEndpointError, type CoreRoutes } from "./core-routes.ts";
 import { createFirebaseTokenVerifier } from "./identity/adapters/driven/firebase-token-verifier.ts";
 import { refuseAllApiKeys, type ApiKeyAuthenticator } from "./identity/application/ports/driven/api-key-authenticator.ts";
+import type { TokenVerifier } from "./identity/application/ports/driven/token-verifier.ts";
 import { makeVerifyBearer, type VerifyBearer } from "./identity/application/use-cases/resolve-principal.ts";
 import { systemClock, type Clock } from "./shared/clock/clock.ts";
 import type { FirebaseAdmin } from "./shared/firebase/firebase-admin.ts";
+import { createFirestoreUnitOfWork } from "./shared/firestore/unit-of-work.ts";
 import type { ApiRouteDeps } from "./shared/http/api-route.ts";
 import { createFirestoreIdempotencyStore } from "./shared/idempotency/firestore-idempotency-store.ts";
 import type { Logger } from "./shared/observability/logger.ts";
 import { createFirestoreRateLimiter } from "./shared/rate-limit/firestore-rate-limiter.ts";
+
+export { createRouteResolver, UnknownEndpointError, type CoreRoutes } from "./core-routes.ts";
 
 /** What a module contributes to the server; a `defineModule` manifest (decision 0015) satisfies it. */
 export type CoreServerModule = { readonly id: string; readonly permissions?: readonly PermissionDefinition[] };
 
 /** Adapters a caller may replace (tests, and later tasks until their Firestore adapters land). */
 export type CoreServerAdapters = {
+  /** Replaces only the four `authorize()` readers. */
   readonly accessReaders?: AccessReaders;
+  /** Every access adapter at once (defaults to Firestore and Firebase Auth). */
+  readonly access?: FirestoreAccessAdapters;
   readonly apiKeyAuthenticator?: ApiKeyAuthenticator;
+  /** Emulator route tests pass `createFakeTokenVerifier` (the Auth Emulator always checks revocation). */
+  readonly tokenVerifier?: TokenVerifier;
 };
 
 export type CoreServer = {
-  /** `/v1` handlers by endpoint id (filled by SP1 Tasks 10–18). */
+  /** `/v1` handlers by endpoint id (filled by SP1 Tasks 9–18). */
   readonly routes: CoreRoutes;
   /** Bearer verification for other runtimes (SP3's Mastra auth provider). */
   readonly verifyBearer: VerifyBearer;
   readonly access: AccessCore;
+  /** Access write side: grants, roles, claims sync (SP1 Task 9). */
+  readonly accessServices: AccessServices;
   readonly audit: AuditWriter;
   /** The dependencies every `withApiRoute` of this server shares. */
   readonly pipeline: ApiRouteDeps;
 };
 
-/** Bug guard: the access readers are not wired yet; every decision rejects (500), never allows. */
-export class AccessReadersNotWiredError extends Error {
-  readonly code = "ACCESS_READERS_NOT_WIRED";
-
-  constructor() {
-    super("ACCESS_READERS_NOT_WIRED: pass adapters.accessReaders (Firestore readers arrive in SP1 Task 9)");
-    this.name = "AccessReadersNotWiredError";
-  }
-}
-
-const notWired = (): Promise<never> => Promise.reject(new AccessReadersNotWiredError());
-
-const UNWIRED_ACCESS_READERS: AccessReaders = {
-  grants: { listGrants: notWired },
-  roles: { getRoles: notWired },
-  nodeChains: { loadChain: notWired },
-  principals: {
-    getUser: notWired,
-    getDevice: notWired,
-    getApiKey: notWired,
-    getPlatformStaff: notWired,
-    getImpersonationSession: notWired,
-  },
-};
-
-/**
- * Builds the core server once per process.
- * @param env `API_KEY_PREFIX` of the validated services env.
- * @param modules installed modules (their permissions join the registry).
- * @throws {PermissionRegistryError} when module permissions conflict (startup bug).
- */
-export const createCoreServer = (args: {
+type CoreServerArgs = {
   env: { readonly API_KEY_PREFIX: string };
   firebase: FirebaseAdmin;
   logger: Logger;
   clock?: Clock;
   modules?: readonly CoreServerModule[];
   adapters?: CoreServerAdapters;
-}): CoreServer => {
-  const clock = args.clock ?? systemClock;
+};
+
+const buildAccess = (args: CoreServerArgs, clock: Clock, audit: AuditWriter) => {
   const { firestore, auth } = args.firebase;
-  const access = createAccessCore({
+  const adapters = args.adapters?.access ?? createFirestoreAccessAdapters({ firestore, auth });
+  const readers = args.adapters?.accessReaders ?? adapters.readers;
+  const core = createAccessCore({
     permissions: (args.modules ?? []).map((module) => ({ moduleId: module.id, permissions: module.permissions ?? [] })),
-    readers: args.adapters?.accessReaders ?? UNWIRED_ACCESS_READERS,
+    readers,
     clock,
   });
+  const syncClaims = makeSyncClaims({ users: adapters.users, projections: adapters.projections, principals: readers.principals, claims: adapters.claims, logger: args.logger });
+  const services = createAccessServices({
+    registry: core.registry,
+    memberships: adapters.memberships,
+    roles: adapters.roles,
+    roleReader: readers.roles,
+    projections: adapters.projections,
+    users: adapters.users,
+    audit,
+    unitOfWork: createFirestoreUnitOfWork({ firestore }),
+    clock,
+    syncClaims,
+  });
+  return { core, services };
+};
+
+/**
+ * Builds the core server once per process. Adapters keep references only, so building
+ * touches neither Firestore nor Auth.
+ * @param env `API_KEY_PREFIX` of the validated services env.
+ * @param modules installed modules (their permissions join the registry).
+ * @throws {PermissionRegistryError} when module permissions conflict (startup bug).
+ */
+export const createCoreServer = (args: CoreServerArgs): CoreServer => {
+  const clock = args.clock ?? systemClock;
+  const { firestore, auth } = args.firebase;
   const audit = makeRecordAudit({ writer: createFirestoreAuditLogWriter({ firestore }), clock });
+  const access = buildAccess(args, clock, audit);
   const verifyBearer = makeVerifyBearer({
-    tokenVerifier: createFirebaseTokenVerifier({ auth }),
+    tokenVerifier: args.adapters?.tokenVerifier ?? createFirebaseTokenVerifier({ auth }),
     apiKeyAuthenticator: args.adapters?.apiKeyAuthenticator ?? refuseAllApiKeys,
     apiKeyPrefix: args.env.API_KEY_PREFIX,
   });
@@ -97,8 +107,9 @@ export const createCoreServer = (args: {
     idempotency: createFirestoreIdempotencyStore({ firestore, clock }),
     verifyBearer,
     apiKeyPrefix: args.env.API_KEY_PREFIX,
-    access,
+    access: access.core,
     audit,
   };
-  return { routes: buildCoreRoutes(pipeline), verifyBearer, access, audit, pipeline };
+  const routes = buildCoreRoutes({ pipeline, access: access.services });
+  return { routes, verifyBearer, access: access.core, accessServices: access.services, audit, pipeline };
 };

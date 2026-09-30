@@ -20,6 +20,9 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   // Workspace packages ship TypeScript sources (`exports` point at `src/*.ts`).
   transpilePackages: ["@core/contracts", "@core/services"],
+  // libpg-query (SP3 SQL guard, via @core/services) loads its .wasm next to its own
+  // module; bundled, it looks in the wrong folder, so Node loads it from node_modules.
+  serverExternalPackages: ["libpg-query"],
   turbopack: { root: WORKSPACE_ROOT },
   // NODE_ENV is set by the Next CLI itself (`next dev` → development).
   headers: () =>

@@ -50,6 +50,12 @@ describe("AuditLogEntrySchema", () => {
     expect(AuditLogEntrySchema.safeParse({ ...entry, action: "ORGANIZATION_CREATE" }).success).toBe(false);
   });
 
+  it("accepts the agent runtime actions SP3 audits (tool runs, semantic queries, indexed documents)", () => {
+    for (const action of ["AGENT_TOOL_EXECUTED", "SEMANTIC_QUERY_EXECUTED", "KNOWLEDGE_DOCUMENT_INDEXED"]) {
+      expect(AuditLogEntrySchema.safeParse({ ...entry, action }).success).toBe(true);
+    }
+  });
+
   it("requires tenantId on tenant entries; platform entries carry targetTenantId instead", () => {
     expect(AuditLogEntrySchema.safeParse({ ...entry, tenantId: undefined }).success).toBe(false);
     expect(Object.keys(PlatformAuditLogEntrySchema.shape)).not.toContain("tenantId");

@@ -3,7 +3,8 @@ import { describe, expect, it } from "vitest";
 import { fixedClock } from "./shared/clock/clock.ts";
 import type { FirebaseAdmin } from "./shared/firebase/firebase-admin.ts";
 import { createLogger } from "./shared/observability/logger.ts";
-import { AccessReadersNotWiredError, createCoreServer } from "./composition.ts";
+import { createInMemoryAccessStore } from "./access/adapters/driven/in-memory-access-store.ts";
+import { createCoreServer } from "./composition.ts";
 
 // Adapters only keep references at construction; nothing here reaches Firebase.
 const firebase = { app: {}, auth: {}, firestore: {} } as unknown as FirebaseAdmin;
@@ -33,18 +34,26 @@ describe("createCoreServer", () => {
     expect(server.access.registry.get("core.project.read")).toBeDefined();
   });
 
-  it("starts with an empty route table", () => {
-    expect(build().routes).toEqual({});
+  it("registers the handlers of the verticals built so far", () => {
+    expect(Object.keys(build().routes)).toEqual(
+      expect.arrayContaining(["access.listPermissions", "access.listRoles", "access.createRole", "access.getRole", "access.updateRole", "access.deleteRole"]),
+    );
   });
 
   it("refuses API keys until their authenticator is wired, without touching Firebase", async () => {
     expect(await build().verifyBearer({ token: "core_PUBLIC_secret", checkRevoked: true })).toBeNull();
   });
 
-  it("fails closed while the access readers are not wired", async () => {
-    const { authorize } = build().access.forRequest();
-    await expect(
-      authorize({ principal: { type: "user", uid: "u1", mfa: false } as never, permission: "core.project.read", node: { level: "organization", tenantId: "org-a" } as never }),
-    ).rejects.toBeInstanceOf(AccessReadersNotWiredError);
+  it("decides with the access readers it is given (Firestore by default)", async () => {
+    const store = createInMemoryAccessStore();
+    store.putOrganization({ id: "org-a" });
+    store.putUser("u1");
+    const server = createCoreServer({ env: { API_KEY_PREFIX: "core" }, firebase, logger, adapters: { accessReaders: store } });
+    const decision = await server.access.forRequest().authorize({
+      principal: { type: "user", uid: "u1", mfa: false } as never,
+      permission: "core.project.read",
+      node: { level: "organization", tenantId: "org-a" } as never,
+    });
+    expect(decision).toEqual({ allowed: false, reason: "NOT_A_MEMBER" });
   });
 });

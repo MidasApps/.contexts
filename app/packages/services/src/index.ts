@@ -128,6 +128,43 @@ export {
   type RoleReader,
   type UserStatusRecord,
 } from "./services/access/index.ts";
+// SP1 access write side (Task 9): grants, custom roles, projections, claims.
+export {
+  AccessDeniedError,
+  AccessNotFoundError,
+  type AccessProjectionStore,
+  type AccessServices,
+  type AccessWriteDeps,
+  buildAccessProjection,
+  ClaimsTooLargeError,
+  type ClaimsWriter,
+  CORE_CLAIM_KEYS,
+  type CoreClaims,
+  createAccessServices,
+  createFirestoreAccessAdapters,
+  createInMemoryAccessWriteStore,
+  EscalationForbiddenError,
+  type FirestoreAccessAdapters,
+  type GrantMembership,
+  type GrantMembershipCommand,
+  type GrantPlan,
+  LastOwnerError,
+  MembershipExistsError,
+  type MembershipRepository,
+  makeSyncClaims,
+  type PrepareGrantArgs,
+  type RoleRepository,
+  RoleInUseError,
+  type SyncClaims,
+  UnknownPermissionError,
+  UnknownRoleError,
+  type UserAccessVersionStore,
+} from "./services/access/index.ts";
+export { createFirestoreUnitOfWork, inMemoryUnitOfWork, type UnitOfWork } from "./services/shared/firestore/unit-of-work.ts";
+export { CORE_COLLECTIONS, CORE_SCHEMA_VERSION } from "./services/shared/firestore/collections.ts";
+export { decodeCursor, encodeCursor, type CursorPosition } from "./services/shared/pagination/cursor.ts";
+export { pageMeta, paginateInMemory, type Page, type PageRequest } from "./services/shared/pagination/page.ts";
+export { err, ok, type Result } from "./services/shared/result/result.ts";
 // SP1 audit writer, rate limiter and idempotency store (Task 7).
 export {
   AUDIT_LOG_COLLECTIONS,

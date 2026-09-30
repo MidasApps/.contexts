@@ -35,7 +35,7 @@ const withoutId = (data: DocumentData): DocumentData =>
  *   when the stored data does not match the contract.
  */
 export const createContractConverter = <Schema extends z.ZodType<DocumentData>>(
-  contract: ContractDefinition<Schema>,
+  contract: Pick<ContractDefinition<Schema>, "schema">,
 ): FirestoreDataConverter<z.output<Schema>> => {
   const dateTimePaths = listDateTimePaths(contract.schema);
   const includeId = hasIdField(contract.schema);
@@ -80,7 +80,7 @@ const pathsBelowKey = (key: string, dateTimePaths: readonly FieldPath[]): FieldP
  *   await ref.update(toFirestoreUpdate(SampleContract, { name: "B", "window.endsAt": "2026-10-01T00:00:00.000Z" }));
  */
 export const toFirestoreUpdate = <Schema extends z.ZodType<DocumentData>>(
-  contract: ContractDefinition<Schema>,
+  contract: Pick<ContractDefinition<Schema>, "schema">,
   patch: Readonly<Record<string, unknown>>,
 ): DocumentData => {
   const dateTimePaths = listDateTimePaths(contract.schema);
