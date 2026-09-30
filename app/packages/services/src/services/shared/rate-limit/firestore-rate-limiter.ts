@@ -3,7 +3,7 @@ import { z } from "zod";
 import { systemClock, type Clock } from "../clock/clock.ts";
 import { CorruptDocumentError } from "../firestore/corrupt-document-error.ts";
 import { runInTransaction } from "../firestore/transaction-runner.ts";
-import { applyFixedWindow, type BucketState, type RateLimitDecision } from "./fixed-window.ts";
+import { applyFixedWindow, applyFixedWindowRefund, type BucketState, type RateLimitDecision } from "./fixed-window.ts";
 import { getRateLimitPolicy, RATE_LIMIT_POLICIES, type RateLimitPolicy } from "./rate-limit-policies.ts";
 import { rateLimitBucketId, type RateLimiter } from "./rate-limiter.ts";
 
@@ -60,6 +60,20 @@ export const createFirestoreRateLimiter = (deps: {
           const { decision, next } = applyFixedWindow({ bucket, policy, now: clock.now(), consume: true });
           if (next !== null) tx.set(ref, toStored(next, policy));
           return decision;
+        },
+        { maxAttempts: MAX_ATTEMPTS },
+      );
+    },
+    refund: (policyId, subject, consumed) => {
+      const policy = getRateLimitPolicy(policyId, policies);
+      const ref = refOf(policyId, subject);
+      return runInTransaction(
+        deps.firestore,
+        async (tx): Promise<RateLimitDecision | null> => {
+          const refunded = applyFixedWindowRefund({ bucket: readBucket(ref, (await tx.get(ref)).data()), policy, consumed });
+          if (refunded === null) return null;
+          tx.set(ref, toStored(refunded.next, policy));
+          return refunded.decision;
         },
         { maxAttempts: MAX_ATTEMPTS },
       );

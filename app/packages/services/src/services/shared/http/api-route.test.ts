@@ -279,6 +279,43 @@ describe("withApiRoute: rate limits", () => {
     expect((await redeem("good", "198.51.100.1")).status).toBe(204);
   });
 
+  it("reserves a failure slot before the work, so a parallel burst cannot pass the lockout", async () => {
+    const { deps } = setup();
+    let runs = 0;
+    let release: () => void = () => undefined;
+    const gate = new Promise<void>((resolve) => (release = resolve));
+    const route = withApiRoute(redeemThing, deps, async (context) => {
+      runs += 1;
+      await gate;
+      return Response.json({ error: { code: "UNAUTHORIZED", message: "x", requestId: context.requestId } }, { status: 401 });
+    });
+    const redeem = () => route(call("/v1/redeem", { method: "POST", headers: { ...json, "x-forwarded-for": "203.0.113.8" }, body: '{"code":"bad"}' }));
+    const burst = Array.from({ length: 6 }, () => redeem());
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    release();
+    const statuses = (await Promise.all(burst)).map((response) => response.status).sort();
+    expect(statuses).toEqual([401, 401, 429, 429, 429, 429]);
+    expect(runs).toBe(2);
+  });
+
+  it("gives the reserved slot back when the work succeeds", async () => {
+    const { deps } = setup();
+    const route = withApiRoute(redeemThing, deps, () => Promise.resolve(noContentResponse()));
+    const redeem = () => route(call("/v1/redeem", { method: "POST", headers: { ...json, "x-forwarded-for": "203.0.113.10" }, body: '{"code":"good"}' }));
+    for (let attempt = 0; attempt < 5; attempt += 1) expect((await redeem()).status).toBe(204);
+    expect((await redeem()).headers.get("x-ratelimit-remaining")).toBe("2");
+  });
+
+  it("locks out a parallel burst of bad API keys before the credentials are checked", async () => {
+    const { deps, bearerCalls } = setup();
+    const route = withApiRoute(createThing, deps, () => Promise.resolve(noContentResponse()));
+    const attempt = () =>
+      route(call("/v1/things", { method: "POST", headers: { ...json, authorization: "Bearer core_PUB_bad", "x-forwarded-for": "203.0.113.11" }, body: '{"name":"a","count":1}' }));
+    const statuses = (await Promise.all(Array.from({ length: 5 }, () => attempt()))).map((response) => response.status).sort();
+    expect(statuses).toEqual([401, 401, 429, 429, 429]);
+    expect(bearerCalls).toHaveLength(2);
+  });
+
   it("locks out API key failures per IP before the credential is checked", async () => {
     const { deps, bearerCalls } = setup();
     const route = withApiRoute(createThing, deps, () => Promise.resolve(noContentResponse()));

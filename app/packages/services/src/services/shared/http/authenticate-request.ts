@@ -14,8 +14,9 @@ const API_KEY_FAILURE_POLICY = "api-key-failure";
 
 /**
  * Authenticates a `/v1` request from `Authorization: Bearer` only (SP1 spec §3.2).
- * API keys are locked out per IP after repeated failures, checked before the key is
- * hashed (decision 0008 §5); ID tokens are verified with the method's revocation rule.
+ * API keys are locked out per IP after repeated failures: a slot is reserved before the key
+ * is hashed and given back on success (decisions 0008 §5, 0030 §1); ID tokens are verified
+ * with the method's revocation rule.
  */
 export const authenticateRequest = async (args: {
   request: Request;
@@ -37,7 +38,6 @@ export const authenticateRequest = async (args: {
   const decision = await gate.before();
   if (!decision.allowed) return { kind: "rate-limited", decision };
   const principal = await args.verifyBearer({ token, checkRevoked });
-  if (principal !== null) return { kind: "principal", principal };
-  await gate.after(true);
-  return { kind: "unauthenticated" };
+  await gate.after(principal === null);
+  return principal === null ? { kind: "unauthenticated" } : { kind: "principal", principal };
 };

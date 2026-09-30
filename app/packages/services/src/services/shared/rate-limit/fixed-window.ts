@@ -36,3 +36,21 @@ export const applyFixedWindow = (args: {
   const next: BucketState = { count: current.count + 1, windowStart: current.windowStart };
   return { decision: { allowed: true, limit: policy.limit, remaining: policy.limit - next.count, resetAt }, next };
 };
+
+/**
+ * Gives back one hit counted by `consumed` (a failure-counted policy reserves a slot before
+ * the work and returns it when the work succeeded). Only the window that counted the hit is
+ * touched: after it ended there is nothing to give back.
+ * @returns the decision after the refund, or null when nothing changes.
+ */
+export const applyFixedWindowRefund = (args: {
+  bucket: BucketState | null;
+  policy: RateLimitPolicy;
+  consumed: RateLimitDecision;
+}): { decision: RateLimitDecision; next: BucketState } | null => {
+  const { bucket, policy, consumed } = args;
+  if (bucket === null || bucket.count === 0) return null;
+  if (bucket.windowStart.getTime() + policy.windowMs !== consumed.resetAt.getTime()) return null;
+  const next: BucketState = { count: bucket.count - 1, windowStart: bucket.windowStart };
+  return { decision: { allowed: true, limit: policy.limit, remaining: policy.limit - next.count, resetAt: consumed.resetAt }, next };
+};

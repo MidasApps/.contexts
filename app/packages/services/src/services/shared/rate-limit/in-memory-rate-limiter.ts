@@ -1,5 +1,5 @@
 import type { Clock } from "../clock/clock.ts";
-import { applyFixedWindow, type BucketState } from "./fixed-window.ts";
+import { applyFixedWindow, applyFixedWindowRefund, type BucketState } from "./fixed-window.ts";
 import { getRateLimitPolicy, RATE_LIMIT_POLICIES, type RateLimitPolicy } from "./rate-limit-policies.ts";
 import { rateLimitBucketId, type RateLimiter } from "./rate-limiter.ts";
 
@@ -17,5 +17,13 @@ export const createInMemoryRateLimiter = (args: { clock: Clock; policies?: reado
   return {
     consume: (policyId, subject) => Promise.resolve().then(() => hit(policyId, subject, true)),
     peek: (policyId, subject) => Promise.resolve().then(() => hit(policyId, subject, false)),
+    refund: (policyId, subject, consumed) =>
+      Promise.resolve().then(() => {
+        const id = rateLimitBucketId(policyId, subject);
+        const refunded = applyFixedWindowRefund({ bucket: buckets.get(id) ?? null, policy: getRateLimitPolicy(policyId, policies), consumed });
+        if (refunded === null) return null;
+        buckets.set(id, refunded.next);
+        return refunded.decision;
+      }),
   };
 };

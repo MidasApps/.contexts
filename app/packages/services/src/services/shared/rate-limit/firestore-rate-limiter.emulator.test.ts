@@ -47,6 +47,18 @@ describe("Firestore rate limiter", () => {
     expect((await limiter.peek("test-five-per-minute", "10.0.0.1")).remaining).toBe(4);
   });
 
+  it("refunds a consumed hit in its window only", async () => {
+    const { clock, advance } = movableClock("2026-09-29T12:00:00.000Z");
+    const limiter = createFirestoreRateLimiter({ firestore, clock, policies });
+    const consumed = await limiter.consume("test-five-per-minute", "10.0.0.2");
+    expect(await limiter.refund("test-five-per-minute", "10.0.0.2", consumed)).toMatchObject({ remaining: 5 });
+    const again = await limiter.consume("test-five-per-minute", "10.0.0.2");
+    advance(60_000);
+    await limiter.consume("test-five-per-minute", "10.0.0.2");
+    expect(await limiter.refund("test-five-per-minute", "10.0.0.2", again)).toBeNull();
+    expect((await limiter.peek("test-five-per-minute", "10.0.0.2")).remaining).toBe(4);
+  });
+
   it("counts concurrent hits exactly", async () => {
     const { clock } = movableClock("2026-09-29T12:00:00.000Z");
     const limiter = createFirestoreRateLimiter({ firestore, clock, policies });
