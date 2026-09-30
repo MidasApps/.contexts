@@ -35,8 +35,8 @@ const validate = (definitions: readonly unknown[]): UnitTypeDefinition[] =>
   });
 
 /**
- * Registry of the unit types the application modules declare (SP1 spec §4); the core
- * registers none.
+ * Registry of unit types (SP1 spec §4): `createTenancyServices` passes the core's
+ * `CORE_UNIT_TYPES` and the ones the application modules declare.
  * @throws {UnitTypeRegistryError} for an invalid definition, a duplicate id, or an
  *   allowed parent that is neither `project` nor a registered type.
  */

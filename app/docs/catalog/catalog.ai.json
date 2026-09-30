@@ -12900,7 +12900,7 @@
     },
     {
       "context": "tenancy",
-      "description": "A unit type registered by an application module; the core registers none.",
+      "description": "A unit type: the core's neutral `core.unit` or one registered by an application module.",
       "examples": [
         {
           "allowedParents": [
@@ -12941,7 +12941,7 @@
       "id": "tenancy.UnitTypeDefinition",
       "jsonSchema": {
         "additionalProperties": false,
-        "description": "A unit type registered by an application module; the core registers none.",
+        "description": "A unit type: the core's neutral `core.unit` or one registered by an application module.",
         "examples": [
           {
             "allowedParents": [

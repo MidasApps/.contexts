@@ -84,8 +84,8 @@ describe("createCoreServer", () => {
     );
   });
 
-  it("registers the unit types of the installed modules", () => {
-    expect(build().tenancy.unitTypes.list().map((type) => type.id)).toEqual(["sample.site"]);
+  it("registers the core unit type and the unit types of the installed modules", () => {
+    expect(build().tenancy.unitTypes.list().map((type) => type.id)).toEqual(["core.unit", "sample.site"]);
   });
 
   it("refuses API keys until their authenticator is wired, without touching Firebase", async () => {

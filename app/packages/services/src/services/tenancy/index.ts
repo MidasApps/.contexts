@@ -8,6 +8,7 @@ export { regionalSettingsAt, type LoadNode, type NodeDetails, type ResolveNodeRe
 export { UserAccountMissingError } from "./application/use-cases/create-organization.ts";
 export { resolveRegionalSettings } from "./domain/regional-settings.ts";
 export { MAX_SUBTREE_REWRITE, placementUnder, planMove, type MovePlan, type TreeRewrite, type TreeUnit } from "./domain/unit-tree.ts";
+export { CORE_UNIT_TYPE_ID, CORE_UNIT_TYPES } from "./domain/core-unit-types.ts";
 export { createUnitTypeRegistry, UnitTypeRegistryError, type UnitTypeRegistry, type UnitTypeRegistryErrorCode } from "./domain/unit-type-registry.ts";
 export { InvalidUnitParentError, type InvalidUnitParentReason } from "./domain/errors/invalid-unit-parent-error.ts";
 export { SubtreeTooLargeError } from "./domain/errors/subtree-too-large-error.ts";

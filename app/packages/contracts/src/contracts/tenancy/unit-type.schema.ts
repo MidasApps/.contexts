@@ -2,7 +2,7 @@ import { z } from "zod";
 import { defineContract } from "../contract.ts";
 import { none } from "../field-docs.ts";
 
-/** `<module>.<type>`, e.g. `sample.site`; declared by module manifests (SP1 spec §4). */
+/** `<module>.<type>`, e.g. `sample.site`; declared by module manifests (SP1 spec §4), or the core's `core.unit`. */
 export const UnitTypeIdSchema = z.string().regex(/^[a-z][a-z0-9-]*\.[a-z][a-z0-9-]*$/, {
   error: "Expected <module>.<type>, e.g. sample.site.",
 });
@@ -25,7 +25,7 @@ export type UnitTypeDefinition = z.infer<typeof UnitTypeDefinitionSchema>;
 export const UnitTypeDefinitionContract = defineContract(UnitTypeDefinitionSchema, {
   id: "tenancy.UnitTypeDefinition",
   kind: "view",
-  description: "A unit type registered by an application module; the core registers none.",
+  description: "A unit type: the core's neutral `core.unit` or one registered by an application module.",
   examples: [
     { id: "sample.site", labelKey: "sample.unitTypes.site", allowedParents: ["project"] },
     { id: "sample.room", labelKey: "sample.unitTypes.room", allowedParents: ["sample.site", "sample.room"] },

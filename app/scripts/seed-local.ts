@@ -6,7 +6,7 @@ import path from "node:path";
 import { createFirebaseAdmin, createLogger } from "@core/services";
 import { createCoreServer } from "@core/services/composition";
 import { createAuthEmulatorAdmin } from "./src/seed/auth-emulator-admin.ts";
-import { createCoreSeedAdapter, SEED_MODULE } from "./src/seed/seed-core-adapter.ts";
+import { createCoreSeedAdapter } from "./src/seed/seed-core-adapter.ts";
 import type { SeedState } from "./src/seed/seed-core-port.ts";
 import { LOCAL_SEED_STEPS } from "./src/seed/seed-steps.ts";
 import { resolveSeedTarget } from "./src/seed/seed-target.ts";
@@ -24,7 +24,7 @@ const main = async (): Promise<void> => {
   const auth = createAuthEmulatorAdmin({ origin: target.authEmulatorOrigin, projectId: target.projectId });
   const firebase = createFirebaseAdmin({ env: { APP_ENV: "local", FIREBASE_PROJECT_ID: target.projectId }, processEnv: process.env });
   const logger = createLogger({ context: { service: "scripts", env: "local" } });
-  const server = createCoreServer({ env: { API_KEY_PREFIX: "core", ORGANIZATION_SELF_SERVE: true }, firebase, logger, modules: [SEED_MODULE] });
+  const server = createCoreServer({ env: { API_KEY_PREFIX: "core", ORGANIZATION_SELF_SERVE: true }, firebase, logger });
   const core = createCoreSeedAdapter({ server, firebase });
   const state: SeedState = { uids: {} };
   print(`project ${target.projectId}, auth emulator ${target.authEmulatorOrigin}`);

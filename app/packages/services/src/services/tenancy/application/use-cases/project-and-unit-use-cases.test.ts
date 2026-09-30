@@ -141,8 +141,22 @@ describe("units", () => {
     expect(settings).toEqual({ locale: "en-US", displayTimeZone: "America/Manaus", nodeTimeZone: "America/Manaus", currency: "USD" });
   });
 
-  it("lists the registered unit types", async () => {
+  it("lists the core unit type and the modules' ones", async () => {
     const world = await setup();
-    expect(world.tenancy.listUnitTypes(page).items.map((type) => type.id)).toEqual(["sample.room", "sample.site"]);
+    expect(world.tenancy.listUnitTypes(page).items.map((type) => type.id)).toEqual(["core.unit", "sample.room", "sample.site"]);
+  });
+
+  it("creates and moves units of the core type without any module type (follow-up #21)", async () => {
+    const world = await setup();
+    const project = await world.project("Alpha");
+    const first = await world.unit(project.id, "First", "core.unit");
+    const second = await world.unit(project.id, "Second", "core.unit");
+    const child = await world.unit(project.id, "Child", "core.unit", first.id);
+
+    const moved = await world.tenancy.updateUnit({ ...world.command("owner"), unitId: child.id, input: { parentUnitId: second.id } });
+    expect(moved).toMatchObject({ ok: true, data: { type: "core.unit", parentUnitId: second.id, ancestorIds: [second.id], depth: 1 } });
+    const underSite = await world.unit(project.id, "Site", "sample.site");
+    const refused = await world.tenancy.updateUnit({ ...world.command("owner"), unitId: child.id, input: { parentUnitId: underSite.id } });
+    expect(refused.ok).toBe(false);
   });
 });

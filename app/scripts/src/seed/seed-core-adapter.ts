@@ -1,5 +1,6 @@
 import {
   CORE_COLLECTIONS,
+  CORE_UNIT_TYPE_ID,
   type FirebaseAdmin,
   OrganizationIdSchema,
   ProjectIdSchema,
@@ -8,20 +9,14 @@ import {
   UnitIdSchema,
   UserIdSchema,
 } from "@core/services";
-import type { CoreServer, CoreServerModule } from "@core/services/composition";
+import type { CoreServer } from "@core/services/composition";
 import type { Named, SeedCore } from "./seed-core-port.ts";
 
 /**
- * The core registers no unit type (SP1 spec §4) and the app installs none yet, so the seed
- * registers one generic type of its own. Units of this type are readable everywhere; moving
- * one through `/v1` needs the type registered by an installed module (follow-up for SP2).
+ * Seeded units use the core's neutral `core.unit` (decision 0030 A6), which every app
+ * registers, so they can be moved through `/v1` whatever modules the app installs.
  */
-export const SEED_UNIT_TYPE = "seed.unit";
-
-export const SEED_MODULE: CoreServerModule = {
-  id: "seed",
-  unitTypes: [{ id: SEED_UNIT_TYPE, labelKey: "seed.unitTypes.unit", allowedParents: ["project", SEED_UNIT_TYPE] }],
-};
+export const SEED_UNIT_TYPE = CORE_UNIT_TYPE_ID;
 
 const SEED_PHONE_ENROLLMENT_ID = "seed-phone";
 const SEED_DEFAULTS = { locale: "pt-BR", timeZone: "America/Sao_Paulo", currency: "BRL" } as const;
@@ -37,7 +32,7 @@ const named = (node: { id: string; name: string }): Named => ({ id: node.id, nam
 
 const actorOf = (uid: string) => ({ type: "user", uid: UserIdSchema.parse(uid), mfa: false }) as const;
 
-/** Binds the seed port to the services use cases (`createCoreServer` with `SEED_MODULE`). */
+/** Binds the seed port to the services use cases (`createCoreServer` without modules). */
 export const createCoreSeedAdapter = (args: { server: CoreServer; firebase: FirebaseAdmin }): SeedCore => {
   const { server, firebase } = args;
   const scope = (uid: string) => ({ actor: actorOf(uid), access: server.access.forRequest(), requestId: resolveRequestId(null) });

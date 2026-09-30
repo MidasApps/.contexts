@@ -148,6 +148,6 @@ describe("units routes (emulator)", () => {
     expect(stored?.["deletedAt"]).not.toBeNull();
 
     const types = await harness.call("tenancy.listUnitTypes", { method: "GET", path: "/v1/unit-types", as: "owner" });
-    expect((await dataOf<{ id: string }[]>(types)).map((type) => type.id)).toEqual(["sample.room", "sample.site"]);
+    expect((await dataOf<{ id: string }[]>(types)).map((type) => type.id)).toEqual(["core.unit", "sample.room", "sample.site"]);
   });
 });

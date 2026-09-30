@@ -234,6 +234,8 @@ export { pageMeta, paginateInMemory, type Page, type PageRequest } from "./servi
 export { err, ok, type Result } from "./services/shared/result/result.ts";
 // SP1 tenancy (Task 10): organizations, projects, the unit tree, regional settings.
 export {
+  CORE_UNIT_TYPE_ID,
+  CORE_UNIT_TYPES,
   createFirestoreTenancyAdapters,
   createInMemoryTenancyStore,
   createTenancyServices,
