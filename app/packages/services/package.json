@@ -21,8 +21,10 @@
   },
   "dependencies": {
     "@core/contracts": "workspace:*",
+    "@mastra/client-js": "catalog:",
     "drizzle-orm": "catalog:",
     "firebase-admin": "catalog:",
+    "google-auth-library": "catalog:",
     "libpg-query": "catalog:",
     "postgres": "catalog:",
     "ulid": "catalog:",

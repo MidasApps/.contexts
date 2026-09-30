@@ -289,3 +289,28 @@ export {
   type SqlRejection,
   type SqlRejectionReason,
 } from "./services/catalog/index.ts";
+// SP3 agents context: the /v1 → Mastra gateway (Task 8).
+export {
+  createMastraGateway,
+  createServerlessIdTokenSource,
+  DEFAULT_GATEWAY_TIMEOUTS,
+  gatewayErrorResponse,
+  mapMastraStatus,
+  ServerlessIdTokenError,
+  type AgentCallScope,
+  type AgentMessage,
+  type AgentRunInput,
+  type AgentRunOptions,
+  type AgentRuntimeGateway,
+  type GatewayError,
+  type GatewayErrorCode,
+  type GatewayResult,
+  type GatewayStream,
+  type IdTokenMinter,
+  type MastraGatewayOptions,
+  type ServerlessIdTokenSource,
+  type ThreadInput,
+  type ToolCallDecisionInput,
+  type WorkflowResumeInput,
+  type WorkflowStartInput,
+} from "./services/agents/index.ts";

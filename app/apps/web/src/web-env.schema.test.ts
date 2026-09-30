@@ -16,6 +16,8 @@ const REMOTE_ENV = {
   FIREBASE_PROJECT_ID: "core-staging",
   DATABASE_URL: "postgresql://app@10.0.0.5:5432/app",
   NEXT_PUBLIC_APP_URL: "https://staging.example.com",
+  MASTRA_URL: "https://mastra-staging.a.run.app",
+  MASTRA_AUDIENCE: "https://mastra-staging.a.run.app",
 };
 
 describe("loadWebEnv", () => {
@@ -57,5 +59,17 @@ describe("loadWebEnv", () => {
   it("rejects a wildcard origin", () => {
     expect(() => loadWebEnv({ ...LOCAL_ENV, CORS_ALLOWED_ORIGINS: "*" })).toThrow(/CORS_ALLOWED_ORIGINS/);
   });
-});
 
+  it("defaults MASTRA_URL to the local mastra dev server and needs no audience in local", () => {
+    const env = loadWebEnv(LOCAL_ENV);
+    expect(env.MASTRA_URL).toBe("http://localhost:4111");
+    expect(env.MASTRA_AUDIENCE).toBeUndefined();
+  });
+
+  it("requires MASTRA_URL (https) and MASTRA_AUDIENCE outside local, reporting every issue at once", () => {
+    const withoutMastra = { ...REMOTE_ENV, CORS_ALLOWED_ORIGINS: "", MASTRA_URL: undefined, MASTRA_AUDIENCE: undefined };
+    expect(() => loadWebEnv(withoutMastra)).toThrow(/MASTRA_URL \(REQUIRED\).*MASTRA_AUDIENCE \(REQUIRED\)/);
+    expect(() => loadWebEnv({ ...REMOTE_ENV, CORS_ALLOWED_ORIGINS: "", MASTRA_URL: "http://mastra.internal" })).toThrow(/MASTRA_URL \(HTTPS_REQUIRED\)/);
+    expect(loadWebEnv({ ...REMOTE_ENV, CORS_ALLOWED_ORIGINS: "" }).MASTRA_URL).toBe("https://mastra-staging.a.run.app");
+  });
+});
