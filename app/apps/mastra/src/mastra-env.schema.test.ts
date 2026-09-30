@@ -63,7 +63,7 @@ describe("loadMastraEnv", () => {
   it("composes the agent env: model roles and local storage init", () => {
     expect(loadMastraEnv(LOCAL_ENV)).toMatchObject({
       AI_MODEL_CHAT: "google/gemini-3.5-flash",
-      AI_MODEL_EMBEDDING: "google/gemini-embedding-001",
+      AI_MODEL_EMBEDDING: "google/gemini-embedding-2",
       MASTRA_STORAGE_INIT: "auto",
     });
   });

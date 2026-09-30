@@ -10,7 +10,7 @@ const baseEnv: ModelFactoryEnv = {
   AI_MODEL_FAST: "google/gemini-3.5-flash-lite",
   AI_MODEL_REASONING: "google/gemini-3.5-flash",
   AI_MODEL_JUDGE: "google/gemini-3.5-flash",
-  AI_MODEL_EMBEDDING: "google/gemini-embedding-001",
+  AI_MODEL_EMBEDDING: "google/gemini-embedding-2",
   AI_MODEL_TRANSCRIPTION: "openai/gpt-transcribe",
   AI_MODEL_SPEECH: "openai/gpt-4o-mini-tts",
   GOOGLE_AI_BACKEND: "ai-studio",
@@ -118,7 +118,7 @@ describe("createModelProvider in real mode", () => {
   it("pins google embeddings to 1536 dimensions", () => {
     const models = createModelProvider(realEnv);
     expect(models.embeddingProviderOptions).toEqual({ google: { outputDimensionality: 1536 } });
-    expect(models.embedding().modelId).toBe("gemini-embedding-001");
+    expect(models.embedding().modelId).toBe("gemini-embedding-2");
   });
 
   it("builds the default AI Studio provider without calling the network", () => {

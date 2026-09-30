@@ -27,3 +27,17 @@ The knowledge base needs tenant isolation that holds even if application code fo
 - **`tenant_id uuid` with a Firestore-id to uuid mapping table.** Adds a lookup to every call and a second identity for the same tenant.
 - **`createVectorQueryTool` / Mastra PgVector for the KB.** The tenant filter would come from request context that a caller can shape, and the tables would not follow the contract.
 - **Native 3072 dimensions.** pgvector's HNSW indexes `vector` up to 2000 dimensions; 1536 keeps the index and memory cost bounded.
+
+## Amendments
+
+- **2026-09-29 — default embedding model `gemini-embedding-2`.** The Gemini API deprecations
+  page (checked 2026-09-29, updated 2026-09-30 UTC) lists `gemini-embedding-001` as deprecated
+  with shutdown on 2028-05-14 and `gemini-embedding-2` (released 2026-04-22, no shutdown date)
+  as its replacement; the embeddings page gives `output_dimensionality` 128–3072 for
+  `gemini-embedding-2`, with 1536 recommended, and Vertex AI lists Gemini Embedding 2. No vector
+  was stored yet, so the default `AI_MODEL_EMBEDDING` becomes `google/gemini-embedding-2` with
+  `outputDimensionality: 1536` (D3-06 keeps its dimension; `ai.chunks_v1` is unchanged). The two
+  models' embedding spaces are incompatible: an environment that overrides back to
+  `gemini-embedding-001` must never share `ai.chunks_v1` or memory vectors with one using
+  `gemini-embedding-2`; changing the model once data exists means `ai.chunks_v2`. Price: $0.20
+  per 1M text input tokens (pricing page, updated 2026-09-24), now in `model-prices.ts`.

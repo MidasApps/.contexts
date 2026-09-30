@@ -4,9 +4,11 @@
  * an entry costs `null` in the usage ledger (the budget then counts tokens).
  *
  * Source (2026-09-29): https://ai.google.dev/gemini-api/docs/pricing, "Standard"
- * paid tier (page last updated 2026-09-24). `gemini-embedding-001` is not listed
- * there any more, so it has no entry. Cached input tokens are priced as regular
- * input (overestimates slightly; never underestimates).
+ * paid tier (page last updated 2026-09-24). `gemini-embedding-2` text input is
+ * $0.20 per 1M tokens (embeddings have no output tokens); `gemini-embedding-001`
+ * (deprecated, decision 0022 amendment) is not listed, so it has no entry.
+ * Cached input tokens are priced as regular input (overestimates slightly; never
+ * underestimates).
  */
 export const PRICES_VERIFIED_AT = "2026-09-29";
 
@@ -18,6 +20,7 @@ export type ModelPrice = {
 export const MODEL_PRICES: Readonly<Record<string, ModelPrice>> = {
   "google/gemini-3.5-flash": { inputMicroUsdPerMTok: 1_500_000, outputMicroUsdPerMTok: 9_000_000 },
   "google/gemini-3.5-flash-lite": { inputMicroUsdPerMTok: 300_000, outputMicroUsdPerMTok: 2_500_000 },
+  "google/gemini-embedding-2": { inputMicroUsdPerMTok: 200_000, outputMicroUsdPerMTok: 0 },
 };
 
 export type TokenUsage = { readonly inputTokens: number; readonly outputTokens: number };

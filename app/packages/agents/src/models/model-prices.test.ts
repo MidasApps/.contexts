@@ -11,6 +11,10 @@ describe("estimateCostMicroUsd", () => {
     expect(estimateCostMicroUsd("google/gemini-3.5-flash", { inputTokens: 1, outputTokens: 0 })).toBe(2);
   });
 
+  it("prices embedding input tokens of the default embedding model", () => {
+    expect(estimateCostMicroUsd("google/gemini-embedding-2", { inputTokens: 10_000, outputTokens: 0 })).toBe(2000);
+  });
+
   it("returns null for a model without a verified price", () => {
     expect(estimateCostMicroUsd("google/gemini-embedding-001", { inputTokens: 10, outputTokens: 0 })).toBeNull();
   });

@@ -48,7 +48,7 @@ export const MODEL_ROLES = {
   embedding: {
     envKey: "AI_MODEL_EMBEDDING",
     fallbackEnvKey: "AI_MODEL_EMBEDDING_FALLBACK",
-    defaultModel: "google/gemini-embedding-001",
+    defaultModel: "google/gemini-embedding-2",
     modality: "embedding",
   },
   transcription: {
