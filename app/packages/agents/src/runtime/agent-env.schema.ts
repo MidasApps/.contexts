@@ -52,7 +52,8 @@ export const AgentEnvSchema = z.object({
   // MCPServer requestState key; local gets a fixed non-secret default.
   MCP_REQUEST_STATE_KEY: optionalValue(z.string().min(1)),
   OTEL_EXPORTER_OTLP_ENDPOINT: optionalValue(z.url({ protocol: /^https?$/ })),
-  MASTRA_PUBSUB: z.enum(["memory", "gcp"]).default("memory"),
+  // Unset: `memory` in local, `gcp` elsewhere (Task 25: every instance sees workflow events).
+  MASTRA_PUBSUB: optionalValue(z.enum(["memory", "gcp"])),
   // Unset: `auto` in local, `skip` elsewhere (decision 0023).
   MASTRA_STORAGE_INIT: optionalValue(z.enum(["auto", "skip"])),
   USAGE_SINK: z.enum(["none", "bigquery"]).default("none"),
@@ -70,10 +71,11 @@ export type AgentRuntimeFlags = {
   AI_MODE: "real" | "fake";
 };
 
-type ResolvedKeys = "MCP_REQUEST_STATE_KEY" | "MASTRA_STORAGE_INIT";
+type ResolvedKeys = "MCP_REQUEST_STATE_KEY" | "MASTRA_STORAGE_INIT" | "MASTRA_PUBSUB";
 export type AgentEnv = Omit<AgentEnvInput, ResolvedKeys> & {
   MCP_REQUEST_STATE_KEY: string;
   MASTRA_STORAGE_INIT: "auto" | "skip";
+  MASTRA_PUBSUB: "memory" | "gcp";
 };
 
 /** Local-only request state key: not a secret, only valid where APP_ENV=local. */
@@ -157,5 +159,6 @@ export const resolveAgentEnv = <TEnv extends AgentEnvInput & AgentRuntimeFlags>(
     ...env,
     MCP_REQUEST_STATE_KEY: env.MCP_REQUEST_STATE_KEY ?? LOCAL_MCP_REQUEST_STATE_KEY,
     MASTRA_STORAGE_INIT: env.MASTRA_STORAGE_INIT ?? (env.APP_ENV === "local" ? "auto" : "skip"),
+    MASTRA_PUBSUB: env.MASTRA_PUBSUB ?? (env.APP_ENV === "local" ? "memory" : "gcp"),
   };
 };

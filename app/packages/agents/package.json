@@ -30,6 +30,7 @@
     "@core/services": "workspace:*",
     "@mastra/ai-sdk": "catalog:",
     "@mastra/core": "catalog:",
+    "@mastra/google-cloud-pubsub": "catalog:",
     "@mastra/mcp": "catalog:",
     "@mastra/memory": "catalog:",
     "@mastra/observability": "catalog:",

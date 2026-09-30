@@ -376,3 +376,5 @@ export { type ChatRouteBody, ChatRouteBodySchema } from "./chat/chat-request.sch
 export { approvalRunIdsOf, type ChatRunOwner, type ChatRunOwners, type ChatRunState, createChatRunOwners } from "./chat/chat-run-owners.ts";
 export { CHAT_AGENT_SUFFIX, chatAgentIdOf, createDurableChatAgent } from "./chat/durable-supervisor.ts";
 export { createChatStreamTap, createToolPreviewer, type ToolPreviewData, type ToolPreviewer } from "./chat/tool-preview.ts";
+// Mastra event bus selection (SP3 Task 25).
+export { createPubSub, type GcpPubSubClass, PubSubConfigError } from "./runtime/create-pubsub.ts";

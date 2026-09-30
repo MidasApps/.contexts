@@ -20,5 +20,7 @@
 # Not needed to build any image.
 .git
 docs
+# ...except the AI catalog: @core/agents imports it and the Mastra bundle inlines it (Task 25).
+!docs/catalog/catalog.ai.json
 infra
 **/*.test.ts

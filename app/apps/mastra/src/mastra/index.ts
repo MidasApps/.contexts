@@ -1,3 +1,4 @@
+import { createPubSub } from "@core/agents";
 import { Mastra } from "@mastra/core";
 import { PinoLogger } from "@mastra/loggers";
 import { env, processEnvForFirebaseGuard } from "../env.ts";
@@ -24,5 +25,7 @@ export const mastra = new Mastra({
   vectors: runtime.vectors,
   logger: new PinoLogger(buildLoggerOptions(env)),
   observability: runtime.observability,
+  // `memory` in local, Google Cloud Pub/Sub elsewhere (Task 25); the GCP adapter loads lazily.
+  pubsub: await createPubSub(env),
   server: { ...buildServerConfig(env), auth: runtime.auth, middleware: runtime.middleware, apiRoutes: runtime.apiRoutes, mcpOptions: runtime.mcpOptions },
 });

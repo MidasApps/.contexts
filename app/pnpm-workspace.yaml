@@ -25,6 +25,7 @@ catalog:
   "@mastra/client-js": 1.50.0 # /v1 -> Mastra gateway; 1.51.0 requires @mastra/core 1.72.0 (follow-up #17 bumps the train)
   "@mastra/core": 1.71.0
   "@mastra/deployer": 1.71.0 # createNodeServer for the agents auth emulator test (same train as core)
+  "@mastra/google-cloud-pubsub": 1.1.3 # Mastra event bus on Google Cloud Pub/Sub outside local (Task 25; Apache-2.0); pulls @google-cloud/pubsub 5 and inngest
   "@mastra/loggers": 1.3.2
   "@mastra/mcp": 2.1.1 # MCP client connectors (allowedHosts, approval) and the core MCP server; peer @mastra/core >=1.68 (Apache-2.0)
   "@mastra/memory": 1.32.1 # agent memory; 1.33.0 belongs to the @mastra/core 1.72.0 train (follow-up #17)
@@ -145,3 +146,9 @@ minimumReleaseAgeExclude:
   # SP3 web tools (Task 23): firecrawl 4.42.1, published 2026-09-30, admitted by pnpm at
   # install; remove after 2026-10-07 (7 days after the publish).
   - firecrawl@4.42.1
+
+# firecrawl 4.42.1 (latest) pins axios 1.18.0, which has high advisories fixed in 1.20.0
+# (GHSA-r4gj-5m52-g5wh and six more; found by the Mastra output audit, SP3 Task 25). Drop this
+# override once firecrawl depends on axios >= 1.20.0.
+overrides:
+  "firecrawl>axios": 1.20.0

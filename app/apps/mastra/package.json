@@ -8,7 +8,7 @@
   },
   "scripts": {
     "dev": "node scripts/copy-agent-assets.ts && node --eval \"process.getBuiltinModule('node:fs').rmSync('.mastra', { recursive: true, force: true })\" && mastra dev --env ../../.env.local",
-    "build": "node scripts/copy-agent-assets.ts && mastra build",
+    "build": "node scripts/copy-agent-assets.ts && mastra build && node scripts/check-mastra-output.ts",
     "start": "node .mastra/output/index.mjs",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
@@ -35,6 +35,7 @@
     "eslint": "catalog:",
     "mastra": "catalog:",
     "typescript": "catalog:",
-    "vitest": "catalog:"
+    "vitest": "catalog:",
+    "yaml": "catalog:"
   }
 }

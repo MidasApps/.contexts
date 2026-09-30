@@ -15,7 +15,11 @@ RUN pnpm fetch
 COPY . .
 # Only the Mastra app and the workspace packages it depends on, from the store.
 RUN pnpm install --offline --frozen-lockfile --filter "@core/mastra..."
-# No --studio: Studio runs only in local via `mastra dev` (spec §16.3).
+# No --studio: Studio runs only in local via `mastra dev` (spec §16.3). The build script also
+# copies the workspace overrides into the output, fails on a shared package that drifts from
+# pnpm-lock.yaml and runs `pnpm audit --prod --audit-level high` there (follow-up #2).
+# The output carries the agent instructions and skills (copied into public/ before the build)
+# and the AI catalog (inlined by the bundler), so nothing else is copied.
 RUN pnpm --filter @core/mastra build
 
 FROM node:26-alpine AS runtime

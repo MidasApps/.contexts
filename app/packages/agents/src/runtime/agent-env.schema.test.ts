@@ -136,6 +136,12 @@ describe("remote-only requirements", () => {
     expect(load({ MASTRA_STORAGE_INIT: "skip" }).MASTRA_STORAGE_INIT).toBe("skip");
   });
 
+  it("puts the event bus on Google Cloud Pub/Sub outside local unless told otherwise", () => {
+    expect(load({}).MASTRA_PUBSUB).toBe("memory");
+    expect(load(PROD_SOURCE, PROD_REAL).MASTRA_PUBSUB).toBe("gcp");
+    expect(load({ ...PROD_SOURCE, MASTRA_PUBSUB: "memory" }, PROD_REAL).MASTRA_PUBSUB).toBe("memory");
+  });
+
   it("accepts a plain-http Firecrawl URL only in local (a self-hosted Firecrawl on the developer machine)", () => {
     expect(issueFields({ ...PROD_SOURCE, FIRECRAWL_API_URL: "http://firecrawl.internal.example.com" }, PROD_REAL)).toEqual(["FIRECRAWL_API_URL"]);
     expect(issueFields({ ...PROD_SOURCE, FIRECRAWL_API_URL: "https://firecrawl.internal.example.com" }, PROD_REAL)).toEqual([]);

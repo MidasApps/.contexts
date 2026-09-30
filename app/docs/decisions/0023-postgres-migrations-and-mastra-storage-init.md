@@ -28,3 +28,26 @@ SP0 created schemas with a local-only init script (`infra/postgres/init/001-sche
 - **Atlas, Sqitch or node-pg-migrate.** Legitimate, but Drizzle is the framework default and also gives typed table definitions.
 - **Cloud SQL Node connector instead of the socket DSN.** Adds a dependency and a second connection path; Cloud Run already mounts the socket.
 - **Vendoring the Mastra output dependencies from the pnpm store.** Fights the deployer's output layout on every Mastra upgrade; a pin check plus audit catches drift with less machinery.
+
+## Amendments
+
+- **2026-09-30 — build output check and event bus (SP3 Task 25, follow-up #2).**
+  - *Build.* `pnpm -F @core/mastra build` = copy agent assets → `mastra build` →
+    `scripts/check-mastra-output.ts`, which (0) copies the workspace `overrides` into
+    `.mastra/output/pnpm-workspace.yaml` and installs the output again when that changed (the
+    deployer's nested install ignores workspace overrides); (1) compares the output lockfile
+    with `pnpm-lock.yaml` and fails when a package both contain resolves in the output to a
+    version the workspace lockfile does not have (direct and transitive; the workspace
+    tarballs are skipped); (2) runs `pnpm audit --prod --audit-level high` in the output
+    (`--no-audit` skips it for offline runs). The Dockerfile build stage and the CI job
+    `mastra-build` run the same script.
+  - *First finding.* The audit failed on the first run: `firecrawl` 4.42.1 (latest) pins
+    `axios` 1.18.0, with 7 high advisories fixed in 1.20.0. The workspace override
+    `"firecrawl>axios": 1.20.0` fixes both trees; step (0) exists because the output did not
+    receive it otherwise (the pin check then reported the drift).
+  - *Event bus.* `MASTRA_PUBSUB` defaults to `memory` in `local` and `gcp` elsewhere.
+    `memory` is Mastra's `EventEmitterPubSub`; `gcp` is `GoogleCloudPubSub({ projectId:
+    FIREBASE_PROJECT_ID })` from `@mastra/google-cloud-pubsub` 1.1.3 (Apache-2.0; it brings
+    `@google-cloud/pubsub` 5 and `inngest`), imported lazily so local runs never load it.
+    Credentials come from ADC; the runtime service account needs Pub/Sub publisher and
+    subscriber on its topics and subscriptions (named by the adapter).
