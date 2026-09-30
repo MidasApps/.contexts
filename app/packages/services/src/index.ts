@@ -209,6 +209,10 @@ export {
 export { createApiKeyServices, parseApiKey, type ApiKeyServices } from "./services/identity/index.ts";
 // SP1 device activations and devices (Task 15).
 export { createDeviceServices, normalizeActivationCode, type DeviceServices } from "./services/identity/index.ts";
+// SP1 platform staff and read-only impersonation (Task 16): SP2 guards, SP5 /admin.
+export { createPlatformServices, ImpersonationNotFoundError, type ImpersonatedRequest, type PlatformServices } from "./services/identity/index.ts";
+// Re-exported for operator scripts (`pnpm platform:grant-staff`), which depend on services only.
+export { PLATFORM_ROLES, PlatformRoleSchema, UserIdSchema, type PlatformRole } from "@core/contracts";
 export { createFirestoreUnitOfWork, inMemoryUnitOfWork, type UnitOfWork } from "./services/shared/firestore/unit-of-work.ts";
 export { CORE_COLLECTIONS, CORE_SCHEMA_VERSION } from "./services/shared/firestore/collections.ts";
 export { decodeCursor, encodeCursor, type CursorPosition } from "./services/shared/pagination/cursor.ts";

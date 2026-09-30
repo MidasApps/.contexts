@@ -76,6 +76,8 @@ describe("AuditLogEntrySchema", () => {
     expect(AuditLogEntrySchema.safeParse({ ...entry, metadata: { inputHash: "not a hash" } }).success).toBe(false);
     expect(AuditLogEntrySchema.safeParse({ ...entry, metadata: { errorCode: "free text error" } }).success).toBe(false);
     expect(AuditLogEntrySchema.safeParse({ ...entry, metadata: { durationMs: -1 } }).success).toBe(false);
+    expect(AuditLogEntrySchema.parse({ ...entry, metadata: { endpointId: "tenancy.getOrganization" } }).metadata).toEqual({ endpointId: "tenancy.getOrganization" });
+    expect(AuditLogEntrySchema.safeParse({ ...entry, metadata: { endpointId: "/v1/organizations/x" } }).success).toBe(false);
   });
 
   it("requires tenantId on tenant entries; platform entries carry targetTenantId instead", () => {

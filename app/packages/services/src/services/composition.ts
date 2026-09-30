@@ -19,6 +19,8 @@ import type { ApiKeyAuthenticator } from "./identity/application/ports/driven/ap
 import type { ApiKeyRevoker } from "./identity/application/ports/driven/api-key-revoker.ts";
 import { createFirestoreApiKeyServices, type ApiKeyServices } from "./identity/api-key-composition.ts";
 import { createFirestoreDeviceServices, type DeviceServices } from "./identity/device-composition.ts";
+import { createFirebaseCustomTokenIssuer } from "./identity/adapters/driven/firebase-custom-token-issuer.ts";
+import { createFirestorePlatformServices, type PlatformServices } from "./identity/platform-composition.ts";
 import type { TokenVerifier } from "./identity/application/ports/driven/token-verifier.ts";
 import { createFirebaseAuthAccountReader } from "./identity/adapters/driven/firebase-auth-account-reader.ts";
 import { createFirebaseUserAccountReader } from "./identity/adapters/driven/firebase-user-account-reader.ts";
@@ -88,6 +90,8 @@ export type CoreServer = {
   readonly apiKeys: ApiKeyServices;
   /** Device activations and devices (SP1 Task 15): the `device` principal path. */
   readonly devices: DeviceServices;
+  /** Platform staff and read-only impersonation (SP1 Task 16); `grantPlatformStaff` is operator tooling only. */
+  readonly platform: PlatformServices;
   /** Server Action bodies for SP2's `(auth)/actions.ts` (decision 0007). */
   readonly sessionActions: SessionActions;
   /** RSC guards for SP2's `(app)` and `/admin` layouts. */
@@ -211,6 +215,14 @@ export const createCoreServer = (args: CoreServerArgs): CoreServer => {
     unitOfWork: createFirestoreUnitOfWork({ firestore }),
     clock,
   });
+  const platform = createFirestorePlatformServices({
+    firestore,
+    customTokens: createFirebaseCustomTokenIssuer({ auth }),
+    syncClaims: access.services.syncClaims,
+    audit,
+    clock,
+    logger: args.logger,
+  });
   const verifyBearer = makeVerifyBearer({
     tokenVerifier: args.adapters?.tokenVerifier ?? createFirebaseTokenVerifier({ auth }),
     apiKeyAuthenticator: args.adapters?.apiKeyAuthenticator ?? apiKeys.authenticator,
@@ -226,6 +238,7 @@ export const createCoreServer = (args: CoreServerArgs): CoreServer => {
     ...(args.env.TRUSTED_PROXY_HOPS === undefined ? {} : { trustedProxyHops: args.env.TRUSTED_PROXY_HOPS }),
     access: access.core,
     audit,
+    onImpersonatedRequest: platform.auditImpersonatedRequest,
   };
   const sessionVertical = createFirebaseSessionVertical({
     firebase: args.firebase,
@@ -248,7 +261,7 @@ export const createCoreServer = (args: CoreServerArgs): CoreServer => {
     randomBytes: args.adapters?.randomBytes ?? randomBytes,
     logger: args.logger,
   });
-  const routes = buildCoreRoutes({ pipeline, access: access.services, members: access.members, tenancy, identity, sessions, apiKeys, devices });
+  const routes = buildCoreRoutes({ pipeline, access: access.services, members: access.members, tenancy, identity, sessions, apiKeys, devices, platform });
   return {
     routes,
     verifyBearer,
@@ -261,6 +274,7 @@ export const createCoreServer = (args: CoreServerArgs): CoreServer => {
     sessions,
     apiKeys,
     devices,
+    platform,
     sessionActions: sessionVertical.sessionActions,
     sessionGuards: sessionVertical.sessionGuards,
     audit,

@@ -66,6 +66,11 @@ export const AuditMetadataSchema = z.strictObject({
     .optional()
     .meta(none("Id of the agent or workflow run.")),
   durationMs: z.int().min(0).max(86_400_000).optional().meta(none("How long the attempt took, in milliseconds.")),
+  endpointId: z
+    .string()
+    .regex(/^[a-z][a-z0-9-]{0,63}\.[a-z][A-Za-z0-9]{0,63}$/, { error: "Expected an endpoint id." })
+    .optional()
+    .meta(none("`/v1` endpoint id of an audited request (`tenancy.getOrganization`), e.g. under impersonation.")),
 });
 export type AuditMetadata = z.infer<typeof AuditMetadataSchema>;
 

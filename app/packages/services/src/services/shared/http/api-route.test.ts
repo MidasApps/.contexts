@@ -1,4 +1,4 @@
-import { dataEnvelope, defineEndpoint, PageQuerySchema, type Principal } from "@core/contracts";
+import { dataEnvelope, defineEndpoint, OrganizationIdSchema, PageQuerySchema, type Principal } from "@core/contracts";
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
 import { createInMemoryAccessStore } from "../../access/adapters/driven/in-memory-access-store.ts";
@@ -365,5 +365,38 @@ describe("withApiRoute: boundary", () => {
     expect(records).toHaveLength(1);
     expect(records[0]).toMatchObject({ level: "info", message: "test_get_thing_ok", status: 200 });
     expect(JSON.stringify(records)).not.toContain("user-token");
+  });
+});
+
+describe("withApiRoute: denials and impersonation", () => {
+  const IMPERSONATED = { type: "user", uid: "user-1", mfa: false, impersonation: { sessionId: "imp-1", staffUid: "staff-1" } } as Principal;
+  const organization = { level: "organization", tenantId: OrganizationIdSchema.parse("org-a") } as const;
+
+  it("logs the deny reason of a refused request, never in the response", async () => {
+    const { deps, records } = setup();
+    const route = withApiRoute(getThing, deps, async ({ principal, authorize }) => {
+      const decision = await authorize({ principal, permission: "core.organization.read", node: organization });
+      return decision.allowed ? noContentResponse() : new Response(null, { status: 403 });
+    });
+    const response = await route(call("/v1/things/t1", { headers: bearer() }));
+    expect(response.status).toBe(403);
+    expect(records.find((record) => record.message === "access_denied")).toMatchObject({ endpointId: "test.getThing", reason: "NODE_NOT_FOUND" });
+  });
+
+  it("reports every request of an impersonated principal with its status and deny reason", async () => {
+    const { deps } = setup();
+    const reported: unknown[] = [];
+    const withHook: ApiRouteDeps = {
+      ...deps,
+      verifyBearer: ({ token }) => Promise.resolve(token === "imp-token" ? IMPERSONATED : (PRINCIPALS[token] ?? null)),
+      onImpersonatedRequest: (request) => Promise.resolve(void reported.push(request)),
+    };
+    const route = withApiRoute(getThing, withHook, async ({ principal, authorize }) => {
+      const decision = await authorize({ principal, permission: "core.organization.read", node: organization });
+      return decision.allowed ? noContentResponse() : new Response(null, { status: 404 });
+    });
+    expect((await route(call("/v1/things/t1", { headers: bearer("imp-token") }))).status).toBe(404);
+    expect((await route(call("/v1/things/t1", { headers: bearer() }))).status).toBe(404);
+    expect(reported).toMatchObject([{ principal: IMPERSONATED, endpointId: "test.getThing", method: "GET", status: 404, denyReason: "NODE_NOT_FOUND" }]);
   });
 });

@@ -5261,6 +5261,12 @@
                 "type": "integer",
                 "x-pii": "none"
               },
+              "endpointId": {
+                "description": "`/v1` endpoint id of an audited request (`tenancy.getOrganization`), e.g. under impersonation.",
+                "pattern": "^[a-z][a-z0-9-]{0,63}\\.[a-z][A-Za-z0-9]{0,63}$",
+                "type": "string",
+                "x-pii": "none"
+              },
               "errorCode": {
                 "description": "Stable error code of a failed attempt.",
                 "pattern": "^[A-Z][A-Z0-9_]{0,63}$",
@@ -5906,6 +5912,12 @@
                 "maximum": 86400000,
                 "minimum": 0,
                 "type": "integer",
+                "x-pii": "none"
+              },
+              "endpointId": {
+                "description": "`/v1` endpoint id of an audited request (`tenancy.getOrganization`), e.g. under impersonation.",
+                "pattern": "^[a-z][a-z0-9-]{0,63}\\.[a-z][A-Za-z0-9]{0,63}$",
+                "type": "string",
                 "x-pii": "none"
               },
               "errorCode": {

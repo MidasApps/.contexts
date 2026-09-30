@@ -60,3 +60,19 @@ export { createDeviceServices, createFirestoreDeviceServices, type DeviceService
 export type { DeviceDeps } from "./application/device-deps.ts";
 export { generateActivationCode, hashActivationCode, normalizeActivationCode } from "./domain/activation-code.ts";
 export { createInMemoryDeviceActivationRepository, createInMemoryDeviceRepository } from "./adapters/driven/in-memory-device-repositories.ts";
+// Platform staff and read-only impersonation (SP1 Task 16).
+export { createFirestorePlatformServices, createPlatformServices, type PlatformServices } from "./platform-composition.ts";
+export type { PlatformDeps } from "./application/platform-deps.ts";
+export type { ImpersonationSessionRepository } from "./application/ports/driven/impersonation-session-repository.ts";
+export type { PlatformStaffRepository } from "./application/ports/driven/platform-staff-repository.ts";
+export type { AuditImpersonatedRequest, ImpersonatedRequest } from "./application/use-cases/audit-impersonated-request.ts";
+export type { GrantPlatformStaff } from "./application/use-cases/grant-platform-staff.ts";
+export type { StartImpersonation, StartImpersonationCommand } from "./application/use-cases/start-impersonation.ts";
+export type { EndImpersonation } from "./application/use-cases/end-impersonation.ts";
+export { ImpersonationNotFoundError } from "./domain/errors/impersonation-errors.ts";
+export {
+  createInMemoryImpersonationSessionRepository,
+  createInMemoryPlatformStaffRepository,
+  type InMemoryImpersonationSessionRepository,
+  type InMemoryPlatformStaffRepository,
+} from "./adapters/driven/in-memory-platform-repositories.ts";

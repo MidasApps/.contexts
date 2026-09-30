@@ -20,6 +20,7 @@
     "contracts:check": "turbo run contracts:check",
     "i18n:check": "turbo run i18n:check",
     "seed:local": "node scripts/seed-local.ts",
+    "platform:grant-staff": "node scripts/grant-platform-staff.ts",
     "db:generate": "pnpm -F @core/services db:generate",
     "db:migrate": "node scripts/db-migrate.ts"
   },
