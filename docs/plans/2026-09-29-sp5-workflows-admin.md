@@ -55,7 +55,8 @@ preview and interval checks, same engine as Mastra), Next 16.3.7, React 19.3.0,
 **Contexts:** spec §3–§8; `@.contexts/engineering/contracts/schemas.md`
 
 **Files:**
-- Create in `app/packages/contracts/src/contracts/`: `workflows/{approval.schema.ts (projection),approval-decision.schema.ts,schedule.schema.ts (cron, IANA timezone, inputData unknown validated server-side),workflow-run.schema.ts,workflow-event.schema.ts}`, `agents/{prompt-version.schema.ts,prompt-activation.schema.ts}`, `platform/{plan.schema.ts,feature-flag.schema.ts,admin-overview.schema.ts}`, `observability/{trace-summary.schema.ts,trace-detail.schema.ts,eval-experiment-summary.schema.ts}`, `usage/usage-daily-rollup.schema.ts`, `conversations/message-feedback.schema.ts`
+- Create in `app/packages/contracts/src/contracts/`: `workflows/{human-approval-resume.schema.ts,schedule.schema.ts (cron, IANA timezone, inputData unknown validated server-side),workflow-run.schema.ts,workflow-event.schema.ts}`, `agents/{prompt-version.schema.ts,prompt-activation.schema.ts}`, `platform/{plan.schema.ts,feature-flag.schema.ts,admin-overview.schema.ts}`, `observability/{trace-summary.schema.ts,trace-detail.schema.ts,eval-experiment-summary.schema.ts}`, `usage/usage-daily-rollup.schema.ts`, `conversations/message-feedback.schema.ts`
+- Modify: `app/packages/contracts/src/contracts/access/core-permissions.ts` (spec §2.1 tenant and platform permissions)
 - Modify: `composition.ts`, `index.ts`; `pnpm contracts:catalog`
 - Test: schema tests (cron 5 fields only; timezone must be IANA; plan limits non-negative integers; flag requires owner and future `expiresAt`)
 
@@ -63,32 +64,34 @@ preview and interval checks, same engine as Mastra), Next 16.3.7, React 19.3.0,
 
 **Verify:** `pnpm -F @core/contracts test && pnpm contracts:check`; `framework-ok`.
 
-### Task 2: `approval-request` workflow and real `ApprovalPort`
+### Task 2: Workflow HITL on SP1 approval requests
 
-**Contexts:** spec §3.3, D5-01; umbrella §4 (`requiresApproval`), §16.2 (four eyes), §16.4; SP3 `define-core-tool.ts`, `runtime-ports.ts`
-
-**Files:**
-- Create: `app/packages/agents/src/workflows/approval-request.workflow.ts` (steps of spec §3.3; `suspendSchema`, `resumeSchema`; four-eyes and permission checks at resume; re-suspend on invalid decider; execute as requester with stored idempotency key; `retryConfig` 3 on `execute-action` only for transient errors)
-- Create: `app/apps/mastra/src/runtime/approval-port-adapter.ts` (starts the workflow via `mastra.getWorkflow('approval-request').createRun({ resourceId }).startAsync(...)`, returns `{ status: 'pending', approvalId: runId }`); bind in `create-runtime-ports.ts` (replaces the SP3 fail-closed adapter)
-- Test: `approval-request.workflow.postgres.test.ts` (fake ports: requester cannot approve own request; approver without action permission → re-suspend + 403 code; approve executes command once even with two concurrent resumes (`WORKFLOW_RESUME_ALREADY_CLAIMED`); reject executes nothing; expired → outcome `expired`; requester lost grant before approval → `FORBIDDEN` outcome); `define-core-tool.test.ts` updated (pending result shape)
-
-- [ ] Steps: read → failing tests → implement → PASS → progress → commit `feat(workflows): add four-eyes approval workflow`
-
-**Verify:** `pnpm -F @core/agents test && pnpm -F @core/agents test:postgres`; `framework-ok`.
-
-### Task 3: Approvals projection, inbox API and notifications
-
-**Contexts:** spec §3.3, §3.4; `@.contexts/engineering/contracts/firebase-firestore.md`; SP1 notifications/audit exports
+**Contexts:** spec §3.3, D5-01; SP1 spec §6.5 (approval requests, `ApprovalActionHandler`); umbrella §16.2 (four eyes); SP3 `runtime-ports.ts`, `agent-command-approval-handler.ts`
 
 **Files:**
-- Create: `app/packages/services/src/services/approvals/{application/use-cases/{project-approval.ts,list-approvals.ts,get-approval.ts,decide-approval.ts,create-generic-approval.ts},adapters/driven/firestore-approval-repository.ts,adapters/driving/approvals-route-handler.ts}` (the `notify-approvers`/`record-outcome` steps call `project-approval` through a runtime port)
-- Create: `app/apps/web/src/app/v1/approvals/route.ts`, `[approvalId]/route.ts`, `[approvalId]/decision/route.ts`
-- Modify: `app/firestore.rules` (`approvals` readable by `requestedBy` and `approverUids` of the same tenant; no client writes), `app/firestore.indexes.json`
-- Test: handler tests (approver sees pending; requester sees own; outsider 404; decision by requester → 403; decision forwards to gateway `resumeWorkflow`; transaction guards `status == pending`), rules emulator test
+- Create: `app/packages/agents/src/workflows/steps/request-human-approval.step.ts` (creates the SP1 approval request with action `{ kind: 'workflow-resume', input: { workflowId, runId, stepId }, summary }` through `ApprovalPort`, then `return await suspend({ approvalRequestId })`; `resumeSchema` of spec §3.3)
+- Create: `app/packages/agents/src/workflows/approval-demo.workflow.ts` (spec §3.2; `apply` runs `example.CreateNoteCommand` as the requester with idempotency key `runId`)
+- Create: `app/packages/agents/src/approvals/workflow-resume-approval-handler.ts` (SP1 handler kind `workflow-resume`: gateway `resumeWorkflow(runId, stepId, { decision: 'approved', decidedBy })`); register it next to SP3's `agent-command` handler
+- Create: `app/apps/functions/src/approvals/on-approval-request-settled.ts` (`onDocumentUpdated('approval-requests/{id}')`: status `rejected|expired|cancelled` + kind `workflow-resume` → resume with that decision; idempotent: ignores runs no longer suspended)
+- Create (only if SP1 has no equivalent; check with `grep -rn "expire" app/packages/services/src/services/access`): `app/packages/services/src/services/access/application/use-cases/expire-approval-requests.ts`
+- Test: `approval-demo.workflow.postgres.test.ts` (fake ports: suspended after request; approve → resumed once even with two concurrent resumes (`WORKFLOW_RESUME_ALREADY_CLAIMED`); reject → `record` path, nothing applied), `workflow-resume-approval-handler.test.ts`, `on-approval-request-settled.emulator.test.ts` (reject in Firestore → gateway resume called with `rejected`; approve ignored by the trigger)
 
-- [ ] Steps: read → failing tests → implement → PASS → progress → commit `feat(workflows): add approvals inbox api`
+- [ ] Steps: read → failing tests → implement → PASS → progress → commit `feat(workflows): add human approval step on approval requests`
 
-**Verify:** `pnpm -F @core/services test && pnpm test:emulators`; `framework-ok`.
+**Verify:** `pnpm -F @core/agents test:postgres && pnpm test:emulators`; `framework-ok`.
+
+### Task 3: Approvals inbox data access
+
+**Contexts:** spec §3.4; SP1 spec §6.5 and §7 (endpoints `/v1/organizations/{organizationId}/approval-requests`, `/v1/approval-requests/{id}/approve|reject`), SP1 Rules for `approval-requests`
+
+**Files:**
+- Create: `app/packages/client/src/entities/approval-request/{api/approval-requests-api.ts,model/use-approval-requests.ts,ui/approval-request-item.tsx}` (typed client over SP1 endpoints; Firestore listener when SP1 Rules allow approver reads, else 15 s refetch + on focus; pending count for the user menu badge)
+- Create: `app/packages/client/src/entities/approval-request/lib/approval-preview.ts` (renders `agent-command` before/after and `workflow-resume` run link)
+- Test: api client maps 403 `SELF_APPROVAL_FORBIDDEN` to an i18n message; hook falls back to polling when the listener is denied; preview renderer for both kinds
+
+- [ ] Steps: read → failing tests → implement → PASS → progress → commit `feat(workflows): add approvals inbox data access`
+
+**Verify:** `pnpm -F @core/client test -- approval-request`; `framework-ok`.
 
 ### Task 4: Workflow runs API and SSE progress
 
@@ -138,9 +141,9 @@ preview and interval checks, same engine as Mastra), Next 16.3.7, React 19.3.0,
 **Contexts:** spec §3.2; SP4 `conversations` context; SP3 eval runner output
 
 **Files:**
-- Create: `app/packages/agents/src/workflows/{approval-expiry-sweep.workflow.ts,conversation-purge.workflow.ts,eval-export.workflow.ts}`
+- Create: `app/packages/agents/src/workflows/{approval-expiry-sweep.workflow.ts,conversation-purge.workflow.ts,eval-export.workflow.ts}` (sweep calls the SP1/Task 2 `expireApprovalRequests` use case through a port)
 - Create: `app/packages/services/src/services/conversations/application/use-cases/purge-deleted-conversations.ts`
-- Test: sweep resumes only expired pending runs; purge deletes conversations soft-deleted > 30 days (Firestore + Mastra thread) and nothing newer; eval export maps experiment summaries to `eval_runs` rows (fake sink)
+- Test: sweep expires only overdue pending requests (the settle trigger then resumes their runs); purge deletes conversations soft-deleted > 30 days (Firestore + Mastra thread) and nothing newer; eval export maps experiment summaries to `eval_runs` rows (fake sink)
 
 - [ ] Steps: read → failing tests → implement → PASS → progress → commit `feat(workflows): add expiry sweep, conversation purge and eval export`
 
@@ -210,7 +213,7 @@ preview and interval checks, same engine as Mastra), Next 16.3.7, React 19.3.0,
 
 **Files:**
 - Create: `app/packages/client/src/views/admin-{overview,organizations,organization-detail,plans,users,agents,agent-prompts}/**`, `src/widgets/admin-{nav,kpi-cards,prompt-diff}/**`, `src/features/admin-{update-plan,update-organization,agent-enablement,prompt-version-editor,prompt-activation}/**`
-- Create: `app/apps/web/src/app/admin/layout.tsx` (server: staff + MFA via session cookie → redirect to login/403), `app/apps/web/src/app/admin/{page.tsx,organizations/**,plans/**,users/**,agents/**}` (composition only)
+- Modify: `app/apps/web/src/app/admin/layout.tsx` (SP2's `AdminShellTemplate` + `requirePlatformStaffSession()`; register SP5 pages in the `admin` slot instead of SP2's empty states), `app/apps/web/src/app/admin/{page.tsx,organizations/**,plans/**,users/**,agents/**}` (composition only)
 - Modify: i18n `admin.*` keys in 3 locales
 - Test: component tests (KPI cards format money with `Intl` and tabular nums; prompt diff; activation button disabled until eval passed; impersonation banner visible while active)
 
@@ -237,7 +240,7 @@ preview and interval checks, same engine as Mastra), Next 16.3.7, React 19.3.0,
 **Contexts:** spec §7; SP2 settings layout and navigation manifest; `@.contexts/engineering/architecture/fsd.md`
 
 **Files:**
-- Create: `app/packages/client/src/views/settings-{agents,connectors,evals,traces,usage,workflows,schedules,flags}/**`, `src/views/approvals-inbox/**`, `src/features/{approval-decision,schedule-editor,connector-editor,tenant-prompt-addendum}/**` (schedule editor: cron builder with presets, IANA zone select defaulting to the resolved zone, next 5 fires shown in schedule zone and viewer zone)
+- Create: `app/packages/client/src/views/settings-{agents,connectors,evals,traces,usage,workflows,schedules,flags}/**`, `src/views/approvals-inbox/**` (over the Task 3 entity), `src/features/{approval-decision,schedule-editor,connector-editor,tenant-prompt-addendum}/**` (approval decision calls SP1 approve/reject with reason) (schedule editor: cron builder with presets, IANA zone select defaulting to the resolved zone, next 5 fires shown in schedule zone and viewer zone)
 - Create: `app/apps/web/src/app/(app)/settings/{agents,connectors,evals,traces,usage,workflows,flags}/**/page.tsx`, `app/apps/web/src/app/(app)/approvals/[[...approvalId]]/page.tsx`; desktop routes for approvals and settings pages that SP2 exposes on desktop (no `/admin` on desktop)
 - Modify: core navigation manifest (permission-filtered entries), user menu badge with pending approvals count (Firestore listener on `approvals`)
 - Test: approval decision flow (approve/reject with comment; requester sees no buttons), schedule editor validation (interval, zone), connector editor never shows secrets, usage page shows budget state
@@ -251,9 +254,9 @@ preview and interval checks, same engine as Mastra), Next 16.3.7, React 19.3.0,
 **Contexts:** umbrella §1 item 4, §13 (SP5); `@.contexts/engineering/stacks/testing/playwright.md`
 
 **Files:**
-- Create: `app/e2e/workflow-approval.spec.ts` (seed users `member@demo.local` with `example.note.create` flagged `requiresApproval` and `approver@demo.local` with `access.approval.decide`; member asks the chat to create a note → approval-pending card; member cannot approve in inbox; approver (second browser context) approves with comment → note exists → audit entries for request, decision, execution; reject path executes nothing)
-- Create: `app/e2e/workflow-schedule.spec.ts` (local policy 1 min: create schedule for `usage-report` in `America/Sao_Paulo` from `/settings/workflows`; next fires shown in both zones; wait (poll API, max 150 s) for a run from the schedule; run appears with success and progress stream; pause stops further fires; run-now creates a run immediately)
-- Modify: e2e seed (second user, permission flagged `requiresApproval` in the example module manifest for the test tenant), Mastra e2e env `SCHEDULE_MIN_INTERVAL_MINUTES=1`
+- Create: `app/apps/web/e2e/workflow-approval.spec.ts` (seed users `member@demo.local` (member) and `approver@demo.local` (admin, `core.approval.decide`); (a) chat: member asks to archive a note (`example.note.archive` has `requiresApproval`) → confirmation → approval-pending card; member sees no decide buttons in the inbox; approver (second browser context) approves → note archived → audit `APPROVAL_REQUESTED|APPROVED|EXECUTED`; (b) workflow: member starts `approval-demo` from `/settings/workflows` → progress stream shows `suspended` → approver approves → run `success` and note created; a second run rejected → run ends on `record`, nothing created)
+- Create: `app/apps/web/e2e/workflow-schedule.spec.ts` (local policy 1 min: create schedule for `usage-report` in `America/Sao_Paulo` from `/settings/workflows`; next fires shown in both zones; wait (poll API, max 150 s) for a run from the schedule; run appears with success and progress stream; pause stops further fires; run-now creates a run immediately)
+- Modify: e2e seed (second user; sample notes), Mastra e2e env `SCHEDULE_MIN_INTERVAL_MINUTES=1`
 
 - [ ] Steps: read → specs → green → progress → commit `test(workflows): add hitl approval and schedule e2e`
 
@@ -264,7 +267,7 @@ preview and interval checks, same engine as Mastra), Next 16.3.7, React 19.3.0,
 **Contexts:** umbrella §1 item 5, §13 (SP5)
 
 **Files:**
-- Create: `app/e2e/admin-observability.spec.ts` (staff with MFA via emulator second factor helper from SP1: after a chat turn by a tenant user, `/admin/traces` lists the trace filtered by tenant, detail shows agent/tool spans with tokens and cost; `/admin/costs` shows the tenant's cost for today > 0 in fake mode prices; `/admin/evals` shows the latest experiment with verdict from `pnpm evals` + `evals:publish` to the local server; non-staff gets 403 page; staff without MFA blocked), axe scan on each admin page (zero violations)
+- Create: `app/apps/web/e2e/admin-observability.spec.ts` (staff with MFA via the SP1/SP2 e2e SMS second-factor helper: after a chat turn by a tenant user, `/admin/traces` lists the trace filtered by tenant, detail shows agent/tool spans with tokens and cost; `/admin/costs` shows the tenant's cost for today > 0 in fake mode prices; `/admin/evals` shows the latest experiment with verdict from `pnpm evals` + `evals:publish` to the local server; non-staff gets 404 (SP2 §7); staff without MFA blocked), axe scan on each admin page (zero violations)
 
 - [ ] Steps: read → spec → green → progress → commit `test(admin): add admin traces, costs and evals e2e`
 
@@ -275,8 +278,8 @@ preview and interval checks, same engine as Mastra), Next 16.3.7, React 19.3.0,
 **Contexts:** umbrella §1 (all six items and the command line), §13; SP0–SP4 summaries; `app/README.md`
 
 **Files:**
-- Create: `app/e2e/criterion-1.spec.ts` (one journey on a fresh `pnpm seed:local`: (1) login, choose org and project in the sidebar, edit profile language/time zone/currency/theme; (2) chat with the supervisor → delegation, streaming, interactive component, approval, history entry, upload, voice; (3) KB question with citation + data catalog question + `renderForm` → submit → approval → audit; (4) HITL workflow approved by a second user + a scheduled run observed; (5) `/admin` traces, costs per tenant, eval results)
-- Create: `docs/plans/2026-09-29-sp5-workflows-admin/reports/criterion-1.md` (evidence per item with command, output excerpt, screenshot paths under `reports/`; item 6 evidence: `pnpm -F @core/desktop tauri:build --debug` or SP2's desktop e2e/smoke command opening the user area against the local `/v1`, with the screenshot; any item that cannot be proven → FAIL with reason, not "done")
+- Create: `app/apps/web/e2e/criterion-1.spec.ts` (one journey on a fresh `pnpm seed:local`: (1) login, choose org and project in the sidebar, edit profile language/time zone/currency/theme; (2) chat with the supervisor → delegation, streaming, interactive component, approval, history entry, upload, voice; (3) KB question with citation + data catalog question + `renderForm` → submit → approval → audit; (4) `approval-demo` HITL workflow approved by a second user + a scheduled run observed; (5) `/admin` traces, costs per tenant, eval results)
+- Create: `docs/plans/2026-09-29-sp5-workflows-admin/reports/criterion-1.md` (evidence per item with command, output excerpt, screenshot paths under `reports/`; item 6 evidence: SP2's `desktop-web` Playwright project running the user-area journey plus the local WebdriverIO Tauri smoke test (SP2 spec §8), with screenshots; any item that cannot be proven → FAIL with reason, not "done")
 - Modify: `app/README.md` (end-to-end tour: start, seed, users, chat, workflows, admin; "create a module" section covering `defineModule` + `defineAgentModule` (agents, tools, commands, skills, workflows, schedules)), `docs/plans/2026-09-29-sp0-app-foundation/follow-ups.md` (close resolved items, add new ones)
 
 - [ ] Step 1: Read contexts
@@ -295,7 +298,7 @@ preview and interval checks, same engine as Mastra), Next 16.3.7, React 19.3.0,
 
 | Requirement | Source | Tasks |
 |---|---|---|
-| Workflows with HITL suspend/resume | prompt item 4; umbrella §9 | 2, 3, 15 |
+| Workflows with HITL suspend/resume | prompt item 4; umbrella §9 | 2, 3, 14, 15 |
 | Scheduled workflows with cron + time zone | prompt items 4, 10; umbrella §9 | 5, 15 |
 | Approvals inbox, four eyes | umbrella §9, §16.2 | 2, 3, 14, 15 |
 | Streaming progress | umbrella §9 | 4 |

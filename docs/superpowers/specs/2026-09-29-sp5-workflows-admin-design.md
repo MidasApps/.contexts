@@ -4,7 +4,7 @@
 - **Umbrella:** `docs/superpowers/specs/2026-09-29-agentic-app-core-design.md` §1, §9, §10, §13 (SP5), §16.2, §16.3
 - **Origin prompt:** `docs/prompts/2026-09-29-agentic-app-core-harness.md` items 4, 7, 8, 11, 13 and "Entrega esperada"
 - **Depends on:** SP3 runtime (workflows engine, usage ledger, scorers/datasets, observability,
-  connectors, `ApprovalPort`), SP4 chat (approval-pending card, workflow parts in chat), SP1
+  connectors, `ApprovalPort`), SP4 chat (approval-pending card, workflow parts in chat), SP1 (approval requests, handler registry,
   (staff principal with MFA, impersonation, audit, permissions `requiresApproval`), SP2
   (shell, `/settings` layout, `DataTable`, `SchemaForm`, i18n, time zone resolution).
 - **Plan:** `docs/plans/2026-09-29-sp5-workflows-admin.md`
@@ -50,6 +50,15 @@ traces/logs, costs and flags.
   `tenantId` metadata (SP3 `requestContextKeys`).
 - `@mastra/editor` 0.15.3 (not adopted, SP3 §14): the prompt store is the app's own.
 
+### 2.1 Permissions added by SP5
+
+Tenant (`CORE_PERMISSIONS`): `core.workflow-run.read|start|cancel` (member+ read/start, owner/admin cancel),
+`core.schedule.read|write` (owner, admin), `core.trace.read`, `core.eval.read|write`, `core.prompt.read|write`,
+`core.flag.read|write` (owner, admin). Platform: `platform.plan.manage`, `platform.organization.update`,
+`platform.agent.manage`, `platform.prompt.manage`, `platform.connector.read`, `platform.eval.manage`,
+`platform.trace.read`, `platform.usage.read`, `platform.workflow.manage`, `platform.flag.manage`
+(platform-admin; read ones also platform-support). Approvals use SP1's `core.approval.read|decide`.
+
 ## 3. Workflows
 
 ### 3.1 Placement
@@ -65,54 +74,51 @@ Workflows live in `@core/agents/src/workflows/` (core) and in modules through
 |---|---|---|
 | `knowledge-ingest` | `/v1/knowledge/sources`, upload event | SP3 |
 | `catalog-reindex` | deploy/seed, platform schedule `0 3 * * *` UTC | SP3 |
-| `approval-request` | `ApprovalPort.requestApproval()` (four-eyes tool call) or `/v1/approvals` (generic) | `validate` → `notify-approvers` → `await-decision` (suspend) → branch `approved` → `execute-action` / `rejected|expired` → `record-outcome` |
+| `approval-demo` (HITL) | `/v1/workflows/approval-demo/runs` or chat tool | `collect-input` → `requestHumanApproval` (SP1 approval request + suspend) → branch approved → `apply` / other → `record` (§3.3) |
 | `usage-report` | platform schedule `15 * * * *` UTC (hourly) + per-tenant daily digest via tenant schedule | aggregate `usage.llm_calls` → `usage.daily_rollups` (idempotent upsert per tenant/day/model) → `UsageSink` export (BigQuery outside local) → budget alerts (80 % / 100 %) → notification |
-| `approval-expiry-sweep` | platform schedule `*/15 * * * *` UTC | resumes expired approval runs with `{ decision: 'expired' }` |
+| `approval-expiry-sweep` | platform schedule `*/15 * * * *` UTC | marks overdue SP1 approval requests `expired`; the settle trigger resumes their runs |
 | `conversation-purge` | platform schedule `30 4 * * *` UTC | hard-deletes conversations soft-deleted > 30 days (Firestore + Mastra thread) |
 | `eval-export` | after each experiment finishes + daily | exports experiment summaries to BigQuery `ai_observability.eval_runs` (no-op sink in local) |
 
-### 3.3 Generic approval (`approval-request`) — HITL and four eyes
+### 3.3 Human-in-the-loop on top of SP1 approval requests (four eyes)
 
-Input (`agents.ApprovalRequest`, SP3 contract): `tenantId`, `requestedBy`,
-`permission`, `action` (`{ kind: 'command', commandId, input, idempotencyKey }` or
-`{ kind: 'workflow', workflowId, inputData }` or `{ kind: 'generic', summaryKey, payload }`),
-`preview` (before/after), `reason?`, `expiresAt` (default +72 h, max 30 d), `origin`
-(`conversationId`, `toolCallId`?).
+SP1 owns four-eyes approvals: `approval-requests/{id}` (status `pending|approved|rejected|cancelled|expired|executed|failed`),
+the `ApprovalActionHandler` registry, the endpoints `GET|POST /v1/organizations/{organizationId}/approval-requests`,
+`POST /v1/approval-requests/{id}/approve|reject` (approver ≠ requester, `core.approval.decide` + the action
+permission, at-most-once execution) and the audit actions `APPROVAL_REQUESTED|APPROVED|REJECTED|EXECUTED`.
+SP3 registers handler `agent-command` (agent mutations). SP5 adds **workflow HITL** without a second inbox:
 
-- `validate`: re-checks `authorize(requestedBy, permission)` now (grants may have changed).
-- `notify-approvers`: approvers = members holding `access.approval.decide` on the node of
-  the action (SP1 query), minus the requester; writes the Firestore projection
-  `approvals/{runId}` (`tenantId`, `status: pending`, `permission`, `summary`, `preview`,
-  `requestedBy`, `approverUids`, `createdAt`, `expiresAt`, `decidedBy?`, `decidedAt?`,
-  `outcome?`) and a notification per approver (SP1/SP2 notifications; FCM optional).
-- `await-decision`: `suspend({ approvalId })`, `resumeSchema = { decision:
-  'approve'|'reject'|'expired', decidedBy?, comment? }`.
-- On resume the step verifies: `decidedBy !== requestedBy` (four eyes), `decidedBy` holds
-  `access.approval.decide` **and** the action permission at decision time; otherwise it
-  suspends again and the API returns 403. Expired → `expired`.
-- `execute-action`: runs the command use case as the **requester** (their current grants,
-  `authorize` again) with the stored idempotency key, then records audit
-  `approvals.request.approved` + the command's own audit; `record-outcome` updates the
-  projection and notifies the requester (and the chat, via the SP4 pending card polling
-  `GET /v1/approvals/{id}`).
-- Concurrency: Mastra's atomic resume claim prevents double execution; the projection
-  update uses a Firestore transaction on `status == 'pending'`.
+- Reusable step `requestHumanApproval` (`@core/agents/src/workflows/steps/request-human-approval.step.ts`):
+  creates an SP1 approval request with action `{ kind: 'workflow-resume', input: { workflowId, runId, stepId },
+  summary }`, the workflow's `permission` and node, then `suspend({ approvalRequestId })`;
+  `resumeSchema = { decision: 'approved'|'rejected'|'expired'|'cancelled', decidedBy?, reason? }`.
+- Handler `workflow-resume` (registered by SP5 in SP1's registry): on approve, resumes the run through the
+  gateway with `{ decision: 'approved', decidedBy }` (Mastra's atomic resume claim + SP1's at-most-once
+  execution prevent double resumes).
+- Non-approve outcomes: Firestore trigger `onApprovalRequestSettled` (Functions,
+  `onDocumentUpdated('approval-requests/{id}')`) resumes the run with `rejected|expired|cancelled` when the
+  action kind is `workflow-resume` (Functions call Mastra through the same gateway adapter; IAM outside local).
+- Expiry: `approval-expiry-sweep` marks pending requests past `expiresAt` as `expired` through an SP1 use
+  case (`expireApprovalRequests`, added by SP5 to the `access` context if SP1 did not ship one); the trigger
+  then resumes the runs.
+- Core HITL workflow `approval-demo` (generic, used by the gate): `collect-input` → `requestHumanApproval` →
+  branch approved → `apply` (creates an `example` note through the module command) / rejected → `record`.
+  Modules build their own HITL workflows with the same step.
 
-### 3.4 Approvals inbox API
+### 3.4 Approvals inbox
 
-`GET /v1/approvals?status=pending&cursor&limit` (items where the caller is an approver or
-requester), `GET /v1/approvals/{id}`, `POST /v1/approvals/{id}/decision { decision:
-'approve'|'reject', comment? }` → gateway `resumeWorkflow` → 200 with the outcome (or 202
-while executing), `POST /v1/approvals` (generic requests from modules; permission of the
-action). Realtime: the client listens to `approvals` projection docs (Rules: readable by
-`requestedBy` and `approverUids`; writes denied).
+The inbox is a UI over SP1's endpoints (`core.approval.read|decide`): pending for me, requested by me,
+history; detail shows action summary, preview (for `agent-command`: the tool's before/after), requester,
+node, expiry, and for `workflow-resume` a link to the run progress (§3.6). Updates: Firestore listener when
+SP1's Rules allow reading `approval-requests` for approvers, else refetch every 15 s and on focus. The chat
+(SP4) links pending cards to `/approvals/{approvalRequestId}`.
 
 ### 3.5 Schedules with time zone
 
 - Platform schedules are declarative on the core workflows (UTC).
 - Tenant schedules: `/v1/schedules` CRUD → `mastra.schedules.create({ id:
   'schedule_<tenantId>_<slug>', workflowId, cron, timezone, inputData, requestContext: {
-  tenantId, projectId?, nodeId?, userId: createdBy, … }, resourceId: 'tenantId:uid', metadata:
+  tenantId, projectId?, unitId?, userId: createdBy, … }, resourceId: 'tenantId:uid', metadata:
   { tenantId, createdBy } })`. Only workflows flagged `schedulable: true` in their
   `AgentModule` entry can be scheduled; `inputData` validated against the workflow schema;
   `timezone` required (IANA, validated by `TimeZoneSchema`; UI default = resolved time
@@ -123,7 +129,7 @@ action). Realtime: the client listens to `approvals` projection docs (Rules: rea
   the schedule is paused with a notification.
 - Pause/resume/run-now/delete; list shows next fire in the schedule's zone and the viewer's
   zone. History from `mastra_schedule_triggers` + run status.
-- `/v1/schedules` permissions `workflows.schedule.read|write`; staff see all in `/admin`.
+- `/v1/schedules` permissions `core.schedule.read|write`; staff see all in `/admin`.
 
 ### 3.6 Streaming progress
 
@@ -152,7 +158,7 @@ version, author, timestamp and rollback, and an eval before production changes.
 - Activation requires an experiment on the agent's dataset with the candidate prompt
   (`startExperiment` with a request-context override `promptVersionId`) whose verdict is
   `passed` against the baseline; staff may force with a recorded reason (audit
-  `agents.prompt.forced_activation`).
+  `PROMPT_ACTIVATION_FORCED`).
 - `load-instructions.ts` (SP3) resolves: platform active version → code seed fallback;
   appends tenant addendum; cached 60 s per (agent, tenant). Seeds (`instructions/*.md`) are
   imported as version 1 by a migration script.
@@ -171,8 +177,9 @@ Expired flags show a warning in `/admin`.
 
 ## 6. `/admin` (web only, staff only)
 
-Access: `platform staff` principal with MFA (SP1 `requireStaff({ mfa: true })` on every
-`/v1/admin/*` handler and on the `/admin` layout); read-only impersonation is SP1's; SP5
+Access: `platform staff` principal with MFA (SP1: `requirePlatformStaffSession()` in the `/admin`
+layout, non-staff get 404 as in SP2 §7; every `/v1/admin/*` handler authorizes a `platform.*`
+permission, which requires staff + MFA); read-only impersonation is SP1's; SP5
 shows the entry points. Layout in `apps/web/src/app/admin/**` (composition only), UI in
 `@core/client` (`views/admin-*`, `widgets/admin-*`).
 
@@ -231,7 +238,7 @@ by a path tenant id.
 
 | Id | Decision |
 |---|---|
-| D5-01 | Generic `approval-request` workflow with suspend/resume, four eyes at resume, requester re-authorized at execution, Firestore `approvals` projection for the inbox, expiry sweep. |
+| D5-01 | Workflow HITL = `requestHumanApproval` step creating an SP1 approval request (kind `workflow-resume`) + Mastra suspend/resume; approve resumes via the SP1 handler, other outcomes via a Firestore trigger; one inbox (SP1 data). |
 | D5-02 | Schedules: Mastra Schedules; platform schedules declarative in UTC; tenant schedules via `/v1/schedules` with required IANA zone, ≥ 15 min interval, creator re-authorized per run, auto-pause on failure; single scheduler on the Mastra host. |
 | D5-03 | Prompts: own append-only Postgres store (platform full, tenant addendum), eval-gated activation, rollback by re-activation; `@mastra/editor` not adopted. |
 | D5-04 | Flags: `FlagsPort` (Remote Config remote, Firestore local), code registry with owner/expiry/kind, core kill-switch `ai.kill-switch`. |
