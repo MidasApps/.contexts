@@ -1,0 +1,93 @@
+{
+  "additionalProperties": false,
+  "description": "A read-only, time-boxed session in which platform staff acts as a user (SP1 spec §6.6).",
+  "examples": [
+    {
+      "createdAt": "2026-09-29T14:30:00.000Z",
+      "endedAt": null,
+      "expiresAt": "2026-09-29T15:30:00.000Z",
+      "id": "Im5rT7yU9iO1pA3sD5fG",
+      "reason": "Ticket 4821: user cannot see project Launch.",
+      "staffUid": "uZ9y8X7w6V5u4T3s2R1q",
+      "targetUid": "uA1b2C3d4E5f6G7h8I9j",
+      "tenantId": "Jd8sK2lPq0WnR5tYu3bV"
+    }
+  ],
+  "properties": {
+    "createdAt": {
+      "description": "When the session started (UTC).",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+      "type": "string",
+      "x-pii": "none"
+    },
+    "endedAt": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "When staff ended the session early (UTC); null while open.",
+      "x-pii": "none"
+    },
+    "expiresAt": {
+      "description": "Hard end of the session (UTC), at most 60 minutes after start.",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+      "type": "string",
+      "x-pii": "none"
+    },
+    "id": {
+      "description": "Impersonation session id (token claim `imp`).",
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "reason": {
+      "description": "Why support needs the access; audited.",
+      "maxLength": 500,
+      "minLength": 10,
+      "type": "string",
+      "x-pii": "personal"
+    },
+    "staffUid": {
+      "description": "Staff member acting as the user.",
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "personal"
+    },
+    "targetUid": {
+      "description": "User being impersonated.",
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "personal"
+    },
+    "tenantId": {
+      "description": "Only organization the session may read.",
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    }
+  },
+  "required": [
+    "id",
+    "staffUid",
+    "targetUid",
+    "tenantId",
+    "reason",
+    "expiresAt",
+    "endedAt",
+    "createdAt"
+  ],
+  "type": "object",
+  "x-kind": "entity",
+  "x-permission": "platform.user.impersonate",
+  "x-pii": "personal",
+  "x-relations": [],
+  "x-tenancyScope": "platform"
+}

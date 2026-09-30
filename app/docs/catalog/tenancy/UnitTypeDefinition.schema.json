@@ -1,0 +1,63 @@
+{
+  "additionalProperties": false,
+  "description": "A unit type registered by an application module; the core registers none.",
+  "examples": [
+    {
+      "allowedParents": [
+        "project"
+      ],
+      "id": "sample.site",
+      "labelKey": "sample.unitTypes.site"
+    },
+    {
+      "allowedParents": [
+        "sample.site",
+        "sample.room"
+      ],
+      "id": "sample.room",
+      "labelKey": "sample.unitTypes.room"
+    }
+  ],
+  "properties": {
+    "allowedParents": {
+      "description": "Where a unit of this type may be created: `project` or other unit type ids.",
+      "items": {
+        "anyOf": [
+          {
+            "const": "project",
+            "type": "string"
+          },
+          {
+            "pattern": "^[a-z][a-z0-9-]*\\.[a-z][a-z0-9-]*$",
+            "type": "string"
+          }
+        ]
+      },
+      "minItems": 1,
+      "type": "array",
+      "x-pii": "none"
+    },
+    "id": {
+      "description": "Unit type id, `<module>.<type>`.",
+      "pattern": "^[a-z][a-z0-9-]*\\.[a-z][a-z0-9-]*$",
+      "type": "string",
+      "x-pii": "none"
+    },
+    "labelKey": {
+      "description": "i18n key of the type label.",
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    }
+  },
+  "required": [
+    "id",
+    "labelKey",
+    "allowedParents"
+  ],
+  "type": "object",
+  "x-kind": "view",
+  "x-pii": "none",
+  "x-relations": [],
+  "x-tenancyScope": "platform"
+}

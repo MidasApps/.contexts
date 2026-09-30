@@ -1,0 +1,242 @@
+{
+  "additionalProperties": false,
+  "description": "A scoped API key (service principal) owned by a user of the organization; no secret.",
+  "examples": [
+    {
+      "createdAt": "2026-09-29T14:30:00.000Z",
+      "expiresAt": "2027-03-29T14:30:00.000Z",
+      "id": "Ak2wS4xE6dC8rF0vT1gB",
+      "lastUsedAt": null,
+      "name": "Reporting export",
+      "node": {
+        "level": "organization",
+        "tenantId": "Jd8sK2lPq0WnR5tYu3bV"
+      },
+      "ownerUid": "uA1b2C3d4E5f6G7h8I9j",
+      "publicId": "K7QX2M4PZ6AB",
+      "scopes": [
+        "core.project.read",
+        "core.unit.read"
+      ],
+      "status": "active",
+      "tenantId": "Jd8sK2lPq0WnR5tYu3bV",
+      "updatedAt": "2026-09-29T14:30:00.000Z"
+    }
+  ],
+  "properties": {
+    "createdAt": {
+      "description": "When the key was created (UTC).",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+      "type": "string",
+      "x-pii": "none"
+    },
+    "expiresAt": {
+      "description": "When the key stops working (UTC); at most 365 days after creation.",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+      "type": "string",
+      "x-pii": "none"
+    },
+    "id": {
+      "description": "API key id.",
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "lastUsedAt": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Last successful use, updated at most once a minute (UTC).",
+      "x-pii": "none"
+    },
+    "name": {
+      "description": "Name given by the owner.",
+      "maxLength": 80,
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "node": {
+      "description": "Node the key is limited to; it acts only there and below.",
+      "oneOf": [
+        {
+          "additionalProperties": false,
+          "properties": {
+            "level": {
+              "const": "organization",
+              "description": "Level of the node.",
+              "type": "string",
+              "x-pii": "none"
+            },
+            "tenantId": {
+              "description": "Organization (tenant) of the node.",
+              "minLength": 1,
+              "type": "string",
+              "x-pii": "none"
+            }
+          },
+          "required": [
+            "level",
+            "tenantId"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "level": {
+              "const": "project",
+              "description": "Level of the node.",
+              "type": "string",
+              "x-pii": "none"
+            },
+            "projectId": {
+              "description": "Project of the node.",
+              "minLength": 1,
+              "type": "string",
+              "x-pii": "none"
+            },
+            "tenantId": {
+              "description": "Organization (tenant) of the node.",
+              "minLength": 1,
+              "type": "string",
+              "x-pii": "none"
+            }
+          },
+          "required": [
+            "level",
+            "tenantId",
+            "projectId"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "level": {
+              "const": "unit",
+              "description": "Level of the node.",
+              "type": "string",
+              "x-pii": "none"
+            },
+            "projectId": {
+              "description": "Project of the node.",
+              "minLength": 1,
+              "type": "string",
+              "x-pii": "none"
+            },
+            "tenantId": {
+              "description": "Organization (tenant) of the node.",
+              "minLength": 1,
+              "type": "string",
+              "x-pii": "none"
+            },
+            "unitId": {
+              "description": "Unit of the node.",
+              "minLength": 1,
+              "type": "string",
+              "x-pii": "none"
+            }
+          },
+          "required": [
+            "level",
+            "tenantId",
+            "projectId",
+            "unitId"
+          ],
+          "type": "object"
+        }
+      ],
+      "x-pii": "none"
+    },
+    "ownerUid": {
+      "description": "User who created and owns the key.",
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "personal"
+    },
+    "publicId": {
+      "description": "Public, non-secret part of the key, to recognize it in lists.",
+      "pattern": "^[A-Z2-7]{12}$",
+      "type": "string",
+      "x-pii": "none"
+    },
+    "revokedReason": {
+      "description": "Why the key was revoked.",
+      "enum": [
+        "revoked",
+        "owner-removed"
+      ],
+      "type": "string",
+      "x-pii": "none"
+    },
+    "scopes": {
+      "description": "Permissions the key may use; always intersected with the owner's current grants.",
+      "items": {
+        "pattern": "^[a-z][a-z0-9-]*\\.[a-z][a-z0-9-]*\\.[a-z][a-z0-9-]*$",
+        "type": "string"
+      },
+      "maxItems": 200,
+      "minItems": 1,
+      "type": "array",
+      "x-pii": "none"
+    },
+    "status": {
+      "description": "`revoked` keys answer 401.",
+      "enum": [
+        "active",
+        "revoked"
+      ],
+      "type": "string",
+      "x-pii": "none"
+    },
+    "tenantId": {
+      "description": "Organization the key acts in.",
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "updatedAt": {
+      "description": "When the key last changed (UTC).",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+      "type": "string",
+      "x-pii": "none"
+    }
+  },
+  "required": [
+    "id",
+    "tenantId",
+    "name",
+    "publicId",
+    "scopes",
+    "node",
+    "ownerUid",
+    "expiresAt",
+    "lastUsedAt",
+    "status",
+    "createdAt",
+    "updatedAt"
+  ],
+  "type": "object",
+  "x-kind": "entity",
+  "x-permission": "core.api-key.read",
+  "x-pii": "personal",
+  "x-relations": [
+    {
+      "field": "tenantId",
+      "target": "tenancy.Organization",
+      "type": "belongs-to"
+    }
+  ],
+  "x-tenancyScope": "organization"
+}

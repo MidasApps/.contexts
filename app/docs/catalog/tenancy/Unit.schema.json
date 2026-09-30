@@ -1,0 +1,152 @@
+{
+  "additionalProperties": false,
+  "description": "A node of a project's unit tree, typed by an application module (depth 0-6).",
+  "examples": [
+    {
+      "ancestorIds": [
+        "Ua2bC4dE6fG8hJ0kL1mN"
+      ],
+      "createdAt": "2026-09-29T14:30:00.000Z",
+      "depth": 1,
+      "id": "Un5mK7pQ9rS1tV3wX6yZ",
+      "name": "Room 101",
+      "parentUnitId": "Ua2bC4dE6fG8hJ0kL1mN",
+      "projectId": "Pq4rS6tU8vW0xY2zA1bC",
+      "settings": {},
+      "tenantId": "Jd8sK2lPq0WnR5tYu3bV",
+      "type": "sample.room",
+      "updatedAt": "2026-09-29T15:00:00.000Z"
+    }
+  ],
+  "properties": {
+    "ancestorIds": {
+      "description": "Ids of every ancestor unit, root first; length equals depth.",
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "maxItems": 6,
+      "type": "array",
+      "x-pii": "none"
+    },
+    "createdAt": {
+      "description": "When the unit was created (UTC).",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+      "type": "string",
+      "x-pii": "none"
+    },
+    "depth": {
+      "description": "Number of ancestors, 0-6.",
+      "maximum": 6,
+      "minimum": 0,
+      "type": "integer",
+      "x-pii": "none"
+    },
+    "id": {
+      "description": "Automatic id of the unit.",
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "name": {
+      "description": "Display name of the unit.",
+      "maxLength": 120,
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "parentUnitId": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Parent unit; null when the unit sits directly under the project.",
+      "x-pii": "none"
+    },
+    "projectId": {
+      "description": "Project the unit tree belongs to.",
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "settings": {
+      "additionalProperties": false,
+      "description": "Regional overrides of the unit.",
+      "properties": {
+        "currency": {
+          "description": "ISO 4217 currency for new amounts here; absent inherits the parent's.",
+          "pattern": "^[A-Z]{3}$",
+          "type": "string",
+          "x-pii": "none"
+        },
+        "timeZone": {
+          "description": "IANA time zone of this node; absent inherits the parent's.",
+          "type": "string",
+          "x-pii": "none"
+        }
+      },
+      "type": "object",
+      "x-pii": "none"
+    },
+    "tenantId": {
+      "description": "Organization that owns the unit.",
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "type": {
+      "description": "Registered unit type, `<module>.<type>`.",
+      "pattern": "^[a-z][a-z0-9-]*\\.[a-z][a-z0-9-]*$",
+      "type": "string",
+      "x-pii": "none"
+    },
+    "updatedAt": {
+      "description": "When the unit last changed (UTC).",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+      "type": "string",
+      "x-pii": "none"
+    }
+  },
+  "required": [
+    "id",
+    "tenantId",
+    "projectId",
+    "parentUnitId",
+    "ancestorIds",
+    "depth",
+    "type",
+    "name",
+    "settings",
+    "createdAt",
+    "updatedAt"
+  ],
+  "type": "object",
+  "x-kind": "entity",
+  "x-permission": "core.unit.read",
+  "x-pii": "none",
+  "x-relations": [
+    {
+      "field": "tenantId",
+      "target": "tenancy.Organization",
+      "type": "belongs-to"
+    },
+    {
+      "field": "projectId",
+      "target": "tenancy.Project",
+      "type": "belongs-to"
+    },
+    {
+      "field": "parentUnitId",
+      "target": "tenancy.Unit",
+      "type": "belongs-to"
+    }
+  ],
+  "x-tenancyScope": "unit"
+}

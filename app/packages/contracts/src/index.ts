@@ -157,5 +157,111 @@ export {
   type FileUploadRequest,
 } from "./contracts/files/file-upload-request.schema.ts";
 export { FileIdSchema, StoredFileContract, StoredFileSchema, type FileId, type StoredFile } from "./contracts/files/stored-file.schema.ts";
+// SP1 tenancy.
+export { TENANCY_CONTRACTS } from "./contracts/tenancy/contracts.ts";
+export {
+  OrganizationIdSchema, ProjectIdSchema, UnitIdSchema, type OrganizationId, type ProjectId, type UnitId,
+} from "./contracts/tenancy/ids.schema.ts";
+export {
+  NodeRegionalOverridesSchema, RegionalDefaultsSchema, type NodeRegionalOverrides, type RegionalDefaults,
+} from "./contracts/tenancy/regional-defaults.schema.ts";
+export {
+  NodeNameSchema, ORGANIZATION_EXAMPLE, OrganizationContract, OrganizationSchema, OrganizationStatusSchema,
+  type Organization, type OrganizationStatus,
+} from "./contracts/tenancy/organization.schema.ts";
+export {
+  PROJECT_EXAMPLE, ProjectContract, ProjectDescriptionSchema, ProjectSchema, ProjectStatusSchema, type Project,
+  type ProjectStatus,
+} from "./contracts/tenancy/project.schema.ts";
+export {
+  MAX_UNIT_DEPTH, UNIT_EXAMPLE, UnitContract, UnitFieldsSchema, UnitSchema, type Unit,
+} from "./contracts/tenancy/unit.schema.ts";
+export {
+  UnitParentKindSchema, UnitTypeDefinitionContract, UnitTypeDefinitionSchema, UnitTypeIdSchema, type UnitParentKind,
+  type UnitTypeDefinition, type UnitTypeId,
+} from "./contracts/tenancy/unit-type.schema.ts";
+export {
+  NodeRefContract, NodeRefSchema, TenantNodeRefContract, TenantNodeRefSchema, tenantNodeRefField, type NodeRef,
+  type TenantNodeRef,
+} from "./contracts/tenancy/node-ref.schema.ts";
+export {
+  CreateOrganizationInputContract, CreateOrganizationInputSchema, type CreateOrganizationInput,
+} from "./contracts/tenancy/create-organization-input.schema.ts";
+export {
+  UpdateOrganizationInputContract, UpdateOrganizationInputSchema, type UpdateOrganizationInput,
+} from "./contracts/tenancy/update-organization-input.schema.ts";
+export {
+  CreateProjectInputContract, CreateProjectInputSchema, type CreateProjectInput,
+} from "./contracts/tenancy/create-project-input.schema.ts";
+export {
+  NodeRegionalOverridesPatchSchema, UpdateProjectInputContract, UpdateProjectInputSchema, type UpdateProjectInput,
+} from "./contracts/tenancy/update-project-input.schema.ts";
+export { CreateUnitInputContract, CreateUnitInputSchema, type CreateUnitInput } from "./contracts/tenancy/create-unit-input.schema.ts";
+export { UpdateUnitInputContract, UpdateUnitInputSchema, type UpdateUnitInput } from "./contracts/tenancy/update-unit-input.schema.ts";
+export {
+  RegionalSettingsContract, RegionalSettingsSchema, type RegionalSettings,
+} from "./contracts/tenancy/regional-settings.schema.ts";
+export {
+  createOrganizationEndpoint, createProjectEndpoint, createUnitEndpoint, deleteOrganizationEndpoint, deleteProjectEndpoint,
+  deleteUnitEndpoint, getOrganizationEndpoint, getProjectEndpoint, getUnitEndpoint, listProjectsEndpoint, listUnitsEndpoint,
+  listUnitTypesEndpoint, OrganizationParamsSchema, TENANCY_ENDPOINTS, updateOrganizationEndpoint, updateProjectEndpoint,
+  updateUnitEndpoint,
+} from "./contracts/tenancy/endpoints.ts";
+// SP1 identity.
+export { IDENTITY_CONTRACTS } from "./contracts/identity/contracts.ts";
+export {
+  ApiKeyIdSchema, DeviceActivationIdSchema, DeviceIdSchema, ImpersonationSessionIdSchema, SessionIdSchema, type ApiKeyId,
+  type DeviceActivationId, type DeviceId, type ImpersonationSessionId, type SessionId,
+} from "./contracts/identity/ids.schema.ts";
+export {
+  PrincipalContract, PrincipalSchema, type DevicePrincipal, type Principal, type ServicePrincipal, type UserPrincipal,
+} from "./contracts/identity/principal.schema.ts";
+export {
+  DEFAULT_USER_PREFERENCES, NotificationPreferencesSchema, ThemeSchema, UserPreferencesContract, UserPreferencesSchema,
+  type NotificationPreferences, type Theme, type UserPreferences,
+} from "./contracts/identity/user-preferences.schema.ts";
+export {
+  DisplayNameSchema, LastContextSchema, UserContract, UserSchema, UserStatusSchema, type LastContext, type User,
+  type UserStatus,
+} from "./contracts/identity/user.schema.ts";
+export { MeContract, MeSchema, type Me } from "./contracts/identity/me.schema.ts";
+export { UpdateMeInputContract, UpdateMeInputSchema, type UpdateMeInput } from "./contracts/identity/update-me-input.schema.ts";
+export {
+  SetActiveOrganizationInputContract, SetActiveOrganizationInputSchema, type SetActiveOrganizationInput,
+} from "./contracts/identity/active-organization-input.schema.ts";
+export {
+  SessionKindSchema, SessionSummaryContract, SessionSummarySchema, type SessionKind, type SessionSummary,
+} from "./contracts/identity/session.schema.ts";
+export {
+  CreateDesktopSessionResponseContract, CreateDesktopSessionResponseSchema, CustomTokenSchema, DesktopSessionSecretSchema,
+  ExchangeDesktopSessionInputContract, ExchangeDesktopSessionInputSchema, ExchangeDesktopSessionResponseContract,
+  ExchangeDesktopSessionResponseSchema, type CreateDesktopSessionResponse, type ExchangeDesktopSessionInput,
+  type ExchangeDesktopSessionResponse,
+} from "./contracts/identity/desktop-session.schema.ts";
+export {
+  DeviceContract, DeviceLabelSchema, DeviceSchema, DeviceStatusSchema, type Device, type DeviceStatus,
+} from "./contracts/identity/device.schema.ts";
+export {
+  API_KEY_MAX_LIFETIME_DAYS, API_KEY_MAX_SCOPES, ApiKeyContract, apiKeyExpiryIssue, ApiKeyNameSchema, ApiKeyPublicIdSchema,
+  ApiKeyRevokedReasonSchema, ApiKeySchema, ApiKeyStatusSchema, CreateApiKeyInputContract, CreateApiKeyInputSchema,
+  CreateApiKeyResponseContract, CreateApiKeyResponseSchema, type ApiKey, type ApiKeyExpiryIssue, type ApiKeyRevokedReason,
+  type ApiKeyStatus, type CreateApiKeyInput, type CreateApiKeyResponse,
+} from "./contracts/identity/api-key.schema.ts";
+export {
+  PLATFORM_ROLES, PlatformRoleSchema, PlatformStaffContract, PlatformStaffSchema, type PlatformRole, type PlatformStaff,
+} from "./contracts/identity/platform-staff.schema.ts";
+export {
+  ImpersonationSessionContract, ImpersonationSessionSchema, MAX_IMPERSONATION_MINUTES, StartImpersonationInputContract,
+  StartImpersonationInputSchema, StartImpersonationResponseContract, StartImpersonationResponseSchema,
+  type ImpersonationSession, type StartImpersonationInput, type StartImpersonationResponse,
+} from "./contracts/identity/impersonation-session.schema.ts";
+export {
+  createApiKeyEndpoint, createDesktopSessionEndpoint, exchangeDesktopSessionEndpoint, getMeEndpoint, IDENTITY_ENDPOINTS,
+  listApiKeysEndpoint, listDevicesEndpoint, listMyOrganizationsEndpoint, listSessionsEndpoint, revokeAllSessionsEndpoint,
+  revokeApiKeyEndpoint, revokeDeviceEndpoint, revokeSessionEndpoint, setActiveOrganizationEndpoint, syncClaimsEndpoint,
+  updateMeEndpoint,
+} from "./contracts/identity/endpoints.ts";
+export { none, personal, sensitive, type FieldDocs } from "./contracts/field-docs.ts";
+export { HAS_ANY_FIELD_ERROR, hasAnyField, hasUniqueItems } from "./contracts/primitives/refinements.ts";
 // Removable sample contract (keeps the catalog non-empty).
 export { NoteContract, NoteIdSchema, NoteSchema, type Note, type NoteId } from "./contracts/example/note.schema.ts";

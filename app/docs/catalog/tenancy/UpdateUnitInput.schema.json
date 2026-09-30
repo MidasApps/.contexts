@@ -1,0 +1,72 @@
+{
+  "additionalProperties": false,
+  "description": "Renames or moves a unit (`core.unit.update`); a move rewrites at most 500 descendants.",
+  "examples": [
+    {
+      "name": "Room 102"
+    },
+    {
+      "parentUnitId": "Ua2bC4dE6fG8hJ0kL1mN"
+    },
+    {
+      "parentUnitId": null
+    }
+  ],
+  "properties": {
+    "name": {
+      "description": "New display name.",
+      "maxLength": 120,
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "parentUnitId": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Moves the unit inside its project: a unit id, or null for directly under the project.",
+      "x-pii": "none"
+    },
+    "settings": {
+      "additionalProperties": false,
+      "description": "Regional override changes.",
+      "properties": {
+        "currency": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Z]{3}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "New ISO 4217 currency; null inherits the parent's again.",
+          "x-pii": "none"
+        },
+        "timeZone": {
+          "description": "New IANA time zone; null inherits the parent's again.",
+          "type": [
+            "string",
+            "null"
+          ],
+          "x-pii": "none"
+        }
+      },
+      "type": "object",
+      "x-pii": "none"
+    }
+  },
+  "type": "object",
+  "x-kind": "command",
+  "x-permission": "core.unit.update",
+  "x-pii": "none",
+  "x-relations": [],
+  "x-tenancyScope": "unit"
+}

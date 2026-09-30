@@ -19,12 +19,19 @@ import { UsageSummaryContract } from "./contracts/usage/usage-summary.schema.ts"
 import type { EndpointDefinition } from "./contracts/http/endpoint.ts";
 import { createEndpointRegistry, type EndpointRegistry } from "./contracts/http/endpoint-registry.ts";
 import { ErrorEnvelopeContract } from "./contracts/http/envelopes.schema.ts";
+import { IDENTITY_CONTRACTS } from "./contracts/identity/contracts.ts";
+import { IDENTITY_ENDPOINTS } from "./contracts/identity/endpoints.ts";
 import { createContractRegistry, type ContractRegistry } from "./contracts/registry.ts";
+import { TENANCY_CONTRACTS } from "./contracts/tenancy/contracts.ts";
+import { TENANCY_ENDPOINTS } from "./contracts/tenancy/endpoints.ts";
 
 /** Every contract of the core; add new contracts here. `example.Note` is removable. */
 export const CORE_CONTRACTS: readonly ContractDefinition[] = [
   NoteContract,
   ErrorEnvelopeContract,
+  // SP1 identity, tenancy and access.
+  ...TENANCY_CONTRACTS,
+  ...IDENTITY_CONTRACTS,
   // SP3 agent runtime.
   AgentRequestContextContract,
   AgentSettingsContract,
@@ -42,7 +49,7 @@ export const CORE_CONTRACTS: readonly ContractDefinition[] = [
 ];
 
 /** Every `/v1` endpoint of the core (SP1 spec §7.3); add descriptors here. */
-export const CORE_ENDPOINTS: readonly EndpointDefinition[] = [];
+export const CORE_ENDPOINTS: readonly EndpointDefinition[] = [...TENANCY_ENDPOINTS, ...IDENTITY_ENDPOINTS];
 
 /** Builds a fresh registry with the core contracts (catalog scripts, apps at startup). */
 export const composeCoreContracts = (extra: readonly ContractDefinition[] = []): ContractRegistry =>

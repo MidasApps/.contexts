@@ -2246,6 +2246,2779 @@
       "tenancyScope": "platform"
     },
     {
+      "context": "identity",
+      "description": "A scoped API key (service principal) owned by a user of the organization; no secret.",
+      "examples": [
+        {
+          "createdAt": "2026-09-29T14:30:00.000Z",
+          "expiresAt": "2027-03-29T14:30:00.000Z",
+          "id": "Ak2wS4xE6dC8rF0vT1gB",
+          "lastUsedAt": null,
+          "name": "Reporting export",
+          "node": {},
+          "ownerUid": "[redacted]",
+          "publicId": "K7QX2M4PZ6AB",
+          "scopes": [
+            "core.project.read",
+            "core.unit.read"
+          ],
+          "status": "active",
+          "tenantId": "Jd8sK2lPq0WnR5tYu3bV",
+          "updatedAt": "2026-09-29T14:30:00.000Z"
+        }
+      ],
+      "fields": [
+        {
+          "description": "When the key was created (UTC).",
+          "name": "createdAt",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "When the key stops working (UTC); at most 365 days after creation.",
+          "name": "expiresAt",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "API key id.",
+          "name": "id",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Last successful use, updated at most once a minute (UTC).",
+          "name": "lastUsedAt",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Name given by the owner.",
+          "name": "name",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Node the key is limited to; it acts only there and below.",
+          "name": "node",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "User who created and owns the key.",
+          "name": "ownerUid",
+          "pii": "personal",
+          "required": true
+        },
+        {
+          "description": "Public, non-secret part of the key, to recognize it in lists.",
+          "name": "publicId",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Why the key was revoked.",
+          "name": "revokedReason",
+          "pii": "none",
+          "required": false
+        },
+        {
+          "description": "Permissions the key may use; always intersected with the owner's current grants.",
+          "name": "scopes",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "`revoked` keys answer 401.",
+          "name": "status",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Organization the key acts in.",
+          "name": "tenantId",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "When the key last changed (UTC).",
+          "name": "updatedAt",
+          "pii": "none",
+          "required": true
+        }
+      ],
+      "id": "identity.ApiKey",
+      "jsonSchema": {
+        "additionalProperties": false,
+        "description": "A scoped API key (service principal) owned by a user of the organization; no secret.",
+        "examples": [
+          {
+            "createdAt": "2026-09-29T14:30:00.000Z",
+            "expiresAt": "2027-03-29T14:30:00.000Z",
+            "id": "Ak2wS4xE6dC8rF0vT1gB",
+            "lastUsedAt": null,
+            "name": "Reporting export",
+            "node": {},
+            "ownerUid": "[redacted]",
+            "publicId": "K7QX2M4PZ6AB",
+            "scopes": [
+              "core.project.read",
+              "core.unit.read"
+            ],
+            "status": "active",
+            "tenantId": "Jd8sK2lPq0WnR5tYu3bV",
+            "updatedAt": "2026-09-29T14:30:00.000Z"
+          }
+        ],
+        "properties": {
+          "createdAt": {
+            "description": "When the key was created (UTC).",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "type": "string",
+            "x-pii": "none"
+          },
+          "expiresAt": {
+            "description": "When the key stops working (UTC); at most 365 days after creation.",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "type": "string",
+            "x-pii": "none"
+          },
+          "id": {
+            "description": "API key id.",
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "lastUsedAt": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Last successful use, updated at most once a minute (UTC).",
+            "x-pii": "none"
+          },
+          "name": {
+            "description": "Name given by the owner.",
+            "maxLength": 80,
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "node": {
+            "description": "Node the key is limited to; it acts only there and below.",
+            "oneOf": [
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "level": {
+                    "const": "organization",
+                    "description": "Level of the node.",
+                    "type": "string",
+                    "x-pii": "none"
+                  },
+                  "tenantId": {
+                    "description": "Organization (tenant) of the node.",
+                    "minLength": 1,
+                    "type": "string",
+                    "x-pii": "none"
+                  }
+                },
+                "required": [
+                  "level",
+                  "tenantId"
+                ],
+                "type": "object"
+              },
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "level": {
+                    "const": "project",
+                    "description": "Level of the node.",
+                    "type": "string",
+                    "x-pii": "none"
+                  },
+                  "projectId": {
+                    "description": "Project of the node.",
+                    "minLength": 1,
+                    "type": "string",
+                    "x-pii": "none"
+                  },
+                  "tenantId": {
+                    "description": "Organization (tenant) of the node.",
+                    "minLength": 1,
+                    "type": "string",
+                    "x-pii": "none"
+                  }
+                },
+                "required": [
+                  "level",
+                  "tenantId",
+                  "projectId"
+                ],
+                "type": "object"
+              },
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "level": {
+                    "const": "unit",
+                    "description": "Level of the node.",
+                    "type": "string",
+                    "x-pii": "none"
+                  },
+                  "projectId": {
+                    "description": "Project of the node.",
+                    "minLength": 1,
+                    "type": "string",
+                    "x-pii": "none"
+                  },
+                  "tenantId": {
+                    "description": "Organization (tenant) of the node.",
+                    "minLength": 1,
+                    "type": "string",
+                    "x-pii": "none"
+                  },
+                  "unitId": {
+                    "description": "Unit of the node.",
+                    "minLength": 1,
+                    "type": "string",
+                    "x-pii": "none"
+                  }
+                },
+                "required": [
+                  "level",
+                  "tenantId",
+                  "projectId",
+                  "unitId"
+                ],
+                "type": "object"
+              }
+            ],
+            "x-pii": "none"
+          },
+          "ownerUid": {
+            "description": "User who created and owns the key.",
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "personal"
+          },
+          "publicId": {
+            "description": "Public, non-secret part of the key, to recognize it in lists.",
+            "pattern": "^[A-Z2-7]{12}$",
+            "type": "string",
+            "x-pii": "none"
+          },
+          "revokedReason": {
+            "description": "Why the key was revoked.",
+            "enum": [
+              "revoked",
+              "owner-removed"
+            ],
+            "type": "string",
+            "x-pii": "none"
+          },
+          "scopes": {
+            "description": "Permissions the key may use; always intersected with the owner's current grants.",
+            "items": {
+              "pattern": "^[a-z][a-z0-9-]*\\.[a-z][a-z0-9-]*\\.[a-z][a-z0-9-]*$",
+              "type": "string"
+            },
+            "maxItems": 200,
+            "minItems": 1,
+            "type": "array",
+            "x-pii": "none"
+          },
+          "status": {
+            "description": "`revoked` keys answer 401.",
+            "enum": [
+              "active",
+              "revoked"
+            ],
+            "type": "string",
+            "x-pii": "none"
+          },
+          "tenantId": {
+            "description": "Organization the key acts in.",
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "updatedAt": {
+            "description": "When the key last changed (UTC).",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "type": "string",
+            "x-pii": "none"
+          }
+        },
+        "required": [
+          "id",
+          "tenantId",
+          "name",
+          "publicId",
+          "scopes",
+          "node",
+          "ownerUid",
+          "expiresAt",
+          "lastUsedAt",
+          "status",
+          "createdAt",
+          "updatedAt"
+        ],
+        "type": "object",
+        "x-kind": "entity",
+        "x-permission": "core.api-key.read",
+        "x-pii": "personal",
+        "x-relations": [
+          {
+            "field": "tenantId",
+            "target": "tenancy.Organization",
+            "type": "belongs-to"
+          }
+        ],
+        "x-tenancyScope": "organization"
+      },
+      "kind": "entity",
+      "name": "ApiKey",
+      "permission": "core.api-key.read",
+      "pii": "personal",
+      "relations": [
+        {
+          "field": "tenantId",
+          "target": "tenancy.Organization",
+          "type": "belongs-to"
+        }
+      ],
+      "tenancyScope": "organization"
+    },
+    {
+      "context": "identity",
+      "description": "Creates an API key; scopes must be within the caller's permissions at the node.",
+      "examples": [
+        {
+          "expiresAt": "2027-03-29T14:30:00.000Z",
+          "name": "Reporting export",
+          "node": {},
+          "scopes": [
+            "core.project.read",
+            "core.unit.read"
+          ]
+        }
+      ],
+      "fields": [
+        {
+          "description": "Required expiry (UTC), after now and at most 365 days ahead.",
+          "name": "expiresAt",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Name of the key.",
+          "name": "name",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Node the key is limited to.",
+          "name": "node",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Permissions the key may use; always intersected with the owner's current grants.",
+          "name": "scopes",
+          "pii": "none",
+          "required": true
+        }
+      ],
+      "id": "identity.CreateApiKeyInput",
+      "jsonSchema": {
+        "additionalProperties": false,
+        "description": "Creates an API key; scopes must be within the caller's permissions at the node.",
+        "examples": [
+          {
+            "expiresAt": "2027-03-29T14:30:00.000Z",
+            "name": "Reporting export",
+            "node": {},
+            "scopes": [
+              "core.project.read",
+              "core.unit.read"
+            ]
+          }
+        ],
+        "properties": {
+          "expiresAt": {
+            "description": "Required expiry (UTC), after now and at most 365 days ahead.",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "type": "string",
+            "x-pii": "none"
+          },
+          "name": {
+            "description": "Name of the key.",
+            "maxLength": 80,
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "node": {
+            "description": "Node the key is limited to.",
+            "oneOf": [
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "level": {
+                    "const": "organization",
+                    "description": "Level of the node.",
+                    "type": "string",
+                    "x-pii": "none"
+                  },
+                  "tenantId": {
+                    "description": "Organization (tenant) of the node.",
+                    "minLength": 1,
+                    "type": "string",
+                    "x-pii": "none"
+                  }
+                },
+                "required": [
+                  "level",
+                  "tenantId"
+                ],
+                "type": "object"
+              },
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "level": {
+                    "const": "project",
+                    "description": "Level of the node.",
+                    "type": "string",
+                    "x-pii": "none"
+                  },
+                  "projectId": {
+                    "description": "Project of the node.",
+                    "minLength": 1,
+                    "type": "string",
+                    "x-pii": "none"
+                  },
+                  "tenantId": {
+                    "description": "Organization (tenant) of the node.",
+                    "minLength": 1,
+                    "type": "string",
+                    "x-pii": "none"
+                  }
+                },
+                "required": [
+                  "level",
+                  "tenantId",
+                  "projectId"
+                ],
+                "type": "object"
+              },
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "level": {
+                    "const": "unit",
+                    "description": "Level of the node.",
+                    "type": "string",
+                    "x-pii": "none"
+                  },
+                  "projectId": {
+                    "description": "Project of the node.",
+                    "minLength": 1,
+                    "type": "string",
+                    "x-pii": "none"
+                  },
+                  "tenantId": {
+                    "description": "Organization (tenant) of the node.",
+                    "minLength": 1,
+                    "type": "string",
+                    "x-pii": "none"
+                  },
+                  "unitId": {
+                    "description": "Unit of the node.",
+                    "minLength": 1,
+                    "type": "string",
+                    "x-pii": "none"
+                  }
+                },
+                "required": [
+                  "level",
+                  "tenantId",
+                  "projectId",
+                  "unitId"
+                ],
+                "type": "object"
+              }
+            ],
+            "x-pii": "none"
+          },
+          "scopes": {
+            "description": "Permissions the key may use; always intersected with the owner's current grants.",
+            "items": {
+              "pattern": "^[a-z][a-z0-9-]*\\.[a-z][a-z0-9-]*\\.[a-z][a-z0-9-]*$",
+              "type": "string"
+            },
+            "maxItems": 200,
+            "minItems": 1,
+            "type": "array",
+            "x-pii": "none"
+          }
+        },
+        "required": [
+          "name",
+          "scopes",
+          "node",
+          "expiresAt"
+        ],
+        "type": "object",
+        "x-kind": "command",
+        "x-permission": "core.api-key.create",
+        "x-pii": "none",
+        "x-relations": [],
+        "x-tenancyScope": "organization"
+      },
+      "kind": "command",
+      "name": "CreateApiKeyInput",
+      "permission": "core.api-key.create",
+      "pii": "none",
+      "relations": [],
+      "tenancyScope": "organization"
+    },
+    {
+      "context": "identity",
+      "description": "One-time answer of API key creation, with the full key.",
+      "examples": [
+        {
+          "apiKey": "[redacted]"
+        }
+      ],
+      "fields": [
+        {
+          "description": "The created key, as later listed.",
+          "name": "apiKey",
+          "pii": "personal",
+          "required": true
+        }
+      ],
+      "id": "identity.CreateApiKeyResponse",
+      "jsonSchema": {
+        "additionalProperties": false,
+        "description": "One-time answer of API key creation, with the full key.",
+        "examples": [
+          {
+            "apiKey": "[redacted]"
+          }
+        ],
+        "properties": {
+          "apiKey": {
+            "additionalProperties": false,
+            "description": "The created key, as later listed.",
+            "properties": {
+              "createdAt": {
+                "description": "When the key was created (UTC).",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                "type": "string",
+                "x-pii": "none"
+              },
+              "expiresAt": {
+                "description": "When the key stops working (UTC); at most 365 days after creation.",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                "type": "string",
+                "x-pii": "none"
+              },
+              "id": {
+                "description": "API key id.",
+                "minLength": 1,
+                "type": "string",
+                "x-pii": "none"
+              },
+              "lastUsedAt": {
+                "anyOf": [
+                  {
+                    "format": "date-time",
+                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "description": "Last successful use, updated at most once a minute (UTC).",
+                "x-pii": "none"
+              },
+              "name": {
+                "description": "Name given by the owner.",
+                "maxLength": 80,
+                "minLength": 1,
+                "type": "string",
+                "x-pii": "none"
+              },
+              "node": {
+                "description": "Node the key is limited to; it acts only there and below.",
+                "oneOf": [
+                  {
+                    "additionalProperties": false,
+                    "properties": {
+                      "level": {
+                        "const": "organization",
+                        "description": "Level of the node.",
+                        "type": "string",
+                        "x-pii": "none"
+                      },
+                      "tenantId": {
+                        "description": "Organization (tenant) of the node.",
+                        "minLength": 1,
+                        "type": "string",
+                        "x-pii": "none"
+                      }
+                    },
+                    "required": [
+                      "level",
+                      "tenantId"
+                    ],
+                    "type": "object"
+                  },
+                  {
+                    "additionalProperties": false,
+                    "properties": {
+                      "level": {
+                        "const": "project",
+                        "description": "Level of the node.",
+                        "type": "string",
+                        "x-pii": "none"
+                      },
+                      "projectId": {
+                        "description": "Project of the node.",
+                        "minLength": 1,
+                        "type": "string",
+                        "x-pii": "none"
+                      },
+                      "tenantId": {
+                        "description": "Organization (tenant) of the node.",
+                        "minLength": 1,
+                        "type": "string",
+                        "x-pii": "none"
+                      }
+                    },
+                    "required": [
+                      "level",
+                      "tenantId",
+                      "projectId"
+                    ],
+                    "type": "object"
+                  },
+                  {
+                    "additionalProperties": false,
+                    "properties": {
+                      "level": {
+                        "const": "unit",
+                        "description": "Level of the node.",
+                        "type": "string",
+                        "x-pii": "none"
+                      },
+                      "projectId": {
+                        "description": "Project of the node.",
+                        "minLength": 1,
+                        "type": "string",
+                        "x-pii": "none"
+                      },
+                      "tenantId": {
+                        "description": "Organization (tenant) of the node.",
+                        "minLength": 1,
+                        "type": "string",
+                        "x-pii": "none"
+                      },
+                      "unitId": {
+                        "description": "Unit of the node.",
+                        "minLength": 1,
+                        "type": "string",
+                        "x-pii": "none"
+                      }
+                    },
+                    "required": [
+                      "level",
+                      "tenantId",
+                      "projectId",
+                      "unitId"
+                    ],
+                    "type": "object"
+                  }
+                ],
+                "x-pii": "none"
+              },
+              "ownerUid": {
+                "description": "User who created and owns the key.",
+                "minLength": 1,
+                "type": "string",
+                "x-pii": "personal"
+              },
+              "publicId": {
+                "description": "Public, non-secret part of the key, to recognize it in lists.",
+                "pattern": "^[A-Z2-7]{12}$",
+                "type": "string",
+                "x-pii": "none"
+              },
+              "revokedReason": {
+                "description": "Why the key was revoked.",
+                "enum": [
+                  "revoked",
+                  "owner-removed"
+                ],
+                "type": "string",
+                "x-pii": "none"
+              },
+              "scopes": {
+                "description": "Permissions the key may use; always intersected with the owner's current grants.",
+                "items": {
+                  "pattern": "^[a-z][a-z0-9-]*\\.[a-z][a-z0-9-]*\\.[a-z][a-z0-9-]*$",
+                  "type": "string"
+                },
+                "maxItems": 200,
+                "minItems": 1,
+                "type": "array",
+                "x-pii": "none"
+              },
+              "status": {
+                "description": "`revoked` keys answer 401.",
+                "enum": [
+                  "active",
+                  "revoked"
+                ],
+                "type": "string",
+                "x-pii": "none"
+              },
+              "tenantId": {
+                "description": "Organization the key acts in.",
+                "minLength": 1,
+                "type": "string",
+                "x-pii": "none"
+              },
+              "updatedAt": {
+                "description": "When the key last changed (UTC).",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                "type": "string",
+                "x-pii": "none"
+              }
+            },
+            "required": [
+              "id",
+              "tenantId",
+              "name",
+              "publicId",
+              "scopes",
+              "node",
+              "ownerUid",
+              "expiresAt",
+              "lastUsedAt",
+              "status",
+              "createdAt",
+              "updatedAt"
+            ],
+            "type": "object",
+            "x-pii": "personal"
+          }
+        },
+        "required": [
+          "apiKey"
+        ],
+        "type": "object",
+        "x-kind": "view",
+        "x-pii": "sensitive",
+        "x-relations": [],
+        "x-tenancyScope": "organization"
+      },
+      "kind": "view",
+      "name": "CreateApiKeyResponse",
+      "pii": "sensitive",
+      "relations": [],
+      "tenancyScope": "organization"
+    },
+    {
+      "context": "identity",
+      "description": "One-time answer of POST /v1/me/desktop-sessions with the session secret.",
+      "examples": [
+        {
+          "expiresAt": "2026-10-06T14:30:00.000Z",
+          "sessionId": "Ss8yH0nU2jM4iK6oL8pZ"
+        }
+      ],
+      "fields": [
+        {
+          "description": "When the session expires unless exchanged again (sliding, UTC).",
+          "name": "expiresAt",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Id of the new desktop session.",
+          "name": "sessionId",
+          "pii": "none",
+          "required": true
+        }
+      ],
+      "id": "identity.CreateDesktopSessionResponse",
+      "jsonSchema": {
+        "additionalProperties": false,
+        "description": "One-time answer of POST /v1/me/desktop-sessions with the session secret.",
+        "examples": [
+          {
+            "expiresAt": "2026-10-06T14:30:00.000Z",
+            "sessionId": "Ss8yH0nU2jM4iK6oL8pZ"
+          }
+        ],
+        "properties": {
+          "expiresAt": {
+            "description": "When the session expires unless exchanged again (sliding, UTC).",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "type": "string",
+            "x-pii": "none"
+          },
+          "sessionId": {
+            "description": "Id of the new desktop session.",
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          }
+        },
+        "required": [
+          "sessionId",
+          "expiresAt"
+        ],
+        "type": "object",
+        "x-kind": "view",
+        "x-pii": "sensitive",
+        "x-relations": [],
+        "x-tenancyScope": "user"
+      },
+      "kind": "view",
+      "name": "CreateDesktopSessionResponse",
+      "pii": "sensitive",
+      "relations": [],
+      "tenancyScope": "user"
+    },
+    {
+      "context": "identity",
+      "description": "A device principal of an organization, activated with a one-time code (SP1 spec §6.4).",
+      "examples": [
+        {
+          "createdAt": "2026-09-29T14:30:00.000Z",
+          "id": "Dv1qA3zW5sX7eD9cR2fV",
+          "label": "Front desk tablet",
+          "lastSeenAt": "2026-09-29T15:00:00.000Z",
+          "node": {},
+          "status": "active",
+          "tenantId": "Jd8sK2lPq0WnR5tYu3bV",
+          "updatedAt": "2026-09-29T15:00:00.000Z"
+        }
+      ],
+      "fields": [
+        {
+          "description": "When the device was activated (UTC).",
+          "name": "createdAt",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Device id; also the Firebase Auth uid of the device.",
+          "name": "id",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Name given at activation, e.g. `Front desk tablet`.",
+          "name": "label",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Last authenticated request (UTC); null before the first one.",
+          "name": "lastSeenAt",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Node the device was activated at; its grant lives there.",
+          "name": "node",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "`revoked` devices cannot sign in.",
+          "name": "status",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Organization the device belongs to.",
+          "name": "tenantId",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "When the device last changed (UTC).",
+          "name": "updatedAt",
+          "pii": "none",
+          "required": true
+        }
+      ],
+      "id": "identity.Device",
+      "jsonSchema": {
+        "additionalProperties": false,
+        "description": "A device principal of an organization, activated with a one-time code (SP1 spec §6.4).",
+        "examples": [
+          {
+            "createdAt": "2026-09-29T14:30:00.000Z",
+            "id": "Dv1qA3zW5sX7eD9cR2fV",
+            "label": "Front desk tablet",
+            "lastSeenAt": "2026-09-29T15:00:00.000Z",
+            "node": {},
+            "status": "active",
+            "tenantId": "Jd8sK2lPq0WnR5tYu3bV",
+            "updatedAt": "2026-09-29T15:00:00.000Z"
+          }
+        ],
+        "properties": {
+          "createdAt": {
+            "description": "When the device was activated (UTC).",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "type": "string",
+            "x-pii": "none"
+          },
+          "id": {
+            "description": "Device id; also the Firebase Auth uid of the device.",
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "label": {
+            "description": "Name given at activation, e.g. `Front desk tablet`.",
+            "maxLength": 80,
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "lastSeenAt": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Last authenticated request (UTC); null before the first one.",
+            "x-pii": "none"
+          },
+          "node": {
+            "description": "Node the device was activated at; its grant lives there.",
+            "oneOf": [
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "level": {
+                    "const": "organization",
+                    "description": "Level of the node.",
+                    "type": "string",
+                    "x-pii": "none"
+                  },
+                  "tenantId": {
+                    "description": "Organization (tenant) of the node.",
+                    "minLength": 1,
+                    "type": "string",
+                    "x-pii": "none"
+                  }
+                },
+                "required": [
+                  "level",
+                  "tenantId"
+                ],
+                "type": "object"
+              },
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "level": {
+                    "const": "project",
+                    "description": "Level of the node.",
+                    "type": "string",
+                    "x-pii": "none"
+                  },
+                  "projectId": {
+                    "description": "Project of the node.",
+                    "minLength": 1,
+                    "type": "string",
+                    "x-pii": "none"
+                  },
+                  "tenantId": {
+                    "description": "Organization (tenant) of the node.",
+                    "minLength": 1,
+                    "type": "string",
+                    "x-pii": "none"
+                  }
+                },
+                "required": [
+                  "level",
+                  "tenantId",
+                  "projectId"
+                ],
+                "type": "object"
+              },
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "level": {
+                    "const": "unit",
+                    "description": "Level of the node.",
+                    "type": "string",
+                    "x-pii": "none"
+                  },
+                  "projectId": {
+                    "description": "Project of the node.",
+                    "minLength": 1,
+                    "type": "string",
+                    "x-pii": "none"
+                  },
+                  "tenantId": {
+                    "description": "Organization (tenant) of the node.",
+                    "minLength": 1,
+                    "type": "string",
+                    "x-pii": "none"
+                  },
+                  "unitId": {
+                    "description": "Unit of the node.",
+                    "minLength": 1,
+                    "type": "string",
+                    "x-pii": "none"
+                  }
+                },
+                "required": [
+                  "level",
+                  "tenantId",
+                  "projectId",
+                  "unitId"
+                ],
+                "type": "object"
+              }
+            ],
+            "x-pii": "none"
+          },
+          "status": {
+            "description": "`revoked` devices cannot sign in.",
+            "enum": [
+              "active",
+              "revoked"
+            ],
+            "type": "string",
+            "x-pii": "none"
+          },
+          "tenantId": {
+            "description": "Organization the device belongs to.",
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "updatedAt": {
+            "description": "When the device last changed (UTC).",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "type": "string",
+            "x-pii": "none"
+          }
+        },
+        "required": [
+          "id",
+          "tenantId",
+          "label",
+          "node",
+          "status",
+          "lastSeenAt",
+          "createdAt",
+          "updatedAt"
+        ],
+        "type": "object",
+        "x-kind": "entity",
+        "x-permission": "core.device.read",
+        "x-pii": "none",
+        "x-relations": [
+          {
+            "field": "tenantId",
+            "target": "tenancy.Organization",
+            "type": "belongs-to"
+          }
+        ],
+        "x-tenancyScope": "organization"
+      },
+      "kind": "entity",
+      "name": "Device",
+      "permission": "core.device.read",
+      "pii": "none",
+      "relations": [
+        {
+          "field": "tenantId",
+          "target": "tenancy.Organization",
+          "type": "belongs-to"
+        }
+      ],
+      "tenancyScope": "organization"
+    },
+    {
+      "context": "identity",
+      "description": "Answer of POST /v1/desktop-sessions/exchange: a custom token and the rotated secret.",
+      "examples": [
+        {
+          "expiresAt": "2026-10-06T14:30:00.000Z"
+        }
+      ],
+      "fields": [
+        {
+          "description": "When the session expires unless exchanged again (sliding, UTC).",
+          "name": "expiresAt",
+          "pii": "none",
+          "required": true
+        }
+      ],
+      "id": "identity.ExchangeDesktopSessionResponse",
+      "jsonSchema": {
+        "additionalProperties": false,
+        "description": "Answer of POST /v1/desktop-sessions/exchange: a custom token and the rotated secret.",
+        "examples": [
+          {
+            "expiresAt": "2026-10-06T14:30:00.000Z"
+          }
+        ],
+        "properties": {
+          "expiresAt": {
+            "description": "When the session expires unless exchanged again (sliding, UTC).",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "type": "string",
+            "x-pii": "none"
+          }
+        },
+        "required": [
+          "expiresAt"
+        ],
+        "type": "object",
+        "x-kind": "view",
+        "x-pii": "sensitive",
+        "x-relations": [],
+        "x-tenancyScope": "user"
+      },
+      "kind": "view",
+      "name": "ExchangeDesktopSessionResponse",
+      "pii": "sensitive",
+      "relations": [],
+      "tenancyScope": "user"
+    },
+    {
+      "context": "identity",
+      "description": "A read-only, time-boxed session in which platform staff acts as a user (SP1 spec §6.6).",
+      "examples": [
+        {
+          "createdAt": "2026-09-29T14:30:00.000Z",
+          "endedAt": null,
+          "expiresAt": "2026-09-29T15:30:00.000Z",
+          "id": "Im5rT7yU9iO1pA3sD5fG",
+          "reason": "[redacted]",
+          "staffUid": "[redacted]",
+          "targetUid": "[redacted]",
+          "tenantId": "Jd8sK2lPq0WnR5tYu3bV"
+        }
+      ],
+      "fields": [
+        {
+          "description": "When the session started (UTC).",
+          "name": "createdAt",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "When staff ended the session early (UTC); null while open.",
+          "name": "endedAt",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Hard end of the session (UTC), at most 60 minutes after start.",
+          "name": "expiresAt",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Impersonation session id (token claim `imp`).",
+          "name": "id",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Why support needs the access; audited.",
+          "name": "reason",
+          "pii": "personal",
+          "required": true
+        },
+        {
+          "description": "Staff member acting as the user.",
+          "name": "staffUid",
+          "pii": "personal",
+          "required": true
+        },
+        {
+          "description": "User being impersonated.",
+          "name": "targetUid",
+          "pii": "personal",
+          "required": true
+        },
+        {
+          "description": "Only organization the session may read.",
+          "name": "tenantId",
+          "pii": "none",
+          "required": true
+        }
+      ],
+      "id": "identity.ImpersonationSession",
+      "jsonSchema": {
+        "additionalProperties": false,
+        "description": "A read-only, time-boxed session in which platform staff acts as a user (SP1 spec §6.6).",
+        "examples": [
+          {
+            "createdAt": "2026-09-29T14:30:00.000Z",
+            "endedAt": null,
+            "expiresAt": "2026-09-29T15:30:00.000Z",
+            "id": "Im5rT7yU9iO1pA3sD5fG",
+            "reason": "[redacted]",
+            "staffUid": "[redacted]",
+            "targetUid": "[redacted]",
+            "tenantId": "Jd8sK2lPq0WnR5tYu3bV"
+          }
+        ],
+        "properties": {
+          "createdAt": {
+            "description": "When the session started (UTC).",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "type": "string",
+            "x-pii": "none"
+          },
+          "endedAt": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "When staff ended the session early (UTC); null while open.",
+            "x-pii": "none"
+          },
+          "expiresAt": {
+            "description": "Hard end of the session (UTC), at most 60 minutes after start.",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "type": "string",
+            "x-pii": "none"
+          },
+          "id": {
+            "description": "Impersonation session id (token claim `imp`).",
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "reason": {
+            "description": "Why support needs the access; audited.",
+            "maxLength": 500,
+            "minLength": 10,
+            "type": "string",
+            "x-pii": "personal"
+          },
+          "staffUid": {
+            "description": "Staff member acting as the user.",
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "personal"
+          },
+          "targetUid": {
+            "description": "User being impersonated.",
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "personal"
+          },
+          "tenantId": {
+            "description": "Only organization the session may read.",
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          }
+        },
+        "required": [
+          "id",
+          "staffUid",
+          "targetUid",
+          "tenantId",
+          "reason",
+          "expiresAt",
+          "endedAt",
+          "createdAt"
+        ],
+        "type": "object",
+        "x-kind": "entity",
+        "x-permission": "platform.user.impersonate",
+        "x-pii": "personal",
+        "x-relations": [],
+        "x-tenancyScope": "platform"
+      },
+      "kind": "entity",
+      "name": "ImpersonationSession",
+      "permission": "platform.user.impersonate",
+      "pii": "personal",
+      "relations": [],
+      "tenancyScope": "platform"
+    },
+    {
+      "context": "identity",
+      "description": "Profile, preferences, staff flags and access version of the signed-in user.",
+      "examples": [
+        {
+          "accessVersion": 3,
+          "displayName": "[redacted]",
+          "email": "[redacted]",
+          "isPlatformStaff": false,
+          "lastContext": {
+            "organizationId": "Jd8sK2lPq0WnR5tYu3bV",
+            "projectId": "Pq4rS6tU8vW0xY2zA1bC"
+          },
+          "mfaEnrolled": true,
+          "preferences": "[redacted]",
+          "uid": "[redacted]"
+        }
+      ],
+      "fields": [
+        {
+          "description": "Bumped on every grant change; a newer value than the token's means stale claims.",
+          "name": "accessVersion",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Name shown to other members; may be empty.",
+          "name": "displayName",
+          "pii": "personal",
+          "required": true
+        },
+        {
+          "description": "Email address of the Firebase Auth account.",
+          "name": "email",
+          "pii": "personal",
+          "required": true
+        },
+        {
+          "description": "Whether an active platform-staff doc exists for the user.",
+          "name": "isPlatformStaff",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Last organization, project and unit used.",
+          "name": "lastContext",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Whether the account has at least one second factor enrolled.",
+          "name": "mfaEnrolled",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Profile photo URL.",
+          "name": "photoUrl",
+          "pii": "personal",
+          "required": false
+        },
+        {
+          "description": "Staff role; present only for active staff.",
+          "name": "platformRole",
+          "pii": "none",
+          "required": false
+        },
+        {
+          "description": "Locale, time zone, currency, theme, notifications.",
+          "name": "preferences",
+          "pii": "personal",
+          "required": true
+        },
+        {
+          "description": "Firebase Auth uid.",
+          "name": "uid",
+          "pii": "personal",
+          "required": true
+        }
+      ],
+      "id": "identity.Me",
+      "jsonSchema": {
+        "additionalProperties": false,
+        "description": "Profile, preferences, staff flags and access version of the signed-in user.",
+        "examples": [
+          {
+            "accessVersion": 3,
+            "displayName": "[redacted]",
+            "email": "[redacted]",
+            "isPlatformStaff": false,
+            "lastContext": {
+              "organizationId": "Jd8sK2lPq0WnR5tYu3bV",
+              "projectId": "Pq4rS6tU8vW0xY2zA1bC"
+            },
+            "mfaEnrolled": true,
+            "preferences": "[redacted]",
+            "uid": "[redacted]"
+          }
+        ],
+        "properties": {
+          "accessVersion": {
+            "description": "Bumped on every grant change; a newer value than the token's means stale claims.",
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer",
+            "x-pii": "none"
+          },
+          "displayName": {
+            "description": "Name shown to other members; may be empty.",
+            "maxLength": 120,
+            "type": "string",
+            "x-pii": "personal"
+          },
+          "email": {
+            "description": "Email address of the Firebase Auth account.",
+            "format": "email",
+            "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$",
+            "type": "string",
+            "x-pii": "personal"
+          },
+          "isPlatformStaff": {
+            "description": "Whether an active platform-staff doc exists for the user.",
+            "type": "boolean",
+            "x-pii": "none"
+          },
+          "lastContext": {
+            "additionalProperties": false,
+            "description": "Last organization, project and unit used.",
+            "properties": {
+              "organizationId": {
+                "description": "Active organization.",
+                "minLength": 1,
+                "type": "string",
+                "x-pii": "none"
+              },
+              "projectId": {
+                "description": "Last project.",
+                "minLength": 1,
+                "type": "string",
+                "x-pii": "none"
+              },
+              "unitId": {
+                "description": "Last unit.",
+                "minLength": 1,
+                "type": "string",
+                "x-pii": "none"
+              }
+            },
+            "type": "object",
+            "x-pii": "none"
+          },
+          "mfaEnrolled": {
+            "description": "Whether the account has at least one second factor enrolled.",
+            "type": "boolean",
+            "x-pii": "none"
+          },
+          "photoUrl": {
+            "description": "Profile photo URL.",
+            "format": "uri",
+            "type": "string",
+            "x-pii": "personal"
+          },
+          "platformRole": {
+            "description": "Staff role; present only for active staff.",
+            "enum": [
+              "platform-admin",
+              "platform-support"
+            ],
+            "type": "string",
+            "x-pii": "none"
+          },
+          "preferences": {
+            "additionalProperties": false,
+            "description": "Locale, time zone, currency, theme, notifications.",
+            "properties": {
+              "currency": {
+                "description": "Preferred ISO 4217 currency for display.",
+                "pattern": "^[A-Z]{3}$",
+                "type": "string",
+                "x-pii": "personal"
+              },
+              "locale": {
+                "description": "Preferred BCP 47 locale; absent uses the organization default.",
+                "minLength": 1,
+                "type": "string",
+                "x-pii": "personal"
+              },
+              "notifications": {
+                "additionalProperties": false,
+                "description": "Notification opt-ins.",
+                "properties": {
+                  "productUpdates": {
+                    "description": "Receive product update notices.",
+                    "type": "boolean",
+                    "x-pii": "none"
+                  },
+                  "securityAlerts": {
+                    "const": true,
+                    "description": "Security alerts are always on.",
+                    "type": "boolean",
+                    "x-pii": "none"
+                  }
+                },
+                "required": [
+                  "productUpdates",
+                  "securityAlerts"
+                ],
+                "type": "object",
+                "x-pii": "none"
+              },
+              "theme": {
+                "description": "Color theme.",
+                "enum": [
+                  "system",
+                  "light",
+                  "dark"
+                ],
+                "type": "string",
+                "x-pii": "none"
+              },
+              "timeZone": {
+                "description": "Preferred IANA time zone for display; absent uses the node's.",
+                "type": "string",
+                "x-pii": "personal"
+              }
+            },
+            "required": [
+              "theme",
+              "notifications"
+            ],
+            "type": "object",
+            "x-pii": "personal"
+          },
+          "uid": {
+            "description": "Firebase Auth uid.",
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "personal"
+          }
+        },
+        "required": [
+          "uid",
+          "email",
+          "displayName",
+          "preferences",
+          "lastContext",
+          "accessVersion",
+          "isPlatformStaff",
+          "mfaEnrolled"
+        ],
+        "type": "object",
+        "x-kind": "view",
+        "x-pii": "personal",
+        "x-relations": [],
+        "x-tenancyScope": "user"
+      },
+      "kind": "view",
+      "name": "Me",
+      "pii": "personal",
+      "relations": [],
+      "tenancyScope": "user"
+    },
+    {
+      "context": "identity",
+      "description": "A platform staff member; access also requires MFA (SP1 spec §3.4).",
+      "examples": [
+        {
+          "createdAt": "2026-09-29T14:30:00.000Z",
+          "isActive": true,
+          "role": "platform-support",
+          "uid": "[redacted]",
+          "updatedAt": "2026-09-29T15:00:00.000Z"
+        }
+      ],
+      "fields": [
+        {
+          "description": "When the staff record was created (UTC).",
+          "name": "createdAt",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Inactive staff hold no platform permission.",
+          "name": "isActive",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Staff role.",
+          "name": "role",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Firebase Auth uid of the staff member (document id).",
+          "name": "uid",
+          "pii": "personal",
+          "required": true
+        },
+        {
+          "description": "When the staff record last changed (UTC).",
+          "name": "updatedAt",
+          "pii": "none",
+          "required": true
+        }
+      ],
+      "id": "identity.PlatformStaff",
+      "jsonSchema": {
+        "additionalProperties": false,
+        "description": "A platform staff member; access also requires MFA (SP1 spec §3.4).",
+        "examples": [
+          {
+            "createdAt": "2026-09-29T14:30:00.000Z",
+            "isActive": true,
+            "role": "platform-support",
+            "uid": "[redacted]",
+            "updatedAt": "2026-09-29T15:00:00.000Z"
+          }
+        ],
+        "properties": {
+          "createdAt": {
+            "description": "When the staff record was created (UTC).",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "type": "string",
+            "x-pii": "none"
+          },
+          "isActive": {
+            "description": "Inactive staff hold no platform permission.",
+            "type": "boolean",
+            "x-pii": "none"
+          },
+          "role": {
+            "description": "Staff role.",
+            "enum": [
+              "platform-admin",
+              "platform-support"
+            ],
+            "type": "string",
+            "x-pii": "none"
+          },
+          "uid": {
+            "description": "Firebase Auth uid of the staff member (document id).",
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "personal"
+          },
+          "updatedAt": {
+            "description": "When the staff record last changed (UTC).",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "type": "string",
+            "x-pii": "none"
+          }
+        },
+        "required": [
+          "uid",
+          "role",
+          "isActive",
+          "createdAt",
+          "updatedAt"
+        ],
+        "type": "object",
+        "x-kind": "entity",
+        "x-pii": "personal",
+        "x-relations": [],
+        "x-tenancyScope": "platform"
+      },
+      "kind": "entity",
+      "name": "PlatformStaff",
+      "pii": "personal",
+      "relations": [],
+      "tenancyScope": "platform"
+    },
+    {
+      "context": "identity",
+      "description": "The authenticated caller of a /v1 request: a user, a device or an API key (service).",
+      "examples": [
+        {},
+        {},
+        {}
+      ],
+      "fields": [],
+      "id": "identity.Principal",
+      "jsonSchema": {
+        "description": "The authenticated caller of a /v1 request: a user, a device or an API key (service).",
+        "examples": [
+          {},
+          {},
+          {}
+        ],
+        "oneOf": [
+          {
+            "additionalProperties": false,
+            "properties": {
+              "impersonation": {
+                "additionalProperties": false,
+                "description": "Present when platform staff acts as this user (SP1 spec §6.6).",
+                "properties": {
+                  "sessionId": {
+                    "description": "Active impersonation session (read-only, time-boxed).",
+                    "minLength": 1,
+                    "type": "string",
+                    "x-pii": "none"
+                  },
+                  "staffUid": {
+                    "description": "Uid of the platform staff member acting as the user.",
+                    "minLength": 1,
+                    "type": "string",
+                    "x-pii": "personal"
+                  }
+                },
+                "required": [
+                  "sessionId",
+                  "staffUid"
+                ],
+                "type": "object",
+                "x-pii": "personal"
+              },
+              "mfa": {
+                "description": "Whether the verified token proves a second factor (SP1 spec §3.4).",
+                "type": "boolean",
+                "x-pii": "none"
+              },
+              "type": {
+                "const": "user",
+                "description": "A person signed in with Firebase Auth.",
+                "type": "string",
+                "x-pii": "none"
+              },
+              "uid": {
+                "description": "Firebase Auth uid of the user.",
+                "minLength": 1,
+                "type": "string",
+                "x-pii": "personal"
+              }
+            },
+            "required": [
+              "type",
+              "uid",
+              "mfa"
+            ],
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "deviceId": {
+                "description": "Device id; also its Firebase Auth uid.",
+                "minLength": 1,
+                "type": "string",
+                "x-pii": "none"
+              },
+              "tenantId": {
+                "description": "The only organization this principal can act in.",
+                "minLength": 1,
+                "type": "string",
+                "x-pii": "none"
+              },
+              "type": {
+                "const": "device",
+                "description": "A device activated with a code; signs in with a custom token.",
+                "type": "string",
+                "x-pii": "none"
+              }
+            },
+            "required": [
+              "type",
+              "deviceId",
+              "tenantId"
+            ],
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "apiKeyId": {
+                "description": "API key id.",
+                "minLength": 1,
+                "type": "string",
+                "x-pii": "none"
+              },
+              "ownerUid": {
+                "description": "User who owns the key; the key never exceeds their permissions.",
+                "minLength": 1,
+                "type": "string",
+                "x-pii": "personal"
+              },
+              "tenantId": {
+                "description": "The only organization this principal can act in.",
+                "minLength": 1,
+                "type": "string",
+                "x-pii": "none"
+              },
+              "type": {
+                "const": "service",
+                "description": "An API key; acts with its scopes intersected with its owner's grants.",
+                "type": "string",
+                "x-pii": "none"
+              }
+            },
+            "required": [
+              "type",
+              "apiKeyId",
+              "tenantId",
+              "ownerUid"
+            ],
+            "type": "object"
+          }
+        ],
+        "x-kind": "view",
+        "x-pii": "personal",
+        "x-relations": [],
+        "x-tenancyScope": "platform"
+      },
+      "kind": "view",
+      "name": "Principal",
+      "pii": "personal",
+      "relations": [],
+      "tenancyScope": "platform"
+    },
+    {
+      "context": "identity",
+      "description": "An active web or desktop session of the signed-in user (GET /v1/me/sessions).",
+      "examples": [
+        {
+          "createdAt": "2026-09-29T14:30:00.000Z",
+          "expiresAt": "2026-10-06T14:30:00.000Z",
+          "id": "Ss8yH0nU2jM4iK6oL8pZ",
+          "kind": "web",
+          "lastSeenAt": "2026-09-29T15:00:00.000Z",
+          "mfa": true,
+          "userAgent": "[redacted]"
+        }
+      ],
+      "fields": [
+        {
+          "description": "When the session was created (UTC).",
+          "name": "createdAt",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "When the session expires (UTC).",
+          "name": "expiresAt",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Session id.",
+          "name": "id",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "`web` (session cookie) or `desktop` (session secret).",
+          "name": "kind",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Last exchange or request seen for the session (UTC).",
+          "name": "lastSeenAt",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Whether the sign-in that created the session used a second factor.",
+          "name": "mfa",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Browser and OS family only, e.g. `Firefox on Windows`.",
+          "name": "userAgent",
+          "pii": "personal",
+          "required": true
+        }
+      ],
+      "id": "identity.SessionSummary",
+      "jsonSchema": {
+        "additionalProperties": false,
+        "description": "An active web or desktop session of the signed-in user (GET /v1/me/sessions).",
+        "examples": [
+          {
+            "createdAt": "2026-09-29T14:30:00.000Z",
+            "expiresAt": "2026-10-06T14:30:00.000Z",
+            "id": "Ss8yH0nU2jM4iK6oL8pZ",
+            "kind": "web",
+            "lastSeenAt": "2026-09-29T15:00:00.000Z",
+            "mfa": true,
+            "userAgent": "[redacted]"
+          }
+        ],
+        "properties": {
+          "createdAt": {
+            "description": "When the session was created (UTC).",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "type": "string",
+            "x-pii": "none"
+          },
+          "expiresAt": {
+            "description": "When the session expires (UTC).",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "type": "string",
+            "x-pii": "none"
+          },
+          "id": {
+            "description": "Session id.",
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "kind": {
+            "description": "`web` (session cookie) or `desktop` (session secret).",
+            "enum": [
+              "web",
+              "desktop"
+            ],
+            "type": "string",
+            "x-pii": "none"
+          },
+          "lastSeenAt": {
+            "description": "Last exchange or request seen for the session (UTC).",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "type": "string",
+            "x-pii": "none"
+          },
+          "mfa": {
+            "description": "Whether the sign-in that created the session used a second factor.",
+            "type": "boolean",
+            "x-pii": "none"
+          },
+          "userAgent": {
+            "description": "Browser and OS family only, e.g. `Firefox on Windows`.",
+            "maxLength": 120,
+            "type": "string",
+            "x-pii": "personal"
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "mfa",
+          "userAgent",
+          "createdAt",
+          "lastSeenAt",
+          "expiresAt"
+        ],
+        "type": "object",
+        "x-kind": "view",
+        "x-pii": "personal",
+        "x-relations": [],
+        "x-tenancyScope": "user"
+      },
+      "kind": "view",
+      "name": "SessionSummary",
+      "pii": "personal",
+      "relations": [],
+      "tenancyScope": "user"
+    },
+    {
+      "context": "identity",
+      "description": "Switches the active organization (claims projection; the API never relies on it).",
+      "examples": [
+        {
+          "organizationId": "Jd8sK2lPq0WnR5tYu3bV"
+        }
+      ],
+      "fields": [
+        {
+          "description": "Organization to make active; the caller must be a member.",
+          "name": "organizationId",
+          "pii": "none",
+          "required": true
+        }
+      ],
+      "id": "identity.SetActiveOrganizationInput",
+      "jsonSchema": {
+        "additionalProperties": false,
+        "description": "Switches the active organization (claims projection; the API never relies on it).",
+        "examples": [
+          {
+            "organizationId": "Jd8sK2lPq0WnR5tYu3bV"
+          }
+        ],
+        "properties": {
+          "organizationId": {
+            "description": "Organization to make active; the caller must be a member.",
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          }
+        },
+        "required": [
+          "organizationId"
+        ],
+        "type": "object",
+        "x-kind": "command",
+        "x-permission": "core.organization.read",
+        "x-pii": "none",
+        "x-relations": [],
+        "x-tenancyScope": "user"
+      },
+      "kind": "command",
+      "name": "SetActiveOrganizationInput",
+      "permission": "core.organization.read",
+      "pii": "none",
+      "relations": [],
+      "tenancyScope": "user"
+    },
+    {
+      "context": "identity",
+      "description": "Starts read-only impersonation (platform.user.impersonate with MFA).",
+      "examples": [
+        {
+          "durationMinutes": 30,
+          "organizationId": "Jd8sK2lPq0WnR5tYu3bV",
+          "reason": "[redacted]",
+          "targetUid": "[redacted]"
+        }
+      ],
+      "fields": [
+        {
+          "description": "Session length in minutes, 1-60 (default 60).",
+          "name": "durationMinutes",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Organization of the user to read.",
+          "name": "organizationId",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Why the access is needed (10-500 chars); audited.",
+          "name": "reason",
+          "pii": "personal",
+          "required": true
+        },
+        {
+          "description": "User to act as.",
+          "name": "targetUid",
+          "pii": "personal",
+          "required": true
+        }
+      ],
+      "id": "identity.StartImpersonationInput",
+      "jsonSchema": {
+        "additionalProperties": false,
+        "description": "Starts read-only impersonation (platform.user.impersonate with MFA).",
+        "examples": [
+          {
+            "durationMinutes": 30,
+            "organizationId": "Jd8sK2lPq0WnR5tYu3bV",
+            "reason": "[redacted]",
+            "targetUid": "[redacted]"
+          }
+        ],
+        "properties": {
+          "durationMinutes": {
+            "default": 60,
+            "description": "Session length in minutes, 1-60 (default 60).",
+            "maximum": 60,
+            "minimum": 1,
+            "type": "integer",
+            "x-pii": "none"
+          },
+          "organizationId": {
+            "description": "Organization of the user to read.",
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "reason": {
+            "description": "Why the access is needed (10-500 chars); audited.",
+            "maxLength": 500,
+            "minLength": 10,
+            "type": "string",
+            "x-pii": "personal"
+          },
+          "targetUid": {
+            "description": "User to act as.",
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "personal"
+          }
+        },
+        "required": [
+          "targetUid",
+          "organizationId",
+          "reason",
+          "durationMinutes"
+        ],
+        "type": "object",
+        "x-kind": "command",
+        "x-permission": "platform.user.impersonate",
+        "x-pii": "personal",
+        "x-relations": [],
+        "x-tenancyScope": "platform"
+      },
+      "kind": "command",
+      "name": "StartImpersonationInput",
+      "permission": "platform.user.impersonate",
+      "pii": "personal",
+      "relations": [],
+      "tenancyScope": "platform"
+    },
+    {
+      "context": "identity",
+      "description": "Answer of POST /v1/platform/impersonation-sessions with the one-time custom token.",
+      "examples": [
+        {
+          "expiresAt": "2026-09-29T15:30:00.000Z",
+          "sessionId": "Im5rT7yU9iO1pA3sD5fG"
+        }
+      ],
+      "fields": [
+        {
+          "description": "Hard end of the session (UTC).",
+          "name": "expiresAt",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Id of the new impersonation session.",
+          "name": "sessionId",
+          "pii": "none",
+          "required": true
+        }
+      ],
+      "id": "identity.StartImpersonationResponse",
+      "jsonSchema": {
+        "additionalProperties": false,
+        "description": "Answer of POST /v1/platform/impersonation-sessions with the one-time custom token.",
+        "examples": [
+          {
+            "expiresAt": "2026-09-29T15:30:00.000Z",
+            "sessionId": "Im5rT7yU9iO1pA3sD5fG"
+          }
+        ],
+        "properties": {
+          "expiresAt": {
+            "description": "Hard end of the session (UTC).",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "type": "string",
+            "x-pii": "none"
+          },
+          "sessionId": {
+            "description": "Id of the new impersonation session.",
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          }
+        },
+        "required": [
+          "sessionId",
+          "expiresAt"
+        ],
+        "type": "object",
+        "x-kind": "view",
+        "x-pii": "sensitive",
+        "x-relations": [],
+        "x-tenancyScope": "platform"
+      },
+      "kind": "view",
+      "name": "StartImpersonationResponse",
+      "pii": "sensitive",
+      "relations": [],
+      "tenancyScope": "platform"
+    },
+    {
+      "context": "identity",
+      "description": "Changes the signed-in user's display name, photo or preferences (PATCH /v1/me).",
+      "examples": [
+        {
+          "displayName": "[redacted]"
+        },
+        {
+          "preferences": "[redacted]"
+        },
+        {
+          "preferences": "[redacted]"
+        }
+      ],
+      "fields": [
+        {
+          "description": "New display name.",
+          "name": "displayName",
+          "pii": "personal",
+          "required": false
+        },
+        {
+          "description": "New profile photo URL; null removes it.",
+          "name": "photoUrl",
+          "pii": "personal",
+          "required": false
+        },
+        {
+          "description": "Preference changes; absent keys keep their value.",
+          "name": "preferences",
+          "pii": "personal",
+          "required": false
+        }
+      ],
+      "id": "identity.UpdateMeInput",
+      "jsonSchema": {
+        "additionalProperties": false,
+        "description": "Changes the signed-in user's display name, photo or preferences (PATCH /v1/me).",
+        "examples": [
+          {
+            "displayName": "[redacted]"
+          },
+          {
+            "preferences": "[redacted]"
+          },
+          {
+            "preferences": "[redacted]"
+          }
+        ],
+        "properties": {
+          "displayName": {
+            "description": "New display name.",
+            "maxLength": 120,
+            "type": "string",
+            "x-pii": "personal"
+          },
+          "photoUrl": {
+            "anyOf": [
+              {
+                "format": "uri",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "New profile photo URL; null removes it.",
+            "x-pii": "personal"
+          },
+          "preferences": {
+            "additionalProperties": false,
+            "description": "Preference changes; absent keys keep their value.",
+            "properties": {
+              "currency": {
+                "anyOf": [
+                  {
+                    "pattern": "^[A-Z]{3}$",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "description": "New display currency; null removes it.",
+                "x-pii": "personal"
+              },
+              "locale": {
+                "anyOf": [
+                  {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "description": "New locale; null falls back to the organization default.",
+                "x-pii": "personal"
+              },
+              "notifications": {
+                "additionalProperties": false,
+                "description": "Notification opt-ins; security alerts cannot be turned off.",
+                "properties": {
+                  "productUpdates": {
+                    "description": "Receive product update notices.",
+                    "type": "boolean",
+                    "x-pii": "none"
+                  }
+                },
+                "required": [
+                  "productUpdates"
+                ],
+                "type": "object",
+                "x-pii": "none"
+              },
+              "theme": {
+                "description": "New color theme.",
+                "enum": [
+                  "system",
+                  "light",
+                  "dark"
+                ],
+                "type": "string",
+                "x-pii": "none"
+              },
+              "timeZone": {
+                "description": "New IANA time zone; null falls back to the node's.",
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "x-pii": "personal"
+              }
+            },
+            "type": "object",
+            "x-pii": "personal"
+          }
+        },
+        "type": "object",
+        "x-kind": "command",
+        "x-pii": "personal",
+        "x-relations": [],
+        "x-tenancyScope": "user"
+      },
+      "kind": "command",
+      "name": "UpdateMeInput",
+      "pii": "personal",
+      "relations": [],
+      "tenancyScope": "user"
+    },
+    {
+      "context": "identity",
+      "description": "A user profile (`users/{uid}`), created on the first GET /v1/me.",
+      "examples": [
+        {
+          "accessVersion": 3,
+          "createdAt": "2026-09-29T14:30:00.000Z",
+          "displayName": "[redacted]",
+          "email": "[redacted]",
+          "id": "[redacted]",
+          "lastContext": {
+            "organizationId": "Jd8sK2lPq0WnR5tYu3bV"
+          },
+          "preferences": "[redacted]",
+          "status": "active",
+          "updatedAt": "2026-09-29T15:00:00.000Z"
+        }
+      ],
+      "fields": [
+        {
+          "description": "Bumped on every grant change; a newer value than the token's means stale claims.",
+          "name": "accessVersion",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "When the user doc was created (UTC).",
+          "name": "createdAt",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Name shown to other members; may be empty.",
+          "name": "displayName",
+          "pii": "personal",
+          "required": true
+        },
+        {
+          "description": "Email address of the Firebase Auth account.",
+          "name": "email",
+          "pii": "personal",
+          "required": true
+        },
+        {
+          "description": "Firebase Auth uid (document id).",
+          "name": "id",
+          "pii": "personal",
+          "required": true
+        },
+        {
+          "description": "Last organization, project and unit used.",
+          "name": "lastContext",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Profile photo URL.",
+          "name": "photoUrl",
+          "pii": "personal",
+          "required": false
+        },
+        {
+          "description": "Locale, time zone, currency, theme, notifications.",
+          "name": "preferences",
+          "pii": "personal",
+          "required": true
+        },
+        {
+          "description": "`disabled` users hold no permission.",
+          "name": "status",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "When the user doc last changed (UTC).",
+          "name": "updatedAt",
+          "pii": "none",
+          "required": true
+        }
+      ],
+      "id": "identity.User",
+      "jsonSchema": {
+        "additionalProperties": false,
+        "description": "A user profile (`users/{uid}`), created on the first GET /v1/me.",
+        "examples": [
+          {
+            "accessVersion": 3,
+            "createdAt": "2026-09-29T14:30:00.000Z",
+            "displayName": "[redacted]",
+            "email": "[redacted]",
+            "id": "[redacted]",
+            "lastContext": {
+              "organizationId": "Jd8sK2lPq0WnR5tYu3bV"
+            },
+            "preferences": "[redacted]",
+            "status": "active",
+            "updatedAt": "2026-09-29T15:00:00.000Z"
+          }
+        ],
+        "properties": {
+          "accessVersion": {
+            "description": "Bumped on every grant change; a newer value than the token's means stale claims.",
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer",
+            "x-pii": "none"
+          },
+          "createdAt": {
+            "description": "When the user doc was created (UTC).",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "type": "string",
+            "x-pii": "none"
+          },
+          "displayName": {
+            "description": "Name shown to other members; may be empty.",
+            "maxLength": 120,
+            "type": "string",
+            "x-pii": "personal"
+          },
+          "email": {
+            "description": "Email address of the Firebase Auth account.",
+            "format": "email",
+            "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$",
+            "type": "string",
+            "x-pii": "personal"
+          },
+          "id": {
+            "description": "Firebase Auth uid (document id).",
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "personal"
+          },
+          "lastContext": {
+            "additionalProperties": false,
+            "description": "Last organization, project and unit used.",
+            "properties": {
+              "organizationId": {
+                "description": "Active organization.",
+                "minLength": 1,
+                "type": "string",
+                "x-pii": "none"
+              },
+              "projectId": {
+                "description": "Last project.",
+                "minLength": 1,
+                "type": "string",
+                "x-pii": "none"
+              },
+              "unitId": {
+                "description": "Last unit.",
+                "minLength": 1,
+                "type": "string",
+                "x-pii": "none"
+              }
+            },
+            "type": "object",
+            "x-pii": "none"
+          },
+          "photoUrl": {
+            "description": "Profile photo URL.",
+            "format": "uri",
+            "type": "string",
+            "x-pii": "personal"
+          },
+          "preferences": {
+            "additionalProperties": false,
+            "description": "Locale, time zone, currency, theme, notifications.",
+            "properties": {
+              "currency": {
+                "description": "Preferred ISO 4217 currency for display.",
+                "pattern": "^[A-Z]{3}$",
+                "type": "string",
+                "x-pii": "personal"
+              },
+              "locale": {
+                "description": "Preferred BCP 47 locale; absent uses the organization default.",
+                "minLength": 1,
+                "type": "string",
+                "x-pii": "personal"
+              },
+              "notifications": {
+                "additionalProperties": false,
+                "description": "Notification opt-ins.",
+                "properties": {
+                  "productUpdates": {
+                    "description": "Receive product update notices.",
+                    "type": "boolean",
+                    "x-pii": "none"
+                  },
+                  "securityAlerts": {
+                    "const": true,
+                    "description": "Security alerts are always on.",
+                    "type": "boolean",
+                    "x-pii": "none"
+                  }
+                },
+                "required": [
+                  "productUpdates",
+                  "securityAlerts"
+                ],
+                "type": "object",
+                "x-pii": "none"
+              },
+              "theme": {
+                "description": "Color theme.",
+                "enum": [
+                  "system",
+                  "light",
+                  "dark"
+                ],
+                "type": "string",
+                "x-pii": "none"
+              },
+              "timeZone": {
+                "description": "Preferred IANA time zone for display; absent uses the node's.",
+                "type": "string",
+                "x-pii": "personal"
+              }
+            },
+            "required": [
+              "theme",
+              "notifications"
+            ],
+            "type": "object",
+            "x-pii": "personal"
+          },
+          "status": {
+            "description": "`disabled` users hold no permission.",
+            "enum": [
+              "active",
+              "disabled"
+            ],
+            "type": "string",
+            "x-pii": "none"
+          },
+          "updatedAt": {
+            "description": "When the user doc last changed (UTC).",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "type": "string",
+            "x-pii": "none"
+          }
+        },
+        "required": [
+          "id",
+          "email",
+          "displayName",
+          "preferences",
+          "lastContext",
+          "accessVersion",
+          "status",
+          "createdAt",
+          "updatedAt"
+        ],
+        "type": "object",
+        "x-kind": "entity",
+        "x-pii": "personal",
+        "x-relations": [],
+        "x-tenancyScope": "user"
+      },
+      "kind": "entity",
+      "name": "User",
+      "pii": "personal",
+      "relations": [],
+      "tenancyScope": "user"
+    },
+    {
+      "context": "identity",
+      "description": "Preferences of the signed-in user: locale, time zone, currency, theme and notifications.",
+      "examples": [
+        {
+          "currency": "[redacted]",
+          "locale": "[redacted]",
+          "notifications": {
+            "productUpdates": true,
+            "securityAlerts": true
+          },
+          "theme": "dark",
+          "timeZone": "[redacted]"
+        }
+      ],
+      "fields": [
+        {
+          "description": "Preferred ISO 4217 currency for display.",
+          "name": "currency",
+          "pii": "personal",
+          "required": false
+        },
+        {
+          "description": "Preferred BCP 47 locale; absent uses the organization default.",
+          "name": "locale",
+          "pii": "personal",
+          "required": false
+        },
+        {
+          "description": "Notification opt-ins.",
+          "name": "notifications",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Color theme.",
+          "name": "theme",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Preferred IANA time zone for display; absent uses the node's.",
+          "name": "timeZone",
+          "pii": "personal",
+          "required": false
+        }
+      ],
+      "id": "identity.UserPreferences",
+      "jsonSchema": {
+        "additionalProperties": false,
+        "description": "Preferences of the signed-in user: locale, time zone, currency, theme and notifications.",
+        "examples": [
+          {
+            "currency": "[redacted]",
+            "locale": "[redacted]",
+            "notifications": {
+              "productUpdates": true,
+              "securityAlerts": true
+            },
+            "theme": "dark",
+            "timeZone": "[redacted]"
+          }
+        ],
+        "properties": {
+          "currency": {
+            "description": "Preferred ISO 4217 currency for display.",
+            "pattern": "^[A-Z]{3}$",
+            "type": "string",
+            "x-pii": "personal"
+          },
+          "locale": {
+            "description": "Preferred BCP 47 locale; absent uses the organization default.",
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "personal"
+          },
+          "notifications": {
+            "additionalProperties": false,
+            "description": "Notification opt-ins.",
+            "properties": {
+              "productUpdates": {
+                "description": "Receive product update notices.",
+                "type": "boolean",
+                "x-pii": "none"
+              },
+              "securityAlerts": {
+                "const": true,
+                "description": "Security alerts are always on.",
+                "type": "boolean",
+                "x-pii": "none"
+              }
+            },
+            "required": [
+              "productUpdates",
+              "securityAlerts"
+            ],
+            "type": "object",
+            "x-pii": "none"
+          },
+          "theme": {
+            "description": "Color theme.",
+            "enum": [
+              "system",
+              "light",
+              "dark"
+            ],
+            "type": "string",
+            "x-pii": "none"
+          },
+          "timeZone": {
+            "description": "Preferred IANA time zone for display; absent uses the node's.",
+            "type": "string",
+            "x-pii": "personal"
+          }
+        },
+        "required": [
+          "theme",
+          "notifications"
+        ],
+        "type": "object",
+        "x-kind": "settings",
+        "x-pii": "personal",
+        "x-relations": [],
+        "x-tenancyScope": "user"
+      },
+      "kind": "settings",
+      "name": "UserPreferences",
+      "pii": "personal",
+      "relations": [],
+      "tenancyScope": "user"
+    },
+    {
       "context": "knowledge",
       "description": "A knowledge base passage returned by search and cited by agent answers.",
       "examples": [
@@ -2744,6 +5517,1747 @@
       "pii": "none",
       "relations": [],
       "tenancyScope": "organization"
+    },
+    {
+      "context": "tenancy",
+      "description": "Creates an organization; the caller becomes its owner (self-serve flag, SP1 spec §6.1).",
+      "examples": [
+        {
+          "defaults": {
+            "currency": "BRL",
+            "locale": "pt-BR",
+            "timeZone": "America/Sao_Paulo"
+          },
+          "name": "Northwind"
+        }
+      ],
+      "fields": [
+        {
+          "description": "Regional defaults: locale, time zone and currency.",
+          "name": "defaults",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Display name of the new organization.",
+          "name": "name",
+          "pii": "none",
+          "required": true
+        }
+      ],
+      "id": "tenancy.CreateOrganizationInput",
+      "jsonSchema": {
+        "additionalProperties": false,
+        "description": "Creates an organization; the caller becomes its owner (self-serve flag, SP1 spec §6.1).",
+        "examples": [
+          {
+            "defaults": {
+              "currency": "BRL",
+              "locale": "pt-BR",
+              "timeZone": "America/Sao_Paulo"
+            },
+            "name": "Northwind"
+          }
+        ],
+        "properties": {
+          "defaults": {
+            "additionalProperties": false,
+            "description": "Regional defaults: locale, time zone and currency.",
+            "properties": {
+              "currency": {
+                "description": "Default ISO 4217 currency for new amounts.",
+                "pattern": "^[A-Z]{3}$",
+                "type": "string",
+                "x-pii": "none"
+              },
+              "locale": {
+                "description": "Default BCP 47 locale when the user has no preference.",
+                "minLength": 1,
+                "type": "string",
+                "x-pii": "none"
+              },
+              "timeZone": {
+                "description": "Default IANA time zone; projects and units may override it.",
+                "type": "string",
+                "x-pii": "none"
+              }
+            },
+            "required": [
+              "locale",
+              "timeZone",
+              "currency"
+            ],
+            "type": "object",
+            "x-pii": "none"
+          },
+          "name": {
+            "description": "Display name of the new organization.",
+            "maxLength": 120,
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          }
+        },
+        "required": [
+          "name",
+          "defaults"
+        ],
+        "type": "object",
+        "x-kind": "command",
+        "x-pii": "none",
+        "x-relations": [],
+        "x-tenancyScope": "user"
+      },
+      "kind": "command",
+      "name": "CreateOrganizationInput",
+      "pii": "none",
+      "relations": [],
+      "tenancyScope": "user"
+    },
+    {
+      "context": "tenancy",
+      "description": "Creates a project in an organization (`core.project.create` at the organization).",
+      "examples": [
+        {
+          "description": "[redacted]",
+          "name": "Launch",
+          "settings": {
+            "timeZone": "America/Manaus"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "description": "Free text about the project; may mention people.",
+          "name": "description",
+          "pii": "personal",
+          "required": false
+        },
+        {
+          "description": "Display name of the new project.",
+          "name": "name",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Regional overrides; absent fields inherit the organization's defaults.",
+          "name": "settings",
+          "pii": "none",
+          "required": false
+        }
+      ],
+      "id": "tenancy.CreateProjectInput",
+      "jsonSchema": {
+        "additionalProperties": false,
+        "description": "Creates a project in an organization (`core.project.create` at the organization).",
+        "examples": [
+          {
+            "description": "[redacted]",
+            "name": "Launch",
+            "settings": {
+              "timeZone": "America/Manaus"
+            }
+          }
+        ],
+        "properties": {
+          "description": {
+            "description": "Free text about the project; may mention people.",
+            "maxLength": 2000,
+            "type": "string",
+            "x-pii": "personal"
+          },
+          "name": {
+            "description": "Display name of the new project.",
+            "maxLength": 120,
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "settings": {
+            "additionalProperties": false,
+            "description": "Regional overrides; absent fields inherit the organization's defaults.",
+            "properties": {
+              "currency": {
+                "description": "ISO 4217 currency for new amounts here; absent inherits the parent's.",
+                "pattern": "^[A-Z]{3}$",
+                "type": "string",
+                "x-pii": "none"
+              },
+              "timeZone": {
+                "description": "IANA time zone of this node; absent inherits the parent's.",
+                "type": "string",
+                "x-pii": "none"
+              }
+            },
+            "type": "object",
+            "x-pii": "none"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "type": "object",
+        "x-kind": "command",
+        "x-permission": "core.project.create",
+        "x-pii": "personal",
+        "x-relations": [],
+        "x-tenancyScope": "organization"
+      },
+      "kind": "command",
+      "name": "CreateProjectInput",
+      "permission": "core.project.create",
+      "pii": "personal",
+      "relations": [],
+      "tenancyScope": "organization"
+    },
+    {
+      "context": "tenancy",
+      "description": "Creates a unit under a project or unit (`core.unit.create` at the parent; depth limit 6).",
+      "examples": [
+        {
+          "name": "North site",
+          "parentUnitId": null,
+          "type": "sample.site"
+        },
+        {
+          "name": "Room 101",
+          "parentUnitId": "Ua2bC4dE6fG8hJ0kL1mN",
+          "settings": {
+            "currency": "USD"
+          },
+          "type": "sample.room"
+        }
+      ],
+      "fields": [
+        {
+          "description": "Display name of the new unit.",
+          "name": "name",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Parent unit in the same project; null (default) creates it directly under the project.",
+          "name": "parentUnitId",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Regional overrides; absent fields inherit from the parent node.",
+          "name": "settings",
+          "pii": "none",
+          "required": false
+        },
+        {
+          "description": "Registered unit type; it must allow the parent.",
+          "name": "type",
+          "pii": "none",
+          "required": true
+        }
+      ],
+      "id": "tenancy.CreateUnitInput",
+      "jsonSchema": {
+        "additionalProperties": false,
+        "description": "Creates a unit under a project or unit (`core.unit.create` at the parent; depth limit 6).",
+        "examples": [
+          {
+            "name": "North site",
+            "parentUnitId": null,
+            "type": "sample.site"
+          },
+          {
+            "name": "Room 101",
+            "parentUnitId": "Ua2bC4dE6fG8hJ0kL1mN",
+            "settings": {
+              "currency": "USD"
+            },
+            "type": "sample.room"
+          }
+        ],
+        "properties": {
+          "name": {
+            "description": "Display name of the new unit.",
+            "maxLength": 120,
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "parentUnitId": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Parent unit in the same project; null (default) creates it directly under the project.",
+            "x-pii": "none"
+          },
+          "settings": {
+            "additionalProperties": false,
+            "description": "Regional overrides; absent fields inherit from the parent node.",
+            "properties": {
+              "currency": {
+                "description": "ISO 4217 currency for new amounts here; absent inherits the parent's.",
+                "pattern": "^[A-Z]{3}$",
+                "type": "string",
+                "x-pii": "none"
+              },
+              "timeZone": {
+                "description": "IANA time zone of this node; absent inherits the parent's.",
+                "type": "string",
+                "x-pii": "none"
+              }
+            },
+            "type": "object",
+            "x-pii": "none"
+          },
+          "type": {
+            "description": "Registered unit type; it must allow the parent.",
+            "pattern": "^[a-z][a-z0-9-]*\\.[a-z][a-z0-9-]*$",
+            "type": "string",
+            "x-pii": "none"
+          }
+        },
+        "required": [
+          "name",
+          "type",
+          "parentUnitId"
+        ],
+        "type": "object",
+        "x-kind": "command",
+        "x-permission": "core.unit.create",
+        "x-pii": "none",
+        "x-relations": [],
+        "x-tenancyScope": "project"
+      },
+      "kind": "command",
+      "name": "CreateUnitInput",
+      "permission": "core.unit.create",
+      "pii": "none",
+      "relations": [],
+      "tenancyScope": "project"
+    },
+    {
+      "context": "tenancy",
+      "description": "Reference to a node of the access tree: platform, organization, project or unit.",
+      "examples": [
+        {},
+        {},
+        {},
+        {}
+      ],
+      "fields": [],
+      "id": "tenancy.NodeRef",
+      "jsonSchema": {
+        "description": "Reference to a node of the access tree: platform, organization, project or unit.",
+        "examples": [
+          {},
+          {},
+          {},
+          {}
+        ],
+        "oneOf": [
+          {
+            "additionalProperties": false,
+            "properties": {
+              "level": {
+                "const": "platform",
+                "description": "Level of the node.",
+                "type": "string",
+                "x-pii": "none"
+              }
+            },
+            "required": [
+              "level"
+            ],
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "level": {
+                "const": "organization",
+                "description": "Level of the node.",
+                "type": "string",
+                "x-pii": "none"
+              },
+              "tenantId": {
+                "description": "Organization (tenant) of the node.",
+                "minLength": 1,
+                "type": "string",
+                "x-pii": "none"
+              }
+            },
+            "required": [
+              "level",
+              "tenantId"
+            ],
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "level": {
+                "const": "project",
+                "description": "Level of the node.",
+                "type": "string",
+                "x-pii": "none"
+              },
+              "projectId": {
+                "description": "Project of the node.",
+                "minLength": 1,
+                "type": "string",
+                "x-pii": "none"
+              },
+              "tenantId": {
+                "description": "Organization (tenant) of the node.",
+                "minLength": 1,
+                "type": "string",
+                "x-pii": "none"
+              }
+            },
+            "required": [
+              "level",
+              "tenantId",
+              "projectId"
+            ],
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "level": {
+                "const": "unit",
+                "description": "Level of the node.",
+                "type": "string",
+                "x-pii": "none"
+              },
+              "projectId": {
+                "description": "Project of the node.",
+                "minLength": 1,
+                "type": "string",
+                "x-pii": "none"
+              },
+              "tenantId": {
+                "description": "Organization (tenant) of the node.",
+                "minLength": 1,
+                "type": "string",
+                "x-pii": "none"
+              },
+              "unitId": {
+                "description": "Unit of the node.",
+                "minLength": 1,
+                "type": "string",
+                "x-pii": "none"
+              }
+            },
+            "required": [
+              "level",
+              "tenantId",
+              "projectId",
+              "unitId"
+            ],
+            "type": "object"
+          }
+        ],
+        "x-kind": "view",
+        "x-pii": "none",
+        "x-relations": [],
+        "x-tenancyScope": "platform"
+      },
+      "kind": "view",
+      "name": "NodeRef",
+      "pii": "none",
+      "relations": [],
+      "tenancyScope": "platform"
+    },
+    {
+      "context": "tenancy",
+      "description": "An organization: the tenant that owns projects, units, roles and memberships.",
+      "examples": [
+        {
+          "createdAt": "2026-09-29T14:30:00.000Z",
+          "defaults": {
+            "currency": "BRL",
+            "locale": "pt-BR",
+            "timeZone": "America/Sao_Paulo"
+          },
+          "id": "Jd8sK2lPq0WnR5tYu3bV",
+          "name": "Northwind",
+          "status": "active",
+          "tenantId": "Jd8sK2lPq0WnR5tYu3bV",
+          "updatedAt": "2026-09-29T15:00:00.000Z"
+        }
+      ],
+      "fields": [
+        {
+          "description": "When the organization was created (UTC).",
+          "name": "createdAt",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Regional defaults: locale, time zone and currency.",
+          "name": "defaults",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Automatic id of the organization; equals tenantId.",
+          "name": "id",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Display name of the organization.",
+          "name": "name",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "`suspended` denies every tenant permission until reactivated.",
+          "name": "status",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Tenant id; an organization is its own tenant (decision 0006).",
+          "name": "tenantId",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "When the organization last changed (UTC).",
+          "name": "updatedAt",
+          "pii": "none",
+          "required": true
+        }
+      ],
+      "id": "tenancy.Organization",
+      "jsonSchema": {
+        "additionalProperties": false,
+        "description": "An organization: the tenant that owns projects, units, roles and memberships.",
+        "examples": [
+          {
+            "createdAt": "2026-09-29T14:30:00.000Z",
+            "defaults": {
+              "currency": "BRL",
+              "locale": "pt-BR",
+              "timeZone": "America/Sao_Paulo"
+            },
+            "id": "Jd8sK2lPq0WnR5tYu3bV",
+            "name": "Northwind",
+            "status": "active",
+            "tenantId": "Jd8sK2lPq0WnR5tYu3bV",
+            "updatedAt": "2026-09-29T15:00:00.000Z"
+          }
+        ],
+        "properties": {
+          "createdAt": {
+            "description": "When the organization was created (UTC).",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "type": "string",
+            "x-pii": "none"
+          },
+          "defaults": {
+            "additionalProperties": false,
+            "description": "Regional defaults: locale, time zone and currency.",
+            "properties": {
+              "currency": {
+                "description": "Default ISO 4217 currency for new amounts.",
+                "pattern": "^[A-Z]{3}$",
+                "type": "string",
+                "x-pii": "none"
+              },
+              "locale": {
+                "description": "Default BCP 47 locale when the user has no preference.",
+                "minLength": 1,
+                "type": "string",
+                "x-pii": "none"
+              },
+              "timeZone": {
+                "description": "Default IANA time zone; projects and units may override it.",
+                "type": "string",
+                "x-pii": "none"
+              }
+            },
+            "required": [
+              "locale",
+              "timeZone",
+              "currency"
+            ],
+            "type": "object",
+            "x-pii": "none"
+          },
+          "id": {
+            "description": "Automatic id of the organization; equals tenantId.",
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "name": {
+            "description": "Display name of the organization.",
+            "maxLength": 120,
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "status": {
+            "description": "`suspended` denies every tenant permission until reactivated.",
+            "enum": [
+              "active",
+              "suspended"
+            ],
+            "type": "string",
+            "x-pii": "none"
+          },
+          "tenantId": {
+            "description": "Tenant id; an organization is its own tenant (decision 0006).",
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "updatedAt": {
+            "description": "When the organization last changed (UTC).",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "type": "string",
+            "x-pii": "none"
+          }
+        },
+        "required": [
+          "id",
+          "tenantId",
+          "name",
+          "status",
+          "defaults",
+          "createdAt",
+          "updatedAt"
+        ],
+        "type": "object",
+        "x-kind": "entity",
+        "x-permission": "core.organization.read",
+        "x-pii": "none",
+        "x-relations": [],
+        "x-tenancyScope": "organization"
+      },
+      "kind": "entity",
+      "name": "Organization",
+      "permission": "core.organization.read",
+      "pii": "none",
+      "relations": [],
+      "tenancyScope": "organization"
+    },
+    {
+      "context": "tenancy",
+      "description": "A project inside an organization; the parent of the optional unit tree.",
+      "examples": [
+        {
+          "createdAt": "2026-09-29T14:30:00.000Z",
+          "description": "[redacted]",
+          "id": "Pq4rS6tU8vW0xY2zA1bC",
+          "name": "Launch",
+          "settings": {
+            "timeZone": "America/Manaus"
+          },
+          "status": "active",
+          "tenantId": "Jd8sK2lPq0WnR5tYu3bV",
+          "updatedAt": "2026-09-29T15:00:00.000Z"
+        }
+      ],
+      "fields": [
+        {
+          "description": "When the project was created (UTC).",
+          "name": "createdAt",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Free text about the project; may mention people.",
+          "name": "description",
+          "pii": "personal",
+          "required": false
+        },
+        {
+          "description": "Automatic id of the project.",
+          "name": "id",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Display name of the project.",
+          "name": "name",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Regional overrides of the project.",
+          "name": "settings",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "`archived` keeps the project readable but out of default lists.",
+          "name": "status",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Organization that owns the project.",
+          "name": "tenantId",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "When the project last changed (UTC).",
+          "name": "updatedAt",
+          "pii": "none",
+          "required": true
+        }
+      ],
+      "id": "tenancy.Project",
+      "jsonSchema": {
+        "additionalProperties": false,
+        "description": "A project inside an organization; the parent of the optional unit tree.",
+        "examples": [
+          {
+            "createdAt": "2026-09-29T14:30:00.000Z",
+            "description": "[redacted]",
+            "id": "Pq4rS6tU8vW0xY2zA1bC",
+            "name": "Launch",
+            "settings": {
+              "timeZone": "America/Manaus"
+            },
+            "status": "active",
+            "tenantId": "Jd8sK2lPq0WnR5tYu3bV",
+            "updatedAt": "2026-09-29T15:00:00.000Z"
+          }
+        ],
+        "properties": {
+          "createdAt": {
+            "description": "When the project was created (UTC).",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "type": "string",
+            "x-pii": "none"
+          },
+          "description": {
+            "description": "Free text about the project; may mention people.",
+            "maxLength": 2000,
+            "type": "string",
+            "x-pii": "personal"
+          },
+          "id": {
+            "description": "Automatic id of the project.",
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "name": {
+            "description": "Display name of the project.",
+            "maxLength": 120,
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "settings": {
+            "additionalProperties": false,
+            "description": "Regional overrides of the project.",
+            "properties": {
+              "currency": {
+                "description": "ISO 4217 currency for new amounts here; absent inherits the parent's.",
+                "pattern": "^[A-Z]{3}$",
+                "type": "string",
+                "x-pii": "none"
+              },
+              "timeZone": {
+                "description": "IANA time zone of this node; absent inherits the parent's.",
+                "type": "string",
+                "x-pii": "none"
+              }
+            },
+            "type": "object",
+            "x-pii": "none"
+          },
+          "status": {
+            "description": "`archived` keeps the project readable but out of default lists.",
+            "enum": [
+              "active",
+              "archived"
+            ],
+            "type": "string",
+            "x-pii": "none"
+          },
+          "tenantId": {
+            "description": "Organization that owns the project.",
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "updatedAt": {
+            "description": "When the project last changed (UTC).",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "type": "string",
+            "x-pii": "none"
+          }
+        },
+        "required": [
+          "id",
+          "tenantId",
+          "name",
+          "status",
+          "settings",
+          "createdAt",
+          "updatedAt"
+        ],
+        "type": "object",
+        "x-kind": "entity",
+        "x-permission": "core.project.read",
+        "x-pii": "personal",
+        "x-relations": [
+          {
+            "field": "tenantId",
+            "target": "tenancy.Organization",
+            "type": "belongs-to"
+          }
+        ],
+        "x-tenancyScope": "project"
+      },
+      "kind": "entity",
+      "name": "Project",
+      "permission": "core.project.read",
+      "pii": "personal",
+      "relations": [
+        {
+          "field": "tenantId",
+          "target": "tenancy.Organization",
+          "type": "belongs-to"
+        }
+      ],
+      "tenancyScope": "project"
+    },
+    {
+      "context": "tenancy",
+      "description": "Locale, display time zone, node time zone and currency resolved for a user at a node.",
+      "examples": [
+        {
+          "currency": "BRL",
+          "displayTimeZone": "America/Sao_Paulo",
+          "locale": "pt-BR",
+          "nodeTimeZone": "America/Manaus"
+        }
+      ],
+      "fields": [
+        {
+          "description": "Default currency for new amounts at the node (unit, project, organization).",
+          "name": "currency",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Time zone to display dates in: user preference, else nodeTimeZone.",
+          "name": "displayTimeZone",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "User preference, else the organization default.",
+          "name": "locale",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Time zone of the node (unit, project, organization) for calendar rules.",
+          "name": "nodeTimeZone",
+          "pii": "none",
+          "required": true
+        }
+      ],
+      "id": "tenancy.RegionalSettings",
+      "jsonSchema": {
+        "additionalProperties": false,
+        "description": "Locale, display time zone, node time zone and currency resolved for a user at a node.",
+        "examples": [
+          {
+            "currency": "BRL",
+            "displayTimeZone": "America/Sao_Paulo",
+            "locale": "pt-BR",
+            "nodeTimeZone": "America/Manaus"
+          }
+        ],
+        "properties": {
+          "currency": {
+            "description": "Default currency for new amounts at the node (unit, project, organization).",
+            "pattern": "^[A-Z]{3}$",
+            "type": "string",
+            "x-pii": "none"
+          },
+          "displayTimeZone": {
+            "description": "Time zone to display dates in: user preference, else nodeTimeZone.",
+            "type": "string",
+            "x-pii": "none"
+          },
+          "locale": {
+            "description": "User preference, else the organization default.",
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "nodeTimeZone": {
+            "description": "Time zone of the node (unit, project, organization) for calendar rules.",
+            "type": "string",
+            "x-pii": "none"
+          }
+        },
+        "required": [
+          "locale",
+          "displayTimeZone",
+          "nodeTimeZone",
+          "currency"
+        ],
+        "type": "object",
+        "x-kind": "view",
+        "x-pii": "none",
+        "x-relations": [],
+        "x-tenancyScope": "user"
+      },
+      "kind": "view",
+      "name": "RegionalSettings",
+      "pii": "none",
+      "relations": [],
+      "tenancyScope": "user"
+    },
+    {
+      "context": "tenancy",
+      "description": "Reference to a node inside one organization: the organization, a project or a unit.",
+      "examples": [
+        {},
+        {},
+        {}
+      ],
+      "fields": [],
+      "id": "tenancy.TenantNodeRef",
+      "jsonSchema": {
+        "description": "Reference to a node inside one organization: the organization, a project or a unit.",
+        "examples": [
+          {},
+          {},
+          {}
+        ],
+        "oneOf": [
+          {
+            "additionalProperties": false,
+            "properties": {
+              "level": {
+                "const": "organization",
+                "description": "Level of the node.",
+                "type": "string",
+                "x-pii": "none"
+              },
+              "tenantId": {
+                "description": "Organization (tenant) of the node.",
+                "minLength": 1,
+                "type": "string",
+                "x-pii": "none"
+              }
+            },
+            "required": [
+              "level",
+              "tenantId"
+            ],
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "level": {
+                "const": "project",
+                "description": "Level of the node.",
+                "type": "string",
+                "x-pii": "none"
+              },
+              "projectId": {
+                "description": "Project of the node.",
+                "minLength": 1,
+                "type": "string",
+                "x-pii": "none"
+              },
+              "tenantId": {
+                "description": "Organization (tenant) of the node.",
+                "minLength": 1,
+                "type": "string",
+                "x-pii": "none"
+              }
+            },
+            "required": [
+              "level",
+              "tenantId",
+              "projectId"
+            ],
+            "type": "object"
+          },
+          {
+            "additionalProperties": false,
+            "properties": {
+              "level": {
+                "const": "unit",
+                "description": "Level of the node.",
+                "type": "string",
+                "x-pii": "none"
+              },
+              "projectId": {
+                "description": "Project of the node.",
+                "minLength": 1,
+                "type": "string",
+                "x-pii": "none"
+              },
+              "tenantId": {
+                "description": "Organization (tenant) of the node.",
+                "minLength": 1,
+                "type": "string",
+                "x-pii": "none"
+              },
+              "unitId": {
+                "description": "Unit of the node.",
+                "minLength": 1,
+                "type": "string",
+                "x-pii": "none"
+              }
+            },
+            "required": [
+              "level",
+              "tenantId",
+              "projectId",
+              "unitId"
+            ],
+            "type": "object"
+          }
+        ],
+        "x-kind": "view",
+        "x-pii": "none",
+        "x-relations": [],
+        "x-tenancyScope": "organization"
+      },
+      "kind": "view",
+      "name": "TenantNodeRef",
+      "pii": "none",
+      "relations": [],
+      "tenancyScope": "organization"
+    },
+    {
+      "context": "tenancy",
+      "description": "A node of a project's unit tree, typed by an application module (depth 0-6).",
+      "examples": [
+        {
+          "ancestorIds": [
+            "Ua2bC4dE6fG8hJ0kL1mN"
+          ],
+          "createdAt": "2026-09-29T14:30:00.000Z",
+          "depth": 1,
+          "id": "Un5mK7pQ9rS1tV3wX6yZ",
+          "name": "Room 101",
+          "parentUnitId": "Ua2bC4dE6fG8hJ0kL1mN",
+          "projectId": "Pq4rS6tU8vW0xY2zA1bC",
+          "settings": {},
+          "tenantId": "Jd8sK2lPq0WnR5tYu3bV",
+          "type": "sample.room",
+          "updatedAt": "2026-09-29T15:00:00.000Z"
+        }
+      ],
+      "fields": [
+        {
+          "description": "Ids of every ancestor unit, root first; length equals depth.",
+          "name": "ancestorIds",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "When the unit was created (UTC).",
+          "name": "createdAt",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Number of ancestors, 0-6.",
+          "name": "depth",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Automatic id of the unit.",
+          "name": "id",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Display name of the unit.",
+          "name": "name",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Parent unit; null when the unit sits directly under the project.",
+          "name": "parentUnitId",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Project the unit tree belongs to.",
+          "name": "projectId",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Regional overrides of the unit.",
+          "name": "settings",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Organization that owns the unit.",
+          "name": "tenantId",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Registered unit type, `<module>.<type>`.",
+          "name": "type",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "When the unit last changed (UTC).",
+          "name": "updatedAt",
+          "pii": "none",
+          "required": true
+        }
+      ],
+      "id": "tenancy.Unit",
+      "jsonSchema": {
+        "additionalProperties": false,
+        "description": "A node of a project's unit tree, typed by an application module (depth 0-6).",
+        "examples": [
+          {
+            "ancestorIds": [
+              "Ua2bC4dE6fG8hJ0kL1mN"
+            ],
+            "createdAt": "2026-09-29T14:30:00.000Z",
+            "depth": 1,
+            "id": "Un5mK7pQ9rS1tV3wX6yZ",
+            "name": "Room 101",
+            "parentUnitId": "Ua2bC4dE6fG8hJ0kL1mN",
+            "projectId": "Pq4rS6tU8vW0xY2zA1bC",
+            "settings": {},
+            "tenantId": "Jd8sK2lPq0WnR5tYu3bV",
+            "type": "sample.room",
+            "updatedAt": "2026-09-29T15:00:00.000Z"
+          }
+        ],
+        "properties": {
+          "ancestorIds": {
+            "description": "Ids of every ancestor unit, root first; length equals depth.",
+            "items": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 6,
+            "type": "array",
+            "x-pii": "none"
+          },
+          "createdAt": {
+            "description": "When the unit was created (UTC).",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "type": "string",
+            "x-pii": "none"
+          },
+          "depth": {
+            "description": "Number of ancestors, 0-6.",
+            "maximum": 6,
+            "minimum": 0,
+            "type": "integer",
+            "x-pii": "none"
+          },
+          "id": {
+            "description": "Automatic id of the unit.",
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "name": {
+            "description": "Display name of the unit.",
+            "maxLength": 120,
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "parentUnitId": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Parent unit; null when the unit sits directly under the project.",
+            "x-pii": "none"
+          },
+          "projectId": {
+            "description": "Project the unit tree belongs to.",
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "settings": {
+            "additionalProperties": false,
+            "description": "Regional overrides of the unit.",
+            "properties": {
+              "currency": {
+                "description": "ISO 4217 currency for new amounts here; absent inherits the parent's.",
+                "pattern": "^[A-Z]{3}$",
+                "type": "string",
+                "x-pii": "none"
+              },
+              "timeZone": {
+                "description": "IANA time zone of this node; absent inherits the parent's.",
+                "type": "string",
+                "x-pii": "none"
+              }
+            },
+            "type": "object",
+            "x-pii": "none"
+          },
+          "tenantId": {
+            "description": "Organization that owns the unit.",
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "type": {
+            "description": "Registered unit type, `<module>.<type>`.",
+            "pattern": "^[a-z][a-z0-9-]*\\.[a-z][a-z0-9-]*$",
+            "type": "string",
+            "x-pii": "none"
+          },
+          "updatedAt": {
+            "description": "When the unit last changed (UTC).",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "type": "string",
+            "x-pii": "none"
+          }
+        },
+        "required": [
+          "id",
+          "tenantId",
+          "projectId",
+          "parentUnitId",
+          "ancestorIds",
+          "depth",
+          "type",
+          "name",
+          "settings",
+          "createdAt",
+          "updatedAt"
+        ],
+        "type": "object",
+        "x-kind": "entity",
+        "x-permission": "core.unit.read",
+        "x-pii": "none",
+        "x-relations": [
+          {
+            "field": "tenantId",
+            "target": "tenancy.Organization",
+            "type": "belongs-to"
+          },
+          {
+            "field": "projectId",
+            "target": "tenancy.Project",
+            "type": "belongs-to"
+          },
+          {
+            "field": "parentUnitId",
+            "target": "tenancy.Unit",
+            "type": "belongs-to"
+          }
+        ],
+        "x-tenancyScope": "unit"
+      },
+      "kind": "entity",
+      "name": "Unit",
+      "permission": "core.unit.read",
+      "pii": "none",
+      "relations": [
+        {
+          "field": "tenantId",
+          "target": "tenancy.Organization",
+          "type": "belongs-to"
+        },
+        {
+          "field": "projectId",
+          "target": "tenancy.Project",
+          "type": "belongs-to"
+        },
+        {
+          "field": "parentUnitId",
+          "target": "tenancy.Unit",
+          "type": "belongs-to"
+        }
+      ],
+      "tenancyScope": "unit"
+    },
+    {
+      "context": "tenancy",
+      "description": "A unit type registered by an application module; the core registers none.",
+      "examples": [
+        {
+          "allowedParents": [
+            "project"
+          ],
+          "id": "sample.site",
+          "labelKey": "sample.unitTypes.site"
+        },
+        {
+          "allowedParents": [
+            "sample.site",
+            "sample.room"
+          ],
+          "id": "sample.room",
+          "labelKey": "sample.unitTypes.room"
+        }
+      ],
+      "fields": [
+        {
+          "description": "Where a unit of this type may be created: `project` or other unit type ids.",
+          "name": "allowedParents",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Unit type id, `<module>.<type>`.",
+          "name": "id",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "i18n key of the type label.",
+          "name": "labelKey",
+          "pii": "none",
+          "required": true
+        }
+      ],
+      "id": "tenancy.UnitTypeDefinition",
+      "jsonSchema": {
+        "additionalProperties": false,
+        "description": "A unit type registered by an application module; the core registers none.",
+        "examples": [
+          {
+            "allowedParents": [
+              "project"
+            ],
+            "id": "sample.site",
+            "labelKey": "sample.unitTypes.site"
+          },
+          {
+            "allowedParents": [
+              "sample.site",
+              "sample.room"
+            ],
+            "id": "sample.room",
+            "labelKey": "sample.unitTypes.room"
+          }
+        ],
+        "properties": {
+          "allowedParents": {
+            "description": "Where a unit of this type may be created: `project` or other unit type ids.",
+            "items": {
+              "anyOf": [
+                {
+                  "const": "project",
+                  "type": "string"
+                },
+                {
+                  "pattern": "^[a-z][a-z0-9-]*\\.[a-z][a-z0-9-]*$",
+                  "type": "string"
+                }
+              ]
+            },
+            "minItems": 1,
+            "type": "array",
+            "x-pii": "none"
+          },
+          "id": {
+            "description": "Unit type id, `<module>.<type>`.",
+            "pattern": "^[a-z][a-z0-9-]*\\.[a-z][a-z0-9-]*$",
+            "type": "string",
+            "x-pii": "none"
+          },
+          "labelKey": {
+            "description": "i18n key of the type label.",
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          }
+        },
+        "required": [
+          "id",
+          "labelKey",
+          "allowedParents"
+        ],
+        "type": "object",
+        "x-kind": "view",
+        "x-pii": "none",
+        "x-relations": [],
+        "x-tenancyScope": "platform"
+      },
+      "kind": "view",
+      "name": "UnitTypeDefinition",
+      "pii": "none",
+      "relations": [],
+      "tenancyScope": "platform"
+    },
+    {
+      "context": "tenancy",
+      "description": "Changes the name or regional defaults of an organization (`core.organization.update`).",
+      "examples": [
+        {
+          "name": "Northwind Brasil"
+        },
+        {
+          "defaults": {
+            "timeZone": "America/Recife"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "description": "Regional defaults to change; absent keys keep their value.",
+          "name": "defaults",
+          "pii": "none",
+          "required": false
+        },
+        {
+          "description": "New display name.",
+          "name": "name",
+          "pii": "none",
+          "required": false
+        }
+      ],
+      "id": "tenancy.UpdateOrganizationInput",
+      "jsonSchema": {
+        "additionalProperties": false,
+        "description": "Changes the name or regional defaults of an organization (`core.organization.update`).",
+        "examples": [
+          {
+            "name": "Northwind Brasil"
+          },
+          {
+            "defaults": {
+              "timeZone": "America/Recife"
+            }
+          }
+        ],
+        "properties": {
+          "defaults": {
+            "additionalProperties": false,
+            "description": "Regional defaults to change; absent keys keep their value.",
+            "properties": {
+              "currency": {
+                "description": "Default ISO 4217 currency for new amounts.",
+                "pattern": "^[A-Z]{3}$",
+                "type": "string",
+                "x-pii": "none"
+              },
+              "locale": {
+                "description": "Default BCP 47 locale when the user has no preference.",
+                "minLength": 1,
+                "type": "string",
+                "x-pii": "none"
+              },
+              "timeZone": {
+                "description": "Default IANA time zone; projects and units may override it.",
+                "type": "string",
+                "x-pii": "none"
+              }
+            },
+            "type": "object",
+            "x-pii": "none"
+          },
+          "name": {
+            "description": "New display name.",
+            "maxLength": 120,
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          }
+        },
+        "type": "object",
+        "x-kind": "command",
+        "x-permission": "core.organization.update",
+        "x-pii": "none",
+        "x-relations": [],
+        "x-tenancyScope": "organization"
+      },
+      "kind": "command",
+      "name": "UpdateOrganizationInput",
+      "permission": "core.organization.update",
+      "pii": "none",
+      "relations": [],
+      "tenancyScope": "organization"
+    },
+    {
+      "context": "tenancy",
+      "description": "Changes a project (`core.project.update` at the project).",
+      "examples": [
+        {
+          "name": "Launch 2"
+        },
+        {
+          "status": "archived"
+        },
+        {
+          "settings": {
+            "timeZone": null
+          }
+        }
+      ],
+      "fields": [
+        {
+          "description": "New description; null removes it.",
+          "name": "description",
+          "pii": "personal",
+          "required": false
+        },
+        {
+          "description": "New display name.",
+          "name": "name",
+          "pii": "none",
+          "required": false
+        },
+        {
+          "description": "Regional override changes.",
+          "name": "settings",
+          "pii": "none",
+          "required": false
+        },
+        {
+          "description": "Archive or reactivate the project.",
+          "name": "status",
+          "pii": "none",
+          "required": false
+        }
+      ],
+      "id": "tenancy.UpdateProjectInput",
+      "jsonSchema": {
+        "additionalProperties": false,
+        "description": "Changes a project (`core.project.update` at the project).",
+        "examples": [
+          {
+            "name": "Launch 2"
+          },
+          {
+            "status": "archived"
+          },
+          {
+            "settings": {
+              "timeZone": null
+            }
+          }
+        ],
+        "properties": {
+          "description": {
+            "anyOf": [
+              {
+                "maxLength": 2000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "New description; null removes it.",
+            "x-pii": "personal"
+          },
+          "name": {
+            "description": "New display name.",
+            "maxLength": 120,
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "settings": {
+            "additionalProperties": false,
+            "description": "Regional override changes.",
+            "properties": {
+              "currency": {
+                "anyOf": [
+                  {
+                    "pattern": "^[A-Z]{3}$",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "description": "New ISO 4217 currency; null inherits the parent's again.",
+                "x-pii": "none"
+              },
+              "timeZone": {
+                "description": "New IANA time zone; null inherits the parent's again.",
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "x-pii": "none"
+              }
+            },
+            "type": "object",
+            "x-pii": "none"
+          },
+          "status": {
+            "description": "Archive or reactivate the project.",
+            "enum": [
+              "active",
+              "archived"
+            ],
+            "type": "string",
+            "x-pii": "none"
+          }
+        },
+        "type": "object",
+        "x-kind": "command",
+        "x-permission": "core.project.update",
+        "x-pii": "personal",
+        "x-relations": [],
+        "x-tenancyScope": "project"
+      },
+      "kind": "command",
+      "name": "UpdateProjectInput",
+      "permission": "core.project.update",
+      "pii": "personal",
+      "relations": [],
+      "tenancyScope": "project"
+    },
+    {
+      "context": "tenancy",
+      "description": "Renames or moves a unit (`core.unit.update`); a move rewrites at most 500 descendants.",
+      "examples": [
+        {
+          "name": "Room 102"
+        },
+        {
+          "parentUnitId": "Ua2bC4dE6fG8hJ0kL1mN"
+        },
+        {
+          "parentUnitId": null
+        }
+      ],
+      "fields": [
+        {
+          "description": "New display name.",
+          "name": "name",
+          "pii": "none",
+          "required": false
+        },
+        {
+          "description": "Moves the unit inside its project: a unit id, or null for directly under the project.",
+          "name": "parentUnitId",
+          "pii": "none",
+          "required": false
+        },
+        {
+          "description": "Regional override changes.",
+          "name": "settings",
+          "pii": "none",
+          "required": false
+        }
+      ],
+      "id": "tenancy.UpdateUnitInput",
+      "jsonSchema": {
+        "additionalProperties": false,
+        "description": "Renames or moves a unit (`core.unit.update`); a move rewrites at most 500 descendants.",
+        "examples": [
+          {
+            "name": "Room 102"
+          },
+          {
+            "parentUnitId": "Ua2bC4dE6fG8hJ0kL1mN"
+          },
+          {
+            "parentUnitId": null
+          }
+        ],
+        "properties": {
+          "name": {
+            "description": "New display name.",
+            "maxLength": 120,
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "parentUnitId": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Moves the unit inside its project: a unit id, or null for directly under the project.",
+            "x-pii": "none"
+          },
+          "settings": {
+            "additionalProperties": false,
+            "description": "Regional override changes.",
+            "properties": {
+              "currency": {
+                "anyOf": [
+                  {
+                    "pattern": "^[A-Z]{3}$",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "description": "New ISO 4217 currency; null inherits the parent's again.",
+                "x-pii": "none"
+              },
+              "timeZone": {
+                "description": "New IANA time zone; null inherits the parent's again.",
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "x-pii": "none"
+              }
+            },
+            "type": "object",
+            "x-pii": "none"
+          }
+        },
+        "type": "object",
+        "x-kind": "command",
+        "x-permission": "core.unit.update",
+        "x-pii": "none",
+        "x-relations": [],
+        "x-tenancyScope": "unit"
+      },
+      "kind": "command",
+      "name": "UpdateUnitInput",
+      "permission": "core.unit.update",
+      "pii": "none",
+      "relations": [],
+      "tenancyScope": "unit"
     },
     {
       "context": "usage",

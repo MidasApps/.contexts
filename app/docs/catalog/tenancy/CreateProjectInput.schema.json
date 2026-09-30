@@ -1,0 +1,56 @@
+{
+  "additionalProperties": false,
+  "description": "Creates a project in an organization (`core.project.create` at the organization).",
+  "examples": [
+    {
+      "description": "Rollout of the new catalog.",
+      "name": "Launch",
+      "settings": {
+        "timeZone": "America/Manaus"
+      }
+    }
+  ],
+  "properties": {
+    "description": {
+      "description": "Free text about the project; may mention people.",
+      "maxLength": 2000,
+      "type": "string",
+      "x-pii": "personal"
+    },
+    "name": {
+      "description": "Display name of the new project.",
+      "maxLength": 120,
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "settings": {
+      "additionalProperties": false,
+      "description": "Regional overrides; absent fields inherit the organization's defaults.",
+      "properties": {
+        "currency": {
+          "description": "ISO 4217 currency for new amounts here; absent inherits the parent's.",
+          "pattern": "^[A-Z]{3}$",
+          "type": "string",
+          "x-pii": "none"
+        },
+        "timeZone": {
+          "description": "IANA time zone of this node; absent inherits the parent's.",
+          "type": "string",
+          "x-pii": "none"
+        }
+      },
+      "type": "object",
+      "x-pii": "none"
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "type": "object",
+  "x-kind": "command",
+  "x-permission": "core.project.create",
+  "x-pii": "personal",
+  "x-relations": [],
+  "x-tenancyScope": "organization"
+}
