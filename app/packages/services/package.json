@@ -30,6 +30,7 @@
     "@core/config": "workspace:*",
     "@firebase/rules-unit-testing": "catalog:",
     "@types/node": "catalog:",
+    "@vitest/coverage-v8": "catalog:",
     "drizzle-kit": "catalog:",
     "eslint": "catalog:",
     "firebase": "catalog:",

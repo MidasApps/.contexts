@@ -37,6 +37,7 @@ catalog:
   "@types/react": 19.3.0
   "@types/react-dom": 19.3.0
   "@typescript/typescript6": 6.0.2
+  "@vitest/coverage-v8": 5.0.2 # coverage provider; same version as vitest (plan coverage commands)
   "@vitejs/plugin-react": 6.1.1
   ai: 7.0.122
   axe-core: 4.13.0
