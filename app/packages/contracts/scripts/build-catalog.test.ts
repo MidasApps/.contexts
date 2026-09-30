@@ -2,9 +2,11 @@ import { describe, expect, it } from "vitest";
 import { parse as parseYaml } from "yaml";
 import { z } from "zod";
 import { defineContract } from "../src/contracts/contract.ts";
+import { defineEndpoint } from "../src/contracts/http/endpoint.ts";
+import { ErrorEnvelopeContract } from "../src/contracts/http/envelopes.schema.ts";
 import { createContractRegistry } from "../src/contracts/registry.ts";
 import { buildCatalogArtifacts, type CatalogArtifact } from "./catalog/artifacts.ts";
-import { findContractProblems, findRawMetaInArtifacts } from "./catalog/contract-problems.ts";
+import { findContractProblems, findDanglingRefsInArtifacts, findRawMetaInArtifacts } from "./catalog/contract-problems.ts";
 import { findCatalogDrift } from "./catalog/drift.ts";
 import { findRawMetaKeys } from "./catalog/json-schema.ts";
 
@@ -36,6 +38,17 @@ const buildContracts = () => {
   });
   return createContractRegistry([contact, tag]).listContracts();
 };
+
+const getContact = defineEndpoint({
+  id: "people.getContact",
+  method: "GET",
+  path: "/v1/contacts/{contactId}",
+  auth: "user",
+  params: z.object({ contactId: z.string().min(1) }),
+  responses: { 200: z.object({ data: z.object({ email: z.email().meta({ description: "E-mail.", pii: "personal" }) }) }) },
+  errors: { 404: ["NOT_FOUND"] },
+  summary: "Reads a contact.",
+});
 
 const findArtifact = (artifacts: CatalogArtifact[], path: string): string => {
   const artifact = artifacts.find((candidate) => candidate.path === path);
@@ -100,6 +113,16 @@ describe("buildCatalogArtifacts", () => {
   it("is deterministic", () => {
     expect(buildCatalogArtifacts(buildContracts())).toEqual(buildCatalogArtifacts(buildContracts()));
   });
+
+  it("renders endpoints into OpenAPI paths, so drift covers them", () => {
+    const contracts = buildContracts();
+    const withoutEndpoints = buildCatalogArtifacts(contracts);
+    const withEndpoint = buildCatalogArtifacts(contracts, [getContact]);
+    const openapi = parseYaml(findArtifact(withEndpoint, "docs/openapi/v1.yaml")) as { paths: Record<string, unknown> };
+    expect(Object.keys(openapi.paths)).toEqual(["/v1/contacts/{contactId}"]);
+    const onDisk = new Map(withoutEndpoints.map((artifact) => [artifact.path, artifact.content]));
+    expect(findCatalogDrift({ expected: withEndpoint, onDisk })).toEqual(["changed: docs/openapi/v1.yaml"]);
+  });
 });
 
 describe("findCatalogDrift", () => {
@@ -140,6 +163,20 @@ describe("findContractProblems", () => {
   });
 });
 
+describe("findDanglingRefsInArtifacts", () => {
+  it("reports an error response whose ErrorEnvelope component is missing", () => {
+    const artifacts = buildCatalogArtifacts(buildContracts(), [getContact]);
+    expect(findDanglingRefsInArtifacts(artifacts)).toEqual([
+      "docs/openapi/v1.yaml: dangling $ref: #/components/schemas/http.ErrorEnvelope",
+    ]);
+  });
+
+  it("reports nothing when every referenced component exists", () => {
+    const contracts = createContractRegistry([...buildContracts(), ErrorEnvelopeContract]).listContracts();
+    expect(findDanglingRefsInArtifacts(buildCatalogArtifacts(contracts, [getContact]))).toEqual([]);
+  });
+});
+
 describe("findRawMetaInArtifacts", () => {
   it("reports custom meta keys that were not renamed to x-*", () => {
     const artifacts: CatalogArtifact[] = [
@@ -149,6 +186,6 @@ describe("findRawMetaInArtifacts", () => {
   });
 
   it("finds no raw keys in generated artifacts", () => {
-    expect(findRawMetaInArtifacts(buildCatalogArtifacts(buildContracts()))).toEqual([]);
+    expect(findRawMetaInArtifacts(buildCatalogArtifacts(buildContracts(), [getContact]))).toEqual([]);
   });
 });

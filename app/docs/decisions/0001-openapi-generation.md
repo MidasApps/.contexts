@@ -23,3 +23,12 @@ Generate `components.schemas` with native `z.toJSONSchema(registry, { uri, overr
 - One JSON Schema per contract, shared by the catalog and OpenAPI. Custom meta goes out only as `x-*`, and `contracts:check` enforces this.
 - No Zod prototype patching and no extra runtime dependency.
 - Endpoint documentation (operations, parameters, per-endpoint examples required by `api.md` §15) is not covered yet. When `/v1` routes land, revisit this decision: either add operations on top of these components, or adopt `zod-to-openapi` for paths only, if its prototype patch can be confined to the generator script.
+
+## Amendments
+
+- **2026-09-29 (SP1 Task 3).** The revisit above chose the first option: operations are built on top of these
+  components with the same native `z.toJSONSchema`, from the endpoint descriptors of `@core/contracts`
+  (`defineEndpoint`, `CORE_ENDPOINTS`; `packages/contracts/scripts/catalog/openapi-paths.ts`). Registered contracts
+  inside an endpoint schema become `$ref`s to `components.schemas`; error responses reference `http.ErrorEnvelope`;
+  `contracts:check` also fails on a dangling `$ref`. Per-endpoint examples (`api.md` §15) are still missing and
+  are tracked as a follow-up.

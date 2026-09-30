@@ -3,6 +3,8 @@ import { inspectSchema, isPiiBelow } from "../../src/contracts/field-meta-rules.
 import type { RegisteredContract } from "../../src/contracts/registry.ts";
 import type { CatalogArtifact } from "./artifacts.ts";
 import { findRawMetaKeys } from "./json-schema.ts";
+import { findDanglingRefs } from "./openapi-paths.ts";
+import type { JsonRecord } from "./stable-json.ts";
 
 const ISSUE_LABELS = {
   MISSING_FIELD_META: "missing field meta (description + pii)",
@@ -33,8 +35,11 @@ type CatalogFileShape = { contracts?: { id?: string; jsonSchema?: unknown }[] };
 const schemaTreesOf = (artifact: CatalogArtifact): [string, unknown][] => {
   if (artifact.path.endsWith(".schema.json")) return [[artifact.path, JSON.parse(artifact.content)]];
   if (artifact.path.endsWith(".yaml")) {
-    const document = parseYaml(artifact.content) as { components?: unknown };
-    return [[artifact.path, document.components]];
+    const document = parseYaml(artifact.content) as { components?: unknown; paths?: unknown };
+    return [
+      [`${artifact.path} components`, document.components],
+      [`${artifact.path} paths`, document.paths],
+    ];
   }
   if (artifact.path.endsWith(".json")) {
     const catalog = JSON.parse(artifact.content) as CatalogFileShape;
@@ -42,6 +47,12 @@ const schemaTreesOf = (artifact: CatalogArtifact): [string, unknown][] => {
   }
   return [];
 };
+
+/** Every `$ref` of the OpenAPI artifact must resolve to a component schema. */
+export const findDanglingRefsInArtifacts = (artifacts: readonly CatalogArtifact[]): string[] =>
+  artifacts
+    .filter((artifact) => artifact.path.endsWith(".yaml"))
+    .flatMap((artifact) => findDanglingRefs(parseYaml(artifact.content) as JsonRecord).map((problem) => `${artifact.path}: ${problem}`));
 
 /** JSON Schema in any artifact must carry custom meta only as `x-*` keys. */
 export const findRawMetaInArtifacts = (artifacts: readonly CatalogArtifact[]): string[] =>

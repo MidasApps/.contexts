@@ -1,3 +1,4 @@
+import type { EndpointDefinition } from "../../src/contracts/http/endpoint.ts";
 import type { RegisteredContract } from "../../src/contracts/registry.ts";
 import { buildAiCatalog } from "./ai-catalog.ts";
 import { buildCatalogEntry, type CatalogEntry } from "./catalog-entry.ts";
@@ -23,8 +24,11 @@ const perContractArtifacts = (entry: CatalogEntry): CatalogArtifact[] => [
 const comparePaths = (left: CatalogArtifact, right: CatalogArtifact): number =>
   left.path < right.path ? -1 : left.path > right.path ? 1 : 0;
 
-/** Pure: same contracts in, byte-identical artifacts out (sorted keys, no timestamps). */
-export const buildCatalogArtifacts = (contracts: readonly RegisteredContract[]): CatalogArtifact[] => {
+/** Pure: same contracts and endpoints in, byte-identical artifacts out (sorted keys, no timestamps). */
+export const buildCatalogArtifacts = (
+  contracts: readonly RegisteredContract[],
+  endpoints: readonly EndpointDefinition[] = [],
+): CatalogArtifact[] => {
   const schemas = buildJsonSchemas(contracts);
   const entries = contracts.map((contract) => buildCatalogEntry(contract, schemas.get(contract.id) ?? {}));
   const aiEntries = buildAiCatalog(entries);
@@ -32,6 +36,6 @@ export const buildCatalogArtifacts = (contracts: readonly RegisteredContract[]):
     ...entries.flatMap(perContractArtifacts),
     { path: `${CATALOG_DIR}/catalog.json`, content: stableStringify({ catalogVersion: CATALOG_VERSION, contracts: entries }) },
     { path: `${CATALOG_DIR}/catalog.ai.json`, content: stableStringify({ catalogVersion: CATALOG_VERSION, contracts: aiEntries }) },
-    { path: OPENAPI_PATH, content: renderOpenApi(schemas) },
+    { path: OPENAPI_PATH, content: renderOpenApi({ schemas, contracts, endpoints }) },
   ].sort(comparePaths);
 };

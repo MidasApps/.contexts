@@ -1,23 +1,26 @@
 // `pnpm contracts:check` (CI gate): regenerates the catalog in memory and fails on
-// drift, missing field meta, dangling relations or raw (non `x-*`) meta keys.
+// drift (components and paths), missing field meta, dangling relations or
+// `$ref`s, or raw (non `x-*`) meta keys.
 import { stdout } from "node:process";
-import { composeCoreContracts } from "../src/composition.ts";
+import { composeCoreContracts, composeCoreEndpoints } from "../src/composition.ts";
 import { readGeneratedFiles } from "./catalog/artifact-files.ts";
 import { buildCatalogArtifacts } from "./catalog/artifacts.ts";
-import { findContractProblems, findRawMetaInArtifacts } from "./catalog/contract-problems.ts";
+import { findContractProblems, findDanglingRefsInArtifacts, findRawMetaInArtifacts } from "./catalog/contract-problems.ts";
 import { findCatalogDrift } from "./catalog/drift.ts";
 
 const main = async (): Promise<number> => {
   const contracts = composeCoreContracts().listContracts();
-  const expected = buildCatalogArtifacts(contracts);
+  const endpoints = composeCoreEndpoints().list();
+  const expected = buildCatalogArtifacts(contracts, endpoints);
   const onDisk = await readGeneratedFiles();
   const problems = [
     ...findContractProblems(contracts),
     ...findRawMetaInArtifacts(expected),
+    ...findDanglingRefsInArtifacts(expected),
     ...findCatalogDrift({ expected, onDisk }),
   ];
   if (problems.length === 0) {
-    stdout.write(`contracts:check ok (${contracts.length} contracts, ${expected.length} files)\n`);
+    stdout.write(`contracts:check ok (${contracts.length} contracts, ${endpoints.length} endpoints, ${expected.length} files)\n`);
     return 0;
   }
   stdout.write(

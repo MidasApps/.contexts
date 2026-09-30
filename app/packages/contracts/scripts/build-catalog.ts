@@ -1,7 +1,7 @@
 // `pnpm contracts:catalog`: regenerates docs/catalog/** and docs/openapi/v1.yaml.
 // Runs on Node 26 native type stripping (`node scripts/build-catalog.ts`).
 import { stdout } from "node:process";
-import { composeCoreContracts } from "../src/composition.ts";
+import { composeCoreContracts, composeCoreEndpoints } from "../src/composition.ts";
 import { writeArtifacts } from "./catalog/artifact-files.ts";
 import { buildCatalogArtifacts } from "./catalog/artifacts.ts";
 import { findContractProblems } from "./catalog/contract-problems.ts";
@@ -13,9 +13,12 @@ const main = async (): Promise<number> => {
     stdout.write(`contracts:catalog failed:\n${problems.map((problem) => `  - ${problem}`).join("\n")}\n`);
     return 1;
   }
-  const artifacts = buildCatalogArtifacts(contracts);
+  const endpoints = composeCoreEndpoints().list();
+  const artifacts = buildCatalogArtifacts(contracts, endpoints);
   await writeArtifacts(artifacts);
-  stdout.write(`contracts:catalog wrote ${artifacts.length} files for ${contracts.length} contracts\n`);
+  stdout.write(
+    `contracts:catalog wrote ${artifacts.length} files for ${contracts.length} contracts and ${endpoints.length} endpoints\n`,
+  );
   return 0;
 };
 

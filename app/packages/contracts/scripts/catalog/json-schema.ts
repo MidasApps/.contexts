@@ -15,7 +15,7 @@ const DATA_KEYS = new Set(["examples", "default", "const", "enum"]);
 export const componentRef = (id: string): string => `#/components/schemas/${id}`;
 
 /** `z.toJSONSchema` copies every meta key; custom ones must travel as `x-<key>`. */
-const renameCustomMetaKeys = (jsonSchema: JsonRecord): void => {
+export const renameCustomMetaKeys = (jsonSchema: JsonRecord): void => {
   for (const key of CUSTOM_META_KEYS) {
     if (!(key in jsonSchema)) continue;
     jsonSchema[`x-${key}`] = jsonSchema[key];

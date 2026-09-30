@@ -1,0 +1,86 @@
+{
+  "additionalProperties": false,
+  "description": "Error body returned by every /v1 endpoint on failure (contracts/api.md §6).",
+  "examples": [
+    {
+      "error": {
+        "code": "VALIDATION_FAILED",
+        "details": [
+          {
+            "field": "name",
+            "issue": "TOO_SMALL"
+          }
+        ],
+        "message": "One or more fields are invalid.",
+        "requestId": "01J8Z3K4M5N6P7Q8R9S0T1V2W3"
+      }
+    }
+  ],
+  "properties": {
+    "error": {
+      "additionalProperties": false,
+      "description": "The error.",
+      "properties": {
+        "code": {
+          "description": "Stable error code; the client maps it to copy.",
+          "pattern": "^[A-Z][A-Z0-9]*(?:_[A-Z0-9]+)*$",
+          "type": "string",
+          "x-pii": "none"
+        },
+        "details": {
+          "description": "Granular problems, e.g. one per invalid field.",
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "field": {
+                "description": "Dotted path of the offending input field.",
+                "type": "string",
+                "x-pii": "none"
+              },
+              "issue": {
+                "description": "What is wrong with the field, SCREAMING_SNAKE.",
+                "pattern": "^[A-Z][A-Z0-9]*(?:_[A-Z0-9]+)*$",
+                "type": "string",
+                "x-pii": "none"
+              }
+            },
+            "required": [
+              "field",
+              "issue"
+            ],
+            "type": "object"
+          },
+          "type": "array",
+          "x-pii": "none"
+        },
+        "message": {
+          "description": "Short, generic English message; never internals.",
+          "minLength": 1,
+          "type": "string",
+          "x-pii": "none"
+        },
+        "requestId": {
+          "description": "Request id to correlate with logs (X-Request-Id).",
+          "minLength": 1,
+          "type": "string",
+          "x-pii": "none"
+        }
+      },
+      "required": [
+        "code",
+        "message",
+        "requestId"
+      ],
+      "type": "object",
+      "x-pii": "none"
+    }
+  },
+  "required": [
+    "error"
+  ],
+  "type": "object",
+  "x-kind": "view",
+  "x-pii": "none",
+  "x-relations": [],
+  "x-tenancyScope": "platform"
+}

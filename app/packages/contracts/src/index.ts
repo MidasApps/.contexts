@@ -10,7 +10,37 @@ export {
   readRawFieldMeta,
   type ZodMetaRegistry,
 } from "./contracts/field-meta.ts";
-export { CORE_CONTRACTS, composeCoreContracts } from "./composition.ts";
+export { CORE_CONTRACTS, CORE_ENDPOINTS, composeCoreContracts, composeCoreEndpoints } from "./composition.ts";
+export {
+  defineEndpoint,
+  pathParamNames,
+  type EndpointAuth,
+  type EndpointDefinition,
+  type EndpointErrors,
+  type EndpointResponses,
+  type ErrorStatus,
+  type HttpMethod,
+  type InferEndpointInput,
+  type InferEndpointResponse,
+  type SuccessStatus,
+} from "./contracts/http/endpoint.ts";
+export { EndpointDefinitionError, type EndpointDefinitionErrorCode } from "./contracts/http/endpoint-definition-error.ts";
+export { createEndpointRegistry, type EndpointRegistry } from "./contracts/http/endpoint-registry.ts";
+export {
+  dataEnvelope,
+  ErrorCodeSchema,
+  ErrorDetailSchema,
+  ErrorEnvelopeContract,
+  ErrorEnvelopeSchema,
+  listEnvelope,
+  PageMetaSchema,
+  PageQuerySchema,
+  type ErrorCode,
+  type ErrorDetail,
+  type ErrorEnvelope,
+  type PageMeta,
+  type PageQuery,
+} from "./contracts/http/envelopes.schema.ts";
 export { defineContract, type ContractDefinition } from "./contracts/contract.ts";
 export { inspectSchema, isPiiBelow, maxPii, type FieldMetaInspection, type FieldMetaProblem } from "./contracts/field-meta-rules.ts";
 export { createContractRegistry, type ContractRegistry, type RegisteredContract } from "./contracts/registry.ts";
