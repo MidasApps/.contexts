@@ -19,3 +19,7 @@
 - 2026-09-30 | Task 14 complete | commits: 0522bf2 | review: pending
 - 2026-09-30 | Task 15 complete | commits: 6522df8 | review: pending
 - 2026-09-30 | Controller requests (rate limiter test, upload/knowledge audit actions, UPSTREAM_UNAVAILABLE) | commits: a9343a6, 21cd27d, 77713ff | review: pending
+- 2026-09-30 | Review decisions 0030 A1 (device role reads its context) and A2 (redeem re-checks the creator) | commits: d92f38f, 3889f61, d18c071 | review: pending
+- 2026-09-30 | Task 16 complete | commits: 694237a | review: pending
+- 2026-09-30 | Task 17 complete | commits: 776b863 | review: pending
+- 2026-09-30 | Task 18 complete | commits: 49c450c | review: pending
