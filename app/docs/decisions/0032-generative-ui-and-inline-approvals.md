@@ -37,3 +37,17 @@ rendering, and every approval decision must be audited.
 
 - **Model-emitted JSX or HTML.** Unsafe and unvalidated.
 - **Approval only in the SP5 inbox.** Breaks the chat flow for single-user approvals.
+
+## Amendments
+
+- **2026-09-30 — path A proven (SP4 Task 1 spike).** With `closeOnSuspend: true`, the chat stream
+  ends at the suspension with `tool-approval-request`. Its `approvalId` is `<runId>::<toolCallId>`,
+  and it comes with `data-tool-call-approval`, which carries the sanitized tool name and the
+  arguments. The next `POST` carries the assistant message with the part in `approval-responded`.
+  `handleChatStream` resumes the durable run and executes the tool once. Replaying the same
+  approval answers an error chunk and never runs the tool twice.
+  - `/v1/chat` audits the decision before forwarding it.
+  - The Mastra route refuses an approval whose `runId` belongs to another owner.
+  - Path B (`/v1/chat/{id}/tool-approvals`) is not built.
+  - `data-tool-preview` (summary, permission, before/after) is emitted by the chat route next to
+    `data-tool-call-approval`, from the tool definition's `summarize` and `preview`.

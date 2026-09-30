@@ -38,3 +38,24 @@ a stream needs server support.
 - **`api.md` §14 events for chat.** `useChat` cannot read them; a client adapter would re-implement the SDK's parser.
 - **`handleChatStream` inside Next.** Puts Mastra in the web process, against umbrella §16.3.
 - **AI SDK `resumable-stream` + Redis.** No Redis in the stack.
+
+## Amendments
+
+- **2026-09-30 — spike result (SP4 Task 1, `docs/plans/2026-09-29-sp4-chat/reports/spike-durable-chat.md`).**
+  The primary design holds, with these changes:
+  - The chat route is our own `registerApiRoute('/chat/:agentId')` over `handleChatStream`
+    (`version: 'v7'`, `closeOnSuspend: true`, SSE heartbeat every 15 s), not `chatRoute`.
+    `chatRoute` forwards the request signal, so a client disconnect aborts the run and nothing is
+    left to observe.
+  - The route itself sets `runId` (returned in `x-run-id`) and `memory: { thread, resource }`
+    from the verified context: a durable agent ignores the thread and resource keys of the
+    request context.
+  - The body contributes only `messages` and `trigger`.
+  - Resume is `GET /chat/:agentId/runs/:runId/observe`: a full replay from `start`, and 204 for
+    an unknown run.
+  - Stop is `POST /chat/runs/:runId/abort` (`publishAbortRequest`). An aborted run keeps the
+    partial answer in memory.
+  - Both routes check that the run belongs to the caller.
+  - Replay comes from the durable agent's in-process cache, not from PubSub, so resume works
+    only on the instance that runs the stream until a shared cache exists. On any other
+    instance it degrades to the fallback (204, then reload from memory).
