@@ -32,7 +32,8 @@
       "count": "{count, plural, one {# fonte} other {# fontes}}"
     },
     "citation": {
-      "label": "Fonte {index}: {title}"
+      "label": "Fonte {index}: {title}",
+      "fallback": "Fonte {index}"
     },
     "context": {
       "label": "Contexto usado: {percent}",
@@ -141,7 +142,8 @@
     "request": "Pedido",
     "steps": "{count, plural, one {# etapa} other {# etapas}}",
     "stepFailed": "falhou",
-    "result": "Resultado"
+    "result": "Resultado",
+    "stepsTitle": "Etapas"
   },
   "tool": {
     "title": "Ferramenta {name}"

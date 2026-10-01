@@ -9,7 +9,7 @@ export type InlineCitationProps = {
   /** 1-based number of the cited source. */
   index: number;
   /** Title of the source, read with the marker ("Fonte 2: Guia de integração"). */
-  title: string;
+  title?: string | undefined;
   /** The passage, shown in the popover. */
   children?: ReactNode;
   className?: string | undefined;
@@ -26,7 +26,7 @@ export function InlineCitation({ index, title, children, className }: InlineCita
     <Popover>
       <PopoverTrigger
         data-slot="inline-citation"
-        aria-label={t("citation.label", { index, title })}
+        aria-label={title === undefined ? t("citation.fallback", { index }) : t("citation.label", { index, title })}
         className={cn(
           "mx-0.5 inline-flex h-[18px] min-w-[18px] items-center justify-center rounded-full border border-border bg-muted px-1 align-text-top font-mono text-[10.5px] text-muted-foreground-strong tabular-nums hover:bg-accent",
           // 24 px target (WCAG 2.5.8) around an 18 px mark that must not push the line height.
@@ -37,7 +37,7 @@ export function InlineCitation({ index, title, children, className }: InlineCita
         {index}
       </PopoverTrigger>
       <PopoverContent align="start" className="w-80 space-y-1.5 text-[13px]">
-        <p className="font-medium text-foreground">{title}</p>
+        <p className="font-medium text-foreground">{title ?? t("citation.fallback", { index })}</p>
         {children === undefined ? null : <div className="text-muted-foreground">{children}</div>}
       </PopoverContent>
     </Popover>
