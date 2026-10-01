@@ -77,3 +77,18 @@ a stream needs server support.
     one Mastra instance (`max-instances=1`). The follow-up is a shared run-owner store in Mastra's
     Postgres storage plus a replay that does not depend on the process (PubSub-backed observe or a
     shared cache).
+
+- **2026-10-01 — the answer's confidence travels as message metadata (SP4 Tasks 11–13, follow-up #42).**
+  - The citation guard grades the knowledge subagent's own message, which the chat never shows: the
+    member reads the supervisor's answer, and the knowledge answer reaches it as the output of the
+    `agent-knowledge` tool call. A probe of the fake-mode stream showed no `messageMetadata` at all, so
+    "sem certeza" could not show, live or after a reload.
+  - The guard now writes `low | normal`, the values of `MessageMetadataSchema` (the contract is the
+    source; `grounded` is gone).
+  - `chat/answer-confidence.ts` grades a knowledge delegation output with the guard's own rule (`low`
+    when the answer cites no passage retrieved in that delegation; several delegations are `normal`
+    once any is). The chat stream tap writes it as a `message-metadata` chunk right after the
+    delegation's `tool-output-available` (live and on observe), and the history route sets it on stored
+    answers when it reads them. Nothing is written to memory, so the two always agree.
+  - The client passes `MessageMetadataSchema` to `useChat`: metadata outside the contract fails the
+    stream instead of being shown. The badge shows while the answer streams.

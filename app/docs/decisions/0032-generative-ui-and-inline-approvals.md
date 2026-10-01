@@ -92,3 +92,15 @@ rendering, and every approval decision must be audited.
   - **Approvals inbox link.** `approval-pending` links to `approvalHref(approvalId)`; the default is
     `/approvals/{approvalId}` as a plain href, because the route map has no approvals route yet. The app
     passes a router-built href once SP5 adds that route.
+
+- **2026-10-01 — fake mode, module contracts and the approvals link (SP4 Tasks 11–13, follow-ups #40 and #41).**
+  - **Fake mode.** The fake action agent has a rule for the `[ui:schema-form]` turn: it reads the JSON
+    block, finds the command the form names among its command tools and calls it with exactly the
+    submitted values (`fake-scenarios.ts`, `action-run-submitted-form`). "renderForm → submit → approval"
+    now completes with `AI_MODE=fake`.
+  - **Module contracts.** The chat is mounted through `ProjectChatPanel`, which gives `ChatPanel` the
+    contracts of `ModuleRegistry.contracts()`, the node's permissions and currency. The example module
+    passes `EXAMPLE_CONTRACTS` to `defineClientModule`, so its note form renders.
+  - **Approvals link.** `approval-pending` links to the SP5 inbox route through the router port:
+    `router.href(approvalRequestRoute(organizationId, approvalId))` (helper of `entities/approval-request`)
+    (`/o/{organizationId}/settings/approvals/{approvalRequestId}`; the web adds the locale).

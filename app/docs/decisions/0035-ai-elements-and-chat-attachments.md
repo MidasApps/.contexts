@@ -78,3 +78,27 @@ signed or localhost URL.
     the Bearer token per request, sends a ULID `x-request-id`, retries once after a 401 with a forced refresh,
     reads `x-conversation-id`, and turns error envelopes into `ApiError`. The body is exactly `ChatRequest`.
   - **`chat` is a core message namespace** (`@core/i18n`), so it joins `RESERVED_MODULE_IDS`.
+
+- **2026-10-01 — the upload queue of the composer (SP4 Task 11).**
+  - **Flow.** `features/chat-upload/model/upload-queue.ts`: `pending → uploading → validating →
+    ready | rejected | failed`. `POST /v1/organizations/{id}/files` → bytes to the ticket's URL with
+    `XMLHttpRequest` (progress, cancel), method and headers exactly as the ticket says and no
+    `Authorization` → poll `GET /v1/files/{id}` every second for at most 30 s.
+  - **The server decides.** The client has no list of allowed types or sizes: a refusal before signing
+    (400 with `TYPE_NOT_ALLOWED` / `TOO_LARGE`) or after the upload (`rejectionReason`) is shown on the
+    chip. A message waits for its uploads, cannot go while a chip has an error, and only `ready` files
+    travel, by id. The only client-side limit is 10 attachments per message.
+  - **What the message shows.** The sent message carries `metadata.attachments` (the same shape the
+    server stores), so the chips show at once and after a reload. A turn sent again (retry, regenerate)
+    takes its file ids from that metadata.
+  - **Knowledge base.** "Add to knowledge base" is a second entry of the attach menu (for
+    `core.knowledge.write`): the file is uploaded with purpose `knowledge` and then posted to
+    `POST …/knowledge/sources`. It does not go with the message. A chat attachment cannot be promoted
+    afterwards (the source route takes knowledge files only), and there is no ingestion progress card:
+    the chip says the indexing started.
+  - **Previews.** Image chips preview from a local object URL. History shows name and type only: loading
+    the read URL would need `img-src` to allow the storage origin, and nothing else does.
+  - **CSP.** `connect-src` gains `https://storage.googleapis.com` (signed URL uploads) on web and
+    desktop, and the Storage Emulator origin on web in local. The bucket needs a CORS rule for `PUT`
+    from the app origins before uploads work outside local; the desktop has no Storage Emulator origin
+    in its CSP, so local desktop uploads are not possible yet.
