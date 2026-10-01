@@ -9,6 +9,8 @@ const LOCAL_ENV = {
   FIREBASE_AUTH_EMULATOR_HOST: "127.0.0.1:9099",
   FIRESTORE_EMULATOR_HOST: "127.0.0.1:8080",
   NEXT_PUBLIC_APP_URL: "http://localhost:3000",
+  NEXT_PUBLIC_APP_ENV: "local",
+  NEXT_PUBLIC_FIREBASE_AUTH_EMULATOR_URL: "http://127.0.0.1:9099",
 };
 
 const REMOTE_ENV = {
@@ -16,6 +18,7 @@ const REMOTE_ENV = {
   FIREBASE_PROJECT_ID: "core-staging",
   DATABASE_URL: "postgresql://app@10.0.0.5:5432/app",
   NEXT_PUBLIC_APP_URL: "https://staging.example.com",
+  NEXT_PUBLIC_APP_ENV: "staging",
   MASTRA_URL: "https://mastra-staging.a.run.app",
   MASTRA_AUDIENCE: "https://mastra-staging.a.run.app",
   FILES_BUCKET: "core-staging-files",
@@ -78,5 +81,24 @@ describe("loadWebEnv", () => {
     expect(loadWebEnv(LOCAL_ENV).FILES_BUCKET).toBe("demo-core.appspot.com");
     expect(() => loadWebEnv({ ...REMOTE_ENV, CORS_ALLOWED_ORIGINS: "", FILES_BUCKET: undefined })).toThrow(/FILES_BUCKET \(REQUIRED\)/);
     expect(loadWebEnv({ ...REMOTE_ENV, CORS_ALLOWED_ORIGINS: "" }).FILES_BUCKET).toBe("core-staging-files");
+  });
+});
+
+describe("loadWebEnv public client variables", () => {
+  it("requires NEXT_PUBLIC_APP_ENV and that it equals APP_ENV (the client bundle must name the same environment)", () => {
+    expect(() => loadWebEnv({ ...LOCAL_ENV, NEXT_PUBLIC_APP_ENV: undefined })).toThrow(/NEXT_PUBLIC_APP_ENV \(REQUIRED\)/);
+    expect(() => loadWebEnv({ ...LOCAL_ENV, NEXT_PUBLIC_APP_ENV: "prod" })).toThrow(/NEXT_PUBLIC_APP_ENV \(MISMATCH\)/);
+  });
+
+  it("parses NEXT_PUBLIC_MFA_FACTORS as a list of known factors", () => {
+    expect(loadWebEnv({ ...LOCAL_ENV, NEXT_PUBLIC_MFA_FACTORS: "phone, totp" }).NEXT_PUBLIC_MFA_FACTORS).toEqual(["phone", "totp"]);
+    expect(() => loadWebEnv({ ...LOCAL_ENV, NEXT_PUBLIC_MFA_FACTORS: "email" })).toThrow(/NEXT_PUBLIC_MFA_FACTORS/);
+  });
+
+  it("requires the Auth Emulator URL in local and refuses it elsewhere", () => {
+    expect(loadWebEnv(LOCAL_ENV).NEXT_PUBLIC_FIREBASE_AUTH_EMULATOR_URL).toBe("http://127.0.0.1:9099");
+    expect(() => loadWebEnv({ ...LOCAL_ENV, NEXT_PUBLIC_FIREBASE_AUTH_EMULATOR_URL: undefined })).toThrow(/NEXT_PUBLIC_FIREBASE_AUTH_EMULATOR_URL \(REQUIRED\)/);
+    const remote = { ...REMOTE_ENV, CORS_ALLOWED_ORIGINS: "", NEXT_PUBLIC_FIREBASE_AUTH_EMULATOR_URL: "http://127.0.0.1:9099" };
+    expect(() => loadWebEnv(remote)).toThrow(/NEXT_PUBLIC_FIREBASE_AUTH_EMULATOR_URL \(FORBIDDEN\)/);
   });
 });

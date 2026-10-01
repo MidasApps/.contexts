@@ -1,6 +1,7 @@
 import { existsSync } from "node:fs";
 import path from "node:path";
 import type { NextConfig } from "next";
+import createNextIntlPlugin from "next-intl/plugin";
 import { buildSecurityHeaders } from "./src/config/security-headers";
 
 /** Workspace root (`app/`): one `.env.local` and one lockfile for every app. */
@@ -19,20 +20,17 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   reactStrictMode: true,
   // Workspace packages ship TypeScript sources (`exports` point at `src/*.ts`).
-  transpilePackages: ["@core/contracts", "@core/services"],
+  transpilePackages: ["@core/contracts", "@core/services", "@core/client", "@core/i18n", "@core/module-example"],
   // libpg-query (SP3 SQL guard, via @core/services) loads its .wasm next to its own
   // module; bundled, it looks in the wrong folder, so Node loads it from node_modules.
   serverExternalPackages: ["libpg-query"],
   turbopack: { root: WORKSPACE_ROOT },
-  // NODE_ENV is set by the Next CLI itself (`next dev` → development).
-  headers: () =>
-    Promise.resolve([
-      {
-        source: "/:path*",
-        headers: buildSecurityHeaders({ isDevelopment: process.env.NODE_ENV === "development" }),
-      },
-    ]),
+  // Static headers only; the CSP is set per request by src/proxy.ts (decision 0016).
+  headers: () => Promise.resolve([{ source: "/:path*", headers: buildSecurityHeaders() }]),
 };
 
+// next-intl's plugin points `next-intl/config` at the request config (server-side messages).
+const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
+
 // Next's config loader requires a default export.
-export default nextConfig;
+export default withNextIntl(nextConfig);

@@ -1,0 +1,9 @@
+/*
+ * Web styles: the shared design tokens and Tailwind setup of @core/client (decision 0014), which
+ * already scan the client sources (`packages/client/src`). Installed modules ship utilities too,
+ * so their sources are scanned here (path relative to this file). Fonts are the system stack from
+ * the tokens: no font files, so the CSP keeps `font-src 'self'`.
+ */
+@import "@core/client/styles.css";
+
+@source "../../../../../modules/*/src";

@@ -1,9 +1,25 @@
 import { createCorsPolicy } from "@core/services";
+import createMiddleware from "next-intl/middleware";
+import { buildPageContentSecurityPolicy } from "./config/security-headers";
 import { env } from "./env";
 import { createProxy } from "./http/create-proxy";
+import { routing } from "./i18n/routing";
 
-/** Next 16 proxy: request id on every request, CORS allowlist on `/v1` (see `createProxy`). */
-export const proxy = createProxy({ corsPolicy: createCorsPolicy(env.CORS_ALLOWED_ORIGINS) });
+const isDevelopment = process.env.NODE_ENV === "development";
+const authEmulatorOrigin = env.APP_ENV === "local" ? env.NEXT_PUBLIC_FIREBASE_AUTH_EMULATOR_URL : undefined;
+
+/**
+ * Next 16 proxy: request id on every request, CORS allowlist on `/v1`, locale routing and the
+ * page CSP on everything else (see `createProxy`; CSP variant in decision 0016).
+ */
+export const proxy = createProxy({
+  corsPolicy: createCorsPolicy(env.CORS_ALLOWED_ORIGINS),
+  localeMiddleware: createMiddleware(routing),
+  pageCsp: (nonce) => buildPageContentSecurityPolicy({ isDevelopment, nonce, authEmulatorOrigin }),
+  // Static fallback (decision 0016 §2): Cache Components prerenders the static shell at build time,
+  // so its framework scripts can never carry a per-request nonce (verified in SP2 Task 18).
+  cspMode: "static",
+});
 
 // Static assets carry no request context worth correlating.
 export const config = {

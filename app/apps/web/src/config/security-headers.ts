@@ -1,20 +1,38 @@
 /** Header entry in the shape `next.config.ts` `headers()` expects. */
 export type HeaderEntry = { key: string; value: string };
 
-type SecurityHeadersOptions = { isDevelopment: boolean };
+/** Firebase Auth endpoints the browser SDK calls (decision 0016). */
+export const FIREBASE_AUTH_ORIGINS = ["https://identitytoolkit.googleapis.com", "https://securetoken.googleapis.com"] as const;
+
+export type PageCspOptions = {
+  readonly isDevelopment: boolean;
+  /**
+   * Per-request nonce (decision 0016 §1). Without it the policy is the static fallback of §2:
+   * framework bootstrap scripts are inline and need `'unsafe-inline'`.
+   */
+  readonly nonce?: string | undefined;
+  /** Auth Emulator origin, from validated env and only in `APP_ENV=local`. */
+  readonly authEmulatorOrigin?: string | undefined;
+};
+
+const scriptSources = ({ isDevelopment, nonce }: PageCspOptions): string[] => [
+  "'self'",
+  ...(nonce === undefined ? ["'unsafe-inline'"] : [`'nonce-${nonce}'`, "'strict-dynamic'"]),
+  // React dev tooling only (Next CSP guide); production never allows eval.
+  ...(isDevelopment ? ["'unsafe-eval'"] : []),
+];
 
 /**
- * Baseline static CSP (rules/security.md). Without a per-request nonce, the
- * inline scripts Next.js injects for RSC hydration need `'unsafe-inline'`; a
- * nonce-based CSP set in `src/proxy.ts` replaces this when the SP2 UI lands.
- * Development adds `'unsafe-eval'` (React dev tooling) and `ws:` (HMR) only.
+ * CSP of HTML page responses (rules/security.md §6, decision 0016). `style-src` keeps
+ * `'unsafe-inline'` in both variants: Radix and sonner position overlays with inline `style`
+ * attributes, which nonces cannot cover (a nonce in `style-src` would disable `'unsafe-inline'`).
+ * Development adds `ws:` (HMR).
  */
-export const buildContentSecurityPolicy = ({ isDevelopment }: SecurityHeadersOptions): string => {
-  const scriptSrc = ["'self'", "'unsafe-inline'", ...(isDevelopment ? ["'unsafe-eval'"] : [])];
-  const connectSrc = ["'self'", ...(isDevelopment ? ["ws:"] : [])];
+export const buildPageContentSecurityPolicy = (options: PageCspOptions): string => {
+  const connectSrc = ["'self'", ...FIREBASE_AUTH_ORIGINS, ...(options.authEmulatorOrigin === undefined ? [] : [options.authEmulatorOrigin]), ...(options.isDevelopment ? ["ws:"] : [])];
   const directives = [
     "default-src 'self'",
-    `script-src ${scriptSrc.join(" ")}`,
+    `script-src ${scriptSources(options).join(" ")}`,
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' blob: data:",
     "font-src 'self'",
@@ -27,11 +45,17 @@ export const buildContentSecurityPolicy = ({ isDevelopment }: SecurityHeadersOpt
   return directives.join("; ");
 };
 
-/** Static security headers applied to every route (rules/security.md checklist). */
-export const buildSecurityHeaders = (options: SecurityHeadersOptions): HeaderEntry[] => [
+/** CSP of `/v1` JSON responses: nothing may load from them, nothing may frame them. */
+export const API_CONTENT_SECURITY_POLICY = "default-src 'none'; frame-ancestors 'none'";
+
+/**
+ * Static security headers applied to every route by `next.config.ts` (rules/security.md
+ * checklist). The CSP is not here: the proxy sets it per request (it needs the validated env and,
+ * for pages, the nonce decision of decision 0016).
+ */
+export const buildSecurityHeaders = (): HeaderEntry[] => [
   { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" },
   { key: "X-Content-Type-Options", value: "nosniff" },
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
   { key: "X-Frame-Options", value: "DENY" },
-  { key: "Content-Security-Policy", value: buildContentSecurityPolicy(options) },
 ];

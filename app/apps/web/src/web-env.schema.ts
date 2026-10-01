@@ -10,9 +10,21 @@ const LOCAL_CORS_ALLOWED_ORIGINS = ["http://localhost:1420", "tauri://localhost"
 /** `mastra dev` default port on the developer machine. */
 const LOCAL_MASTRA_URL = "http://localhost:4111";
 
+// Comma-separated second factors the UI offers (same shape as the server's MFA_FACTORS).
+const MfaFactorListSchema = z
+  .string()
+  .transform((value) => [...new Set(value.split(",").map((item) => item.trim()).filter((item) => item !== ""))])
+  .pipe(z.array(z.enum(["totp", "phone"])).min(1));
+
 /** Variables only the web app reads, on top of the services env. */
 export const WebOnlyEnvSchema = z.object({
   NEXT_PUBLIC_APP_URL: z.url(),
+  // Public client config (inlined into the browser bundle, SP2 Task 18); validated here too so a
+  // wrong deployment fails at boot instead of in the browser.
+  NEXT_PUBLIC_APP_ENV: z.enum(["local", "dev", "staging", "prod"]).optional(),
+  NEXT_PUBLIC_MFA_FACTORS: MfaFactorListSchema.optional(),
+  // Auth Emulator origin of the browser SDK (local only); the CSP allows it (decision 0016).
+  NEXT_PUBLIC_FIREBASE_AUTH_EMULATOR_URL: z.url({ protocol: /^http$/ }).optional(),
   // Origins allowed to call /v1 cross-origin (never `*`); empty string = CORS off.
   CORS_ALLOWED_ORIGINS: CorsOriginListSchema.optional(),
   // Private Mastra service the /v1 gateway calls (SP3 spec §4.1); required outside local.
@@ -25,6 +37,18 @@ export const WebOnlyEnvSchema = z.object({
 });
 
 type WebOnlyEnv = z.infer<typeof WebOnlyEnvSchema>;
+
+// Both environments: the client bundle names the same environment as the server.
+const publicIssues = (env: WebOnlyEnv & { APP_ENV: string }): EnvIssue[] => {
+  const isLocal = env.APP_ENV === "local";
+  const emulator = env.NEXT_PUBLIC_FIREBASE_AUTH_EMULATOR_URL;
+  return [
+    ...(env.NEXT_PUBLIC_APP_ENV === undefined ? [{ field: "NEXT_PUBLIC_APP_ENV", issue: "REQUIRED" }] : []),
+    ...(env.NEXT_PUBLIC_APP_ENV !== undefined && env.NEXT_PUBLIC_APP_ENV !== env.APP_ENV ? [{ field: "NEXT_PUBLIC_APP_ENV", issue: "MISMATCH" }] : []),
+    ...(isLocal && emulator === undefined ? [{ field: "NEXT_PUBLIC_FIREBASE_AUTH_EMULATOR_URL", issue: "REQUIRED" }] : []),
+    ...(!isLocal && emulator !== undefined ? [{ field: "NEXT_PUBLIC_FIREBASE_AUTH_EMULATOR_URL", issue: "FORBIDDEN" }] : []),
+  ];
+};
 
 // Remote environments must state these: a silent localhost default would ship dev
 // origins to prod, and an http Mastra URL would send the caller's token in clear.
@@ -43,7 +67,9 @@ const remoteIssues = (env: WebOnlyEnv): EnvIssue[] => [
  */
 export const loadWebEnv = (source: Record<string, string | undefined>) => {
   const env = loadServicesEnvWith(WebOnlyEnvSchema, source);
+  const clientIssues = publicIssues(env);
   if (env.APP_ENV === "local") {
+    if (clientIssues.length > 0) throw new InvalidEnvError(clientIssues);
     return {
       ...env,
       CORS_ALLOWED_ORIGINS: env.CORS_ALLOWED_ORIGINS ?? LOCAL_CORS_ALLOWED_ORIGINS,
@@ -51,7 +77,7 @@ export const loadWebEnv = (source: Record<string, string | undefined>) => {
       FILES_BUCKET: env.FILES_BUCKET ?? `${env.FIREBASE_PROJECT_ID}.appspot.com`,
     };
   }
-  const issues = remoteIssues(env);
+  const issues = [...clientIssues, ...remoteIssues(env)];
   if (issues.length > 0 || env.CORS_ALLOWED_ORIGINS === undefined || env.MASTRA_URL === undefined || env.FILES_BUCKET === undefined) {
     throw new InvalidEnvError(issues);
   }
