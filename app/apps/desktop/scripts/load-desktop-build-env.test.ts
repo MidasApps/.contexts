@@ -1,9 +1,9 @@
-import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { InvalidDesktopEnvError } from "../src/config/desktop-env.schema.ts";
-import { loadDesktopBuildEnv } from "./load-desktop-build-env.ts";
+import { loadDesktopBuildEnv, MissingDesktopEnvFileError } from "./load-desktop-build-env.ts";
 
 let envDir: string;
 
@@ -35,6 +35,23 @@ describe("loadDesktopBuildEnv", () => {
     writeFileSync(path.join(envDir, ".env.production"), `${REMOTE_ENV}\n`);
 
     expect(() => loadDesktopBuildEnv({ mode: "production", envDir })).toThrow(InvalidDesktopEnvError);
+  });
+
+  it("says which file to create when the mode has no env file (clean checkout)", () => {
+    writeFileSync(path.join(envDir, ".env.development"), `VITE_API_URL=http://localhost:3100\n${REMOTE_ENV}\n`);
+
+    expect(() => loadDesktopBuildEnv({ mode: "production", envDir })).toThrow(MissingDesktopEnvFileError);
+    expect(() => loadDesktopBuildEnv({ mode: "production", envDir })).toThrow(/^invalid environment: VITE_API_URL, .*copy \.env\.production\.example to \.env\.production/);
+  });
+
+  it("builds with the committed example values, which are placeholders of a remote environment", () => {
+    const example = readFileSync(path.resolve(import.meta.dirname, "../.env.production.example"), "utf8");
+    writeFileSync(path.join(envDir, ".env.production"), example);
+
+    const env = loadDesktopBuildEnv({ mode: "production", envDir });
+    expect(new URL(env.VITE_API_URL).hostname).toMatch(/\.invalid$/);
+    expect(env.VITE_APP_ENV).not.toBe("local");
+    expect(env.VITE_AUTH_EMULATOR_URL).toBeUndefined();
   });
 
   it("fails closed on an invalid value, naming only the variable", () => {

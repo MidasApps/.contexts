@@ -1,0 +1,3 @@
+# The root .gitignore ignores `.env.*`; the example of the release build env is versioned
+# (placeholders only, like the root .env.example).
+!.env.production.example

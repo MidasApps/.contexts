@@ -22,8 +22,10 @@ calls the web `/v1` API on its own origin.
 - **Env:** `src/config/desktop-env.schema.ts` validates `VITE_*` at build and at
   start (fail closed): `VITE_API_URL`, `VITE_APP_ENV`, `VITE_FIREBASE_API_KEY`,
   `VITE_FIREBASE_AUTH_DOMAIN`, `VITE_FIREBASE_PROJECT_ID`,
-  `VITE_AUTH_EMULATOR_URL` (local only) and `VITE_MFA_FACTORS` (`totp,phone`).
-  The Tauri CSP `connect-src` (API, Firebase Auth, emulator in local) is derived
+  `VITE_AUTH_EMULATOR_URL` (local only), `VITE_STORAGE_EMULATOR_URL` (local only,
+  optional: where local uploads send their bytes) and `VITE_MFA_FACTORS` (`totp,phone`).
+  The Tauri CSP `connect-src` (API, Firebase Auth, upload origin; Auth and Storage
+  Emulators in local only) is derived
   from the same values by `scripts/write-tauri-api-config.ts`.
 - **Session (decision 0017):** the Firebase ID token lives in memory only. After an
   interactive sign-in `src/adapters/desktop-session-bridge.ts` creates an SP1
@@ -66,6 +68,25 @@ VITE_API_URL=https://api.example.com VITE_APP_ENV=prod VITE_FIREBASE_API_KEY=...
 `.env.development` targets local development (`http://localhost:3100`, project
 `demo-core`, Auth Emulator on `127.0.0.1:9099`); override in
 `.env.development.local` (gitignored) or the shell.
+
+### Build env
+
+`vite build` runs in mode `production`, which reads `.env.production`. That file is
+not versioned on purpose: a committed one would let `tauri:build` ship a release that
+points at whatever placeholder it held, and the env check exists to fail closed
+instead. A clean checkout therefore stops with `invalid environment: … copy
+.env.production.example to .env.production`. Three ways to build:
+
+```bash
+cp apps/desktop/.env.production.example apps/desktop/.env.production   # from app/; then set the real values
+pnpm -F @core/desktop build                       # release bundle of that environment
+pnpm -F @core/desktop build --mode development    # local bundle from .env.development (emulators)
+VITE_API_URL=... VITE_APP_ENV=... pnpm -F @core/desktop build   # CI: variables in the env, no file
+```
+
+`.env.production.example` holds public placeholders that pass validation (the same
+shape the `desktop-check` CI job passes), so the copy builds as is; that bundle
+cannot reach an API (`https://api.example.invalid`). Shell variables win over the file.
 
 ## How to test
 
