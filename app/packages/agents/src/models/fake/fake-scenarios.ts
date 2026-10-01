@@ -182,6 +182,48 @@ const runCommandRule: FakeScenarioRule = {
   },
 };
 
+const FENCE = "```";
+const SUBMITTED_FORM = new RegExp(`\\[ui:schema-form\\][\\s\\S]*?${FENCE}json\\s*([\\s\\S]*?)\\s*${FENCE}`);
+
+type SubmittedForm = { readonly commandId: string; readonly values: Readonly<Record<string, unknown>> };
+
+const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === "object" && value !== null && !Array.isArray(value);
+
+/** The form a `[ui:schema-form]` user turn carries (written by the chat client, decision 0032), or `undefined`. */
+const submittedFormOf = (text: string): SubmittedForm | undefined => {
+  const block = SUBMITTED_FORM.exec(text)?.[1];
+  if (block === undefined) return undefined;
+  try {
+    const payload: unknown = JSON.parse(block);
+    if (!isRecord(payload) || typeof payload.commandId !== "string" || !isRecord(payload.values)) return undefined;
+    return { commandId: payload.commandId, values: payload.values };
+  } catch {
+    // Not JSON: an ordinary message that only looks like a submission.
+    return undefined;
+  }
+};
+
+/**
+ * The action agent runs the command a submitted form names, with exactly the submitted values
+ * (SP0 follow-up #40): the tool is that command's, not the first command tool offered.
+ */
+const runSubmittedFormRule = (commands: readonly FakeCommandRef[]): FakeScenarioRule => {
+  const callFor = (text: string, toolNames: readonly string[]): FakeToolCall | undefined => {
+    const form = submittedFormOf(text);
+    const command = form === undefined ? undefined : commands.find((candidate) => candidate.commandId === form.commandId);
+    const toolName = command === undefined ? undefined : modelToolName(toolNames, command.toolId);
+    return form === undefined || toolName === undefined ? undefined : { toolName, input: form.values };
+  };
+  return {
+    id: "action-run-submitted-form",
+    matches: ({ text, toolNames }) => callFor(text, toolNames) !== undefined,
+    respond: ({ text, toolNames }) => {
+      const call = callFor(text, toolNames);
+      return call === undefined ? { text: echoText(text) } : { toolCalls: [call] };
+    },
+  };
+};
+
 const listEntitiesRule: FakeScenarioRule = {
   id: "data-list-entities",
   matches: ({ text, toolNames }) => modelToolName(toolNames, "catalog.listEntities") !== undefined && /\b(entities|which data)\b/i.test(text),
@@ -208,7 +250,8 @@ const webSearchRule: FakeScenarioRule = {
  * delegates: a confirmation → `agent-action`, "create a <record>" / data words →
  * `agent-data`, web words → `agent-web`, a question → `agent-knowledge`. The data agent
  * lists entities or renders the form of the command whose target contract matches the
- * word; the action agent runs the first command tool with the quoted name; the
+ * word; the action agent runs the command of a submitted form (`[ui:schema-form]` turn) with
+ * its values, or else the first command tool with the quoted name; the
  * knowledge agent searches the knowledge base with the request; the web agent searches
  * the web with the message when Firecrawl is offered.
  */
@@ -219,6 +262,7 @@ export const coreFakeRules = (commands: readonly FakeCommandRef[]): readonly (re
   ["assistant", delegation("supervisor-knowledge", "knowledge", QUESTION)],
   ["data", renderFormRule(commands)],
   ["data", listEntitiesRule],
+  ["action", runSubmittedFormRule(commands)],
   ["action", runCommandRule],
   ["knowledge", searchKnowledgeRule],
   ["web", webSearchRule],
