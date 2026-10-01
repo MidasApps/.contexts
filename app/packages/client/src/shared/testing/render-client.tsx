@@ -74,14 +74,15 @@ export const createClientTestContext = (options: ClientTestOptions = {}): Client
   const queryClient = options.queryClient ?? createTestQueryClient();
   const locale = options.locale ?? "pt-BR";
   const messages = loadMessages(locale);
-  const callEndpoint = createEndpointCaller(createHttpClient({ baseUrl: "", getIdToken: auth.getIdToken, fetch: api.fetch }));
+  const connection = { baseUrl: "", getIdToken: auth.getIdToken, fetch: api.fetch };
+  const callEndpoint = createEndpointCaller(createHttpClient(connection));
   function Wrapper({ children }: { children: ReactNode }) {
     return (
       <QueryClientProvider client={queryClient}>
         <IntlProvider locale={locale} messages={messages} timeZone={options.timeZone ?? "America/Sao_Paulo"} onError={throwOnIntlError}>
           <RouterProvider router={router}>
             <AuthProvider auth={auth}>
-              <ApiProvider callEndpoint={callEndpoint}>
+              <ApiProvider callEndpoint={callEndpoint} connection={connection}>
                 <SessionContextProvider session={session}>{children}</SessionContextProvider>
               </ApiProvider>
             </AuthProvider>

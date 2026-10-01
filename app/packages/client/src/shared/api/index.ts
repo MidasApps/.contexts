@@ -12,7 +12,8 @@ export {
 } from "./http-client.ts";
 export { createQueryClient, shouldRetryQuery } from "./query-client.ts";
 export { queryKeys, type QueryKey } from "./query-keys.ts";
-export { ApiProvider, useCallEndpoint } from "./api-context.tsx";
+export { ApiProvider, useApiConnection, useCallEndpoint, type ApiConnection } from "./api-context.tsx";
+export { createChatTransport, type ChatScope, type ChatTransportOptions } from "./chat-transport.ts";
 export { accessContextQuery, meQuery, type NodeParams } from "./core-queries.ts";
 export {
   COLLECT_PAGE_LIMIT,

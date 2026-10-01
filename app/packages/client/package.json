@@ -15,6 +15,7 @@
     "./widgets/*": "./src/widgets/*/index.ts",
     "./entities/*": "./src/entities/*/index.ts",
     "./shared/ui/*": "./src/shared/ui/*.tsx",
+    "./shared/ui/ai": "./src/shared/ui/ai/index.ts",
     "./shared/ui/notify": "./src/shared/ui/molecules/Toaster/notify.ts",
     "./shared/api": "./src/shared/api/index.ts",
     "./shared/config": "./src/shared/config/index.ts",
@@ -33,9 +34,11 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@ai-sdk/react": "catalog:",
     "@core/contracts": "workspace:*",
     "@core/i18n": "workspace:*",
     "@tanstack/react-table": "catalog:",
+    "ai": "catalog:",
     "class-variance-authority": "catalog:",
     "clsx": "catalog:",
     "cmdk": "catalog:",
@@ -47,9 +50,11 @@
     "react-is": "catalog:",
     "recharts": "catalog:",
     "sonner": "catalog:",
+    "streamdown": "catalog:",
     "tailwind-merge": "catalog:",
     "tw-animate-css": "catalog:",
     "ulid": "catalog:",
+    "use-stick-to-bottom": "catalog:",
     "zod": "catalog:",
     "zustand": "catalog:"
   },

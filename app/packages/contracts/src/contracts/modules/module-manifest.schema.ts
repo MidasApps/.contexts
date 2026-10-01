@@ -12,7 +12,7 @@ import { NavItemSchema } from "./nav-item.schema.ts";
  * (decision 0015 amendment). `@core/contracts` cannot import `@core/i18n`, so the client keeps a
  * parity test against `CORE_MESSAGES`; add a namespace there and here together.
  */
-export const RESERVED_MODULE_IDS = ["core", "platform", "common", "errors", "shell", "auth", "profile", "settings", "admin", "permissions"] as const;
+export const RESERVED_MODULE_IDS = ["core", "platform", "common", "errors", "shell", "auth", "profile", "settings", "admin", "permissions", "chat"] as const;
 
 /** Kebab-case module id: permission prefix, message namespace and route segment (`/m/:moduleId`). */
 export const ModuleIdSchema = z.string().regex(/^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/, { error: "Expected a kebab-case module id." });

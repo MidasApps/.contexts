@@ -1,0 +1,211 @@
+{
+  "markdown": {
+    "newTab": "(opens in a new tab)",
+    "image": "[image: {alt}]",
+    "imageOmitted": "[image omitted]"
+  },
+  "elements": {
+    "scrollToBottom": "Jump to latest",
+    "send": "Send message",
+    "stop": "Stop answer",
+    "copyCode": "Copy",
+    "copied": "Copied",
+    "reasoning": {
+      "thinking": "Thinking…",
+      "done": "Reasoning"
+    },
+    "tool": {
+      "input": "Input",
+      "output": "Result",
+      "error": "Error",
+      "state": {
+        "input-streaming": "Preparing",
+        "input-available": "Running",
+        "approval-requested": "Awaiting approval",
+        "approval-responded": "Decision sent",
+        "output-available": "Done",
+        "output-error": "Failed",
+        "output-denied": "Declined"
+      }
+    },
+    "sources": {
+      "count": "{count, plural, one {# source} other {# sources}}"
+    },
+    "citation": {
+      "label": "Source {index}: {title}"
+    },
+    "context": {
+      "label": "Context used: {percent}",
+      "title": "Context usage",
+      "input": "Input",
+      "output": "Output",
+      "reasoning": "Reasoning",
+      "window": "Model window"
+    }
+  },
+  "panel": {
+    "title": "Assistant",
+    "logLabel": "Conversation with the assistant",
+    "newConversation": "New conversation",
+    "loadEarlier": "Load earlier messages",
+    "loadingHistory": "Loading conversation…",
+    "notFound": {
+      "title": "Conversation not found",
+      "description": "It was deleted or belongs to another account."
+    },
+    "empty": {
+      "title": "How can I help?",
+      "description": "Ask about the organization's data and documents, or request an action.",
+      "suggestionsLabel": "Suggestions"
+    },
+    "suggestions": {
+      "capabilities": {
+        "title": "What can you do?",
+        "description": "Agents and actions available in this context.",
+        "prompt": "What can you do for me here?"
+      },
+      "knowledge": {
+        "title": "Search the knowledge base",
+        "description": "Answers with sources, from the organization's documents.",
+        "prompt": "What are the main topics in the knowledge base?"
+      },
+      "data": {
+        "title": "Query data",
+        "description": "Entities and records you can see.",
+        "prompt": "Which data can I query?"
+      },
+      "create": {
+        "title": "Create a record",
+        "description": "A form to review before saving.",
+        "prompt": "I want to create a record. Which types exist?"
+      }
+    }
+  },
+  "input": {
+    "label": "Message",
+    "placeholder": "Send a message",
+    "hint": "Enter sends · Shift+Enter adds a line · Esc stops",
+    "counter": "{count} of {max} characters",
+    "tooLong": "Limit of {max} characters. Remove {over, plural, one {# character} other {# characters}}.",
+    "offline": "Offline. Sending is unavailable until the connection is back."
+  },
+  "status": {
+    "connecting": "Connecting…",
+    "responding": "Answering…",
+    "resuming": "Resuming answer…",
+    "finished": "Answer complete.",
+    "stopped": "Answer stopped.",
+    "lost": "Connection lost. The answer stopped before the end.",
+    "offline": "Offline.",
+    "awaitingApproval": "Waiting for your approval.",
+    "failed": "The answer failed."
+  },
+  "message": {
+    "you": "You",
+    "assistant": "Assistant",
+    "lowConfidence": "Not sure",
+    "lowConfidenceHint": "Answer without a source in the knowledge base. Check it before use.",
+    "stopped": "Stopped",
+    "stoppedHint": "The partial answer was kept.",
+    "regenerate": "Generate again",
+    "copy": "Copy answer",
+    "copied": "Answer copied.",
+    "attachments": "Attachments",
+    "formSubmitted": "Form submitted: {command}",
+    "choiceSubmitted": "Choice sent: {choice}"
+  },
+  "error": {
+    "title": "Could not answer",
+    "stream": "The answer failed before finishing. Try again.",
+    "retry": "Try again",
+    "history": "Could not load the conversation."
+  },
+  "tripwire": {
+    "title": "Answer blocked",
+    "default": "A safety rule stopped this answer.",
+    "tenant-budget-guard": "The organization's AI budget ran out. Contact an administrator.",
+    "tenant-pii-detector": "The message had personal data that cannot be sent to the model.",
+    "prompt-injection-detector": "The request looked like an attempt to bypass the assistant's instructions.",
+    "moderation": "The content breaks the usage rules.",
+    "system-prompt-scrubber-result": "The answer was blocked to avoid exposing internal instructions."
+  },
+  "delegation": {
+    "label": "Delegated to {agent}",
+    "agents": {
+      "knowledge": "Knowledge agent",
+      "data": "Data agent",
+      "action": "Action agent",
+      "web": "Web research agent",
+      "unknown": "Agent {id}"
+    },
+    "request": "Request",
+    "steps": "{count, plural, one {# step} other {# steps}}",
+    "stepFailed": "failed",
+    "result": "Result"
+  },
+  "tool": {
+    "title": "Tool {name}"
+  },
+  "approval": {
+    "label": "Approval: {summary}",
+    "title": "Approval required",
+    "fallbackSummary": "Run {tool}",
+    "permission": "Permission",
+    "details": "Data sent",
+    "diffCaption": "Proposed changes",
+    "field": "Field",
+    "before": "Before",
+    "after": "After",
+    "none": "—",
+    "noPreview": "No preview of the changes.",
+    "approve": "Approve",
+    "decline": "Decline",
+    "reasonLabel": "Reason for declining (optional)",
+    "reasonHint": "It is recorded in the audit log.",
+    "confirmDecline": "Confirm decline",
+    "cancelDecline": "Back",
+    "approving": "Approving…",
+    "declining": "Declining…",
+    "approved": "Approved. Running…",
+    "executed": "Approved and executed.",
+    "declined": "Declined.",
+    "declinedReason": "Declined: {reason}",
+    "failed": "Approved, but the execution failed."
+  },
+  "ui": {
+    "form": {
+      "label": "Form: {command}",
+      "submit": "Submit",
+      "submitted": "Form submitted. The assistant asks for confirmation before saving."
+    },
+    "table": {
+      "caption": "Result",
+      "truncated": "Showing the first {count, plural, one {# row} other {# rows}}. There are more results.",
+      "empty": "No rows.",
+      "yes": "Yes",
+      "no": "No"
+    },
+    "chart": {
+      "label": "{kind} chart: {series}",
+      "kinds": {
+        "bar": "Bar",
+        "line": "Line",
+        "area": "Area",
+        "pie": "Pie"
+      },
+      "data": "Chart data"
+    },
+    "picker": {
+      "legend": "Choose an option",
+      "legendMultiple": "Choose one or more options",
+      "submit": "Confirm choice",
+      "required": "Choose at least one option.",
+      "submitted": "Choice sent."
+    },
+    "approvalPending": {
+      "title": "Waiting for another person's approval",
+      "open": "Open approvals",
+      "reference": "Request {approvalId}"
+    }
+  }
+}

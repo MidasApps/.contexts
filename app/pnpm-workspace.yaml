@@ -13,6 +13,7 @@ catalog:
   "@ai-sdk/google-vertex": 5.0.98 # Gemini via Vertex ADC (GOOGLE_AI_BACKEND=vertex)
   "@ai-sdk/openai": 4.0.81
   "@ai-sdk/provider": 4.0.19 # LanguageModelV4 types for the fake models
+  "@ai-sdk/react": 4.0.125 # useChat for the chat panel; pins ai 7.0.122 exactly (4.0.129 needs ai 7.0.126: bump with the ai train, decision 0035)
   "@axe-core/playwright": 4.13.0 # axe in the e2e journeys (web, desktop-web)
   "@eslint/js": 9.39.5
   "@firebase/rules-unit-testing": 5.0.2
@@ -99,6 +100,7 @@ catalog:
   recharts: 3.10.1 # admin charts (shadcn chart pattern; decision 0042)
   server-only: 0.0.1
   sonner: 2.0.8 # Toaster (shadcn replaced its Toast with Sonner)
+  streamdown: 2.6.0 # streaming markdown of chat answers, hardened (decision 0035); 2.7.0 (2026-09-30) is inside the release-age window
   tailwind-merge: 3.7.0
   tailwindcss: 4.3.3
   turbo: 2.11.5
@@ -106,6 +108,7 @@ catalog:
   typescript: 7.0.2
   typescript-eslint: 8.71.0 # E2: runs on the TS 6 API via .pnpmfile.cjs
   ulid: 3.0.2
+  use-stick-to-bottom: 1.1.6 # chat scroll anchoring (AI Elements conversation, decision 0035)
   use-intl: 4.14.8 # same release as next-intl (web wraps it)
   vite: 8.3.1
   vitest: 5.0.2

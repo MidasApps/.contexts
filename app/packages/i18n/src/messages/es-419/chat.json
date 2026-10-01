@@ -1,0 +1,211 @@
+{
+  "markdown": {
+    "newTab": "(se abre en una pestaña nueva)",
+    "image": "[imagen: {alt}]",
+    "imageOmitted": "[imagen omitida]"
+  },
+  "elements": {
+    "scrollToBottom": "Ir al final",
+    "send": "Enviar mensaje",
+    "stop": "Detener respuesta",
+    "copyCode": "Copiar",
+    "copied": "Copiado",
+    "reasoning": {
+      "thinking": "Razonando…",
+      "done": "Razonamiento"
+    },
+    "tool": {
+      "input": "Entrada",
+      "output": "Resultado",
+      "error": "Error",
+      "state": {
+        "input-streaming": "Preparando",
+        "input-available": "Ejecutando",
+        "approval-requested": "Esperando aprobación",
+        "approval-responded": "Decisión enviada",
+        "output-available": "Completado",
+        "output-error": "Falló",
+        "output-denied": "Rechazado"
+      }
+    },
+    "sources": {
+      "count": "{count, plural, one {# fuente} other {# fuentes}}"
+    },
+    "citation": {
+      "label": "Fuente {index}: {title}"
+    },
+    "context": {
+      "label": "Contexto usado: {percent}",
+      "title": "Uso del contexto",
+      "input": "Entrada",
+      "output": "Salida",
+      "reasoning": "Razonamiento",
+      "window": "Ventana del modelo"
+    }
+  },
+  "panel": {
+    "title": "Asistente",
+    "logLabel": "Conversación con el asistente",
+    "newConversation": "Nueva conversación",
+    "loadEarlier": "Cargar mensajes anteriores",
+    "loadingHistory": "Cargando conversación…",
+    "notFound": {
+      "title": "Conversación no encontrada",
+      "description": "Fue eliminada o pertenece a otra cuenta."
+    },
+    "empty": {
+      "title": "¿En qué puedo ayudar?",
+      "description": "Pregunta sobre los datos y documentos de la organización o pide una acción.",
+      "suggestionsLabel": "Sugerencias"
+    },
+    "suggestions": {
+      "capabilities": {
+        "title": "¿Qué puedes hacer?",
+        "description": "Agentes y acciones disponibles en este contexto.",
+        "prompt": "¿Qué puedes hacer por mí aquí?"
+      },
+      "knowledge": {
+        "title": "Consultar la base de conocimiento",
+        "description": "Respuestas con fuente, a partir de los documentos de la organización.",
+        "prompt": "¿Cuáles son los temas principales de la base de conocimiento?"
+      },
+      "data": {
+        "title": "Consultar datos",
+        "description": "Entidades y registros que puedes ver.",
+        "prompt": "¿Qué datos puedo consultar?"
+      },
+      "create": {
+        "title": "Crear un registro",
+        "description": "Formulario para revisar antes de guardar.",
+        "prompt": "Quiero crear un registro. ¿Qué tipos existen?"
+      }
+    }
+  },
+  "input": {
+    "label": "Mensaje",
+    "placeholder": "Enviar mensaje",
+    "hint": "Enter envía · Shift+Enter agrega una línea · Esc detiene",
+    "counter": "{count} de {max} caracteres",
+    "tooLong": "Límite de {max} caracteres. Quita {over, plural, one {# carácter} other {# caracteres}}.",
+    "offline": "Sin conexión. El envío no está disponible hasta que vuelva la conexión."
+  },
+  "status": {
+    "connecting": "Conectando…",
+    "responding": "Respondiendo…",
+    "resuming": "Retomando respuesta…",
+    "finished": "Respuesta completa.",
+    "stopped": "Respuesta detenida.",
+    "lost": "Conexión perdida. La respuesta se detuvo antes del final.",
+    "offline": "Sin conexión.",
+    "awaitingApproval": "Esperando tu aprobación.",
+    "failed": "La respuesta falló."
+  },
+  "message": {
+    "you": "Tú",
+    "assistant": "Asistente",
+    "lowConfidence": "Sin certeza",
+    "lowConfidenceHint": "Respuesta sin fuente en la base de conocimiento. Revísala antes de usarla.",
+    "stopped": "Detenido",
+    "stoppedHint": "Se conservó la respuesta parcial.",
+    "regenerate": "Generar de nuevo",
+    "copy": "Copiar respuesta",
+    "copied": "Respuesta copiada.",
+    "attachments": "Adjuntos",
+    "formSubmitted": "Formulario enviado: {command}",
+    "choiceSubmitted": "Elección enviada: {choice}"
+  },
+  "error": {
+    "title": "No se pudo responder",
+    "stream": "La respuesta falló antes de terminar. Intenta de nuevo.",
+    "retry": "Intentar de nuevo",
+    "history": "No se pudo cargar la conversación."
+  },
+  "tripwire": {
+    "title": "Respuesta bloqueada",
+    "default": "Una regla de seguridad detuvo esta respuesta.",
+    "tenant-budget-guard": "Se agotó el presupuesto de IA de la organización. Habla con un administrador.",
+    "tenant-pii-detector": "El mensaje tenía datos personales que no pueden enviarse al modelo.",
+    "prompt-injection-detector": "El pedido parecía intentar eludir las instrucciones del asistente.",
+    "moderation": "El contenido incumple las reglas de uso.",
+    "system-prompt-scrubber-result": "La respuesta se bloqueó para no exponer instrucciones internas."
+  },
+  "delegation": {
+    "label": "Delegado a {agent}",
+    "agents": {
+      "knowledge": "Agente de conocimiento",
+      "data": "Agente de datos",
+      "action": "Agente de acciones",
+      "web": "Agente de búsqueda web",
+      "unknown": "Agente {id}"
+    },
+    "request": "Pedido",
+    "steps": "{count, plural, one {# paso} other {# pasos}}",
+    "stepFailed": "falló",
+    "result": "Resultado"
+  },
+  "tool": {
+    "title": "Herramienta {name}"
+  },
+  "approval": {
+    "label": "Aprobación: {summary}",
+    "title": "Aprobación necesaria",
+    "fallbackSummary": "Ejecutar {tool}",
+    "permission": "Permiso",
+    "details": "Datos enviados",
+    "diffCaption": "Cambios propuestos",
+    "field": "Campo",
+    "before": "Antes",
+    "after": "Después",
+    "none": "—",
+    "noPreview": "Sin vista previa de los cambios.",
+    "approve": "Aprobar",
+    "decline": "Rechazar",
+    "reasonLabel": "Motivo del rechazo (opcional)",
+    "reasonHint": "Queda registrado en la auditoría.",
+    "confirmDecline": "Confirmar rechazo",
+    "cancelDecline": "Volver",
+    "approving": "Aprobando…",
+    "declining": "Rechazando…",
+    "approved": "Aprobado. Ejecutando…",
+    "executed": "Aprobado y ejecutado.",
+    "declined": "Rechazado.",
+    "declinedReason": "Rechazado: {reason}",
+    "failed": "Aprobado, pero la ejecución falló."
+  },
+  "ui": {
+    "form": {
+      "label": "Formulario: {command}",
+      "submit": "Enviar",
+      "submitted": "Formulario enviado. El asistente pide confirmación antes de guardar."
+    },
+    "table": {
+      "caption": "Resultado",
+      "truncated": "Mostrando las primeras {count, plural, one {# fila} other {# filas}}. Hay más resultados.",
+      "empty": "Ninguna fila.",
+      "yes": "Sí",
+      "no": "No"
+    },
+    "chart": {
+      "label": "Gráfico de {kind}: {series}",
+      "kinds": {
+        "bar": "barras",
+        "line": "líneas",
+        "area": "área",
+        "pie": "torta"
+      },
+      "data": "Datos del gráfico"
+    },
+    "picker": {
+      "legend": "Elige una opción",
+      "legendMultiple": "Elige una o más opciones",
+      "submit": "Confirmar elección",
+      "required": "Elige al menos una opción.",
+      "submitted": "Elección enviada."
+    },
+    "approvalPending": {
+      "title": "Esperando la aprobación de otra persona",
+      "open": "Abrir aprobaciones",
+      "reference": "Solicitud {approvalId}"
+    }
+  }
+}

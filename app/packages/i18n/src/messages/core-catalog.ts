@@ -1,5 +1,6 @@
 import enUSAdmin from "./en-US/admin.json" with { type: "json" };
 import enUSAuth from "./en-US/auth.json" with { type: "json" };
+import enUSChat from "./en-US/chat.json" with { type: "json" };
 import enUSCommon from "./en-US/common.json" with { type: "json" };
 import enUSErrors from "./en-US/errors.json" with { type: "json" };
 import enUSPermissions from "./en-US/permissions.json" with { type: "json" };
@@ -8,6 +9,7 @@ import enUSSettings from "./en-US/settings.json" with { type: "json" };
 import enUSShell from "./en-US/shell.json" with { type: "json" };
 import es419Admin from "./es-419/admin.json" with { type: "json" };
 import es419Auth from "./es-419/auth.json" with { type: "json" };
+import es419Chat from "./es-419/chat.json" with { type: "json" };
 import es419Common from "./es-419/common.json" with { type: "json" };
 import es419Errors from "./es-419/errors.json" with { type: "json" };
 import es419Permissions from "./es-419/permissions.json" with { type: "json" };
@@ -16,6 +18,7 @@ import es419Settings from "./es-419/settings.json" with { type: "json" };
 import es419Shell from "./es-419/shell.json" with { type: "json" };
 import ptBRAdmin from "./pt-BR/admin.json" with { type: "json" };
 import ptBRAuth from "./pt-BR/auth.json" with { type: "json" };
+import ptBRChat from "./pt-BR/chat.json" with { type: "json" };
 import ptBRCommon from "./pt-BR/common.json" with { type: "json" };
 import ptBRErrors from "./pt-BR/errors.json" with { type: "json" };
 import ptBRPermissions from "./pt-BR/permissions.json" with { type: "json" };
@@ -34,6 +37,7 @@ export type MessageTree = { [key: string]: string | MessageTree };
 export type CoreMessages = {
   admin: typeof ptBRAdmin;
   auth: typeof ptBRAuth;
+  chat: typeof ptBRChat;
   common: typeof ptBRCommon;
   errors: typeof ptBRErrors;
   permissions: typeof ptBRPermissions;
@@ -44,7 +48,7 @@ export type CoreMessages = {
 
 /** Static imports keep the catalogs bundler-friendly (Next, Vite) and Node-loadable. */
 export const CORE_MESSAGES: Record<SupportedLocale, CoreMessages> = {
-  "pt-BR": { admin: ptBRAdmin, auth: ptBRAuth, common: ptBRCommon, errors: ptBRErrors, permissions: ptBRPermissions, profile: ptBRProfile, settings: ptBRSettings, shell: ptBRShell },
-  "en-US": { admin: enUSAdmin, auth: enUSAuth, common: enUSCommon, errors: enUSErrors, permissions: enUSPermissions, profile: enUSProfile, settings: enUSSettings, shell: enUSShell },
-  "es-419": { admin: es419Admin, auth: es419Auth, common: es419Common, errors: es419Errors, permissions: es419Permissions, profile: es419Profile, settings: es419Settings, shell: es419Shell },
+  "pt-BR": { admin: ptBRAdmin, auth: ptBRAuth, chat: ptBRChat, common: ptBRCommon, errors: ptBRErrors, permissions: ptBRPermissions, profile: ptBRProfile, settings: ptBRSettings, shell: ptBRShell },
+  "en-US": { admin: enUSAdmin, auth: enUSAuth, chat: enUSChat, common: enUSCommon, errors: enUSErrors, permissions: enUSPermissions, profile: enUSProfile, settings: enUSSettings, shell: enUSShell },
+  "es-419": { admin: es419Admin, auth: es419Auth, chat: es419Chat, common: es419Common, errors: es419Errors, permissions: es419Permissions, profile: es419Profile, settings: es419Settings, shell: es419Shell },
 };

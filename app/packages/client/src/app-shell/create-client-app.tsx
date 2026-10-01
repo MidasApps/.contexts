@@ -90,7 +90,8 @@ export const createClientApp = (args: CreateClientAppArgs): CreatedClientApp => 
   const modules = createModuleRegistry(args.modules);
   const navigation = createNavigationRegistry([...CORE_NAVIGATION, ...(args.navigation ?? []), ...modules.navItems()]);
   const queryClient = createQueryClient();
-  const http = createHttpClient({ baseUrl: args.config.apiBaseUrl, getIdToken: adapters.auth.getIdToken, fetch: adapters.fetch ?? ((input, init) => globalThis.fetch(input, init)) });
+  const connection = { baseUrl: args.config.apiBaseUrl, getIdToken: adapters.auth.getIdToken, fetch: adapters.fetch ?? ((input: string, init?: RequestInit) => globalThis.fetch(input, init)) };
+  const http = createHttpClient(connection);
   const callEndpoint = createEndpointCaller(http);
   const shellUi = createShellUiStore(adapters.shellUiStorage);
   const registries = { modules, navigation, slots: args.slots ?? {} };
@@ -108,7 +109,7 @@ export const createClientApp = (args: CreateClientAppArgs): CreatedClientApp => 
           <RouterProvider router={adapters.router}>
             <AuthProvider auth={adapters.auth}>
               <QueryClientProvider client={queryClient}>
-                <ApiProvider callEndpoint={callEndpoint}>
+                <ApiProvider callEndpoint={callEndpoint} connection={connection}>
                   <ShellRegistryProvider registries={registries}>
                     <ShellUiStoreProvider store={shellUi}>
                       <SessionProvider sessionBridge={adapters.sessionBridge} reportError={reportError} onSignedOut={resetShellUi}>
