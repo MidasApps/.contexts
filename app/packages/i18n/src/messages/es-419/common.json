@@ -18,5 +18,26 @@
     "offline": "No tienes conexión. Algunas acciones no están disponibles hasta que vuelva la conexión."
   },
   "errorWithReference": "Algo salió mal. Referencia: {requestId}",
-  "itemCount": "{count, plural, =0 {Ningún elemento} one {# elemento} other {# elementos}}"
+  "itemCount": "{count, plural, =0 {Ningún elemento} one {# elemento} other {# elementos}}",
+  "approvals": {
+    "status": {
+      "pending": "Pendiente",
+      "approved": "Aprobada",
+      "rejected": "Rechazada",
+      "cancelled": "Cancelada",
+      "expired": "Vencida",
+      "executed": "Ejecutada",
+      "failed": "Falló"
+    },
+    "item": {
+      "expires": "Vence {when}",
+      "requestedBy": "Pedida por {requester}"
+    },
+    "preview": {
+      "before": "Antes",
+      "after": "Después",
+      "none": "No hay vista previa disponible.",
+      "viewRun": "Ver el progreso del flujo"
+    }
+  }
 }
