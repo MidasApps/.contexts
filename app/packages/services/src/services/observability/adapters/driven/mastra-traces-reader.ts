@@ -26,7 +26,7 @@ export const createMastraConsoleGateway = (options: {
   const baseUrl = options.baseUrl.replace(/\/+$/, "");
   const fetchFn = options.fetch ?? fetch;
   const call = async <S extends z.ZodType>(request: { method: "GET" | "POST"; path: string; query?: Record<string, string | number | undefined>; body?: unknown; requestId?: string }, schema: S): Promise<ConsoleResult<z.infer<S>>> => {
-    const params = new URLSearchParams(Object.entries(request.query ?? {}).flatMap(([key, value]) => (value === undefined ? [] : [[key, String(value)]])));
+    const params = new URLSearchParams(Object.entries(request.query ?? {}).flatMap(([key, value]) => (value === undefined ? [] : [[key, String(value)] as [string, string]])));
     const url = `${baseUrl}/console${request.path}${params.size === 0 ? "" : `?${params.toString()}`}`;
     try {
       const headers: Record<string, string> = {
