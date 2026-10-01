@@ -58,7 +58,7 @@ signed or localhost URL.
     |---|---|---|
     | `shiki`, `@streamdown/code` | `code-block`, markdown code | plain mono text + copy: shiki's regex engine is WebAssembly and the web CSP has no `wasm-unsafe-eval` (decision 0016) |
     | `@streamdown/mermaid`, `@streamdown/math`, `@streamdown/cjk` | `message` | not loaded: diagrams and math of untrusted text widen the attack surface for no v1 use case |
-    | `motion` | `shimmer` | CSS pulse that the reduced-motion rule stops |
+    | `motion` | `shimmer` | a CSS colour animation between two AA-safe text tokens (`animate-shimmer` in `globals.css`); the reduced-motion rule stops it |
     | `media-chrome` | `audio-player` | the native `audio` controls |
     | `tokenlens` | `context` | tokens only; cost belongs to the usage ledger (decision 0026) |
     | `embla-carousel-react`, hover card | `inline-citation` | a button that opens a popover (hover-only content fails WCAG 1.4.13) |

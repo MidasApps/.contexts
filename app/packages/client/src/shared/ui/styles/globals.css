@@ -202,10 +202,23 @@
   --shadow-popover: 0 4px 12px #00000026;
   --shadow-modal: 0 20px 40px #00000040;
 
+  /* Work-in-progress text (chat "Respondendo…"): the colour moves between two AA-safe text tokens, never through opacity. */
+  --animate-shimmer: shimmer 1.8s var(--ease-in-out) infinite;
+
   --breakpoint-sm: 40rem;
   --breakpoint-md: 48rem;
   --breakpoint-lg: 64rem;
   --breakpoint-xl: 80rem;
+}
+
+@keyframes shimmer {
+  0%,
+  100% {
+    color: var(--muted-foreground);
+  }
+  50% {
+    color: var(--foreground);
+  }
 }
 
 @layer base {

@@ -66,7 +66,7 @@ export function StatusLine({ phase, failure, onRetry, className }: StatusLinePro
       <div className={cn("flex min-h-5 items-center justify-between gap-3", line?.visible === true ? undefined : "sr-only")}>
         <p role="status" aria-live="polite" className={cn("flex items-center gap-2 text-[12.5px]", line?.tone === "warning" ? "text-amber-foreground" : "text-muted-foreground")}>
           {line?.icon}
-          {line === null ? "" : BUSY.has(phase) ? <Shimmer className="text-inherit">{line.text}</Shimmer> : line.text}
+          {line === null ? "" : BUSY.has(phase) ? <Shimmer>{line.text}</Shimmer> : line.text}
         </p>
         {line?.retry === true ? (
           <Button variant="outline" size="sm" onClick={onRetry}>
