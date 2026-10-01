@@ -5710,7 +5710,8 @@
               "CONVERSATION_DELETED",
               "VOICE_TRANSCRIBED",
               "VOICE_SYNTHESIZED",
-              "BUDGET_THRESHOLD_REACHED"
+              "BUDGET_THRESHOLD_REACHED",
+              "FEATURE_FLAG_UPDATED"
             ],
             "type": "string",
             "x-pii": "none"
@@ -6147,7 +6148,8 @@
               "CONVERSATION_DELETED",
               "VOICE_TRANSCRIBED",
               "VOICE_SYNTHESIZED",
-              "BUDGET_THRESHOLD_REACHED"
+              "BUDGET_THRESHOLD_REACHED",
+              "FEATURE_FLAG_UPDATED"
             ],
             "type": "string",
             "x-pii": "none"
@@ -6380,7 +6382,8 @@
               "CONVERSATION_DELETED",
               "VOICE_TRANSCRIBED",
               "VOICE_SYNTHESIZED",
-              "BUDGET_THRESHOLD_REACHED"
+              "BUDGET_THRESHOLD_REACHED",
+              "FEATURE_FLAG_UPDATED"
             ],
             "type": "string",
             "x-pii": "none"
@@ -15984,6 +15987,55 @@
       "pii": "none",
       "relations": [],
       "tenancyScope": "platform"
+    },
+    {
+      "context": "platform",
+      "description": "Overrides a tenant-overridable flag for the caller's organization (switch off, or back on when the environment allows).",
+      "examples": [
+        {
+          "value": false
+        }
+      ],
+      "fields": [
+        {
+          "description": "Override for the organization.",
+          "name": "value",
+          "pii": "none",
+          "required": true
+        }
+      ],
+      "id": "platform.TenantFlagValueInput",
+      "jsonSchema": {
+        "additionalProperties": false,
+        "description": "Overrides a tenant-overridable flag for the caller's organization (switch off, or back on when the environment allows).",
+        "examples": [
+          {
+            "value": false
+          }
+        ],
+        "properties": {
+          "value": {
+            "description": "Override for the organization.",
+            "type": "boolean",
+            "x-pii": "none"
+          }
+        },
+        "required": [
+          "value"
+        ],
+        "type": "object",
+        "x-kind": "command",
+        "x-permission": "core.flag.write",
+        "x-pii": "none",
+        "x-relations": [],
+        "x-tenancyScope": "organization"
+      },
+      "kind": "command",
+      "name": "TenantFlagValueInput",
+      "permission": "core.flag.write",
+      "pii": "none",
+      "relations": [],
+      "tenancyScope": "organization"
     },
     {
       "context": "platform",

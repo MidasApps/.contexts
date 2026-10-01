@@ -12,7 +12,7 @@ const REQUEST_ID = "01J8Z3K4M5N6P7Q8R9S0T1V2W3";
 const silentLogger = { debug: () => undefined, info: () => undefined, warn: () => undefined, error: () => undefined };
 const voice = createVoice({ models: { transcription: () => createFakeTranscriptionModel(), speech: () => createFakeSpeechModel() } });
 
-const setup = (options: { enabled?: boolean; budget?: BudgetCheck | "fails" } = {}) => {
+const setup = (options: { enabled?: boolean; realtime?: boolean; offFor?: string; budget?: BudgetCheck | "fails" } = {}) => {
   const rows: LlmCall[] = [];
   const audits: AuditEntry[] = [];
   const usage = {
@@ -25,7 +25,8 @@ const setup = (options: { enabled?: boolean; budget?: BudgetCheck | "fails" } = 
   };
   const audit = { record: (entry: AuditEntry) => Promise.resolve(void audits.push(entry)) };
   const governance = createVoiceGovernance({
-    enabled: options.enabled ?? true,
+    isEnabled: ({ tenantId, feature }) =>
+      Promise.resolve(tenantId !== options.offFor && (feature === "voice" ? (options.enabled ?? true) : (options.realtime ?? true))),
     usage,
     audit,
     logger: silentLogger,
@@ -57,7 +58,23 @@ describe("voice governance (SP3 follow-ups #29 and #30)", () => {
     expect(Object.keys(audits[0]?.metadata ?? {})).toEqual(["durationMs"]);
   });
 
-  it("answers 503 FEATURE_UNAVAILABLE while the platform flag is off, before any provider call", async () => {
+  it("answers 503 for the one tenant whose chat.voice flag is off, after reading its context (decision 0039)", async () => {
+    const { rows, deps } = setup({ offFor: TEST_TENANT });
+    const response = await handleSpeech(speech(), deps, memberContext());
+    expect(response.status).toBe(503);
+    expect(await codeOf(response)).toBe("FEATURE_UNAVAILABLE");
+    expect(rows).toEqual([]);
+    expect((await handleSpeech(speech(), setup({ offFor: "OtherTenantaaaaaaaaaa" }).deps, memberContext())).status).toBe(200);
+  });
+
+  it("refuses a realtime session while chat.voice.realtime is off, even with a minter", async () => {
+    const realtime = { mint: () => Promise.resolve({ clientSecret: "ek_test", expiresAt: "2026-09-30T12:01:00.000Z", model: "gpt-realtime-2.1" }) };
+    const { deps } = setup({ realtime: false });
+    const response = await handleRealtimeSession(new Request("http://mastra.local/voice/realtime-sessions", { method: "POST" }), { ...deps, realtime }, memberContext());
+    expect(response.status).toBe(503);
+  });
+
+  it("answers 503 FEATURE_UNAVAILABLE while the voice flag is off, before any provider call", async () => {
     const { rows, deps } = setup({ enabled: false });
     const response = await handleTranscription(audio(), deps, memberContext());
     expect(response.status).toBe(503);

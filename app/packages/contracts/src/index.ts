@@ -520,3 +520,10 @@ export {
   createScheduleEndpoint, deleteScheduleEndpoint, getScheduleEndpoint, listSchedulesEndpoint, pauseScheduleEndpoint, resumeScheduleEndpoint,
   runScheduleNowEndpoint, SCHEDULE_ENDPOINTS, ScheduleRunQueuedSchema, updateScheduleEndpoint,
 } from "./contracts/workflows/endpoints.ts";
+export {
+  adminListFlagsEndpoint, adminSetFlagEndpoint, FLAG_ENDPOINTS, listFlagsEndpoint, setTenantFlagEndpoint,
+} from "./contracts/platform/flag-endpoints.ts";
+export {
+  TenantFlagValueInputContract, TenantFlagValueInputSchema, type TenantFlagValueInput,
+} from "./contracts/platform/feature-flag.schema.ts";
+export { SP5_ADMIN_ENDPOINTS } from "./contracts/sp5-admin-endpoints.ts";

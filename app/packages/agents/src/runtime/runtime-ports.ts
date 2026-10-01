@@ -237,6 +237,13 @@ export type ProjectsPort = {
 
 export type SettingsPort = { readonly getAgentSettings: (input: { tenantId: string }) => Promise<AgentSettings> };
 
+/**
+ * Feature flags (decision 0039): the effective value of every registry flag for an organization
+ * (`tenantId: null` = the environment values). Rejects when the store fails; readers decide the
+ * fail-safe (the kill-switch fails closed).
+ */
+export type FlagsPort = { readonly getValues: (input: { readonly tenantId: string | null }) => Promise<Readonly<Record<string, boolean>>> };
+
 /** An SP1 approval request as workflows read it: effective status (a pending one past its expiry reads `expired`). */
 export type WorkflowApprovalRecord = {
   readonly id: string;
@@ -362,4 +369,6 @@ export type AgentRuntimePorts = {
   readonly approvalSweeps: ApprovalSweepPort;
   readonly conversationPurge: ConversationPurgePort;
   readonly evalExport: EvalExportPort;
+  /** SP5 feature flags (Task 8, decision 0039); read through `createFlagReader` (30 s cache). */
+  readonly flags: FlagsPort;
 };

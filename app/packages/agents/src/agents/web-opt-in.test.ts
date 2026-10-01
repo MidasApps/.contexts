@@ -2,7 +2,8 @@ import type { DelegationStartContext } from "@mastra/core/agent";
 import { RequestContext } from "@mastra/core/request-context";
 import { describe, expect, it } from "vitest";
 import { buildAgentContextEntries } from "../testing/agent-context-fixture.ts";
-import { createFakeSettingsPort } from "../testing/fake-ports.ts";
+import { createFlagReader } from "../runtime/flag-reader.ts";
+import { createFakeFlagsPort, createFakeSettingsPort } from "../testing/fake-ports.ts";
 import { createDelegationGuard, SUPERVISOR_AGENT_ID } from "./supervisor-agent.ts";
 import { buildSupervisorHarness, memberContext } from "./supervisor.fixture.ts";
 import { createTenantAgentSettingsReader, DEFAULT_ENABLED_SUBAGENTS } from "./tenant-agent-settings.ts";
@@ -81,5 +82,17 @@ describe("web opt-in and tenant subagents", () => {
   it("offers nothing when the run has no server context", async () => {
     const reader = createTenantAgentSettingsReader(createFakeSettingsPort());
     expect((await reader(new RequestContext<unknown>())).enabledAgents.size).toBe(0);
+  });
+});
+
+describe("ai.web-tools flag (decision 0039)", () => {
+  it("hides web tools and the web subagent while the flag is off, whatever the opt-in", async () => {
+    const settings = createFakeSettingsPort({ enabledAgents: ["knowledge", "web"], webTools: { firecrawl: true, browser: true } });
+    const off = createTenantAgentSettingsReader(settings, createFlagReader(createFakeFlagsPort({ "ai.web-tools": false })));
+    const read = await off(new RequestContext<unknown>(buildAgentContextEntries()));
+    expect([...read.enabledAgents]).toEqual(["knowledge"]);
+    expect(read.webTools).toEqual({ firecrawl: false, browser: false });
+    const on = createTenantAgentSettingsReader(settings, createFlagReader(createFakeFlagsPort()));
+    expect([...(await on(new RequestContext<unknown>(buildAgentContextEntries()))).enabledAgents]).toEqual(["knowledge", "web"]);
   });
 });

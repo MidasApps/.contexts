@@ -22,5 +22,6 @@
   "FEATURE_UNAVAILABLE": "Esta función no está disponible en este momento.",
   "WORKFLOW_NOT_STARTABLE": "Este flujo no se puede iniciar manualmente.",
   "WORKFLOW_NOT_SCHEDULABLE": "Este flujo no se puede programar.",
-  "SCHEDULE_INTERVAL_TOO_SHORT": "La programación es demasiado frecuente. Elige un intervalo mayor."
+  "SCHEDULE_INTERVAL_TOO_SHORT": "La programación es demasiado frecuente. Elige un intervalo mayor.",
+  "FEATURE_DISABLED": "Esta función está desactivada en este momento."
 }

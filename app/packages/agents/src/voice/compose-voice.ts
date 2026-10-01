@@ -4,6 +4,8 @@ import type { RequestContext } from "@mastra/core/request-context";
 import type { ApiRoute } from "@mastra/core/server";
 import type { AgentModels } from "../models/model-factory.ts";
 import { parseModelId } from "../models/model-roles.ts";
+import { CORE_FLAG_KEYS } from "../runtime/core-flag-keys.ts";
+import type { FlagReader } from "../runtime/flag-reader.ts";
 import type { AgentRuntimePorts } from "../runtime/runtime-ports.ts";
 import { type CoreVoice, createVoice } from "./create-voice.ts";
 import { createOpenAiRealtimeMinter, type RealtimeMinter } from "./realtime-session.ts";
@@ -16,7 +18,10 @@ export type VoiceEnv = {
   /** Realtime model `<provider>/<model>`; without it realtime stays off. */
   readonly AI_MODEL_REALTIME?: string;
   readonly OPENAI_API_KEY?: string | undefined;
-  /** Unset: on in local only (the resolved agent env always sets it). */
+  /**
+   * Environment defaults of the flags `chat.voice` and `chat.voice.realtime` (decision 0034
+   * amendment): `apps/mastra` passes them to the flags binding; the gate itself is the flag.
+   */
   readonly AI_VOICE_ENABLED?: boolean;
   readonly AI_VOICE_REALTIME_ENABLED?: boolean;
 };
@@ -29,12 +34,12 @@ const textOf = (instructions: unknown): string => {
   return typeof instructions.content === "string" ? instructions.content : "";
 };
 
-/** Realtime only when the flag is on, voice is on, the mode is real and the provider is OpenAI with a key. */
-const realtimeMinterOf = (args: { env: VoiceEnv; enabled: boolean; models: AgentModels; supervisor: Agent | undefined }): RealtimeMinter | undefined => {
+/** A minter only in real mode with an OpenAI realtime model and key; each call also needs both voice flags. */
+const realtimeMinterOf = (args: { env: VoiceEnv; models: AgentModels; supervisor: Agent | undefined }): RealtimeMinter | undefined => {
   const { env } = args;
   if (env.AI_MODEL_REALTIME === undefined) return undefined;
   const { provider, model } = parseModelId(env.AI_MODEL_REALTIME);
-  if (!args.enabled || env.AI_VOICE_REALTIME_ENABLED !== true || args.models.mode !== "real" || provider !== "openai" || env.OPENAI_API_KEY === undefined) return undefined;
+  if (args.models.mode !== "real" || provider !== "openai" || env.OPENAI_API_KEY === undefined) return undefined;
   const supervisor = args.supervisor;
   if (supervisor === undefined) return undefined;
   return createOpenAiRealtimeMinter({
@@ -45,19 +50,22 @@ const realtimeMinterOf = (args: { env: VoiceEnv; enabled: boolean; models: Agent
 };
 
 /**
- * Voice of the runtime and its routes (SP3 Task 26, SP4 Task 7): the platform flag, the tenant
+ * Voice of the runtime and its routes (SP3 Task 26, SP4 Task 7): the per-tenant voice flags, the tenant
  * budget, the usage ledger and the audit trail wrap every provider call (decision 0034).
  */
 export const composeVoice = (args: {
   readonly env: VoiceEnv;
   readonly models: AgentModels;
   readonly ports: Pick<AgentRuntimePorts, "usage" | "audit">;
+  readonly flags: FlagReader;
   readonly supervisor: Agent | undefined;
   readonly logger: Logger;
 }): { readonly voice: CoreVoice | null; readonly routes: ApiRoute[] } => {
   const voice = createVoice({ models: args.models });
-  const enabled = args.env.AI_VOICE_ENABLED ?? args.env.APP_ENV === "local";
-  const governance = createVoiceGovernance({ enabled, usage: args.ports.usage, audit: args.ports.audit, logger: args.logger });
-  const realtime = realtimeMinterOf({ env: args.env, enabled, models: args.models, supervisor: args.supervisor });
+  // Per tenant, cached 30 s; a store failure with nothing cached keeps voice off (fail closed).
+  const isEnabled: Parameters<typeof createVoiceGovernance>[0]["isEnabled"] = ({ tenantId, feature }) =>
+    args.flags.isEnabled({ key: feature === "voice" ? CORE_FLAG_KEYS.voice : CORE_FLAG_KEYS.voiceRealtime, tenantId, fallback: false });
+  const governance = createVoiceGovernance({ isEnabled, usage: args.ports.usage, audit: args.ports.audit, logger: args.logger });
+  const realtime = realtimeMinterOf({ env: args.env, models: args.models, supervisor: args.supervisor });
   return { voice, routes: createVoiceRoutes({ voice, logger: args.logger, governance, ...(realtime === undefined ? {} : { realtime }) }) };
 };

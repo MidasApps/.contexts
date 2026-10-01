@@ -88,7 +88,8 @@
         "CONVERSATION_DELETED",
         "VOICE_TRANSCRIBED",
         "VOICE_SYNTHESIZED",
-        "BUDGET_THRESHOLD_REACHED"
+        "BUDGET_THRESHOLD_REACHED",
+        "FEATURE_FLAG_UPDATED"
       ],
       "type": "string",
       "x-pii": "none"

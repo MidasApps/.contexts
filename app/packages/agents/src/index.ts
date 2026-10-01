@@ -28,6 +28,7 @@ export type {
   ConnectorsPort,
   FileReadError,
   FilesPort,
+  FlagsPort,
   KnowledgeChunkInput,
   KnowledgeDocumentInput,
   KnowledgeEventsPort,
@@ -439,3 +440,6 @@ export {
 export { APPROVAL_EXPIRY_SWEEP_CRON, APPROVAL_EXPIRY_SWEEP_WORKFLOW_ID, createApprovalExpirySweepWorkflow } from "./workflows/approval-expiry-sweep.workflow.ts";
 export { CONVERSATION_PURGE_CRON, CONVERSATION_PURGE_WORKFLOW_ID, createConversationPurgeWorkflow } from "./workflows/conversation-purge.workflow.ts";
 export { createEvalExportWorkflow, EVAL_EXPORT_CRON, EVAL_EXPORT_WINDOW_MS, EVAL_EXPORT_WORKFLOW_ID } from "./workflows/eval-export.workflow.ts";
+// SP5 feature flags (Task 8, decision 0039): the runtime's cached reader and the kill-switch paths.
+export { createFlagReader, FLAG_CACHE_TTL_MS, type FlagReader } from "./runtime/flag-reader.ts";
+export { CORE_FLAG_KEYS, isAgentRunPath } from "./runtime/core-flag-keys.ts";

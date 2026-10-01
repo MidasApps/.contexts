@@ -1,0 +1,25 @@
+{
+  "additionalProperties": false,
+  "description": "Overrides a tenant-overridable flag for the caller's organization (switch off, or back on when the environment allows).",
+  "examples": [
+    {
+      "value": false
+    }
+  ],
+  "properties": {
+    "value": {
+      "description": "Override for the organization.",
+      "type": "boolean",
+      "x-pii": "none"
+    }
+  },
+  "required": [
+    "value"
+  ],
+  "type": "object",
+  "x-kind": "command",
+  "x-permission": "core.flag.write",
+  "x-pii": "none",
+  "x-relations": [],
+  "x-tenancyScope": "organization"
+}

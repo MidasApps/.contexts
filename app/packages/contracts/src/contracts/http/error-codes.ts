@@ -36,6 +36,8 @@ export const CORE_ERROR_CODES = [
   "WORKFLOW_NOT_STARTABLE",
   "WORKFLOW_NOT_SCHEDULABLE",
   "SCHEDULE_INTERVAL_TOO_SHORT",
+  // 503: the AI kill-switch `ai.kill-switch` or another feature flag is off (decision 0039).
+  "FEATURE_DISABLED",
 ] as const;
 
 export const CoreErrorCodeSchema = z.enum(CORE_ERROR_CODES);

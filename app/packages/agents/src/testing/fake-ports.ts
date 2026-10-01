@@ -1,4 +1,5 @@
 import { type AgentSettings, AgentSettingsSchema, type LlmCall } from "@core/contracts";
+import { CORE_FLAGS } from "@core/services";
 import type {
   AccessContext,
   AccessPort,
@@ -10,6 +11,7 @@ import type {
   AuditPort,
   BudgetCheck,
   FilesPort,
+  FlagsPort,
   KnowledgeEventsPort,
   NodeRef,
   ProjectsPort,
@@ -189,6 +191,23 @@ export const defaultAgentSettings = (tenantId: string): AgentSettings =>
     updatedAt: "2026-09-29T00:00:00.000Z",
   });
 
+/**
+ * Flag values like a local environment: the registry defaults with voice and realtime on (the
+ * local default of `AI_VOICE_ENABLED`). Pass `values` to switch flags; `fails` makes reads reject.
+ */
+export const createFakeFlagsPort = (values: Readonly<Record<string, boolean>> | "fails" = {}): FlagsPort & { readonly reads: (string | null)[] } => {
+  const reads: (string | null)[] = [];
+  return {
+    reads,
+    getValues: ({ tenantId }) => {
+      reads.push(tenantId);
+      if (values === "fails") return Promise.reject(new Error("flag store down"));
+      const defaults = Object.fromEntries(CORE_FLAGS.map((flag) => [flag.key, flag.default]));
+      return Promise.resolve({ ...defaults, "chat.voice": true, "chat.voice.realtime": true, ...values });
+    },
+  };
+};
+
 export const createFakeSettingsPort = (overrides: Partial<AgentSettings> = {}): SettingsPort => ({
   getAgentSettings: ({ tenantId }) => Promise.resolve({ ...defaultAgentSettings(tenantId), ...overrides }),
 });
@@ -276,6 +295,7 @@ export const createFakeRuntimePorts = (overrides: Partial<AgentRuntimePorts> = {
   approvalSweeps: { expire: () => Promise.resolve({ expired: 0 }), failInterrupted: () => Promise.resolve({ failed: 0 }) },
   conversationPurge: { purgeDeleted: () => Promise.resolve({ purged: 0, failed: 0 }) },
   evalExport: { listFinishedSince: () => Promise.resolve([]), exportSummaries: () => Promise.resolve(0) },
+  flags: createFakeFlagsPort(),
   ...overrides,
 });
 

@@ -14,8 +14,11 @@ import { createInMemoryRateLimiter } from "../rate-limit/in-memory-rate-limiter.
 
 export type PipelineMember = { readonly uid: string; readonly tenantId: string; readonly role: "member" | "admin" | "owner" };
 
-/** A pipeline whose `<uid>-token` Bearer authenticates each member (system role grant on the organization). */
-export const makeInMemoryPipeline = (args: { readonly now: string; readonly members: readonly PipelineMember[] }) => {
+/** Platform staff (SP5 console tests): `mfa` is the token claim, `isActive` the staff record. */
+export type PipelineStaff = { readonly uid: string; readonly role: "platform-admin" | "platform-support"; readonly mfa: boolean; readonly isActive?: boolean };
+
+/** A pipeline whose `<uid>-token` Bearer authenticates each member (system role grant on the organization) and staff. */
+export const makeInMemoryPipeline = (args: { readonly now: string; readonly members: readonly PipelineMember[]; readonly staff?: readonly PipelineStaff[] }) => {
   const clock = fixedClock(args.now);
   const store = createInMemoryAccessStore();
   const principals = new Map<string, Principal>();
@@ -25,6 +28,12 @@ export const makeInMemoryPipeline = (args: { readonly now: string; readonly memb
     store.putGrant({ tenantId, principalId: uid, nodeId: tenantId, roles: [{ kind: "system", key: role }] });
     principals.set(`${uid}-token`, { type: "user", uid, mfa: false } as Principal);
   }
+  for (const { uid, role, mfa, isActive } of args.staff ?? []) {
+    store.putUser(uid);
+    store.putPlatformStaff(uid, { role, isActive: isActive ?? true });
+    principals.set(`${uid}-token`, { type: "user", uid, mfa } as Principal);
+  }
+  const auditLog = createInMemoryAuditLogWriter();
   const pipeline: ApiRouteDeps = {
     logger: createLogger({ context: { service: "test", env: "local" }, sink: () => undefined }),
     clock,
@@ -33,9 +42,9 @@ export const makeInMemoryPipeline = (args: { readonly now: string; readonly memb
     apiKeyPrefix: "core",
     verifyBearer: ({ token }) => Promise.resolve(principals.get(token) ?? null),
     access: createAccessCore({ readers: store, clock }),
-    audit: makeRecordAudit({ writer: createInMemoryAuditLogWriter(), clock }),
+    audit: makeRecordAudit({ writer: auditLog, clock }),
   };
-  return { pipeline, store, clock };
+  return { pipeline, store, clock, auditLog };
 };
 
 /** Calls a route of a route table with an optional `<uid>-token` Bearer and JSON body. */

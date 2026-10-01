@@ -87,3 +87,18 @@ export const SetFeatureFlagValueInputContract = defineContract(SetFeatureFlagVal
   relations: [],
   permission: "platform.flag.manage",
 });
+
+/** Body of `PUT /v1/flags/{flagKey}`: the organization comes from the query, never from the body. */
+export const TenantFlagValueInputSchema = z.strictObject({ value: z.boolean().meta(none("Override for the organization.")) });
+export type TenantFlagValueInput = z.infer<typeof TenantFlagValueInputSchema>;
+
+export const TenantFlagValueInputContract = defineContract(TenantFlagValueInputSchema, {
+  id: "platform.TenantFlagValueInput",
+  kind: "command",
+  description: "Overrides a tenant-overridable flag for the caller's organization (switch off, or back on when the environment allows).",
+  examples: [{ value: false }],
+  pii: "none",
+  tenancyScope: "organization",
+  relations: [],
+  permission: "core.flag.write",
+});

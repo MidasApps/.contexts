@@ -21,11 +21,15 @@ export type VoiceCaller = { readonly tenantId: string; readonly principal: Acces
 
 export type VoiceRefusal = { readonly status: 403 | 429 | 503; readonly code: "FORBIDDEN" | "BUDGET_EXCEEDED" | "FEATURE_UNAVAILABLE" };
 
+/** Which voice feature a call needs: `voice` (flag `chat.voice`) or also `realtime` (`chat.voice.realtime`). */
+export type VoiceFeature = "voice" | "realtime";
+
 export type VoiceGovernance = {
-  /** Platform flag `AI_VOICE_ENABLED` (off outside local until compliance approves sending audio). */
-  readonly enabled: boolean;
-  /** The caller, or why the call may not start (feature off, no context, budget). */
-  readonly admit: (requestContext: RequestContext<unknown> | undefined) => Promise<{ readonly ok: true; readonly caller: VoiceCaller } | { readonly ok: false; readonly refusal: VoiceRefusal }>;
+  /**
+   * The caller, or why the call may not start (no context, feature off for the tenant, budget).
+   * `realtime` also needs the realtime flag.
+   */
+  readonly admit: (requestContext: RequestContext<unknown> | undefined, options?: { readonly realtime?: boolean }) => Promise<{ readonly ok: true; readonly caller: VoiceCaller } | { readonly ok: false; readonly refusal: VoiceRefusal }>;
   /** Ledger row and audit entry of a finished provider call; failures are logged, never thrown. */
   readonly record: (input: { readonly caller: VoiceCaller; readonly kind: VoiceCallKind; readonly model: VoiceModelRef | null; readonly latencyMs: number }) => Promise<void>;
 };
@@ -56,14 +60,22 @@ const ledgerRowOf = (input: Parameters<VoiceGovernance["record"]>[0], now: Date,
   return parsed.success ? parsed.data : null;
 };
 
+type AdmitDeps = { readonly isEnabled: VoiceFeatureGate; readonly usage: Pick<UsagePort, "checkTenantBudget"> };
+
+const UNAVAILABLE = { ok: false, refusal: { status: 503, code: "FEATURE_UNAVAILABLE" } } as const;
+
+const featuresOn = async (deps: AdmitDeps, tenantId: string, realtime: boolean): Promise<boolean> =>
+  (await deps.isEnabled({ tenantId, feature: "voice" })) && (!realtime || (await deps.isEnabled({ tenantId, feature: "realtime" })));
+
 const admitCaller = async (
-  deps: { readonly enabled: boolean; readonly usage: Pick<UsagePort, "checkTenantBudget"> },
+  deps: AdmitDeps,
   requestContext: RequestContext<unknown> | undefined,
+  options: { readonly realtime?: boolean } = {},
 ): ReturnType<VoiceGovernance["admit"]> => {
-  if (!deps.enabled) return { ok: false, refusal: { status: 503, code: "FEATURE_UNAVAILABLE" } };
   const read = requestContext === undefined ? null : readAgentContext(requestContext);
   if (read === null || !read.ok) return { ok: false, refusal: { status: 403, code: "FORBIDDEN" } };
   const caller = { tenantId: read.data.context.tenantId, principal: read.data.principal, requestId: read.data.context.requestId };
+  if (!(await featuresOn(deps, caller.tenantId, options.realtime === true))) return UNAVAILABLE;
   try {
     const budget = await deps.usage.checkTenantBudget({ tenantId: caller.tenantId });
     return budget.allowed ? { ok: true, caller } : { ok: false, refusal: { status: 429, code: "BUDGET_EXCEEDED" } };
@@ -73,16 +85,21 @@ const admitCaller = async (
   }
 };
 
+/**
+ * Per-tenant voice flags (decision 0039: `chat.voice`, `chat.voice.realtime`, read through the flag
+ * reader; `AI_VOICE_ENABLED` only seeds the environment default, decision 0034 amendment).
+ */
+export type VoiceFeatureGate = (input: { readonly tenantId: string; readonly feature: VoiceFeature }) => Promise<boolean>;
+
 export const createVoiceGovernance = (deps: {
-  readonly enabled: boolean;
+  readonly isEnabled: VoiceFeatureGate;
   readonly usage: UsagePort;
   readonly audit: AuditPort;
   readonly logger: Logger;
   readonly now?: () => Date;
   readonly newId?: () => string;
 }): VoiceGovernance => ({
-  enabled: deps.enabled,
-  admit: (requestContext) => admitCaller(deps, requestContext),
+  admit: (requestContext, options) => admitCaller(deps, requestContext, options),
   record: async (input) => {
     const row = ledgerRowOf(input, (deps.now ?? (() => new Date()))(), deps.newId ?? uuidv7);
     const { caller } = input;

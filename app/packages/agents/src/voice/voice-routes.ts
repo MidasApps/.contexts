@@ -26,7 +26,7 @@ export type VoiceRouteDeps = {
   readonly logger: Logger;
   /** Feature flag, tenant budget, usage ledger and audit (SP4 Task 7); the composition always sets it. */
   readonly governance?: VoiceGovernance;
-  /** Ephemeral realtime secrets; absent while the realtime flag is off, in fake mode or without a key. */
+  /** Ephemeral realtime secrets; absent in fake mode or without a model and key (each call also checks `chat.voice.realtime`). */
   readonly realtime?: RealtimeMinter;
 };
 
@@ -96,9 +96,9 @@ const upstreamFailure = (deps: VoiceRouteDeps, event: string, requestId: string,
 type Admission = { readonly ok: true; readonly caller: VoiceCaller | null } | { readonly ok: false; readonly response: Response };
 
 /** Gate, caller and budget before any body is read or the provider is called (decision 0034). */
-const admit = async (deps: VoiceRouteDeps, requestContext: RequestContext<unknown> | undefined, requestId: string): Promise<Admission> => {
+const admit = async (deps: VoiceRouteDeps, requestContext: RequestContext<unknown> | undefined, requestId: string, realtime = false): Promise<Admission> => {
   if (deps.governance === undefined) return { ok: true, caller: null };
-  const admitted = await deps.governance.admit(requestContext);
+  const admitted = await deps.governance.admit(requestContext, { realtime });
   return admitted.ok ? { ok: true, caller: admitted.caller } : { ok: false, response: errorResponse(admitted.refusal.code, requestId) };
 };
 
@@ -178,13 +178,13 @@ export const handleSpeech = async (request: Request, deps: VoiceRouteDeps, reque
 /**
  * `POST /voice/realtime-sessions` (spec §4.5, decision 0034): an ephemeral client secret (at most
  * 60 s) for a realtime session with the supervisor's instructions and no tools. 503 unless the
- * realtime flag is on, the mode is real and the provider key exists. The audio then flows between
+ * tenant's `chat.voice` and `chat.voice.realtime` flags are on, the mode is real and the provider key exists. The audio then flows between
  * the browser and the provider, outside the usage ledger (decision 0034 amendment).
  */
 export const handleRealtimeSession = async (request: Request, deps: VoiceRouteDeps, requestContext?: RequestContext<unknown>): Promise<Response> => {
   const requestId = requestIdOf(request);
   if (deps.realtime === undefined || deps.governance === undefined) return errorResponse("FEATURE_UNAVAILABLE", requestId);
-  const admitted = await admit(deps, requestContext, requestId);
+  const admitted = await admit(deps, requestContext, requestId, true);
   if (!admitted.ok) return admitted.response;
   try {
     const session = await deps.realtime.mint({ requestContext, abortSignal: request.signal });

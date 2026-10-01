@@ -58,3 +58,16 @@ answers 503 `FEATURE_UNAVAILABLE`. Permission `core.voice.use`; 30 transcription
     instructions, `tools: []`. Otherwise the route answers 503. The realtime audio then flows
     between the browser and the provider, outside the usage ledger, so realtime needs its own
     metering before it is enabled anywhere.
+- **2026-10-01 — per-tenant voice flags (SP5 Task 8, decision 0039).**
+  - The gate is now the flag `chat.voice`, read per tenant through the runtime's flag reader
+    (30 s cache). Mastra checks it after the caller's context is known, so a tenant whose flag is off
+    gets 503 while others keep voice. Realtime also needs `chat.voice.realtime`, checked per call;
+    the minter only needs real mode and an OpenAI realtime model with a key.
+  - `AI_VOICE_ENABLED` and `AI_VOICE_REALTIME_ENABLED` no longer gate anything themselves. They seed
+    the environment default of the two flags (`flagEnvironmentDefaults`; unset voice = on in local
+    only) until a value is stored for the environment. A stored environment value, then a tenant
+    override, win over the seed.
+  - The compliance hold stands: outside local the default stays off, and only staff may turn voice
+    on for an environment or a tenant (`/v1/admin/flags`, audited). A tenant's own admins may
+    switch voice off, never on above the environment value.
+  - A flag store failure with nothing cached keeps voice off (fail closed).

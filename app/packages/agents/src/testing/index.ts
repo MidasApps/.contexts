@@ -5,6 +5,7 @@ export {
   createFakeAuditPort,
   createFakeCommandIdempotency,
   createFakeFilesPort,
+  createFakeFlagsPort,
   createFakeProjectsPort,
   createFakeRuntimePorts,
   createFakeSettingsPort,

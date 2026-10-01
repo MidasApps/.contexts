@@ -688,3 +688,29 @@ export {
   type EvalRunsTableLike,
   toEvalRunRows,
 } from "./services/evals/index.ts";
+// SP5 feature flags (Task 8, decision 0039): registry, Remote Config / Firestore stores, `/v1` routes.
+export {
+  buildAdminFlagsRoutes,
+  buildFlagsRoutes,
+  CORE_FLAGS,
+  createFirebaseFlagsServices,
+  createFlagsServices,
+  createFlagStoresFor,
+  createInMemoryFlagStores,
+  expiredFlags,
+  FEATURE_FLAG_OVERRIDES_COLLECTION,
+  FEATURE_FLAGS_COLLECTION,
+  FLAG_PERMISSIONS,
+  findFlag,
+  flagEnvironmentDefaults,
+  isFlagExpired,
+  remoteConfigParameterOf,
+  type EnvironmentFlagValues,
+  type FlagsServices,
+  type FlagStores,
+  type GetFlagValues,
+  type RegisteredFlag,
+  type RemoteConfigClient,
+  type TenantFlagOverrides,
+} from "./services/flags/index.ts";
+export { requireStaff, requireTenant } from "./services/platform/adapters/driving/console-guards.ts";

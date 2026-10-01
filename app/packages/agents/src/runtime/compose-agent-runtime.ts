@@ -44,6 +44,8 @@ import { coreFakeRules } from "../models/fake/fake-scenarios.ts";
 import { type AgentModels, createModelProvider, embeddingModelIdOf, type ModelFactoryEnv } from "../models/model-factory.ts";
 import { createObservability, type ObservabilityEnv } from "../observability/create-observability.ts";
 import { createGuardrailProfile } from "../processors/guardrail-profile.ts";
+import { CORE_FLAG_KEYS, isAgentRunPath } from "./core-flag-keys.ts";
+import { createFlagReader } from "./flag-reader.ts";
 import { createAiCatalogReader } from "../tools/catalog/ai-catalog-reader.ts";
 import { loadBundledAiCatalog } from "../tools/catalog/ai-catalog-source.ts";
 import { createDescribeEntityTool } from "../tools/catalog/describe-entity.tool.ts";
@@ -338,7 +340,8 @@ export const composeAgentRuntime = (args: ComposeAgentRuntimeArgs): RuntimeParts
     args.vector === undefined
       ? undefined
       : createMemory({ storage: args.storage, vector: args.vector, models, env: { AI_MEMORY_OBSERVATIONAL: args.env.AI_MEMORY_OBSERVATIONAL ?? false } });
-  const tenantSettings = createTenantAgentSettingsReader(args.ports.settings);
+  const flags = createFlagReader(args.ports.flags);
+  const tenantSettings = createTenantAgentSettingsReader(args.ports.settings, flags);
   const skillDirs = [...(args.skillsDirs ?? []), ...CORE_SKILL_DIRS];
   const skills = (names: readonly string[]) => createSkillsResolver({ core: names.map((name) => loadSkill(name, skillDirs)), modules: args.modules, settings: tenantSettings });
   const deps: AgentFactoryDeps = { models, tools, ports: args.ports, guardrails, memory, tenantSettings, skills, commands, connectorTools, webTools };
@@ -346,13 +349,19 @@ export const composeAgentRuntime = (args: ComposeAgentRuntimeArgs): RuntimeParts
   const apiPrefix = args.apiPrefix;
   const auth = new FirebaseMastraAuth({ access: args.ports.access, ...(apiPrefix === undefined ? {} : { apiPrefix }) });
   const prefix = apiPrefix === undefined ? {} : { apiPrefix };
-  const { voice, routes: voiceRoutes } = composeVoice({ env: args.env, models, ports: args.ports, supervisor: agents[SUPERVISOR_AGENT_ID], logger: processLogger });
+  const { voice, routes: voiceRoutes } = composeVoice({ env: args.env, models, ports: args.ports, flags, supervisor: agents[SUPERVISOR_AGENT_ID], logger: processLogger });
   const chat = buildChat(agents, { tools, toolDeps, summarizer: createConversationSummarizer({ models, guardrails: guardrails("delegated") }) });
   const { workflows, catalog: workflowCatalog, platformSchedules } = collectWorkflows(args, models, memory);
+  // Decision 0039: `ai.kill-switch` stops agent, chat and voice runs (fails closed on a store failure).
+  const killSwitch = {
+    appliesTo: isAgentRunPath(apiPrefix),
+    isKilled: (tenantId: string) => flags.isEnabled({ key: CORE_FLAG_KEYS.killSwitch, tenantId, fallback: true }),
+  };
   const contextMiddleware = (path?: string, maxBodyBytes?: number) =>
     createContextMiddleware({
       auth,
       aiMode: args.env.AI_MODE,
+      killSwitch,
       threadOwnerOf: threadOwnerFromStorage(args.storage),
       ...prefix,
       ...(path === undefined ? {} : { path }),

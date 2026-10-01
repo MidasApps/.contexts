@@ -45,6 +45,7 @@ import { IDENTITY_ENDPOINTS } from "./contracts/identity/endpoints.ts";
 import { createContractRegistry, type ContractRegistry } from "./contracts/registry.ts";
 import { TENANCY_CONTRACTS } from "./contracts/tenancy/contracts.ts";
 import { TENANCY_ENDPOINTS } from "./contracts/tenancy/endpoints.ts";
+import { SP5_ADMIN_ENDPOINTS } from "./contracts/sp5-admin-endpoints.ts";
 import { SP5_CONTRACTS } from "./contracts/sp5-contracts.ts";
 import { VOICE_ENDPOINTS } from "./contracts/voice/endpoints.ts";
 import { SCHEDULE_ENDPOINTS, WORKFLOW_RUN_ENDPOINTS } from "./contracts/workflows/endpoints.ts";
@@ -110,6 +111,8 @@ export const CORE_ENDPOINTS: readonly EndpointDefinition[] = [
   // SP5 workflow runs and tenant schedules.
   ...WORKFLOW_RUN_ENDPOINTS,
   ...SCHEDULE_ENDPOINTS,
+  // SP5 console APIs: flags, prompts, plans and organizations, traces, evals.
+  ...SP5_ADMIN_ENDPOINTS,
 ];
 
 /** Builds a fresh registry with the core contracts (catalog scripts, apps at startup). */

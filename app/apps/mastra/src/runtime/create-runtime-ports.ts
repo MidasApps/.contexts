@@ -7,6 +7,8 @@ import {
   agentCommandExecutors,
   createCoreAgentCommandExecutors,
   createFirebaseConnectorsServices,
+  createFirebaseFlagsServices,
+  flagEnvironmentDefaults,
   createFirebaseFilesServices,
   createKnowledgeServices,
   createLogKnowledgeEventPublisher,
@@ -46,6 +48,10 @@ export type RuntimePortsEnv = Pick<ServicesEnv, "API_KEY_PREFIX" | "DATABASE_URL
   readonly AI_MODEL_EMBEDDING: string;
   /** Bucket of uploads (files context). */
   readonly FILES_BUCKET: string;
+  /** Boot defaults of the voice and memory flags (decision 0034 amendment, `flagEnvironmentDefaults`). */
+  readonly AI_VOICE_ENABLED?: boolean | undefined;
+  readonly AI_VOICE_REALTIME_ENABLED?: boolean | undefined;
+  readonly AI_MEMORY_OBSERVATIONAL?: boolean | undefined;
   /** Platform Firecrawl key and self-hosted API URL (knowledge URL sources, decision 0027). */
   readonly FIRECRAWL_API_KEY?: string | undefined;
   readonly FIRECRAWL_API_URL?: string | undefined;
@@ -96,6 +102,8 @@ export type RuntimePortsAdapters = {
  * - workflow approvals and commands: SP1 approval requests of kind `workflow-resume` (whose
  *   handler this runtime registers so SP1 accepts the kind; approvals execute in `/v1`) and the
  *   SP3 executors run once per workflow run (decision 0036).
+ * - flags: the SP5 flags services (Remote Config outside local, Firestore `feature-flags` in local,
+ *   tenant overrides in Firestore; the env voice/memory switches only seed defaults, decision 0039).
  * - settings: fail-closed until SP5.
  * @param args.modules installed modules (their permissions join SP1's registry).
  */
@@ -132,6 +140,8 @@ export const createRuntimePorts = (args: {
   const commands = registerAgentCommandApprovals({ approvals: core.approvals, executors, access: core.access, idempotency: core.pipeline.idempotency });
   // Decided in /v1; registered here so SP1 accepts requests of the kind (decision 0036).
   registerWorkflowApprovals({ approvals: core.approvals, settler: RUNTIME_SIDE_SETTLER });
+  // Remote Config outside local, Firestore in local; the agents cache the values 30 s (decision 0039).
+  const flags = createFirebaseFlagsServices({ firebase: args.firebase, appEnv: args.env.APP_ENV, audit: core.audit, clock: systemClock, environmentDefaults: flagEnvironmentDefaults(args.env) });
   return {
     access: bindAccessPort({ verifyBearer: core.verifyBearer, access: core.access, resolveAccessContext: adapters.resolveAccessContext ?? core.resolveAccessContext }),
     audit: bindAuditPort(core.audit),
@@ -150,6 +160,7 @@ export const createRuntimePorts = (args: {
     workflowApprovals: bindWorkflowApprovalsPort(core.approvals),
     workflowCommands: bindWorkflowCommandsPort({ executors: agentCommandExecutors(executors), access: core.access, commands }),
     notifications: createLogNotificationPort(args.logger),
+    flags: { getValues: ({ tenantId }) => flags.getFlagValues({ tenantId }) },
     usageReport: bindUsageReportPort({ env: sinkEnv, sql, firestore: args.firebase.firestore, audit: core.audit, logger: args.logger }),
     approvalSweeps: bindApprovalSweepPort(core.approvals),
     conversationPurge: bindConversationPurgePort(args.firebase.firestore),

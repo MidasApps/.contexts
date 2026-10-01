@@ -30,6 +30,23 @@ export type ContextMiddlewareOptions = {
    * the chat route's cap, so an oversized body is never buffered (defense in depth behind `/v1`).
    */
   readonly maxBodyBytes?: number;
+  /**
+   * AI kill-switch (decision 0039): once the caller's context is known, a path it applies to
+   * answers 503 `FEATURE_DISABLED` when `ai.kill-switch` is on for the environment or the tenant.
+   */
+  readonly killSwitch?: KillSwitch;
+};
+
+export type KillSwitch = {
+  readonly appliesTo: (pathname: string) => boolean;
+  /** Fails closed: a store failure with nothing cached counts as killed. */
+  readonly isKilled: (tenantId: string) => Promise<boolean>;
+};
+
+const killedResponse = async (killSwitch: KillSwitch | undefined, request: Request, context: AgentRequestContext): Promise<Response | undefined> => {
+  if (killSwitch === undefined || !killSwitch.appliesTo(new URL(request.url).pathname)) return undefined;
+  if (!(await killSwitch.isKilled(context.tenantId))) return undefined;
+  return Response.json({ error: { code: "FEATURE_DISABLED", message: "This feature is turned off.", requestId: context.requestId } }, { status: 503 });
 };
 
 const BODY_METHODS: ReadonlySet<string> = new Set(["POST", "PUT", "PATCH"]);
@@ -130,6 +147,8 @@ export const createContextMiddleware = (options: ContextMiddlewareOptions): Agen
     const snapshot = await resolveSnapshot(options, context.req.raw);
     if (snapshot === "malformed") return Response.json({ error: "Invalid conversation id" }, { status: 400 });
     if (snapshot !== null) {
+      const killed = await killedResponse(options.killSwitch, context.req.raw, snapshot.context);
+      if (killed !== undefined) return killed;
       writeAgentContext(store, snapshot);
       // Before `next()`: Hono folds headers set here into streamed answers too.
       if (snapshot.createdConversationId !== undefined) context.header?.(FORWARDED_HEADERS.conversationId, snapshot.createdConversationId);

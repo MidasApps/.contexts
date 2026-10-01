@@ -6,7 +6,7 @@ import { EvalExperimentSummaryContract } from "./observability/eval-experiment-s
 import { TraceDetailContract } from "./observability/trace-detail.schema.ts";
 import { TraceSummaryContract } from "./observability/trace-summary.schema.ts";
 import { AdminOverviewContract } from "./platform/admin-overview.schema.ts";
-import { FeatureFlagContract, FeatureFlagDefinitionContract, SetFeatureFlagValueInputContract } from "./platform/feature-flag.schema.ts";
+import { FeatureFlagContract, FeatureFlagDefinitionContract, SetFeatureFlagValueInputContract, TenantFlagValueInputContract } from "./platform/feature-flag.schema.ts";
 import { PlanContract, UpsertPlanInputContract } from "./platform/plan.schema.ts";
 import { UsageDailyRollupContract } from "./usage/usage-daily-rollup.schema.ts";
 import { HumanApprovalResumeContract, WorkflowResumeActionInputContract } from "./workflows/human-approval-resume.schema.ts";
@@ -33,6 +33,7 @@ export const SP5_CONTRACTS: readonly ContractDefinition[] = [
   FeatureFlagDefinitionContract,
   FeatureFlagContract,
   SetFeatureFlagValueInputContract,
+  TenantFlagValueInputContract,
   AdminOverviewContract,
   TraceSummaryContract,
   TraceDetailContract,

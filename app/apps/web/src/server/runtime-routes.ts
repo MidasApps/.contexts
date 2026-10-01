@@ -1,6 +1,8 @@
 import "server-only";
 import {
+  buildAdminFlagsRoutes,
   buildChatRoutes,
+  buildFlagsRoutes,
   buildConnectorsRoutes,
   buildConversationsRoutes,
   buildFilesRoutes,
@@ -15,6 +17,8 @@ import {
   createFirebaseAdmin,
   createFirebaseConnectorsServices,
   createFirebaseFilesServices,
+  createFirebaseFlagsServices,
+  flagEnvironmentDefaults,
   createFirestoreConversationsServices,
   createKnowledgeServices,
   createMastraChatGateway,
@@ -77,6 +81,10 @@ export const buildRuntimeRoutes = async (core: CoreServer): Promise<CoreRoutes> 
   // SP5 workflow runs and tenant schedules (decisions 0037, 0040): custom Mastra routes with the caller's Bearer.
   const workflowGateway = createMastraWorkflowGateway({ baseUrl: env.MASTRA_URL, serverlessToken });
   const workflowDeps = { pipeline: core.pipeline, gateway: workflowGateway, resolveAccessContext: core.resolveAccessContext };
+  const flagsDeps = {
+    pipeline: core.pipeline,
+    flags: createFirebaseFlagsServices({ firebase, appEnv: env.APP_ENV, audit: core.audit, clock: core.pipeline.clock, environmentDefaults: flagEnvironmentDefaults(env) }),
+  };
   const chatDeps = {
     pipeline: core.pipeline,
     chat: createMastraChatGateway(gatewayOptions),
@@ -98,5 +106,8 @@ export const buildRuntimeRoutes = async (core: CoreServer): Promise<CoreRoutes> 
     ...buildConversationsRoutes(chatDeps),
     // SP4 voice (decision 0034): Mastra gates the feature, the budget, the ledger and the audit.
     ...buildVoiceRoutes({ pipeline: core.pipeline, voice: createMastraVoiceGateway(gatewayOptions), resolveAccessContext: core.resolveAccessContext }),
+    // SP5 feature flags (decision 0039): tenant overrides and the staff console.
+    ...buildFlagsRoutes(flagsDeps),
+    ...buildAdminFlagsRoutes(flagsDeps),
   };
 };
