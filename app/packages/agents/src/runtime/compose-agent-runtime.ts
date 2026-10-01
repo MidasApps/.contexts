@@ -17,6 +17,7 @@ import { createWebAgentDefinition } from "../agents/web-agent.ts";
 import type { ChatRuntime } from "../chat/chat-http.ts";
 import { CHAT_ROUTES_PATTERN, createChatRoutes, MAX_CHAT_BODY_BYTES } from "../chat/chat-routes.ts";
 import { createChatRunOwners } from "../chat/chat-run-owners.ts";
+import { createConversationSummarizer, SUMMARIZER_AGENT_ID } from "../chat/conversation-summarizer.ts";
 import { chatAgentIdOf, createDurableChatAgent } from "../chat/durable-supervisor.ts";
 import { createToolPreviewer } from "../chat/tool-preview.ts";
 import { type ConnectorLoaders, createConnectorToolResolver, defaultConnectorLoaders } from "../connectors/connector-registry.ts";
@@ -275,15 +276,18 @@ const buildMcpServers = (args: ComposeAgentRuntimeArgs, tools: ToolRegistry, too
 /** Chat entry agents (spec §4.2): the supervisor gets a durable wrapper served by `/chat/*`. */
 const CHAT_AGENT_IDS = [SUPERVISOR_AGENT_ID];
 
-const buildChat = (agents: Record<string, Agent>, tools: ToolRegistry, toolDeps: CoreToolDeps) => {
+const buildChat = (agents: Record<string, Agent>, deps: { tools: ToolRegistry; toolDeps: CoreToolDeps; summarizer: Agent }) => {
   const durable = CHAT_AGENT_IDS.flatMap((id) => (agents[id] === undefined ? [] : [[id, createDurableChatAgent(agents[id])] as const]));
   const runtime: ChatRuntime = {
     chatAgents: Object.fromEntries(durable.map(([id]) => [id, chatAgentIdOf(id)])),
     owners: createChatRunOwners(),
-    previewer: createToolPreviewer({ tools, toolDeps }),
+    previewer: createToolPreviewer({ tools: deps.tools, toolDeps: deps.toolDeps }),
+    summarizer: deps.summarizer,
   };
-  // DurableAgent extends Agent; Mastra registers it (workflow, cache, PubSub) like any agent.
-  return { runtime, agents: { ...agents, ...Object.fromEntries(durable.map(([id, agent]) => [chatAgentIdOf(id), agent as unknown as Agent])) } };
+  // DurableAgent extends Agent; Mastra registers it (workflow, cache, PubSub) like any agent. The
+  // summarizer is registered too (spans, usage ledger) but, like the wrappers, only custom routes reach it.
+  const registered = { ...Object.fromEntries(durable.map(([id, agent]) => [chatAgentIdOf(id), agent as unknown as Agent])), [SUMMARIZER_AGENT_ID]: deps.summarizer };
+  return { runtime, agents: { ...agents, ...registered }, hiddenAgentIds: Object.keys(registered) };
 };
 
 /**
@@ -320,7 +324,7 @@ export const composeAgentRuntime = (args: ComposeAgentRuntimeArgs): RuntimeParts
   const auth = new FirebaseMastraAuth({ access: args.ports.access, ...(apiPrefix === undefined ? {} : { apiPrefix }) });
   const prefix = apiPrefix === undefined ? {} : { apiPrefix };
   const voice = createVoice({ models });
-  const chat = buildChat(agents, tools, toolDeps);
+  const chat = buildChat(agents, { tools, toolDeps, summarizer: createConversationSummarizer({ models, guardrails: guardrails("delegated") }) });
   const { workflows, catalog: workflowCatalog, platformSchedules } = collectWorkflows(args, models);
   const contextMiddleware = (path?: string, maxBodyBytes?: number) =>
     createContextMiddleware({
@@ -351,7 +355,7 @@ export const composeAgentRuntime = (args: ComposeAgentRuntimeArgs): RuntimeParts
     }),
     auth,
     middleware: [
-      createRouteAllowlistMiddleware({ ...prefix, hiddenAgentIds: Object.values(chat.runtime.chatAgents) }),
+      createRouteAllowlistMiddleware({ ...prefix, hiddenAgentIds: chat.hiddenAgentIds }),
       contextMiddleware(),
       contextMiddleware(CHAT_ROUTES_PATTERN, MAX_CHAT_BODY_BYTES),
       contextMiddleware(WORKFLOW_RUN_ROUTES_PATTERN),

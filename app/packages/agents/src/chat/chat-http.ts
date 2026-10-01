@@ -1,6 +1,7 @@
 import { type Logger, resolveRequestId } from "@core/services";
 import { MASTRA_RESOURCE_ID_KEY, MASTRA_THREAD_ID_KEY } from "@mastra/core/request-context";
 import type { RequestContextReader } from "../context/agent-request-context.ts";
+import type { Agent } from "@mastra/core/agent";
 import type { ChatRunOwners } from "./chat-run-owners.ts";
 import type { ToolPreviewer } from "./tool-preview.ts";
 
@@ -10,6 +11,8 @@ export type ChatRuntime = {
   readonly chatAgents: Readonly<Record<string, string>>;
   readonly owners: ChatRunOwners;
   readonly previewer: ToolPreviewer;
+  /** Hidden `fast` agent of the summary route (SP4 Task 6). */
+  readonly summarizer: Agent;
 };
 
 export type ChatRouteDeps = ChatRuntime & {
@@ -20,12 +23,13 @@ export type ChatRouteDeps = ChatRuntime & {
   readonly heartbeatMs?: number;
 };
 
-type ErrorCode = "VALIDATION_FAILED" | "FORBIDDEN" | "NOT_FOUND" | "PAYLOAD_TOO_LARGE" | "INTERNAL_ERROR";
+type ErrorCode = "VALIDATION_FAILED" | "FORBIDDEN" | "NOT_FOUND" | "CONFLICT" | "PAYLOAD_TOO_LARGE" | "INTERNAL_ERROR";
 
 const ERRORS: Record<ErrorCode, { status: number; message: string }> = {
   VALIDATION_FAILED: { status: 400, message: "One or more fields are invalid." },
   FORBIDDEN: { status: 403, message: "Not allowed." },
   NOT_FOUND: { status: 404, message: "Not found." },
+  CONFLICT: { status: 409, message: "Nothing to do in the current state." },
   PAYLOAD_TOO_LARGE: { status: 413, message: "The request body is too large." },
   INTERNAL_ERROR: { status: 500, message: "Internal error." },
 };

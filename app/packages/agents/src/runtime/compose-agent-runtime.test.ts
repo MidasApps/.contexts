@@ -56,7 +56,7 @@ const echoTool = (id: string) =>
 describe("composeAgentRuntime", () => {
   it("returns the entry agents, the subagents, the auth provider, both middlewares and the core tools", () => {
     const runtime = compose();
-    expect(Object.keys(runtime.agents)).toEqual([PING_AGENT_ID, "assistant", "assistant-chat"]);
+    expect(Object.keys(runtime.agents)).toEqual([PING_AGENT_ID, "assistant", "assistant-chat", "conversation-summarizer"]);
     expect(runtime.chat.chatAgents).toEqual({ assistant: "assistant-chat" });
     expect(Object.keys(runtime.subagents)).toEqual(["knowledge", "data", "action", "web"]);
     expect(runtime.auth).toBeInstanceOf(FirebaseMastraAuth);
@@ -86,6 +86,8 @@ describe("composeAgentRuntime", () => {
       "POST /chat/:agentId",
       "GET /chat/:agentId/runs/:runId/observe",
       "POST /chat/runs/:runId/abort",
+      "GET /chat/:agentId/messages",
+      "POST /chat/:agentId/summary",
       "POST /workflow-approvals/:approvalRequestId/settle",
       "GET /workflow-runs",
       "POST /workflow-runs/start/:workflowId",
@@ -128,13 +130,17 @@ describe("composeAgentRuntime", () => {
 
   it("puts the entry guardrail profile on every entry agent and the delegated one on subagents", async () => {
     const runtime = compose();
-    for (const agent of Object.values(runtime.agents)) {
+    // The hidden summarizer (SP4 Task 6) takes no user input: it gets the delegated profile.
+    const entryAgents = Object.values(runtime.agents).filter((agent) => agent.id !== "conversation-summarizer");
+    expect(runtime.agents["conversation-summarizer"]).toBeDefined();
+    for (const agent of entryAgents) {
       const input = (await agent.listConfiguredInputProcessors()).map((processor) => processor.id);
       const output = (await agent.listConfiguredOutputProcessors()).map((processor) => processor.id);
       expect(input).toEqual(expect.arrayContaining([TENANT_BUDGET_GUARD_ID, "prompt-injection-detector", "moderation", "token-limiter"]));
       expect(output).toEqual(expect.arrayContaining(["regex-filter"]));
     }
-    for (const agent of Object.values(runtime.subagents)) {
+    const delegated = [...Object.values(runtime.subagents), ...Object.values(runtime.agents).filter((agent) => agent.id === "conversation-summarizer")];
+    for (const agent of delegated) {
       const input = (await agent.listConfiguredInputProcessors()).map((processor) => processor.id);
       expect(input).toEqual(expect.arrayContaining([TENANT_BUDGET_GUARD_ID, "token-limiter"]));
       expect(input).not.toContain("prompt-injection-detector");

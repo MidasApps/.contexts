@@ -3,7 +3,17 @@ import { describe, expect, it } from "vitest";
 import { buildSupervisorHarness, MEMBER_PERMISSIONS } from "../agents/supervisor.fixture.ts";
 import { buildAgentContextEntries, TEST_TENANT, TEST_UID } from "../testing/agent-context-fixture.ts";
 import { createFakeProjectsPort } from "../testing/fake-ports.ts";
-import { ABORT_ROUTE_PATH, CHAT_ROUTE_PATH, createChatRoutes, handleAbort, handleChatPost, handleObserve, OBSERVE_ROUTE_PATH } from "./chat-routes.ts";
+import {
+  ABORT_ROUTE_PATH,
+  CHAT_ROUTE_PATH,
+  createChatRoutes,
+  handleAbort,
+  handleChatPost,
+  handleObserve,
+  MESSAGES_ROUTE_PATH,
+  OBSERVE_ROUTE_PATH,
+  SUMMARY_ROUTE_PATH,
+} from "./chat-routes.ts";
 
 const THREAD = "ChatThread0000000001";
 const RESOURCE = `${TEST_TENANT}:${TEST_UID}`;
@@ -38,13 +48,15 @@ const readChunks = async (response: Response): Promise<Chunk[]> => {
 };
 
 describe("chat routes (fake mode, in-process Mastra)", { timeout: 30_000 }, () => {
-  it("registers the chat, observe and abort routes as authenticated routes outside the API prefix", () => {
+  it("registers the chat, observe, abort, messages and summary routes as authenticated routes outside the API prefix", () => {
     const { deps } = setup();
     const routes = createChatRoutes(deps);
     expect(routes.map((route) => [route.method, route.path, route.requiresAuth])).toEqual([
       ["POST", CHAT_ROUTE_PATH, true],
       ["GET", OBSERVE_ROUTE_PATH, true],
       ["POST", ABORT_ROUTE_PATH, true],
+      ["GET", MESSAGES_ROUTE_PATH, true],
+      ["POST", SUMMARY_ROUTE_PATH, true],
     ]);
   });
 

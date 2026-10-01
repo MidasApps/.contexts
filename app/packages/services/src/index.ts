@@ -658,6 +658,7 @@ export {
   type ConversationsServices,
   type InMemoryConversationRepository,
   buildChatRoutes,
+  buildConversationsRoutes,
   type ChatRoutesDeps,
 } from "./services/conversations/index.ts";
 export {

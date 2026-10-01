@@ -8,11 +8,13 @@ import { handleAbort } from "./abort-route.ts";
 import { callerOf, chatError, type ChatRouteDeps, readCappedJson } from "./chat-http.ts";
 import { type ChatRouteBody, ChatRouteBodySchema } from "./chat-request.schema.ts";
 import { approvalRunIdsOf } from "./chat-run-owners.ts";
+import { handleMessages, handleSummary, MESSAGES_ROUTE_PATH, SUMMARY_ROUTE_PATH } from "./history-routes.ts";
 import { handleObserve } from "./observe-route.ts";
 import { createChatStreamTap } from "./tool-preview.ts";
 
 export { handleAbort } from "./abort-route.ts";
 export { handleObserve } from "./observe-route.ts";
+export { handleMessages, handleSummary, MESSAGES_ROUTE_PATH, SUMMARY_ROUTE_PATH } from "./history-routes.ts";
 
 /** Custom routes live outside the Mastra API prefix; `/v1/chat` reaches them through the gateway. */
 export const CHAT_ROUTE_PATH = "/chat/:agentId";
@@ -117,7 +119,7 @@ const inputsOf = (context: { readonly get: (key: "mastra" | "requestContext") =>
   requestContext: context.get("requestContext") as RequestContext<unknown>,
 });
 
-/** The chat routes (spec §4.2, decision 0031): all require Mastra auth (`core.chat.use`). */
+/** The chat routes (spec §4.1, §4.2, decision 0031): all require Mastra auth (`core.chat.use`). */
 export const createChatRoutes = (deps: ChatRouteDeps): ApiRoute[] => [
   registerApiRoute(CHAT_ROUTE_PATH, {
     method: "POST",
@@ -133,5 +135,15 @@ export const createChatRoutes = (deps: ChatRouteDeps): ApiRoute[] => [
     method: "POST",
     requiresAuth: true,
     handler: (context) => handleAbort({ ...inputsOf(context), runId: context.req.param("runId") }, deps),
+  }),
+  registerApiRoute(MESSAGES_ROUTE_PATH, {
+    method: "GET",
+    requiresAuth: true,
+    handler: (context) => handleMessages({ ...inputsOf(context), agentId: context.req.param("agentId"), url: new URL(context.req.url) }, deps),
+  }),
+  registerApiRoute(SUMMARY_ROUTE_PATH, {
+    method: "POST",
+    requiresAuth: true,
+    handler: (context) => handleSummary({ ...inputsOf(context), agentId: context.req.param("agentId"), url: new URL(context.req.url) }, deps),
   }),
 ];
