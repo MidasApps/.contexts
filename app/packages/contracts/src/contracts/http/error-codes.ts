@@ -32,6 +32,10 @@ export const CORE_ERROR_CODES = [
   "UPSTREAM_UNAVAILABLE",
   // 503: a feature switched off for the platform or not configured (SP4 voice, decision 0034).
   "FEATURE_UNAVAILABLE",
+  // 422: SP5 workflow rules (decisions 0037 and 0040).
+  "WORKFLOW_NOT_STARTABLE",
+  "WORKFLOW_NOT_SCHEDULABLE",
+  "SCHEDULE_INTERVAL_TOO_SHORT",
 ] as const;
 
 export const CoreErrorCodeSchema = z.enum(CORE_ERROR_CODES);

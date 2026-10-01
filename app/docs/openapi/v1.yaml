@@ -7396,6 +7396,494 @@ paths:
         - voice
       x-auth: user
       x-rate-limit: voice-call
+  /v1/workflows/runs:
+    get:
+      operationId: workflows.listRuns
+      parameters:
+        - description: Organization to act in; required for users, and when given it must be an API key's own organization.
+          in: query
+          name: organizationId
+          required: false
+          schema:
+            minLength: 1
+            type: string
+            x-pii: none
+        - description: Cursor returned by the previous page.
+          in: query
+          name: cursor
+          required: false
+          schema:
+            minLength: 1
+            type: string
+            x-pii: none
+        - description: Page size, 1-100 (default 20).
+          in: query
+          name: limit
+          required: false
+          schema:
+            default: 20
+            maximum: 100
+            minimum: 1
+            type: integer
+            x-pii: none
+        - description: Only runs of this workflow.
+          in: query
+          name: workflowId
+          required: false
+          schema:
+            pattern: ^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$
+            type: string
+            x-pii: none
+        - description: Only runs in this status.
+          in: query
+          name: status
+          required: false
+          schema:
+            enum:
+              - pending
+              - running
+              - waiting
+              - suspended
+              - paused
+              - success
+              - failed
+              - canceled
+              - tripwire
+            type: string
+            x-pii: none
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    description: The items of this page.
+                    items:
+                      $ref: "#/components/schemas/workflows.WorkflowRun"
+                    type: array
+                    x-pii: personal
+                  meta:
+                    additionalProperties: false
+                    description: Response metadata.
+                    properties:
+                      page:
+                        additionalProperties: false
+                        description: Pagination state.
+                        properties:
+                          cursor:
+                            anyOf:
+                              - minLength: 1
+                                type: string
+                              - type: "null"
+                            description: Opaque cursor of the next page; null at the end.
+                            x-pii: none
+                          hasMore:
+                            description: Whether another page exists.
+                            type: boolean
+                            x-pii: none
+                          limit:
+                            description: Page size used for this response.
+                            maximum: 100
+                            minimum: 1
+                            type: integer
+                            x-pii: none
+                        required:
+                          - cursor
+                          - hasMore
+                          - limit
+                        type: object
+                        x-pii: none
+                    required:
+                      - page
+                    type: object
+                    x-pii: none
+                required:
+                  - data
+                  - meta
+                type: object
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: VALIDATION_FAILED
+          x-error-codes:
+            - VALIDATION_FAILED
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UNAUTHORIZED
+          x-error-codes:
+            - UNAUTHORIZED
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: FORBIDDEN
+          x-error-codes:
+            - FORBIDDEN
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: INTERNAL_ERROR
+          x-error-codes:
+            - INTERNAL_ERROR
+      security:
+        - bearerAuth: []
+      summary: Lists the organization's workflow runs, newest first (core.workflow-run.read).
+      tags:
+        - workflows
+      x-auth: principal
+  /v1/workflows/runs/{runId}:
+    get:
+      operationId: workflows.getRun
+      parameters:
+        - description: Workflow run id.
+          in: path
+          name: runId
+          required: true
+          schema:
+            pattern: ^[A-Za-z0-9_-]{1,128}$
+            type: string
+            x-pii: none
+        - description: Organization to act in; required for users, and when given it must be an API key's own organization.
+          in: query
+          name: organizationId
+          required: false
+          schema:
+            minLength: 1
+            type: string
+            x-pii: none
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: "#/components/schemas/workflows.WorkflowRun"
+                required:
+                  - data
+                type: object
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: VALIDATION_FAILED
+          x-error-codes:
+            - VALIDATION_FAILED
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UNAUTHORIZED
+          x-error-codes:
+            - UNAUTHORIZED
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: FORBIDDEN
+          x-error-codes:
+            - FORBIDDEN
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: NOT_FOUND
+          x-error-codes:
+            - NOT_FOUND
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: INTERNAL_ERROR
+          x-error-codes:
+            - INTERNAL_ERROR
+      security:
+        - bearerAuth: []
+      summary: Reads one workflow run of the organization (core.workflow-run.read).
+      tags:
+        - workflows
+      x-auth: principal
+  /v1/workflows/runs/{runId}/cancel:
+    post:
+      operationId: workflows.cancelRun
+      parameters:
+        - description: Workflow run id.
+          in: path
+          name: runId
+          required: true
+          schema:
+            pattern: ^[A-Za-z0-9_-]{1,128}$
+            type: string
+            x-pii: none
+        - description: Organization to act in; required for users, and when given it must be an API key's own organization.
+          in: query
+          name: organizationId
+          required: false
+          schema:
+            minLength: 1
+            type: string
+            x-pii: none
+      responses:
+        "204":
+          description: No Content
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: VALIDATION_FAILED
+          x-error-codes:
+            - VALIDATION_FAILED
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UNAUTHORIZED
+          x-error-codes:
+            - UNAUTHORIZED
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: FORBIDDEN
+          x-error-codes:
+            - FORBIDDEN
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: NOT_FOUND
+          x-error-codes:
+            - NOT_FOUND
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: INTERNAL_ERROR
+          x-error-codes:
+            - INTERNAL_ERROR
+      security:
+        - bearerAuth: []
+      summary: Cancels a run of the organization (core.workflow-run.cancel).
+      tags:
+        - workflows
+      x-auth: principal
+  /v1/workflows/runs/{runId}/stream:
+    get:
+      operationId: workflows.streamRun
+      parameters:
+        - description: Workflow run id.
+          in: path
+          name: runId
+          required: true
+          schema:
+            pattern: ^[A-Za-z0-9_-]{1,128}$
+            type: string
+            x-pii: none
+        - description: Organization to act in; required for users, and when given it must be an API key's own organization.
+          in: query
+          name: organizationId
+          required: false
+          schema:
+            minLength: 1
+            type: string
+            x-pii: none
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                description: Server-sent events of the run's progress (api.md §14).
+                type: string
+                x-pii: none
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: VALIDATION_FAILED
+          x-error-codes:
+            - VALIDATION_FAILED
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UNAUTHORIZED
+          x-error-codes:
+            - UNAUTHORIZED
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: FORBIDDEN
+          x-error-codes:
+            - FORBIDDEN
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: NOT_FOUND
+          x-error-codes:
+            - NOT_FOUND
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: INTERNAL_ERROR
+          x-error-codes:
+            - INTERNAL_ERROR
+      security:
+        - bearerAuth: []
+      summary: Streams the run's progress as server-sent events; Last-Event-Id resumes after an event index (core.workflow-run.read).
+      tags:
+        - workflows
+      x-auth: principal
+  /v1/workflows/{workflowId}/runs:
+    post:
+      operationId: workflows.startRun
+      parameters:
+        - description: Workflow to start; it must be startable.
+          in: path
+          name: workflowId
+          required: true
+          schema:
+            pattern: ^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$
+            type: string
+            x-pii: none
+        - description: Organization to act in; required for users, and when given it must be an API key's own organization.
+          in: query
+          name: organizationId
+          required: false
+          schema:
+            minLength: 1
+            type: string
+            x-pii: none
+        - description: ULID; a retry with the same key and body replays the first response (24 h).
+          in: header
+          name: Idempotency-Key
+          required: false
+          schema:
+            format: ulid
+            pattern: ^[0-7][0-9A-HJKMNP-TV-Za-hjkmnp-tv-z]{25}$
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/workflows.StartWorkflowRunInput"
+        required: true
+      responses:
+        "202":
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    additionalProperties: false
+                    properties:
+                      runId:
+                        description: Id of the started run.
+                        maxLength: 128
+                        minLength: 1
+                        type: string
+                        x-pii: none
+                    required:
+                      - runId
+                    type: object
+                required:
+                  - data
+                type: object
+          description: Accepted
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: VALIDATION_FAILED
+          x-error-codes:
+            - VALIDATION_FAILED
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UNAUTHORIZED
+          x-error-codes:
+            - UNAUTHORIZED
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: FORBIDDEN
+          x-error-codes:
+            - FORBIDDEN
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: NOT_FOUND
+          x-error-codes:
+            - NOT_FOUND
+        "409":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: IDEMPOTENCY_KEY_REUSED
+          x-error-codes:
+            - IDEMPOTENCY_KEY_REUSED
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: WORKFLOW_NOT_STARTABLE
+          x-error-codes:
+            - WORKFLOW_NOT_STARTABLE
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: INTERNAL_ERROR
+          x-error-codes:
+            - INTERNAL_ERROR
+      security:
+        - bearerAuth: []
+      summary: Starts a run of a startable workflow in the organization (core.workflow-run.start).
+      tags:
+        - workflows
+      x-auth: principal
 components:
   schemas:
     access.AcceptInvitationResponse:

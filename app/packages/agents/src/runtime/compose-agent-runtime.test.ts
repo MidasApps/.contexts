@@ -60,7 +60,7 @@ describe("composeAgentRuntime", () => {
     expect(runtime.chat.chatAgents).toEqual({ assistant: "assistant-chat" });
     expect(Object.keys(runtime.subagents)).toEqual(["knowledge", "data", "action", "web"]);
     expect(runtime.auth).toBeInstanceOf(FirebaseMastraAuth);
-    expect(runtime.middleware.map((entry) => entry.path)).toEqual(["/api/*", "/api/*", "/chat/*"]);
+    expect(runtime.middleware.map((entry) => entry.path)).toEqual(["/api/*", "/api/*", "/chat/*", "/workflow-runs/*"]);
     expect(runtime.tools.ids()).toEqual([
       "catalog.listEntities",
       "catalog.describeEntity",
@@ -81,6 +81,12 @@ describe("composeAgentRuntime", () => {
       "GET /chat/:agentId/runs/:runId/observe",
       "POST /chat/runs/:runId/abort",
       "POST /workflow-approvals/:approvalRequestId/settle",
+      "GET /workflow-runs",
+      "POST /workflow-runs/start/:workflowId",
+      "GET /workflow-runs/:runId",
+      "GET /workflow-runs/:runId/events",
+      "POST /workflow-runs/:runId/cancel",
+      "POST /chat/workflows/:workflowId",
     ]);
     expect(runtime.voice?.capabilities).toEqual({ transcription: true, speech: true, realtime: false });
     expect(Object.keys(runtime.workflows).sort()).toEqual(["approval-demo", "catalog-reindex", "knowledge-ingest"]);

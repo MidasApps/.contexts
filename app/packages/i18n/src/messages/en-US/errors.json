@@ -19,5 +19,8 @@
   "SELF_APPROVAL_FORBIDDEN": "You can't approve your own request.",
   "MFA_REQUIRED": "This action requires two-step verification.",
   "MEMBERSHIP_EXISTS": "This person is already a member.",
-  "FEATURE_UNAVAILABLE": "This feature is not available right now."
+  "FEATURE_UNAVAILABLE": "This feature is not available right now.",
+  "WORKFLOW_NOT_STARTABLE": "This workflow cannot be started manually.",
+  "WORKFLOW_NOT_SCHEDULABLE": "This workflow cannot be scheduled.",
+  "SCHEDULE_INTERVAL_TOO_SHORT": "The schedule runs too often. Choose a longer interval."
 }

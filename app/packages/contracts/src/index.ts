@@ -512,3 +512,7 @@ export {
   MessageFeedbackContract, MessageFeedbackInputContract, MessageFeedbackInputSchema, MessageFeedbackSchema,
   MessageRatingSchema, type MessageFeedback, type MessageFeedbackInput,
 } from "./contracts/conversations/message-feedback.schema.ts";
+export {
+  cancelWorkflowRunEndpoint, getWorkflowRunEndpoint, listWorkflowRunsEndpoint, OrganizationQuerySchema, StartedWorkflowRunSchema,
+  startWorkflowRunEndpoint, streamWorkflowRunEndpoint, WORKFLOW_RUN_ENDPOINTS, WorkflowRunStreamSchema,
+} from "./contracts/workflows/endpoints.ts";

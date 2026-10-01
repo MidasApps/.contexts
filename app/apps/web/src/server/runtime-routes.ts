@@ -5,12 +5,15 @@ import {
   buildKnowledgeDocumentsRoutes,
   buildKnowledgeSourcesRoutes,
   buildMcpRoutes,
+  buildWorkflowRunsRoutes,
+  buildWorkflowRunStreamRoutes,
   createCoreAgentCommandExecutors,
   createFirebaseAdmin,
   createFirebaseConnectorsServices,
   createFirebaseFilesServices,
   createKnowledgeServices,
   createMastraGateway,
+  createMastraWorkflowGateway,
   createMastraWorkflowApprovalSettler,
   createPostgresClient,
   createPostgresKnowledgeRepository,
@@ -62,11 +65,16 @@ export const buildRuntimeRoutes = async (core: CoreServer): Promise<CoreRoutes> 
     audit: core.audit,
     clock: core.pipeline.clock,
   });
+  // SP5 workflow runs (decision 0040): custom Mastra routes with the caller's Bearer.
+  const workflowGateway = createMastraWorkflowGateway({ baseUrl: env.MASTRA_URL, serverlessToken });
+  const workflowDeps = { pipeline: core.pipeline, gateway: workflowGateway, resolveAccessContext: core.resolveAccessContext };
   return {
     ...buildConnectorsRoutes({ pipeline: core.pipeline, connectors }),
     ...buildFilesRoutes({ pipeline: core.pipeline, files }),
     ...buildKnowledgeDocumentsRoutes({ pipeline: core.pipeline, knowledge }),
     ...buildKnowledgeSourcesRoutes({ pipeline: core.pipeline, gateway, getReadyFile: files.getReadyFile, resolveAccessContext: core.resolveAccessContext }),
     ...buildMcpRoutes({ pipeline: core.pipeline, gateway, resolveAccessContext: core.resolveAccessContext }),
+    ...buildWorkflowRunsRoutes(workflowDeps),
+    ...buildWorkflowRunStreamRoutes(workflowDeps),
   };
 };

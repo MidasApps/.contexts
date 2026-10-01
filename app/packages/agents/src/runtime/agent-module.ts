@@ -9,6 +9,7 @@ import type { AgentCommand } from "../tools/commands/agent-command.ts";
 import type { CoreToolDefinition } from "../tools/define-core-tool.ts";
 import type { ToolRegistry } from "../tools/tool-registry.ts";
 import type { WebToolsRuntime } from "../tools/web/web-tools-runtime.ts";
+import { type ModuleWorkflow, workflowIdOf } from "../workflows/workflow-catalog.ts";
 import type { AgentRuntimePorts } from "./runtime-ports.ts";
 
 /**
@@ -69,6 +70,8 @@ export type AgentModule = {
   readonly commands?: readonly AgentCommand[];
   /** Agent Skills (`skillFromContent` / `createSkill`), named `<module>-<skill>`; shown only to tenants that enabled the module. */
   readonly skills?: readonly InlineSkill[];
+  /** Workflows `<module>-<name>` with their policy (SP5 spec §3.1): `startable` from `/v1`, `schedulable` by tenant schedules. */
+  readonly workflows?: readonly ModuleWorkflow[];
 };
 
 export type AgentModuleErrorCode = "INVALID_MODULE_ID" | "UNPREFIXED_CAPABILITY" | "DUPLICATE_CAPABILITY" | "UNKNOWN_CAPABILITY_REF" | "MANIFEST_MISMATCH";
@@ -143,5 +146,6 @@ export const defineAgentModule = (module: AgentModule): AgentModule => {
   checkManifest(module, "tools", toolIds);
   checkCommands(module);
   checkCapabilities(module.id, (module.skills ?? []).map((skill) => skill.name));
+  checkCapabilities(module.id, (module.workflows ?? []).map((entry) => workflowIdOf(entry.workflow)));
   return module;
 };

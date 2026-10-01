@@ -14,3 +14,18 @@ export {
   DEFAULT_SETTLE_TIMEOUT_MS,
   type MastraWorkflowApprovalSettlerOptions,
 } from "./adapters/driven/mastra-workflow-approval-settler.ts";
+// Workflow runs and progress stream (SP5 Task 4, decision 0040).
+export type {
+  FieldIssue as WorkflowFieldIssue,
+  ListRunsQuery,
+  PageMeta as WorkflowPageMeta,
+  ScheduleAction,
+  ScheduleWriteInput,
+  WorkflowGatewayError,
+  WorkflowGatewayResult,
+  WorkflowRuntimeGateway,
+} from "./application/ports/workflow-runtime-gateway.ts";
+export { createMastraWorkflowGateway, DEFAULT_WORKFLOW_GATEWAY_TIMEOUT_MS, type MastraWorkflowGatewayOptions } from "./adapters/driven/mastra-workflow-gateway.ts";
+export { encodeDone, encodeError, encodeWorkflowEvent, resumeIndexOf, SSE_HEADERS } from "./adapters/driven/workflow-event-sse.ts";
+export { buildWorkflowRunsRoutes, WORKFLOW_RUN_PERMISSIONS, type WorkflowRunsRouteDeps } from "./adapters/driving/workflow-runs-route-handler.ts";
+export { buildWorkflowRunStreamRoutes, STREAM_TIMING, type WorkflowRunStreamDeps } from "./adapters/driving/workflow-run-stream-route-handler.ts";

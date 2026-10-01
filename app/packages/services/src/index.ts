@@ -621,3 +621,12 @@ export {
 } from "./services/workflows/index.ts";
 // Functions: the approval trigger test writes SP1 requests through the same adapter.
 export { createFirestoreApprovalRequestRepository } from "./services/access/index.ts";
+// SP5 workflow runs and progress stream (decision 0040).
+export {
+  buildWorkflowRunsRoutes,
+  buildWorkflowRunStreamRoutes,
+  createMastraWorkflowGateway,
+  WORKFLOW_RUN_PERMISSIONS,
+  type WorkflowGatewayResult,
+  type WorkflowRuntimeGateway,
+} from "./services/workflows/index.ts";
