@@ -6,11 +6,19 @@ Plan: `docs/plans/2026-09-29-sp3-agentic-runtime.md` (Task 19). Branch `feat/age
 
 | Commit | Message |
 |---|---|
-| `f0004d1` | `feat(agents): derive mutation tools from command contracts` |
-| this commit | `docs(agents): record sp3 task 19 decisions, report and progress` |
+| `da1bc34` | `feat(agents): derive mutation tools from command contracts` |
+| `14f1429` | `docs(agents): record sp3 task 19 decisions, report and progress` |
+| this commit | `docs(agents): correct the commit ids in the sp3 task 19 report` |
 
 Both were made in the main tree. I staged only my own paths. `pnpm-lock.yaml` held only my two
 importer hunks when I staged it (`apps/mastra` and `modules/example`).
+
+**Commit incident.** Between my staging check and my `git commit`, another agent staged 32 files
+(`app/packages/client/**` and decision 0032), and my first commit (`f0004d1`) took them with it.
+Nothing was pushed and nobody had committed on top. I rebuilt my two commits with `commit-tree`
+from the same blobs, without those 32 files, and moved the branch with a compare-and-swap
+`update-ref` (`84c1e34` → `14f1429`). The 32 files are staged again, exactly as the other agent
+left them. `git diff 84c1e34 14f1429` lists only those files.
 
 ## What changed
 
