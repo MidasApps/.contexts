@@ -87,13 +87,14 @@ describe("preflightResponse", () => {
 });
 
 describe("applyCorsHeaders", () => {
-  it("echoes an allowed origin, exposes x-request-id and varies on Origin", () => {
+  it("echoes an allowed origin, exposes the headers clients read and varies on Origin", () => {
     const headers = new Headers();
 
     applyCorsHeaders(policy, DESKTOP_DEV, headers);
 
     expect(headers.get("access-control-allow-origin")).toBe(DESKTOP_DEV);
-    expect(headers.get("access-control-expose-headers")).toBe("x-request-id");
+    // The desktop reads the id of a new conversation and the wait of a 429 across origins.
+    expect(headers.get("access-control-expose-headers")).toBe("x-request-id, x-conversation-id, retry-after");
     expect(headers.get("access-control-allow-credentials")).toBeNull();
     expect(headers.get("vary")).toBe("Origin");
   });

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { FORWARDED_HEADERS } from "@core/contracts";
 import { REQUEST_ID_HEADER } from "../observability/request-id.ts";
 
 /**
@@ -10,6 +11,12 @@ import { REQUEST_ID_HEADER } from "../observability/request-id.ts";
 // scheme://host[:port] and nothing else: no path, query, fragment or userinfo.
 // Custom schemes are allowed on purpose (`tauri://localhost` is the Tauri
 // webview origin on macOS/Linux).
+/**
+ * Response headers a cross-origin client (the desktop) may read: the request id of an error, the
+ * id `/v1/chat` gives a new conversation, and the wait of a 429.
+ */
+const EXPOSED_HEADERS = [REQUEST_ID_HEADER, FORWARDED_HEADERS.conversationId, "retry-after"].join(", ");
+
 const ORIGIN_PATTERN = /^[a-z][a-z0-9+.-]*:\/\/[^\s/?#@]+$/;
 
 const OriginSchema = z
@@ -84,5 +91,5 @@ export const applyCorsHeaders = (policy: CorsPolicy, origin: string | null, head
   appendVary(headers, ["Origin"]);
   if (!isAllowedOrigin(policy, origin)) return;
   headers.set("access-control-allow-origin", origin);
-  headers.set("access-control-expose-headers", REQUEST_ID_HEADER);
+  headers.set("access-control-expose-headers", EXPOSED_HEADERS);
 };
