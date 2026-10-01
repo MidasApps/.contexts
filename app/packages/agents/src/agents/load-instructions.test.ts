@@ -3,7 +3,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { validateSkillContent } from "@mastra/core/skills";
 import { describe, expect, it } from "vitest";
-import { InstructionsNotFoundError, loadInstructions } from "./load-instructions.ts";
+import { InstructionsNotFoundError, loadInstructions, packageInstructionDirs } from "./load-instructions.ts";
 
 const SKILLS_DIR = path.join(import.meta.dirname, "..", "..", "skills");
 
@@ -20,6 +20,14 @@ describe("loadInstructions", () => {
     writeFileSync(path.join(dir, "knowledge.v1.md"), "override\n");
     expect(loadInstructions("knowledge.v1", [dir])).toBe("override");
     expect(loadInstructions("knowledge.v1", [path.join(dir, "missing")])).toContain("knowledge.searchKnowledge");
+  });
+
+  it("finds the package files from the folder `mastra dev` bundles this package into", () => {
+    // `mastra dev` writes `<package>/node_modules/.cache/index.mjs` and copies no file there.
+    const devBundleDir = path.resolve(import.meta.dirname, "..", "..", "node_modules", ".cache");
+    const fromDevBundle = packageInstructionDirs(devBundleDir).slice(1);
+    expect(fromDevBundle).toEqual([path.join(import.meta.dirname, "instructions")]);
+    expect(readFileSync(path.join(fromDevBundle[0] ?? "", "knowledge.v1.md"), "utf8")).toContain("knowledge.searchKnowledge");
   });
 
   it("refuses unknown and malformed names (boot error)", () => {

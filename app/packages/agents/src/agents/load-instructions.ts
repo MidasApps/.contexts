@@ -20,10 +20,22 @@ export class InstructionsNotFoundError extends Error {
   }
 }
 
-/** The directory of this package's instruction files (source layout: tests, `mastra dev`). */
+/** The directory of this package's instruction files (source layout: tests). */
 export const PACKAGE_INSTRUCTIONS_DIR = path.join(import.meta.dirname, "instructions");
 
-const candidateDirs = (dirs: readonly string[] | undefined): string[] => [...(dirs ?? []), PACKAGE_INSTRUCTIONS_DIR];
+/**
+ * Where the instruction files can be, seen from the directory of the module that holds this code:
+ * next to it (source layout; `mastra build` copies them next to the bundle), then the package
+ * source folder seen from `<package>/node_modules/.cache`, where `mastra dev` writes its bundle of
+ * this workspace package without copying any file (the skills and eval folders are found the same
+ * way, two levels up).
+ */
+export const packageInstructionDirs = (moduleDir: string): string[] => [
+  path.join(moduleDir, "instructions"),
+  path.join(moduleDir, "..", "..", "src", "agents", "instructions"),
+];
+
+const candidateDirs = (dirs: readonly string[] | undefined): string[] => [...(dirs ?? []), ...packageInstructionDirs(import.meta.dirname)];
 
 /**
  * Reads `<name>.md` (e.g. `knowledge.v1`), trimmed.

@@ -53,6 +53,11 @@ pnpm -F mastra build         # .mastra/output (no Studio)
 docker build -f apps/mastra/Dockerfile -t core-mastra .   # from app/
 ```
 
+`mastra dev` bundles `@core/agents` into `packages/agents/node_modules/.cache` and copies
+no file next to it, so in dev the instructions, skills and eval sets are read from the
+package folders (`loadInstructions`, `CORE_SKILL_DIRS`, `EVALS_DIR` try the bundle copy
+first, then the package source). A clean checkout needs nothing copied by hand.
+
 ## Storage and deploy order
 
 Mastra's tables live in schema `mastra`. In `local`, `MASTRA_STORAGE_INIT`
