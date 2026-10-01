@@ -101,7 +101,7 @@ const isZodType = (schema: unknown): schema is z.ZodType => schema instanceof z.
 const jsonSchemaOf = (schema: unknown): Record<string, unknown> | null => {
   if (!isZodType(schema)) return null;
   try {
-    return z.toJSONSchema(schema) as Record<string, unknown>;
+    return z.toJSONSchema(schema);
   } catch {
     return null;
   }
