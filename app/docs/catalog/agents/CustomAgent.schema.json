@@ -31,7 +31,7 @@
       "x-pii": "none"
     },
     "coreSkills": {
-      "description": "Names of the platform skills the agent loads.",
+      "description": "Names of the platform skills the agent loads, from `GET /v1/agent-options`; an unknown name is refused on write.",
       "items": {
         "maxLength": 100,
         "minLength": 1,
@@ -123,7 +123,7 @@
       "x-pii": "none"
     },
     "tools": {
-      "description": "Ids of the tools the agent may call, from the tools the organization already has; unknown ids are ignored at run time.",
+      "description": "Ids of the tools the agent may call, from `GET /v1/agent-options`; an id the runtime does not offer is refused on write (one that disappears later is ignored at run time).",
       "items": {
         "maxLength": 200,
         "minLength": 1,

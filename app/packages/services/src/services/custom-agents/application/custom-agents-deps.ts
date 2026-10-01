@@ -68,6 +68,25 @@ export const changedFieldsOf = (input: Readonly<Record<string, unknown>>): strin
     .map(([key]) => key)
     .toSorted();
 
+/**
+ * What the agent runtime offers the organization (`GET /v1/agent-options`): the tool ids and the
+ * platform skill names an agent may select. The route reads it from the runtime before a write.
+ */
+export type SelectableAgentOptions = { readonly tools: ReadonlySet<string>; readonly coreSkills: ReadonlySet<string> };
+
+/**
+ * One issue per selected tool or platform skill the runtime does not offer (decision 0046
+ * amendment A1). Without `selectable` every item is unknown: a selection is never stored unchecked.
+ */
+export const selectionIssues = (
+  input: { readonly tools?: readonly string[] | undefined; readonly coreSkills?: readonly string[] | undefined },
+  selectable: SelectableAgentOptions | undefined,
+): ErrorDetail[] => {
+  const unknown = (field: string, issue: string, items: readonly string[] | undefined, known: ReadonlySet<string> | undefined): ErrorDetail[] =>
+    (items ?? []).flatMap((item, index) => (known?.has(item) === true ? [] : [{ field: `${field}.${String(index)}`, issue }]));
+  return [...unknown("tools", "UNKNOWN_TOOL", input.tools, selectable?.tools), ...unknown("coreSkills", "UNKNOWN_SKILL", input.coreSkills, selectable?.coreSkills)];
+};
+
 /** The plan's instruction cap (the schema only knows the hard cap). */
 export const instructionIssues = (instructions: string | undefined, maxChars: number): ErrorDetail[] =>
   instructions !== undefined && instructions.length > maxChars ? [{ field: "instructions", issue: "TOO_BIG" }] : [];

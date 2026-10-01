@@ -34,9 +34,17 @@ const setup = (limits = { maxAgents: 2, maxSkills: 2, maxInstructionChars: 100 }
   const skills = createInMemoryCustomSkillRepository();
   const customAgents = createCustomAgentsServices({ agents, skills, limits: fixedCustomLimits(limits), audit: pipeline.audit, unitOfWork: inMemoryUnitOfWork, clock });
   const invalidated: AgentCallScope[] = [];
-  const script = { invalidate: { ok: true, data: null } as WorkflowGatewayResult<null>, throws: false };
+  const script = {
+    invalidate: { ok: true, data: null } as WorkflowGatewayResult<null>,
+    throws: false,
+    options: { ok: true, data: RUNTIME_OPTIONS } as WorkflowGatewayResult<CustomAgentRuntimeOptions>,
+    optionCalls: 0,
+  };
   const gateway = {
-    getCustomAgentOptions: () => Promise.resolve({ ok: true as const, data: RUNTIME_OPTIONS }),
+    getCustomAgentOptions: () => {
+      script.optionCalls += 1;
+      return Promise.resolve(script.options);
+    },
     invalidateCustomAgents: (scope: AgentCallScope) => {
       invalidated.push(scope);
       return script.throws ? Promise.reject(new Error("runtime down")) : Promise.resolve(script.invalidate);
@@ -118,11 +126,59 @@ describe("/v1/agents (custom agents)", () => {
     const foreign = await dataOf<CustomSkill>(await createSkill(routes, SKILL_BODY, "bob", ORG_B));
     const refused = await createAgent(routes, { ...AGENT_BODY, customSkills: [foreign.id] });
     expect(refused.status).toBe(400);
-    expect((await errorOf(refused)).details).toEqual([{ field: "customSkills", issue: "NOT_FOUND" }]);
+    expect((await errorOf(refused)).details).toEqual([{ field: "customSkills.0", issue: "NOT_FOUND" }]);
     const agent = await dataOf<CustomAgent>(await createAgent(routes, { ...AGENT_BODY, customSkills: [own.id], coreSkills: ["knowledge-citations"], knowledgeScope: "organization" }));
     expect(agent.customSkills).toEqual([own.id]);
     const patched = await callRoute(routes, "custom-agents.update", `/v1/agents/${agent.id}${q(ORG_A)}`, { method: "PATCH", as: "alice", body: { customSkills: [foreign.id] } });
     expect(patched.status).toBe(400);
+  });
+
+  it("refuses tools and platform skills the runtime does not offer, naming every unknown item at once", async () => {
+    const { routes, agents } = setup();
+    const foreign = await dataOf<CustomSkill>(await createSkill(routes, SKILL_BODY, "bob", ORG_B));
+    const refused = await createAgent(routes, {
+      ...AGENT_BODY,
+      tools: ["catalog.listEntities", "nope.tool", "other.missing"],
+      coreSkills: ["ghost-skill"],
+      customSkills: [foreign.id],
+    });
+    expect(refused.status).toBe(400);
+    expect(await errorOf(refused)).toMatchObject({
+      code: "VALIDATION_FAILED",
+      details: [
+        { field: "tools.1", issue: "UNKNOWN_TOOL" },
+        { field: "tools.2", issue: "UNKNOWN_TOOL" },
+        { field: "coreSkills.0", issue: "UNKNOWN_SKILL" },
+        { field: "customSkills.0", issue: "NOT_FOUND" },
+      ],
+    });
+    expect(agents.rows.size).toBe(0);
+    const agent = await dataOf<CustomAgent>(await createAgent(routes, { ...AGENT_BODY, tools: ["catalog.listEntities"] }));
+    expect(agent.tools).toEqual(["catalog.listEntities"]);
+    const patched = await callRoute(routes, "custom-agents.update", `/v1/agents/${agent.id}${q(ORG_A)}`, { method: "PATCH", as: "alice", body: { tools: ["nope.tool"] } });
+    expect(patched.status).toBe(400);
+    expect((await errorOf(patched)).details).toEqual([{ field: "tools.0", issue: "UNKNOWN_TOOL" }]);
+    expect(agents.rows.get(agent.id)?.tools).toEqual(["catalog.listEntities"]);
+  });
+
+  it("does not store a selection it could not check: a runtime failure is answered as such", async () => {
+    const { routes, agents, script } = setup();
+    script.options = { ok: false, error: { code: "UPSTREAM_UNAVAILABLE", status: 502 } };
+    const refused = await createAgent(routes, { ...AGENT_BODY, tools: ["catalog.listEntities"] });
+    expect(refused.status).toBe(502);
+    expect((await errorOf(refused)).code).toBe("UPSTREAM_UNAVAILABLE");
+    expect(agents.rows.size).toBe(0);
+    // Nothing to check: the runtime is not asked and the write goes through.
+    const calls = script.optionCalls;
+    const agent = await dataOf<CustomAgent>(await createAgent(routes, { ...AGENT_BODY, tools: [], coreSkills: [] }));
+    expect((await callRoute(routes, "custom-agents.update", `/v1/agents/${agent.id}${q(ORG_A)}`, { method: "PATCH", as: "alice", body: { enabled: false } })).status).toBe(200);
+    expect(script.optionCalls).toBe(calls);
+  });
+
+  it("asks the runtime only for callers who may write", async () => {
+    const { routes, script } = setup();
+    expect((await createAgent(routes, { ...AGENT_BODY, tools: ["nope.tool"] }, "mia")).status).toBe(403);
+    expect(script.optionCalls).toBe(0);
   });
 
   it("updates and deletes, auditing field names and never the instructions", async () => {

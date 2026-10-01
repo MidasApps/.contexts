@@ -17,7 +17,7 @@ Changes an agent's configuration or enabled state.
 | Field | Required | PII | Description | UI |
 |---|---|---|---|---|
 | `connectorTools` | no | `none` | Whether the agent also gets the read-only tools of the organization's connectors. |  |
-| `coreSkills` | no | `none` | Names of the platform skills the agent loads. |  |
+| `coreSkills` | no | `none` | Names of the platform skills the agent loads, from `GET /v1/agent-options`; an unknown name is refused on write. |  |
 | `customSkills` | no | `none` | Ids of the organization's own skills the agent loads; disabled or deleted ones are ignored. |  |
 | `description` | no | `none` | What the agent is for. |  |
 | `enabled` | no | `none` | Whether members can chat with the agent. |  |
@@ -25,7 +25,7 @@ Changes an agent's configuration or enabled state.
 | `knowledgeScope` | no | `none` | What the agent may search in the knowledge base. |  |
 | `model` | no | `none` | Model role the agent runs on, from the platform's allowlist. |  |
 | `name` | no | `none` | Display name of the agent. |  |
-| `tools` | no | `none` | Ids of the tools the agent may call, from the tools the organization already has; unknown ids are ignored at run time. |  |
+| `tools` | no | `none` | Ids of the tools the agent may call, from `GET /v1/agent-options`; an id the runtime does not offer is refused on write (one that disappears later is ignored at run time). |  |
 
 ## Relations
 

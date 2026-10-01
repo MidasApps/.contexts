@@ -101,3 +101,16 @@ durable wrapper need a registered agent id. `instructions`, `model`, `tools`, `s
 - **Provider model ids chosen by the tenant.** Breaks decision 0021 and the price table. Rejected.
 - **New permissions `core.agent.read|write`.** More roles to seed and translate for the same
   audience as `core.agent-settings.*`. Rejected for now.
+
+## Amendment A1 (2026-10-01, SP5 gate): selections are checked on write
+
+- `POST /v1/agents` and `PATCH /v1/agents/{agentId}` refuse a tool id or a platform skill name the
+  runtime does not offer (`GET /tenant-catalog/agent-options`, the source of `/v1/agent-options`),
+  and an organization skill id that is not the organization's. Every unknown item is named at once:
+  400 `VALIDATION_FAILED`, `details: [{ field: "tools.<i>", issue: "UNKNOWN_TOOL" }`,
+  `{ field: "coreSkills.<i>", issue: "UNKNOWN_SKILL" }`, `{ field: "customSkills.<i>", issue: "NOT_FOUND" }]`
+  (before, `customSkills` answered one `customSkills` detail without an index).
+- The runtime is asked only when the body selects a tool or a platform skill, after the write
+  permission is checked. When it cannot answer, the write fails with the gateway's error (e.g. 502
+  `UPSTREAM_UNAVAILABLE`); a selection is never stored unchecked.
+- An id that disappears later (a module removed, a skill deleted) is still ignored at run time.

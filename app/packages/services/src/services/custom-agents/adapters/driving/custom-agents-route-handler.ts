@@ -17,7 +17,7 @@ import type { RouteHandler } from "../../../shared/http/route-boundary.ts";
 import type { Logger } from "../../../shared/observability/logger.ts";
 import { runtimeCallScope, tenantOfCall, workflowCallScope, workflowGatewayErrorResponse } from "../../../workflows/adapters/driving/workflow-call-scope.ts";
 import type { WorkflowRuntimeGateway } from "../../../workflows/application/ports/workflow-runtime-gateway.ts";
-import { CUSTOM_AGENTS_READ_PERMISSION } from "../../application/custom-agents-deps.ts";
+import { CUSTOM_AGENTS_READ_PERMISSION, CUSTOM_AGENTS_WRITE_PERMISSION, type SelectableAgentOptions } from "../../application/custom-agents-deps.ts";
 import type { CustomAgentsServices } from "../../composition.ts";
 import {
   CustomAgentNotFoundError,
@@ -64,6 +64,28 @@ export const invalidateRuntimeCache = async (deps: Pick<CustomAgentsRouteDeps, "
   }
 };
 
+type SelectionCtx = Parameters<typeof workflowCallScope>[0]["ctx"];
+
+/**
+ * What the runtime offers the organization, read only when the write selects a tool or a platform
+ * skill (decision 0046 amendment A1). The caller must hold the write permission before the runtime
+ * is asked; a runtime that cannot answer fails the write (its gateway error), so a selection is
+ * never stored unchecked.
+ */
+const selectableOf = async (
+  deps: Pick<CustomAgentsRouteDeps, "gateway" | "resolveAccessContext">,
+  ctx: SelectionCtx,
+  tenantId: TenantId,
+  body: { readonly tools?: readonly string[] | undefined; readonly coreSkills?: readonly string[] | undefined },
+): Promise<SelectableAgentOptions | undefined | Response> => {
+  if ((body.tools ?? []).length === 0 && (body.coreSkills ?? []).length === 0) return undefined;
+  const scope = await workflowCallScope({ ctx, organizationId: tenantId, permission: CUSTOM_AGENTS_WRITE_PERMISSION, resolveAccessContext: deps.resolveAccessContext });
+  if (scope instanceof Response) return scope;
+  const options = await deps.gateway.getCustomAgentOptions(scope);
+  if (!options.ok) return workflowGatewayErrorResponse(options.error, ctx.requestId);
+  return { tools: new Set(options.data.tools.map((tool) => tool.id)), coreSkills: new Set(options.data.coreSkills.map((skill) => skill.name)) };
+};
+
 const agentPath = (agentId: string, tenantId: string) => `/v1/agents/${agentId}?organizationId=${tenantId}`;
 
 const buildAgentWriteRoutes = (deps: CustomAgentsRouteDeps): Record<string, RouteHandler> => {
@@ -72,7 +94,9 @@ const buildAgentWriteRoutes = (deps: CustomAgentsRouteDeps): Record<string, Rout
     [createCustomAgentEndpoint.id]: withApiRoute(createCustomAgentEndpoint, pipeline, async (ctx) => {
       const tenantId = tenantOfCall(ctx.principal, ctx.input.query.organizationId, ctx.requestId);
       if (tenantId instanceof Response) return tenantId;
-      const result = await customAgents.createCustomAgent({ actor: ctx.principal, access: ctx.scope, tenantId, requestId: ctx.requestId, input: ctx.input.body });
+      const selectable = await selectableOf(deps, ctx, tenantId, ctx.input.body);
+      if (selectable instanceof Response) return selectable;
+      const result = await customAgents.createCustomAgent({ actor: ctx.principal, access: ctx.scope, tenantId, requestId: ctx.requestId, input: ctx.input.body, selectable });
       if (!result.ok) return customAgentErrorResponse(result.error, ctx.requestId);
       await invalidateRuntimeCache(deps, ctx, tenantId);
       return dataResponse({ data: result.data }, { status: 201, location: agentPath(result.data.id, tenantId) });
@@ -80,7 +104,9 @@ const buildAgentWriteRoutes = (deps: CustomAgentsRouteDeps): Record<string, Rout
     [updateCustomAgentEndpoint.id]: withApiRoute(updateCustomAgentEndpoint, pipeline, async (ctx) => {
       const tenantId = tenantOfCall(ctx.principal, ctx.input.query.organizationId, ctx.requestId);
       if (tenantId instanceof Response) return tenantId;
-      const result = await customAgents.updateCustomAgent({ actor: ctx.principal, access: ctx.scope, tenantId, requestId: ctx.requestId, agentId: ctx.input.params.agentId, input: ctx.input.body });
+      const selectable = await selectableOf(deps, ctx, tenantId, ctx.input.body);
+      if (selectable instanceof Response) return selectable;
+      const result = await customAgents.updateCustomAgent({ actor: ctx.principal, access: ctx.scope, tenantId, requestId: ctx.requestId, agentId: ctx.input.params.agentId, input: ctx.input.body, selectable });
       if (!result.ok) return customAgentErrorResponse(result.error, ctx.requestId);
       await invalidateRuntimeCache(deps, ctx, tenantId);
       return dataResponse({ data: result.data });

@@ -57,13 +57,13 @@ const fields = {
     .array(z.string().min(1).max(200))
     .max(MAX_CUSTOM_AGENT_TOOLS)
     .refine(hasUniqueItems, unique)
-    .meta(none("Ids of the tools the agent may call, from the tools the organization already has; unknown ids are ignored at run time.")),
+    .meta(none("Ids of the tools the agent may call, from `GET /v1/agent-options`; an id the runtime does not offer is refused on write (one that disappears later is ignored at run time).")),
   connectorTools: z.boolean().meta(none("Whether the agent also gets the read-only tools of the organization's connectors.")),
   coreSkills: z
     .array(z.string().min(1).max(100))
     .max(MAX_CUSTOM_AGENT_SKILLS)
     .refine(hasUniqueItems, unique)
-    .meta(none("Names of the platform skills the agent loads.")),
+    .meta(none("Names of the platform skills the agent loads, from `GET /v1/agent-options`; an unknown name is refused on write.")),
   customSkills: z
     .array(CustomSkillIdSchema)
     .max(MAX_CUSTOM_AGENT_SKILLS)

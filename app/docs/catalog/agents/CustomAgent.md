@@ -17,7 +17,7 @@ An agent an organization configured: instructions, a model role, tools, skills a
 | Field | Required | PII | Description | UI |
 |---|---|---|---|---|
 | `connectorTools` | yes | `none` | Whether the agent also gets the read-only tools of the organization's connectors. |  |
-| `coreSkills` | yes | `none` | Names of the platform skills the agent loads. |  |
+| `coreSkills` | yes | `none` | Names of the platform skills the agent loads, from `GET /v1/agent-options`; an unknown name is refused on write. |  |
 | `createdAt` | yes | `none` | When the agent was created (UTC). |  |
 | `createdBy` | yes | `personal` | Uid of the admin who created it. |  |
 | `customSkills` | yes | `none` | Ids of the organization's own skills the agent loads; disabled or deleted ones are ignored. |  |
@@ -29,7 +29,7 @@ An agent an organization configured: instructions, a model role, tools, skills a
 | `model` | yes | `none` | Model role the agent runs on, from the platform's allowlist. |  |
 | `name` | yes | `none` | Display name of the agent. |  |
 | `tenantId` | yes | `none` | Owning organization. |  |
-| `tools` | yes | `none` | Ids of the tools the agent may call, from the tools the organization already has; unknown ids are ignored at run time. |  |
+| `tools` | yes | `none` | Ids of the tools the agent may call, from `GET /v1/agent-options`; an id the runtime does not offer is refused on write (one that disappears later is ignored at run time). |  |
 | `updatedAt` | yes | `none` | When the agent last changed (UTC). |  |
 
 ## Relations

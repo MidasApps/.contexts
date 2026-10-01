@@ -15,17 +15,21 @@ import {
   instructionIssues,
   recordCustomAudit,
   schemaIssuesOf,
+  type SelectableAgentOptions,
+  selectionIssues,
 } from "../custom-agents-deps.ts";
 
 type AgentKey = { readonly agentId: CustomAgentId };
+/** The runtime's offer, read by the route when the write selects tools or platform skills. */
+type Selection = { readonly selectable?: SelectableAgentOptions | undefined };
 
 export type CreateCustomAgentError = AccessDeniedError | CustomLimitReachedError | InvalidCustomDefinitionError;
-export type CreateCustomAgent = (command: CustomAgentsCommand & { readonly input: CreateCustomAgentInput }) => Promise<Result<CustomAgent, CreateCustomAgentError>>;
+export type CreateCustomAgent = (command: CustomAgentsCommand & Selection & { readonly input: CreateCustomAgentInput }) => Promise<Result<CustomAgent, CreateCustomAgentError>>;
 
 export type GetCustomAgent = (command: Omit<CustomAgentsCommand, "requestId"> & AgentKey) => Promise<Result<CustomAgent, AccessDeniedError | CustomAgentNotFoundError>>;
 
 export type UpdateCustomAgentError = AccessDeniedError | CustomAgentNotFoundError | InvalidCustomDefinitionError;
-export type UpdateCustomAgent = (command: CustomAgentsCommand & AgentKey & { readonly input: UpdateCustomAgentInput }) => Promise<Result<CustomAgent, UpdateCustomAgentError>>;
+export type UpdateCustomAgent = (command: CustomAgentsCommand & AgentKey & Selection & { readonly input: UpdateCustomAgentInput }) => Promise<Result<CustomAgent, UpdateCustomAgentError>>;
 
 export type DeleteCustomAgent = (command: CustomAgentsCommand & AgentKey) => Promise<Result<void, AccessDeniedError | CustomAgentNotFoundError>>;
 
@@ -33,13 +37,14 @@ export type DeleteCustomAgent = (command: CustomAgentsCommand & AgentKey) => Pro
 const unknownSkillIssues = async (deps: Pick<CustomAgentsDeps, "skills">, tx: Transaction, command: CustomAgentsCommand, skillIds: readonly CustomSkillId[] | undefined): Promise<ErrorDetail[]> => {
   if (skillIds === undefined || skillIds.length === 0) return [];
   const found = await Promise.all(skillIds.map((skillId) => deps.skills.get(tx, { tenantId: command.tenantId, skillId })));
-  return found.some((skill) => skill === null) ? [{ field: "customSkills", issue: "NOT_FOUND" }] : [];
+  return found.flatMap((skill, index) => (skill === null ? [{ field: `customSkills.${String(index)}`, issue: "NOT_FOUND" }] : []));
 };
 
 /**
  * Creates an agent of the organization (`core.agent-settings.update`): the plan caps how many
  * and how long their instructions are; audited as `CUSTOM_AGENT_CREATED`. The count is read
- * before the write, not in its transaction (decision 0046 §12).
+ * before the write, not in its transaction (decision 0046 §12). Selected tools and skills must
+ * exist: every unknown one is named in the refusal (decision 0046 amendment A1).
  */
 export const makeCreateCustomAgent =
   (deps: CustomAgentsDeps): CreateCustomAgent =>
@@ -67,7 +72,7 @@ export const makeCreateCustomAgent =
       updatedAt: now,
     });
     return deps.unitOfWork.run(async (tx): Promise<Result<CustomAgent, CreateCustomAgentError>> => {
-      const unknown = await unknownSkillIssues(deps, tx, command, agent.customSkills);
+      const unknown = [...selectionIssues(agent, command.selectable), ...(await unknownSkillIssues(deps, tx, command, agent.customSkills))];
       if (unknown.length > 0) return err(new InvalidCustomDefinitionError(unknown));
       deps.agents.create(tx, { agent });
       await recordCustomAudit(deps, command, { action: "CUSTOM_AGENT_CREATED", target: { type: "custom-agent", id: agent.id } }, tx);
@@ -100,7 +105,7 @@ export const makeUpdateCustomAgent =
       if (current === null) return err(new CustomAgentNotFoundError());
       const parsed = CustomAgentSchema.safeParse({ ...current, ...definedOf(command.input), updatedAt: now });
       if (!parsed.success) return err(new InvalidCustomDefinitionError(schemaIssuesOf(parsed.error)));
-      const unknown = await unknownSkillIssues(deps, tx, command, command.input.customSkills);
+      const unknown = [...selectionIssues(command.input, command.selectable), ...(await unknownSkillIssues(deps, tx, command, command.input.customSkills))];
       if (unknown.length > 0) return err(new InvalidCustomDefinitionError(unknown));
       deps.agents.replace(tx, { agent: parsed.data, actorId: auditActorOf(command.actor).id });
       await recordCustomAudit(deps, command, { action: "CUSTOM_AGENT_UPDATED", target: { type: "custom-agent", id: current.id }, changes: changedFieldsOf(command.input) }, tx);
