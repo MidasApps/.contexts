@@ -68,3 +68,35 @@ The action agent executes module commands (mutations). A mutation triggered by a
     store failure is `IDEMPOTENCY_UNAVAILABLE` (fail-closed, nothing runs). A replayed tool
     call is audited again with `replayed: true` in the port metadata (SP1's audit allowlist
     keeps only the tool id, run id, input hash and error code).
+- **2026-10-01 — one command registry; module commands (SP3 Task 19).**
+  - *One definition per command.* `defineContractCommand({ contract, targetContractId,
+    outputSchema, execute, summarize?, preview? })` (`@core/services`,
+    `services/agents/application/commands/contract-command.ts`) declares a command from its
+    contract: id, description, permission and input schema come from the contract. A contract
+    that is not `kind: "command"` or has no `permission` is a boot error
+    (`CommandContractError`). The value (`ContractCommand`) is an `AgentCommandExecutor` plus
+    the data a tool needs, so it ends the duplication noted in the amendment above.
+  - *Three consumers, one entry.* The agent tool `command.<contractId>` is derived from the
+    entry (`@core/agents` `tools/commands/command-tools.ts`, port `commandRegistry`); the SP1
+    `agent-command` approval handler and the workflow command port run the same entry. The
+    core command `tenancy.CreateProjectInput` is now such an entry
+    (`createCoreAgentCommandExecutors`); `create-project-command.tool.ts`, `ProjectsPort` and
+    its binding are removed. The tool id is unchanged. A use case refusal reaches the model as
+    `COMMAND_REFUSED` (before: `FORBIDDEN`).
+  - *Registry composition.* `apps/mastra` (`create-runtime-ports.ts`) and `apps/web`
+    (`runtime-routes.ts`) build the registry as core commands plus the installed modules'
+    command factories. Two entries with one id are a boot error (`DuplicateCommandError`).
+  - *Idempotency key reaches the use case.* `AgentCommandExecution` carries `idempotencyKey`
+    (`runId:toolCallId`, or `workflow:<runId>`), as §4 says; at-most-once is still enforced
+    by the idempotency store around the call.
+  - *Workflows never skip four eyes.* The workflow command port refuses a command whose
+    permission needs approval (`APPROVAL_REQUIRED`). A workflow that needs such a command asks
+    for its own approval first (decision 0036) and applies a command without that flag.
+  - *Module audit actions.* A module's use cases audit `MODULE_RECORD_CREATED` and
+    `MODULE_RECORD_UPDATED` (new entries of `AUDIT_ACTIONS`); `target.type` names the record
+    kind (`example-note`), so a module needs no action name of its own in the core. The
+    agent pipeline still audits `AGENT_TOOL_EXECUTED` for the call.
+  - *Example module.* `example.CreateNoteCommand` (`example.note.create`) and
+    `example.ArchiveNoteCommand` (`example.note.archive`, `requiresApproval`) over Firestore
+    `notes` (`tenantId`, automatic ids). An archive requested through the agent becomes an SP1
+    approval request and runs in `/v1`, as the requester, after a different member approves.

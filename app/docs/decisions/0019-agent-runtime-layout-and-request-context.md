@@ -104,3 +104,22 @@ SP3 adds agents, tools, skills, workflows, memory, knowledge and connectors. Mas
     memory.
   - *Rejected.* Answering 400 `VALIDATION_FAILED` when the header is missing: every API client
     and the MCP `ask_assistant` tool would have to create ids the server can create safely.
+- **2026-10-01 — module composition in `apps/mastra` (SP3 Task 19).**
+  - *`APP_MODULES` entries.* Each entry of `apps/mastra/src/modules.ts` is `{ manifest,
+    createCommands, createAgentModule }`. `createAgentRuntime` hands the manifests to the
+    runtime's core server (so the module's permissions, unit types and settings exist where
+    tools are authorized), builds the command registry from `createCommands` with the core
+    server's access, audit and Firestore, and then calls `createAgentModule({ ports })`.
+    Before, `APP_MODULES` was a list of `AgentModule` values, which could not receive the
+    ports their workflows and tools need.
+  - *Manifest refs.* `defineAgentModule` now also matches the manifest's `skills` and
+    `workflows` refs with implementations (before: `agents` and `tools` only). Commands are
+    not capability refs: they are command contracts in the catalog and entries of the command
+    registry (decision 0025).
+  - *Who sees what.* Module commands are action-agent tools in every organization and are
+    gated by the module's permissions. Module skills still reach only organizations whose
+    `enabledAgents` names the module (decision 0029).
+  - *Module package entries.* `@core/module-example` exports `./server` (commands, use cases;
+    loaded by `apps/web` and `apps/mastra`) and `./agents` (skill, workflow; loaded by
+    `apps/mastra` only). `@core/client` is an optional peer of the module, so the Mastra build
+    output does not install the client tree.

@@ -6,8 +6,9 @@ Plan `docs/plans/2026-09-29-sp3-agentic-runtime.md` (Tasks 28–29). Spec
 Branch `feat/agentic-app-core-sp0`. The plan names this file `sp3-summary.md`; the coordinator
 asked for `sp3-gate.md`, and this is the one summary.
 
-**Verdict: gate met, with Task 19 pending** (blocked on SP2's uncommitted `modules/example`)
-and Observational Memory not measured with real models (no provider keys).
+**Verdict: gate met.** Task 19 landed on 2026-10-01 (module commands and the example module,
+`reports/task-19.md`, §8.1). Observational Memory is still not measured with real models (no
+provider keys).
 
 ## 1. Umbrella §13 gate
 
@@ -49,7 +50,7 @@ pgvector service container, the init scripts and `pnpm db:migrate`.
 | Skills | `packages/agents/skills/*/SKILL.md`, `src/skills/resolve-skills.ts` | `src/skills/skills.test.ts` | 15 `928cbe6`, 20 |
 | Tools: catalog | `src/tools/catalog/{list-entities,describe-entity,render-form}.tool.ts` | tool tests, gate (2) | 10 `d69cc79` |
 | Tools: semantic SQL | `src/tools/sql/query-semantic-sql.tool.ts`, `services/catalog` | `sql-guard.test.ts`, `postgres-semantic-runner.postgres.test.ts` | 11 `0b1f606`, fix `7cf02dc` |
-| Tools: contract-derived mutations | `src/tools/commands/*`, `define-core-tool.ts`, `core-tool-pipeline.ts` | pipeline tests, gate (3) | 9 `7783da1`, 20, fix `aa8a742`; **module commands: Task 19 pending** |
+| Tools: contract-derived mutations | `src/tools/commands/*`, `define-core-tool.ts`, `core-tool-pipeline.ts` | pipeline tests, `command-tools.test.ts`, gate (3), `module-commands.emulator.test.ts` | 9 `7783da1`, 20, fix `aa8a742`, 19 (one command registry; module commands) |
 | Tools: knowledge, web | `src/tools/knowledge/search-knowledge.tool.ts`, `src/tools/web/*` | tool tests, gate (1) | 15, 23 `26b968f` |
 | Memory | `src/memory/create-memory.ts` | `memory-isolation.postgres.test.ts`, gate (4) | 18 `09d0bf1` |
 | Knowledge base (RAG) | `services/knowledge`, `src/knowledge/*`, migrations 0003–0005 | repository + workflow Postgres tests, `knowledge-agent.postgres.test.ts` | 12 `ba823e4`, 13 `db44008`, 14 `36a8b9b`, 15 |
@@ -77,7 +78,7 @@ pgvector service container, the init scripts and `pnpm db:migrate`.
 | D3-06, D3-07, D3-08 | 0022 | Tasks 12–15 (1536 dims; app-owned KB tables; `tenant_id text` + `_platform`) |
 | D3-09, D3-20 | 0023 | Tasks 2, 3, 25 |
 | D3-10 | 0024 | Task 11 |
-| D3-11 | 0025 | Tasks 9, 20, fix `aa8a742` (module commands: Task 19 pending) |
+| D3-11 | 0025 | Tasks 9, 20, fix `aa8a742`, Task 19 (command registry, module commands) |
 | D3-12, D3-13 | 0026 | Tasks 16, 17 (`TokenCostControl` probed, kept off) |
 | D3-14, D3-15, D3-16 | 0027 | Tasks 21–24 |
 | D3-18 | 0028 | Task 27 |
@@ -90,7 +91,7 @@ header); item 9 only through the voice runtime (chat is SP4).
 
 | Prompt item | SP3 coverage | Gaps / owner |
 |---|---|---|
-| 1 Agents and skills: multi-agent, skills, tools | Supervisor + 4 subagents, core skills, tool registry with read/mutation, approval and audit | Module commands and example-module tools: Task 19 (SP2 `modules/example`) |
+| 1 Agents and skills: multi-agent, skills, tools | Supervisor + 4 subagents, core skills, tool registry with read/mutation, approval and audit | Module commands, skill and workflow of the example module: Task 19, done |
 | 2 Memory short/long + vector KB | Thread history, semantic recall, working memory (resource `tenantId:uid`), pgvector KB with ingestion (upload, URL, catalog), namespaces, citations | Observational Memory not measured (follow-up #37); module namespaces wait for SP5 agent settings |
 | 5 Connectors: DB, APIs, MCP client and server | Postgres read-only, OpenAPI (JSON), MCP http (+ stdio local), core MCP server at `/v1/mcp` | MCP OAuth and YAML specs (follow-up #27); workflows over MCP in SP5 |
 | 6 Tools for AI: Firecrawl, browser | Firecrawl search/scrape with SSRF guard and tenant opt-in; browser through the Playwright MCP connector | `@mastra/agent-browser` not adopted (0.x, D3-16) |
@@ -154,9 +155,11 @@ Not SP3: items 3 (SP1), 4 (SP5), 10–12 (SP1/SP2), the chat UI (SP4).
 
 ## 6. Deviations
 
-1. **Task 19 pending.** SP2's `modules/example` is not committed, so no module command, tool
-   or skill exists; the action agent uses the core `command.tenancy.CreateProjectInput`.
-   `APP_MODULES` is empty (`apps/mastra/src/modules.ts`).
+1. **Task 19 landed after the gate (2026-10-01).** `APP_MODULES` lists the example module:
+   its commands (`command.example.CreateNoteCommand`, `command.example.ArchiveNoteCommand`)
+   are action-agent tools next to the core `command.tenancy.CreateProjectInput`, all derived
+   from one command registry; it also adds the skill `example-notes` and the workflow
+   `example-note-intake`. The module's notes have no `/v1` endpoint or page yet (follow-up #38).
 2. **Observational Memory not measured.** No provider keys; the harness runs in fake mode
    only; OM stays off (decision 0029 amendment, `om-comparison.md`, follow-up #37). memory.v1
    is too short to cross OM's 30 000-token threshold, so a real run needs a longer set.
@@ -191,7 +194,8 @@ Open and relevant to SP3's runtime (`docs/plans/2026-09-29-sp0-app-foundation/fo
 | 30 | Voice provider governance gate | SP4 |
 | 36 | Drop the `firecrawl>axios` override and firecrawl exclusion | workspace |
 | 37 | Real Observational Memory comparison (new) | SP3 / SP5 |
-| — | Task 19: module commands and the example module's tools/skills once SP2 commits `modules/example` | SP3 |
+| 38 | The example module's notes have no `/v1` endpoint or page (new, Task 19) | SP2 follow-up |
+| 39 | Module command tools ignore module enablement (new, Task 19) | SP5 |
 | — | Agent settings port (tenant `enabledAgents`, web opt-ins, PII mode) is a fail-closed stand-in with core defaults | SP5 |
 
 ## 8. Verification
@@ -221,5 +225,30 @@ pnpm -F @core/mastra db:init && pnpm evals:seed (twice) → created 18/12/11/10,
 pnpm -F @core/mastra build        → output pins match the lockfile; audit: no high or critical
 built server (PORT=4198, stopped by its PID): GET /health 200 {"success":true};
   POST /api/vectors/x/query 404; POST /api/agents/assistant/generate without a token 401
+git diff --quiet main -- .contexts .claude && echo framework-ok → framework-ok
+```
+
+### 8.1 Task 19 (2026-10-01)
+
+Fresh runs in the main tree (Node 26.10.0, pnpm 12.6.0, compose Postgres, scratch emulators on
+ports 45080/45099/45150/45199/45400/45500). Details in `reports/task-19.md`.
+
+```
+turbo run test (services, agents, mastra, module-example, contracts, web)
+                                  → services 125 files / 846, agents 73 / 528 (1 skipped), mastra 13 / 64,
+                                    module-example 5 / 30, contracts 36 / 411, web 11 / 72: all passed
+turbo run test:postgres --concurrency=1 → services 8 files / 44, agents 7 / 27 passed
+firebase emulators:exec --only auth,firestore,storage "turbo run test:emulators --concurrency=1 --continue"
+                                  → mastra 8 files / 36 (sp3-gate 7/7, workflow-hitl 3/3 with a real note,
+                                    module-commands 5/5), module-example 1 / 3, agents 1 / 6, scripts 1 / 2,
+                                    services 37 / 187 (one rules test failed in the first full run and passed
+                                    alone and in a second full run); functions needs the Functions emulator,
+                                    which the scratch config does not start
+AI_MODE=fake pnpm evals           → 7 files, 7 passed
+pnpm contracts:check              → ok (132 contracts, 142 endpoints, 267 files)
+pnpm i18n:check                   → ok
+pnpm -F @core/mastra build        → build successful; output pins match; audit: no high or critical
+built server (PORT=4196, fake mode, scratch emulators): GET /health 200 {"success":true};
+  POST /api/agents/assistant/generate without a token 401
 git diff --quiet main -- .contexts .claude && echo framework-ok → framework-ok
 ```

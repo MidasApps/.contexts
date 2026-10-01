@@ -39,6 +39,11 @@ A derived application adds its business capabilities as modules under `app/modul
   - Capability refs: `EXAMPLE_CAPABILITIES` keeps `agents`/`tools`/`workflows`/`skills` typed and **empty**; SP3 adds each ref together with its `defineAgentModule()` implementation (a ref without one is a boot error, decision 0019).
   - Web composition: `apps/web/src/modules.ts` (`INSTALLED_MODULES`, manifests) feeds `src/server/modules.ts`; Task 18 derives the client module list from the same file. Desktop gets its list in Task 20.
   - Module-facing client API: `@core/client` exports `./entities/*`, `./widgets/*`, `./shared/ui/notify`, and the test harness `./testing` (`renderApp`, `shellRoutes`, fake `/v1`, fixtures, axe) plus `./testing/setup`, so module pages are tested inside the real composition.
+- **Outcome of SP3 Task 19 (2026-10-01).**
+  - `modules/example` gains the note commands: permissions `example.note.read`, `example.note.create` and `example.note.archive` (`requiresApproval`), contracts `example.CreateNoteCommand` and `example.ArchiveNoteCommand` in `EXAMPLE_CONTRACTS` (they reach the catalog through `app/catalog.modules.ts`), use cases over Firestore `notes` (Security Rules deny every client), and two more package exports: `./server` (`createExampleCommands`) and `./agents` (`createExampleAgentModule`: skill `example-notes`, workflow `example-note-intake`).
+  - `EXAMPLE_CAPABILITIES` names the skill and the workflow; `agents` and `tools` stay empty because the module's agent tools are its command contracts (decisions 0019 and 0025).
+  - Installing a module with commands = the steps above, plus one entry in `apps/mastra/src/modules.ts` and its command factory in `apps/web/src/server/modules.ts` (`createModuleCommands`), where approved commands run.
+  - `@core/client` is an optional peer dependency of the module (dev dependency for its tests); the apps that render its pages depend on `@core/client` themselves.
 
 ## Alternatives rejected
 
