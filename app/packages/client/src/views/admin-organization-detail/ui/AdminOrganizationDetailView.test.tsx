@@ -39,7 +39,8 @@ describe("AdminOrganizationDetailView", () => {
     expect(plain(summary.textContent)).toContain("US$ 50,00");
     expect(within(summary).getByText("Do plano")).toBeDefined();
     expect(plain(summary.textContent)).toContain("20.000.000");
-    expect(plain(within(summary).getByText("Membros").parentElement?.textContent ?? null)).toContain("12");
+    // Value and hint are separate words for assistive tech (the e2e read "12pessoas com acesso").
+    expect(plain(within(summary).getByText("Membros").parentElement?.textContent ?? null)).toContain("12 pessoas com acesso");
     const related = section("Ver esta organização em");
     expect(within(related).getAllByRole("link").map((link) => link.getAttribute("href"))).toEqual(
       ["agents", "traces", "flags", "costs"].map((area) => `/admin/${area}?organizationId=${IDS.organization}`),
