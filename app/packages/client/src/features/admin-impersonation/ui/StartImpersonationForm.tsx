@@ -18,10 +18,17 @@ const FIELDS = ["targetUid", "organizationId", "reason", "durationMinutes"] as c
 type Field = (typeof FIELDS)[number];
 type FieldErrors = Partial<Record<Field, string>>;
 
+/** The user staff picked in the search: the id goes to the API, the rest is what the form shows. */
+export type ImpersonationTarget = { readonly id: string; readonly label: string; readonly detail?: string | undefined };
+
 export type StartImpersonationFormProps = {
+  /** The user to act as, chosen in the user search of the page; `undefined` until one is picked. */
+  target: ImpersonationTarget | undefined;
+  /** Forgets the chosen user ("change", and after a session starts). */
+  onTargetClear: () => void;
   /** Chosen organization (the view owns the picker: a widget, which features do not import). */
   organizationId: string | undefined;
-  /** The organization picker, rendered between the user id and the reason. */
+  /** The organization picker, rendered between the user and the reason. */
   organizationField: ReactNode;
 };
 
@@ -51,14 +58,13 @@ function FieldMessage({ id, message }: { id: string; message: string | undefined
  * The answer's custom token stays in memory; the session id and expiry go to the session store so
  * staff can end it later.
  */
-export function StartImpersonationForm({ organizationId, organizationField }: StartImpersonationFormProps) {
+export function StartImpersonationForm({ target, onTargetClear, organizationId, organizationField }: StartImpersonationFormProps) {
   const t = useTranslations("admin.impersonation.form");
   const online = useOnlineStatus();
   const callEndpoint = useCallEndpoint();
   const start = useImpersonationStore((state) => state.start);
   const explain = useStartError();
   const ids = { uid: useId(), reason: useId(), minutes: useId(), error: useId() };
-  const [targetUid, setTargetUid] = useState("");
   const [reason, setReason] = useState("");
   const [minutes, setMinutes] = useState(String(MAX_IMPERSONATION_MINUTES));
   const [errors, setErrors] = useState<FieldErrors>({});
@@ -68,7 +74,7 @@ export function StartImpersonationForm({ organizationId, organizationField }: St
   const submit = async (event: FormEvent<HTMLFormElement>): Promise<void> => {
     event.preventDefault();
     setFailure(undefined);
-    const parsed = StartImpersonationInputSchema.safeParse({ targetUid: targetUid.trim(), organizationId, reason, durationMinutes: Number(minutes) });
+    const parsed = StartImpersonationInputSchema.safeParse({ targetUid: target?.id, organizationId, reason, durationMinutes: Number(minutes) });
     if (!parsed.success) {
       const invalid = new Set(parsed.error.issues.map((issue) => String(issue.path[0])));
       setErrors(Object.fromEntries(FIELDS.filter((field) => invalid.has(field)).map((field) => [field, t(`errors.${field}`)])));
@@ -81,7 +87,7 @@ export function StartImpersonationForm({ organizationId, organizationField }: St
         const { data } = await callEndpoint(startImpersonationEndpoint, { body });
         start({ sessionId: data.sessionId, expiresAt: data.expiresAt, targetUid: body.targetUid, organizationId: body.organizationId }, data.customToken);
         notify.success(t("started"));
-        setTargetUid("");
+        onTargetClear();
         setReason("");
       } catch (error: unknown) {
         const explained = explain(error);
@@ -94,20 +100,24 @@ export function StartImpersonationForm({ organizationId, organizationField }: St
   const formError = failure ?? save.error;
   return (
     <form noValidate className="flex flex-col gap-4" onSubmit={(event) => void submit(event)}>
-      <div className="flex flex-col gap-1.5">
-        <Label htmlFor={ids.uid}>{t("targetUid")}</Label>
-        <Input
-          id={ids.uid}
-          className="font-mono sm:w-96"
-          autoComplete="off"
-          value={targetUid}
-          onChange={(event) => setTargetUid(event.target.value)}
-          aria-invalid={errors.targetUid !== undefined}
-          aria-describedby={`${ids.uid}-hint ${ids.uid}-error`}
-        />
-        <p id={`${ids.uid}-hint`} className="text-xs text-muted-foreground">
-          {t("targetUidHint")}
-        </p>
+      <div role="group" aria-labelledby={ids.uid} aria-describedby={errors.targetUid === undefined ? undefined : `${ids.uid}-error`} className="flex flex-col gap-1.5">
+        <span id={ids.uid} className="text-sm leading-none font-medium">
+          {t("target")}
+        </span>
+        {target === undefined ? (
+          <p className="text-sm text-muted-foreground">{t("targetEmpty")}</p>
+        ) : (
+          <div className="flex flex-wrap items-center gap-3 rounded-lg border border-border px-3 py-2 sm:w-96">
+            <span className="flex min-w-0 flex-1 flex-col">
+              <span className="truncate text-sm font-medium">{target.label}</span>
+              {target.detail === undefined ? null : <span className="truncate text-xs text-muted-foreground">{target.detail}</span>}
+              <span className="font-mono text-[11.5px] break-all text-muted-foreground">{target.id}</span>
+            </span>
+            <Button type="button" variant="ghost" size="sm" onClick={onTargetClear} aria-label={t("targetChangeNamed", { name: target.label })}>
+              {t("targetChange")}
+            </Button>
+          </div>
+        )}
         <FieldMessage id={`${ids.uid}-error`} message={errors.targetUid} />
       </div>
       <div className="flex flex-col gap-1.5 sm:w-96">

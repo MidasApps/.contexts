@@ -8,4 +8,4 @@ export {
 } from "./model/use-impersonation-store.ts";
 export { useStoredImpersonation } from "./model/use-stored-impersonation.ts";
 export { OpenImpersonationSession, type OpenImpersonationSessionProps } from "./ui/OpenImpersonationSession.tsx";
-export { StartImpersonationForm, type StartImpersonationFormProps } from "./ui/StartImpersonationForm.tsx";
+export { StartImpersonationForm, type ImpersonationTarget, type StartImpersonationFormProps } from "./ui/StartImpersonationForm.tsx";

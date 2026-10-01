@@ -20,7 +20,7 @@
   },
   "descriptions": {
     "organizations": "Status, plan, cost and budget of each organization.",
-    "users": "Support access as a user, read-only and audited.",
+    "users": "User search and support access, read-only and audited.",
     "agents": "Agents per organization and the platform prompts.",
     "connectors": "Connectors configured in each organization.",
     "traces": "Agent and workflow runs, with tokens and cost.",
@@ -327,34 +327,73 @@
   },
   "users": {
     "title": "Users",
-    "description": "Support access as a user, in one organization, read-only.",
+    "description": "User search and support access as a user, in one organization, read-only.",
     "notice": {
       "title": "Audited access",
-      "description": "Every session and every page opened as the user is recorded in the platform's and the organization's audit logs. User search does not exist yet: enter the user id."
+      "description": "Every session and every page opened as the user is recorded in the platform's and the organization's audit logs."
     },
     "session": {
       "title": "Session open in this tab",
       "description": "The session you started here, until it is ended or expires.",
       "emptyTitle": "No open session",
-      "emptyDescription": "Start a session below to see the app as a user."
+      "emptyDescription": "Search for a user, select them and start a session below to see the app as they do."
     },
     "start": {
       "title": "Start access as a user",
       "description": "You will see what the user sees in the chosen organization, without being able to change anything.",
       "organization": "Organization"
+    },
+    "status": {
+      "active": "Active",
+      "disabled": "Disabled"
+    },
+    "search": {
+      "title": "Find a user",
+      "description": "By the start of the name or of the email, or by the whole account id.",
+      "query": "Name, email or id",
+      "placeholder": "E.g. ana or ana@example.com",
+      "by": "Search by",
+      "byOptions": {
+        "auto": "Automatic",
+        "name": "Name",
+        "email": "Email",
+        "uid": "User id"
+      },
+      "submit": "Search",
+      "hint": "The search compares the start of the text and ignores case and accents. In automatic mode, text with @ is read as an email and a whole id returns only that user.",
+      "idleTitle": "Search for a user",
+      "idleDescription": "Type the start of the name or of the email, or the account id, and press Search.",
+      "loading": "Searching users…",
+      "caption": "Users found",
+      "pagination": "User pages",
+      "noMatchTitle": "No user found",
+      "noMatchDescription": "Check the spelling or try the whole email. The search only finds names and emails that start with the text.",
+      "columns": {
+        "user": "User",
+        "email": "Email",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "noName": "No name",
+      "noEmail": "No email",
+      "select": "Select",
+      "selected": "Selected",
+      "selectNamed": "Select {name} for support access"
     }
   },
   "impersonation": {
     "form": {
-      "targetUid": "User id",
-      "targetUidHint": "The account identifier, as the audit log shows it.",
+      "target": "User",
+      "targetEmpty": "No user selected. Use the search above and select the user.",
+      "targetChange": "Change",
+      "targetChangeNamed": "Change the selected user ({name})",
       "reason": "Reason",
       "reasonHint": "10 to 500 characters, for example the ticket number. It is kept in the audit log.",
       "durationMinutes": "Duration in minutes",
       "submit": "Start session",
       "started": "Support session started.",
       "errors": {
-        "targetUid": "Enter the user id.",
+        "targetUid": "Select the user in the search.",
         "organizationId": "Choose the organization.",
         "reason": "Explain the reason in 10 to 500 characters.",
         "durationMinutes": "Enter 1 to 60 minutes.",

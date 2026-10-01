@@ -20,7 +20,7 @@
   },
   "descriptions": {
     "organizations": "Estado, plan, costo y presupuesto de cada organización.",
-    "users": "Acceso de soporte como un usuario, solo lectura y auditado.",
+    "users": "Búsqueda de usuarios y acceso de soporte, solo lectura y auditado.",
     "agents": "Agentes por organización y los prompts de la plataforma.",
     "connectors": "Conectores configurados en cada organización.",
     "traces": "Ejecuciones de agentes y workflows, con tokens y costo.",
@@ -327,34 +327,73 @@
   },
   "users": {
     "title": "Usuarios",
-    "description": "Acceso de soporte como un usuario, en una organización, solo lectura.",
+    "description": "Búsqueda de usuarios y acceso de soporte como un usuario, en una organización, solo lectura.",
     "notice": {
       "title": "Acceso auditado",
-      "description": "Cada sesión y cada página abierta como el usuario quedan registradas en la auditoría de la plataforma y de la organización. La búsqueda de usuarios todavía no existe: ingresa el id del usuario."
+      "description": "Cada sesión y cada página abierta como el usuario quedan registradas en la auditoría de la plataforma y de la organización."
     },
     "session": {
       "title": "Sesión abierta en esta pestaña",
       "description": "La sesión que iniciaste aquí, hasta que se cierre o expire.",
       "emptyTitle": "No hay sesión abierta",
-      "emptyDescription": "Inicia una sesión abajo para ver la app como un usuario."
+      "emptyDescription": "Busca un usuario, selecciónalo e inicia una sesión abajo para ver la app como él."
     },
     "start": {
       "title": "Iniciar acceso como usuario",
       "description": "Verás lo que ve el usuario en la organización elegida, sin poder cambiar nada.",
       "organization": "Organización"
+    },
+    "status": {
+      "active": "Activo",
+      "disabled": "Desactivado"
+    },
+    "search": {
+      "title": "Buscar usuario",
+      "description": "Por el inicio del nombre o del correo, o por el id completo de la cuenta.",
+      "query": "Nombre, correo o id",
+      "placeholder": "Ej.: ana o ana@ejemplo.com",
+      "by": "Buscar por",
+      "byOptions": {
+        "auto": "Automático",
+        "name": "Nombre",
+        "email": "Correo",
+        "uid": "Id del usuario"
+      },
+      "submit": "Buscar",
+      "hint": "La búsqueda compara el inicio del texto, sin distinguir mayúsculas ni acentos. En el modo automático, un texto con @ se lee como correo y un id completo trae solo a ese usuario.",
+      "idleTitle": "Busca un usuario",
+      "idleDescription": "Escribe el inicio del nombre o del correo, o el id de la cuenta, y presiona Buscar.",
+      "loading": "Buscando usuarios…",
+      "caption": "Usuarios encontrados",
+      "pagination": "Páginas de usuarios",
+      "noMatchTitle": "No se encontró ningún usuario",
+      "noMatchDescription": "Revisa la escritura o prueba con el correo completo. La búsqueda solo encuentra nombres y correos que empiezan con el texto.",
+      "columns": {
+        "user": "Usuario",
+        "email": "Correo",
+        "status": "Estado",
+        "actions": "Acciones"
+      },
+      "noName": "Sin nombre",
+      "noEmail": "Sin correo",
+      "select": "Seleccionar",
+      "selected": "Seleccionado",
+      "selectNamed": "Seleccionar a {name} para el acceso de soporte"
     }
   },
   "impersonation": {
     "form": {
-      "targetUid": "Id del usuario",
-      "targetUidHint": "El identificador de la cuenta, como aparece en la auditoría.",
+      "target": "Usuario",
+      "targetEmpty": "Ningún usuario seleccionado. Usa la búsqueda de arriba y selecciona al usuario.",
+      "targetChange": "Cambiar",
+      "targetChangeNamed": "Cambiar el usuario seleccionado ({name})",
       "reason": "Motivo",
       "reasonHint": "De 10 a 500 caracteres, por ejemplo el número del ticket. Queda en la auditoría.",
       "durationMinutes": "Duración en minutos",
       "submit": "Iniciar sesión de soporte",
       "started": "Sesión de soporte iniciada.",
       "errors": {
-        "targetUid": "Ingresa el id del usuario.",
+        "targetUid": "Selecciona al usuario en la búsqueda.",
         "organizationId": "Elige la organización.",
         "reason": "Explica el motivo con 10 a 500 caracteres.",
         "durationMinutes": "Ingresa de 1 a 60 minutos.",

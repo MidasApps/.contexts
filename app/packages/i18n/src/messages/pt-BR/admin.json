@@ -20,7 +20,7 @@
   },
   "descriptions": {
     "organizations": "Status, plano, custo e orçamento de cada organização.",
-    "users": "Acesso de suporte como um usuário, somente leitura e auditado.",
+    "users": "Busca de usuários e acesso de suporte, somente leitura e auditado.",
     "agents": "Agentes por organização e os prompts da plataforma.",
     "connectors": "Conectores configurados em cada organização.",
     "traces": "Execuções de agentes e workflows, com tokens e custo.",
@@ -327,34 +327,73 @@
   },
   "users": {
     "title": "Usuários",
-    "description": "Acesso de suporte como um usuário, em uma organização, somente leitura.",
+    "description": "Busca de usuários e acesso de suporte como um usuário, em uma organização, somente leitura.",
     "notice": {
       "title": "Acesso auditado",
-      "description": "Cada sessão e cada página aberta como o usuário ficam registradas na auditoria da plataforma e da organização. A busca de usuários ainda não existe: informe o id do usuário."
+      "description": "Cada sessão e cada página aberta como o usuário ficam registradas na auditoria da plataforma e da organização."
     },
     "session": {
       "title": "Sessão aberta nesta aba",
       "description": "A sessão que você iniciou aqui, até ser encerrada ou expirar.",
       "emptyTitle": "Nenhuma sessão aberta",
-      "emptyDescription": "Inicie uma sessão abaixo para ver o app como um usuário."
+      "emptyDescription": "Busque um usuário, selecione-o e inicie uma sessão abaixo para ver o app como ele."
     },
     "start": {
       "title": "Iniciar acesso como usuário",
       "description": "Você verá o que o usuário vê na organização escolhida, sem poder alterar nada.",
       "organization": "Organização"
+    },
+    "status": {
+      "active": "Ativo",
+      "disabled": "Desativado"
+    },
+    "search": {
+      "title": "Buscar usuário",
+      "description": "Pelo início do nome ou do e-mail, ou pelo id completo da conta.",
+      "query": "Nome, e-mail ou id",
+      "placeholder": "Ex.: ana ou ana@exemplo.com",
+      "by": "Buscar por",
+      "byOptions": {
+        "auto": "Automático",
+        "name": "Nome",
+        "email": "E-mail",
+        "uid": "Id do usuário"
+      },
+      "submit": "Buscar",
+      "hint": "A busca compara o início do texto, sem diferenciar maiúsculas ou acentos. No modo automático, um texto com @ é lido como e-mail e um id completo traz só aquele usuário.",
+      "idleTitle": "Busque um usuário",
+      "idleDescription": "Digite o início do nome ou do e-mail, ou o id da conta, e pressione Buscar.",
+      "loading": "Buscando usuários…",
+      "caption": "Usuários encontrados",
+      "pagination": "Páginas de usuários",
+      "noMatchTitle": "Nenhum usuário encontrado",
+      "noMatchDescription": "Confira a grafia ou tente o e-mail completo. A busca só encontra nomes e e-mails que começam com o texto.",
+      "columns": {
+        "user": "Usuário",
+        "email": "E-mail",
+        "status": "Situação",
+        "actions": "Ações"
+      },
+      "noName": "Sem nome",
+      "noEmail": "Sem e-mail",
+      "select": "Selecionar",
+      "selected": "Selecionado",
+      "selectNamed": "Selecionar {name} para o acesso de suporte"
     }
   },
   "impersonation": {
     "form": {
-      "targetUid": "Id do usuário",
-      "targetUidHint": "O identificador da conta, como aparece na auditoria.",
+      "target": "Usuário",
+      "targetEmpty": "Nenhum usuário selecionado. Use a busca acima e selecione o usuário.",
+      "targetChange": "Trocar",
+      "targetChangeNamed": "Trocar o usuário selecionado ({name})",
       "reason": "Motivo",
       "reasonHint": "De 10 a 500 caracteres, por exemplo o número do chamado. Fica na auditoria.",
       "durationMinutes": "Duração em minutos",
       "submit": "Iniciar sessão",
       "started": "Sessão de suporte iniciada.",
       "errors": {
-        "targetUid": "Informe o id do usuário.",
+        "targetUid": "Selecione o usuário na busca.",
         "organizationId": "Escolha a organização.",
         "reason": "Explique o motivo com 10 a 500 caracteres.",
         "durationMinutes": "Informe de 1 a 60 minutos.",
