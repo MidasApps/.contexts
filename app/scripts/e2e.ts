@@ -8,7 +8,8 @@
 // e.g. `pnpm test:e2e -- pnpm -F @core/web exec playwright test e2e/auth.spec.ts`.
 // Ports: E2E_WEB_PORT (default 3100), E2E_DESKTOP_PORT (1420), E2E_MASTRA_PORT (4191); never 3000.
 import { spawnSync } from "node:child_process";
-import { readFileSync } from "node:fs";
+import { mkdirSync, readFileSync } from "node:fs";
+import { tmpdir } from "node:os";
 import path from "node:path";
 import { resolvePackageBin } from "./src/dev/package-bin.ts";
 import { ensureE2eDatabase } from "./src/e2e/e2e-database.ts";
@@ -42,8 +43,14 @@ const main = async (): Promise<number> => {
   runNodeStep("applying migrations to the e2e database", path.join("scripts", "db-migrate.ts"), env);
   // The Functions emulator loads apps/functions/lib (the upload validation trigger).
   runNodeStep("building the functions source", path.join("apps", "functions", "build.ts"), env);
+  // The Storage Emulator keeps its blobs under the OS temp dir and every emulator suite on the
+  // machine shares that folder: another suite starting or stopping wiped it and crashed this one
+  // on the next upload. Each e2e stack (keyed by its web port) gets its own temp dir.
+  const emulatorTmp = path.join(tmpdir(), `core-e2e-${e2eEnv["E2E_WEB_PORT"] ?? "web"}`);
+  mkdirSync(emulatorTmp, { recursive: true });
+  const emulatorEnv = { ...env, TMP: emulatorTmp, TEMP: emulatorTmp, TMPDIR: emulatorTmp };
   print(`running: ${command}`);
-  const result = spawnSync(process.execPath, [firebaseBin, ...buildEmulatorExecArgs(command)], { cwd: APP_ROOT, env, stdio: "inherit", windowsHide: true });
+  const result = spawnSync(process.execPath, [firebaseBin, ...buildEmulatorExecArgs(command)], { cwd: APP_ROOT, env: emulatorEnv, stdio: "inherit", windowsHide: true });
   if (result.error !== undefined) throw result.error;
   return result.status ?? 1;
 };
