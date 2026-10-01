@@ -69,6 +69,13 @@ describe("loadDesktopEnv", () => {
     expect(fieldsOf({ ...REMOTE, VITE_AUTH_EMULATOR_URL: "http://127.0.0.1:9099" })).toEqual(["VITE_AUTH_EMULATOR_URL"]);
   });
 
+  it("accepts the Storage Emulator in local only, as a loopback http origin, and it stays optional", () => {
+    expect(loadDesktopEnv({ ...LOCAL, VITE_STORAGE_EMULATOR_URL: "http://127.0.0.1:9199/" }).VITE_STORAGE_EMULATOR_URL).toBe("http://127.0.0.1:9199");
+    expect(loadDesktopEnv({ ...LOCAL, VITE_STORAGE_EMULATOR_URL: "" }).VITE_STORAGE_EMULATOR_URL).toBeUndefined();
+    expect(fieldsOf({ ...REMOTE, VITE_STORAGE_EMULATOR_URL: "http://127.0.0.1:9199" })).toEqual(["VITE_STORAGE_EMULATOR_URL"]);
+    expect(fieldsOf({ ...LOCAL, VITE_STORAGE_EMULATOR_URL: "http://storage.example.com:9199" })).toEqual(["VITE_STORAGE_EMULATOR_URL"]);
+  });
+
   it("accepts the emulator only as a loopback http origin", () => {
     expect(fieldsOf({ ...LOCAL, VITE_AUTH_EMULATOR_URL: "http://emulator.example.com:9099" })).toEqual(["VITE_AUTH_EMULATOR_URL"]);
     expect(fieldsOf({ ...LOCAL, VITE_AUTH_EMULATOR_URL: "http://127.0.0.1:9099/path" })).toEqual(["VITE_AUTH_EMULATOR_URL"]);

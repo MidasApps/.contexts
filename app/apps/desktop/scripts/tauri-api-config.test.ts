@@ -27,6 +27,17 @@ describe("buildTauriApiConfigPatch", () => {
     expect(patch.app.security.csp["connect-src"]).toBe(`'self' ipc: http://ipc.localhost http://localhost:3100 ${FIREBASE} http://127.0.0.1:9099`);
   });
 
+  it("adds the Storage Emulator origin for local uploads when the env declares one", () => {
+    const patch = buildTauriApiConfigPatch({ apiUrl: "http://localhost:3100", authEmulatorUrl: "http://127.0.0.1:9099", storageEmulatorUrl: "http://127.0.0.1:9199/" });
+
+    expect(patch.app.security.csp["connect-src"]).toBe(`'self' ipc: http://ipc.localhost http://localhost:3100 ${FIREBASE} http://127.0.0.1:9099 http://127.0.0.1:9199`);
+    expect(patch.app.security.devCsp["connect-src"]).toBe(`'self' ipc: http://ipc.localhost ws://localhost:1420 http://localhost:3100 ${FIREBASE} http://127.0.0.1:9099 http://127.0.0.1:9199`);
+  });
+
+  it("opens no emulator origin for a remote build", () => {
+    expect(buildTauriApiConfigPatch({ apiUrl: "https://api.example.com" }).app.security.csp["connect-src"]).not.toMatch(/127\.0\.0\.1|:9\d{3}/);
+  });
+
   it("uses origins only, so a base path never widens or breaks the directive", () => {
     const patch = buildTauriApiConfigPatch({ apiUrl: "http://localhost:3100/", authEmulatorUrl: "http://127.0.0.1:9099/" });
 

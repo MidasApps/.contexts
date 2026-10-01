@@ -22,17 +22,20 @@ export type TauriApiConfigInput = {
   apiUrl: string;
   /** A validated `VITE_AUTH_EMULATOR_URL`; the env schema allows it only when `VITE_APP_ENV=local`. */
   authEmulatorUrl?: string | undefined;
+  /** A validated `VITE_STORAGE_EMULATOR_URL` (local uploads); the env schema refuses it outside local. */
+  storageEmulatorUrl?: string | undefined;
 };
 
 /**
  * Tauri config merge patch (RFC 7396, `tauri dev|build --config <file>`) that
  * sets CSP `connect-src` to exactly what the bundle calls: the API origin, the
- * Firebase Auth origins, the upload origin and, in local, the Auth Emulator — in both `csp` and
+ * Firebase Auth origins, the upload origin and, in local, the Auth and Storage Emulators — in both `csp` and
  * `devCsp`. Only `connect-src` is replaced; every other directive stays as in
  * tauri.conf.json.
  */
-export const buildTauriApiConfigPatch = ({ apiUrl, authEmulatorUrl }: TauriApiConfigInput): TauriApiConfigPatch => {
-  const origins = [new URL(apiUrl).origin, ...FIREBASE_AUTH_ORIGINS, FILE_UPLOAD_ORIGIN, ...(authEmulatorUrl === undefined ? [] : [new URL(authEmulatorUrl).origin])].join(" ");
+export const buildTauriApiConfigPatch = ({ apiUrl, authEmulatorUrl, storageEmulatorUrl }: TauriApiConfigInput): TauriApiConfigPatch => {
+  const emulatorOrigins = [authEmulatorUrl, storageEmulatorUrl].filter((url): url is string => url !== undefined).map((url) => new URL(url).origin);
+  const origins = [new URL(apiUrl).origin, ...FIREBASE_AUTH_ORIGINS, FILE_UPLOAD_ORIGIN, ...emulatorOrigins].join(" ");
   return {
     app: {
       security: {

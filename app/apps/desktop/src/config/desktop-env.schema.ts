@@ -18,7 +18,7 @@ const ApiOriginSchema = z
 // Vite env files cannot unset a variable, so an empty value means "absent".
 const emptyAsUndefined = (value: unknown): unknown => (value === "" ? undefined : value);
 
-/** Auth Emulator origin (follow-up #12c): plain http on loopback only, never a remote host. */
+/** Emulator origin (Auth: follow-up #12c; Storage: local uploads): plain http on loopback only, never a remote host. */
 const EmulatorOriginSchema = z.preprocess(
   emptyAsUndefined,
   z
@@ -48,11 +48,18 @@ export const DesktopEnvSchema = z
     VITE_FIREBASE_AUTH_DOMAIN: z.string().min(1),
     VITE_FIREBASE_PROJECT_ID: z.string().min(1),
     VITE_AUTH_EMULATOR_URL: EmulatorOriginSchema,
+    // Where local uploads send their bytes (the files API answers a Storage Emulator URL in
+    // local). Only the Tauri CSP reads it; optional, because a local build may not upload.
+    VITE_STORAGE_EMULATOR_URL: EmulatorOriginSchema,
     VITE_MFA_FACTORS: MfaFactorListSchema,
   })
   .refine((env) => (env.VITE_APP_ENV === "local") === (env.VITE_AUTH_EMULATOR_URL !== undefined), {
     error: "VITE_AUTH_EMULATOR_URL is required in local and forbidden elsewhere",
     path: ["VITE_AUTH_EMULATOR_URL"],
+  })
+  .refine((env) => env.VITE_APP_ENV === "local" || env.VITE_STORAGE_EMULATOR_URL === undefined, {
+    error: "VITE_STORAGE_EMULATOR_URL is allowed in local only",
+    path: ["VITE_STORAGE_EMULATOR_URL"],
   });
 
 export type DesktopEnv = z.infer<typeof DesktopEnvSchema>;
