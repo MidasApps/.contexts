@@ -17,6 +17,16 @@ export async function exchangeSession(): Promise<SessionActionResult<{ customTok
   return runSessionAction("exchangeSession", (actions, context) => actions.exchangeSession(context));
 }
 
+/** Staff opens the app as the user of an open impersonation session; kept across reloads (decision 0047). */
+export async function enterImpersonation(input: { impersonationSessionId: string }): Promise<SessionActionResult<{ customToken: string }>> {
+  return runSessionAction("enterImpersonation", (actions, context) => actions.enterImpersonation(input, context));
+}
+
+/** Ends the impersonation and returns the staff account custom token (decision 0047). */
+export async function leaveImpersonation(): Promise<SessionActionResult<{ customToken: string }>> {
+  return runSessionAction("leaveImpersonation", (actions, context) => actions.leaveImpersonation(context));
+}
+
 /** Revokes the session and deletes the cookie. */
 export async function signOut(): Promise<SessionActionResult<null>> {
   return runSessionAction("signOut", (actions, context) => actions.signOut(context));

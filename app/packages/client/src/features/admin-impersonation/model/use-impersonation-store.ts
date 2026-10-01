@@ -16,11 +16,7 @@ export type StoredImpersonation = z.infer<typeof StoredImpersonationSchema>;
 type ImpersonationState = {
   /** The last session started here; kept until it is ended or expires. */
   session: StoredImpersonation | null;
-  /** One-time custom token of that session: memory only, gone on reload. */
-  customToken: string | null;
-  start: (session: StoredImpersonation, customToken: string) => void;
-  /** Forgets the token once it was used to sign in as the user. */
-  consumeToken: () => void;
+  start: (session: StoredImpersonation) => void;
   reset: () => void;
 };
 
@@ -28,20 +24,18 @@ export const IMPERSONATION_STORAGE_KEY = "core.admin-impersonation";
 const STORAGE_VERSION = 1;
 
 /**
- * What staff need to end an impersonation session later (SP1 has no "list my sessions"): the
- * session id, its expiry, the user and the organization, in `sessionStorage` so it survives the
- * sign-out and sign-in that returning to the staff account takes, but not the tab. The custom
- * token is a credential: it stays in memory and is never persisted. Hydrated after mount
- * (`skipHydration`), validated before it replaces state, with `reset`.
+ * What staff need to open or end an impersonation session started in this tab: the session id,
+ * its expiry, the user and the organization, in `sessionStorage` so it survives reloads but not
+ * the tab. No token is kept: the server session mints it when the tab enters the session
+ * (decision 0047). Hydrated after mount (`skipHydration`), validated before it replaces state,
+ * with `reset`.
  */
 export const useImpersonationStore = create<ImpersonationState>()(
   persist(
     (set) => ({
       session: null,
-      customToken: null,
-      start: (session, customToken) => set({ session, customToken }),
-      consumeToken: () => set({ customToken: null }),
-      reset: () => set({ session: null, customToken: null }),
+      start: (session) => set({ session }),
+      reset: () => set({ session: null }),
     }),
     {
       name: IMPERSONATION_STORAGE_KEY,

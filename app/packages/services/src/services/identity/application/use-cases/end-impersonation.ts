@@ -14,7 +14,8 @@ export type EndImpersonation = (command: {
   requestId: string;
 }) => Promise<Result<void, AccessDeniedError | ImpersonationNotFoundError>>;
 
-const auditEnd = async (tx: Transaction, deps: PlatformDeps, session: ImpersonationSession, requestId: string): Promise<void> => {
+/** Both audit entries of an ended impersonation session (platform and tenant logs). */
+export const auditEnd = async (tx: Transaction, deps: Pick<PlatformDeps, "audit">, session: ImpersonationSession, requestId: string): Promise<void> => {
   const common = { action: "IMPERSONATION_ENDED", outcome: "success", requestId } as const;
   await deps.audit.record(
     { log: "platform", ...common, actor: { type: "user", id: session.staffUid }, target: { type: "user", id: session.targetUid }, targetTenantId: session.tenantId },

@@ -38,7 +38,8 @@ const memoryStorage = (): StateStorage => {
   return { getItem: (key) => data.get(key) ?? null, setItem: (key, value) => void data.set(key, value), removeItem: (key) => void data.delete(key) };
 };
 
-export type BridgeLog = { established: string[]; ended: number };
+/** What the fake session bridge was asked: sign-ins, sign-outs, impersonations entered and left. */
+export type BridgeLog = { established: string[]; ended: number; entered: string[]; left: number };
 
 export type RenderAppOptions = {
   /** Extra or overriding `/v1` routes; `GET /v1/me` and claims sync have defaults. */
@@ -56,6 +57,8 @@ export type RenderAppOptions = {
   config?: Partial<ClientConfig>;
   /** Overrides `sessionBridge.establish` (e.g. to fail the web session). */
   establish?: SessionBridgePort["establish"];
+  /** Overrides `sessionBridge.leaveImpersonation` (e.g. to fail the return to staff). */
+  leaveImpersonation?: SessionBridgePort["leaveImpersonation"];
 };
 
 export type RenderAppResult = RenderResult & {
@@ -72,11 +75,21 @@ export const renderApp = (ui: ReactElement, options: RenderAppOptions = {}): Ren
   const api = createFakeApi({ "GET /v1/me": ok(buildMe()), "POST /v1/me/claims/sync": noContent(), ...options.routes });
   const auth = options.auth ?? createFakeAuth(TEST_USER);
   auth.setClaims({ accessVersion: 3 });
-  const bridge: BridgeLog = { established: [], ended: 0 };
+  const bridge: BridgeLog = { established: [], ended: 0, entered: [], left: 0 };
   const sessionBridge: SessionBridgePort = {
     establish: options.establish ?? (({ idToken }) => Promise.resolve(void bridge.established.push(idToken))),
     restore: () => Promise.resolve(options.signedIn === false ? null : { customToken: "custom-token" }),
     end: () => Promise.resolve(void (bridge.ended += 1)),
+    enterImpersonation: ({ impersonationSessionId }) => {
+      bridge.entered.push(impersonationSessionId);
+      return Promise.resolve({ customToken: "impersonated-token" });
+    },
+    leaveImpersonation:
+      options.leaveImpersonation ??
+      (() => {
+        bridge.left += 1;
+        return Promise.resolve({ customToken: "staff-token" });
+      }),
   };
   const router = createMemoryRouter(options.path ?? "/");
   const app = createClientApp({

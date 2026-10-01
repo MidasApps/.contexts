@@ -1,4 +1,5 @@
-import { UserIdSchema } from "@core/contracts";
+import { ImpersonationSessionIdSchema, UserIdSchema } from "@core/contracts";
+import { createFirestoreSessionRepository } from "../driven/firestore-session-repository.ts";
 import { beforeEach, describe, expect, it } from "vitest";
 import { CORE_COLLECTIONS } from "../../../shared/firestore/collections.ts";
 import { signInWithCustomToken, signUpWithPassword } from "../../../shared/testing/auth-emulator-rest.fixture.ts";
@@ -51,6 +52,23 @@ describe("sessions (Auth Emulator)", () => {
     expect(await sessions.requireWebSession({ cookie: created.data.cookie })).toMatchObject({ ok: false });
     expect(await sessions.exchangeWebSession({ cookie: created.data.cookie })).toMatchObject({ ok: false });
     expect((await exchangeDesktop(rotatedBody.data.secret)).status).toBe(401);
+  });
+
+  it("stores and clears the impersonation marker; a marker without a usable session restores staff (decision 0047)", { timeout: 60_000 }, async () => {
+    const signUp = await signUpWithPassword(email, "correct-horse-battery");
+    const uid = UserIdSchema.parse(signUp.localId ?? "");
+    const created = await sessions.createWebSession({ idToken: signUp.idToken, userAgent: null });
+    if (!created.ok) throw created.error;
+    const repository = createFirestoreSessionRepository({ firestore });
+    await repository.setImpersonation({ id: created.data.sessionId, impersonationSessionId: ImpersonationSessionIdSchema.parse("imp-missing") });
+    expect((await repository.get(undefined, created.data.sessionId))?.impersonationSessionId).toBe("imp-missing");
+
+    const exchanged = await sessions.exchangeWebSession({ cookie: created.data.cookie });
+    if (!exchanged.ok) throw exchanged.error;
+    const decoded = await auth.verifyIdToken((await signInWithCustomToken(exchanged.data.customToken)).idToken);
+    expect(decoded.uid).toBe(uid);
+    expect(decoded["imp"]).toBeUndefined();
+    expect((await repository.get(undefined, created.data.sessionId))?.impersonationSessionId).toBeNull();
   });
 
   it("revokes a desktop session whose rotated secret is presented again", { timeout: 60_000 }, async () => {

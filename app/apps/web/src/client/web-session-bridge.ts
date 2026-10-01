@@ -9,6 +9,8 @@ export type WebSessionActions = {
   readonly createSession: (input: { idToken: string }) => Promise<ActionResult<{ expiresAt: string }>>;
   readonly exchangeSession: () => Promise<ActionResult<{ customToken: string }>>;
   readonly signOut: () => Promise<ActionResult<null>>;
+  readonly enterImpersonation: (input: { impersonationSessionId: string }) => Promise<ActionResult<{ customToken: string }>>;
+  readonly leaveImpersonation: () => Promise<ActionResult<{ customToken: string }>>;
 };
 
 // HTTP-equivalent status of the codes the session actions answer, so `isClientError` works.
@@ -17,6 +19,7 @@ const STATUS_BY_CODE: Readonly<Record<string, number>> = {
   UNAUTHORIZED: 401,
   RECENT_SIGN_IN_REQUIRED: 401,
   FORBIDDEN: 403,
+  NOT_FOUND: 404,
 };
 
 const toApiError = (error: ActionError): ApiError =>
@@ -44,4 +47,7 @@ export const createWebSessionBridge = (actions: WebSessionActions): SessionBridg
   end: async () => {
     dataOf(await actions.signOut());
   },
+  // Support access (decision 0047): the cookie session remembers the impersonation across reloads.
+  enterImpersonation: async (input) => dataOf(await actions.enterImpersonation(input)),
+  leaveImpersonation: async () => dataOf(await actions.leaveImpersonation()),
 });

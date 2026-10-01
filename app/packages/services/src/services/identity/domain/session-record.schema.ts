@@ -1,4 +1,4 @@
-import { IsoDateTimeSchema, SessionIdSchema, SessionKindSchema, UserIdSchema } from "@core/contracts";
+import { ImpersonationSessionIdSchema, IsoDateTimeSchema, SessionIdSchema, SessionKindSchema, UserIdSchema } from "@core/contracts";
 import { z } from "zod";
 
 const Sha256HexSchema = z.string().regex(/^[a-f0-9]{64}$/);
@@ -24,5 +24,10 @@ export const SessionRecordSchema = z.object({
   lastSeenAt: IsoDateTimeSchema,
   expiresAt: IsoDateTimeSchema,
   revokedAt: IsoDateTimeSchema.nullable(),
+  /**
+   * Web only: the impersonation session staff entered from this session (decision 0047). The
+   * exchange restores that user while it is open; absent or null means the staff account.
+   */
+  impersonationSessionId: ImpersonationSessionIdSchema.nullable().optional(),
 });
 export type SessionRecord = z.infer<typeof SessionRecordSchema>;

@@ -1,4 +1,5 @@
-import type { RequestId } from "@core/contracts";
+import { ImpersonationSessionIdSchema, type RequestId } from "@core/contracts";
+import { z } from "zod";
 import type { Logger } from "../../../shared/observability/logger.ts";
 import { resolveRequestId } from "../../../shared/observability/request-id.ts";
 import { CreateWebSessionInputSchema } from "../../application/use-cases/create-web-session.schema.ts";
@@ -38,13 +39,22 @@ export type SessionActions = {
   readonly exchangeSession: (context: SessionActionContext) => Promise<SessionActionResult<{ customToken: string }>>;
   /** `signOut()` → revokes the record and deletes `__session`. */
   readonly signOut: (context: SessionActionContext) => Promise<SessionActionResult<null>>;
+  /** `enterImpersonation({ impersonationSessionId })` → the impersonated user's custom token; kept across reloads (decision 0047). */
+  readonly enterImpersonation: (input: unknown, context: SessionActionContext) => Promise<SessionActionResult<{ customToken: string }>>;
+  /** `leaveImpersonation()` → ends the impersonation and returns the staff custom token (decision 0047). */
+  readonly leaveImpersonation: (context: SessionActionContext) => Promise<SessionActionResult<{ customToken: string }>>;
 };
+
+const EnterImpersonationInputSchema = z.strictObject({ impersonationSessionId: ImpersonationSessionIdSchema });
+
+const validationDetails = (error: z.ZodError) => error.issues.map((issue) => ({ field: issue.path.map(String).join("."), issue: issue.code.toUpperCase() }));
 
 const MESSAGES: Readonly<Record<string, string>> = {
   FORBIDDEN: "You do not have permission to do this.",
   UNAUTHORIZED: "Authentication required.",
   RECENT_SIGN_IN_REQUIRED: "Sign in again to continue.",
   VALIDATION_FAILED: "One or more fields are invalid.",
+  NOT_FOUND: "The resource was not found.",
 };
 
 const failure = (code: string, requestId: RequestId, details?: SessionActionError["details"]): { ok: false; error: SessionActionError } => ({
@@ -79,7 +89,7 @@ export const makeSessionActions = (deps: { sessions: SessionServices; appUrl: st
       const { requestId, allowed } = begin(context);
       if (!allowed) return failure("FORBIDDEN", requestId);
       const parsed = CreateWebSessionInputSchema.safeParse(input);
-      if (!parsed.success) return failure("VALIDATION_FAILED", requestId, parsed.error.issues.map((issue) => ({ field: issue.path.map(String).join("."), issue: issue.code.toUpperCase() })));
+      if (!parsed.success) return failure("VALIDATION_FAILED", requestId, validationDetails(parsed.error));
       const created = await deps.sessions.createWebSession({ idToken: parsed.data.idToken, userAgent: context.userAgent ?? null });
       if (!created.ok) return failure(created.error.code, requestId);
       context.cookies.set(SESSION_COOKIE_NAME, created.data.cookie, { maxAgeSeconds: created.data.maxAgeSeconds });
@@ -89,7 +99,7 @@ export const makeSessionActions = (deps: { sessions: SessionServices; appUrl: st
     exchangeSession: async (context) => {
       const { requestId, allowed } = begin(context);
       if (!allowed) return failure("FORBIDDEN", requestId);
-      const exchanged = await deps.sessions.exchangeWebSession({ cookie: context.cookies.get(SESSION_COOKIE_NAME) });
+      const exchanged = await deps.sessions.exchangeWebSession({ cookie: context.cookies.get(SESSION_COOKIE_NAME), requestId });
       if (exchanged.ok) return exchanged;
       context.cookies.delete(SESSION_COOKIE_NAME);
       return failure("UNAUTHORIZED", requestId);
@@ -100,6 +110,27 @@ export const makeSessionActions = (deps: { sessions: SessionServices; appUrl: st
       await deps.sessions.signOutWebSession({ cookie: context.cookies.get(SESSION_COOKIE_NAME), requestId });
       context.cookies.delete(SESSION_COOKIE_NAME);
       return { ok: true, data: null };
+    },
+    // The staff cookie is never replaced: the web session record remembers the impersonation.
+    enterImpersonation: async (input, context) => {
+      const { requestId, allowed } = begin(context);
+      if (!allowed) return failure("FORBIDDEN", requestId);
+      const parsed = EnterImpersonationInputSchema.safeParse(input);
+      if (!parsed.success) return failure("VALIDATION_FAILED", requestId, validationDetails(parsed.error));
+      const entered = await deps.sessions.enterImpersonation({ cookie: context.cookies.get(SESSION_COOKIE_NAME), impersonationSessionId: parsed.data.impersonationSessionId, requestId });
+      if (entered.ok) {
+        deps.logger.info("impersonation_entered", { requestId, impersonationSessionId: parsed.data.impersonationSessionId });
+        return entered;
+      }
+      return failure(entered.error.code === "NOT_PLATFORM_STAFF" ? "FORBIDDEN" : entered.error.code, requestId);
+    },
+    leaveImpersonation: async (context) => {
+      const { requestId, allowed } = begin(context);
+      if (!allowed) return failure("FORBIDDEN", requestId);
+      const left = await deps.sessions.leaveImpersonation({ cookie: context.cookies.get(SESSION_COOKIE_NAME), requestId });
+      if (!left.ok) return failure(left.error.code, requestId);
+      deps.logger.info("impersonation_left", { requestId });
+      return left;
     },
   };
 };

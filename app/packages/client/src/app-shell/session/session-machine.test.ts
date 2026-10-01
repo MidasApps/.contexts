@@ -22,6 +22,7 @@ const EVENTS: SessionEvent[] = [
   { type: "MFA_CANCELLED" },
   { type: "SIGNED_IN", uid: "u1" },
   { type: "SIGNED_OUT" },
+  { type: "USER_SWITCHED", uid: "u2" },
 ];
 
 // Every allowed transition; any other (state, event) pair leaves the state unchanged.
@@ -38,6 +39,8 @@ const ALLOWED: [SessionState["status"], SessionEvent["type"], SessionState][] = 
   ["mfa-required", "MFA_CANCELLED", { status: "signed-out", reason: "none" }],
   ["mfa-required", "SIGNED_OUT", { status: "signed-out", reason: "signed-out" }],
   ["signed-in", "SIGNED_OUT", { status: "signed-out", reason: "signed-out" }],
+  // Support access enters or leaves an impersonation in the same tab (decision 0047).
+  ["signed-in", "USER_SWITCHED", { status: "signed-in", uid: "u2" }],
 ];
 
 describe("sessionReducer", () => {

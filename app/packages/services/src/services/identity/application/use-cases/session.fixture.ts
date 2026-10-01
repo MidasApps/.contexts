@@ -6,6 +6,7 @@ import { makeRecordAudit } from "../../../audit/application/use-cases/record-aud
 import { inMemoryUnitOfWork } from "../../../shared/firestore/unit-of-work.ts";
 import { createLogger } from "../../../shared/observability/logger.ts";
 import { createFakeFirebaseAuth } from "../../adapters/driven/fake-firebase-auth.ts";
+import { createInMemoryImpersonationSessionRepository } from "../../adapters/driven/in-memory-platform-repositories.ts";
 import { createInMemorySessionRepository } from "../../adapters/driven/in-memory-session-repository.ts";
 import { createSessionServices } from "../../session-composition.ts";
 import type { SessionId, UserId } from "@core/contracts";
@@ -16,12 +17,14 @@ export const buildSessionWorld = () => {
   let now = new Date(WORLD_NOW);
   const clock = { now: () => new Date(now.getTime()) };
   const repository = createInMemorySessionRepository();
+  const impersonations = createInMemoryImpersonationSessionRepository();
   const auth = createFakeFirebaseAuth();
   const staff = new Map<string, PlatformStaffRecord>();
   const writer = createInMemoryAuditLogWriter();
   let random = 0;
   const services = createSessionServices({
     sessions: repository,
+    impersonations,
     cookies: auth.cookies,
     customTokens: auth.customTokens,
     authUsers: auth.authUsers,
@@ -50,10 +53,12 @@ export const buildSessionWorld = () => {
   return {
     services,
     repository,
+    impersonations,
     auth,
     staff,
     webSession,
     audited: () => writer.entries("platform").map((entry) => entry.action),
+    tenantAudited: () => writer.entries("tenant").map((entry) => entry.action),
     setNow: (iso: string) => {
       now = new Date(iso);
     },

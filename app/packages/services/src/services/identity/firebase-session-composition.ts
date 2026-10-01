@@ -10,6 +10,7 @@ import type { Logger } from "../shared/observability/logger.ts";
 import { createFirebaseAuthUserAdmin } from "./adapters/driven/firebase-auth-user-admin.ts";
 import { createFirebaseCustomTokenIssuer } from "./adapters/driven/firebase-custom-token-issuer.ts";
 import { createFirebaseSessionCookieIssuer } from "./adapters/driven/firebase-session-cookie-issuer.ts";
+import { createFirestoreImpersonationSessionRepository } from "./adapters/driven/firestore-platform-repositories.ts";
 import { createFirestoreSessionRepository } from "./adapters/driven/firestore-session-repository.ts";
 import { makeSessionActions, type SessionActions } from "./adapters/driving/session-actions.ts";
 import { makeSessionGuards, type SessionGuards } from "./adapters/driving/session-guards.ts";
@@ -49,6 +50,7 @@ export const createFirebaseSessionVertical = (args: {
   const authUsers = createFirebaseAuthUserAdmin({ auth });
   const sessions = createSessionServices({
     sessions: createFirestoreSessionRepository({ firestore }),
+    impersonations: createFirestoreImpersonationSessionRepository({ firestore }),
     cookies: createFirebaseSessionCookieIssuer({ auth }),
     customTokens,
     authUsers,

@@ -10,7 +10,9 @@ export type SessionEvent =
   | { readonly type: "MFA_REQUIRED"; readonly challenge: MfaChallenge }
   | { readonly type: "MFA_CANCELLED" }
   | { readonly type: "SIGNED_IN"; readonly uid: string }
-  | { readonly type: "SIGNED_OUT" };
+  | { readonly type: "SIGNED_OUT" }
+  /** The same tab now runs as another Firebase user: support access entered or left (decision 0047). */
+  | { readonly type: "USER_SWITCHED"; readonly uid: string };
 
 export const INITIAL_SESSION_STATE: SessionState = { status: "booting" };
 
@@ -57,6 +59,7 @@ export const sessionReducer = (state: SessionState, event: SessionEvent): Sessio
     case "mfa-required":
       return mfaTransition(state, event);
     case "signed-in":
+      if (event.type === "USER_SWITCHED") return { status: "signed-in", uid: event.uid };
       return event.type === "SIGNED_OUT" ? { status: "signed-out", reason: "signed-out" } : state;
   }
 };

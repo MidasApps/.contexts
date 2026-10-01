@@ -18,6 +18,14 @@ const actions = (overrides: Partial<WebSessionActions> = {}): WebSessionActions 
       calls.push(["signOut"]);
       return Promise.resolve({ ok: true, data: null });
     },
+    enterImpersonation: (input) => {
+      calls.push(["enterImpersonation", input]);
+      return Promise.resolve({ ok: true, data: { customToken: "impersonated-token" } });
+    },
+    leaveImpersonation: () => {
+      calls.push(["leaveImpersonation"]);
+      return Promise.resolve({ ok: true, data: { customToken: "staff-token" } });
+    },
     ...overrides,
   };
 };
@@ -57,5 +65,15 @@ describe("createWebSessionBridge", () => {
     expect(fake.calls).toEqual([["signOut"]]);
 
     await expect(createWebSessionBridge(actions({ signOut: () => Promise.resolve(failure("FORBIDDEN")) })).end()).rejects.toBeInstanceOf(ApiError);
+  });
+
+  it("enters and leaves an impersonation through the session actions (decision 0047)", async () => {
+    const fake = actions();
+    const bridge = createWebSessionBridge(fake);
+    expect(await bridge.enterImpersonation?.({ impersonationSessionId: "imp-1" })).toEqual({ customToken: "impersonated-token" });
+    expect(await bridge.leaveImpersonation?.()).toEqual({ customToken: "staff-token" });
+    expect(fake.calls).toEqual([["enterImpersonation", { impersonationSessionId: "imp-1" }], ["leaveImpersonation"]]);
+    const refused = createWebSessionBridge(actions({ leaveImpersonation: () => Promise.resolve(failure("UNAUTHORIZED")) }));
+    await expect(refused.leaveImpersonation?.()).rejects.toMatchObject({ code: "UNAUTHORIZED", status: 401 });
   });
 });

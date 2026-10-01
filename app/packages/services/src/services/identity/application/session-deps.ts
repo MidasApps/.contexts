@@ -10,12 +10,15 @@ import { err, ok, type Result } from "../../shared/result/result.ts";
 import type { SessionRecord } from "../domain/session-record.schema.ts";
 import type { AuthUserAdmin } from "./ports/driven/auth-user-admin.ts";
 import type { CustomTokenIssuer } from "./ports/driven/custom-token-issuer.ts";
+import type { ImpersonationSessionRepository } from "./ports/driven/impersonation-session-repository.ts";
 import type { SessionCookieIssuer } from "./ports/driven/session-cookie-issuer.ts";
 import type { SessionRepository } from "./ports/driven/session-repository.ts";
 
 /** Dependencies of the session use cases (SP1 Task 13, decision 0007). */
 export type SessionDeps = {
   readonly sessions: SessionRepository;
+  /** Read and ended by the web session when staff enters or leaves an impersonation (decision 0047). */
+  readonly impersonations: ImpersonationSessionRepository;
   readonly cookies: SessionCookieIssuer;
   readonly customTokens: CustomTokenIssuer;
   readonly authUsers: AuthUserAdmin;

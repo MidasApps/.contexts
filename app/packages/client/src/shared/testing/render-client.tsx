@@ -36,6 +36,8 @@ export const createRecordingSession = (state: SessionState = { status: "signed-i
     actions,
     completeSignIn: record("completeSignIn"),
     signOut: record("signOut"),
+    enterImpersonation: () => record("enterImpersonation")(),
+    leaveImpersonation: record("leaveImpersonation"),
     requireMfa: () => void actions.push("requireMfa"),
     cancelMfa: () => void actions.push("cancelMfa"),
   };

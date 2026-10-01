@@ -41,6 +41,9 @@ export const createFirestoreSessionRepository = (deps: { firestore: Firestore })
     touch: async ({ id, lastSeenAt }) => {
       await raw().doc(id).update(update({ lastSeenAt }));
     },
+    setImpersonation: async ({ id, impersonationSessionId }) => {
+      await raw().doc(id).update(update({ impersonationSessionId }));
+    },
     rotate: (tx, { id, ...patch }) => void tx.update(raw().doc(id), update({ ...patch, previousSecretHashes: [...patch.previousSecretHashes] })),
     revoke: async (tx, { id, revokedAt }) => {
       const ref = raw().doc(id);

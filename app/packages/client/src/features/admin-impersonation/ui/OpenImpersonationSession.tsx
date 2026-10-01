@@ -6,12 +6,12 @@ import { useState } from "react";
 import { useTranslations } from "use-intl";
 import { impersonationSessionKeys } from "#/entities/impersonation-session/index.ts";
 import { useCallEndpoint } from "#/shared/api/api-context.tsx";
-import { useAuth } from "#/shared/lib/auth/auth-context.tsx";
 import { useAsyncAction } from "#/shared/lib/errors/use-async-action.ts";
 import { useConfirmedAction } from "#/shared/lib/errors/use-confirmed-action.ts";
 import { useFormatDateTime } from "#/shared/lib/format/use-format-date-time.ts";
 import { useOnlineStatus } from "#/shared/lib/network/use-online-status.ts";
 import { useRouter } from "#/shared/lib/router/router-context.tsx";
+import { useSession } from "#/shared/lib/session/session-context.tsx";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
 import { StatusPill } from "#/shared/ui/molecules/StatusPill/StatusPill.tsx";
 import { notify } from "#/shared/ui/molecules/Toaster/notify.ts";
@@ -26,20 +26,18 @@ export type OpenImpersonationSessionProps = {
 
 /**
  * The impersonation session this tab started: who, where and until when, with "open the app as
- * this user" (while the one-time token is still in memory) and "end session". Opening signs the
- * tab in as the user, read-only; the staff account comes back by reloading or signing in again,
- * and the session can then be ended here until it expires.
+ * this user" and "end session". Opening has the server session enter it (decision 0047): the tab
+ * runs as the user, read-only, also after a reload, until the banner's "leave support mode"
+ * (which ends it and returns to the staff account) or the expiry.
  */
 export function OpenImpersonationSession({ session, organizationName }: OpenImpersonationSessionProps) {
   const t = useTranslations("admin.impersonation.session");
   const online = useOnlineStatus();
-  const auth = useAuth();
+  const sessionController = useSession();
   const router = useRouter();
   const queryClient = useQueryClient();
   const callEndpoint = useCallEndpoint();
   const formatDateTime = useFormatDateTime();
-  const customToken = useImpersonationStore((state) => state.customToken);
-  const consumeToken = useImpersonationStore((state) => state.consumeToken);
   const reset = useImpersonationStore((state) => state.reset);
   const [ending, setEnding] = useState(false);
   const open = useAsyncAction();
@@ -52,12 +50,9 @@ export function OpenImpersonationSession({ session, organizationName }: OpenImpe
     () => notify.success(t("ended")),
   );
 
-  const openAsUser = (token: string): Promise<boolean> =>
+  const openAsUser = (): Promise<boolean> =>
     open.run(async () => {
-      await auth.signInWithCustomToken(token);
-      consumeToken();
-      // Everything cached belongs to the staff account.
-      queryClient.clear();
+      await sessionController.enterImpersonation(session.sessionId);
       router.navigate({ id: "home" });
     });
 
@@ -82,18 +77,16 @@ export function OpenImpersonationSession({ session, organizationName }: OpenImpe
           </dd>
         </div>
       </dl>
-      <p className="text-sm text-muted-foreground">{customToken === null ? t("tokenUsed") : t("openHint")}</p>
+      <p className="text-sm text-muted-foreground">{t("openHint")}</p>
       {open.error === undefined ? null : (
         <p role="alert" className="text-sm font-medium text-destructive-text">
           {open.error}
         </p>
       )}
       <div className="flex flex-wrap gap-2">
-        {customToken === null ? null : (
-          <Button onClick={() => void openAsUser(customToken)} pending={open.pending} disabled={!online}>
-            {t("open")}
-          </Button>
-        )}
+        <Button onClick={() => void openAsUser()} pending={open.pending} disabled={!online}>
+          {t("open")}
+        </Button>
         <Button variant="outline" onClick={() => setEnding(true)} disabled={!online || open.pending}>
           {t("end")}
         </Button>

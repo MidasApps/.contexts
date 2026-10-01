@@ -42,6 +42,8 @@ export const AUDIT_ACTIONS = [
   "DESKTOP_SESSION_REUSE_DETECTED",
   "IMPERSONATION_STARTED",
   "IMPERSONATION_ENDED",
+  // Decision 0047: a web session found its impersonation past `expiresAt` and went back to staff.
+  "IMPERSONATION_EXPIRED",
   "IMPERSONATED_REQUEST_SERVED",
   "IMPERSONATED_WRITE_DENIED",
   "APPROVAL_REQUESTED",

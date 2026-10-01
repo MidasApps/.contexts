@@ -10,6 +10,7 @@ import { SessionContextProvider } from "#/shared/lib/session/session-context.tsx
 import type { SessionController } from "#/shared/lib/session/session-state.ts";
 import { useAuthLossWatch, useClaimsFreshness, useSessionBoot, waitForSignedInUid, type ReportError } from "./session-effects.ts";
 import { INITIAL_SESSION_STATE, sessionReducer } from "./session-machine.ts";
+import { useImpersonationSwitch } from "./use-impersonation-switch.ts";
 
 export type SessionProviderProps = {
   sessionBridge: SessionBridgePort;
@@ -61,6 +62,8 @@ export function SessionProvider({ sessionBridge, reportError, onSignedOut, child
     }
   }, [auth, sessionBridge, endLocally]);
 
+  const { enterImpersonation, leaveImpersonation } = useImpersonationSwitch({ auth, sessionBridge, dispatch });
+
   const controller = useMemo<SessionController>(
     () => ({
       state,
@@ -68,8 +71,10 @@ export function SessionProvider({ sessionBridge, reportError, onSignedOut, child
       requireMfa: (challenge: MfaChallenge) => dispatch({ type: "MFA_REQUIRED", challenge }),
       cancelMfa: () => dispatch({ type: "MFA_CANCELLED" }),
       signOut,
+      enterImpersonation,
+      leaveImpersonation,
     }),
-    [state, completeSignIn, signOut],
+    [state, completeSignIn, signOut, enterImpersonation, leaveImpersonation],
   );
   return <SessionContextProvider session={controller}>{children}</SessionContextProvider>;
 }

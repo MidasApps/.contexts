@@ -39,6 +39,7 @@ export const createInMemorySessionRepository = (): InMemorySessionRepository => 
       return Promise.resolve(pageFromOverfetch({ fetched: matching.slice(0, page.limit + 1), limit: page.limit, positionOf: (r) => [r.createdAt, r.id] }));
     },
     touch: ({ id, lastSeenAt }) => Promise.resolve(update(id, { lastSeenAt })),
+    setImpersonation: ({ id, impersonationSessionId }) => Promise.resolve(update(id, { impersonationSessionId })),
     rotate: (_tx, { id, ...patch }) => update(id, { ...patch, previousSecretHashes: [...patch.previousSecretHashes] }),
     revoke: (_tx, { id, revokedAt }) => Promise.resolve(update(id, { revokedAt })),
     revokeAllOf: ({ uid, revokedAt }) => {

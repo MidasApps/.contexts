@@ -29,4 +29,15 @@ export type SessionController = {
   readonly cancelMfa: () => void;
   /** Ends the session server-side, signs Firebase out, clears the query cache and UI stores. */
   readonly signOut: () => Promise<void>;
+  /**
+   * Staff opens the app as the user of one of their open impersonation sessions (web only,
+   * decision 0047): the server session remembers it, so a reload keeps the user until it ends.
+   * @throws {Error} when the bridge cannot (desktop) or the server refuses.
+   */
+  readonly enterImpersonation: (impersonationSessionId: string) => Promise<void>;
+  /**
+   * Ends that impersonation server-side and returns the tab to the staff account without a new
+   * sign-in. @throws {Error} when the bridge cannot or the staff session is gone (caller signs out).
+   */
+  readonly leaveImpersonation: () => Promise<void>;
 };

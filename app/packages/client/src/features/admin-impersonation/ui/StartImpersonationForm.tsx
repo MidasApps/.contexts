@@ -57,8 +57,8 @@ function FieldMessage({ id, message }: { id: string; message: string | undefined
 /**
  * Starts read-only, time-boxed impersonation of a user in one organization (SP1 spec §6.6;
  * platform.user.impersonate with MFA; audited in the platform log and the organization's).
- * The answer's custom token stays in memory; the session id and expiry go to the session store so
- * staff can end it later.
+ * The session id and expiry go to the session store so staff can open or end it later; the
+ * answer's one-time custom token is not kept (the web session mints one on entry, decision 0047).
  */
 export function StartImpersonationForm({ target, onTargetClear, organizationId, organizationField }: StartImpersonationFormProps) {
   const t = useTranslations("admin.impersonation.form");
@@ -88,7 +88,7 @@ export function StartImpersonationForm({ target, onTargetClear, organizationId, 
     await save.run(async () => {
       try {
         const { data } = await callEndpoint(startImpersonationEndpoint, { body });
-        start({ sessionId: data.sessionId, expiresAt: data.expiresAt, targetUid: body.targetUid, organizationId: body.organizationId }, data.customToken);
+        start({ sessionId: data.sessionId, expiresAt: data.expiresAt, targetUid: body.targetUid, organizationId: body.organizationId });
         void queryClient.invalidateQueries({ queryKey: impersonationSessionKeys.all() });
         notify.success(t("started"));
         onTargetClear();

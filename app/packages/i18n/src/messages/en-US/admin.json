@@ -481,8 +481,7 @@
       "organization": "Organization",
       "expires": "Expires",
       "readOnly": "Read-only",
-      "openHint": "Opening switches this tab to the user's account, read-only. To return to the team account, reload the page or sign out and in again; then end the session here.",
-      "tokenUsed": "This session's access was already used or the page was reloaded. You can still end it before it expires.",
+      "openHint": "Opening switches this tab to the user's account, read-only, also after a reload. To return to the team account, use \"Leave support mode\" in the notice at the top: it ends the session.",
       "open": "Open the app as this user",
       "end": "End session",
       "endTitle": "End the support session?",
@@ -493,7 +492,7 @@
     "banner": {
       "message": "You are seeing the app as another user, read-only. Everything you open is recorded.",
       "messageUntil": "You are seeing the app as another user, read-only, until {when}. Everything you open is recorded.",
-      "signOut": "Leave support mode"
+      "leave": "Leave support mode"
     },
     "endAny": {
       "title": "End this support session?",

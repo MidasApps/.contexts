@@ -227,7 +227,7 @@ describe("AdminUsersView", () => {
   });
 
   it("starts a session, opens the app as the user and keeps only the session data in storage", async () => {
-    const { user, api, router, container } = render({ routes: { ...ORGANIZATIONS, "POST /v1/platform/impersonation-sessions": ok(buildImpersonationStart(), 201) } });
+    const { user, api, router, container, bridge } = render({ routes: { ...ORGANIZATIONS, "POST /v1/platform/impersonation-sessions": ok(buildImpersonationStart(), 201) } });
     const start = await fillForm(user);
     const minutes = within(start).getByRole("spinbutton", { name: "Duração em minutos" });
     await user.clear(minutes);
@@ -245,7 +245,9 @@ describe("AdminUsersView", () => {
     await expectNoAxeViolations(container);
     await user.click(within(session).getByRole("button", { name: "Abrir o app como este usuário" }));
     await waitFor(() => expect(router.current()).toBe("/"));
-    expect(useImpersonationStore.getState().customToken).toBeNull();
+    // The server session enters it (decision 0047): no token is kept in the browser.
+    expect(bridge.entered).toEqual([IMPERSONATION_IDS.session]);
+    expect(JSON.stringify(useImpersonationStore.getState())).not.toContain("eyJ");
   });
 
   it("explains a user that cannot be impersonated in that organization", async () => {
@@ -262,13 +264,13 @@ describe("AdminUsersView", () => {
     expect((await within(start).findByRole("alert")).textContent).toContain("Esta ação exige verificação em duas etapas.");
   });
 
-  it("offers to end the session started earlier in this tab, after a confirmation", async () => {
+  it("after a reload still opens the session started in this tab, or ends it after a confirmation", async () => {
     globalThis.sessionStorage.setItem(IMPERSONATION_STORAGE_KEY, storedImpersonation());
     const { user, api } = render({ routes: { ...ORGANIZATIONS, "POST /v1/platform/impersonation-sessions/:sessionId/end": noContent() } });
     const session = await screen.findByRole("region", { name: "Sessão aberta nesta aba" });
     expect(await within(session).findByText(IMPERSONATION_IDS.target)).toBeDefined();
-    expect(within(session).queryByRole("button", { name: "Abrir o app como este usuário" })).toBeNull();
-    expect(within(session).getByText(/já foi usado ou a página foi recarregada/u)).toBeDefined();
+    expect(within(session).getByRole("button", { name: "Abrir o app como este usuário" })).toBeDefined();
+    expect(within(session).getByText(/Sair do modo suporte/u)).toBeDefined();
     await user.click(within(session).getByRole("button", { name: "Encerrar sessão" }));
     const dialog = await screen.findByRole("alertdialog", { name: "Encerrar a sessão de suporte?" });
     await user.click(within(dialog).getByRole("button", { name: "Encerrar" }));

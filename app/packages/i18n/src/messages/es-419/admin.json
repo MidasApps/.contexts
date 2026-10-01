@@ -481,8 +481,7 @@
       "organization": "Organización",
       "expires": "Expira el",
       "readOnly": "Solo lectura",
-      "openHint": "Abrir cambia esta pestaña a la cuenta del usuario, solo lectura. Para volver a la cuenta del equipo, recarga la página o cierra la sesión y vuelve a entrar; luego cierra la sesión aquí.",
-      "tokenUsed": "El acceso de esta sesión ya se usó o la página se recargó. Todavía puedes cerrarla antes de que expire.",
+      "openHint": "Abrir cambia esta pestaña a la cuenta del usuario, solo lectura, también después de recargar la página. Para volver a la cuenta del equipo, usa \"Salir del modo soporte\" en el aviso de arriba: eso cierra la sesión.",
       "open": "Abrir la app como este usuario",
       "end": "Cerrar sesión de soporte",
       "endTitle": "¿Cerrar la sesión de soporte?",
@@ -493,7 +492,7 @@
     "banner": {
       "message": "Estás viendo la app como otro usuario, en modo solo lectura. Todo lo que abras queda registrado.",
       "messageUntil": "Estás viendo la app como otro usuario, en modo solo lectura, hasta {when}. Todo lo que abras queda registrado.",
-      "signOut": "Salir del modo soporte"
+      "leave": "Salir del modo soporte"
     },
     "endAny": {
       "title": "¿Finalizar esta sesión de soporte?",
