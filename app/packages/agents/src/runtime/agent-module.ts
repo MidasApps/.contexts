@@ -42,6 +42,19 @@ export type AgentFactoryDeps = {
   readonly instructions: InstructionsResolver;
 };
 
+/**
+ * What the staff catalog shows about an agent (decision 0044). Data only: `create` builds the
+ * agent, and its tools are resolved per run, so the catalog cannot read them from the agent.
+ */
+export type AgentCatalogInfo = {
+  /** Ids of the tools the agent has in every organization. */
+  readonly tools: readonly string[];
+  /** Names of the core skills it loads. */
+  readonly skills: readonly string[];
+  /** True when it also gets tools from the organization's connectors or web opt-ins. */
+  readonly perOrganizationTools?: boolean;
+};
+
 export type AgentDefinition = {
   /** Mastra agent id and key (`/api/agents/<id>`). Module agents are prefixed by the module id. */
   readonly id: string;
@@ -53,6 +66,8 @@ export type AgentDefinition = {
    * in tenants whose `agent-settings.enabledAgents` lists its id.
    */
   readonly role?: "entry" | "subagent";
+  /** Tools and skills for the staff catalog; absent: the catalog lists the agent without them. */
+  readonly catalog?: AgentCatalogInfo;
   readonly create: (deps: AgentFactoryDeps) => Agent;
 };
 

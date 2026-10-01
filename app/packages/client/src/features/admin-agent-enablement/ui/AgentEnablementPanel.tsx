@@ -14,7 +14,13 @@ import { Switch } from "#/shared/ui/atoms/Switch/Switch.tsx";
 import { Alert, AlertDescription, AlertTitle } from "#/shared/ui/molecules/Alert/Alert.tsx";
 import { notify } from "#/shared/ui/molecules/Toaster/notify.ts";
 
-export type AgentEnablementPanelProps = { organizationId: string; organizationName: string; settings: AgentSettings };
+export type AgentEnablementPanelProps = {
+  organizationId: string;
+  organizationName: string;
+  settings: AgentSettings;
+  /** Ids of every subagent the runtime registered; without them the list is the core ones plus the enabled ones. */
+  registeredAgents?: readonly string[] | undefined;
+};
 
 type Change = { patch: UpdateAgentSettingsInput; next: AgentSettings; done: string };
 type Failure = { message: string; requestId: string | undefined };
@@ -113,7 +119,7 @@ function PiiMode({ value, disabled, onChange }: { value: "warn" | "redact"; disa
  * platform.agent.manage, audited with the organization as target): which subagents the supervisor
  * may delegate to, the web tool opt-ins and the PII guardrail mode. Each control saves on change.
  */
-export function AgentEnablementPanel({ organizationId, organizationName, settings }: AgentEnablementPanelProps) {
+export function AgentEnablementPanel({ organizationId, organizationName, settings, registeredAgents }: AgentEnablementPanelProps) {
   const t = useTranslations("admin.agentSettings");
   const names = useTranslations("admin.agents.names");
   const online = useOnlineStatus();
@@ -146,7 +152,7 @@ export function AgentEnablementPanel({ organizationId, organizationName, setting
       {online ? null : <p className="text-xs text-muted-foreground">{t("offline")}</p>}
       <Group title={t("agents.title")} description={t("agents.description")}>
         <ul className="divide-y divide-border">
-          {listedAgentKeys(settings).map((key) => (
+          {listedAgentKeys(settings, registeredAgents).map((key) => (
             <ToggleRow key={key} label={agentName(key)} description={names.has(key) ? key : undefined} checked={settings.enabledAgents.includes(key)} disabled={disabled} onChange={(enabled) => toggleAgent(key, enabled)} />
           ))}
         </ul>

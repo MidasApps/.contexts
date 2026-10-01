@@ -1,4 +1,4 @@
-import { AdminScheduleSchema, AdminWorkflowRunSchema, FORWARDED_HEADERS, PageMetaSchema } from "@core/contracts";
+import { AdminAgentSchema, AdminScheduleSchema, AdminWorkflowRunSchema, FORWARDED_HEADERS, PageMetaSchema } from "@core/contracts";
 import { z } from "zod";
 import type { ServerlessIdTokenSource } from "../../../agents/adapters/driven/serverless-id-token.ts";
 import type { OperationsError, OperationsGateway, OperationsResult } from "../../application/ports/operations-gateway.ts";
@@ -13,12 +13,13 @@ const RunsSchema = z.object({ data: z.array(AdminWorkflowRunSchema), meta: z.obj
 const RunSchema = z.object({ data: AdminWorkflowRunSchema });
 const SchedulesSchema = z.object({ data: z.array(AdminScheduleSchema) });
 const ScheduleSchema = z.object({ data: AdminScheduleSchema });
+const AgentsSchema = z.object({ data: z.array(AdminAgentSchema) });
 
 type Call = { readonly method: "GET" | "POST"; readonly path: string; readonly query?: Record<string, string | number | undefined>; readonly requestId?: string };
 
 /**
- * `OperationsGateway` over the runtime's `/console/workflow-runs` and `/console/schedules` routes
- * (decision 0043). Sends no user credential, only `X-Request-Id` and, outside local, the
+ * `OperationsGateway` over the runtime's `/console/workflow-runs`, `/console/schedules` and
+ * `/console/agents` routes (decisions 0043 and 0044). Sends no user credential, only `X-Request-Id` and, outside local, the
  * serverless token: `/v1/admin` already required staff with MFA. Every answer is parsed against
  * the contracts; a malformed one is 502.
  */
@@ -68,6 +69,10 @@ export const createMastraOperationsGateway = (options: {
     },
     actOnSchedule: async ({ scheduleId, action, requestId }) => {
       const result = await call({ method: "POST", path: `/schedules/${encodeURIComponent(scheduleId)}/${action}`, requestId }, ScheduleSchema);
+      return result.ok ? { ok: true, data: result.data.data } : result;
+    },
+    listAgents: async ({ requestId }) => {
+      const result = await call({ method: "GET", path: "/agents", requestId }, AgentsSchema);
       return result.ok ? { ok: true, data: result.data.data } : result;
     },
   };

@@ -25,6 +25,7 @@ export const createActionAgentDefinition = (options: {
   id: ACTION_AGENT_ID,
   role: "subagent",
   ceiling: actionCeilingOf(options.commands),
+  catalog: { tools: options.commands.map(({ tool }) => tool.id), skills: [CORE_SKILLS.safeActions], perOrganizationTools: true },
   create: ({ models, tools, guardrails, skills, connectorTools, instructions }) =>
     new Agent({
       id: ACTION_AGENT_ID,

@@ -12,6 +12,30 @@ export const PROMPT_IDS = {
   activation2: "01927f3d-0000-7000-8000-000000000002",
 } as const;
 
+/** A row of `GET /v1/admin/agents` (the default is the `knowledge` subagent). */
+export const buildAdminAgent = (overrides: Json = {}): Json => ({
+  id: "knowledge",
+  name: "Knowledge",
+  description: "Answers questions about the organization's documents, citing every claim.",
+  role: "subagent",
+  enablement: "per-organization",
+  subagents: [],
+  tools: ["knowledge.searchKnowledge"],
+  toolsVaryByOrganization: false,
+  skills: ["knowledge-citations"],
+  permissions: ["core.chat.use", "core.knowledge.read"],
+  ...overrides,
+});
+
+/** The catalog of a runtime with the core agents and one module agent. */
+export const buildAgentCatalog = (): Json[] => [
+  buildAdminAgent({ id: "assistant", name: "Assistant", role: "supervisor", enablement: "always", subagents: ["knowledge", "data", "example-notes"], tools: [], toolsVaryByOrganization: true, skills: [], permissions: ["core.chat.use"] }),
+  buildAdminAgent({ id: "ping", name: "Ping", description: "Answers a health check.", role: "entry", enablement: "always", tools: ["catalog.listEntities"], skills: [] }),
+  buildAdminAgent(),
+  buildAdminAgent({ id: "data", name: "Data", tools: ["catalog.listEntities", "sql.querySemanticSql"], toolsVaryByOrganization: true, skills: ["data-catalog"] }),
+  buildAdminAgent({ id: "example-notes", name: "Notes helper", description: "Finds the notes of the example module.", tools: [], skills: [], permissions: ["example.note.read"] }),
+];
+
 export const buildAgentSettings = (overrides: Json = {}): Json => ({
   tenantId: IDS.organization,
   enabledAgents: ["knowledge", "data", "action"],

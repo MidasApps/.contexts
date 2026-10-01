@@ -1,4 +1,4 @@
-import type { AdminSchedule, AdminWorkflowRun, Connector, TenantId } from "@core/contracts";
+import type { AdminAgent, AdminSchedule, AdminWorkflowRun, Connector, TenantId } from "@core/contracts";
 import { describe, expect, it } from "vitest";
 import type { LogRecord } from "../../../shared/observability/logger.ts";
 import { callRoute, makeInMemoryPipeline } from "../../../shared/testing/in-memory-api-pipeline.fixture.ts";
@@ -33,6 +33,19 @@ const schedule = (overrides: Partial<AdminSchedule> = {}): AdminSchedule =>
 
 const PLATFORM = schedule({ id: "schedule_platform-usage-report", scope: "platform", tenantId: null, createdBy: null, timezone: "UTC" });
 
+const KNOWLEDGE: AdminAgent = {
+  id: "knowledge",
+  name: "Knowledge",
+  description: "Answers from the knowledge base.",
+  role: "subagent",
+  enablement: "per-organization",
+  subagents: [],
+  tools: ["knowledge.searchKnowledge"],
+  toolsVaryByOrganization: false,
+  skills: ["knowledge-citations"],
+  permissions: ["core.chat.use", "core.knowledge.read"],
+};
+
 /** The runtime's console routes: records what `/v1/admin` asks for. */
 const fakeOperations = () => {
   const calls: unknown[] = [];
@@ -43,6 +56,7 @@ const fakeOperations = () => {
       if (runId === "missing") return Promise.resolve({ ok: false, error: { code: "NOT_FOUND", status: 404 } });
       return Promise.resolve({ ok: true, data: run({ runId, tenantId: runId === "platform-run" ? null : (ORG_B as TenantId) }) });
     },
+    listAgents: () => (calls.push(["listAgents"]), Promise.resolve({ ok: true, data: [KNOWLEDGE] })),
     listSchedules: (query) => (calls.push(["listSchedules", query.tenantId]), Promise.resolve({ ok: true, data: query.tenantId === null ? [PLATFORM, schedule()] : [schedule()] })),
     actOnSchedule: ({ scheduleId, action }) => {
       calls.push(["actOnSchedule", scheduleId, action]);
@@ -89,6 +103,24 @@ const ENDPOINTS: [string, string, string][] = [
   ["admin.listConnectors", "GET", `/v1/admin/connectors?organizationId=${ORG_A}`],
   ["admin.listLogs", "GET", "/v1/admin/logs"],
 ];
+
+describe("GET /v1/admin/agents", () => {
+  it("answers the runtime's agent catalog to staff with platform.agent.manage only", async () => {
+    const { routes, calls } = setup();
+    const listed = await callRoute(routes, "admin.listAgents", "/v1/admin/agents", { as: "sam" });
+    expect(listed.status).toBe(200);
+    expect(await listed.json()).toEqual({ data: [KNOWLEDGE] });
+    for (const as of ["alice", "nomfa", "sue"]) expect((await callRoute(routes, "admin.listAgents", "/v1/admin/agents", { as })).status).toBe(403);
+    expect(calls).toEqual([["listAgents"]]);
+  });
+
+  it("reads the catalog from the runtime and answers 502 when it is malformed or unreachable", async () => {
+    const answers = (body: unknown, status = 200) => createMastraOperationsGateway({ baseUrl: "http://runtime/", serverlessToken: null, fetch: () => Promise.resolve(Response.json(body, { status })) });
+    expect(await answers({ data: [KNOWLEDGE] }).listAgents({ requestId: "r1" })).toEqual({ ok: true, data: [KNOWLEDGE] });
+    expect(await answers({ data: [{ id: "knowledge" }] }).listAgents({ requestId: "r1" })).toEqual({ ok: false, error: { code: "UPSTREAM_UNAVAILABLE", status: 502 } });
+    expect(await answers({}, 500).listAgents({ requestId: "r1" })).toEqual({ ok: false, error: { code: "UPSTREAM_UNAVAILABLE", status: 502 } });
+  });
+});
 
 describe("/v1/admin operations: staff with MFA only", () => {
   it.each(ENDPOINTS)("%s refuses a tenant owner (403 FORBIDDEN) and staff without MFA (403 MFA_REQUIRED), audited, before acting", async (id, method, url) => {

@@ -24,6 +24,7 @@ export const createDataAgentDefinition = (options: { readonly instructionsDirs?:
   id: DATA_AGENT_ID,
   role: "subagent",
   ceiling: ["core.chat.use", CATALOG_READ_PERMISSION, CATALOG_QUERY_PERMISSION],
+  catalog: { tools: DATA_AGENT_TOOLS, skills: [CORE_SKILLS.dataCatalog], perOrganizationTools: true },
   create: ({ models, tools, guardrails, skills, connectorTools, instructions }) => {
     const profile = guardrails("delegated");
     return new Agent({

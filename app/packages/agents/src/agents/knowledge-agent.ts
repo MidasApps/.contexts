@@ -25,6 +25,7 @@ export const createKnowledgeAgentDefinition = (options: { readonly instructionsD
   id: KNOWLEDGE_AGENT_ID,
   role: "subagent",
   ceiling: ["core.chat.use", KNOWLEDGE_READ_PERMISSION, CATALOG_READ_PERMISSION],
+  catalog: { tools: [SEARCH_KNOWLEDGE_TOOL_ID], skills: [CORE_SKILLS.knowledgeCitations] },
   create: ({ models, tools, guardrails, skills, instructions }) => {
     const profile = guardrails("delegated");
     return new Agent({

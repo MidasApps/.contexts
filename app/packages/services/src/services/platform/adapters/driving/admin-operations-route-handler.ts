@@ -1,5 +1,6 @@
 import {
   adminCancelWorkflowRunEndpoint,
+  adminListAgentsEndpoint,
   adminListConnectorsEndpoint,
   adminListSchedulesEndpoint,
   adminListWorkflowRunsEndpoint,
@@ -20,7 +21,7 @@ import type { OperationsError, OperationsGateway, ScheduleAction } from "../../a
 import { type GuardContext, requireStaff } from "./console-guards.ts";
 
 /** `platform.*` permissions of the staff operations (SP5 spec §2.1). */
-export const OPERATIONS_PERMISSIONS = { workflows: "platform.workflow.manage", connectors: "platform.connector.read" } as const;
+export const OPERATIONS_PERMISSIONS = { workflows: "platform.workflow.manage", connectors: "platform.connector.read", agents: "platform.agent.manage" } as const;
 
 export type AdminOperationsRouteDeps = {
   readonly pipeline: ApiRouteDeps;
@@ -100,6 +101,16 @@ const buildConnectorRoutes = (deps: AdminOperationsRouteDeps): Record<string, Ro
   }),
 });
 
+// The runtime's own registry (decision 0044): which agents exist, never what an organization did with them.
+const buildAgentCatalogRoutes = (deps: AdminOperationsRouteDeps): Record<string, RouteHandler> => ({
+  [adminListAgentsEndpoint.id]: withApiRoute(adminListAgentsEndpoint, deps.pipeline, async (ctx) => {
+    const denied = await requireStaff(ctx, { permission: OPERATIONS_PERMISSIONS.agents });
+    if (denied !== null) return denied;
+    const result = await deps.operations.listAgents({ requestId: ctx.requestId });
+    return result.ok ? dataResponse({ data: result.data }) : failed(result.error, ctx.requestId);
+  }),
+});
+
 /**
  * `/v1/admin` workflow runs, schedules and connectors (SP5 spec §6, decision 0043): every handler
  * first requires staff with MFA and the `platform.*` permission; cancel, pause, resume and
@@ -109,4 +120,5 @@ export const buildAdminOperationsRoutes = (deps: AdminOperationsRouteDeps): Reco
   ...buildRunRoutes(deps),
   ...buildScheduleRoutes(deps),
   ...buildConnectorRoutes(deps),
+  ...buildAgentCatalogRoutes(deps),
 });

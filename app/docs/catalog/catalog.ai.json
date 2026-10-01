@@ -16310,6 +16310,235 @@
     },
     {
       "context": "platform",
+      "description": "A registered agent for staff: its role, subagents, tools, skills, permission ceiling and whether organizations enable it.",
+      "examples": [
+        {
+          "description": "Answers questions about the organization's documents and data catalog from the knowledge base, citing every claim.",
+          "enablement": "per-organization",
+          "id": "knowledge",
+          "name": "Knowledge",
+          "permissions": [
+            "core.chat.use",
+            "core.knowledge.read",
+            "core.catalog.read"
+          ],
+          "role": "subagent",
+          "skills": [
+            "knowledge-citations"
+          ],
+          "subagents": [],
+          "tools": [
+            "knowledge.searchKnowledge"
+          ],
+          "toolsVaryByOrganization": false
+        }
+      ],
+      "fields": [
+        {
+          "description": "What the agent does, as registered (English, from code).",
+          "name": "description",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "`always`, or `per-organization` when the organization's agent settings decide.",
+          "name": "enablement",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Agent id (module agents are prefixed by the module id).",
+          "name": "id",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Name the runtime registered (English, from code).",
+          "name": "name",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Its ceiling: the permissions its tool calls may ever use (the caller's permissions narrow them).",
+          "name": "permissions",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "`supervisor`, `entry` or `subagent`.",
+          "name": "role",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Names of the core skills it loads; skills of enabled modules come on top.",
+          "name": "skills",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Ids of the agents it may delegate to (the supervisor); the organization's settings narrow them per run.",
+          "name": "subagents",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Ids of the tools it has in every organization.",
+          "name": "tools",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "True when it also gets tools from the organization's connectors or web opt-ins.",
+          "name": "toolsVaryByOrganization",
+          "pii": "none",
+          "required": true
+        }
+      ],
+      "id": "platform.AdminAgent",
+      "jsonSchema": {
+        "additionalProperties": false,
+        "description": "A registered agent for staff: its role, subagents, tools, skills, permission ceiling and whether organizations enable it.",
+        "examples": [
+          {
+            "description": "Answers questions about the organization's documents and data catalog from the knowledge base, citing every claim.",
+            "enablement": "per-organization",
+            "id": "knowledge",
+            "name": "Knowledge",
+            "permissions": [
+              "core.chat.use",
+              "core.knowledge.read",
+              "core.catalog.read"
+            ],
+            "role": "subagent",
+            "skills": [
+              "knowledge-citations"
+            ],
+            "subagents": [],
+            "tools": [
+              "knowledge.searchKnowledge"
+            ],
+            "toolsVaryByOrganization": false
+          }
+        ],
+        "properties": {
+          "description": {
+            "description": "What the agent does, as registered (English, from code).",
+            "maxLength": 1000,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "enablement": {
+            "description": "`always`, or `per-organization` when the organization's agent settings decide.",
+            "enum": [
+              "always",
+              "per-organization"
+            ],
+            "type": "string",
+            "x-pii": "none"
+          },
+          "id": {
+            "description": "Agent id (module agents are prefixed by the module id).",
+            "maxLength": 120,
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "name": {
+            "description": "Name the runtime registered (English, from code).",
+            "maxLength": 120,
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "permissions": {
+            "description": "Its ceiling: the permissions its tool calls may ever use (the caller's permissions narrow them).",
+            "items": {
+              "maxLength": 200,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 500,
+            "type": "array",
+            "x-pii": "none"
+          },
+          "role": {
+            "description": "`supervisor`, `entry` or `subagent`.",
+            "enum": [
+              "supervisor",
+              "entry",
+              "subagent"
+            ],
+            "type": "string",
+            "x-pii": "none"
+          },
+          "skills": {
+            "description": "Names of the core skills it loads; skills of enabled modules come on top.",
+            "items": {
+              "maxLength": 200,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 500,
+            "type": "array",
+            "x-pii": "none"
+          },
+          "subagents": {
+            "description": "Ids of the agents it may delegate to (the supervisor); the organization's settings narrow them per run.",
+            "items": {
+              "maxLength": 200,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 500,
+            "type": "array",
+            "x-pii": "none"
+          },
+          "tools": {
+            "description": "Ids of the tools it has in every organization.",
+            "items": {
+              "maxLength": 200,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 500,
+            "type": "array",
+            "x-pii": "none"
+          },
+          "toolsVaryByOrganization": {
+            "description": "True when it also gets tools from the organization's connectors or web opt-ins.",
+            "type": "boolean",
+            "x-pii": "none"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "description",
+          "role",
+          "enablement",
+          "subagents",
+          "tools",
+          "toolsVaryByOrganization",
+          "skills",
+          "permissions"
+        ],
+        "type": "object",
+        "x-kind": "view",
+        "x-permission": "platform.agent.manage",
+        "x-pii": "none",
+        "x-relations": [],
+        "x-tenancyScope": "platform"
+      },
+      "kind": "view",
+      "name": "AdminAgent",
+      "permission": "platform.agent.manage",
+      "pii": "none",
+      "relations": [],
+      "tenancyScope": "platform"
+    },
+    {
+      "context": "platform",
       "description": "A support access session for staff: who acted as whom, in which organization, why, and whether it is still open.",
       "examples": [
         {

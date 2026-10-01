@@ -15,6 +15,7 @@ import { createSupervisorAgent, SUPERVISOR_AGENT_ID } from "../agents/supervisor
 import { createTenantAgentSettingsReader } from "../agents/tenant-agent-settings.ts";
 import { createInstructionsResolver } from "../agents/prompt-instructions.ts";
 import { createPromptEvalRoutes, type PromptEvalRunner } from "../agents/prompt-eval-route.ts";
+import { buildAgentCatalog } from "../console/agent-catalog.ts";
 import { createConsoleRoutes } from "../console/console-routes.ts";
 import { createWebAgentDefinition } from "../agents/web-agent.ts";
 import type { ChatRuntime } from "../chat/chat-http.ts";
@@ -414,7 +415,13 @@ export const composeAgentRuntime = (args: ComposeAgentRuntimeArgs): RuntimeParts
       // SP5 prompt store (decision 0038): candidate prompts on the isolated eval harness, verdict recorded here.
       ...createPromptEvalRoutes({ prompts: args.ports.prompts, runner: args.promptEvalRunner, logger: processLogger }),
       // SP5 console (decision 0040): traces, experiments, datasets and eval runs over Mastra storage, tenant-filtered.
-      ...createConsoleRoutes({ access: args.ports.access, aiMode: args.env.AI_MODE, logger: processLogger }),
+      ...createConsoleRoutes({
+        access: args.ports.access,
+        aiMode: args.env.AI_MODE,
+        logger: processLogger,
+        // Decision 0044: the staff catalog of what this runtime registered.
+        agentCatalog: () => buildAgentCatalog({ definitions, built: { ...agents, ...subagents }, isEntry, supervisor: { id: SUPERVISOR_AGENT_ID, ceiling: SUPERVISOR_CEILING } }),
+      }),
       ...createWorkflowRunRoutes({ access: args.ports.access, catalog: workflowCatalog, logger: processLogger }),
       ...createWorkflowChatRoutes({ access: args.ports.access, catalog: workflowCatalog, logger: processLogger }),
       ...createTenantScheduleRoutes({ access: args.ports.access, catalog: workflowCatalog, minIntervalMinutes: minIntervalMinutesOf(args.env), logger: processLogger }),

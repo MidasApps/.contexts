@@ -639,8 +639,27 @@
       "web": "Busca y lee páginas web, cuando está permitido."
     },
     "catalog": {
-      "title": "Prompts de la plataforma",
-      "description": "Agentes con prompt versionado. Una versión solo llega a producción después de evaluarse."
+      "title": "Agentes registrados",
+      "description": "Lo que registró el runtime: el rol de cada agente, sus subagentes, herramientas, skills y permisos. Los agentes con prompt versionado tienen un acceso a sus versiones.",
+      "loading": "Cargando los agentes registrados…",
+      "role": {
+        "supervisor": "Supervisor",
+        "entry": "Entrada",
+        "subagent": "Subagente"
+      },
+      "enablement": {
+        "always": "Siempre disponible",
+        "perOrganization": "Habilitado por organización"
+      },
+      "subagents": "Subagentes",
+      "tools": "Herramientas",
+      "toolsOfOrganization": "Más las herramientas de los conectores y de las opciones de la organización",
+      "skills": "Skills",
+      "permissions": "Permisos (techo)",
+      "none": "Sin elementos",
+      "emptyTitle": "Ningún agente registrado",
+      "emptyDescription": "El runtime no informó ningún agente. Verifica que esté en ejecución y recarga.",
+      "reload": "Recargar"
     },
     "organization": {
       "title": "Agentes por organización",

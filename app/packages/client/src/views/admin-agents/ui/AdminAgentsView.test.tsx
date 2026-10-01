@@ -1,7 +1,7 @@
 import { act, screen, waitFor, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { renderAdmin } from "#/app-shell/testing/render-admin.tsx";
-import { buildAgentSettings } from "#/shared/testing/admin-agents-fixtures.ts";
+import { buildAgentCatalog, buildAgentSettings } from "#/shared/testing/admin-agents-fixtures.ts";
 import { buildOrganizationSummary } from "#/shared/testing/admin-fixtures.ts";
 import { expectNoAxeViolations } from "#/shared/testing/axe.ts";
 import { apiError, FAKE_REQUEST_ID, ok, page, type FakeRoutes } from "#/shared/testing/fake-api.ts";
@@ -14,6 +14,7 @@ const WITH_ORGANIZATION = `/admin/agents?organizationId=${IDS.organization}`;
 const routes = (overrides: FakeRoutes = {}): FakeRoutes => ({
   "GET /v1/admin/organizations": page([buildOrganizationSummary(), buildOrganizationSummary({ id: IDS.otherOrganization, name: "Contoso" })]),
   [`GET ${SETTINGS_PATH}`]: ok(buildAgentSettings()),
+  "GET /v1/admin/agents": ok(buildAgentCatalog()),
   ...overrides,
 });
 
@@ -25,13 +26,53 @@ const setOnline = (online: boolean): void => {
 };
 
 describe("AdminAgentsView", () => {
-  it("lists the agents with a platform prompt, each linking to its versions", async () => {
-    const { container } = render();
-    const catalog = await screen.findByRole("list", { name: "Prompts da plataforma" });
-    expect(within(catalog).getAllByRole("listitem")).toHaveLength(5);
-    expect(within(catalog).getByRole("link", { name: "Ver prompts de Assistente" }).getAttribute("href")).toBe("/admin/agents/assistant/prompts");
-    expect(within(catalog).getByRole("link", { name: "Ver prompts de Web" }).getAttribute("href")).toBe("/admin/agents/web/prompts");
+  it("lists the registered agents with role, subagents, tools, skills and permissions, linking the ones with a prompt", async () => {
+    const { container, api } = render();
+    const catalog = await screen.findByRole("list", { name: "Agentes registrados" });
+    const rows = within(catalog).getAllByRole("listitem");
+    expect(rows).toHaveLength(5);
+    const [assistant, ping, knowledge, data, notes] = rows as [HTMLElement, HTMLElement, HTMLElement, HTMLElement, HTMLElement];
+    expect(within(assistant).getByText("Assistente")).toBeDefined();
+    expect(within(assistant).getByText("Supervisor")).toBeDefined();
+    expect(within(assistant).getByText("Sempre disponível")).toBeDefined();
+    expect(within(assistant).getByText("example-notes")).toBeDefined();
+    expect(within(assistant).getByText("Mais as ferramentas dos conectores e das opções da organização")).toBeDefined();
+    expect(within(assistant).getByRole("link", { name: "Ver prompts de Assistente" }).getAttribute("href")).toBe("/admin/agents/assistant/prompts");
+    expect(within(ping).getByText("Entrada")).toBeDefined();
+    expect(within(ping).queryByRole("link")).toBeNull();
+    expect(within(knowledge).getByText("Habilitado por organização")).toBeDefined();
+    expect(within(knowledge).getByText("knowledge.searchKnowledge")).toBeDefined();
+    expect(within(knowledge).getByText("knowledge-citations")).toBeDefined();
+    expect(within(knowledge).getByText("core.knowledge.read")).toBeDefined();
+    expect(within(data).getByText("sql.querySemanticSql")).toBeDefined();
+    // A module agent has no translation: it shows what its code registered.
+    expect(within(notes).getByText("Notes helper")).toBeDefined();
+    expect(within(notes).getByText("Finds the notes of the example module.")).toBeDefined();
+    expect(within(notes).queryByRole("link")).toBeNull();
+    expect(api.callLines().filter((line) => line === "GET /v1/admin/agents")).toHaveLength(1);
     await expectNoAxeViolations(container);
+  });
+
+  it("explains an empty catalog and an unreachable runtime, each with a way to try again", async () => {
+    const empty = render({ routes: routes({ "GET /v1/admin/agents": ok([]) }) });
+    expect(await screen.findByRole("heading", { level: 3, name: "Nenhum agente registrado" })).toBeDefined();
+    empty.api.route("GET /v1/admin/agents", ok(buildAgentCatalog()));
+    await empty.user.click(screen.getByRole("button", { name: "Recarregar" }));
+    expect(await screen.findByRole("list", { name: "Agentes registrados" })).toBeDefined();
+    empty.unmount();
+    const failing = render({ routes: routes({ "GET /v1/admin/agents": apiError(409, "CONFLICT") }) });
+    const section = await screen.findByRole("region", { name: "Agentes registrados" });
+    expect((await within(section).findByRole("alert")).textContent).toContain(FAKE_REQUEST_ID);
+    failing.api.route("GET /v1/admin/agents", ok(buildAgentCatalog()));
+    await failing.user.click(within(section).getByRole("button", { name: "Tentar novamente" }));
+    expect(await screen.findByRole("list", { name: "Agentes registrados" })).toBeDefined();
+  });
+
+  it("offers every registered subagent to an organization, a module's too, before it is enabled", async () => {
+    render({ path: WITH_ORGANIZATION });
+    expect((await screen.findByRole("switch", { name: "example-notes" })).getAttribute("aria-checked")).toBe("false");
+    expect(screen.queryByRole("switch", { name: "ping" })).toBeNull();
+    expect(screen.queryByRole("switch", { name: "Assistente" })).toBeNull();
   });
 
   it("asks for an organization before showing settings and keeps the choice in the URL", async () => {
@@ -122,7 +163,8 @@ describe("AdminAgentsView", () => {
   it("is closed to the support role", async () => {
     const { api } = render({ role: "platform-support", path: WITH_ORGANIZATION });
     expect(await screen.findByRole("heading", { level: 2, name: "Você não tem acesso a esta página" })).toBeDefined();
-    expect(screen.queryByRole("list", { name: "Prompts da plataforma" })).toBeNull();
+    expect(screen.queryByRole("list", { name: "Agentes registrados" })).toBeNull();
+    expect(api.callLines()).not.toContain("GET /v1/admin/agents");
     expect(api.callLines().some((line) => line.includes("agent-settings"))).toBe(false);
   });
 

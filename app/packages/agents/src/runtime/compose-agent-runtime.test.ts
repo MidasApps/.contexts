@@ -108,6 +108,7 @@ describe("composeAgentRuntime", () => {
       "POST /console/schedules/:scheduleId/pause",
       "POST /console/schedules/:scheduleId/resume",
       "POST /console/schedules/:scheduleId/run",
+      "GET /console/agents",
       "GET /workflow-runs",
       "POST /workflow-runs/start/:workflowId",
       "GET /workflow-runs/:runId",

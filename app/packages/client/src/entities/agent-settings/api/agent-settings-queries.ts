@@ -29,8 +29,10 @@ export const useAdminAgentSettings = (organizationId: string | undefined) => {
   return useQuery({ ...adminAgentSettingsQuery(callEndpoint, organizationId ?? ""), enabled: signedIn && organizationId !== undefined && organizationId !== "" });
 };
 
-/** Agents the console lists for an organization: the core subagents, then any other enabled one. */
-export const listedAgentKeys = (settings: Pick<AgentSettings, "enabledAgents">): string[] => [
-  ...CORE_SUBAGENT_KEYS,
-  ...settings.enabledAgents.filter((key) => !(CORE_SUBAGENT_KEYS as readonly string[]).includes(key)),
+/**
+ * Agents the console lists for an organization: the core subagents, then the other registered
+ * subagents (when the catalog is known), then any other one the organization has enabled.
+ */
+export const listedAgentKeys = (settings: Pick<AgentSettings, "enabledAgents">, registered: readonly string[] = []): string[] => [
+  ...new Set([...CORE_SUBAGENT_KEYS, ...registered, ...settings.enabledAgents]),
 ];

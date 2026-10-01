@@ -13,6 +13,7 @@ export const PING_AGENT_ID = "ping";
 export const PING_AGENT: AgentDefinition = {
   id: PING_AGENT_ID,
   ceiling: ["core.chat.use", CATALOG_READ_PERMISSION],
+  catalog: { tools: ["catalog.listEntities"], skills: [] },
   create: ({ models, tools, guardrails }) =>
     new Agent({
       id: PING_AGENT_ID,

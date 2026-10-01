@@ -1,4 +1,4 @@
-import type { AgentRequestContext } from "@core/contracts";
+import type { AdminAgent, AgentRequestContext } from "@core/contracts";
 import type { Logger } from "@core/services";
 import type { Mastra } from "@mastra/core/mastra";
 import { type ApiRoute, registerApiRoute } from "@mastra/core/server";
@@ -23,6 +23,8 @@ export type ConsoleRouteDeps = {
   readonly access: Pick<AccessPort, "resolveAccessContext">;
   readonly aiMode: AgentRequestContext["aiMode"];
   readonly logger: Pick<Logger, "info" | "error">;
+  /** The registered agents for the staff catalog (decision 0044); absent: an empty catalog. */
+  readonly agentCatalog?: () => readonly AdminAgent[];
 };
 
 /** What a console handler reads from the Hono context of its custom route. */
@@ -235,4 +237,19 @@ const operationRoutes = (deps: ConsoleRouteDeps): ApiRoute[] => [
   ),
 ];
 
-export const createConsoleRoutes = (deps: ConsoleRouteDeps): ApiRoute[] => [...traceRoutes(deps), ...evalRoutes(deps), ...datasetRoutes(deps), ...operationRoutes(deps)];
+// Registry data of the runtime itself (decision 0044): no tenant data, so no tenant filter.
+const agentRoutes = (deps: ConsoleRouteDeps): ApiRoute[] => [
+  registerApiRoute(`${CONSOLE_ROUTES_PREFIX}/agents`, {
+    method: "GET",
+    requiresAuth: false,
+    handler: guarded(deps, "console_agents_failed", () => Promise.resolve(json(200, { data: deps.agentCatalog?.() ?? [] }))),
+  }),
+];
+
+export const createConsoleRoutes = (deps: ConsoleRouteDeps): ApiRoute[] => [
+  ...traceRoutes(deps),
+  ...evalRoutes(deps),
+  ...datasetRoutes(deps),
+  ...operationRoutes(deps),
+  ...agentRoutes(deps),
+];

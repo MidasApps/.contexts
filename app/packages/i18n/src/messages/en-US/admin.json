@@ -639,8 +639,27 @@
       "web": "Searches and reads web pages, when allowed."
     },
     "catalog": {
-      "title": "Platform prompts",
-      "description": "Agents with a versioned prompt. A version only reaches production after it is evaluated."
+      "title": "Registered agents",
+      "description": "What the runtime registered: each agent's role, subagents, tools, skills and permissions. Agents with a versioned prompt link to their versions.",
+      "loading": "Loading the registered agents…",
+      "role": {
+        "supervisor": "Supervisor",
+        "entry": "Entry",
+        "subagent": "Subagent"
+      },
+      "enablement": {
+        "always": "Always available",
+        "perOrganization": "Enabled per organization"
+      },
+      "subagents": "Subagents",
+      "tools": "Tools",
+      "toolsOfOrganization": "Plus the tools of the organization's connectors and options",
+      "skills": "Skills",
+      "permissions": "Permissions (ceiling)",
+      "none": "None",
+      "emptyTitle": "No agent registered",
+      "emptyDescription": "The runtime reported no agent. Check that it is running and reload.",
+      "reload": "Reload"
     },
     "organization": {
       "title": "Agents per organization",

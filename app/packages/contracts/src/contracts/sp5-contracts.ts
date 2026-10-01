@@ -6,6 +6,7 @@ import { EvalExperimentSummaryContract } from "./observability/eval-experiment-s
 import { TraceDetailContract } from "./observability/trace-detail.schema.ts";
 import { TraceSummaryContract } from "./observability/trace-summary.schema.ts";
 import { AdminScheduleContract, AdminWorkflowRunContract, LogLineContract } from "./platform/admin-operations.schema.ts";
+import { AdminAgentContract } from "./platform/admin-agent.schema.ts";
 import { AdminImpersonationSessionContract } from "./platform/admin-impersonation.schema.ts";
 import { AdminUserSummaryContract } from "./platform/admin-user.schema.ts";
 import { AdminOverviewContract } from "./platform/admin-overview.schema.ts";
@@ -66,4 +67,5 @@ export const SP5_CONTRACTS: readonly ContractDefinition[] = [
   LogLineContract,
   AdminUserSummaryContract,
   AdminImpersonationSessionContract,
+  AdminAgentContract,
 ];

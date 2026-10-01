@@ -32,6 +32,8 @@ export const createWebAgentDefinition = (options: { readonly instructionsDirs?: 
   id: WEB_AGENT_ID,
   role: "subagent",
   ceiling: ["core.chat.use", WEB_TOOLS_PERMISSION],
+  // Every web tool depends on the organization's opt-ins (browser connectors, Firecrawl).
+  catalog: { tools: [], skills: [], perOrganizationTools: true },
   create: (deps) =>
     new Agent({
       id: WEB_AGENT_ID,
