@@ -246,8 +246,8 @@ describe("tenant-defined agents and skills end to end (fake mode)", { timeout: 1
   it("hides the agent and the skill from another organization and refuses to run it there", async () => {
     expect((await call("custom-agents.get", `/v1/agents/${agentId}?organizationId=${TENANT_B}`, { user: adminB })).status).toBe(404);
     expect((await call("custom-skills.get", `/v1/skills/${skillId}?organizationId=${TENANT_B}`, { user: adminB })).status).toBe(404);
-    // An admin of B cannot act in A either (a non-member is answered as if the organization did not exist).
-    expect([403, 404]).toContain((await call("custom-agents.get", `/v1/agents/${agentId}?organizationId=${TENANT_A}`, { user: adminB })).status);
+    // An admin of B cannot act in A either: a non-member is answered as if the organization did not exist.
+    expect((await call("custom-agents.get", `/v1/agents/${agentId}?organizationId=${TENANT_A}`, { user: adminB })).status).toBe(404);
     const catalog = await dataOf<{ key: string }[]>(await call("agents.listCatalog", `/v1/agents?organizationId=${TENANT_B}`, { user: adminB }));
     expect(catalog.some((item) => item.key === agentId)).toBe(false);
     const skills = await dataOf<{ id: string }[]>(await call("custom-skills.list", `/v1/skills?organizationId=${TENANT_B}`, { user: adminB }));

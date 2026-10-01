@@ -2,7 +2,7 @@ import { MASTRA_RESOURCE_ID_KEY, MASTRA_THREAD_ID_KEY, RequestContext } from "@m
 import { describe, expect, it } from "vitest";
 import { buildSupervisorHarness, MEMBER_PERMISSIONS, noteModule } from "../agents/supervisor.fixture.ts";
 import { isAllowedRoute } from "../auth/route-allowlist-middleware.ts";
-import { handleChatPost, handleMessages } from "../chat/chat-routes.ts";
+import { handleAbort, handleChatPost, handleMessages } from "../chat/chat-routes.ts";
 import { buildAgentContextEntries, TEST_TENANT, TEST_UID } from "../testing/agent-context-fixture.ts";
 import { createFakeAccessPort, createFakeAuditPort, createFakeCustomAgentsPort, createFakeUsagePort } from "../testing/fake-ports.ts";
 import { buildCustomAgent, buildCustomSkill, CUSTOM_AGENT_TEST_ID, OTHER_TENANT } from "./custom-agent.fixture.ts";
@@ -174,6 +174,19 @@ describe("custom agent chat (fake mode, in-process Mastra)", { timeout: 30_000 }
     const chunks = await readChunks(response);
     expect(chunks.some((chunk) => chunk.type === "tool-output-available")).toBe(false);
     expect(JSON.stringify(chunks)).toContain("not allowed to use this tool");
+  });
+
+  it("lets the owner stop a run of an agent that was disabled meanwhile", async () => {
+    const state = setup();
+    const slow = `[[fake:slow {"delayMs":60}]] [[fake:text {"text":"${"S".repeat(640)}"}]]`;
+    const response = await post(state, slow);
+    const reading = readChunks(response);
+    await new Promise((resolve) => setTimeout(resolve, 300));
+    state.customAgents.agents[0] = buildCustomAgent({ enabled: false });
+    const stopped = await handleAbort({ runId: "run-1", requestContext: contextFor(), mastra: state.harness.mastra }, state.deps);
+    expect(stopped.status).toBe(204);
+    const text = textOf(await reading);
+    expect(text.length).toBeLessThan(640);
   });
 
   it("hides the generic agent and its durable wrapper from the built-in agent routes", () => {

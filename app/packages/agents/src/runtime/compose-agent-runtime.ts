@@ -325,6 +325,7 @@ const buildChat = (agents: Record<string, Agent>, deps: { tools: ToolRegistry; t
     summarizer: deps.summarizer,
     // Decision 0046: an enabled custom agent of the caller's tenant runs on the generic durable agent.
     resolveCustomAgent: deps.custom.resolveChatAgent,
+    customRunAgentId: chatAgentIdOf(CUSTOM_AGENT_ID),
   };
   // DurableAgent extends Agent; Mastra registers it (workflow, cache, PubSub) like any agent. The
   // summarizer is registered too (spans, usage ledger) but, like the wrappers, only custom routes reach it.

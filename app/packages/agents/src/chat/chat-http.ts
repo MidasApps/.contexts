@@ -19,6 +19,11 @@ export type ChatRuntime = {
    * the request context. `undefined` when there is no such agent for the caller.
    */
   readonly resolveCustomAgent?: (agentId: string, requestContext: RequestContext<unknown>) => Promise<string | undefined>;
+  /**
+   * Durable id every custom agent run uses. A run recorded for an agent outside `chatAgents` is a
+   * custom agent's, so its owner can still stop it after the agent was disabled or deleted.
+   */
+  readonly customRunAgentId?: string;
 };
 
 /** Mastra id of the durable agent that serves a public chat agent id, for this caller. */
