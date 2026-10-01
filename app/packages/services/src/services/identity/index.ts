@@ -62,6 +62,7 @@ export { generateActivationCode, hashActivationCode, normalizeActivationCode } f
 export { createInMemoryDeviceActivationRepository, createInMemoryDeviceRepository } from "./adapters/driven/in-memory-device-repositories.ts";
 // Platform staff and read-only impersonation (SP1 Task 16).
 export { createFirestorePlatformServices, createPlatformServices, type PlatformServices } from "./platform-composition.ts";
+export { buildAdminImpersonationRoutes, IMPERSONATION_ADMIN_PERMISSIONS, type AdminImpersonationRouteDeps } from "./adapters/driving/admin-impersonation-routes.ts";
 export type { PlatformDeps } from "./application/platform-deps.ts";
 export type { ImpersonationSessionRepository } from "./application/ports/driven/impersonation-session-repository.ts";
 export type { PlatformStaffRepository } from "./application/ports/driven/platform-staff-repository.ts";

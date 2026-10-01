@@ -3,6 +3,7 @@ import type { Firestore } from "firebase-admin/firestore";
 import { createFirestoreUnitOfWork } from "../shared/firestore/unit-of-work.ts";
 import { createFirestoreImpersonationSessionRepository, createFirestorePlatformStaffRepository } from "./adapters/driven/firestore-platform-repositories.ts";
 import type { PlatformDeps } from "./application/platform-deps.ts";
+import { makeEndImpersonationSession, makeListImpersonationSessions, type EndImpersonationSession, type ListImpersonationSessions } from "./application/use-cases/admin-impersonation-sessions.ts";
 import { makeAuditImpersonatedRequest, type AuditImpersonatedRequest } from "./application/use-cases/audit-impersonated-request.ts";
 import { makeEndImpersonation, type EndImpersonation } from "./application/use-cases/end-impersonation.ts";
 import { makeGrantPlatformStaff, type GrantPlatformStaff } from "./application/use-cases/grant-platform-staff.ts";
@@ -11,6 +12,9 @@ import { makeStartImpersonation, type StartImpersonation } from "./application/u
 export type PlatformServices = {
   readonly startImpersonation: StartImpersonation;
   readonly endImpersonation: EndImpersonation;
+  /** Staff console (decision 0044): every staff member's sessions, and ending any of them. */
+  readonly listImpersonationSessions: ListImpersonationSessions;
+  readonly endImpersonationSession: EndImpersonationSession;
   /** Operator tooling only (`pnpm platform:grant-staff`, `pnpm seed:local`). */
   readonly grantPlatformStaff: GrantPlatformStaff;
   /** The `/v1` pipeline reports every impersonated request here (`ApiRouteDeps.onImpersonatedRequest`). */
@@ -21,6 +25,8 @@ export type PlatformServices = {
 export const createPlatformServices = (deps: PlatformDeps): PlatformServices => ({
   startImpersonation: makeStartImpersonation(deps),
   endImpersonation: makeEndImpersonation(deps),
+  listImpersonationSessions: makeListImpersonationSessions(deps),
+  endImpersonationSession: makeEndImpersonationSession(deps),
   grantPlatformStaff: makeGrantPlatformStaff(deps),
   auditImpersonatedRequest: makeAuditImpersonatedRequest(deps),
 });

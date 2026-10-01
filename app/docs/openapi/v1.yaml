@@ -919,6 +919,191 @@ paths:
       tags:
         - flags
       x-auth: user
+  /v1/admin/impersonation-sessions:
+    get:
+      operationId: admin.listImpersonationSessions
+      parameters:
+        - description: Cursor returned by the previous page.
+          in: query
+          name: cursor
+          required: false
+          schema:
+            minLength: 1
+            type: string
+            x-pii: none
+        - description: Page size, 1-100 (default 20).
+          in: query
+          name: limit
+          required: false
+          schema:
+            default: 20
+            maximum: 100
+            minimum: 1
+            type: integer
+            x-pii: none
+        - description: "`active`: only sessions still open, soonest expiry first, in one page; without it, every session, newest first."
+          in: query
+          name: status
+          required: false
+          schema:
+            enum:
+              - active
+            type: string
+            x-pii: none
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    description: The items of this page.
+                    items:
+                      $ref: "#/components/schemas/platform.AdminImpersonationSession"
+                    type: array
+                    x-pii: personal
+                  meta:
+                    additionalProperties: false
+                    description: Response metadata.
+                    properties:
+                      page:
+                        additionalProperties: false
+                        description: Pagination state.
+                        properties:
+                          cursor:
+                            anyOf:
+                              - minLength: 1
+                                type: string
+                              - type: "null"
+                            description: Opaque cursor of the next page; null at the end.
+                            x-pii: none
+                          hasMore:
+                            description: Whether another page exists.
+                            type: boolean
+                            x-pii: none
+                          limit:
+                            description: Page size used for this response.
+                            maximum: 100
+                            minimum: 1
+                            type: integer
+                            x-pii: none
+                        required:
+                          - cursor
+                          - hasMore
+                          - limit
+                        type: object
+                        x-pii: none
+                    required:
+                      - page
+                    type: object
+                    x-pii: none
+                required:
+                  - data
+                  - meta
+                type: object
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: VALIDATION_FAILED
+          x-error-codes:
+            - VALIDATION_FAILED
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UNAUTHORIZED
+          x-error-codes:
+            - UNAUTHORIZED
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: FORBIDDEN, MFA_REQUIRED
+          x-error-codes:
+            - FORBIDDEN
+            - MFA_REQUIRED
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: INTERNAL_ERROR
+          x-error-codes:
+            - INTERNAL_ERROR
+      security:
+        - bearerAuth: []
+      summary: Lists impersonation sessions of every staff member, active or recent, with their status (staff, platform.user.read).
+      tags:
+        - admin
+      x-auth: user
+  /v1/admin/impersonation-sessions/{sessionId}/end:
+    post:
+      operationId: admin.endImpersonationSession
+      parameters:
+        - description: Impersonation session id.
+          in: path
+          name: sessionId
+          required: true
+          schema:
+            minLength: 1
+            type: string
+            x-pii: none
+      responses:
+        "204":
+          description: No Content
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: VALIDATION_FAILED
+          x-error-codes:
+            - VALIDATION_FAILED
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UNAUTHORIZED
+          x-error-codes:
+            - UNAUTHORIZED
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: FORBIDDEN, MFA_REQUIRED
+          x-error-codes:
+            - FORBIDDEN
+            - MFA_REQUIRED
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: NOT_FOUND
+          x-error-codes:
+            - NOT_FOUND
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: INTERNAL_ERROR
+          x-error-codes:
+            - INTERNAL_ERROR
+      security:
+        - bearerAuth: []
+      summary: Ends any staff member's impersonation session early; idempotent (staff, platform.user.impersonate; audited on both logs with targetTenantId).
+      tags:
+        - admin
+      x-auth: user
   /v1/admin/logs:
     get:
       operationId: admin.listLogs
@@ -21827,6 +22012,90 @@ components:
       x-pii: none
       x-relations: []
       x-tenancyScope: organization
+    platform.AdminImpersonationSession:
+      additionalProperties: false
+      description: "A support access session for staff: who acted as whom, in which organization, why, and whether it is still open."
+      examples:
+        - createdAt: "2026-09-29T14:30:00.000Z"
+          endedAt: null
+          expiresAt: "2026-09-29T15:30:00.000Z"
+          id: Im5rT7yU9iO1pA3sD5fG
+          reason: "Ticket 4821: user cannot see project Launch."
+          staffUid: uZ9y8X7w6V5u4T3s2R1q
+          status: active
+          targetUid: uA1b2C3d4E5f6G7h8I9j
+          tenantId: Jd8sK2lPq0WnR5tYu3bV
+      properties:
+        createdAt:
+          description: When the session started (UTC).
+          format: date-time
+          pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z))$
+          type: string
+          x-pii: none
+        endedAt:
+          anyOf:
+            - format: date-time
+              pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z))$
+              type: string
+            - type: "null"
+          description: When staff ended the session early (UTC); null while open.
+          x-pii: none
+        expiresAt:
+          description: Hard end of the session (UTC), at most 60 minutes after start.
+          format: date-time
+          pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z))$
+          type: string
+          x-pii: none
+        id:
+          description: Impersonation session id (token claim `imp`).
+          minLength: 1
+          type: string
+          x-pii: none
+        reason:
+          description: Why support needs the access; audited.
+          maxLength: 500
+          minLength: 10
+          type: string
+          x-pii: personal
+        staffUid:
+          description: Staff member acting as the user.
+          minLength: 1
+          type: string
+          x-pii: personal
+        status:
+          description: "`active`, `ended` or `expired`, at the time of the answer."
+          enum:
+            - active
+            - ended
+            - expired
+          type: string
+          x-pii: none
+        targetUid:
+          description: User being impersonated.
+          minLength: 1
+          type: string
+          x-pii: personal
+        tenantId:
+          description: Only organization the session may read.
+          minLength: 1
+          type: string
+          x-pii: none
+      required:
+        - id
+        - staffUid
+        - targetUid
+        - tenantId
+        - reason
+        - expiresAt
+        - endedAt
+        - createdAt
+        - status
+      type: object
+      x-kind: view
+      x-permission: platform.user.read
+      x-pii: personal
+      x-relations: []
+      x-tenancyScope: platform
     platform.AdminOverview:
       additionalProperties: false
       description: "Platform overview for staff: organizations, active users, cost, guardrail and approval rates, eval status."

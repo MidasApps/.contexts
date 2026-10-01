@@ -1,8 +1,10 @@
 "use client";
 
 import { MAX_IMPERSONATION_MINUTES, startImpersonationEndpoint, StartImpersonationInputSchema } from "@core/contracts";
+import { useQueryClient } from "@tanstack/react-query";
 import { useId, useState, type FormEvent, type ReactNode } from "react";
 import { useTranslations } from "use-intl";
+import { impersonationSessionKeys } from "#/entities/impersonation-session/index.ts";
 import { useCallEndpoint } from "#/shared/api/api-context.tsx";
 import { ApiError } from "#/shared/api/api-error.ts";
 import { useAsyncAction } from "#/shared/lib/errors/use-async-action.ts";
@@ -62,6 +64,7 @@ export function StartImpersonationForm({ target, onTargetClear, organizationId, 
   const t = useTranslations("admin.impersonation.form");
   const online = useOnlineStatus();
   const callEndpoint = useCallEndpoint();
+  const queryClient = useQueryClient();
   const start = useImpersonationStore((state) => state.start);
   const explain = useStartError();
   const ids = { uid: useId(), reason: useId(), minutes: useId(), error: useId() };
@@ -86,6 +89,7 @@ export function StartImpersonationForm({ target, onTargetClear, organizationId, 
       try {
         const { data } = await callEndpoint(startImpersonationEndpoint, { body });
         start({ sessionId: data.sessionId, expiresAt: data.expiresAt, targetUid: body.targetUid, organizationId: body.organizationId }, data.customToken);
+        void queryClient.invalidateQueries({ queryKey: impersonationSessionKeys.all() });
         notify.success(t("started"));
         onTargetClear();
         setReason("");

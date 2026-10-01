@@ -388,6 +388,43 @@
       "select": "Select",
       "selected": "Selected",
       "selectNamed": "Select {name} for support access"
+    },
+    "sessions": {
+      "title": "Support access sessions",
+      "description": "The sessions of the whole team: who acted as whom, in which organization and why.",
+      "scope": "Show",
+      "scopeOptions": {
+        "active": "Open now",
+        "all": "All, newest first"
+      },
+      "loading": "Loading support sessions…",
+      "caption": "Support sessions of the team",
+      "pagination": "Support session pages",
+      "columns": {
+        "staff": "Staff",
+        "user": "User",
+        "organization": "Organization",
+        "reason": "Reason",
+        "started": "Started",
+        "until": "End",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "status": {
+        "active": "Open",
+        "ended": "Ended",
+        "expired": "Expired"
+      },
+      "expiresAt": "Expires {when}",
+      "endedAt": "Ended {when}",
+      "cardWho": "{staff} as {user}",
+      "end": "End",
+      "endNamed": "End the session of {staff} as {user}",
+      "seeAll": "See all sessions",
+      "emptyActiveTitle": "No support session in progress",
+      "emptyActiveDescription": "Nobody on the team is acting as a user right now.",
+      "emptyAllTitle": "No support session recorded",
+      "emptyAllDescription": "Sessions appear here as soon as someone on the team starts support access."
     }
   },
   "impersonation": {
@@ -428,6 +465,12 @@
       "message": "You are seeing the app as another user, read-only. Everything you open is recorded.",
       "messageUntil": "You are seeing the app as another user, read-only, until {when}. Everything you open is recorded.",
       "signOut": "Leave support mode"
+    },
+    "endAny": {
+      "title": "End this support session?",
+      "description": "The access of {staff} as {user} stops working immediately. The end is recorded in the platform and organization audit logs.",
+      "confirm": "End session",
+      "done": "Session of {staff} ended."
     }
   },
   "traces": {

@@ -2,7 +2,7 @@ import { act, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { renderAdmin } from "#/app-shell/testing/render-admin.tsx";
 import { IMPERSONATION_STORAGE_KEY, useImpersonationStore } from "#/features/admin-impersonation/index.ts";
-import { buildAdminUser, buildImpersonationStart, IMPERSONATION_IDS, storedImpersonation } from "#/shared/testing/admin-accounts-fixtures.ts";
+import { buildAdminImpersonationSession, buildAdminUser, buildImpersonationStart, IMPERSONATION_IDS, storedImpersonation } from "#/shared/testing/admin-accounts-fixtures.ts";
 import { buildOrganizationSummary } from "#/shared/testing/admin-fixtures.ts";
 import { expectNoAxeViolations } from "#/shared/testing/axe.ts";
 import { apiError, noContent, ok, page } from "#/shared/testing/fake-api.ts";
@@ -10,7 +10,11 @@ import { IDS } from "#/shared/testing/fixtures.ts";
 import { AdminUsersView } from "./AdminUsersView.tsx";
 
 const REASON = "Chamado 4821: usuário não vê o projeto.";
-const ORGANIZATIONS = { "GET /v1/admin/organizations": page([buildOrganizationSummary()]), "GET /v1/admin/users": page([buildAdminUser()]) };
+const ORGANIZATIONS = {
+  "GET /v1/admin/organizations": page([buildOrganizationSummary()]),
+  "GET /v1/admin/users": page([buildAdminUser()]),
+  "GET /v1/admin/impersonation-sessions": page([]),
+};
 
 const render = (options: Parameters<typeof renderAdmin>[1] = {}) => renderAdmin(<AdminUsersView />, { path: "/admin/users", routes: ORGANIZATIONS, ...options });
 
@@ -115,6 +119,88 @@ describe("AdminUsersView user search", () => {
     const { user } = render({ routes: { ...ORGANIZATIONS, "GET /v1/admin/users": apiError(403, "MFA_REQUIRED") } });
     const search = await searchFor(user, "ana");
     expect(await within(search).findByText(/verificação em duas etapas/u)).toBeDefined();
+  });
+});
+
+describe("AdminUsersView support access sessions", () => {
+  const STAFF = buildAdminUser({ id: IMPERSONATION_IDS.staff, email: "sue@example.com", displayName: "Sue Staff" });
+  const sessionsRoutes = (sessions: unknown[]) => ({
+    ...ORGANIZATIONS,
+    "GET /v1/admin/users": page([buildAdminUser(), STAFF]),
+    "GET /v1/admin/impersonation-sessions": page(sessions),
+  });
+
+  it("lists the open sessions of every staff member with names, organization and reason, from one lookup", async () => {
+    const { api, container } = render({ routes: sessionsRoutes([buildAdminImpersonationSession()]) });
+    const section = await screen.findByRole("region", { name: "Sessões de acesso de suporte" });
+    const table = await within(section).findByRole("table", { name: "Sessões de suporte da equipe" });
+    const row = within(table).getAllByRole("row")[1] as HTMLElement;
+    await waitFor(() => expect(within(row).getByText("Sue Staff")).toBeDefined());
+    expect(within(row).getByText("Ana Souza")).toBeDefined();
+    await waitFor(() => expect(within(row).getByText("Northwind")).toBeDefined());
+    expect(within(row).getByText("Ticket 4821: user cannot see project Launch.")).toBeDefined();
+    expect(within(row).getByText("Aberta")).toBeDefined();
+    const listed = api.calls.filter((call) => call.path === "/v1/admin/impersonation-sessions");
+    expect(listed.map((call) => new URLSearchParams(call.query).get("status"))).toEqual(["active"]);
+    expect(api.calls.filter((call) => call.path === "/v1/admin/users" && new URLSearchParams(call.query).has("ids"))).toHaveLength(1);
+    await expectNoAxeViolations(container);
+  });
+
+  it("ends a colleague's session after a destructive confirmation and reloads the list", async () => {
+    const { user, api } = render({
+      routes: { ...sessionsRoutes([buildAdminImpersonationSession()]), "POST /v1/admin/impersonation-sessions/:sessionId/end": noContent() },
+    });
+    const section = await screen.findByRole("region", { name: "Sessões de acesso de suporte" });
+    const endButton = await within(section).findByRole("button", { name: "Encerrar a sessão de Sue Staff como Ana Souza" });
+    await user.click(endButton);
+    const dialog = await screen.findByRole("alertdialog", { name: "Encerrar esta sessão de suporte?" });
+    expect(dialog.textContent).toContain("Sue Staff");
+    expect(api.callLines()).not.toContain(`POST /v1/admin/impersonation-sessions/${IMPERSONATION_IDS.session}/end`);
+    api.route("GET /v1/admin/impersonation-sessions", page([]));
+    await user.click(within(dialog).getByRole("button", { name: "Encerrar sessão" }));
+    expect(await screen.findByText("Sessão de Sue Staff encerrada.")).toBeDefined();
+    expect(api.callLines()).toContain(`POST /v1/admin/impersonation-sessions/${IMPERSONATION_IDS.session}/end`);
+    expect(await within(section).findByRole("heading", { level: 3, name: "Nenhuma sessão de suporte em andamento" })).toBeDefined();
+  });
+
+  it("keeps the confirmation open with the error and its reference when ending fails", async () => {
+    const { user } = render({
+      routes: { ...sessionsRoutes([buildAdminImpersonationSession()]), "POST /v1/admin/impersonation-sessions/:sessionId/end": apiError(403, "FORBIDDEN") },
+    });
+    const section = await screen.findByRole("region", { name: "Sessões de acesso de suporte" });
+    await user.click(await within(section).findByRole("button", { name: "Encerrar a sessão de Sue Staff como Ana Souza" }));
+    const dialog = await screen.findByRole("alertdialog", { name: "Encerrar esta sessão de suporte?" });
+    await user.click(within(dialog).getByRole("button", { name: "Encerrar sessão" }));
+    expect((await within(dialog).findByRole("alert")).textContent).toContain("Você não tem permissão para fazer isso.");
+  });
+
+  it("shows every session, ended and expired ones without the end action, when asked for all", async () => {
+    const { user, api } = render({ routes: sessionsRoutes([]) });
+    const section = await screen.findByRole("region", { name: "Sessões de acesso de suporte" });
+    expect(await within(section).findByRole("heading", { level: 3, name: "Nenhuma sessão de suporte em andamento" })).toBeDefined();
+    api.route(
+      "GET /v1/admin/impersonation-sessions",
+      page([
+        buildAdminImpersonationSession({ id: "Im5sK2lPq0WnR5tYu3bA", status: "ended", endedAt: "2026-09-29T15:00:00.000Z" }),
+        buildAdminImpersonationSession({ id: "Im5sK2lPq0WnR5tYu3bB", status: "expired", expiresAt: "2026-09-29T15:30:00.000Z" }),
+      ]),
+    );
+    await user.click(within(section).getByRole("button", { name: "Ver todas as sessões" }));
+    const table = await within(section).findByRole("table", { name: "Sessões de suporte da equipe" });
+    expect(within(table).getByText("Encerrada")).toBeDefined();
+    expect(within(table).getByText("Expirada")).toBeDefined();
+    expect(within(table).queryByRole("button", { name: /^Encerrar a sessão de/u })).toBeNull();
+    const last = api.calls.filter((call) => call.path === "/v1/admin/impersonation-sessions").at(-1);
+    expect(new URLSearchParams(last?.query).has("status")).toBe(false);
+  });
+
+  it("shows the error with a retry when the sessions cannot be read", async () => {
+    const { user, api } = render({ routes: { ...ORGANIZATIONS, "GET /v1/admin/impersonation-sessions": apiError(409, "CONFLICT") } });
+    const section = await screen.findByRole("region", { name: "Sessões de acesso de suporte" });
+    expect(await within(section).findByRole("alert")).toBeDefined();
+    api.route("GET /v1/admin/impersonation-sessions", page([]));
+    await user.click(within(section).getByRole("button", { name: "Tentar novamente" }));
+    expect(await within(section).findByRole("heading", { level: 3, name: "Nenhuma sessão de suporte em andamento" })).toBeDefined();
   });
 });
 

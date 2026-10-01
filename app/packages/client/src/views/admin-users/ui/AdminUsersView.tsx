@@ -11,6 +11,7 @@ import { Alert, AlertDescription, AlertTitle } from "#/shared/ui/molecules/Alert
 import { EmptyState } from "#/shared/ui/molecules/EmptyState/EmptyState.tsx";
 import { SectionCard } from "#/shared/ui/molecules/SectionCard/SectionCard.tsx";
 import { AdminOrganizationFilter, AdminPageFrame } from "#/widgets/admin-nav/index.ts";
+import { ImpersonationSessionsSection } from "./ImpersonationSessionsSection.tsx";
 import { UserSearchSection } from "./UserSearchSection.tsx";
 
 const targetOf = (user: AdminUserSummary): ImpersonationTarget => ({ id: user.id, label: adminUserLabel(user), detail: user.displayName.trim() === "" ? undefined : (user.email ?? undefined) });
@@ -43,7 +44,8 @@ function StartSection({ target, onTargetClear }: { target: ImpersonationTarget |
  * `/admin/users` (SP5 spec §6, platform.user.read): staff find a user by name, email or id
  * (decision 0044) and, with `platform.user.impersonate`, pick one to start SP1's support access —
  * acting as the user in one organization, read-only, for at most an hour, audited in both logs.
- * The session started in this tab stays listed until it is ended or expires.
+ * The session started in this tab stays listed until it is ended or expires; below it, the
+ * sessions of every staff member (open now, or all), which staff may end.
  */
 export function AdminUsersView() {
   const t = useTranslations("admin.users");
@@ -62,6 +64,7 @@ export function AdminUsersView() {
             <CurrentSession />
           </SectionCard>
           {canImpersonate ? <StartSection target={target} onTargetClear={() => setTarget(undefined)} /> : null}
+          <ImpersonationSessionsSection canEnd={canImpersonate} />
       </div>
     </AdminPageFrame>
   );

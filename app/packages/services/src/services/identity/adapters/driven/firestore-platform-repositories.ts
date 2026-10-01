@@ -1,7 +1,8 @@
 import { ImpersonationSessionIdSchema, ImpersonationSessionSchema, PlatformStaffSchema } from "@core/contracts";
-import { Timestamp, type DocumentReference, type Firestore, type Transaction } from "firebase-admin/firestore";
+import { FieldPath, Timestamp, type DocumentReference, type Firestore, type Transaction } from "firebase-admin/firestore";
 import { CORE_COLLECTIONS, CORE_SCHEMA_VERSION } from "../../../shared/firestore/collections.ts";
 import { createContractConverter } from "../../../shared/firestore/contract-converter.ts";
+import { pageFromOverfetch } from "../../../shared/pagination/page.ts";
 import type { ImpersonationSessionRepository } from "../../application/ports/driven/impersonation-session-repository.ts";
 import type { PlatformStaffRepository } from "../../application/ports/driven/platform-staff-repository.ts";
 
@@ -44,6 +45,18 @@ export const createFirestoreImpersonationSessionRepository = (deps: { firestore:
     end: (tx, { id, endedAt, actorId }) => {
       const at = Timestamp.fromDate(new Date(endedAt));
       tx.update(raw().doc(id), { endedAt: at, updatedAt: at, updatedBy: actorId });
+    },
+    // One field plus the document id in the same direction: the automatic single-field index serves it.
+    listRecent: async ({ after, limit }) => {
+      let query = raw().withConverter(sessionConverter).orderBy("createdAt", "desc").orderBy(FieldPath.documentId(), "desc").limit(limit + 1);
+      if (after !== undefined) query = query.startAfter(Timestamp.fromDate(new Date(after[0])), after[1]);
+      const snapshot = await query.get();
+      return pageFromOverfetch({ fetched: snapshot.docs.map((doc) => doc.data()), limit, positionOf: (session) => [session.createdAt, session.id] });
+    },
+    // A range on `expiresAt` alone (no composite index); the few ended ones among them are dropped here.
+    listOpen: async ({ now, limit }) => {
+      const snapshot = await raw().withConverter(sessionConverter).where("expiresAt", ">", Timestamp.fromDate(now)).orderBy("expiresAt").limit(limit).get();
+      return snapshot.docs.map((doc) => doc.data()).filter((session) => session.endedAt === null);
     },
   };
 };

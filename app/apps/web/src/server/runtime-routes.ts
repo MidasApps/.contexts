@@ -1,6 +1,7 @@
 import "server-only";
 import {
   buildAdminFlagsRoutes,
+  buildAdminImpersonationRoutes,
   buildAdminLogsRoutes,
   buildAdminOperationsRoutes,
   buildAdminPlatformRoutes,
@@ -163,6 +164,8 @@ export const buildRuntimeRoutes = async (core: CoreServer): Promise<CoreRoutes> 
     }),
     ...buildAdminLogsRoutes({ pipeline: core.pipeline, appEnv: env.APP_ENV, readLogs: readProcessLogBuffer }),
     // SP5 admin gaps (decision 0044): staff user search and the batched name lookup over `users/{uid}`.
+    // SP5 admin gaps (decision 0044): every staff member's impersonation sessions, and ending any of them.
+    ...buildAdminImpersonationRoutes({ pipeline: core.pipeline, platform: core.platform }),
     ...buildAdminUsersRoutes({ pipeline: core.pipeline, users: createFirestoreAdminUserDirectory({ firestore: firebase.firestore }) }),
   };
 };

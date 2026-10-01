@@ -212,6 +212,7 @@ export { createApiKeyServices, parseApiKey, type ApiKeyServices } from "./servic
 export { createDeviceServices, normalizeActivationCode, type DeviceServices } from "./services/identity/index.ts";
 // SP1 platform staff and read-only impersonation (Task 16): SP2 guards, SP5 /admin.
 export { createPlatformServices, ImpersonationNotFoundError, type ImpersonatedRequest, type PlatformServices } from "./services/identity/index.ts";
+export { buildAdminImpersonationRoutes, type AdminImpersonationRouteDeps } from "./services/identity/index.ts";
 // SP1 four-eyes approval requests (Task 17): SP3 registers `agent-command`, SP5 its workflow handler.
 export {
   createApprovalHandlerRegistry,

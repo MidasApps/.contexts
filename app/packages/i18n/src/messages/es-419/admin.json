@@ -388,6 +388,43 @@
       "select": "Seleccionar",
       "selected": "Seleccionado",
       "selectNamed": "Seleccionar a {name} para el acceso de soporte"
+    },
+    "sessions": {
+      "title": "Sesiones de acceso de soporte",
+      "description": "Las sesiones de todo el equipo: quién accedió como quién, en qué organización y por qué.",
+      "scope": "Mostrar",
+      "scopeOptions": {
+        "active": "Abiertas ahora",
+        "all": "Todas, las más recientes primero"
+      },
+      "loading": "Cargando sesiones de soporte…",
+      "caption": "Sesiones de soporte del equipo",
+      "pagination": "Páginas de sesiones de soporte",
+      "columns": {
+        "staff": "Equipo",
+        "user": "Usuario",
+        "organization": "Organización",
+        "reason": "Motivo",
+        "started": "Inicio",
+        "until": "Fin",
+        "status": "Estado",
+        "actions": "Acciones"
+      },
+      "status": {
+        "active": "Abierta",
+        "ended": "Finalizada",
+        "expired": "Vencida"
+      },
+      "expiresAt": "Vence el {when}",
+      "endedAt": "Finalizada el {when}",
+      "cardWho": "{staff} como {user}",
+      "end": "Finalizar",
+      "endNamed": "Finalizar la sesión de {staff} como {user}",
+      "seeAll": "Ver todas las sesiones",
+      "emptyActiveTitle": "Ninguna sesión de soporte en curso",
+      "emptyActiveDescription": "Nadie del equipo está accediendo como un usuario ahora.",
+      "emptyAllTitle": "Ninguna sesión de soporte registrada",
+      "emptyAllDescription": "Las sesiones aparecen aquí en cuanto alguien del equipo inicie un acceso de soporte."
     }
   },
   "impersonation": {
@@ -428,6 +465,12 @@
       "message": "Estás viendo la app como otro usuario, en modo solo lectura. Todo lo que abras queda registrado.",
       "messageUntil": "Estás viendo la app como otro usuario, en modo solo lectura, hasta {when}. Todo lo que abras queda registrado.",
       "signOut": "Salir del modo soporte"
+    },
+    "endAny": {
+      "title": "¿Finalizar esta sesión de soporte?",
+      "description": "El acceso de {staff} como {user} deja de funcionar de inmediato. El cierre queda registrado en la auditoría de la plataforma y de la organización.",
+      "confirm": "Finalizar sesión",
+      "done": "Sesión de {staff} finalizada."
     }
   },
   "traces": {

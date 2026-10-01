@@ -7,5 +7,6 @@ export {
   type StoredImpersonation,
 } from "./model/use-impersonation-store.ts";
 export { useStoredImpersonation } from "./model/use-stored-impersonation.ts";
+export { EndImpersonationSessionDialog, type EndImpersonationSessionDialogProps } from "./ui/EndImpersonationSessionDialog.tsx";
 export { OpenImpersonationSession, type OpenImpersonationSessionProps } from "./ui/OpenImpersonationSession.tsx";
 export { StartImpersonationForm, type ImpersonationTarget, type StartImpersonationFormProps } from "./ui/StartImpersonationForm.tsx";

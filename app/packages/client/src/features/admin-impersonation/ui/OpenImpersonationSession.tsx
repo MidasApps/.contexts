@@ -4,6 +4,7 @@ import { endImpersonationEndpoint } from "@core/contracts";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useTranslations } from "use-intl";
+import { impersonationSessionKeys } from "#/entities/impersonation-session/index.ts";
 import { useCallEndpoint } from "#/shared/api/api-context.tsx";
 import { useAuth } from "#/shared/lib/auth/auth-context.tsx";
 import { useAsyncAction } from "#/shared/lib/errors/use-async-action.ts";
@@ -46,6 +47,7 @@ export function OpenImpersonationSession({ session, organizationName }: OpenImpe
     async () => {
       await callEndpoint(endImpersonationEndpoint, { params: { sessionId: session.sessionId } });
       reset();
+      await queryClient.invalidateQueries({ queryKey: impersonationSessionKeys.all() });
     },
     () => notify.success(t("ended")),
   );

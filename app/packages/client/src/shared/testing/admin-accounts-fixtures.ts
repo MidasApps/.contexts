@@ -3,7 +3,7 @@ import { IDS } from "./fixtures.ts";
 
 type Json = Record<string, unknown>;
 
-export const IMPERSONATION_IDS = { session: "Im5sK2lPq0WnR5tYu3bV", target: "uT9s8R7q6P5o4N3m2L1k" } as const;
+export const IMPERSONATION_IDS = { session: "Im5sK2lPq0WnR5tYu3bV", target: "uT9s8R7q6P5o4N3m2L1k", staff: "uS1t2A3f4F5u6S7e8R9x" } as const;
 
 /** A row of `GET /v1/admin/users` (the default is the impersonation target). */
 export const buildAdminUser = (overrides: Json = {}): Json => ({
@@ -20,6 +20,20 @@ export const buildImpersonationStart = (overrides: Json = {}): Json => ({
   sessionId: IMPERSONATION_IDS.session,
   customToken: "eyJhbGciOiJSUzI1NiJ9.eyJpbXAiOiJJbTUifQ.c2ln",
   expiresAt: new Date(Date.now() + 60 * 60_000).toISOString(),
+  ...overrides,
+});
+
+/** A row of `GET /v1/admin/impersonation-sessions`: open for 30 more minutes by default. */
+export const buildAdminImpersonationSession = (overrides: Json = {}): Json => ({
+  id: IMPERSONATION_IDS.session,
+  staffUid: IMPERSONATION_IDS.staff,
+  targetUid: IMPERSONATION_IDS.target,
+  tenantId: IDS.organization,
+  reason: "Ticket 4821: user cannot see project Launch.",
+  createdAt: new Date(Date.now() - 30 * 60_000).toISOString(),
+  expiresAt: new Date(Date.now() + 30 * 60_000).toISOString(),
+  endedAt: null,
+  status: "active",
   ...overrides,
 });
 
