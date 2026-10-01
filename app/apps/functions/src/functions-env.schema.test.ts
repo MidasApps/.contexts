@@ -40,6 +40,17 @@ describe("loadFunctionsEnv", () => {
     });
   });
 
+  it("reads the Mastra URL and audience of the workflow approval trigger (decision 0036)", () => {
+    expect(loadFunctionsEnv({ APP_ENV: "staging", MASTRA_URL: "https://mastra.run.app", MASTRA_AUDIENCE: "https://mastra.run.app" })).toEqual({
+      APP_ENV: "staging",
+      MASTRA_URL: "https://mastra.run.app",
+      MASTRA_AUDIENCE: "https://mastra.run.app",
+    });
+    expect(loadFunctionsEnv({ APP_ENV: "local", MASTRA_URL: "http://localhost:4111" })).toEqual({ APP_ENV: "local", MASTRA_URL: "http://localhost:4111" });
+    expect(() => loadFunctionsEnv({ APP_ENV: "prod", MASTRA_URL: "http://mastra.internal" })).toThrow(/MASTRA_URL/);
+    expect(() => loadFunctionsEnv({ APP_ENV: "prod", MASTRA_URL: "not a url" })).toThrow(/MASTRA_URL/);
+  });
+
   it("reads an optional files bucket and rejects a malformed one", () => {
     expect(loadFunctionsEnv({ APP_ENV: "staging", FILES_BUCKET: "core-files-staging" })).toEqual({ APP_ENV: "staging", FILES_BUCKET: "core-files-staging" });
     expect(() => loadFunctionsEnv({ APP_ENV: "staging", FILES_BUCKET: "Bad Bucket" })).toThrow(/FILES_BUCKET/);

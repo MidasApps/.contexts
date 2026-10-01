@@ -602,3 +602,22 @@ export {
   type SecretManagerClientLike,
   type SecretStore as ConnectorSecretStore,
 } from "./services/connectors/index.ts";
+// SP5 workflows: HITL on SP1 approval requests (decision 0036).
+export {
+  createMastraWorkflowApprovalSettler,
+  createWorkflowResumeApprovalHandler,
+  DEFAULT_SETTLE_TIMEOUT_MS,
+  makeSettleOnApprovalUpdate,
+  registerWorkflowApprovals,
+  TRIGGER_SETTLED_STATUSES,
+  WORKFLOW_RESUME_HANDLER_KIND,
+  WorkflowApprovalError,
+  type ApprovalUpdate,
+  type MastraWorkflowApprovalSettlerOptions,
+  type SettleOnUpdateOutcome,
+  type SettleOutcome,
+  type WorkflowApprovalErrorCode,
+  type WorkflowApprovalSettler,
+} from "./services/workflows/index.ts";
+// Functions: the approval trigger test writes SP1 requests through the same adapter.
+export { createFirestoreApprovalRequestRepository } from "./services/access/index.ts";

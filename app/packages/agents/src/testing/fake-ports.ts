@@ -13,6 +13,9 @@ import type {
   KnowledgeEventsPort,
   NodeRef,
   ProjectsPort,
+  WorkflowApprovalPort,
+  WorkflowApprovalRecord,
+  WorkflowCommandPort,
   RegionalSettings,
   SettingsPort,
   UsagePort,
@@ -262,5 +265,74 @@ export const createFakeRuntimePorts = (overrides: Partial<AgentRuntimePorts> = {
   settings: createFakeSettingsPort(),
   catalog: { runSemanticQuery: () => Promise.resolve({ ok: false, error: { code: "CONNECTOR_DISABLED" } }) },
   projects: createFakeProjectsPort(),
+  workflowApprovals: createFakeWorkflowApprovalPort(),
+  workflowCommands: createFakeWorkflowCommandPort(),
   ...overrides,
 });
+
+type WorkflowApprovalRequestInput = Parameters<WorkflowApprovalPort["requestWorkflowApproval"]>[0];
+
+export type FakeWorkflowApprovalPort = WorkflowApprovalPort & {
+  readonly requests: WorkflowApprovalRequestInput[];
+  readonly records: Map<string, WorkflowApprovalRecord>;
+  /** Moves a stored request to a settled status, as SP1 would (approve, reject, expire, ...). */
+  readonly settle: (approvalRequestId: string, status: WorkflowApprovalRecord["status"], decidedBy?: string) => void;
+};
+
+/** In-memory SP1 approval requests of kind `workflow-resume` (decision 0036). */
+export const createFakeWorkflowApprovalPort = (): FakeWorkflowApprovalPort => {
+  const requests: WorkflowApprovalRequestInput[] = [];
+  const records = new Map<string, WorkflowApprovalRecord>();
+  return {
+    requests,
+    records,
+    requestWorkflowApproval: (input) => {
+      requests.push(input);
+      const id = `wfApproval${String(requests.length).padStart(4, "0")}`;
+      const tenantId = input.node.level === "platform" ? "" : input.node.tenantId;
+      const { principal } = input;
+      const requestedBy =
+        principal.type === "user" ? { type: "user" as const, id: principal.uid } : principal.type === "device" ? { type: "device" as const, id: principal.deviceId } : { type: "service" as const, id: principal.apiKeyId };
+      records.set(id, {
+        id,
+        tenantId,
+        status: "pending",
+        kind: "workflow-resume",
+        input: { ...input.action },
+        requestedBy,
+        decidedBy: null,
+        reason: null,
+      });
+      return Promise.resolve({ approvalId: id });
+    },
+    getApprovalRequest: ({ approvalRequestId }) => Promise.resolve(records.get(approvalRequestId) ?? null),
+    settle: (approvalRequestId, status, decidedBy) => {
+      const record = records.get(approvalRequestId);
+      if (record === undefined) throw new Error(`unknown approval request ${approvalRequestId}`);
+      records.set(approvalRequestId, { ...record, status, decidedBy: decidedBy ?? null });
+    },
+  };
+};
+
+type WorkflowCommandRun = Parameters<WorkflowCommandPort["run"]>[0];
+
+export type FakeWorkflowCommandPort = WorkflowCommandPort & { readonly runs: WorkflowCommandRun[] };
+
+/** Runs commands once per tenant, command and key; `refuse` answers a code for a command id. */
+export const createFakeWorkflowCommandPort = (options: { readonly refuse?: Readonly<Record<string, string>> } = {}): FakeWorkflowCommandPort => {
+  const runs: WorkflowCommandRun[] = [];
+  const results = new Map<string, unknown>();
+  return {
+    runs,
+    run: (command) => {
+      const refusal = options.refuse?.[command.commandId];
+      if (refusal !== undefined) return Promise.resolve({ ok: false, code: refusal });
+      const key = `${command.tenantId}:${command.commandId}:${command.idempotencyKey}`;
+      if (results.has(key)) return Promise.resolve({ ok: true, output: results.get(key), replayed: true });
+      runs.push(command);
+      const output = { id: `created-${runs.length}` };
+      results.set(key, output);
+      return Promise.resolve({ ok: true, output, replayed: false });
+    },
+  };
+};

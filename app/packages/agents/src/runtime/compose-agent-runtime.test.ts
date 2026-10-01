@@ -80,9 +80,10 @@ describe("composeAgentRuntime", () => {
       "POST /chat/:agentId",
       "GET /chat/:agentId/runs/:runId/observe",
       "POST /chat/runs/:runId/abort",
+      "POST /workflow-approvals/:approvalRequestId/settle",
     ]);
     expect(runtime.voice?.capabilities).toEqual({ transcription: true, speech: true, realtime: false });
-    expect(Object.keys(runtime.workflows).sort()).toEqual(["catalog-reindex", "knowledge-ingest"]);
+    expect(Object.keys(runtime.workflows).sort()).toEqual(["approval-demo", "catalog-reindex", "knowledge-ingest"]);
   });
 
   it("registers module tools and agents", () => {

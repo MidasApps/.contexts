@@ -30,6 +30,10 @@ export const FunctionsEnvSchema = z
     GCLOUD_PROJECT: z.string().min(1).optional(),
     // Bucket of uploads (files context); unset = the project's default bucket.
     FILES_BUCKET: BucketNameSchema.optional(),
+    // Private agent runtime of the workflow approval trigger (decision 0036); https outside local.
+    MASTRA_URL: z.url().optional(),
+    // Cloud Run audience of that runtime (X-Serverless-Authorization).
+    MASTRA_AUDIENCE: z.url().optional(),
     FIREBASE_AUTH_EMULATOR_HOST: EmulatorHostSchema,
     FIRESTORE_EMULATOR_HOST: EmulatorHostSchema,
     FIREBASE_STORAGE_EMULATOR_HOST: EmulatorHostSchema,
@@ -38,14 +42,17 @@ export const FunctionsEnvSchema = z
   })
   .superRefine((env, ctx) => {
     if (env.APP_ENV === "local") return;
+    if (env.MASTRA_URL?.startsWith("https://") === false) ctx.addIssue({ code: "custom", path: ["MASTRA_URL"], message: "https is required outside local" });
     for (const key of EMULATOR_HOST_KEYS) {
       if (env[key]) ctx.addIssue({ code: "custom", path: [key], message: "emulators are local only" });
     }
   })
-  .transform(({ APP_ENV, GCLOUD_PROJECT, FILES_BUCKET }) => ({
+  .transform(({ APP_ENV, GCLOUD_PROJECT, FILES_BUCKET, MASTRA_URL, MASTRA_AUDIENCE }) => ({
     APP_ENV,
     ...(GCLOUD_PROJECT === undefined ? {} : { GCLOUD_PROJECT }),
     ...(FILES_BUCKET === undefined ? {} : { FILES_BUCKET }),
+    ...(MASTRA_URL === undefined ? {} : { MASTRA_URL }),
+    ...(MASTRA_AUDIENCE === undefined ? {} : { MASTRA_AUDIENCE }),
   }));
 
 export type FunctionsEnv = z.infer<typeof FunctionsEnvSchema>;

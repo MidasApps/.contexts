@@ -27,6 +27,8 @@ import { createRouteAllowlistMiddleware } from "../auth/route-allowlist-middlewa
 import { threadOwnerFromStorage } from "../auth/thread-ownership.ts";
 import { createCatalogReindexWorkflow } from "../knowledge/workflows/catalog-reindex.workflow.ts";
 import { createKnowledgeIngestWorkflow } from "../knowledge/workflows/knowledge-ingest.workflow.ts";
+import { createApprovalDemoWorkflow } from "../workflows/approval-demo.workflow.ts";
+import { createWorkflowApprovalRoutes } from "../workflows/workflow-approval-routes.ts";
 import { coreFakeRules } from "../models/fake/fake-scenarios.ts";
 import { type AgentModels, createModelProvider, embeddingModelIdOf, type ModelFactoryEnv } from "../models/model-factory.ts";
 import { createObservability, type ObservabilityEnv } from "../observability/create-observability.ts";
@@ -112,7 +114,7 @@ export type RuntimeParts = {
   readonly auth: FirebaseMastraAuth;
   /** Route allowlist first, then the context middleware. */
   readonly middleware: AgentMiddleware[];
-  /** Voice routes (`/voice/transcriptions`, `/voice/speech`, Task 26) and the chat routes (SP4 Task 2). */
+  /** Voice routes (Task 26), the chat routes (SP4 Task 2) and the workflow approval settle route (SP5, decision 0036). */
   readonly apiRoutes: ApiRoute[];
   /** Chat agents, run owners and the approval previewer the chat routes share (SP4, decision 0031). */
   readonly chat: ChatRuntime;
@@ -161,7 +163,7 @@ const collectAgents = (args: ComposeAgentRuntimeArgs, commands: readonly AgentCo
   return all;
 };
 
-/** Core workflows (spec §11): knowledge ingestion and the platform catalog reindex. */
+/** Core workflows: knowledge ingestion, the platform catalog reindex (SP3 §11) and the HITL demo (SP5, decision 0036). */
 const coreWorkflows = (args: ComposeAgentRuntimeArgs, models: AgentModels): Record<string, AnyWorkflow> => {
   const indexing = { knowledge: args.ports.knowledge, embedding: models.embedding, embeddingModelId: embeddingModelIdOf(args.env) };
   const ingest = createKnowledgeIngestWorkflow({
@@ -172,7 +174,8 @@ const coreWorkflows = (args: ComposeAgentRuntimeArgs, models: AgentModels): Reco
     events: args.ports.knowledgeEvents,
   });
   const reindex = createCatalogReindexWorkflow({ ...indexing, ...(args.aiCatalog === undefined ? {} : { aiCatalog: args.aiCatalog }) });
-  return { [ingest.id]: ingest, [reindex.id]: reindex };
+  const approvalDemo = createApprovalDemoWorkflow({ approvals: args.ports.workflowApprovals, commands: args.ports.workflowCommands, access: args.ports.access });
+  return { [ingest.id]: ingest, [reindex.id]: reindex, [approvalDemo.id]: approvalDemo };
 };
 
 /** The supervisor calls no core tool itself; its subagents' calls are capped by their own ceilings. */
@@ -296,7 +299,11 @@ export const composeAgentRuntime = (args: ComposeAgentRuntimeArgs): RuntimeParts
       contextMiddleware(),
       contextMiddleware(CHAT_ROUTES_PATTERN),
     ],
-    apiRoutes: [...createVoiceRoutes({ voice, logger: processLogger }), ...createChatRoutes({ ...chat.runtime, logger: processLogger })],
+    apiRoutes: [
+      ...createVoiceRoutes({ voice, logger: processLogger }),
+      ...createChatRoutes({ ...chat.runtime, logger: processLogger }),
+      ...createWorkflowApprovalRoutes({ approvals: args.ports.workflowApprovals, logger: processLogger }),
+    ],
     tools,
     voice,
     chat: chat.runtime,

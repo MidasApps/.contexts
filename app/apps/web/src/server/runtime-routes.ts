@@ -11,11 +11,13 @@ import {
   createFirebaseFilesServices,
   createKnowledgeServices,
   createMastraGateway,
+  createMastraWorkflowApprovalSettler,
   createPostgresClient,
   createPostgresKnowledgeRepository,
   createServerlessIdTokenSource,
   processLogger,
   registerAgentCommandApprovals,
+  registerWorkflowApprovals,
 } from "@core/services";
 import type { CoreRoutes, CoreServer } from "@core/services/composition";
 
@@ -29,7 +31,8 @@ const UNUSED_SEARCH_MODEL = "web/no-search";
  * the core server's pipeline, audit writer and Admin SDK app, plus `POST /v1/mcp` (the core
  * MCP server through the Mastra gateway, Task 24). It also registers the SP1
  * approval handler of kind `agent-command` (decision 0025): approvals are decided here, so the
- * approved agent command runs here, at most once per `runId:toolCallId`.
+ * approved agent command runs here, at most once per `runId:toolCallId`. The `workflow-resume`
+ * handler (decision 0036) settles approved workflow requests through the Mastra settle route.
  */
 export const buildRuntimeRoutes = async (core: CoreServer): Promise<CoreRoutes> => {
   const { env, processEnvForFirebaseGuard } = await import("@/env");
@@ -50,10 +53,9 @@ export const buildRuntimeRoutes = async (core: CoreServer): Promise<CoreRoutes> 
     repository: createPostgresKnowledgeRepository(createPostgresClient({ DATABASE_URL: env.DATABASE_URL })),
     embeddingModel: UNUSED_SEARCH_MODEL,
   });
-  const gateway = createMastraGateway({
-    baseUrl: env.MASTRA_URL,
-    serverlessToken: env.APP_ENV === "local" || env.MASTRA_AUDIENCE === undefined ? null : createServerlessIdTokenSource({ audience: env.MASTRA_AUDIENCE }),
-  });
+  const serverlessToken = env.APP_ENV === "local" || env.MASTRA_AUDIENCE === undefined ? null : createServerlessIdTokenSource({ audience: env.MASTRA_AUDIENCE });
+  const gateway = createMastraGateway({ baseUrl: env.MASTRA_URL, serverlessToken });
+  registerWorkflowApprovals({ approvals: core.approvals, settler: createMastraWorkflowApprovalSettler({ baseUrl: env.MASTRA_URL, serverlessToken }) });
   const connectors = createFirebaseConnectorsServices({
     firebase,
     env: { APP_ENV: env.APP_ENV, FIREBASE_PROJECT_ID: env.FIREBASE_PROJECT_ID },

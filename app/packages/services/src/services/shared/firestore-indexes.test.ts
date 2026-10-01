@@ -61,6 +61,16 @@ const REQUIRED = [
   signature("connectors", ["tenantId:ASCENDING", "createdAt:DESCENDING"]),
 ];
 
+/**
+ * Cross-tenant indexes of server-only platform jobs (decisions 0030 A3 and 0036: the approval
+ * expiry and interrupted-execution sweeps). No client query can use them: Rules deny the
+ * collection, and only the sweeps run these queries.
+ */
+const PLATFORM_SWEEP_INDEXES: readonly string[] = [
+  signature("approval-requests", ["status:ASCENDING", "expiresAt:ASCENDING"]),
+  signature("approval-requests", ["status:ASCENDING", "updatedAt:ASCENDING"]),
+];
+
 const TTL_COLLECTIONS = [RATE_LIMIT_BUCKETS_COLLECTION, IDEMPOTENCY_RECORDS_COLLECTION, CORE_COLLECTIONS.deviceActivations];
 const KNOWN_COLLECTIONS = new Set<string>([
   ...Object.values(CORE_COLLECTIONS),
@@ -74,7 +84,10 @@ const KNOWN_COLLECTIONS = new Set<string>([
 describe("firestore.indexes.json", () => {
   it("starts every composite index with tenantId, or with a key already bound to one tenant or user", () => {
     const allowedFirst = (collection: string) => new Set(["tenantId", TENANT_BOUND_FIRST_FIELD[collection]]);
+    const signatureOf = (index: (typeof file.indexes)[number]) =>
+      signature(index.collectionGroup, index.fields.map((field) => `${field.fieldPath}:${field.order ?? field.arrayConfig ?? ""}`));
     const offending = file.indexes
+      .filter((index) => !PLATFORM_SWEEP_INDEXES.includes(signatureOf(index)))
       .filter((index) => !allowedFirst(index.collectionGroup).has(index.fields[0]?.fieldPath))
       .map((index) => signature(index.collectionGroup, index.fields.map((field) => field.fieldPath)));
     expect(offending).toEqual([]);
@@ -86,7 +99,7 @@ describe("firestore.indexes.json", () => {
   });
 
   it("declares the composite index of every adapter query that needs one", () => {
-    expect(REQUIRED.filter((required) => !declared.has(required))).toEqual([]);
+    expect([...REQUIRED, ...PLATFORM_SWEEP_INDEXES].filter((required) => !declared.has(required))).toEqual([]);
   });
 
   it("has no duplicate composite index", () => {

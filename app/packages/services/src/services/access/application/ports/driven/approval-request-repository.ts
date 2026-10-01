@@ -20,4 +20,14 @@ export type ApprovalRequestRepository = {
   /** Newest first (`createdAt desc`, id desc); `statuses` filters the stored status. */
   readonly list: (args: { tenantId: TenantId; statuses?: readonly ApprovalStatus[] | undefined; page: PageRequest }) => Promise<Page<ApprovalRequest>>;
   readonly setStatus: (tx: Transaction, change: ApprovalStatusChange) => void;
+  /**
+   * Platform sweeps (decision 0036): requests of every tenant in `status` whose `field` is at or
+   * before `before`, oldest first, at most `limit`. Firestore index `status + <field>`.
+   */
+  readonly listByStatusBefore: (args: {
+    status: ApprovalStatus;
+    field: "expiresAt" | "updatedAt";
+    before: string;
+    limit: number;
+  }) => Promise<readonly ApprovalRequest[]>;
 };

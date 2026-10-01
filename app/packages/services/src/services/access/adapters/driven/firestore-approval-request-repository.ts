@@ -31,6 +31,10 @@ export const createFirestoreApprovalRequestRepository = (deps: { firestore: Fire
       const fetched = (await query.limit(page.limit + 1).get()).docs.map((doc) => doc.data());
       return pageFromOverfetch({ fetched, limit: page.limit, positionOf: (request: ApprovalRequest) => [request.createdAt, request.id] });
     },
+    listByStatusBefore: async ({ status, field, before, limit }) => {
+      const query = typed().where("status", "==", status).where(field, "<=", Timestamp.fromDate(new Date(before))).orderBy(field, "asc").limit(limit);
+      return (await query.get()).docs.map((doc) => doc.data());
+    },
     setStatus: (tx, { id, status, decidedBy, reason, updatedAt, actorId }) =>
       void tx.update(
         raw().doc(id),

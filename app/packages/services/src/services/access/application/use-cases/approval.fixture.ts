@@ -83,6 +83,7 @@ export const buildApprovalWorld = async (options: { failWith?: Error; hangOnExec
     executions,
     access: () => core.forRequest(),
     actions: () => writer.entries("tenant").map((entry) => entry.action),
+    auditEntries: () => writer.entries("tenant"),
     setNow: (iso: string) => {
       now = new Date(iso);
     },

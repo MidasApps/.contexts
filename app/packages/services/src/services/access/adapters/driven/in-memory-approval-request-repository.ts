@@ -28,6 +28,13 @@ export const createInMemoryApprovalRequestRepository = (): InMemoryApprovalReque
       if (row === undefined) return;
       rows.set(id, { ...row, status, ...(decidedBy === undefined ? {} : { decidedBy }), ...(reason === undefined ? {} : { reason }), updatedAt });
     },
+    listByStatusBefore: ({ status, field, before, limit }) =>
+      Promise.resolve(
+        [...rows.values()]
+          .filter((row) => row.status === status && Date.parse(row[field]) <= Date.parse(before))
+          .sort((a, b) => Date.parse(a[field]) - Date.parse(b[field]))
+          .slice(0, limit),
+      ),
     rowOf: (id) => rows.get(id),
     put: (request) => void rows.set(request.id, request),
   };

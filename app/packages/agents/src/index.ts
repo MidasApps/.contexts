@@ -38,6 +38,9 @@ export type {
   UsagePort,
   WebContentPort,
   WebPage,
+  WorkflowApprovalPort,
+  WorkflowApprovalRecord,
+  WorkflowCommandPort,
 } from "./runtime/runtime-ports.ts";
 export {
   type AgentModels,
@@ -378,3 +381,26 @@ export { CHAT_AGENT_SUFFIX, chatAgentIdOf, createDurableChatAgent } from "./chat
 export { createChatStreamTap, createToolPreviewer, type ToolPreviewData, type ToolPreviewer } from "./chat/tool-preview.ts";
 // Mastra event bus selection (SP3 Task 25).
 export { createPubSub, type GcpPubSubClass, PubSubConfigError } from "./runtime/create-pubsub.ts";
+// SP5 workflow HITL on SP1 approval requests (decision 0036).
+export {
+  APPROVAL_DEMO_COMMAND_ID,
+  APPROVAL_DEMO_PERMISSION,
+  APPROVAL_DEMO_WORKFLOW_ID,
+  ApprovalDemoInputSchema,
+  ApprovalDemoResultSchema,
+  createApprovalDemoWorkflow,
+  type ApprovalDemoDeps,
+  type ApprovalDemoInput,
+  type ApprovalDemoResult,
+} from "./workflows/approval-demo.workflow.ts";
+export {
+  confirmsDecision,
+  createRequestHumanApprovalStep,
+  HumanApprovalOutcomeSchema,
+  HumanApprovalStepError,
+  REQUEST_HUMAN_APPROVAL_STEP_ID,
+  type HumanApprovalOutcome,
+  type RequestHumanApprovalStepOptions,
+} from "./workflows/steps/request-human-approval.step.ts";
+export { settleWorkflowApproval, type SettleSkipReason, type SettleWorkflowApprovalResult } from "./workflows/settle-workflow-approval.ts";
+export { createWorkflowApprovalRoutes, handleSettleWorkflowApproval, WORKFLOW_APPROVAL_SETTLE_PATH, type WorkflowApprovalRouteDeps } from "./workflows/workflow-approval-routes.ts";

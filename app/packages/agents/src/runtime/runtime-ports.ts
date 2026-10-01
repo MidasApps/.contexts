@@ -1,5 +1,6 @@
 import type {
   AgentApprovalRequest,
+  ApprovalStatus,
   AgentSettings,
   Citation,
   CreateProjectInput,
@@ -8,6 +9,7 @@ import type {
   KnowledgeDocumentSource,
   LlmCall,
   StoredFile,
+  WorkflowResumeActionInput,
 } from "@core/contracts";
 import type { RunSemanticQuery } from "@core/services";
 
@@ -234,6 +236,52 @@ export type ProjectsPort = {
 
 export type SettingsPort = { readonly getAgentSettings: (input: { tenantId: string }) => Promise<AgentSettings> };
 
+/** An SP1 approval request as workflows read it: effective status (a pending one past its expiry reads `expired`). */
+export type WorkflowApprovalRecord = {
+  readonly id: string;
+  readonly tenantId: string;
+  readonly status: ApprovalStatus;
+  readonly kind: string;
+  readonly input: Readonly<Record<string, unknown>>;
+  readonly requestedBy: { readonly type: "user" | "device" | "service"; readonly id: string };
+  readonly decidedBy: string | null;
+  readonly reason: string | null;
+};
+
+/**
+ * Workflow HITL on SP1 approval requests (decision 0036). `requestWorkflowApproval` creates a
+ * request of kind `workflow-resume` as the run's principal (rejects when SP1 refuses);
+ * `getApprovalRequest` is a system read used to verify every resume and by the settle route.
+ */
+export type WorkflowApprovalPort = {
+  readonly requestWorkflowApproval: (input: {
+    readonly principal: AccessPrincipal;
+    readonly node: NodeRef;
+    readonly permission: string;
+    readonly action: WorkflowResumeActionInput;
+    readonly summary: string;
+    readonly requestId: string;
+  }) => Promise<{ readonly approvalId: string }>;
+  readonly getApprovalRequest: (input: { readonly approvalRequestId: string }) => Promise<WorkflowApprovalRecord | null>;
+};
+
+/**
+ * Runs a module command as a principal, at most once per idempotency key (SP3 executors and
+ * idempotency records). Expected refusals answer a SCREAMING_SNAKE `code` (`UNKNOWN_COMMAND`,
+ * `REQUESTER_FORBIDDEN`, `COMMAND_INPUT_INVALID`, ...); infrastructure errors reject.
+ */
+export type WorkflowCommandPort = {
+  readonly run: (input: {
+    readonly principal: AccessPrincipal;
+    readonly tenantId: string;
+    readonly node: NodeRef;
+    readonly commandId: string;
+    readonly input: unknown;
+    readonly idempotencyKey: string;
+    readonly requestId: string;
+  }) => Promise<{ readonly ok: true; readonly output: unknown; readonly replayed: boolean } | { readonly ok: false; readonly code: string }>;
+};
+
 export type AgentRuntimePorts = {
   readonly access: AccessPort;
   readonly audit: AuditPort;
@@ -249,4 +297,7 @@ export type AgentRuntimePorts = {
   readonly settings: SettingsPort;
   readonly catalog: SemanticQueryPort;
   readonly projects: ProjectsPort;
+  /** SP5 workflow HITL (decision 0036). */
+  readonly workflowApprovals: WorkflowApprovalPort;
+  readonly workflowCommands: WorkflowCommandPort;
 };

@@ -2,7 +2,9 @@ import { type AgentRuntimePorts, createWebContentPort, embeddingModelIdOf, type 
 import { TenantIdSchema } from "@core/contracts";
 import {
   type AccessReaders,
+  type AgentCommandExecutor,
   type ApiKeyAuthenticator,
+  agentCommandExecutors,
   createCoreAgentCommandExecutors,
   createFirebaseConnectorsServices,
   createFirebaseFilesServices,
@@ -21,6 +23,7 @@ import {
   type ResolveAccessContext,
   makeRunSemanticQuery,
   registerAgentCommandApprovals,
+  registerWorkflowApprovals,
   type ServicesEnv,
   systemClock,
 } from "@core/services";
@@ -32,6 +35,7 @@ import { bindKnowledgePort } from "./knowledge-port-binding.ts";
 import { bindProjectsPort } from "./projects-port-binding.ts";
 import { bindUsagePort } from "./usage-port-binding.ts";
 import { UNWIRED_PORTS } from "./unwired-ports.ts";
+import { bindWorkflowApprovalsPort, bindWorkflowCommandsPort, RUNTIME_SIDE_SETTLER } from "./workflow-ports-binding.ts";
 
 export type RuntimePortsEnv = Pick<ServicesEnv, "API_KEY_PREFIX" | "DATABASE_URL" | "APP_ENV" | "AI_MODE" | "FIREBASE_STORAGE_EMULATOR_HOST" | "FIREBASE_PROJECT_ID"> & {
   /** Model id of the stored vectors in real mode; search only compares vectors of this model (decision 0022). */
@@ -60,6 +64,8 @@ export type RuntimePortsAdapters = {
   readonly accessReaders?: AccessReaders;
   readonly apiKeyAuthenticator?: ApiKeyAuthenticator;
   readonly resolveAccessContext?: ResolveAccessContext;
+  /** Extra command executors (tests: a module command the workflow HITL applies). */
+  readonly commandExecutors?: readonly AgentCommandExecutor[];
 };
 
 /**
@@ -83,6 +89,9 @@ export type RuntimePortsAdapters = {
  *   `runId:toolCallId` over SP1's idempotency store, shared with that handler (follow-up #26).
  * - web content: Firecrawl scrape for knowledge URL sources, behind the SSRF guard (fixture
  *   pages in `AI_MODE=fake`; the tenant key `firecrawl-<tenantId>`, else the platform key).
+ * - workflow approvals and commands: SP1 approval requests of kind `workflow-resume` (whose
+ *   handler this runtime registers so SP1 accepts the kind; approvals execute in `/v1`) and the
+ *   SP3 executors run once per workflow run (decision 0036).
  * - settings: fail-closed until SP5.
  * @param args.modules installed modules (their permissions join SP1's registry).
  */
@@ -110,12 +119,10 @@ export const createRuntimePorts = (args: {
   const knowledge = createKnowledgeServices({ repository: createPostgresKnowledgeRepository(sql), embeddingModel: embeddingModelIdOf(args.env) });
   const files = createFirebaseFilesServices({ firebase: args.firebase, env: args.env, logger: args.logger });
   const connectors = createFirebaseConnectorsServices({ firebase: args.firebase, env: args.env, audit: core.audit, clock: systemClock });
-  const commands = registerAgentCommandApprovals({
-    approvals: core.approvals,
-    executors: createCoreAgentCommandExecutors({ tenancy: core.tenancy, access: core.access }),
-    access: core.access,
-    idempotency: core.pipeline.idempotency,
-  });
+  const executors = [...createCoreAgentCommandExecutors({ tenancy: core.tenancy, access: core.access }), ...(adapters.commandExecutors ?? [])];
+  const commands = registerAgentCommandApprovals({ approvals: core.approvals, executors, access: core.access, idempotency: core.pipeline.idempotency });
+  // Decided in /v1; registered here so SP1 accepts requests of the kind (decision 0036).
+  registerWorkflowApprovals({ approvals: core.approvals, settler: RUNTIME_SIDE_SETTLER });
   return {
     access: bindAccessPort({ verifyBearer: core.verifyBearer, access: core.access, resolveAccessContext: adapters.resolveAccessContext ?? core.resolveAccessContext }),
     audit: bindAuditPort(core.audit),
@@ -131,5 +138,7 @@ export const createRuntimePorts = (args: {
     knowledgeEvents: createLogKnowledgeEventPublisher(args.logger),
     usage: bindUsagePort(createUsageServices({ repository: createPostgresUsageRepository(sql), clock: systemClock })),
     projects: bindProjectsPort({ tenancy: core.tenancy, access: core.access }),
+    workflowApprovals: bindWorkflowApprovalsPort(core.approvals),
+    workflowCommands: bindWorkflowCommandsPort({ executors: agentCommandExecutors(executors), access: core.access, commands }),
   };
 };

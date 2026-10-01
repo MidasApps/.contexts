@@ -2,7 +2,9 @@ import { createLogger } from "@core/services";
 import { setGlobalOptions } from "firebase-functions/v2";
 import { write } from "firebase-functions/logger";
 import { onRequest } from "firebase-functions/v2/https";
+import { onDocumentUpdated } from "firebase-functions/v2/firestore";
 import { onObjectFinalized } from "firebase-functions/v2/storage";
+import { makeOnApprovalRequestSettled } from "./approvals/on-approval-request-settled.ts";
 import { env, processEnvForFirebaseGuard } from "./env.ts";
 import { makeOnFileFinalized } from "./files/on-file-finalized.ts";
 import { DEFAULT_MAX_INSTANCES, FUNCTIONS_REGION } from "./functions-options.ts";
@@ -36,4 +38,15 @@ export const healthz = onRequest(
 export const onFileFinalized = onObjectFinalized(
   { ...(env.FILES_BUCKET === undefined ? {} : { bucket: env.FILES_BUCKET }), memory: "512MiB", timeoutSeconds: 60, retry: true },
   makeOnFileFinalized({ env, processEnv: processEnvForFirebaseGuard, logger }),
+);
+
+/**
+ * Workflow HITL (decision 0036): a `workflow-resume` approval request that became rejected,
+ * expired or cancelled resumes its suspended run through the Mastra settle route. Retries are
+ * on: the handler is idempotent and throws only on infrastructure errors. Outside local the
+ * service account of the function needs `roles/run.invoker` on Mastra (`MASTRA_AUDIENCE`).
+ */
+export const onApprovalRequestSettled = onDocumentUpdated(
+  { document: "approval-requests/{id}", memory: "256MiB", timeoutSeconds: 120, retry: true },
+  makeOnApprovalRequestSettled({ env, logger }),
 );

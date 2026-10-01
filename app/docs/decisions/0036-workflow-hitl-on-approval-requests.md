@@ -42,8 +42,9 @@ workflows suspend and resume; on Postgres a resume atomically claims the run
      gateway's `X-Serverless-Authorization`, as for every Mastra call). Accepted threat: a caller
      inside the trust boundary can only force an early settle of a request SP1 already decided.
      It cannot choose the decision.
-   - The gateway method `settleWorkflowApproval({ approvalRequestId, requestId })` sends only
-     `X-Request-Id` and the serverless token.
+   - The settler adapter (`createMastraWorkflowApprovalSettler`, `@core/services` workflows
+     context, beside the gateway) sends only `X-Request-Id` and the serverless token, and maps
+     errors by status like the gateway.
    - The route awaits the resume, so the `/v1` approve call returns when the run reaches its next
      suspension or its end. Long post-approval work belongs in a step started asynchronously.
 4. **Approve.** SP1 runs the `workflow-resume` handler at most once. The handler checks the
@@ -70,7 +71,13 @@ workflows suspend and resume; on Postgres a resume atomically claims the run
 ## Consequences
 
 - One approvals inbox and one audit trail for agent commands and workflows.
-- Forged resumes are harmless; the settle route only reconciles.
+- Forged resumes are harmless; the settle route only reconciles. The step also refuses to act
+  when the restored context is not the stored requester's (a resume under another caller's
+  context ends `failed` with `REQUESTER_MISMATCH`).
+- Functions read `MASTRA_URL` (https outside local; `http://localhost:4111` by default in local)
+  and `MASTRA_AUDIENCE`. A remote environment without `MASTRA_URL` fails each trigger event
+  (retried, `MASTRA_URL_MISSING`) instead of the boot, so the other functions keep deploying.
+  Deploy step: the Functions service account needs `roles/run.invoker` on the Mastra service.
 - The core demo workflow `approval-demo` needs a permission with `requiresApproval`:
   `core.workflow-run.approve-demo` (SP5 Task 1).
 - `approval-demo`'s `apply` step runs the module command `example.CreateNoteCommand` as the

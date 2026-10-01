@@ -9,6 +9,14 @@ import { makeApproveRequest, type ApproveRequest } from "./application/use-cases
 import { makeListApprovalRequests, type ListApprovalRequests } from "./application/use-cases/list-approval-requests.ts";
 import { makeRejectRequest, type RejectRequest } from "./application/use-cases/reject-request.ts";
 import { makeRequestApproval, type RequestApproval } from "./application/use-cases/request-approval.ts";
+import {
+  type ExpireApprovalRequests,
+  type FailInterruptedApprovals,
+  type GetApprovalRequest,
+  makeExpireApprovalRequests,
+  makeFailInterruptedApprovals,
+  makeGetApprovalRequest,
+} from "./application/use-cases/approval-sweeps.ts";
 
 export type ApprovalServices = {
   /** Route and in-process entry (SP3 tool approvals, SP5 workflow HITL). */
@@ -16,6 +24,11 @@ export type ApprovalServices = {
   readonly listApprovalRequests: ListApprovalRequests;
   readonly approveRequest: ApproveRequest;
   readonly rejectRequest: RejectRequest;
+  /** System read with the effective status (SP5 workflow HITL, decision 0036). */
+  readonly getApprovalRequest: GetApprovalRequest;
+  /** Platform sweeps run by `approval-expiry-sweep` (decisions 0036 and 0030 A3). */
+  readonly expireApprovalRequests: ExpireApprovalRequests;
+  readonly failInterruptedApprovals: FailInterruptedApprovals;
   /** Open registry: SP3 registers `agent-command`, SP5 its workflow handler. */
   readonly handlers: ApprovalHandlerRegistry;
 };
@@ -26,6 +39,9 @@ export const createApprovalServices = (deps: ApprovalDeps): ApprovalServices => 
   listApprovalRequests: makeListApprovalRequests(deps),
   approveRequest: makeApproveRequest(deps),
   rejectRequest: makeRejectRequest(deps),
+  getApprovalRequest: makeGetApprovalRequest(deps),
+  expireApprovalRequests: makeExpireApprovalRequests(deps),
+  failInterruptedApprovals: makeFailInterruptedApprovals(deps),
   handlers: deps.handlers,
 });
 
