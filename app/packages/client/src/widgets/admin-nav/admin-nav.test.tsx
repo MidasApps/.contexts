@@ -34,6 +34,16 @@ function Filters() {
       <button type="button" onClick={() => search.set({ status: undefined })}>
         limpar
       </button>
+      <button
+        type="button"
+        onClick={() => {
+          // Two filters changed before the URL re-renders (e2e: "De" then "Até" of /admin/traces).
+          search.set({ status: "error" });
+          search.set({ organizationId: "o2" });
+        }}
+      >
+        dois filtros
+      </button>
       <button type="button" onClick={pagination?.onNext}>
         próxima
       </button>
@@ -96,6 +106,14 @@ describe("useAdminSearch and AdminOrganizationFilter", () => {
     await user.click(screen.getByRole("button", { name: "limpar" }));
     expect(router.current()).toBe("/admin/traces?organizationId=o1");
     expect(router.history()).toHaveLength(1);
+  });
+
+  it("keeps both filters when two are written before the URL updates", async () => {
+    const { user, router } = renderAdmin(<Filters />, { path: "/admin/traces?page=2", routes });
+    await user.click(await screen.findByRole("button", { name: "dois filtros" }));
+    expect(router.current()).toBe("/admin/traces?status=error&organizationId=o2");
+    await user.click(screen.getByRole("button", { name: "limpar" }));
+    expect(router.current()).toBe("/admin/traces?organizationId=o2");
   });
 
   it("picks an organization by name and clears it with the all option", async () => {

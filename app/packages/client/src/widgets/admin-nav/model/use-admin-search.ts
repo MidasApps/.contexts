@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { useRouter } from "#/shared/lib/router/router-context.tsx";
 
 export type AdminSearch<K extends string> = {
@@ -25,15 +26,26 @@ const PAGE = "page";
 export const useAdminSearch = <K extends string>(keys: readonly K[]): AdminSearch<K> => {
   const router = useRouter();
   const rest = router.useRouteParams()["rest"] ?? "";
-  const params = new URLSearchParams(router.useSearch());
+  const search = router.useSearch();
+  const params = new URLSearchParams(search);
+  // The query written last, until the URL shows it: two writes before a re-render (two date fields
+  // changed in a row) must build on each other, not both on the URL of the last render.
+  const pending = useRef<string | null>(null);
+  useEffect(() => {
+    pending.current = null;
+  }, [search]);
+  const base = (): URLSearchParams => new URLSearchParams(pending.current ?? search);
   const values = Object.fromEntries(keys.map((key) => [key, params.get(key) ?? undefined])) as Record<K, string | undefined>;
   const parsedPage = Number.parseInt(params.get(PAGE) ?? "1", 10);
-  const write = (next: URLSearchParams): void => router.navigate({ id: "admin", rest, search: Object.fromEntries(next) }, { replace: true });
+  const write = (next: URLSearchParams): void => {
+    pending.current = next.toString();
+    router.navigate({ id: "admin", rest, search: Object.fromEntries(next) }, { replace: true });
+  };
   return {
     values,
     page: Number.isInteger(parsedPage) && parsedPage >= 1 ? parsedPage : 1,
     set: (patch) => {
-      const next = new URLSearchParams(params);
+      const next = base();
       for (const [key, value] of Object.entries<string | undefined>(patch)) {
         if (value === undefined || value === "") next.delete(key);
         else next.set(key, value);
@@ -42,7 +54,7 @@ export const useAdminSearch = <K extends string>(keys: readonly K[]): AdminSearc
       write(next);
     },
     setPage: (page) => {
-      const next = new URLSearchParams(params);
+      const next = base();
       if (page <= 1) next.delete(PAGE);
       else next.set(PAGE, String(page));
       write(next);
