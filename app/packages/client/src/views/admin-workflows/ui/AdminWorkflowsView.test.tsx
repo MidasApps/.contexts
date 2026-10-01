@@ -195,6 +195,11 @@ describe("AdminWorkflowsView: schedules", () => {
     const tenant = within(table).getByRole("row", { name: new RegExp(OPS_IDS.tenantSchedule, "u") });
     api.route("GET /v1/admin/schedules", ok([buildPlatformSchedule(), buildAdminSchedule({ status: "paused", nextFireAt: null })]));
     await user.click(within(tenant).getByRole("button", { name: /^Pausar o agendamento/u }));
+    const dialog = await screen.findByRole("alertdialog", { name: "Pausar o agendamento de usage-report?" });
+    expect(dialog.textContent).toContain("deixa de disparar para a organização");
+    expect(dialog.textContent).not.toContain("todas as organizações");
+    expect(api.callLines()).not.toContain(`POST /v1/admin/schedules/${OPS_IDS.tenantSchedule}/pause`);
+    await user.click(within(dialog).getByRole("button", { name: "Pausar agendamento" }));
     expect(await screen.findByText("Agendamento de usage-report pausado.")).toBeDefined();
     expect(api.callLines()).toContain(`POST /v1/admin/schedules/${OPS_IDS.tenantSchedule}/pause`);
     const paused = await screen.findByRole("row", { name: new RegExp(`${OPS_IDS.tenantSchedule}.*Pausado`, "u") });
@@ -205,8 +210,41 @@ describe("AdminWorkflowsView: schedules", () => {
     const { user } = renderSchedules({ "POST /v1/admin/schedules/:scheduleId/pause": apiError(502, "UPSTREAM_UNAVAILABLE") });
     const table = await screen.findByRole("table", { name: "Agendamentos da plataforma e das organizações" });
     await user.click(within(within(table).getByRole("row", { name: new RegExp(OPS_IDS.tenantSchedule, "u") })).getByRole("button", { name: /^Pausar o agendamento/u }));
-    expect(await screen.findByText("Não foi possível pausar o agendamento de usage-report.")).toBeDefined();
-    expect(screen.getByText(new RegExp(FAKE_REQUEST_ID, "u"))).toBeDefined();
+    const dialog = await screen.findByRole("alertdialog", { name: "Pausar o agendamento de usage-report?" });
+    await user.click(within(dialog).getByRole("button", { name: "Pausar agendamento" }));
+    const alert = await within(dialog).findByRole("alert");
+    expect(alert.textContent).toContain(FAKE_REQUEST_ID);
+  });
+
+  it("warns that pausing a platform schedule stops the job for every organization, and does nothing on cancel", async () => {
+    const { user, api, container } = renderSchedules({ "POST /v1/admin/schedules/:scheduleId/pause": ok(buildPlatformSchedule({ status: "paused", nextFireAt: null })) });
+    const table = await screen.findByRole("table", { name: "Agendamentos da plataforma e das organizações" });
+    const platform = within(table).getByRole("row", { name: new RegExp(OPS_IDS.platformSchedule, "u") });
+    await user.click(within(platform).getByRole("button", { name: /^Pausar o agendamento/u }));
+    const dialog = await screen.findByRole("alertdialog", { name: "Pausar o agendamento de usage-report?" });
+    expect(dialog.textContent).toContain("job da plataforma");
+    expect(dialog.textContent).toContain("todas as organizações");
+    await expectNoAxeViolations(container.ownerDocument.body);
+    await user.click(within(dialog).getByRole("button", { name: "Cancelar" }));
+    await waitFor(() => expect(screen.queryByRole("alertdialog")).toBeNull());
+    expect(api.callLines()).not.toContain(`POST /v1/admin/schedules/${OPS_IDS.platformSchedule}/pause`);
+    await user.click(within(platform).getByRole("button", { name: /^Pausar o agendamento/u }));
+    await user.click(within(await screen.findByRole("alertdialog")).getByRole("button", { name: "Pausar job da plataforma" }));
+    await waitFor(() => expect(api.callLines()).toContain(`POST /v1/admin/schedules/${OPS_IDS.platformSchedule}/pause`));
+  });
+
+  it("confirms before resuming a paused schedule", async () => {
+    const { user, api } = renderSchedules({
+      "GET /v1/admin/schedules": ok([buildAdminSchedule({ status: "paused", nextFireAt: null })]),
+      "POST /v1/admin/schedules/:scheduleId/resume": ok(buildAdminSchedule()),
+    });
+    const table = await screen.findByRole("table", { name: "Agendamentos da plataforma e das organizações" });
+    await user.click(within(table).getByRole("button", { name: /^Retomar o agendamento/u }));
+    const dialog = await screen.findByRole("alertdialog", { name: "Retomar o agendamento de usage-report?" });
+    expect(api.callLines()).not.toContain(`POST /v1/admin/schedules/${OPS_IDS.tenantSchedule}/resume`);
+    await user.click(within(dialog).getByRole("button", { name: "Retomar agendamento" }));
+    expect(await screen.findByText("Agendamento de usage-report retomado.")).toBeDefined();
+    expect(api.callLines()).toContain(`POST /v1/admin/schedules/${OPS_IDS.tenantSchedule}/resume`);
   });
 
   it("runs a schedule now after a confirmation", async () => {

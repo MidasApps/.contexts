@@ -206,7 +206,9 @@
       "setOn": "Turn on",
       "setOff": "Turn off",
       "setOnNamed": "Turn {key} on for {name}",
-      "setOffNamed": "Turn {key} off for {name}"
+      "setOffNamed": "Turn {key} off for {name}",
+      "clear": "Remove override",
+      "clearNamed": "Remove the override of {key} for {name}"
     },
     "confirm": {
       "titleOn": "Turn {key} on?",
@@ -219,6 +221,12 @@
       "confirmOff": "Turn off",
       "doneOn": "{key} turned on.",
       "doneOff": "{key} turned off."
+    },
+    "clear": {
+      "title": "Remove the override of {key}?",
+      "description": "{name} follows the environment value for this flag again. The removal is recorded in the audit log. {reason}",
+      "confirm": "Remove override",
+      "done": "Override of {key} removed."
     }
   },
   "costs": {
@@ -772,11 +780,18 @@
       "confirm": "Run now",
       "done": "Run of {workflow} requested."
     },
-    "scheduleActions": {
+    "scheduleState": {
+      "pauseTitle": "Pause the schedule of {workflow}?",
+      "resumeTitle": "Resume the schedule of {workflow}?",
+      "pauseTenant": "The schedule stops firing for the organization until it is resumed. Runs in progress continue. The action is recorded in the audit log.",
+      "pausePlatform": "Warning: this is a platform job. While it is paused, it stops running for every organization (for example, approval expiry, data cleanup or the usage report). Pause it only during an incident and resume it right after. The action is recorded in the audit log.",
+      "resumeTenant": "The schedule fires again for the organization from the next cron time. Fires missed during the pause are not made up.",
+      "resumePlatform": "This platform job runs again for every organization from the next cron time. Fires missed during the pause are not made up.",
+      "confirmPause": "Pause schedule",
+      "confirmPausePlatform": "Pause platform job",
+      "confirmResume": "Resume schedule",
       "paused": "Schedule of {workflow} paused.",
-      "resumed": "Schedule of {workflow} resumed.",
-      "pauseFailed": "Could not pause the schedule of {workflow}.",
-      "resumeFailed": "Could not resume the schedule of {workflow}."
+      "resumed": "Schedule of {workflow} resumed."
     },
     "runs": {
       "caption": "Workflow runs",

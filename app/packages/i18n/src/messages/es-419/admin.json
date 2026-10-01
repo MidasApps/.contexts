@@ -206,7 +206,9 @@
       "setOn": "Activar",
       "setOff": "Desactivar",
       "setOnNamed": "Activar {key} para {name}",
-      "setOffNamed": "Desactivar {key} para {name}"
+      "setOffNamed": "Desactivar {key} para {name}",
+      "clear": "Quitar ajuste",
+      "clearNamed": "Quitar el ajuste de {key} para {name}"
     },
     "confirm": {
       "titleOn": "¿Activar {key}?",
@@ -219,6 +221,12 @@
       "confirmOff": "Desactivar",
       "doneOn": "{key} activada.",
       "doneOff": "{key} desactivada."
+    },
+    "clear": {
+      "title": "¿Quitar el ajuste de {key}?",
+      "description": "{name} vuelve a seguir el valor del entorno para esta flag. La eliminación queda registrada en la auditoría. {reason}",
+      "confirm": "Quitar ajuste",
+      "done": "Ajuste de {key} quitado."
     }
   },
   "costs": {
@@ -772,11 +780,18 @@
       "confirm": "Ejecutar ahora",
       "done": "Ejecución de {workflow} solicitada."
     },
-    "scheduleActions": {
+    "scheduleState": {
+      "pauseTitle": "¿Pausar la programación de {workflow}?",
+      "resumeTitle": "¿Reanudar la programación de {workflow}?",
+      "pauseTenant": "La programación deja de dispararse para la organización hasta que se reanude. Las ejecuciones en curso continúan. La acción queda registrada en la auditoría.",
+      "pausePlatform": "Atención: este es un job de la plataforma. Mientras esté pausado, deja de ejecutarse para todas las organizaciones (por ejemplo, el vencimiento de aprobaciones, la limpieza de datos o el informe de uso). Páusalo solo durante un incidente y reanúdalo enseguida. La acción queda registrada en la auditoría.",
+      "resumeTenant": "La programación vuelve a dispararse para la organización desde el próximo horario del cron. Los disparos que no ocurrieron durante la pausa no se reponen.",
+      "resumePlatform": "Este job de la plataforma vuelve a ejecutarse para todas las organizaciones desde el próximo horario del cron. Los disparos que no ocurrieron durante la pausa no se reponen.",
+      "confirmPause": "Pausar programación",
+      "confirmPausePlatform": "Pausar job de la plataforma",
+      "confirmResume": "Reanudar programación",
       "paused": "Programación de {workflow} pausada.",
-      "resumed": "Programación de {workflow} reanudada.",
-      "pauseFailed": "No se pudo pausar la programación de {workflow}.",
-      "resumeFailed": "No se pudo reanudar la programación de {workflow}."
+      "resumed": "Programación de {workflow} reanudada."
     },
     "runs": {
       "caption": "Ejecuciones de workflows",

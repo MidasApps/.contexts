@@ -206,7 +206,9 @@
       "setOn": "Ligar",
       "setOff": "Desligar",
       "setOnNamed": "Ligar {key} para {name}",
-      "setOffNamed": "Desligar {key} para {name}"
+      "setOffNamed": "Desligar {key} para {name}",
+      "clear": "Remover ajuste",
+      "clearNamed": "Remover o ajuste de {key} para {name}"
     },
     "confirm": {
       "titleOn": "Ligar {key}?",
@@ -219,6 +221,12 @@
       "confirmOff": "Desligar",
       "doneOn": "{key} ligada.",
       "doneOff": "{key} desligada."
+    },
+    "clear": {
+      "title": "Remover o ajuste de {key}?",
+      "description": "{name} volta a seguir o valor do ambiente para esta flag. A remoção fica registrada na auditoria. {reason}",
+      "confirm": "Remover ajuste",
+      "done": "Ajuste de {key} removido."
     }
   },
   "costs": {
@@ -772,11 +780,18 @@
       "confirm": "Executar agora",
       "done": "Execução de {workflow} solicitada."
     },
-    "scheduleActions": {
+    "scheduleState": {
+      "pauseTitle": "Pausar o agendamento de {workflow}?",
+      "resumeTitle": "Retomar o agendamento de {workflow}?",
+      "pauseTenant": "O agendamento deixa de disparar para a organização até ser retomado. Execuções em andamento continuam. A ação fica registrada na auditoria.",
+      "pausePlatform": "Atenção: este é um job da plataforma. Enquanto estiver pausado, ele deixa de rodar para todas as organizações (por exemplo, a expiração de aprovações, a limpeza de dados ou o relatório de uso). Pause só durante um incidente e retome em seguida. A ação fica registrada na auditoria.",
+      "resumeTenant": "O agendamento volta a disparar para a organização a partir do próximo horário do cron. Disparos que não aconteceram durante a pausa não são repostos.",
+      "resumePlatform": "Este job da plataforma volta a rodar para todas as organizações a partir do próximo horário do cron. Disparos que não aconteceram durante a pausa não são repostos.",
+      "confirmPause": "Pausar agendamento",
+      "confirmPausePlatform": "Pausar job da plataforma",
+      "confirmResume": "Retomar agendamento",
       "paused": "Agendamento de {workflow} pausado.",
-      "resumed": "Agendamento de {workflow} retomado.",
-      "pauseFailed": "Não foi possível pausar o agendamento de {workflow}.",
-      "resumeFailed": "Não foi possível retomar o agendamento de {workflow}."
+      "resumed": "Agendamento de {workflow} retomado."
     },
     "runs": {
       "caption": "Execuções de workflows",
