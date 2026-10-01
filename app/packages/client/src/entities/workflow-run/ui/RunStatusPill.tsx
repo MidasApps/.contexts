@@ -18,6 +18,6 @@ const TONES: Record<WorkflowRunStatus, StatusTone> = {
 
 /** A run status in words (the color is never the only signal). */
 export function RunStatusPill({ status }: { status: WorkflowRunStatus }) {
-  const t = useTranslations("admin.runTimeline.status");
+  const t = useTranslations("common.runTimeline.status");
   return <StatusPill tone={TONES[status]}>{t(status)}</StatusPill>;
 }

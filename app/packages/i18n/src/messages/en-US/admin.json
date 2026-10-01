@@ -270,14 +270,6 @@
       "actions": "Actions"
     }
   },
-  "costCharts": {
-    "title": "Cost this month and cap",
-    "description": "From the highest cost down.",
-    "descriptionTop": "The {shown} highest costs of {total}.",
-    "cost": "Cost this month",
-    "cap": "Monthly cap",
-    "total": "Month total: <value>{total}</value>"
-  },
   "organizationDetail": {
     "title": "Organization",
     "idLine": "Id {id}",
@@ -442,30 +434,6 @@
       "cost": "Cost",
       "traceId": "Trace id"
     }
-  },
-  "traceViewer": {
-    "title": "{count, plural, =0 {No spans} one {# span} other {# spans}}",
-    "status": {
-      "ok": "OK",
-      "error": "Error"
-    },
-    "running": "Running",
-    "unknownCost": "Unknown price",
-    "model": "Model",
-    "duration": "Duration",
-    "tokens": "Tokens",
-    "tokensValue": "{input} in · {output} out",
-    "cost": "Cost",
-    "payload": "Input and output",
-    "payloadOf": "Input and output of {name}",
-    "inputOf": "Input of {name}",
-    "outputOf": "Output of {name}",
-    "collapse": "Collapse the spans of {name}",
-    "expand": "Expand the spans of {name}",
-    "childrenOf": "Spans of {name}",
-    "logs": "See the logs of this trace",
-    "emptyTitle": "No spans recorded",
-    "emptyDescription": "This trace has no spans to show."
   },
   "evals": {
     "title": "Evals",
@@ -822,53 +790,6 @@
       "noMatchTitle": "This organization has no schedules",
       "noMatchDescription": "Platform schedules show when no organization is chosen.",
       "seeAll": "See all"
-    }
-  },
-  "runTimeline": {
-    "status": {
-      "pending": "Pending",
-      "running": "Running",
-      "waiting": "Waiting",
-      "suspended": "Suspended",
-      "paused": "Paused",
-      "success": "Completed",
-      "failed": "Failed",
-      "canceled": "Cancelled",
-      "tripwire": "Stopped by guardrail"
-    },
-    "started": "Started",
-    "startedBySchedule": "By the schedule {schedule}",
-    "startedByUser": "By the user {user}",
-    "startedByPlatform": "By the platform",
-    "waitingApproval": "Waits for approval",
-    "current": "Current state",
-    "updatedAt": "Since {when}"
-  },
-  "scheduleTable": {
-    "noFire": "—",
-    "inZone": "{when} ({zone})",
-    "inYourZone": "{when} in your time zone ({zone})",
-    "scope": {
-      "platform": "Platform",
-      "tenant": "Organization"
-    },
-    "status": {
-      "active": "Active",
-      "paused": "Paused"
-    },
-    "pause": "Pause",
-    "pauseNamed": "Pause the schedule {id} of {name}",
-    "resume": "Resume",
-    "resumeNamed": "Resume the schedule {id} of {name}",
-    "runNow": "Run now",
-    "runNowNamed": "Run the schedule {id} of {name} now",
-    "columns": {
-      "workflow": "Workflow",
-      "cron": "Cron and time zone",
-      "status": "Status",
-      "nextFire": "Next fire",
-      "lastFire": "Last fire",
-      "actions": "Actions"
     }
   },
   "connectors": {

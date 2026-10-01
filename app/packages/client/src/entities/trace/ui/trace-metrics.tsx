@@ -21,7 +21,7 @@ export const useFormatDuration = (): ((durationMs: number) => string) => {
 
 /** `ok` / `error` in words with an icon (color is never the only signal). */
 export function TraceStatusPill({ status }: { status: TraceSummary["status"] }) {
-  const t = useTranslations("admin.traceViewer.status");
+  const t = useTranslations("common.traceViewer.status");
   return (
     <StatusPill tone={status === "ok" ? "emerald" : "danger"} icon={status === "ok" ? "circle-check" : "circle-x"}>
       {t(status)}
@@ -31,7 +31,7 @@ export function TraceStatusPill({ status }: { status: TraceSummary["status"] }) 
 
 /** Duration of a trace or span; `null` means it is still running. */
 export function TraceDuration({ durationMs }: { durationMs: number | null }) {
-  const t = useTranslations("admin.traceViewer");
+  const t = useTranslations("common.traceViewer");
   const formatDuration = useFormatDuration();
   return <>{durationMs === null ? t("running") : formatDuration(durationMs)}</>;
 }
@@ -41,7 +41,7 @@ export function TraceDuration({ durationMs }: { durationMs: number | null }) {
  * shows a dash that reads "unknown price" to assistive technology.
  */
 export function TraceCost({ costMicroUsd }: { costMicroUsd: number | null }) {
-  const t = useTranslations("admin.traceViewer");
+  const t = useTranslations("common.traceViewer");
   const formatCost = useFormatMicroUsd();
   if (costMicroUsd !== null) return <>{formatCost(costMicroUsd, "exact")}</>;
   return (

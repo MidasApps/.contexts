@@ -26,7 +26,7 @@ export type TraceFiltersProps = {
  */
 export function TraceFilters({ values, onChange }: TraceFiltersProps) {
   const t = useTranslations("admin.traces.filters");
-  const statusText = useTranslations("admin.traceViewer.status");
+  const statusText = useTranslations("common.traceViewer.status");
   const agentId = useId();
   const errorId = useId();
   const statusId = useId();

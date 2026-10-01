@@ -23,7 +23,7 @@ export type CostChartsProps = {
  * the total line carry no arithmetic of their own beyond ordering and the row limit.
  */
 export function CostCharts({ rows, totalCostMicroUsd, rowHeader, limit = 10 }: CostChartsProps) {
-  const t = useTranslations("admin.costCharts");
+  const t = useTranslations("common.costCharts");
   const formatCost = useFormatMicroUsd();
   const top = [...rows].sort((a, b) => b.costMicroUsd - a.costMicroUsd).slice(0, limit);
   return (

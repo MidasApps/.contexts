@@ -55,7 +55,7 @@ const useTableState = (): TableState => {
 const column = dataTableColumnHelper<ScheduleRow>();
 
 function Fire({ iso, timezone }: { iso: string | null; timezone: string }) {
-  const t = useTranslations("admin.scheduleTable");
+  const t = useTranslations("common.scheduleTable");
   const locale = useLocale();
   const viewerZone = useTimeZone() ?? Intl.DateTimeFormat().resolvedOptions().timeZone;
   if (iso === null) return <span className="text-muted-foreground">{t("noFire")}</span>;
@@ -71,7 +71,7 @@ function Fire({ iso, timezone }: { iso: string | null; timezone: string }) {
 }
 
 function Workflow({ schedule }: { schedule: ScheduleRow }) {
-  const t = useTranslations("admin.scheduleTable");
+  const t = useTranslations("common.scheduleTable");
   const { ownerLabel } = useTableState();
   return (
     <span className="flex min-w-0 flex-col gap-0.5">
@@ -95,12 +95,12 @@ function Cron({ schedule }: { schedule: ScheduleRow }) {
 }
 
 function Status({ status }: { status: ScheduleRow["status"] }) {
-  const t = useTranslations("admin.scheduleTable.status");
+  const t = useTranslations("common.scheduleTable.status");
   return <StatusPill tone={status === "active" ? "emerald" : "amber"}>{t(status)}</StatusPill>;
 }
 
 function Actions({ schedule }: { schedule: ScheduleRow }) {
-  const t = useTranslations("admin.scheduleTable");
+  const t = useTranslations("common.scheduleTable");
   const { canManage, disabled = false, pendingId, onPause, onResume, onRunNow } = useTableState();
   if (!canManage) return null;
   const pending = pendingId === schedule.id;
@@ -125,7 +125,7 @@ function Actions({ schedule }: { schedule: ScheduleRow }) {
 }
 
 const useColumns = () => {
-  const t = useTranslations("admin.scheduleTable");
+  const t = useTranslations("common.scheduleTable");
   return useMemo(
     () => [
       column.display({ id: "workflow", header: () => t("columns.workflow"), cell: ({ row }) => <Workflow schedule={row.original} /> }),
@@ -146,7 +146,7 @@ const useColumns = () => {
  * the confirmation and the toasts. Phones get cards.
  */
 export function ScheduleTable<Row extends ScheduleRow>({ caption, schedules, empty, ...state }: ScheduleTableProps<Row>) {
-  const t = useTranslations("admin.scheduleTable");
+  const t = useTranslations("common.scheduleTable");
   const columns = useColumns();
   return (
     // The callbacks take `Row`; cells hand back the very rows they were given.

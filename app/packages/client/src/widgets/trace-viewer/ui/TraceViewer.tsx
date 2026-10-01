@@ -37,7 +37,7 @@ function Payload({ label, value }: { label: string; value: unknown }) {
 
 /** Input and output of a span behind a disclosure: closed until someone asks for it. */
 function SpanPayload({ span }: { span: TraceSpan }) {
-  const t = useTranslations("admin.traceViewer");
+  const t = useTranslations("common.traceViewer");
   return (
     <Collapsible>
       <CollapsibleTrigger asChild>
@@ -57,7 +57,7 @@ function SpanPayload({ span }: { span: TraceSpan }) {
 }
 
 function SpanMetrics({ span }: { span: TraceSpan }) {
-  const t = useTranslations("admin.traceViewer");
+  const t = useTranslations("common.traceViewer");
   const format = useFormatter();
   return (
     <dl className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
@@ -88,7 +88,7 @@ function SpanMetrics({ span }: { span: TraceSpan }) {
 }
 
 function SpanItem({ node }: { node: SpanNode }) {
-  const t = useTranslations("admin.traceViewer");
+  const t = useTranslations("common.traceViewer");
   const [open, setOpen] = useState(true);
   const { span, children } = node;
   return (
@@ -125,7 +125,7 @@ function SpanItem({ node }: { node: SpanNode }) {
  * the staff console and the tenant settings share it.
  */
 export function TraceViewer({ detail, logsRoute }: TraceViewerProps) {
-  const t = useTranslations("admin.traceViewer");
+  const t = useTranslations("common.traceViewer");
   const tree = useMemo(() => buildSpanTree(detail.spans), [detail.spans]);
   return (
     <section aria-labelledby="trace-viewer-title" className="flex flex-col gap-3">

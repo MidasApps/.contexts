@@ -270,14 +270,6 @@
       "actions": "Ações"
     }
   },
-  "costCharts": {
-    "title": "Custo no mês e limite",
-    "description": "Do maior custo para o menor.",
-    "descriptionTop": "Os {shown} maiores custos de {total}.",
-    "cost": "Custo no mês",
-    "cap": "Limite mensal",
-    "total": "Total do mês: <value>{total}</value>"
-  },
   "organizationDetail": {
     "title": "Organização",
     "idLine": "Id {id}",
@@ -442,30 +434,6 @@
       "cost": "Custo",
       "traceId": "Id do trace"
     }
-  },
-  "traceViewer": {
-    "title": "{count, plural, =0 {Nenhum span} one {# span} other {# spans}}",
-    "status": {
-      "ok": "OK",
-      "error": "Erro"
-    },
-    "running": "Em execução",
-    "unknownCost": "Preço desconhecido",
-    "model": "Modelo",
-    "duration": "Duração",
-    "tokens": "Tokens",
-    "tokensValue": "{input} de entrada · {output} de saída",
-    "cost": "Custo",
-    "payload": "Entrada e saída",
-    "payloadOf": "Entrada e saída de {name}",
-    "inputOf": "Entrada de {name}",
-    "outputOf": "Saída de {name}",
-    "collapse": "Recolher os spans de {name}",
-    "expand": "Expandir os spans de {name}",
-    "childrenOf": "Spans de {name}",
-    "logs": "Ver logs deste trace",
-    "emptyTitle": "Nenhum span registrado",
-    "emptyDescription": "Este trace não tem spans para mostrar."
   },
   "evals": {
     "title": "Avaliações",
@@ -822,53 +790,6 @@
       "noMatchTitle": "Esta organização não tem agendamentos",
       "noMatchDescription": "Os agendamentos da plataforma aparecem quando nenhuma organização está escolhida.",
       "seeAll": "Ver todos"
-    }
-  },
-  "runTimeline": {
-    "status": {
-      "pending": "Pendente",
-      "running": "Em execução",
-      "waiting": "Em espera",
-      "suspended": "Suspensa",
-      "paused": "Pausada",
-      "success": "Concluída",
-      "failed": "Falhou",
-      "canceled": "Cancelada",
-      "tripwire": "Parada por guardrail"
-    },
-    "started": "Iniciada",
-    "startedBySchedule": "Pelo agendamento {schedule}",
-    "startedByUser": "Pelo usuário {user}",
-    "startedByPlatform": "Pela plataforma",
-    "waitingApproval": "Aguarda aprovação",
-    "current": "Estado atual",
-    "updatedAt": "Desde {when}"
-  },
-  "scheduleTable": {
-    "noFire": "—",
-    "inZone": "{when} ({zone})",
-    "inYourZone": "{when} no seu fuso ({zone})",
-    "scope": {
-      "platform": "Plataforma",
-      "tenant": "Organização"
-    },
-    "status": {
-      "active": "Ativo",
-      "paused": "Pausado"
-    },
-    "pause": "Pausar",
-    "pauseNamed": "Pausar o agendamento {id} de {name}",
-    "resume": "Retomar",
-    "resumeNamed": "Retomar o agendamento {id} de {name}",
-    "runNow": "Executar agora",
-    "runNowNamed": "Executar agora o agendamento {id} de {name}",
-    "columns": {
-      "workflow": "Workflow",
-      "cron": "Cron e fuso",
-      "status": "Status",
-      "nextFire": "Próximo disparo",
-      "lastFire": "Último disparo",
-      "actions": "Ações"
     }
   },
   "connectors": {

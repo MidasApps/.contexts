@@ -42,7 +42,7 @@ function Step({ title, when, children }: { title: string; when?: string | undefi
  * around this widget where an endpoint exists.
  */
 export function RunTimeline({ run, label, renderApproval }: RunTimelineProps) {
-  const t = useTranslations("admin.runTimeline");
+  const t = useTranslations("common.runTimeline");
   const formatDateTime = useFormatDateTime();
   const origin = run.scheduleId !== null ? t("startedBySchedule", { schedule: run.scheduleId }) : run.startedBy !== null ? t("startedByUser", { user: run.startedBy }) : t("startedByPlatform");
   const waiting = run.status === "suspended" && run.approvalRequestId !== null;

@@ -53,7 +53,7 @@ function WorkflowIdField({ value, onApply }: { value: string | undefined; onAppl
 
 function RunFilters({ values, onChange }: { values: RunFilterValues; onChange: (patch: FilterPatch) => void }) {
   const t = useTranslations("admin.workflows.runs.filters");
-  const tStatus = useTranslations("admin.runTimeline.status");
+  const tStatus = useTranslations("common.runTimeline.status");
   const statusId = useId();
   const suspendedOnly = values.status === "suspended";
   return (
