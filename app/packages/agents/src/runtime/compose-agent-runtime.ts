@@ -15,7 +15,7 @@ import { createSupervisorAgent, SUPERVISOR_AGENT_ID } from "../agents/supervisor
 import { createTenantAgentSettingsReader } from "../agents/tenant-agent-settings.ts";
 import { createWebAgentDefinition } from "../agents/web-agent.ts";
 import type { ChatRuntime } from "../chat/chat-http.ts";
-import { CHAT_ROUTES_PATTERN, createChatRoutes } from "../chat/chat-routes.ts";
+import { CHAT_ROUTES_PATTERN, createChatRoutes, MAX_CHAT_BODY_BYTES } from "../chat/chat-routes.ts";
 import { createChatRunOwners } from "../chat/chat-run-owners.ts";
 import { chatAgentIdOf, createDurableChatAgent } from "../chat/durable-supervisor.ts";
 import { createToolPreviewer } from "../chat/tool-preview.ts";
@@ -322,8 +322,15 @@ export const composeAgentRuntime = (args: ComposeAgentRuntimeArgs): RuntimeParts
   const voice = createVoice({ models });
   const chat = buildChat(agents, tools, toolDeps);
   const { workflows, catalog: workflowCatalog, platformSchedules } = collectWorkflows(args, models);
-  const contextMiddleware = (path?: string) =>
-    createContextMiddleware({ auth, aiMode: args.env.AI_MODE, threadOwnerOf: threadOwnerFromStorage(args.storage), ...prefix, ...(path === undefined ? {} : { path }) });
+  const contextMiddleware = (path?: string, maxBodyBytes?: number) =>
+    createContextMiddleware({
+      auth,
+      aiMode: args.env.AI_MODE,
+      threadOwnerOf: threadOwnerFromStorage(args.storage),
+      ...prefix,
+      ...(path === undefined ? {} : { path }),
+      ...(maxBodyBytes === undefined ? {} : { maxBodyBytes }),
+    });
   return {
     agents: chat.agents,
     subagents,
@@ -346,7 +353,7 @@ export const composeAgentRuntime = (args: ComposeAgentRuntimeArgs): RuntimeParts
     middleware: [
       createRouteAllowlistMiddleware({ ...prefix, hiddenAgentIds: Object.values(chat.runtime.chatAgents) }),
       contextMiddleware(),
-      contextMiddleware(CHAT_ROUTES_PATTERN),
+      contextMiddleware(CHAT_ROUTES_PATTERN, MAX_CHAT_BODY_BYTES),
       contextMiddleware(WORKFLOW_RUN_ROUTES_PATTERN),
       contextMiddleware(TENANT_SCHEDULE_ROUTES_PATTERN),
     ],

@@ -18,7 +18,8 @@ export type MastraGatewayOptions = {
   readonly fetch?: typeof fetch;
 };
 
-const connectionOf = (options: MastraGatewayOptions): MastraConnection => ({
+/** The connection of every gateway built from the same options (JSON, stream, chat and voice calls). */
+export const connectionOf = (options: MastraGatewayOptions): MastraConnection => ({
   baseUrl: options.baseUrl.replace(/\/+$/, ""),
   apiPrefix: `/${(options.apiPrefix ?? "/api").replace(/^\/+|\/+$/g, "")}`,
   fetch: options.fetch ?? fetch,
@@ -28,7 +29,7 @@ const connectionOf = (options: MastraGatewayOptions): MastraConnection => ({
 
 // One client per call: the headers carry this caller's credential. No retries: a
 // generate is not idempotent, and the SDK would re-run it on a 5xx.
-const clientFor = async (connection: MastraConnection, scope: AgentCallScope, signal: AbortSignal): Promise<MastraClient> =>
+export const clientFor = async (connection: MastraConnection, scope: AgentCallScope, signal: AbortSignal): Promise<MastraClient> =>
   new MastraClient({
     baseUrl: connection.baseUrl,
     apiPrefix: connection.apiPrefix,

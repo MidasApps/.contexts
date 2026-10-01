@@ -77,7 +77,7 @@ export type RunEndFacts = { readonly runId: string; readonly endedAt: string; re
 
 /**
  * The conversation after a run's stream closed (with or without `finish`): the run is cleared
- * only when it is still the active one, the turn is counted, and an automatic title is copied
+ * and the turn counted only when it is still the active one, and an automatic title is copied
  * from the memory thread while the owner has not renamed the conversation.
  */
 export const endRunOf = (current: Conversation, end: RunEndFacts): Conversation => {
@@ -85,11 +85,10 @@ export const endRunOf = (current: Conversation, end: RunEndFacts): Conversation 
   const copied = current.titleSource === "auto" && end.title !== undefined && end.title.trim() !== "" ? end.title.trim().slice(0, MAX_TITLE_CHARS) : current.title;
   return {
     ...current,
-    ...(ownsRun ? { activeRunId: null, activeStreamStartedAt: null } : {}),
+    // Only the end that clears the run counts the turn (a stop and the stream's close both end it).
+    ...(ownsRun ? { activeRunId: null, activeStreamStartedAt: null, messageCount: current.messageCount + MESSAGES_PER_TURN, lastMessageAt: end.endedAt } : {}),
     title: copied,
     searchTokens: copied === current.title ? current.searchTokens : buildSearchTokens({ title: copied, summary: current.summary }),
-    messageCount: current.messageCount + MESSAGES_PER_TURN,
-    lastMessageAt: end.endedAt,
     updatedAt: end.endedAt,
   };
 };

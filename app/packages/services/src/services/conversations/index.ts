@@ -23,3 +23,9 @@ export type { ListConversations } from "./application/use-cases/list-conversatio
 export type { StartConversation } from "./application/use-cases/start-conversation.ts";
 export type { UpdateConversation } from "./application/use-cases/update-conversation.ts";
 export { type ConversationsServices, createConversationsServices, createFirestoreConversationsServices } from "./composition.ts";
+export { buildChatRoutes, sendChatErrorResponse } from "./adapters/driving/chat-route-handler.ts";
+export type { ChatRoutesDeps } from "./adapters/driving/chat-http.ts";
+export { trackRunStream } from "./adapters/driving/run-stream.ts";
+export { makeResolveAttachments, MAX_INLINE_ATTACHMENT_BYTES, type ResolveAttachments } from "./application/use-cases/resolve-attachments.ts";
+export { decisionOf, makeRecordToolDecisions, type RecordToolDecisions } from "./application/use-cases/record-tool-decision.ts";
+export { CONVERSATION_SEND_PERMISSION, makeSendChatMessage, type SendChatError, type SendChatMessage } from "./application/use-cases/send-chat-message.ts";

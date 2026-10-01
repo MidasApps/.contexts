@@ -24,6 +24,26 @@ export type ContextMiddlewareOptions = {
   readonly threadOwnerOf?: ThreadOwnerLookup;
   /** Mount path; defaults to the API prefix (`/api/*`). The chat routes mount a second instance on `/chat/*`. */
   readonly path?: string;
+  /**
+   * Body cap checked before anything reads the body (the tracing step parses JSON bodies): a
+   * larger declared `Content-Length` answers 413, a body without one 411. The chat instance sets
+   * the chat route's cap, so an oversized body is never buffered (defense in depth behind `/v1`).
+   */
+  readonly maxBodyBytes?: number;
+};
+
+const BODY_METHODS: ReadonlySet<string> = new Set(["POST", "PUT", "PATCH"]);
+
+const bodyRefusal = (request: Request, maxBodyBytes: number | undefined): Response | undefined => {
+  if (maxBodyBytes === undefined || !BODY_METHODS.has(request.method) || request.body === null) return undefined;
+  const requestId = resolveRequestId(readHeader(request, FORWARDED_HEADERS.requestId));
+  const declared = readHeader(request, "content-length");
+  if (declared === undefined) {
+    return Response.json({ error: { code: "VALIDATION_FAILED", message: "Content-Length is required.", requestId } }, { status: 411 });
+  }
+  const length = Number(declared);
+  if (Number.isSafeInteger(length) && length >= 0 && length <= maxBodyBytes) return undefined;
+  return Response.json({ error: { code: "PAYLOAD_TOO_LARGE", message: "The request body is too large.", requestId } }, { status: 413 });
 };
 
 const readHeader = (request: Request, name: string): string | undefined => {
@@ -101,6 +121,8 @@ const refuseForeignThread = async (options: ContextMiddlewareOptions, request: R
 export const createContextMiddleware = (options: ContextMiddlewareOptions): AgentMiddleware => ({
   path: options.path ?? apiPathPattern(options.apiPrefix),
   handler: async (context, next) => {
+    const refused = bodyRefusal(context.req.raw, options.maxBodyBytes);
+    if (refused !== undefined) return refused;
     const store = context.get("requestContext");
     clearAgentContext(store);
     // Before authentication, so the route auth sees (and memoizes) the same request object.

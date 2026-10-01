@@ -1,5 +1,5 @@
 import { FORWARDED_HEADERS } from "@core/contracts";
-import type { AgentCallScope, AgentRunOptions, GatewayResult, GatewayStream, McpGatewayResponse } from "../../application/ports/agent-runtime-gateway.ts";
+import type { AgentCallScope, AgentRunOptions, GatewayError, GatewayResult, GatewayStream, McpGatewayResponse } from "../../application/ports/agent-runtime-gateway.ts";
 import { mapMastraStatus, statusOfClientError, UPSTREAM_TIMEOUT, UPSTREAM_UNAVAILABLE } from "./mastra-error-mapper.ts";
 import type { ServerlessIdTokenSource } from "./serverless-id-token.ts";
 
@@ -53,12 +53,15 @@ export const buildForwardedHeaders = async (connection: MastraConnection, scope:
 class UpstreamStatusError extends Error {
   readonly status: number;
   readonly retryAfter: string | null;
+  /** Set by callers with their own status mapping (the voice routes). */
+  readonly mapped: GatewayError | undefined;
 
-  constructor(status: number, retryAfter: string | null) {
+  constructor(status: number, retryAfter: string | null, mapped?: GatewayError) {
     super(`mastra answered ${status}`);
     this.name = "UpstreamStatusError";
     this.status = status;
     this.retryAfter = retryAfter;
+    this.mapped = mapped;
   }
 }
 
@@ -83,7 +86,7 @@ export const withDeadline = async <T>(scope: AgentCallScope, deadlineMs: number,
   } catch (error: unknown) {
     if (scope.signal?.aborted === true) throw scope.signal.reason ?? error;
     if (deadline.signal.aborted) return { ok: false, error: UPSTREAM_TIMEOUT };
-    if (error instanceof UpstreamStatusError) return { ok: false, error: mapMastraStatus(error.status, error.retryAfter) };
+    if (error instanceof UpstreamStatusError) return { ok: false, error: error.mapped ?? mapMastraStatus(error.status, error.retryAfter) };
     const status = statusOfClientError(error);
     return { ok: false, error: status === undefined ? UPSTREAM_UNAVAILABLE : mapMastraStatus(status) };
   } finally {
@@ -164,5 +167,38 @@ export const postMcp = (args: {
       return value === null ? [] : [[name, value] as const];
     });
     return { status: response.status, body: response.body, contentType: response.headers.get("content-type"), headers: Object.fromEntries(passed) };
+  });
+};
+
+/** One call to a Mastra custom route (outside the API prefix: `/chat/*`, `/voice/*`). */
+export type RawRouteCall = {
+  readonly method: "GET" | "POST";
+  /** Absolute path on the Mastra server, e.g. `/chat/assistant`. */
+  readonly path: string;
+  readonly body?: RequestInit["body"];
+  readonly contentType?: string;
+  readonly accept?: string;
+  /** Mastra's answer statuses mapped differently from `mapMastraStatus` (e.g. voice's 503). */
+  readonly mapStatus?: (status: number) => GatewayError | undefined;
+};
+
+/**
+ * Raw call to a Mastra custom route with the caller's forwarded headers. The deadline covers the
+ * time to the response headers only, so a stream then flows until it ends or the caller cancels
+ * it. `204` is a success without a body; any other non-2xx answer is mapped by status and its
+ * body discarded unread.
+ */
+export const callRawRoute = (args: { connection: MastraConnection; scope: AgentCallScope; call: RawRouteCall }): Promise<GatewayResult<Response>> => {
+  const { connection, scope, call } = args;
+  return withDeadline(scope, connection.timeouts.streamConnectMs, async (signal) => {
+    const headers: Record<string, string> = {
+      ...(await buildForwardedHeaders(connection, scope)),
+      ...(call.contentType === undefined ? {} : { "content-type": call.contentType }),
+      ...(call.accept === undefined ? {} : { accept: call.accept }),
+    };
+    const response = await connection.fetch(`${connection.baseUrl}${call.path}`, { method: call.method, headers, ...(call.body === undefined ? {} : { body: call.body }), signal });
+    if (response.ok) return response;
+    await response.body?.cancel();
+    throw new UpstreamStatusError(response.status, response.headers.get("retry-after"), call.mapStatus?.(response.status));
   });
 };

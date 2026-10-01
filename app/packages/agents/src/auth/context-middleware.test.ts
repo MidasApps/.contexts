@@ -54,6 +54,41 @@ describe("createContextMiddleware", () => {
     expect(headers["x-conversation-id"]).toBe(store.get(MASTRA_THREAD_ID_KEY));
   });
 
+  describe("body cap of the chat instance (SP4 Task 0-2 concern 10)", () => {
+    const chatWithCap = () => {
+      const access = createFakeAccessPort({ credentials: { "member-token": MEMBER }, memberships: [{ tenantId: TENANT, uid: "member-uid", permissions: ["core.chat.use"] }] });
+      return createContextMiddleware({ auth: new FirebaseMastraAuth({ access }), aiMode: "fake", path: "/chat/*", maxBodyBytes: 10 });
+    };
+    const post = async (body: string, headers: Record<string, string>) => {
+      const store = new RequestContext<unknown>();
+      let nextCalled = false;
+      const raw = new Request("http://mastra.internal/chat/assistant", { method: "POST", headers: { ...memberHeaders, "content-type": "application/json", ...headers }, body });
+      const response = await chatWithCap().handler({ req: { raw }, get: () => store }, () => {
+        nextCalled = true;
+        return Promise.resolve();
+      });
+      return { response, nextCalled };
+    };
+
+    it("answers 413 before reading a body whose declared length is over the cap", async () => {
+      const { response, nextCalled } = await post('{"messages":[1,2,3,4,5]}', { "content-length": "25" });
+      expect(response?.status).toBe(413);
+      expect(await response?.json()).toMatchObject({ error: { code: "PAYLOAD_TOO_LARGE", requestId: REQUEST_ID } });
+      expect(nextCalled).toBe(false);
+    });
+
+    it("answers 411 for a body without a declared length", async () => {
+      const { response } = await post("{}", { "transfer-encoding": "chunked" });
+      expect(response?.status).toBe(411);
+    });
+
+    it("lets a body within the cap through", async () => {
+      const { response, nextCalled } = await post("{}", { "content-length": "2" });
+      expect(response).toBeUndefined();
+      expect(nextCalled).toBe(true);
+    });
+  });
+
   it("writes the typed context of a member and overwrites a client-sent tenant", async () => {
     const { store, nextCalled } = await run(memberHeaders, [
       ["tenantId", "ClientTenant00000000"],

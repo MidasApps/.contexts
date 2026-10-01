@@ -51,3 +51,12 @@ rendering, and every approval decision must be audited.
   - Path B (`/v1/chat/{id}/tool-approvals`) is not built.
   - `data-tool-preview` (summary, permission, before/after) is emitted by the chat route next to
     `data-tool-call-approval`, from the tool definition's `summarize` and `preview`.
+- **2026-09-30 — the audit of an inline decision (SP4 Task 5).** `/v1/chat` accepts an assistant
+  message only when it carries approval responses (`state: approval-responded`, `approval.id` =
+  `<runId>::<toolCallId>` of the part's own tool call), and forwards only those fields. Before
+  forwarding, it writes `AGENT_TOOL_CALL_APPROVED|DECLINED` per decision: target the conversation,
+  metadata `runId`, `toolCallId` (new allowlisted key) and `toolId` (the sanitized tool name of the
+  part, `agent-action` when the supervisor delegated the command), actor, and the member's `reason`.
+  An audit failure answers 500 and nothing is forwarded. The permission is not in this entry: `/v1`
+  only has the client's copy of the part; `AGENT_TOOL_EXECUTED`, written by the tool pipeline when
+  the call runs, carries it.

@@ -657,4 +657,12 @@ export {
   type ConversationRepository,
   type ConversationsServices,
   type InMemoryConversationRepository,
+  buildChatRoutes,
+  type ChatRoutesDeps,
 } from "./services/conversations/index.ts";
+export {
+  CHAT_ROUTES,
+  createMastraChatGateway,
+  type ChatRuntimeGateway,
+  type ChatStreamAnswer,
+} from "./services/agents/index.ts";

@@ -79,13 +79,14 @@ describe("conversations use cases", () => {
     });
   });
 
-  it("ends only the active run, counts the turn and copies the automatic title once", async () => {
+  it("ends only the active run, counts its turn once and copies the automatic title", async () => {
     const { services } = setup([conversationOf("a")]);
     await services.activeRuns.start({ conversationId: "a" as Conversation["id"], runId: "run-1" });
     const stale = await services.activeRuns.end({ conversationId: "a" as Conversation["id"], runId: "run-0" });
-    expect(stale).toMatchObject({ activeRunId: "run-1", messageCount: 2 });
+    expect(stale).toMatchObject({ activeRunId: "run-1", messageCount: 0 });
     const ended = await services.activeRuns.end({ conversationId: "a" as Conversation["id"], runId: "run-1", title: "Onboarding plan" });
-    expect(ended).toMatchObject({ activeRunId: null, activeStreamStartedAt: null, title: "Onboarding plan", searchTokens: ["onboarding", "plan"], messageCount: 4 });
+    expect(ended).toMatchObject({ activeRunId: null, activeStreamStartedAt: null, title: "Onboarding plan", searchTokens: ["onboarding", "plan"], messageCount: 2 });
+    expect(await services.activeRuns.end({ conversationId: "a" as Conversation["id"], runId: "run-1" })).toMatchObject({ messageCount: 2 });
   });
 
   it("never overwrites a title the owner chose", async () => {

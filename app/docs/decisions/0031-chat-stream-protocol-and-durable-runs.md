@@ -59,3 +59,21 @@ a stream needs server support.
   - Replay comes from the durable agent's in-process cache, not from PubSub, so resume works
     only on the instance that runs the stream until a shared cache exists. On any other
     instance it degrades to the fallback (204, then reload from memory).
+- **2026-09-30 — `/v1/chat` and multi-instance resume (SP4 Tasks 5–7).**
+  - `/v1/chat` stores the run of `x-run-id` as the conversation's `activeRunId` before it answers,
+    and clears it when Mastra closes the stream, with or without `finish` (an aborted durable run
+    just closes), or when `POST …/stop` aborts it. A client that disconnects only cancels its read:
+    the run goes on and `activeRunId` stays, so `GET …/stream` can resume it. A run older than
+    15 min (Mastra `server.timeout`) counts as gone. Only the end that clears the run counts the turn.
+  - The context middleware of `/chat/*` caps the body before anything reads it: a declared
+    `Content-Length` above 140 MiB answers 413, a body without one 411.
+  - **v1 choice for several Mastra instances: Cloud Run session affinity.** The replay cache of a
+    durable run and the run owners (`ChatRunOwners`) live in the process that runs the stream. On
+    another instance the routes fail closed: resume answers 204 (the client reloads the messages),
+    stop is a no-op (the run finishes by itself), and an approval answers 403. None of them ever
+    acts on another member's run. Production therefore runs the Mastra service with session
+    affinity, and the gateway must send the affinity cookie of the conversation's run with resume,
+    stop and approval calls. That cookie forwarding is not built: until it is, deploy the chat with
+    one Mastra instance (`max-instances=1`). The follow-up is a shared run-owner store in Mastra's
+    Postgres storage plus a replay that does not depend on the process (PubSub-backed observe or a
+    shared cache).
