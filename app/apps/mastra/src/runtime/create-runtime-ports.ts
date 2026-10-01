@@ -37,6 +37,7 @@ import { bindUsagePort } from "./usage-port-binding.ts";
 import { UNWIRED_PORTS } from "./unwired-ports.ts";
 import { createLogNotificationPort } from "./notifications-port-binding.ts";
 import { bindUsageReportPort, type UsageReportBindingEnv } from "./usage-report-port-binding.ts";
+import { bindApprovalSweepPort, bindConversationPurgePort, bindEvalExportPort } from "./maintenance-ports-binding.ts";
 import { bindWorkflowApprovalsPort, bindWorkflowCommandsPort, RUNTIME_SIDE_SETTLER } from "./workflow-ports-binding.ts";
 
 export type RuntimePortsEnv = Pick<ServicesEnv, "API_KEY_PREFIX" | "DATABASE_URL" | "APP_ENV" | "AI_MODE" | "FIREBASE_STORAGE_EMULATOR_HOST" | "FIREBASE_PROJECT_ID"> &
@@ -122,6 +123,11 @@ export const createRuntimePorts = (args: {
   const knowledge = createKnowledgeServices({ repository: createPostgresKnowledgeRepository(sql), embeddingModel: embeddingModelIdOf(args.env) });
   const files = createFirebaseFilesServices({ firebase: args.firebase, env: args.env, logger: args.logger });
   const connectors = createFirebaseConnectorsServices({ firebase: args.firebase, env: args.env, audit: core.audit, clock: systemClock });
+  const sinkEnv = {
+    USAGE_SINK: args.env.USAGE_SINK ?? "none",
+    BIGQUERY_DATASET_AI_OBSERVABILITY: args.env.BIGQUERY_DATASET_AI_OBSERVABILITY ?? "ai_observability",
+    FIREBASE_PROJECT_ID: args.env.FIREBASE_PROJECT_ID,
+  } as const;
   const executors = [...createCoreAgentCommandExecutors({ tenancy: core.tenancy, access: core.access }), ...(adapters.commandExecutors ?? [])];
   const commands = registerAgentCommandApprovals({ approvals: core.approvals, executors, access: core.access, idempotency: core.pipeline.idempotency });
   // Decided in /v1; registered here so SP1 accepts requests of the kind (decision 0036).
@@ -144,16 +150,9 @@ export const createRuntimePorts = (args: {
     workflowApprovals: bindWorkflowApprovalsPort(core.approvals),
     workflowCommands: bindWorkflowCommandsPort({ executors: agentCommandExecutors(executors), access: core.access, commands }),
     notifications: createLogNotificationPort(args.logger),
-    usageReport: bindUsageReportPort({
-      env: {
-        USAGE_SINK: args.env.USAGE_SINK ?? "none",
-        BIGQUERY_DATASET_AI_OBSERVABILITY: args.env.BIGQUERY_DATASET_AI_OBSERVABILITY ?? "ai_observability",
-        FIREBASE_PROJECT_ID: args.env.FIREBASE_PROJECT_ID,
-      },
-      sql,
-      firestore: args.firebase.firestore,
-      audit: core.audit,
-      logger: args.logger,
-    }),
+    usageReport: bindUsageReportPort({ env: sinkEnv, sql, firestore: args.firebase.firestore, audit: core.audit, logger: args.logger }),
+    approvalSweeps: bindApprovalSweepPort(core.approvals),
+    conversationPurge: bindConversationPurgePort(args.firebase.firestore),
+    evalExport: bindEvalExportPort({ env: sinkEnv, logger: args.logger }),
   };
 };

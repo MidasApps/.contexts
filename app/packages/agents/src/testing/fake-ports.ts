@@ -273,6 +273,9 @@ export const createFakeRuntimePorts = (overrides: Partial<AgentRuntimePorts> = {
   workflowCommands: createFakeWorkflowCommandPort(),
   notifications: createRecordingNotificationPort(),
   usageReport: createFakeUsageReportPort(),
+  approvalSweeps: { expire: () => Promise.resolve({ expired: 0 }), failInterrupted: () => Promise.resolve({ failed: 0 }) },
+  conversationPurge: { purgeDeleted: () => Promise.resolve({ purged: 0, failed: 0 }) },
+  evalExport: { listFinishedSince: () => Promise.resolve([]), exportSummaries: () => Promise.resolve(0) },
   ...overrides,
 });
 

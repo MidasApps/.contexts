@@ -46,7 +46,8 @@ describe("createRuntimePorts (default bindings)", () => {
     expect(await bound.access.resolveAccessContext({ principal: MEMBER, node: ORG })).toEqual({ tenantId: TENANT, principal: MEMBER, permissions: ["core.chat.use"], regional: REGIONAL });
     expect(await bound.access.resolveAccessContext({ principal: MEMBER, node: { level: "platform" } })).toBeNull();
     expect(await bound.access.authorize({ principal: MEMBER, permission: "core.chat.use", node: ORG })).toEqual({ allowed: true, requiresApproval: false });
-  });
+    // The first binding pays the cold import of every runtime adapter (SP3 concern 7: 5 s flakes under turbo).
+  }, 30_000);
 
   it("binds SP1 approvals: a permission that needs no approval is refused before anything is stored", async () => {
     const store = createInMemoryAccessStore();

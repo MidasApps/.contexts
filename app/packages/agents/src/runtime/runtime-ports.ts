@@ -3,6 +3,7 @@ import type {
   ApprovalStatus,
   AgentSettings,
   Citation,
+  EvalExperimentSummary,
   CreateProjectInput,
   Connector,
   KnowledgeDocument,
@@ -318,6 +319,24 @@ export type UsageReportPort = {
   readonly reportTenant: (input: { readonly tenantId: string; readonly requestId: string }) => Promise<TenantUsageReportResult>;
 };
 
+/** SP1 approval sweeps (decision 0030 A3, SP5 spec §3.3): overdue pending → `expired`; stale `approved` → `failed`. */
+export type ApprovalSweepPort = {
+  readonly expire: (input: { readonly requestId: string }) => Promise<{ readonly expired: number }>;
+  readonly failInterrupted: (input: { readonly requestId: string }) => Promise<{ readonly failed: number }>;
+};
+
+/** Conversations soft-deleted more than 30 days ago (SP4 metadata); the workflow deletes each Mastra thread. */
+export type ConversationPurgePort = {
+  readonly purgeDeleted: (input: { readonly deleteThread: (threadId: string) => Promise<boolean> }) => Promise<{ readonly purged: number; readonly failed: number }>;
+};
+
+/** Eval experiment summaries finished since a time, and their warehouse export (decision 0040). */
+export type EvalExportPort = {
+  readonly listFinishedSince: (input: { readonly since: string }) => Promise<readonly EvalExperimentSummary[]>;
+  /** @returns the rows sent (one per experiment and scorer; 0 in local). */
+  readonly exportSummaries: (summaries: readonly EvalExperimentSummary[]) => Promise<number>;
+};
+
 export type AgentRuntimePorts = {
   readonly access: AccessPort;
   readonly audit: AuditPort;
@@ -339,4 +358,8 @@ export type AgentRuntimePorts = {
   /** SP5 notices of scheduled and platform workflows (decisions 0037, 0039). */
   readonly notifications: NotificationPort;
   readonly usageReport: UsageReportPort;
+  /** SP5 maintenance workflows (Task 7). */
+  readonly approvalSweeps: ApprovalSweepPort;
+  readonly conversationPurge: ConversationPurgePort;
+  readonly evalExport: EvalExportPort;
 };

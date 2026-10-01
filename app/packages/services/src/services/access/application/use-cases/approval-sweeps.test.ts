@@ -25,7 +25,7 @@ describe("getApprovalRequest (system read, decision 0036)", () => {
 });
 
 describe("expireApprovalRequests (approval-expiry-sweep)", () => {
-  it("stores expired on overdue pending requests only, without executing them", async () => {
+  it("stores expired on overdue pending requests only, audited, without executing them", async () => {
     const world = await buildApprovalWorld();
     const overdue = await request(world);
     world.setNow("2026-10-05T12:00:00.000Z");
@@ -39,6 +39,10 @@ describe("expireApprovalRequests (approval-expiry-sweep)", () => {
     expect(world.approvals.rowOf(decided.id)?.status).toBe("executed");
     expect(await world.services.expireApprovalRequests({ requestId: "sweep" })).toEqual({ expired: 0 });
     expect(world.executions).toHaveLength(1);
+    // Audited once, by the system, in the sweep's transaction (SP5 Task 7).
+    expect(world.auditEntries().filter((entry) => entry.action === "APPROVAL_EXPIRED")).toEqual([
+      expect.objectContaining({ tenantId, actor: { type: "system", id: "system" }, target: { type: "approval-request", id: overdue.id }, outcome: "success", requestId: "sweep" }),
+    ]);
   });
 });
 

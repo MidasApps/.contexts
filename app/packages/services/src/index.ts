@@ -671,3 +671,20 @@ export {
   type VoiceRoutesDeps,
   type VoiceRuntimeGateway,
 } from "./services/agents/index.ts";
+// SP5 maintenance workflows (Task 7): conversation purge and eval export.
+export type { DeletedConversation, DeletedConversationStore } from "./services/conversations/application/ports/deleted-conversation-store.ts";
+export {
+  makePurgeDeletedConversations,
+  PURGE_AFTER_DAYS,
+  type PurgeDeletedConversations,
+} from "./services/conversations/application/use-cases/purge-deleted-conversations.ts";
+export { createFirestoreDeletedConversationStore } from "./services/conversations/adapters/driven/firestore-deleted-conversation-store.ts";
+export {
+  type BigQueryEvalRunRow,
+  createBigQueryEvalRunSink,
+  createNoopEvalRunSink,
+  EVAL_RUNS_TABLE,
+  type EvalRunSink,
+  type EvalRunsTableLike,
+  toEvalRunRows,
+} from "./services/evals/index.ts";

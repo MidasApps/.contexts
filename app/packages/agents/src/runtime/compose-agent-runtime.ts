@@ -30,6 +30,9 @@ import { createCatalogReindexWorkflow } from "../knowledge/workflows/catalog-rei
 import { createKnowledgeIngestWorkflow } from "../knowledge/workflows/knowledge-ingest.workflow.ts";
 import { createApprovalDemoWorkflow } from "../workflows/approval-demo.workflow.ts";
 import { createUsageReportWorkflow, USAGE_REPORT_PLATFORM_CRON } from "../workflows/usage-report.workflow.ts";
+import { APPROVAL_EXPIRY_SWEEP_CRON, createApprovalExpirySweepWorkflow } from "../workflows/approval-expiry-sweep.workflow.ts";
+import { CONVERSATION_PURGE_CRON, createConversationPurgeWorkflow } from "../workflows/conversation-purge.workflow.ts";
+import { createEvalExportWorkflow, EVAL_EXPORT_CRON } from "../workflows/eval-export.workflow.ts";
 import { createWorkflowApprovalRoutes } from "../workflows/workflow-approval-routes.ts";
 import { createWorkflowRunRoutes, WORKFLOW_RUN_ROUTES_PATTERN } from "../workflows/runs/workflow-run-routes.ts";
 import { createWorkflowChatRoutes } from "../chat/workflow-chat-route.ts";
@@ -181,8 +184,11 @@ const collectAgents = (args: ComposeAgentRuntimeArgs, commands: readonly AgentCo
   return all;
 };
 
-/** Core workflows: knowledge ingestion, the catalog reindex (SP3 §11), the HITL demo (decision 0036) and the usage report (decision 0039). */
-const coreWorkflowMap = (args: ComposeAgentRuntimeArgs, models: AgentModels): Record<string, AnyWorkflow> => {
+/**
+ * Core workflows: knowledge ingestion, the catalog reindex (SP3 §11), the HITL demo (decision 0036),
+ * the usage report (decision 0039) and the maintenance sweeps (approval expiry, conversation purge, eval export).
+ */
+const coreWorkflowMap = (args: ComposeAgentRuntimeArgs, models: AgentModels, memory: Memory | undefined): Record<string, AnyWorkflow> => {
   const indexing = { knowledge: args.ports.knowledge, embedding: models.embedding, embeddingModelId: embeddingModelIdOf(args.env) };
   const ingest = createKnowledgeIngestWorkflow({
     ...indexing,
@@ -194,7 +200,18 @@ const coreWorkflowMap = (args: ComposeAgentRuntimeArgs, models: AgentModels): Re
   const reindex = createCatalogReindexWorkflow({ ...indexing, ...(args.aiCatalog === undefined ? {} : { aiCatalog: args.aiCatalog }) });
   const approvalDemo = createApprovalDemoWorkflow({ approvals: args.ports.workflowApprovals, commands: args.ports.workflowCommands, access: args.ports.access });
   const usageReport = createUsageReportWorkflow({ access: args.ports.access, notifications: args.ports.notifications, usageReport: args.ports.usageReport });
-  return { [ingest.id]: ingest, [reindex.id]: reindex, [approvalDemo.id]: approvalDemo, [usageReport.id]: usageReport };
+  const maintenance = [
+    createApprovalExpirySweepWorkflow({ approvalSweeps: args.ports.approvalSweeps }),
+    createConversationPurgeWorkflow({ conversationPurge: args.ports.conversationPurge, memory }),
+    createEvalExportWorkflow({ evalExport: args.ports.evalExport }),
+  ];
+  return {
+    [ingest.id]: ingest,
+    [reindex.id]: reindex,
+    [approvalDemo.id]: approvalDemo,
+    [usageReport.id]: usageReport,
+    ...Object.fromEntries(maintenance.map((workflow) => [workflow.id, workflow])),
+  };
 };
 
 /**
@@ -205,14 +222,18 @@ const CORE_WORKFLOW_FLAGS: Readonly<Record<string, { startable?: boolean; schedu
   "approval-demo": { startable: true },
   "catalog-reindex": { platformCron: "0 3 * * *" },
   "usage-report": { schedulable: true, platformCron: USAGE_REPORT_PLATFORM_CRON },
+  "approval-expiry-sweep": { platformCron: APPROVAL_EXPIRY_SWEEP_CRON },
+  "conversation-purge": { platformCron: CONVERSATION_PURGE_CRON },
+  "eval-export": { platformCron: EVAL_EXPORT_CRON },
 };
 
 /** Core and module workflows with the catalog of their policies (decisions 0037, 0040). */
 const collectWorkflows = (
   args: ComposeAgentRuntimeArgs,
   models: AgentModels,
+  memory: Memory | undefined,
 ): { workflows: Record<string, AnyWorkflow>; catalog: WorkflowCatalog; platformSchedules: PlatformSchedule[] } => {
-  const workflows = coreWorkflowMap(args, models);
+  const workflows = coreWorkflowMap(args, models, memory);
   const policies: WorkflowPolicy[] = Object.keys(workflows).map((id) => policyOf(id, CORE_WORKFLOW_FLAGS[id]));
   for (const entry of args.modules.flatMap((module) => module.workflows ?? [])) {
     const id = workflowIdOf(entry.workflow);
@@ -327,7 +348,7 @@ export const composeAgentRuntime = (args: ComposeAgentRuntimeArgs): RuntimeParts
   const prefix = apiPrefix === undefined ? {} : { apiPrefix };
   const { voice, routes: voiceRoutes } = composeVoice({ env: args.env, models, ports: args.ports, supervisor: agents[SUPERVISOR_AGENT_ID], logger: processLogger });
   const chat = buildChat(agents, { tools, toolDeps, summarizer: createConversationSummarizer({ models, guardrails: guardrails("delegated") }) });
-  const { workflows, catalog: workflowCatalog, platformSchedules } = collectWorkflows(args, models);
+  const { workflows, catalog: workflowCatalog, platformSchedules } = collectWorkflows(args, models, memory);
   const contextMiddleware = (path?: string, maxBodyBytes?: number) =>
     createContextMiddleware({
       auth,

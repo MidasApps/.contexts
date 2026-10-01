@@ -44,6 +44,8 @@ export const AUDIT_ACTIONS = [
   "APPROVAL_REJECTED",
   "APPROVAL_EXECUTED",
   "APPROVAL_FAILED",
+  // SP5 Task 7: the approval-expiry-sweep stored `expired` on an overdue pending request.
+  "APPROVAL_EXPIRED",
   "PLATFORM_STAFF_GRANTED",
   "PLATFORM_ACCESS_DENIED",
   // Agent runtime (SP3 spec §8.1, §8.3, §11): SP3 adds action names only, the writer stays SP1's.

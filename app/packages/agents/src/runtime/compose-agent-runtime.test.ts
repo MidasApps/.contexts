@@ -63,6 +63,9 @@ describe("composeAgentRuntime", () => {
     expect(runtime.platformSchedules).toEqual([
       { workflowId: "catalog-reindex", cron: "0 3 * * *" },
       { workflowId: "usage-report", cron: "15 * * * *" },
+      { workflowId: "approval-expiry-sweep", cron: "*/15 * * * *" },
+      { workflowId: "conversation-purge", cron: "30 4 * * *" },
+      { workflowId: "eval-export", cron: "0 5 * * *" },
     ]);
     expect(runtime.workflowCatalog.get("usage-report")).toMatchObject({ schedulable: true, startable: false });
     expect(runtime.workflowCatalog.get("approval-demo")).toEqual({ id: "approval-demo", startable: true, schedulable: false });
@@ -106,7 +109,7 @@ describe("composeAgentRuntime", () => {
       "POST /tenant-schedules/:scheduleId/run",
     ]);
     expect(runtime.voice?.capabilities).toEqual({ transcription: true, speech: true, realtime: false });
-    expect(Object.keys(runtime.workflows).sort()).toEqual(["approval-demo", "catalog-reindex", "knowledge-ingest", "usage-report"]);
+    expect(Object.keys(runtime.workflows).sort()).toEqual(["approval-demo", "approval-expiry-sweep", "catalog-reindex", "conversation-purge", "eval-export", "knowledge-ingest", "usage-report"]);
   });
 
   it("registers module tools and agents", () => {

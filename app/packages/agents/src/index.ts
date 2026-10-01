@@ -16,7 +16,10 @@ export type {
   AccessPrincipal,
   AgentRuntimePorts,
   ApprovalPort,
+  ApprovalSweepPort,
   CommandIdempotencyPort,
+  ConversationPurgePort,
+  EvalExportPort,
   AuditEntry,
   AuditPort,
   AuthorizeDecision,
@@ -432,3 +435,7 @@ export {
   type UsageReportResult,
   UsageReportResultSchema,
 } from "./workflows/usage-report.workflow.ts";
+// SP5 maintenance workflows (Task 7).
+export { APPROVAL_EXPIRY_SWEEP_CRON, APPROVAL_EXPIRY_SWEEP_WORKFLOW_ID, createApprovalExpirySweepWorkflow } from "./workflows/approval-expiry-sweep.workflow.ts";
+export { CONVERSATION_PURGE_CRON, CONVERSATION_PURGE_WORKFLOW_ID, createConversationPurgeWorkflow } from "./workflows/conversation-purge.workflow.ts";
+export { createEvalExportWorkflow, EVAL_EXPORT_CRON, EVAL_EXPORT_WINDOW_MS, EVAL_EXPORT_WORKFLOW_ID } from "./workflows/eval-export.workflow.ts";
