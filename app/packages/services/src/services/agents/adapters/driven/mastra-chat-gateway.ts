@@ -46,7 +46,8 @@ const threadTitleOf = (connection: MastraConnection): ChatRuntimeGateway["thread
 
 /**
  * The chat routes of Mastra through the gateway (decision 0031): the caller's Bearer and scope
- * as headers, the UI message stream handed back unread, errors mapped by status only.
+ * as headers, the UI message stream handed back unread, errors mapped by `mapMastraError` (a core
+ * code of the envelope, e.g. the kill-switch 503 `FEATURE_DISABLED`, else the status).
  */
 export const createMastraChatGateway = (options: MastraGatewayOptions): ChatRuntimeGateway => {
   const connection = connectionOf(options);

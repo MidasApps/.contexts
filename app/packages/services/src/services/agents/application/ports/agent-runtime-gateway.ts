@@ -1,4 +1,4 @@
-import type { RegionalSettings } from "@core/contracts";
+import type { CoreErrorCode, RegionalSettings } from "@core/contracts";
 
 /**
  * Driven port of `/v1` to the private agent runtime (SP3 spec §4.1, umbrella
@@ -28,19 +28,16 @@ export type AgentCallScope = {
 };
 
 /** Codes of `contracts/api.md` §6 the gateway answers with; the Mastra body never passes through. */
-export type GatewayErrorCode =
-  | "UNAUTHORIZED"
-  | "FORBIDDEN"
-  | "NOT_FOUND"
-  | "VALIDATION_FAILED"
-  | "CONFLICT"
-  | "RATE_LIMITED"
-  | "UPSTREAM_UNAVAILABLE"
-  | "FEATURE_UNAVAILABLE";
+/**
+ * A core error code (`CORE_ERROR_CODES`) the gateway answers: one Mastra's envelope carried (e.g.
+ * the kill-switch 503 `FEATURE_DISABLED`), or the status mapping. Never `INTERNAL_ERROR`: an
+ * upstream crash is `UPSTREAM_UNAVAILABLE`.
+ */
+export type GatewayErrorCode = Exclude<CoreErrorCode, "INTERNAL_ERROR">;
 
 export type GatewayError = {
   readonly code: GatewayErrorCode;
-  /** HTTP status for `/v1`: 401, 403, 404, 400, 409, 429, 502, 503 (voice off) or 504 (timeout). */
+  /** HTTP status for `/v1`: Mastra's status for a passed code, else 401, 403, 404, 400, 409, 429, 502, 503 (voice off) or 504 (timeout). */
   readonly status: number;
   /** From Mastra's `Retry-After` on 429, when numeric. */
   readonly retryAfterSeconds?: number;

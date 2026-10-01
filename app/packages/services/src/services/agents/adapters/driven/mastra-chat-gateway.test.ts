@@ -58,4 +58,22 @@ describe("Mastra chat gateway", () => {
     expect(seen[0]?.url).toBe("http://mastra.local/chat/assistant/messages?page=1&perPage=20");
     expect(await gateway.summarize({ scope: SCOPE, agentId: "assistant" })).toEqual({ ok: false, error: { code: "UPSTREAM_UNAVAILABLE", status: 502 } });
   });
+
+  it("passes a core error code of Mastra's envelope, so the kill-switch reaches /v1 as FEATURE_DISABLED", async () => {
+    const { gateway } = gatewayWith(() => Response.json({ error: { code: "FEATURE_DISABLED", message: "This feature is turned off.", requestId: "r" } }, { status: 503 }));
+    const sent = await gateway.send({ scope: SCOPE, agentId: "assistant", body: { messages: [{ id: "m1", role: "user", parts: [] }] } });
+    expect(sent).toEqual({ ok: false, error: { code: "FEATURE_DISABLED", status: 503 } });
+  });
+
+  it("falls back to the status for an unknown code, a non-JSON body and an upstream INTERNAL_ERROR", async () => {
+    const answers = [
+      Response.json({ error: { code: "SOMETHING_ELSE" } }, { status: 503 }),
+      new Response("<html>bad gateway</html>", { status: 503, headers: { "content-type": "text/html" } }),
+      Response.json({ error: { code: "INTERNAL_ERROR", message: "Internal error." } }, { status: 500 }),
+    ];
+    const { gateway } = gatewayWith(() => answers.shift() ?? new Response(null, { status: 500 }));
+    for (let index = 0; index < 3; index += 1) {
+      expect(await gateway.abort({ scope: SCOPE, runId: "run-1" })).toEqual({ ok: false, error: { code: "UPSTREAM_UNAVAILABLE", status: 502 } });
+    }
+  });
 });

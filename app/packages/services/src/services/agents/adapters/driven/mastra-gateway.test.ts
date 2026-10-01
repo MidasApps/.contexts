@@ -150,6 +150,12 @@ describe("createMastraGateway error mapping", () => {
     expect(JSON.parse(body)).toMatchObject({ error: { code, requestId: SCOPE.requestId } });
   });
 
+  it("passes the kill-switch's 503 FEATURE_DISABLED from the envelope code, never its message", async () => {
+    routes.set("POST /api/agents/ping/generate", json(503, { error: { code: "FEATURE_DISABLED", message: "internal stack at /srv/mastra.js" } }));
+    const result = await gateway().generate({ scope: SCOPE, agentId: "ping", messages: "ping" });
+    expect(result).toEqual({ ok: false, error: { code: "FEATURE_DISABLED", status: 503 } });
+  });
+
   it("does not retry a failed generate", async () => {
     routes.set("POST /api/agents/ping/generate", json(500, { error: "boom" }));
     await gateway().generate({ scope: SCOPE, agentId: "ping", messages: "ping" });

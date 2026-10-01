@@ -16,7 +16,7 @@ export const mapVoiceStatus = (status: number): GatewayError | undefined => {
   return undefined;
 };
 
-/** The voice routes of Mastra through the gateway: caller's Bearer and scope, errors by status only. */
+/** The voice routes of Mastra through the gateway: caller's Bearer and scope; errors keep a core code of the envelope (`FEATURE_DISABLED`), else go by `mapVoiceStatus`. */
 export const createMastraVoiceGateway = (options: MastraGatewayOptions): VoiceRuntimeGateway => {
   const connection = connectionOf(options);
   return {
