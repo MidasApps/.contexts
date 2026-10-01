@@ -154,7 +154,8 @@ Key evidence, all on the production composition (`createAgentRuntime` with `APP_
    existing Firestore document") failed in the first full emulator run. It passed alone and in a
    second full services run. I did not find the cause.
 6. **`@core/functions` emulator tests were not run.** They need the Functions emulator, which my
-   scratch config does not start. I changed no Functions code; its typecheck and lint are clean.
+   scratch config does not start. I changed no Functions code; its typecheck and lint are clean,
+   and `pnpm -F @core/functions build` (the bundle that loads the services barrel) succeeds.
 7. **`next build` of `apps/web` was not run.** Other agents are editing the web client. The web
    typecheck and unit tests pass. `apps/web` lint fails on `src/client/section-pages.tsx`, which is
    another agent's uncommitted file.
@@ -170,3 +171,10 @@ Key evidence, all on the production composition (`createAgentRuntime` with `APP_
     module enablement (follow-up #39).
 12. **The module skill reaches only organizations that enabled the module.** The core default
     `enabledAgents` does not name `example`, so by default no organization sees `example-notes`.
+13. **The branch head moved after it was first written** (see "Commit incident"): `f0004d1` and
+    `84c1e34` no longer exist on the branch. Anyone who read `git log` in that window saw them.
+14. **Generated catalog.** `catalog.json`, `catalog.ai.json` and `openapi/v1.yaml` were regenerated
+    in the main tree. No other agent had uncommitted contract sources at that moment
+    (`git status` listed only my two files under `packages/contracts`), and `contracts:check`
+    passed. Six files under `docs/catalog/platform/` show as modified with line-ending
+    differences only; I left them unstaged.
