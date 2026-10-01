@@ -1,7 +1,7 @@
 {
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
-  "description": "Minimal grant for the main window: Tauri core defaults only (no shell, fs, http or other plugin permissions).",
+  "description": "Minimal grant for the main window: Tauri core defaults and the secure store commands (no shell, fs, http or other plugin permissions).",
   "windows": ["main"],
-  "permissions": ["core:default"]
+  "permissions": ["core:default", "allow-secure-store"]
 }

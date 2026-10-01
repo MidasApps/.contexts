@@ -1,0 +1,23 @@
+# App permissions of the secure store commands (src/secure_store.rs, decision 0017 §1).
+# Declaring any app permission turns on Tauri's ACL for app commands: a command not
+# allowed by a capability is refused, so every future app command must be granted here.
+
+[[permission]]
+identifier = "allow-secure-store-get"
+description = "Reads the desktop session record from the OS keychain."
+commands.allow = ["secure_store_get"]
+
+[[permission]]
+identifier = "allow-secure-store-set"
+description = "Writes the desktop session record to the OS keychain."
+commands.allow = ["secure_store_set"]
+
+[[permission]]
+identifier = "allow-secure-store-delete"
+description = "Deletes the desktop session record from the OS keychain."
+commands.allow = ["secure_store_delete"]
+
+[[set]]
+identifier = "allow-secure-store"
+description = "The three secure store commands, nothing else."
+permissions = ["allow-secure-store-get", "allow-secure-store-set", "allow-secure-store-delete"]

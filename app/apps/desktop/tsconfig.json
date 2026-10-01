@@ -9,6 +9,6 @@
     "incremental": true,
     "tsBuildInfoFile": ".tscache/tsbuildinfo"
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx", "scripts/**/*.ts", "*.ts", "*.js"],
-  "exclude": ["node_modules", "dist", "src-tauri"]
+  "include": ["src/**/*.ts", "src/**/*.tsx", "scripts/**/*.ts", "e2e/**/*.ts", "*.ts", "*.js"],
+  "exclude": ["node_modules", "dist", "src-tauri", "test-native"]
 }

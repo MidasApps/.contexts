@@ -1,14 +1,9 @@
-/* Minimal neutral styles until the shared design system lands (SP2). No inline
-   styles anywhere: the CSP has no 'unsafe-inline' for style-src in builds. */
-:root {
-  color-scheme: light dark;
-  font-family: system-ui, sans-serif;
-}
+/*
+ * Desktop styles: the shared design tokens and Tailwind setup of @core/client (decision 0014),
+ * which already scan the client sources. Installed modules ship utilities too, so their sources
+ * are scanned here (path relative to this file). Fonts are the system stack from the tokens: no
+ * font files, so the Tauri CSP keeps `font-src 'self'`.
+ */
+@import "@core/client/styles.css";
 
-.shell {
-  padding: 2rem;
-}
-
-.muted {
-  opacity: 0.7;
-}
+@source "../../../modules/*/src";

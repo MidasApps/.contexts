@@ -2,6 +2,11 @@
 export const BASE_CONNECT_SRC = "'self' ipc: http://ipc.localhost";
 /** Vite HMR socket; dev only. Must match the port in vite.config.ts and `build.devUrl`. */
 const DEV_HMR_SOCKET = "ws://localhost:1420";
+/**
+ * REST origins the Firebase Auth JS SDK calls for email/password, MFA, custom-token sign-in and
+ * token refresh (decision 0017 §3). No popup/redirect flow is used, so `authDomain` is never loaded.
+ */
+export const FIREBASE_AUTH_ORIGINS = ["https://identitytoolkit.googleapis.com", "https://securetoken.googleapis.com"] as const;
 
 type ConnectSrcPatch = { "connect-src": string };
 
@@ -9,20 +14,27 @@ export type TauriApiConfigPatch = {
   app: { security: { csp: ConnectSrcPatch; devCsp: ConnectSrcPatch } };
 };
 
+export type TauriApiConfigInput = {
+  /** A validated `VITE_API_URL`. */
+  apiUrl: string;
+  /** A validated `VITE_AUTH_EMULATOR_URL`; the env schema allows it only when `VITE_APP_ENV=local`. */
+  authEmulatorUrl?: string | undefined;
+};
+
 /**
  * Tauri config merge patch (RFC 7396, `tauri dev|build --config <file>`) that
- * sets CSP `connect-src` to the API origin the bundle calls, in both `csp` and
+ * sets CSP `connect-src` to exactly what the bundle calls: the API origin, the
+ * Firebase Auth origins and, in local, the Auth Emulator — in both `csp` and
  * `devCsp`. Only `connect-src` is replaced; every other directive stays as in
  * tauri.conf.json.
- * @param apiUrl a validated `VITE_API_URL`.
  */
-export const buildTauriApiConfigPatch = (apiUrl: string): TauriApiConfigPatch => {
-  const apiOrigin = new URL(apiUrl).origin;
+export const buildTauriApiConfigPatch = ({ apiUrl, authEmulatorUrl }: TauriApiConfigInput): TauriApiConfigPatch => {
+  const origins = [new URL(apiUrl).origin, ...FIREBASE_AUTH_ORIGINS, ...(authEmulatorUrl === undefined ? [] : [new URL(authEmulatorUrl).origin])].join(" ");
   return {
     app: {
       security: {
-        csp: { "connect-src": `${BASE_CONNECT_SRC} ${apiOrigin}` },
-        devCsp: { "connect-src": `${BASE_CONNECT_SRC} ${DEV_HMR_SOCKET} ${apiOrigin}` },
+        csp: { "connect-src": `${BASE_CONNECT_SRC} ${origins}` },
+        devCsp: { "connect-src": `${BASE_CONNECT_SRC} ${DEV_HMR_SOCKET} ${origins}` },
       },
     },
   };

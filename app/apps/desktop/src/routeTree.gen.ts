@@ -10,33 +10,158 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as InviteRouteImport } from './routes/invite'
+import { Route as OrganizationsRouteImport } from './routes/organizations'
+import { Route as SignInRouteImport } from './routes/sign-in'
+import { Route as ProfileSectionRouteImport } from './routes/profile/$section'
+import { Route as OOrganizationIdIndexRouteImport } from './routes/o/$organizationId/index'
+import { Route as OOrganizationIdSettingsSectionRouteImport } from './routes/o/$organizationId/settings/$section'
+import { Route as OOrganizationIdPProjectIdIndexRouteImport } from './routes/o/$organizationId/p/$projectId/index'
+import { Route as OOrganizationIdSettingsMModuleIdRouteImport } from './routes/o/$organizationId/settings/m/$moduleId'
+import { Route as OOrganizationIdPProjectIdMModuleIdSplatRouteImport } from './routes/o/$organizationId/p/$projectId/m/$moduleId/$'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const InviteRoute = InviteRouteImport.update({
+  id: '/invite',
+  path: '/invite',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OrganizationsRoute = OrganizationsRouteImport.update({
+  id: '/organizations',
+  path: '/organizations',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SignInRoute = SignInRouteImport.update({
+  id: '/sign-in',
+  path: '/sign-in',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfileSectionRoute = ProfileSectionRouteImport.update({
+  id: '/profile/$section',
+  path: '/profile/$section',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OOrganizationIdIndexRoute = OOrganizationIdIndexRouteImport.update({
+  id: '/o/$organizationId/',
+  path: '/o/$organizationId/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OOrganizationIdSettingsSectionRoute =
+  OOrganizationIdSettingsSectionRouteImport.update({
+    id: '/o/$organizationId/settings/$section',
+    path: '/o/$organizationId/settings/$section',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const OOrganizationIdPProjectIdIndexRoute =
+  OOrganizationIdPProjectIdIndexRouteImport.update({
+    id: '/o/$organizationId/p/$projectId/',
+    path: '/o/$organizationId/p/$projectId/',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const OOrganizationIdSettingsMModuleIdRoute =
+  OOrganizationIdSettingsMModuleIdRouteImport.update({
+    id: '/o/$organizationId/settings/m/$moduleId',
+    path: '/o/$organizationId/settings/m/$moduleId',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const OOrganizationIdPProjectIdMModuleIdSplatRoute =
+  OOrganizationIdPProjectIdMModuleIdSplatRouteImport.update({
+    id: '/o/$organizationId/p/$projectId/m/$moduleId/$',
+    path: '/o/$organizationId/p/$projectId/m/$moduleId/$',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/invite': typeof InviteRoute
+  '/organizations': typeof OrganizationsRoute
+  '/sign-in': typeof SignInRoute
+  '/profile/$section': typeof ProfileSectionRoute
+  '/o/$organizationId/': typeof OOrganizationIdIndexRoute
+  '/o/$organizationId/settings/$section': typeof OOrganizationIdSettingsSectionRoute
+  '/o/$organizationId/settings/m/$moduleId': typeof OOrganizationIdSettingsMModuleIdRoute
+  '/o/$organizationId/p/$projectId/': typeof OOrganizationIdPProjectIdIndexRoute
+  '/o/$organizationId/p/$projectId/m/$moduleId/$': typeof OOrganizationIdPProjectIdMModuleIdSplatRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/invite': typeof InviteRoute
+  '/organizations': typeof OrganizationsRoute
+  '/sign-in': typeof SignInRoute
+  '/profile/$section': typeof ProfileSectionRoute
+  '/o/$organizationId': typeof OOrganizationIdIndexRoute
+  '/o/$organizationId/settings/$section': typeof OOrganizationIdSettingsSectionRoute
+  '/o/$organizationId/settings/m/$moduleId': typeof OOrganizationIdSettingsMModuleIdRoute
+  '/o/$organizationId/p/$projectId': typeof OOrganizationIdPProjectIdIndexRoute
+  '/o/$organizationId/p/$projectId/m/$moduleId/$': typeof OOrganizationIdPProjectIdMModuleIdSplatRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/invite': typeof InviteRoute
+  '/organizations': typeof OrganizationsRoute
+  '/sign-in': typeof SignInRoute
+  '/profile/$section': typeof ProfileSectionRoute
+  '/o/$organizationId/': typeof OOrganizationIdIndexRoute
+  '/o/$organizationId/settings/$section': typeof OOrganizationIdSettingsSectionRoute
+  '/o/$organizationId/settings/m/$moduleId': typeof OOrganizationIdSettingsMModuleIdRoute
+  '/o/$organizationId/p/$projectId/': typeof OOrganizationIdPProjectIdIndexRoute
+  '/o/$organizationId/p/$projectId/m/$moduleId/$': typeof OOrganizationIdPProjectIdMModuleIdSplatRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/invite'
+    | '/organizations'
+    | '/sign-in'
+    | '/profile/$section'
+    | '/o/$organizationId/'
+    | '/o/$organizationId/settings/$section'
+    | '/o/$organizationId/settings/m/$moduleId'
+    | '/o/$organizationId/p/$projectId/'
+    | '/o/$organizationId/p/$projectId/m/$moduleId/$'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/invite'
+    | '/organizations'
+    | '/sign-in'
+    | '/profile/$section'
+    | '/o/$organizationId'
+    | '/o/$organizationId/settings/$section'
+    | '/o/$organizationId/settings/m/$moduleId'
+    | '/o/$organizationId/p/$projectId'
+    | '/o/$organizationId/p/$projectId/m/$moduleId/$'
+  id:
+    | '__root__'
+    | '/'
+    | '/invite'
+    | '/organizations'
+    | '/sign-in'
+    | '/profile/$section'
+    | '/o/$organizationId/'
+    | '/o/$organizationId/settings/$section'
+    | '/o/$organizationId/settings/m/$moduleId'
+    | '/o/$organizationId/p/$projectId/'
+    | '/o/$organizationId/p/$projectId/m/$moduleId/$'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  InviteRoute: typeof InviteRoute
+  OrganizationsRoute: typeof OrganizationsRoute
+  SignInRoute: typeof SignInRoute
+  ProfileSectionRoute: typeof ProfileSectionRoute
+  OOrganizationIdIndexRoute: typeof OOrganizationIdIndexRoute
+  OOrganizationIdSettingsSectionRoute: typeof OOrganizationIdSettingsSectionRoute
+  OOrganizationIdSettingsMModuleIdRoute: typeof OOrganizationIdSettingsMModuleIdRoute
+  OOrganizationIdPProjectIdIndexRoute: typeof OOrganizationIdPProjectIdIndexRoute
+  OOrganizationIdPProjectIdMModuleIdSplatRoute: typeof OOrganizationIdPProjectIdMModuleIdSplatRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +173,84 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/invite': {
+      id: '/invite'
+      path: '/invite'
+      fullPath: '/invite'
+      preLoaderRoute: typeof InviteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/organizations': {
+      id: '/organizations'
+      path: '/organizations'
+      fullPath: '/organizations'
+      preLoaderRoute: typeof OrganizationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sign-in': {
+      id: '/sign-in'
+      path: '/sign-in'
+      fullPath: '/sign-in'
+      preLoaderRoute: typeof SignInRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profile/$section': {
+      id: '/profile/$section'
+      path: '/profile/$section'
+      fullPath: '/profile/$section'
+      preLoaderRoute: typeof ProfileSectionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/o/$organizationId/': {
+      id: '/o/$organizationId/'
+      path: '/o/$organizationId'
+      fullPath: '/o/$organizationId/'
+      preLoaderRoute: typeof OOrganizationIdIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/o/$organizationId/settings/$section': {
+      id: '/o/$organizationId/settings/$section'
+      path: '/o/$organizationId/settings/$section'
+      fullPath: '/o/$organizationId/settings/$section'
+      preLoaderRoute: typeof OOrganizationIdSettingsSectionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/o/$organizationId/p/$projectId/': {
+      id: '/o/$organizationId/p/$projectId/'
+      path: '/o/$organizationId/p/$projectId'
+      fullPath: '/o/$organizationId/p/$projectId/'
+      preLoaderRoute: typeof OOrganizationIdPProjectIdIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/o/$organizationId/settings/m/$moduleId': {
+      id: '/o/$organizationId/settings/m/$moduleId'
+      path: '/o/$organizationId/settings/m/$moduleId'
+      fullPath: '/o/$organizationId/settings/m/$moduleId'
+      preLoaderRoute: typeof OOrganizationIdSettingsMModuleIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/o/$organizationId/p/$projectId/m/$moduleId/$': {
+      id: '/o/$organizationId/p/$projectId/m/$moduleId/$'
+      path: '/o/$organizationId/p/$projectId/m/$moduleId/$'
+      fullPath: '/o/$organizationId/p/$projectId/m/$moduleId/$'
+      preLoaderRoute: typeof OOrganizationIdPProjectIdMModuleIdSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  InviteRoute: InviteRoute,
+  OrganizationsRoute: OrganizationsRoute,
+  SignInRoute: SignInRoute,
+  ProfileSectionRoute: ProfileSectionRoute,
+  OOrganizationIdIndexRoute: OOrganizationIdIndexRoute,
+  OOrganizationIdSettingsSectionRoute: OOrganizationIdSettingsSectionRoute,
+  OOrganizationIdSettingsMModuleIdRoute: OOrganizationIdSettingsMModuleIdRoute,
+  OOrganizationIdPProjectIdIndexRoute: OOrganizationIdPProjectIdIndexRoute,
+  OOrganizationIdPProjectIdMModuleIdSplatRoute:
+    OOrganizationIdPProjectIdMModuleIdSplatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

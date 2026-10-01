@@ -20,10 +20,11 @@
     ],
     "security": {
       "freezePrototype": true,
+      "dangerousDisableAssetCspModification": ["style-src"],
       "csp": {
         "default-src": "'self'",
         "script-src": "'self'",
-        "style-src": "'self'",
+        "style-src": "'self' 'unsafe-inline'",
         "img-src": "'self' data: blob:",
         "font-src": "'self'",
         "connect-src": "'self' ipc: http://ipc.localhost",
@@ -38,7 +39,7 @@
         "style-src": "'self' 'unsafe-inline'",
         "img-src": "'self' data: blob:",
         "font-src": "'self'",
-        "connect-src": "'self' ipc: http://ipc.localhost ws://localhost:1420 http://localhost:3000",
+        "connect-src": "'self' ipc: http://ipc.localhost ws://localhost:1420 http://localhost:3100",
         "object-src": "'none'",
         "base-uri": "'self'",
         "form-action": "'self'",
