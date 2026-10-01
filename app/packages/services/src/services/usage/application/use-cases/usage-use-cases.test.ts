@@ -24,6 +24,7 @@ const fakeRepository = (state: { spend?: UsageTotals; budget?: StoredBudget | nu
     },
     getMonthByModel: () => Promise.resolve([]),
     getTenantBudget: () => Promise.resolve(state.budget ?? null),
+    setTenantBudget: () => Promise.resolve(),
   };
   return { repository, inserted, monthStarts };
 };

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ALERT_THRESHOLD_PERCENT, DEFAULT_PLAN_BUDGET, evaluateBudget, resolveBudget } from "./budget-policy.ts";
+import { ALERT_THRESHOLD_PERCENT, DEFAULT_PLAN_BUDGET, evaluateBudget, resolveBudget, resolveTenantCaps, selfCapWithin } from "./budget-policy.ts";
 
 describe("resolveBudget", () => {
   it("keeps valid tenant caps", () => {
@@ -50,5 +50,20 @@ describe("evaluateBudget", () => {
 
   it("refuses at the token cap even when every call was unpriced", () => {
     expect(evaluateBudget({ budget, spend: { costMicroUsd: 0, tokens: 100 } })).toEqual({ allowed: false, reason: "BUDGET_EXCEEDED" });
+  });
+});
+
+describe("resolveTenantCaps (decision 0039)", () => {
+  const plan = { monthlyMicroUsd: 80_000_000, monthlyTokens: 30_000_000 };
+  it("takes the staff override, else the plan, else the platform default", () => {
+    expect(resolveTenantCaps({ plan, override: { monthlyMicroUsd: 1, monthlyTokens: 2 }, selfCap: null })).toEqual({ caps: { monthlyMicroUsd: 1, monthlyTokens: 2 }, source: "override" });
+    expect(resolveTenantCaps({ plan, override: null, selfCap: null })).toEqual({ caps: plan, source: "plan" });
+    expect(resolveTenantCaps({ plan: null, override: null, selfCap: null })).toEqual({ caps: { monthlyMicroUsd: 50_000_000, monthlyTokens: 20_000_000 }, source: "default" });
+  });
+
+  it("lets the tenant's own cap lower each value, never raise it", () => {
+    expect(resolveTenantCaps({ plan, override: null, selfCap: { monthlyMicroUsd: 10_000_000, monthlyTokens: 90_000_000 } }).caps).toEqual({ monthlyMicroUsd: 10_000_000, monthlyTokens: 30_000_000 });
+    expect(selfCapWithin({ monthlyMicroUsd: 10, monthlyTokens: 10 }, plan)).toBe(true);
+    expect(selfCapWithin({ monthlyMicroUsd: 80_000_001, monthlyTokens: 10 }, plan)).toBe(false);
   });
 });

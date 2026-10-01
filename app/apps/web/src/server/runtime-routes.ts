@@ -1,6 +1,8 @@
 import "server-only";
 import {
   buildAdminFlagsRoutes,
+  buildAdminPlatformRoutes,
+  buildAgentSettingsRoutes,
   buildChatRoutes,
   buildFlagsRoutes,
   buildConnectorsRoutes,
@@ -17,6 +19,7 @@ import {
   createFirebaseAdmin,
   createFirebaseConnectorsServices,
   createFirebaseFilesServices,
+  createFirebaseConsoleServices,
   createFirebaseFlagsServices,
   flagEnvironmentDefaults,
   createFirestoreConversationsServices,
@@ -64,8 +67,9 @@ export const buildRuntimeRoutes = async (core: CoreServer): Promise<CoreRoutes> 
     logger: processLogger,
   });
   // postgres.js connects lazily; the web login role may SET ROLE knowledge_runtime (migration 0005).
+  const sql = createPostgresClient({ DATABASE_URL: env.DATABASE_URL });
   const knowledge = createKnowledgeServices({
-    repository: createPostgresKnowledgeRepository(createPostgresClient({ DATABASE_URL: env.DATABASE_URL })),
+    repository: createPostgresKnowledgeRepository(sql),
     embeddingModel: UNUSED_SEARCH_MODEL,
   });
   const serverlessToken = env.APP_ENV === "local" || env.MASTRA_AUDIENCE === undefined ? null : createServerlessIdTokenSource({ audience: env.MASTRA_AUDIENCE });
@@ -85,6 +89,7 @@ export const buildRuntimeRoutes = async (core: CoreServer): Promise<CoreRoutes> 
     pipeline: core.pipeline,
     flags: createFirebaseFlagsServices({ firebase, appEnv: env.APP_ENV, audit: core.audit, clock: core.pipeline.clock, environmentDefaults: flagEnvironmentDefaults(env) }),
   };
+  const consoleDeps = { pipeline: core.pipeline, console: createFirebaseConsoleServices({ firebase, sql, audit: core.audit, clock: core.pipeline.clock }) };
   const chatDeps = {
     pipeline: core.pipeline,
     chat: createMastraChatGateway(gatewayOptions),
@@ -109,5 +114,8 @@ export const buildRuntimeRoutes = async (core: CoreServer): Promise<CoreRoutes> 
     // SP5 feature flags (decision 0039): tenant overrides and the staff console.
     ...buildFlagsRoutes(flagsDeps),
     ...buildAdminFlagsRoutes(flagsDeps),
+    // SP5 staff console and agent settings (decisions 0039, 0041): budgets materialize into usage.tenant_budgets.
+    ...buildAdminPlatformRoutes(consoleDeps),
+    ...buildAgentSettingsRoutes(consoleDeps),
   };
 };

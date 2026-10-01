@@ -101,6 +101,17 @@ const getTenantBudget = (sql: Sql) => (input: { tenantId: string }): Promise<Sto
     return row === undefined ? null : { monthlyMicroUsd: Number(row.monthly_micro_usd), monthlyTokens: Number(row.monthly_tokens) };
   });
 
+// usage_runtime may INSERT and UPDATE budgets (migration 0007); one row per tenant (tenant_budgets_tenant_key).
+const setTenantBudget = (sql: Sql) => (input: { tenantId: string; budget: StoredBudget }): Promise<void> =>
+  withTenantTransaction(sql, { tenantId: input.tenantId }, async (tx) => {
+    await asRuntime(tx);
+    await tx`
+      INSERT INTO usage.tenant_budgets (tenant_id, monthly_micro_usd, monthly_tokens)
+      VALUES (${input.tenantId}, ${input.budget.monthlyMicroUsd}, ${input.budget.monthlyTokens})
+      ON CONFLICT (tenant_id) DO UPDATE
+        SET monthly_micro_usd = EXCLUDED.monthly_micro_usd, monthly_tokens = EXCLUDED.monthly_tokens, updated_at = now()`;
+  });
+
 /**
  * Usage ledger over `usage.llm_calls` / `usage.tenant_budgets` (decision 0026): every
  * transaction is tenant-scoped (`withTenantTransaction`) and runs as `usage_runtime`.
@@ -110,4 +121,5 @@ export const createPostgresUsageRepository = (sql: Sql): UsageRepository => ({
   getMonthSpend: getMonthSpend(sql),
   getMonthByModel: getMonthByModel(sql),
   getTenantBudget: getTenantBudget(sql),
+  setTenantBudget: setTenantBudget(sql),
 });

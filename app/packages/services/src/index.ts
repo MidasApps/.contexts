@@ -714,3 +714,22 @@ export {
   type TenantFlagOverrides,
 } from "./services/flags/index.ts";
 export { requireStaff, requireTenant } from "./services/platform/adapters/driving/console-guards.ts";
+// SP5 staff console (Task 10, decisions 0039 and 0041): plans, organizations, budgets, agent settings.
+export {
+  AGENT_SETTINGS_COLLECTION,
+  buildAdminPlatformRoutes,
+  CONSOLE_PERMISSIONS,
+  createConsoleServices,
+  createFirebaseConsoleServices,
+  createFirestoreAgentSettingsRepository,
+  createInMemoryConsoleStores,
+  createPostgresConsoleUsage,
+  defaultAgentSettingsOf,
+  ORGANIZATION_PLANS_COLLECTION,
+  PLANS_COLLECTION,
+  syncTenantBudget,
+  type AgentSettingsRepository,
+  type ConsoleServices,
+} from "./services/platform/index.ts";
+export { AGENT_SETTINGS_PERMISSIONS, buildAgentSettingsRoutes } from "./services/agents/adapters/driving/agent-settings-route-handler.ts";
+export { resolveTenantCaps, selfCapWithin, type TenantCaps } from "./services/usage/domain/budget-policy.ts";

@@ -14,6 +14,7 @@ const repository = (spend: UsageTotals = ZERO): UsageRepository & { rows: LlmCal
     getMonthSpend: () => Promise.resolve(spend),
     getMonthByModel: () => Promise.resolve([]),
     getTenantBudget: () => Promise.resolve({ monthlyMicroUsd: 1000, monthlyTokens: 1000 }),
+    setTenantBudget: () => Promise.resolve(),
   };
 };
 

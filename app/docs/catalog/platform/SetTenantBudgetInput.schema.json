@@ -1,0 +1,59 @@
+{
+  "additionalProperties": false,
+  "description": "Staff overrides (or clears the override of) an organization's monthly budget caps.",
+  "examples": [
+    {
+      "override": {
+        "monthlyMicroUsd": 100000000,
+        "monthlyTokens": 40000000
+      }
+    },
+    {
+      "override": null
+    }
+  ],
+  "properties": {
+    "override": {
+      "anyOf": [
+        {
+          "additionalProperties": false,
+          "properties": {
+            "monthlyMicroUsd": {
+              "description": "Monthly model spend cap in micro-USD.",
+              "maximum": 9007199254740991,
+              "minimum": 0,
+              "type": "integer",
+              "x-pii": "none"
+            },
+            "monthlyTokens": {
+              "description": "Monthly model token cap.",
+              "maximum": 9007199254740991,
+              "minimum": 0,
+              "type": "integer",
+              "x-pii": "none"
+            }
+          },
+          "required": [
+            "monthlyMicroUsd",
+            "monthlyTokens"
+          ],
+          "type": "object"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Caps that replace the plan's; null returns to the plan.",
+      "x-pii": "none"
+    }
+  },
+  "required": [
+    "override"
+  ],
+  "type": "object",
+  "x-kind": "command",
+  "x-permission": "platform.organization.update",
+  "x-pii": "none",
+  "x-relations": [],
+  "x-tenancyScope": "platform"
+}

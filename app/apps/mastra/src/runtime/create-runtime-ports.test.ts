@@ -2,7 +2,6 @@ import { createFirebaseAdmin, createInMemoryAccessStore, processLogger } from "@
 import { describe, expect, it } from "vitest";
 import { createRuntimePorts } from "./create-runtime-ports.ts";
 import { KnowledgeSearchRejectedError } from "./knowledge-port-binding.ts";
-import { PortNotWiredError } from "./unwired-ports.ts";
 
 const ENV = {
   API_KEY_PREFIX: "core",
@@ -77,11 +76,6 @@ describe("createRuntimePorts (default bindings)", () => {
     } as never;
     const pending = bound.approvals.requestApproval({ principal: MEMBER, node: ORG, permission: "core.project.create", action, requestId: "01J8Z3K4M5N6P7Q8R9S0T1V2W3" });
     await expect(pending).rejects.toMatchObject({ code: "APPROVAL_NOT_REQUIRED" });
-  });
-
-  it("rejects every port whose service lands later", async () => {
-    const bound = ports();
-    await expect(bound.settings.getAgentSettings({ tenantId: TENANT })).rejects.toBeInstanceOf(PortNotWiredError);
   });
 
   it("binds knowledge URL sources to Firecrawl: fixture pages in fake mode, private targets refused", async () => {

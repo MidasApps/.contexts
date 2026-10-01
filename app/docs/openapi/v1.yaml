@@ -150,6 +150,795 @@ paths:
       tags:
         - flags
       x-auth: user
+  /v1/admin/organizations:
+    get:
+      operationId: admin.listOrganizations
+      parameters:
+        - description: Cursor returned by the previous page.
+          in: query
+          name: cursor
+          required: false
+          schema:
+            minLength: 1
+            type: string
+            x-pii: none
+        - description: Page size, 1-100 (default 20).
+          in: query
+          name: limit
+          required: false
+          schema:
+            default: 20
+            maximum: 100
+            minimum: 1
+            type: integer
+            x-pii: none
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    description: The items of this page.
+                    items:
+                      $ref: "#/components/schemas/platform.OrganizationAdminSummary"
+                    type: array
+                    x-pii: none
+                  meta:
+                    additionalProperties: false
+                    description: Response metadata.
+                    properties:
+                      page:
+                        additionalProperties: false
+                        description: Pagination state.
+                        properties:
+                          cursor:
+                            anyOf:
+                              - minLength: 1
+                                type: string
+                              - type: "null"
+                            description: Opaque cursor of the next page; null at the end.
+                            x-pii: none
+                          hasMore:
+                            description: Whether another page exists.
+                            type: boolean
+                            x-pii: none
+                          limit:
+                            description: Page size used for this response.
+                            maximum: 100
+                            minimum: 1
+                            type: integer
+                            x-pii: none
+                        required:
+                          - cursor
+                          - hasMore
+                          - limit
+                        type: object
+                        x-pii: none
+                    required:
+                      - page
+                    type: object
+                    x-pii: none
+                required:
+                  - data
+                  - meta
+                type: object
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: VALIDATION_FAILED
+          x-error-codes:
+            - VALIDATION_FAILED
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UNAUTHORIZED
+          x-error-codes:
+            - UNAUTHORIZED
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: FORBIDDEN, MFA_REQUIRED
+          x-error-codes:
+            - FORBIDDEN
+            - MFA_REQUIRED
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: INTERNAL_ERROR
+          x-error-codes:
+            - INTERNAL_ERROR
+      security:
+        - bearerAuth: []
+      summary: Lists live organizations with plan, budget and cost month to date (staff, platform.organization.read).
+      tags:
+        - admin
+      x-auth: user
+  /v1/admin/organizations/{organizationId}:
+    patch:
+      operationId: admin.updateOrganization
+      parameters:
+        - description: Organization id.
+          in: path
+          name: organizationId
+          required: true
+          schema:
+            minLength: 1
+            type: string
+            x-pii: none
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/platform.UpdateOrganizationAdminInput"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: "#/components/schemas/platform.OrganizationAdminSummary"
+                required:
+                  - data
+                type: object
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: VALIDATION_FAILED
+          x-error-codes:
+            - VALIDATION_FAILED
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UNAUTHORIZED
+          x-error-codes:
+            - UNAUTHORIZED
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: FORBIDDEN, MFA_REQUIRED
+          x-error-codes:
+            - FORBIDDEN
+            - MFA_REQUIRED
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: NOT_FOUND
+          x-error-codes:
+            - NOT_FOUND
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: INTERNAL_ERROR
+          x-error-codes:
+            - INTERNAL_ERROR
+      security:
+        - bearerAuth: []
+      summary: Changes an organization's plan or status (staff, platform.organization.update).
+      tags:
+        - admin
+      x-auth: user
+  /v1/admin/organizations/{organizationId}/agent-settings:
+    get:
+      operationId: admin.getOrganizationAgentSettings
+      parameters:
+        - description: Organization id.
+          in: path
+          name: organizationId
+          required: true
+          schema:
+            minLength: 1
+            type: string
+            x-pii: none
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: "#/components/schemas/agents.AgentSettings"
+                required:
+                  - data
+                type: object
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: VALIDATION_FAILED
+          x-error-codes:
+            - VALIDATION_FAILED
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UNAUTHORIZED
+          x-error-codes:
+            - UNAUTHORIZED
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: FORBIDDEN, MFA_REQUIRED
+          x-error-codes:
+            - FORBIDDEN
+            - MFA_REQUIRED
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: NOT_FOUND
+          x-error-codes:
+            - NOT_FOUND
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: INTERNAL_ERROR
+          x-error-codes:
+            - INTERNAL_ERROR
+      security:
+        - bearerAuth: []
+      summary: Reads an organization's agent settings (staff, platform.agent.manage).
+      tags:
+        - admin
+      x-auth: user
+    put:
+      operationId: admin.updateOrganizationAgentSettings
+      parameters:
+        - description: Organization id.
+          in: path
+          name: organizationId
+          required: true
+          schema:
+            minLength: 1
+            type: string
+            x-pii: none
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/agents.UpdateAgentSettingsInput"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: "#/components/schemas/agents.AgentSettings"
+                required:
+                  - data
+                type: object
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: VALIDATION_FAILED
+          x-error-codes:
+            - VALIDATION_FAILED
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UNAUTHORIZED
+          x-error-codes:
+            - UNAUTHORIZED
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: FORBIDDEN, MFA_REQUIRED
+          x-error-codes:
+            - FORBIDDEN
+            - MFA_REQUIRED
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: NOT_FOUND
+          x-error-codes:
+            - NOT_FOUND
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: INTERNAL_ERROR
+          x-error-codes:
+            - INTERNAL_ERROR
+      security:
+        - bearerAuth: []
+      summary: Changes an organization's agent settings (staff, platform.agent.manage, audited with targetTenantId).
+      tags:
+        - admin
+      x-auth: user
+  /v1/admin/organizations/{organizationId}/budget:
+    put:
+      operationId: admin.setOrganizationBudget
+      parameters:
+        - description: Organization id.
+          in: path
+          name: organizationId
+          required: true
+          schema:
+            minLength: 1
+            type: string
+            x-pii: none
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/platform.SetTenantBudgetInput"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: "#/components/schemas/platform.OrganizationAdminSummary"
+                required:
+                  - data
+                type: object
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: VALIDATION_FAILED
+          x-error-codes:
+            - VALIDATION_FAILED
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UNAUTHORIZED
+          x-error-codes:
+            - UNAUTHORIZED
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: FORBIDDEN, MFA_REQUIRED
+          x-error-codes:
+            - FORBIDDEN
+            - MFA_REQUIRED
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: NOT_FOUND
+          x-error-codes:
+            - NOT_FOUND
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: INTERNAL_ERROR
+          x-error-codes:
+            - INTERNAL_ERROR
+      security:
+        - bearerAuth: []
+      summary: Overrides or clears an organization's monthly budget caps (staff, platform.organization.update).
+      tags:
+        - admin
+      x-auth: user
+  /v1/admin/overview:
+    get:
+      operationId: admin.getOverview
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: "#/components/schemas/platform.AdminOverview"
+                required:
+                  - data
+                type: object
+          description: OK
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UNAUTHORIZED
+          x-error-codes:
+            - UNAUTHORIZED
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: FORBIDDEN, MFA_REQUIRED
+          x-error-codes:
+            - FORBIDDEN
+            - MFA_REQUIRED
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: INTERNAL_ERROR
+          x-error-codes:
+            - INTERNAL_ERROR
+      security:
+        - bearerAuth: []
+      summary: Platform overview numbers (staff, platform.usage.read).
+      tags:
+        - admin
+      x-auth: user
+  /v1/admin/plans:
+    get:
+      operationId: admin.listPlans
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    items:
+                      $ref: "#/components/schemas/platform.Plan"
+                    type: array
+                required:
+                  - data
+                type: object
+          description: OK
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UNAUTHORIZED
+          x-error-codes:
+            - UNAUTHORIZED
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: FORBIDDEN, MFA_REQUIRED
+          x-error-codes:
+            - FORBIDDEN
+            - MFA_REQUIRED
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: INTERNAL_ERROR
+          x-error-codes:
+            - INTERNAL_ERROR
+      security:
+        - bearerAuth: []
+      summary: Lists the plan catalog (staff, platform.plan.manage).
+      tags:
+        - admin
+      x-auth: user
+    post:
+      operationId: admin.createPlan
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/platform.UpsertPlanInput"
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: "#/components/schemas/platform.Plan"
+                required:
+                  - data
+                type: object
+          description: Created
+          headers:
+            Location:
+              description: URL of the created resource.
+              schema:
+                type: string
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: VALIDATION_FAILED
+          x-error-codes:
+            - VALIDATION_FAILED
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UNAUTHORIZED
+          x-error-codes:
+            - UNAUTHORIZED
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: FORBIDDEN, MFA_REQUIRED
+          x-error-codes:
+            - FORBIDDEN
+            - MFA_REQUIRED
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: INTERNAL_ERROR
+          x-error-codes:
+            - INTERNAL_ERROR
+      security:
+        - bearerAuth: []
+      summary: Creates a plan (staff, platform.plan.manage).
+      tags:
+        - admin
+      x-auth: user
+  /v1/admin/plans/{planId}:
+    put:
+      operationId: admin.updatePlan
+      parameters:
+        - description: Plan id.
+          in: path
+          name: planId
+          required: true
+          schema:
+            minLength: 1
+            type: string
+            x-pii: none
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/platform.UpsertPlanInput"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: "#/components/schemas/platform.Plan"
+                required:
+                  - data
+                type: object
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: VALIDATION_FAILED
+          x-error-codes:
+            - VALIDATION_FAILED
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UNAUTHORIZED
+          x-error-codes:
+            - UNAUTHORIZED
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: FORBIDDEN, MFA_REQUIRED
+          x-error-codes:
+            - FORBIDDEN
+            - MFA_REQUIRED
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: NOT_FOUND
+          x-error-codes:
+            - NOT_FOUND
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: INTERNAL_ERROR
+          x-error-codes:
+            - INTERNAL_ERROR
+      security:
+        - bearerAuth: []
+      summary: Replaces a plan; the budgets of organizations on it follow (staff, platform.plan.manage).
+      tags:
+        - admin
+      x-auth: user
+  /v1/agent-settings:
+    get:
+      operationId: agent-settings.get
+      parameters:
+        - description: Organization to act in; required for users, and when given it must be an API key's own organization.
+          in: query
+          name: organizationId
+          required: false
+          schema:
+            minLength: 1
+            type: string
+            x-pii: none
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: "#/components/schemas/agents.AgentSettings"
+                required:
+                  - data
+                type: object
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: VALIDATION_FAILED
+          x-error-codes:
+            - VALIDATION_FAILED
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UNAUTHORIZED
+          x-error-codes:
+            - UNAUTHORIZED
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: FORBIDDEN
+          x-error-codes:
+            - FORBIDDEN
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: INTERNAL_ERROR
+          x-error-codes:
+            - INTERNAL_ERROR
+      security:
+        - bearerAuth: []
+      summary: Reads the organization's agent settings (core.agent-settings.read).
+      tags:
+        - agent-settings
+      x-auth: principal
+    patch:
+      operationId: agent-settings.update
+      parameters:
+        - description: Organization to act in; required for users, and when given it must be an API key's own organization.
+          in: query
+          name: organizationId
+          required: false
+          schema:
+            minLength: 1
+            type: string
+            x-pii: none
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/agents.UpdateAgentSettingsInput"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: "#/components/schemas/agents.AgentSettings"
+                required:
+                  - data
+                type: object
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: VALIDATION_FAILED
+          x-error-codes:
+            - VALIDATION_FAILED
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UNAUTHORIZED
+          x-error-codes:
+            - UNAUTHORIZED
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: FORBIDDEN
+          x-error-codes:
+            - FORBIDDEN
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: INTERNAL_ERROR
+          x-error-codes:
+            - INTERNAL_ERROR
+      security:
+        - bearerAuth: []
+      summary: Changes the organization's agent settings; its own budget cap may only be lower than the plan's (core.agent-settings.update).
+      tags:
+        - agent-settings
+      x-auth: user
   /v1/api-keys/{apiKeyId}:
     delete:
       operationId: identity.revokeApiKey
@@ -11929,6 +12718,88 @@ components:
       x-pii: personal
       x-relations: []
       x-tenancyScope: organization
+    agents.UpdateAgentSettingsInput:
+      additionalProperties: false
+      description: Changes enabled agents, web opt-ins, the PII mode or the organization's own lower budget cap.
+      examples:
+        - enabledAgents:
+            - knowledge
+            - data
+        - budget:
+            monthlyMicroUsd: 20000000
+            monthlyTokens: 10000000
+          guardrails:
+            pii: redact
+      properties:
+        budget:
+          anyOf:
+            - additionalProperties: false
+              properties:
+                monthlyMicroUsd:
+                  description: Monthly model spend cap in micro-USD.
+                  maximum: 9007199254740991
+                  minimum: 0
+                  type: integer
+                  x-pii: none
+                monthlyTokens:
+                  description: Monthly model token cap.
+                  maximum: 9007199254740991
+                  minimum: 0
+                  type: integer
+                  x-pii: none
+              required:
+                - monthlyMicroUsd
+                - monthlyTokens
+              type: object
+            - type: "null"
+          description: The organization's own lower monthly cap; null removes it.
+          x-pii: none
+        enabledAgents:
+          description: Subagents the supervisor may delegate to.
+          items:
+            pattern: ^[a-z][a-z0-9-]*$
+            type: string
+          maxItems: 50
+          type: array
+          x-pii: none
+        guardrails:
+          additionalProperties: false
+          description: PII detector mode for user input.
+          properties:
+            pii:
+              description: "`warn` or `redact`."
+              enum:
+                - warn
+                - redact
+              type: string
+              x-pii: none
+          required:
+            - pii
+          type: object
+          x-pii: none
+        webTools:
+          additionalProperties: false
+          description: Web tool opt-ins (the platform flag ai.web-tools must also be on).
+          properties:
+            browser:
+              description: Browser automation through a Playwright MCP connector.
+              type: boolean
+              x-pii: none
+            firecrawl:
+              description: Web search and scrape through Firecrawl.
+              type: boolean
+              x-pii: none
+          required:
+            - firecrawl
+            - browser
+          type: object
+          x-pii: none
+      type: object
+      x-kind: command
+      x-permission: core.agent-settings.update
+      x-pii: none
+      x-relations: []
+      x-tenancyScope: organization
     audit.AuditLogEntry:
       additionalProperties: false
       description: An append-only audit record of an organization; lists changed field names, never values.
@@ -12014,6 +12885,10 @@ components:
             - VOICE_SYNTHESIZED
             - BUDGET_THRESHOLD_REACHED
             - FEATURE_FLAG_UPDATED
+            - PLAN_CREATED
+            - PLAN_UPDATED
+            - TENANT_BUDGET_UPDATED
+            - AGENT_SETTINGS_UPDATED
           type: string
           x-pii: none
         actor:
@@ -12323,6 +13198,10 @@ components:
             - VOICE_SYNTHESIZED
             - BUDGET_THRESHOLD_REACHED
             - FEATURE_FLAG_UPDATED
+            - PLAN_CREATED
+            - PLAN_UPDATED
+            - TENANT_BUDGET_UPDATED
+            - AGENT_SETTINGS_UPDATED
           type: string
           x-pii: none
         actorId:
@@ -12445,6 +13324,10 @@ components:
             - VOICE_SYNTHESIZED
             - BUDGET_THRESHOLD_REACHED
             - FEATURE_FLAG_UPDATED
+            - PLAN_CREATED
+            - PLAN_UPDATED
+            - TENANT_BUDGET_UPDATED
+            - AGENT_SETTINGS_UPDATED
           type: string
           x-pii: none
         actor:
@@ -17768,6 +18651,128 @@ components:
       x-pii: none
       x-relations: []
       x-tenancyScope: platform
+    platform.OrganizationAdminSummary:
+      additionalProperties: false
+      description: "An organization for staff: status, plan, budget caps and their source, cost month to date."
+      examples:
+        - budget:
+            caps:
+              monthlyMicroUsd: 50000000
+              monthlyTokens: 20000000
+            override: null
+            source: plan
+          costMtdMicroUsd: 1250000
+          id: Jd8sK2lPq0WnR5tYu3bV
+          name: Northwind
+          planId: Pl1aB2cD3eF4gH5iJ6kL
+          status: active
+      properties:
+        budget:
+          additionalProperties: false
+          description: Monthly budget of the organization.
+          properties:
+            caps:
+              additionalProperties: false
+              description: Caps in force (after the tenant's own lower cap).
+              properties:
+                monthlyMicroUsd:
+                  description: Monthly model spend cap in micro-USD.
+                  maximum: 9007199254740991
+                  minimum: 0
+                  type: integer
+                  x-pii: none
+                monthlyTokens:
+                  description: Monthly model token cap.
+                  maximum: 9007199254740991
+                  minimum: 0
+                  type: integer
+                  x-pii: none
+              required:
+                - monthlyMicroUsd
+                - monthlyTokens
+              type: object
+              x-pii: none
+            override:
+              anyOf:
+                - additionalProperties: false
+                  properties:
+                    monthlyMicroUsd:
+                      description: Monthly model spend cap in micro-USD.
+                      maximum: 9007199254740991
+                      minimum: 0
+                      type: integer
+                      x-pii: none
+                    monthlyTokens:
+                      description: Monthly model token cap.
+                      maximum: 9007199254740991
+                      minimum: 0
+                      type: integer
+                      x-pii: none
+                  required:
+                    - monthlyMicroUsd
+                    - monthlyTokens
+                  type: object
+                - type: "null"
+              description: Staff override, if any.
+              x-pii: none
+            source:
+              description: "`override`, `plan` or `default`."
+              enum:
+                - override
+                - plan
+                - default
+              type: string
+              x-pii: none
+          required:
+            - caps
+            - source
+            - override
+          type: object
+          x-pii: none
+        costMtdMicroUsd:
+          description: Model cost month to date, in micro-USD.
+          maximum: 9007199254740991
+          minimum: 0
+          type: integer
+          x-pii: none
+        id:
+          description: Organization id (= tenant id).
+          minLength: 1
+          type: string
+          x-pii: none
+        name:
+          description: Display name.
+          maxLength: 120
+          minLength: 1
+          type: string
+          x-pii: none
+        planId:
+          anyOf:
+            - minLength: 1
+              type: string
+            - type: "null"
+          description: Assigned plan; null = platform default caps.
+          x-pii: none
+        status:
+          description: "`active` or `suspended`."
+          enum:
+            - active
+            - suspended
+          type: string
+          x-pii: none
+      required:
+        - id
+        - name
+        - status
+        - planId
+        - budget
+        - costMtdMicroUsd
+      type: object
+      x-kind: view
+      x-permission: platform.organization.read
+      x-pii: none
+      x-relations: []
+      x-tenancyScope: platform
     platform.Plan:
       additionalProperties: false
       description: A plan with the spend, token and connector limits it grants to organizations.
@@ -17880,6 +18885,46 @@ components:
       x-pii: none
       x-relations: []
       x-tenancyScope: platform
+    platform.SetTenantBudgetInput:
+      additionalProperties: false
+      description: Staff overrides (or clears the override of) an organization's monthly budget caps.
+      examples:
+        - override:
+            monthlyMicroUsd: 100000000
+            monthlyTokens: 40000000
+        - override: null
+      properties:
+        override:
+          anyOf:
+            - additionalProperties: false
+              properties:
+                monthlyMicroUsd:
+                  description: Monthly model spend cap in micro-USD.
+                  maximum: 9007199254740991
+                  minimum: 0
+                  type: integer
+                  x-pii: none
+                monthlyTokens:
+                  description: Monthly model token cap.
+                  maximum: 9007199254740991
+                  minimum: 0
+                  type: integer
+                  x-pii: none
+              required:
+                - monthlyMicroUsd
+                - monthlyTokens
+              type: object
+            - type: "null"
+          description: Caps that replace the plan's; null returns to the plan.
+          x-pii: none
+      required:
+        - override
+      type: object
+      x-kind: command
+      x-permission: platform.organization.update
+      x-pii: none
+      x-relations: []
+      x-tenancyScope: platform
     platform.TenantFlagValueInput:
       additionalProperties: false
       description: Overrides a tenant-overridable flag for the caller's organization (switch off, or back on when the environment allows).
@@ -17898,6 +18943,33 @@ components:
       x-pii: none
       x-relations: []
       x-tenancyScope: organization
+    platform.UpdateOrganizationAdminInput:
+      additionalProperties: false
+      description: Staff changes an organization's plan or status (audited with targetTenantId).
+      examples:
+        - planId: Pl1aB2cD3eF4gH5iJ6kL
+        - status: suspended
+      properties:
+        planId:
+          anyOf:
+            - minLength: 1
+              type: string
+            - type: "null"
+          description: Plan to assign; null removes it (platform default caps).
+          x-pii: none
+        status:
+          description: "`active` or `suspended`."
+          enum:
+            - active
+            - suspended
+          type: string
+          x-pii: none
+      type: object
+      x-kind: command
+      x-permission: platform.organization.update
+      x-pii: none
+      x-relations: []
+      x-tenancyScope: platform
     platform.UpsertPlanInput:
       additionalProperties: false
       description: Creates or replaces a plan (staff).

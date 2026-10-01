@@ -53,3 +53,38 @@ export const evaluateBudget = (input: { readonly budget: Budget; readonly spend:
     reachesPercent(spend.tokens, budget.monthlyTokens, budget.alertThresholdPercent);
   return { allowed: true, alert };
 };
+
+/** Monthly caps without the alert threshold (plan limits, staff override, tenant self-cap). */
+export type BudgetCapsInput = { readonly monthlyMicroUsd: number; readonly monthlyTokens: number };
+
+export type TenantCaps = { readonly caps: BudgetCapsInput; readonly source: "override" | "plan" | "default" };
+
+/**
+ * Caps in force for a tenant (SP5, decision 0039 amendment): the staff override, else the plan's
+ * limits, else the platform default; then the tenant's own cap lowers either value, never raises it.
+ * The result is what `usage.tenant_budgets` stores and `checkTenantBudget` enforces.
+ */
+export const resolveTenantCaps = (input: {
+  readonly plan: BudgetCapsInput | null;
+  readonly override: BudgetCapsInput | null;
+  readonly selfCap: BudgetCapsInput | null;
+}): TenantCaps => {
+  const base: TenantCaps =
+    input.override !== null
+      ? { caps: input.override, source: "override" }
+      : input.plan !== null
+        ? { caps: input.plan, source: "plan" }
+        : { caps: { monthlyMicroUsd: DEFAULT_PLAN_BUDGET.monthlyMicroUsd, monthlyTokens: DEFAULT_PLAN_BUDGET.monthlyTokens }, source: "default" };
+  if (input.selfCap === null) return base;
+  return {
+    source: base.source,
+    caps: {
+      monthlyMicroUsd: Math.min(base.caps.monthlyMicroUsd, input.selfCap.monthlyMicroUsd),
+      monthlyTokens: Math.min(base.caps.monthlyTokens, input.selfCap.monthlyTokens),
+    },
+  };
+};
+
+/** True when a tenant's own cap stays within the caps above it (it may only lower them). */
+export const selfCapWithin = (selfCap: BudgetCapsInput, base: BudgetCapsInput): boolean =>
+  selfCap.monthlyMicroUsd <= base.monthlyMicroUsd && selfCap.monthlyTokens <= base.monthlyTokens;

@@ -76,3 +76,27 @@ plan values), but nothing defines plans.
     staff without MFA 403 `MFA_REQUIRED`, and an impersonated token is never staff. Each refusal is
     audited `PLATFORM_ACCESS_DENIED`. The API answers 403, not 404: the platform node is not a
     secret, and the `/admin` layout still answers 404 to non-staff (decision 0041).
+- **2026-10-01 — plans, budgets and agent settings as built (SP5 Task 10).**
+  - **Stores.** Plans in Firestore `plans` (automatic ids). An organization's plan and the staff
+    budget override live in `organization-plans/{tenantId}`, not on the SP1 organization document;
+    staff status changes (`active|suspended`) write the SP1 document through a narrow adapter.
+    Agent settings live in `agent-settings/{tenantId}` (the contract's document id), with the
+    organization's own lower cap as a storage-only `selfCap`. Without a document the defaults
+    apply: core subagents, web off, PII `redact` (conservative while `compliance.md` is a template).
+  - **Caps.** `resolveTenantCaps`: staff override → plan limits → platform default (USD 50, 20 M
+    tokens), then the tenant's own cap lowers each value, never raises it (`PATCH
+    /v1/agent-settings` with a higher cap answers 400 `VALIDATION_FAILED`, issue `ABOVE_PLAN`).
+  - **Materialized for the guard.** Every write that changes an input (plan assignment, plan
+    limits for every organization on the plan, override, self-cap) upserts the resolved caps into
+    `usage.tenant_budgets` (role `usage_runtime`) and mirrors them in `agent-settings.budget`. The
+    runtime's `checkTenantBudget` is unchanged and never reads Firestore. A failure between the
+    Firestore write and the Postgres upsert answers 500 and leaves the old caps in force until the
+    next write.
+  - **Runtime.** The Mastra `SettingsPort` is bound to these settings, so the PII detector mode and
+    the enabled agents are the tenant's (SP3 Task 17 concern 4; the fail-closed stand-in is gone).
+  - **Audit.** `PLAN_CREATED`, `PLAN_UPDATED`, `ORGANIZATION_UPDATED` (plan, status),
+    `TENANT_BUDGET_UPDATED` and staff `AGENT_SETTINGS_UPDATED` on the platform log, with
+    `targetTenantId` for an organization; a tenant's own `AGENT_SETTINGS_UPDATED` on its log.
+  - **Overview.** `/v1/admin/overview` computes active organizations and the cost month to date
+    (one ledger read per organization). Active users, tripwire and approval rates answer 0 and the
+    eval status `unknown` until span aggregates and an eval run history exist.

@@ -8,6 +8,12 @@ import { TraceSummaryContract } from "./observability/trace-summary.schema.ts";
 import { AdminOverviewContract } from "./platform/admin-overview.schema.ts";
 import { FeatureFlagContract, FeatureFlagDefinitionContract, SetFeatureFlagValueInputContract, TenantFlagValueInputContract } from "./platform/feature-flag.schema.ts";
 import { PlanContract, UpsertPlanInputContract } from "./platform/plan.schema.ts";
+import {
+  OrganizationAdminSummaryContract,
+  SetTenantBudgetInputContract,
+  UpdateOrganizationAdminInputContract,
+} from "./platform/organization-admin.schema.ts";
+import { UpdateAgentSettingsInputContract } from "./agents/update-agent-settings.schema.ts";
 import { UsageDailyRollupContract } from "./usage/usage-daily-rollup.schema.ts";
 import { HumanApprovalResumeContract, WorkflowResumeActionInputContract } from "./workflows/human-approval-resume.schema.ts";
 import { CreateScheduleInputContract, ScheduleContract, UpdateScheduleInputContract } from "./workflows/schedule.schema.ts";
@@ -39,6 +45,10 @@ export const SP5_CONTRACTS: readonly ContractDefinition[] = [
   TraceDetailContract,
   EvalExperimentSummaryContract,
   UsageDailyRollupContract,
+  OrganizationAdminSummaryContract,
+  UpdateOrganizationAdminInputContract,
+  SetTenantBudgetInputContract,
+  UpdateAgentSettingsInputContract,
   MessageFeedbackContract,
   MessageFeedbackInputContract,
 ];

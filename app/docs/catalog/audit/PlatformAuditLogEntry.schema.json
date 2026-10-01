@@ -86,7 +86,11 @@
         "VOICE_TRANSCRIBED",
         "VOICE_SYNTHESIZED",
         "BUDGET_THRESHOLD_REACHED",
-        "FEATURE_FLAG_UPDATED"
+        "FEATURE_FLAG_UPDATED",
+        "PLAN_CREATED",
+        "PLAN_UPDATED",
+        "TENANT_BUDGET_UPDATED",
+        "AGENT_SETTINGS_UPDATED"
       ],
       "type": "string",
       "x-pii": "none"

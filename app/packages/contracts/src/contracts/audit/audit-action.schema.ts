@@ -72,6 +72,11 @@ export const AUDIT_ACTIONS = [
   "BUDGET_THRESHOLD_REACHED",
   // SP5 console: a flag value or tenant override changed (decision 0039).
   "FEATURE_FLAG_UPDATED",
+  // SP5 console: plans, an organization's plan or budget override, agent settings (decision 0039).
+  "PLAN_CREATED",
+  "PLAN_UPDATED",
+  "TENANT_BUDGET_UPDATED",
+  "AGENT_SETTINGS_UPDATED",
 ] as const;
 
 export const AuditActionSchema = z.enum(AUDIT_ACTIONS);

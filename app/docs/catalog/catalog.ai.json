@@ -5529,6 +5529,168 @@
       "tenancyScope": "organization"
     },
     {
+      "context": "agents",
+      "description": "Changes enabled agents, web opt-ins, the PII mode or the organization's own lower budget cap.",
+      "examples": [
+        {
+          "enabledAgents": [
+            "knowledge",
+            "data"
+          ]
+        },
+        {
+          "budget": {},
+          "guardrails": {
+            "pii": "redact"
+          }
+        }
+      ],
+      "fields": [
+        {
+          "description": "The organization's own lower monthly cap; null removes it.",
+          "name": "budget",
+          "pii": "none",
+          "required": false
+        },
+        {
+          "description": "Subagents the supervisor may delegate to.",
+          "name": "enabledAgents",
+          "pii": "none",
+          "required": false
+        },
+        {
+          "description": "PII detector mode for user input.",
+          "name": "guardrails",
+          "pii": "none",
+          "required": false
+        },
+        {
+          "description": "Web tool opt-ins (the platform flag ai.web-tools must also be on).",
+          "name": "webTools",
+          "pii": "none",
+          "required": false
+        }
+      ],
+      "id": "agents.UpdateAgentSettingsInput",
+      "jsonSchema": {
+        "additionalProperties": false,
+        "description": "Changes enabled agents, web opt-ins, the PII mode or the organization's own lower budget cap.",
+        "examples": [
+          {
+            "enabledAgents": [
+              "knowledge",
+              "data"
+            ]
+          },
+          {
+            "budget": {},
+            "guardrails": {
+              "pii": "redact"
+            }
+          }
+        ],
+        "properties": {
+          "budget": {
+            "anyOf": [
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "monthlyMicroUsd": {
+                    "description": "Monthly model spend cap in micro-USD.",
+                    "maximum": 9007199254740991,
+                    "minimum": 0,
+                    "type": "integer",
+                    "x-pii": "none"
+                  },
+                  "monthlyTokens": {
+                    "description": "Monthly model token cap.",
+                    "maximum": 9007199254740991,
+                    "minimum": 0,
+                    "type": "integer",
+                    "x-pii": "none"
+                  }
+                },
+                "required": [
+                  "monthlyMicroUsd",
+                  "monthlyTokens"
+                ],
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The organization's own lower monthly cap; null removes it.",
+            "x-pii": "none"
+          },
+          "enabledAgents": {
+            "description": "Subagents the supervisor may delegate to.",
+            "items": {
+              "pattern": "^[a-z][a-z0-9-]*$",
+              "type": "string"
+            },
+            "maxItems": 50,
+            "type": "array",
+            "x-pii": "none"
+          },
+          "guardrails": {
+            "additionalProperties": false,
+            "description": "PII detector mode for user input.",
+            "properties": {
+              "pii": {
+                "description": "`warn` or `redact`.",
+                "enum": [
+                  "warn",
+                  "redact"
+                ],
+                "type": "string",
+                "x-pii": "none"
+              }
+            },
+            "required": [
+              "pii"
+            ],
+            "type": "object",
+            "x-pii": "none"
+          },
+          "webTools": {
+            "additionalProperties": false,
+            "description": "Web tool opt-ins (the platform flag ai.web-tools must also be on).",
+            "properties": {
+              "browser": {
+                "description": "Browser automation through a Playwright MCP connector.",
+                "type": "boolean",
+                "x-pii": "none"
+              },
+              "firecrawl": {
+                "description": "Web search and scrape through Firecrawl.",
+                "type": "boolean",
+                "x-pii": "none"
+              }
+            },
+            "required": [
+              "firecrawl",
+              "browser"
+            ],
+            "type": "object",
+            "x-pii": "none"
+          }
+        },
+        "type": "object",
+        "x-kind": "command",
+        "x-permission": "core.agent-settings.update",
+        "x-pii": "none",
+        "x-relations": [],
+        "x-tenancyScope": "organization"
+      },
+      "kind": "command",
+      "name": "UpdateAgentSettingsInput",
+      "permission": "core.agent-settings.update",
+      "pii": "none",
+      "relations": [],
+      "tenancyScope": "organization"
+    },
+    {
       "context": "audit",
       "description": "An append-only audit record of an organization; lists changed field names, never values.",
       "examples": [
@@ -5711,7 +5873,11 @@
               "VOICE_TRANSCRIBED",
               "VOICE_SYNTHESIZED",
               "BUDGET_THRESHOLD_REACHED",
-              "FEATURE_FLAG_UPDATED"
+              "FEATURE_FLAG_UPDATED",
+              "PLAN_CREATED",
+              "PLAN_UPDATED",
+              "TENANT_BUDGET_UPDATED",
+              "AGENT_SETTINGS_UPDATED"
             ],
             "type": "string",
             "x-pii": "none"
@@ -6149,7 +6315,11 @@
               "VOICE_TRANSCRIBED",
               "VOICE_SYNTHESIZED",
               "BUDGET_THRESHOLD_REACHED",
-              "FEATURE_FLAG_UPDATED"
+              "FEATURE_FLAG_UPDATED",
+              "PLAN_CREATED",
+              "PLAN_UPDATED",
+              "TENANT_BUDGET_UPDATED",
+              "AGENT_SETTINGS_UPDATED"
             ],
             "type": "string",
             "x-pii": "none"
@@ -6383,7 +6553,11 @@
               "VOICE_TRANSCRIBED",
               "VOICE_SYNTHESIZED",
               "BUDGET_THRESHOLD_REACHED",
-              "FEATURE_FLAG_UPDATED"
+              "FEATURE_FLAG_UPDATED",
+              "PLAN_CREATED",
+              "PLAN_UPDATED",
+              "TENANT_BUDGET_UPDATED",
+              "AGENT_SETTINGS_UPDATED"
             ],
             "type": "string",
             "x-pii": "none"
@@ -15755,6 +15929,233 @@
     },
     {
       "context": "platform",
+      "description": "An organization for staff: status, plan, budget caps and their source, cost month to date.",
+      "examples": [
+        {
+          "budget": {
+            "caps": {
+              "monthlyMicroUsd": 50000000,
+              "monthlyTokens": 20000000
+            },
+            "override": null,
+            "source": "plan"
+          },
+          "costMtdMicroUsd": 1250000,
+          "id": "Jd8sK2lPq0WnR5tYu3bV",
+          "name": "Northwind",
+          "planId": "Pl1aB2cD3eF4gH5iJ6kL",
+          "status": "active"
+        }
+      ],
+      "fields": [
+        {
+          "description": "Monthly budget of the organization.",
+          "name": "budget",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Model cost month to date, in micro-USD.",
+          "name": "costMtdMicroUsd",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Organization id (= tenant id).",
+          "name": "id",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Display name.",
+          "name": "name",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Assigned plan; null = platform default caps.",
+          "name": "planId",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "`active` or `suspended`.",
+          "name": "status",
+          "pii": "none",
+          "required": true
+        }
+      ],
+      "id": "platform.OrganizationAdminSummary",
+      "jsonSchema": {
+        "additionalProperties": false,
+        "description": "An organization for staff: status, plan, budget caps and their source, cost month to date.",
+        "examples": [
+          {
+            "budget": {
+              "caps": {
+                "monthlyMicroUsd": 50000000,
+                "monthlyTokens": 20000000
+              },
+              "override": null,
+              "source": "plan"
+            },
+            "costMtdMicroUsd": 1250000,
+            "id": "Jd8sK2lPq0WnR5tYu3bV",
+            "name": "Northwind",
+            "planId": "Pl1aB2cD3eF4gH5iJ6kL",
+            "status": "active"
+          }
+        ],
+        "properties": {
+          "budget": {
+            "additionalProperties": false,
+            "description": "Monthly budget of the organization.",
+            "properties": {
+              "caps": {
+                "additionalProperties": false,
+                "description": "Caps in force (after the tenant's own lower cap).",
+                "properties": {
+                  "monthlyMicroUsd": {
+                    "description": "Monthly model spend cap in micro-USD.",
+                    "maximum": 9007199254740991,
+                    "minimum": 0,
+                    "type": "integer",
+                    "x-pii": "none"
+                  },
+                  "monthlyTokens": {
+                    "description": "Monthly model token cap.",
+                    "maximum": 9007199254740991,
+                    "minimum": 0,
+                    "type": "integer",
+                    "x-pii": "none"
+                  }
+                },
+                "required": [
+                  "monthlyMicroUsd",
+                  "monthlyTokens"
+                ],
+                "type": "object",
+                "x-pii": "none"
+              },
+              "override": {
+                "anyOf": [
+                  {
+                    "additionalProperties": false,
+                    "properties": {
+                      "monthlyMicroUsd": {
+                        "description": "Monthly model spend cap in micro-USD.",
+                        "maximum": 9007199254740991,
+                        "minimum": 0,
+                        "type": "integer",
+                        "x-pii": "none"
+                      },
+                      "monthlyTokens": {
+                        "description": "Monthly model token cap.",
+                        "maximum": 9007199254740991,
+                        "minimum": 0,
+                        "type": "integer",
+                        "x-pii": "none"
+                      }
+                    },
+                    "required": [
+                      "monthlyMicroUsd",
+                      "monthlyTokens"
+                    ],
+                    "type": "object"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "description": "Staff override, if any.",
+                "x-pii": "none"
+              },
+              "source": {
+                "description": "`override`, `plan` or `default`.",
+                "enum": [
+                  "override",
+                  "plan",
+                  "default"
+                ],
+                "type": "string",
+                "x-pii": "none"
+              }
+            },
+            "required": [
+              "caps",
+              "source",
+              "override"
+            ],
+            "type": "object",
+            "x-pii": "none"
+          },
+          "costMtdMicroUsd": {
+            "description": "Model cost month to date, in micro-USD.",
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer",
+            "x-pii": "none"
+          },
+          "id": {
+            "description": "Organization id (= tenant id).",
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "name": {
+            "description": "Display name.",
+            "maxLength": 120,
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "planId": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Assigned plan; null = platform default caps.",
+            "x-pii": "none"
+          },
+          "status": {
+            "description": "`active` or `suspended`.",
+            "enum": [
+              "active",
+              "suspended"
+            ],
+            "type": "string",
+            "x-pii": "none"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "status",
+          "planId",
+          "budget",
+          "costMtdMicroUsd"
+        ],
+        "type": "object",
+        "x-kind": "view",
+        "x-permission": "platform.organization.read",
+        "x-pii": "none",
+        "x-relations": [],
+        "x-tenancyScope": "platform"
+      },
+      "kind": "view",
+      "name": "OrganizationAdminSummary",
+      "permission": "platform.organization.read",
+      "pii": "none",
+      "relations": [],
+      "tenancyScope": "platform"
+    },
+    {
+      "context": "platform",
       "description": "A plan with the spend, token and connector limits it grants to organizations.",
       "examples": [
         {
@@ -15990,6 +16391,89 @@
     },
     {
       "context": "platform",
+      "description": "Staff overrides (or clears the override of) an organization's monthly budget caps.",
+      "examples": [
+        {
+          "override": {}
+        },
+        {
+          "override": null
+        }
+      ],
+      "fields": [
+        {
+          "description": "Caps that replace the plan's; null returns to the plan.",
+          "name": "override",
+          "pii": "none",
+          "required": true
+        }
+      ],
+      "id": "platform.SetTenantBudgetInput",
+      "jsonSchema": {
+        "additionalProperties": false,
+        "description": "Staff overrides (or clears the override of) an organization's monthly budget caps.",
+        "examples": [
+          {
+            "override": {}
+          },
+          {
+            "override": null
+          }
+        ],
+        "properties": {
+          "override": {
+            "anyOf": [
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "monthlyMicroUsd": {
+                    "description": "Monthly model spend cap in micro-USD.",
+                    "maximum": 9007199254740991,
+                    "minimum": 0,
+                    "type": "integer",
+                    "x-pii": "none"
+                  },
+                  "monthlyTokens": {
+                    "description": "Monthly model token cap.",
+                    "maximum": 9007199254740991,
+                    "minimum": 0,
+                    "type": "integer",
+                    "x-pii": "none"
+                  }
+                },
+                "required": [
+                  "monthlyMicroUsd",
+                  "monthlyTokens"
+                ],
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Caps that replace the plan's; null returns to the plan.",
+            "x-pii": "none"
+          }
+        },
+        "required": [
+          "override"
+        ],
+        "type": "object",
+        "x-kind": "command",
+        "x-permission": "platform.organization.update",
+        "x-pii": "none",
+        "x-relations": [],
+        "x-tenancyScope": "platform"
+      },
+      "kind": "command",
+      "name": "SetTenantBudgetInput",
+      "permission": "platform.organization.update",
+      "pii": "none",
+      "relations": [],
+      "tenancyScope": "platform"
+    },
+    {
+      "context": "platform",
       "description": "Overrides a tenant-overridable flag for the caller's organization (switch off, or back on when the environment allows).",
       "examples": [
         {
@@ -16036,6 +16520,81 @@
       "pii": "none",
       "relations": [],
       "tenancyScope": "organization"
+    },
+    {
+      "context": "platform",
+      "description": "Staff changes an organization's plan or status (audited with targetTenantId).",
+      "examples": [
+        {
+          "planId": "Pl1aB2cD3eF4gH5iJ6kL"
+        },
+        {
+          "status": "suspended"
+        }
+      ],
+      "fields": [
+        {
+          "description": "Plan to assign; null removes it (platform default caps).",
+          "name": "planId",
+          "pii": "none",
+          "required": false
+        },
+        {
+          "description": "`active` or `suspended`.",
+          "name": "status",
+          "pii": "none",
+          "required": false
+        }
+      ],
+      "id": "platform.UpdateOrganizationAdminInput",
+      "jsonSchema": {
+        "additionalProperties": false,
+        "description": "Staff changes an organization's plan or status (audited with targetTenantId).",
+        "examples": [
+          {
+            "planId": "Pl1aB2cD3eF4gH5iJ6kL"
+          },
+          {
+            "status": "suspended"
+          }
+        ],
+        "properties": {
+          "planId": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Plan to assign; null removes it (platform default caps).",
+            "x-pii": "none"
+          },
+          "status": {
+            "description": "`active` or `suspended`.",
+            "enum": [
+              "active",
+              "suspended"
+            ],
+            "type": "string",
+            "x-pii": "none"
+          }
+        },
+        "type": "object",
+        "x-kind": "command",
+        "x-permission": "platform.organization.update",
+        "x-pii": "none",
+        "x-relations": [],
+        "x-tenancyScope": "platform"
+      },
+      "kind": "command",
+      "name": "UpdateOrganizationAdminInput",
+      "permission": "platform.organization.update",
+      "pii": "none",
+      "relations": [],
+      "tenancyScope": "platform"
     },
     {
       "context": "platform",

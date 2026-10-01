@@ -1,0 +1,66 @@
+import type { BudgetCaps, OrganizationStatus, Plan } from "@core/contracts";
+import { PlanIdSchema } from "@core/contracts";
+import { pageFromOverfetch } from "../../../shared/pagination/page.ts";
+import type { AgentSettingsRepository, ConsoleUsage, OrganizationAdminStore, OrganizationPlan, PlanRepository, StoredAgentSettings } from "../../application/ports/console-ports.ts";
+
+/** In-memory console stores for unit tests; every map is inspectable. */
+export const createInMemoryConsoleStores = (seed: { organizations?: readonly { id: string; name?: string; status?: OrganizationStatus }[] } = {}) => {
+  const plans = new Map<string, Plan>();
+  const organizations = new Map(seed.organizations?.map((org) => [org.id, { id: org.id, name: org.name ?? org.id, status: org.status ?? "active" }]) ?? []);
+  const assignments = new Map<string, OrganizationPlan>();
+  const settings = new Map<string, StoredAgentSettings>();
+  const budgets = new Map<string, BudgetCaps>();
+  const costs = new Map<string, number>();
+  let sequence = 0;
+  const planRepository: PlanRepository = {
+    list: () => Promise.resolve([...plans.values()].sort((a, b) => a.name.localeCompare(b.name))),
+    get: (planId) => Promise.resolve(plans.get(planId) ?? null),
+    create: ({ name, limits, at }) => {
+      sequence += 1;
+      const plan: Plan = { id: PlanIdSchema.parse(`plan${String(sequence).padStart(16, "0")}`), name, limits, createdAt: at, updatedAt: at };
+      plans.set(plan.id, plan);
+      return Promise.resolve(plan);
+    },
+    replace: ({ id, name, limits, at }) => {
+      const current = plans.get(id);
+      if (current === undefined) return Promise.resolve(null);
+      const plan = { ...current, name, limits, updatedAt: at };
+      plans.set(id, plan);
+      return Promise.resolve(plan);
+    },
+  };
+  const organizationStore: OrganizationAdminStore = {
+    listLive: ({ after, limit }) => {
+      const sorted = [...organizations.values()].sort((a, b) => (a.id < b.id ? -1 : 1)).filter((org) => after === undefined || org.id > after[1]);
+      return Promise.resolve(pageFromOverfetch({ fetched: sorted.slice(0, limit + 1), limit, positionOf: (org) => [org.id, org.id] }));
+    },
+    getLive: (tenantId) => Promise.resolve(organizations.get(tenantId) ?? null),
+    setStatus: ({ tenantId, status }) => {
+      const org = organizations.get(tenantId);
+      if (org === undefined) return Promise.resolve(false);
+      organizations.set(tenantId, { ...org, status });
+      return Promise.resolve(true);
+    },
+    getPlan: (tenantId) => Promise.resolve(assignments.get(tenantId) ?? { tenantId, planId: null, budgetOverride: null }),
+    setPlan: ({ tenantId, planId, budgetOverride }) => {
+      assignments.set(tenantId, { tenantId, planId, budgetOverride });
+      return Promise.resolve();
+    },
+    tenantsOnPlan: (planId) => Promise.resolve([...assignments.values()].filter((row) => row.planId === planId).map((row) => row.tenantId)),
+  };
+  const settingsRepository: AgentSettingsRepository = {
+    get: (tenantId) => Promise.resolve(settings.get(tenantId) ?? null),
+    save: (stored) => {
+      settings.set(stored.settings.tenantId, stored);
+      return Promise.resolve();
+    },
+  };
+  const usage: ConsoleUsage = {
+    setTenantBudget: ({ tenantId, budget }) => {
+      budgets.set(tenantId, budget);
+      return Promise.resolve();
+    },
+    monthCostMicroUsd: ({ tenantId }) => Promise.resolve(costs.get(tenantId) ?? 0),
+  };
+  return { stores: { plans: planRepository, organizations: organizationStore, agentSettings: settingsRepository, usage }, plans, organizations, assignments, settings, budgets, costs };
+};

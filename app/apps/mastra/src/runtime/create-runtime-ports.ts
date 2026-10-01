@@ -7,6 +7,7 @@ import {
   agentCommandExecutors,
   createCoreAgentCommandExecutors,
   createFirebaseConnectorsServices,
+  createFirebaseConsoleServices,
   createFirebaseFlagsServices,
   flagEnvironmentDefaults,
   createFirebaseFilesServices,
@@ -36,7 +37,6 @@ import { bindAuditPort } from "./audit-port-binding.ts";
 import { bindKnowledgePort } from "./knowledge-port-binding.ts";
 import { bindProjectsPort } from "./projects-port-binding.ts";
 import { bindUsagePort } from "./usage-port-binding.ts";
-import { UNWIRED_PORTS } from "./unwired-ports.ts";
 import { createLogNotificationPort } from "./notifications-port-binding.ts";
 import { bindUsageReportPort, type UsageReportBindingEnv } from "./usage-report-port-binding.ts";
 import { bindApprovalSweepPort, bindConversationPurgePort, bindEvalExportPort } from "./maintenance-ports-binding.ts";
@@ -104,7 +104,7 @@ export type RuntimePortsAdapters = {
  *   SP3 executors run once per workflow run (decision 0036).
  * - flags: the SP5 flags services (Remote Config outside local, Firestore `feature-flags` in local,
  *   tenant overrides in Firestore; the env voice/memory switches only seed defaults, decision 0039).
- * - settings: fail-closed until SP5.
+ * - settings: SP5 agent settings (Firestore `agent-settings`, defaults when none are stored).
  * @param args.modules installed modules (their permissions join SP1's registry).
  */
 export const createRuntimePorts = (args: {
@@ -141,12 +141,14 @@ export const createRuntimePorts = (args: {
   // Decided in /v1; registered here so SP1 accepts requests of the kind (decision 0036).
   registerWorkflowApprovals({ approvals: core.approvals, settler: RUNTIME_SIDE_SETTLER });
   // Remote Config outside local, Firestore in local; the agents cache the values 30 s (decision 0039).
+  const settings = createFirebaseConsoleServices({ firebase: args.firebase, sql, audit: core.audit, clock: systemClock });
   const flags = createFirebaseFlagsServices({ firebase: args.firebase, appEnv: args.env.APP_ENV, audit: core.audit, clock: systemClock, environmentDefaults: flagEnvironmentDefaults(args.env) });
   return {
     access: bindAccessPort({ verifyBearer: core.verifyBearer, access: core.access, resolveAccessContext: adapters.resolveAccessContext ?? core.resolveAccessContext }),
     audit: bindAuditPort(core.audit),
     catalog: { runSemanticQuery: makeRunSemanticQuery({ views: createSemanticViewRegistry([]), guard: guardSemanticSql, runner }) },
-    ...UNWIRED_PORTS,
+    // SP5 Task 10: `agent-settings/{tenantId}` (defaults when missing), so the PII mode and enabled agents are the tenant's.
+    settings: { getAgentSettings: ({ tenantId }) => settings.getAgentSettings({ tenantId }) },
     approvals: bindApprovalsPort(core.approvals),
     commands,
     connectors: { listActive: ({ tenantId }) => connectors.listActiveConnectors({ tenantId: TenantIdSchema.parse(tenantId) }) },

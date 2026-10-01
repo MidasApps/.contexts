@@ -33,4 +33,6 @@ export type UsageRepository = {
   readonly getMonthByModel: (input: { readonly tenantId: string; readonly monthStart: Date }) => Promise<readonly ModelTotals[]>;
   /** Stored caps of the tenant (`usage.tenant_budgets`); `null` = plan default. */
   readonly getTenantBudget: (input: { readonly tenantId: string }) => Promise<StoredBudget | null>;
+  /** Stores the caps in force (SP5: plan, staff override and self-cap resolved by `resolveTenantCaps`). */
+  readonly setTenantBudget: (input: { readonly tenantId: string; readonly budget: StoredBudget }) => Promise<void>;
 };
