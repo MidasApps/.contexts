@@ -8,6 +8,7 @@ import { AppShellTemplate } from "#/shared/ui/templates/AppShellTemplate/AppShel
 import { AppSidebar } from "#/widgets/app-sidebar/index.ts";
 import { AppTopbar } from "#/widgets/app-topbar/index.ts";
 import { CommandPalette } from "#/widgets/command-palette/index.ts";
+import { ImpersonationBanner } from "#/widgets/impersonation-banner/index.ts";
 import { OrganizationSwitcher } from "#/widgets/organization-switcher/index.ts";
 import { ProjectSwitcher } from "#/widgets/project-switcher/index.ts";
 import { UnitPicker } from "#/widgets/unit-picker/index.ts";
@@ -25,7 +26,8 @@ export type AppLayoutProps = {
 /**
  * Layout of every signed-in page of the user area (SP2 spec §9): the app composes the shell widgets
  * here (FSD app layer), so widgets never import each other. Sidebar with switchers, unit picker,
- * navigation and user menu; topbar with breadcrumbs and the palette trigger; the offline banner;
+ * navigation and user menu; topbar with breadcrumbs and the palette trigger; the offline banner; the
+ * impersonation banner (support access as a user, SP1 spec §6.6);
  * the command palette (⌘K / Ctrl+K); the right-panel slot SP4 fills with chat.
  */
 export function AppLayout({ children, sidebarDefaultOpen, persistSidebarState }: AppLayoutProps) {
@@ -56,6 +58,7 @@ export function AppLayout({ children, sidebarDefaultOpen, persistSidebarState }:
         {...(persistSidebarState === undefined ? {} : { persistSidebarState })}
       >
         <OfflineBanner className="mb-4 empty:mb-0" />
+        <ImpersonationBanner className="mb-4 empty:mb-0" />
         {children}
       </AppShellTemplate>
       <CommandPalette open={paletteOpen} onOpenChange={setPaletteOpen} />

@@ -36,6 +36,23 @@ describe("AppLayout", () => {
     await expectNoAxeViolations(container);
   });
 
+  it("warns while the tab is signed in as an impersonated user and offers to leave", async () => {
+    const auth = createFakeAuth(TEST_USER);
+    const { container } = renderLayout({ auth });
+    // `renderApp` sets the default claims; the impersonated token carries `imp` (SP1 spec §6.6).
+    auth.setClaims({ accessVersion: 3, imp: "Im5sK2lPq0WnR5tYu3bV", impBy: "staff-1" });
+    expect(await screen.findByText(/Você está vendo o app como outro usuário, em modo somente leitura/u)).toBeDefined();
+    expect(screen.getByRole("button", { name: "Sair do modo suporte" })).toBeDefined();
+    await expectNoAxeViolations(container);
+  });
+
+  it("shows no impersonation notice in a normal session", async () => {
+    const { container } = renderLayout();
+    await screen.findByRole("button", { name: "Ana Souza, menu da conta" });
+    expect(container.querySelector("[data-slot='impersonation-banner']")?.childElementCount).toBe(0);
+    expect(screen.queryByRole("button", { name: "Sair do modo suporte" })).toBeNull();
+  });
+
   it("switches organization: navigates (dropping the project), PUTs the active organization, then refreshes the token", async () => {
     // Record when the token is force-refreshed, as a position in the API call log.
     const auth = createFakeAuth(TEST_USER);
