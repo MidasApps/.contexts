@@ -88,6 +88,10 @@ to the demo organization.
   emulators). Staff routes need MFA; locally MFA is SMS, because the Auth Emulator has
   no TOTP: sign in, then read the code from the emulator's `verificationCodes`
   (Emulator UI or `GET /emulator/v1/projects/demo-core/verificationCodes`).
+- Staff user search (decision 0044): names are found through the storage-only
+  `users.searchName`. After deploying it, run once per environment
+  `pnpm users:backfill-search-names -- --project <id> --confirm <id>` (add `--dry-run`
+  to count first; idempotent, resumes with `--start-after <uid>`).
 - Rate limits (Firestore buckets, decision 0009): device redeem 5 failures / 15 min
   per IP; API key failures 20 / min per IP; desktop exchange 10 / min per IP;
   active-organization switch and claims sync 10 / min per principal; invitation

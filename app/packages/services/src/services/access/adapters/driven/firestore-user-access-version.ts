@@ -3,6 +3,7 @@ import type { Firestore } from "firebase-admin/firestore";
 import { z } from "zod";
 import { CORE_COLLECTIONS, CORE_SCHEMA_VERSION } from "../../../shared/firestore/collections.ts";
 import { createContractConverter, toFirestoreUpdate } from "../../../shared/firestore/contract-converter.ts";
+import { userSearchFields } from "../../../shared/firestore/user-search-fields.ts";
 import type { UserAccessVersionStore } from "../../application/ports/driven/user-access-version.ts";
 
 // Only the access fields are read, so a users doc written by another context stays readable.
@@ -48,7 +49,7 @@ export const createFirestoreUserAccessVersionStore = (deps: { firestore: Firesto
         createdAt,
         updatedAt: createdAt,
       };
-      tx.create(raw().doc(uid), { ...userConverter.toFirestore(user), createdBy: uid, updatedBy: uid, schemaVersion: CORE_SCHEMA_VERSION });
+      tx.create(raw().doc(uid), { ...userConverter.toFirestore(user), ...userSearchFields(profile.displayName), createdBy: uid, updatedBy: uid, schemaVersion: CORE_SCHEMA_VERSION });
     },
   };
 };

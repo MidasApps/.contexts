@@ -4,6 +4,7 @@ import { z } from "zod";
 import { CORE_COLLECTIONS, CORE_SCHEMA_VERSION } from "../../../shared/firestore/collections.ts";
 import { createContractConverter, toFirestoreUpdate } from "../../../shared/firestore/contract-converter.ts";
 import { CorruptDocumentError } from "../../../shared/firestore/corrupt-document-error.ts";
+import { userSearchFields } from "../../../shared/firestore/user-search-fields.ts";
 import { runInTransaction } from "../../../shared/firestore/transaction-runner.ts";
 import type { NewUserProfile } from "../../../access/application/ports/driven/user-access-version.ts";
 import type { UserRepository } from "../../application/ports/driven/user-repository.ts";
@@ -50,7 +51,10 @@ export const createFirestoreUserRepository = (deps: { firestore: Firestore }): U
   const fillMissing = (args: { uid: UserId; profile: NewUserProfile; now: string }) =>
     runInTransaction(deps.firestore, async (tx) => {
       const snapshot = await tx.get(raw().doc(args.uid));
-      const missing = missingFields(snapshot.data() ?? {}, converter.toFirestore(newUser(args.uid, args.profile, args.now)));
+      const stored = snapshot.data() ?? {};
+      // The searchable name follows the name the doc keeps (decision 0044), not the Auth profile's.
+      const displayName = typeof stored["displayName"] === "string" ? stored["displayName"] : args.profile.displayName;
+      const missing = missingFields(stored, { ...converter.toFirestore(newUser(args.uid, args.profile, args.now)), ...userSearchFields(displayName) });
       if (Object.keys(missing).length === 0) return;
       const created = snapshot.exists ? {} : { createdBy: args.uid, schemaVersion: CORE_SCHEMA_VERSION };
       tx.set(raw().doc(args.uid), { ...missing, ...created, updatedBy: args.uid }, { merge: true });
@@ -73,7 +77,8 @@ export const createFirestoreUserRepository = (deps: { firestore: Firestore }): U
     updateProfile: (tx, { uid, patch, updatedAt, actorId }) => {
       const { photoUrl, ...rest } = patch;
       const photo = photoUrl === undefined ? {} : { photoUrl: photoUrl ?? FieldValue.delete() };
-      tx.update(raw().doc(uid), toFirestoreUpdate(UserContract, { ...rest, ...photo, updatedAt, updatedBy: actorId }));
+      const search = rest.displayName === undefined ? {} : userSearchFields(rest.displayName);
+      tx.update(raw().doc(uid), toFirestoreUpdate(UserContract, { ...rest, ...search, ...photo, updatedAt, updatedBy: actorId }));
     },
     setActiveOrganization: (tx, { uid, organizationId, updatedAt, actorId }) =>
       void tx.update(raw().doc(uid), toFirestoreUpdate(UserContract, { lastContext: { organizationId }, updatedAt, updatedBy: actorId })),

@@ -53,6 +53,8 @@ describe("me routes (emulator)", () => {
     expect(first.status).toBe(200);
     expect((await body(first)).data).toMatchObject({ uid: "me-outsider", email: "me-outsider@example.com", accessVersion: 0, isPlatformStaff: false, mfaEnrolled: false });
     expect((await firestore.collection(CORE_COLLECTIONS.users).doc("me-outsider").get()).data()).toMatchObject({ email: "me-outsider@example.com", status: "active", schemaVersion: 1 });
+    // The searchable name is stored with the profile (decision 0044); the Auth name here is the uid's.
+    expect(typeof (await firestore.collection(CORE_COLLECTIONS.users).doc("me-outsider").get()).get("searchName")).toBe("string");
     expect((await harness.call("identity.getMe", { method: "GET", path: "/v1/me", as: "me-outsider" })).status).toBe(200);
 
     const invalid = await harness.call("identity.updateMe", { method: "PATCH", path: "/v1/me", as: "me-outsider", body: { preferences: { timeZone: "Mars/Olympus_Mons" } } });
@@ -60,10 +62,14 @@ describe("me routes (emulator)", () => {
     expect((await body(invalid)).error?.code).toBe("VALIDATION_FAILED");
     const valid = await harness.call("identity.updateMe", { method: "PATCH", path: "/v1/me", as: "me-outsider", body: { displayName: "Out Sider", preferences: { timeZone: "America/Recife" } } });
     expect((await body(valid)).data).toMatchObject({ displayName: "Out Sider", preferences: { timeZone: "America/Recife" } });
+    // The searchable name follows the display name (decision 0044).
+    expect((await firestore.collection(CORE_COLLECTIONS.users).doc("me-outsider").get()).get("searchName")).toBe("out sider");
   });
 
   it("switches the active organization (204) and the next ID token carries its tenantId", { timeout: 30_000 }, async () => {
     const first = await createOrganization("First");
+    // `createOrganization` creates the founder's users doc with its searchable name (decision 0044).
+    expect((await firestore.collection(CORE_COLLECTIONS.users).doc("me-founder").get()).get("searchName")).toEqual(expect.any(String));
     await createOrganization("Second");
     expect((await freshIdTokenClaims("me-founder"))["tenantId"]).toBe(first);
 
