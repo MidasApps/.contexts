@@ -6,12 +6,12 @@ import { CITATION_MARKER_PATTERN, extractCitationIds } from "../knowledge/citati
  * Citation guard (SP3 spec §11, harness-engineering "citation checks"): an answer may
  * cite only passages retrieved in this turn. Unknown `[kb:...]` markers are stripped;
  * an answer with no valid citation gets message metadata `confidence: "low"` (SP4 shows
- * "not sure"), a grounded one `confidence: "grounded"`.
+ * "not sure"), a grounded one `confidence: "normal"` (the values of `MessageMetadataSchema`).
  */
 
 export const CITATION_GUARD_ID = "citation-guard";
 
-export type CitationConfidence = "grounded" | "low";
+export type CitationConfidence = "normal" | "low";
 
 export type GuardedAnswer = { readonly text: string; readonly confidence: CitationConfidence; readonly removed: readonly string[]; readonly cited: readonly string[] };
 
@@ -29,7 +29,7 @@ export const guardCitations = (input: { readonly text: string; readonly retrieve
     return "";
   });
   const clean = removed.length === 0 ? text : text.replace(/[ \t]+([.,;:!?])/g, "$1").replace(/[ \t]{2,}/g, " ");
-  return { text: clean, confidence: cited.length === 0 ? "low" : "grounded", removed, cited };
+  return { text: clean, confidence: cited.length === 0 ? "low" : "normal", removed, cited };
 };
 
 type Part = MastraDBMessage["content"]["parts"][number];
@@ -49,7 +49,7 @@ const guardMessage = (message: MastraDBMessage, retrievedIds: ReadonlySet<string
   const parts = message.content.parts.map((part: Part) => {
     if (part.type !== "text") return part;
     const guarded = guardCitations({ text: part.text, retrievedIds });
-    if (guarded.confidence === "grounded") confidence = "grounded";
+    if (guarded.confidence === "normal") confidence = "normal";
     return { ...part, text: guarded.text };
   });
   const legacy = typeof message.content.content === "string" ? { content: guardCitations({ text: message.content.content, retrievedIds }).text } : {};

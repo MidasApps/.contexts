@@ -3,7 +3,9 @@ import type { UIMessageChunk } from "ai";
 import type { RequestContextReader } from "../context/agent-request-context.ts";
 import { previewCoreToolCall } from "../tools/core-tool-pipeline.ts";
 import type { CoreToolDeps, CoreToolPreview } from "../tools/define-core-tool.ts";
+import type { CitationConfidence } from "../processors/citation-guard.ts";
 import type { ToolRegistry } from "../tools/tool-registry.ts";
+import { confidenceOfDelegation, KNOWLEDGE_DELEGATION_TOOL, mergeConfidence } from "./answer-confidence.ts";
 import type { ChatRunState } from "./chat-run-owners.ts";
 
 /**
@@ -53,7 +55,9 @@ const approvalDataOf = (chunk: UIMessageChunk): ApprovalData | undefined =>
  * Pass-through transform of a chat stream: after each `data-tool-call-approval` it writes the
  * `data-tool-preview` of the same tool call, and it reports the run state as the chunks pass
  * (`suspended` at an approval request, `finished` at `finish` or at the end of the stream).
- * With `closeAtSuspension` (observe) it ends the stream after the preview: a durable run
+ * After the output of a knowledge delegation it writes `message-metadata` with the answer's
+ * `confidence` (`low | normal`, `MessageMetadataSchema`), so "sem certeza" shows while the answer
+ * streams (SP0 follow-up #42). With `closeAtSuspension` (observe) it ends the stream after the preview: a durable run
  * publishes nothing more until the approval is answered, so an observer would wait for ever.
  */
 export const createChatStreamTap = (args: {
@@ -68,9 +72,22 @@ export const createChatStreamTap = (args: {
     reported = state;
     args.onState(state);
   };
+  const knowledgeCalls = new Set<string>();
+  let confidence: CitationConfidence | undefined;
+  /** The answer's confidence when this chunk changes it, else `undefined`. */
+  const gradeKnowledge = (chunk: UIMessageChunk): CitationConfidence | undefined => {
+    if ((chunk.type === "tool-input-start" || chunk.type === "tool-input-available") && chunk.toolName === KNOWLEDGE_DELEGATION_TOOL) knowledgeCalls.add(chunk.toolCallId);
+    if (chunk.type !== "tool-output-available" || !knowledgeCalls.has(chunk.toolCallId)) return undefined;
+    const graded = mergeConfidence(confidence, confidenceOfDelegation(chunk.output));
+    if (graded === confidence) return undefined;
+    confidence = graded;
+    return graded;
+  };
   return new TransformStream<UIMessageChunk, UIMessageChunk>({
     transform: async (chunk, controller) => {
       controller.enqueue(chunk);
+      const graded = gradeKnowledge(chunk);
+      if (graded !== undefined) controller.enqueue({ type: "message-metadata", messageMetadata: { confidence: graded } });
       if (chunk.type === "tool-approval-request") report("suspended");
       if (chunk.type === "finish") report("finished");
       const approval = approvalDataOf(chunk);

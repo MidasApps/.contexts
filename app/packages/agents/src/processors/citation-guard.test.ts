@@ -11,7 +11,7 @@ const UNKNOWN = `kb:${OTHER}#4`;
 describe("guardCitations", () => {
   it("keeps markers of retrieved passages and strips unknown ones", () => {
     const guarded = guardCitations({ text: `Owners approve members [${KNOWN}]. Billing is monthly [${UNKNOWN}].`, retrievedIds: new Set([KNOWN]) });
-    expect(guarded).toEqual({ text: `Owners approve members [${KNOWN}]. Billing is monthly.`, confidence: "grounded", removed: [UNKNOWN], cited: [KNOWN] });
+    expect(guarded).toEqual({ text: `Owners approve members [${KNOWN}]. Billing is monthly.`, confidence: "normal", removed: [UNKNOWN], cited: [KNOWN] });
   });
 
   it("marks an answer without any valid citation as low confidence", () => {
@@ -20,7 +20,7 @@ describe("guardCitations", () => {
   });
 
   it("compares ids case-insensitively", () => {
-    expect(guardCitations({ text: `A [${KNOWN.toUpperCase().replace("KB:", "kb:")}]`, retrievedIds: new Set([KNOWN]) }).confidence).toBe("grounded");
+    expect(guardCitations({ text: `A [${KNOWN.toUpperCase().replace("KB:", "kb:")}]`, retrievedIds: new Set([KNOWN]) }).confidence).toBe("normal");
   });
 });
 
@@ -38,7 +38,7 @@ describe("createCitationGuard (output processor)", () => {
     const [message] = run([assistant(`Owners approve [${KNOWN}] and [${UNKNOWN}].`)], [{ toolName: "knowledge.searchKnowledge", result: { results: [{ citationId: KNOWN }] } }]);
     const text = message?.content.parts.find((part) => part.type === "text");
     expect(text).toMatchObject({ text: `Owners approve [${KNOWN}] and.` });
-    expect(message?.content.metadata).toEqual({ confidence: "grounded" });
+    expect(message?.content.metadata).toEqual({ confidence: "normal" });
   });
 
   it("marks an answer without citations as low confidence and leaves user messages alone", () => {

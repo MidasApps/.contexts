@@ -3,6 +3,7 @@ import type { Agent } from "@mastra/core/agent";
 import type { Mastra } from "@mastra/core/mastra";
 import type { RequestContext } from "@mastra/core/request-context";
 import { safeValidateUIMessages, type UIMessage } from "ai";
+import { withAnswerConfidence } from "./answer-confidence.ts";
 import { callerOf, chatError, type ChatRouteDeps } from "./chat-http.ts";
 
 /** `GET /chat/:agentId/messages?page&perPage` and `POST /chat/:agentId/summary` (SP4 Task 6). */
@@ -38,7 +39,8 @@ const toUiMessages = async (stored: Parameters<typeof toAISdkMessages>[0]): Prom
   const converted = toAISdkMessages(stored, { version: "v7" }) as unknown as UIMessage[];
   if (converted.length === 0) return [];
   const validated = await safeValidateUIMessages({ messages: converted });
-  return validated.success ? validated.data : [];
+  // Confidence is derived from the answer's knowledge delegations, exactly as the live stream does.
+  return validated.success ? withAnswerConfidence(validated.data) : [];
 };
 
 /**
