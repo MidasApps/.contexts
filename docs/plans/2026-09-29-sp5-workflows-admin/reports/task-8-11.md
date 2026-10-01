@@ -256,7 +256,30 @@ Most other tests were written together with their code and passed on the first o
     tenant from the token".
 11. **Flaky test.** `firebase-rules.emulator.test.ts` failed once in a full run, because state
     from other files was left in the shared emulator. It passed alone and in the later full runs.
-12. **New shared exports.**
+12. **Prompt evals fail in the built Mastra service.** `pnpm -F @core/mastra build` succeeds
+    (output pins match, no high or critical advisory). But `copy-agent-assets.ts` copies only the
+    instructions and the skills into the bundle, not `packages/agents/evals/{datasets,baselines}`.
+    So `POST /prompt-evals/:versionId` works in `mastra dev` and in the tests, but in the built
+    service it would answer 502 (the eval set file is missing). Follow-up: copy `evals/` like
+    the instructions, and pass its directory to the harness.
+13. **The `prompt seeds` step of `pnpm seed:local` was not run.** It is unit-tested against the
+    in-memory repository only; Task 17 runs `seed:local` on a fresh database.
+14. **Follow-up rows to add** to `docs/plans/2026-09-29-sp0-app-foundation/follow-ups.md`. That file
+    carries SP2 WIP, so it was not touched; the coordinator should add:
+    - `FEATURE_DISABLED` at `/v1` chat and voice;
+    - Remote Config verified against a real project;
+    - the eval sets in the Mastra bundle;
+    - joining the trace cost to the ledger;
+    - Mastra trace feedback;
+    - experiment comparison and dataset item editing;
+    - the `GET /v1/admin/agents` catalog;
+    - the thumbs up/down UI in `@core/client`;
+    - the overview metrics (active users, tripwire and approval rates, eval status).
+15. **Left in the scratchpad.** The worktree `wt-sp5-t8` and `firebase.sp5t8.json` stay there; they
+    were never committed.
+16. **Route ids checked.** A script matched every `route("…")` id under `apps/web/src/app/v1`
+    (131) against `CORE_ENDPOINTS`; none is unknown.
+17. **New shared exports.**
     - `@core/services`: flags, console guards, plans/console, prompts, observability and feedback.
     - `@core/agents`: the flag reader, the instructions resolver, the eval route and runner, and
       the console.
