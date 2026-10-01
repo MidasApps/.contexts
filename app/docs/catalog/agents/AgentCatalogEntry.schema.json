@@ -1,6 +1,6 @@
 {
   "additionalProperties": false,
-  "description": "A subagent available to an organization with its enabled state, tools and skills.",
+  "description": "An agent available to an organization (code-defined or its own) with its enabled state, tools and skills.",
   "examples": [
     {
       "description": "Answers from the organization's knowledge base with citations.",
@@ -33,14 +33,22 @@
       "x-pii": "none"
     },
     "enabled": {
-      "description": "Whether the supervisor may delegate to it in this organization.",
+      "description": "Whether the supervisor may delegate to it in this organization; for a custom agent, whether members can chat with it.",
       "type": "boolean",
       "x-pii": "none"
     },
     "key": {
-      "description": "Agent key used in agent-settings.enabledAgents.",
-      "pattern": "^[a-z][a-z0-9-]*$",
-      "type": "string",
+      "anyOf": [
+        {
+          "pattern": "^[a-z][a-z0-9-]*$",
+          "type": "string"
+        },
+        {
+          "pattern": "^[A-Za-z0-9]{20}$",
+          "type": "string"
+        }
+      ],
+      "description": "Agent key used in agent-settings.enabledAgents; for a custom agent, its id.",
       "x-pii": "none"
     },
     "moduleId": {
@@ -76,17 +84,18 @@
             "x-pii": "none"
           },
           "name": {
-            "description": "Skill name (its SKILL.md directory, or <module>-<skill>).",
+            "description": "Skill name (its SKILL.md directory, <module>-<skill>, or org-<name> for an organization's own skill).",
             "maxLength": 100,
             "minLength": 1,
             "type": "string",
             "x-pii": "none"
           },
           "source": {
-            "description": "Shipped with the core or with an installed module.",
+            "description": "Shipped with the core or an installed module, or written by the organization.",
             "enum": [
               "core",
-              "module"
+              "module",
+              "custom"
             ],
             "type": "string",
             "x-pii": "none"
@@ -104,10 +113,11 @@
       "x-pii": "none"
     },
     "source": {
-      "description": "Shipped with the core or with an installed module.",
+      "description": "Shipped with the core or an installed module, or configured by the organization.",
       "enum": [
         "core",
-        "module"
+        "module",
+        "custom"
       ],
       "type": "string",
       "x-pii": "none"

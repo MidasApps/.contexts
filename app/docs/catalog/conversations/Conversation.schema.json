@@ -57,11 +57,17 @@
       "x-pii": "none"
     },
     "agentId": {
-      "description": "Chat agent that answers.",
-      "enum": [
-        "assistant"
+      "anyOf": [
+        {
+          "const": "assistant",
+          "type": "string"
+        },
+        {
+          "pattern": "^[A-Za-z0-9]{20}$",
+          "type": "string"
+        }
       ],
-      "type": "string",
+      "description": "Chat agent that answers.",
       "x-pii": "none"
     },
     "archivedAt": {

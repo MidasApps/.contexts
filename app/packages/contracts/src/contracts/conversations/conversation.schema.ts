@@ -5,6 +5,7 @@ import { none, personal } from "../field-docs.ts";
 import { TenantIdSchema, UserIdSchema } from "../primitives/ids.schema.ts";
 import { IsoDateTimeSchema } from "../primitives/iso-datetime.schema.ts";
 import { ProjectIdSchema } from "../tenancy/ids.schema.ts";
+import { CustomAgentIdSchema } from "../agents/custom-agent.schema.ts";
 
 /**
  * Conversation id: a Firestore automatic id that is also the Mastra memory thread id
@@ -16,8 +17,11 @@ export const ConversationIdSchema = z
   .brand<"ConversationId">();
 export type ConversationId = z.infer<typeof ConversationIdSchema>;
 
-/** Public chat agent ids (`/chat/:agentId` on Mastra); v1 serves the supervisor only. */
-export const ChatAgentIdSchema = z.enum(["assistant"]);
+/**
+ * Public chat agent ids (`/chat/:agentId` on Mastra): the supervisor, or the id of an enabled
+ * custom agent of the organization (decision 0046; `/v1/chat` checks it exists).
+ */
+export const ChatAgentIdSchema = z.union([z.literal("assistant"), CustomAgentIdSchema]);
 export type ChatAgentId = z.infer<typeof ChatAgentIdSchema>;
 
 export const MAX_TITLE_CHARS = 200;

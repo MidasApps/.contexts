@@ -36,11 +36,17 @@
   ],
   "properties": {
     "agentId": {
-      "description": "Chat agent of a new conversation (default assistant).",
-      "enum": [
-        "assistant"
+      "anyOf": [
+        {
+          "const": "assistant",
+          "type": "string"
+        },
+        {
+          "pattern": "^[A-Za-z0-9]{20}$",
+          "type": "string"
+        }
       ],
-      "type": "string",
+      "description": "Chat agent of a new conversation (default assistant).",
       "x-pii": "none"
     },
     "attachments": {

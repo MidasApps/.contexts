@@ -16,6 +16,10 @@ export const PlanLimitsSchema = z.strictObject({
   monthlyMicroUsd: limit("Monthly model spend cap in micro-USD."),
   monthlyTokens: limit("Monthly model token cap."),
   maxConnectors: limit("Most connectors an organization may configure."),
+  // Decision 0046: optional so plans stored before it stay valid; absent means the platform default.
+  maxCustomAgents: limit("Most custom agents an organization may have; absent means the platform default.").optional(),
+  maxCustomSkills: limit("Most custom skills an organization may have; absent means the platform default.").optional(),
+  maxCustomInstructionChars: limit("Longest instructions of a custom agent or skill, in characters; absent means the platform default.").optional(),
   features: z
     .array(z.string().regex(/^[a-z][a-z0-9-]*(?:\.[a-z0-9-]+)*$/))
     .max(50)

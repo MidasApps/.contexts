@@ -4187,7 +4187,7 @@
     },
     {
       "context": "agents",
-      "description": "A subagent available to an organization with its enabled state, tools and skills.",
+      "description": "An agent available to an organization (code-defined or its own) with its enabled state, tools and skills.",
       "examples": [
         {
           "description": "Answers from the organization's knowledge base with citations.",
@@ -4220,13 +4220,13 @@
           "required": true
         },
         {
-          "description": "Whether the supervisor may delegate to it in this organization.",
+          "description": "Whether the supervisor may delegate to it in this organization; for a custom agent, whether members can chat with it.",
           "name": "enabled",
           "pii": "none",
           "required": true
         },
         {
-          "description": "Agent key used in agent-settings.enabledAgents.",
+          "description": "Agent key used in agent-settings.enabledAgents; for a custom agent, its id.",
           "name": "key",
           "pii": "none",
           "required": true
@@ -4250,7 +4250,7 @@
           "required": true
         },
         {
-          "description": "Shipped with the core or with an installed module.",
+          "description": "Shipped with the core or an installed module, or configured by the organization.",
           "name": "source",
           "pii": "none",
           "required": true
@@ -4265,7 +4265,7 @@
       "id": "agents.AgentCatalogEntry",
       "jsonSchema": {
         "additionalProperties": false,
-        "description": "A subagent available to an organization with its enabled state, tools and skills.",
+        "description": "An agent available to an organization (code-defined or its own) with its enabled state, tools and skills.",
         "examples": [
           {
             "description": "Answers from the organization's knowledge base with citations.",
@@ -4298,14 +4298,22 @@
             "x-pii": "none"
           },
           "enabled": {
-            "description": "Whether the supervisor may delegate to it in this organization.",
+            "description": "Whether the supervisor may delegate to it in this organization; for a custom agent, whether members can chat with it.",
             "type": "boolean",
             "x-pii": "none"
           },
           "key": {
-            "description": "Agent key used in agent-settings.enabledAgents.",
-            "pattern": "^[a-z][a-z0-9-]*$",
-            "type": "string",
+            "anyOf": [
+              {
+                "pattern": "^[a-z][a-z0-9-]*$",
+                "type": "string"
+              },
+              {
+                "pattern": "^[A-Za-z0-9]{20}$",
+                "type": "string"
+              }
+            ],
+            "description": "Agent key used in agent-settings.enabledAgents; for a custom agent, its id.",
             "x-pii": "none"
           },
           "moduleId": {
@@ -4341,17 +4349,18 @@
                   "x-pii": "none"
                 },
                 "name": {
-                  "description": "Skill name (its SKILL.md directory, or <module>-<skill>).",
+                  "description": "Skill name (its SKILL.md directory, <module>-<skill>, or org-<name> for an organization's own skill).",
                   "maxLength": 100,
                   "minLength": 1,
                   "type": "string",
                   "x-pii": "none"
                 },
                 "source": {
-                  "description": "Shipped with the core or with an installed module.",
+                  "description": "Shipped with the core or an installed module, or written by the organization.",
                   "enum": [
                     "core",
-                    "module"
+                    "module",
+                    "custom"
                   ],
                   "type": "string",
                   "x-pii": "none"
@@ -4369,10 +4378,11 @@
             "x-pii": "none"
           },
           "source": {
-            "description": "Shipped with the core or with an installed module.",
+            "description": "Shipped with the core or an installed module, or configured by the organization.",
             "enum": [
               "core",
-              "module"
+              "module",
+              "custom"
             ],
             "type": "string",
             "x-pii": "none"
@@ -5214,6 +5224,426 @@
     },
     {
       "context": "agents",
+      "description": "An agent a member of the organization can start a conversation with.",
+      "examples": [
+        {
+          "description": "Plans the work and delegates to the organization's specialists.",
+          "id": "assistant",
+          "name": "Assistant",
+          "source": "core"
+        },
+        {
+          "description": "Answers questions of new members.",
+          "id": "Ag4sK2lPq0WnR5tYu3bV",
+          "name": "Onboarding guide",
+          "source": "custom"
+        }
+      ],
+      "fields": [
+        {
+          "description": "What the agent is for.",
+          "name": "description",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Chat agent id to send as `agentId` of a new conversation.",
+          "name": "id",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Display name.",
+          "name": "name",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Shipped with the platform, or configured by the organization.",
+          "name": "source",
+          "pii": "none",
+          "required": true
+        }
+      ],
+      "id": "agents.ChatAgentOption",
+      "jsonSchema": {
+        "additionalProperties": false,
+        "description": "An agent a member of the organization can start a conversation with.",
+        "examples": [
+          {
+            "description": "Plans the work and delegates to the organization's specialists.",
+            "id": "assistant",
+            "name": "Assistant",
+            "source": "core"
+          },
+          {
+            "description": "Answers questions of new members.",
+            "id": "Ag4sK2lPq0WnR5tYu3bV",
+            "name": "Onboarding guide",
+            "source": "custom"
+          }
+        ],
+        "properties": {
+          "description": {
+            "description": "What the agent is for.",
+            "maxLength": 1000,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "const": "assistant",
+                "type": "string"
+              },
+              {
+                "pattern": "^[A-Za-z0-9]{20}$",
+                "type": "string"
+              }
+            ],
+            "description": "Chat agent id to send as `agentId` of a new conversation.",
+            "x-pii": "none"
+          },
+          "name": {
+            "description": "Display name.",
+            "maxLength": 100,
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "source": {
+            "description": "Shipped with the platform, or configured by the organization.",
+            "enum": [
+              "core",
+              "custom"
+            ],
+            "type": "string",
+            "x-pii": "none"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "description",
+          "source"
+        ],
+        "type": "object",
+        "x-kind": "view",
+        "x-permission": "core.chat.use",
+        "x-pii": "none",
+        "x-relations": [],
+        "x-tenancyScope": "organization"
+      },
+      "kind": "view",
+      "name": "ChatAgentOption",
+      "permission": "core.chat.use",
+      "pii": "none",
+      "relations": [],
+      "tenancyScope": "organization"
+    },
+    {
+      "context": "agents",
+      "description": "Creates an agent of the organization.",
+      "examples": [
+        {
+          "connectorTools": false,
+          "coreSkills": [
+            "knowledge-citations"
+          ],
+          "customSkills": [
+            "Sk7cX9zA1sD3fG5hJ7kL"
+          ],
+          "description": "Answers questions of new members from the organization's handbook.",
+          "instructions": "[redacted]",
+          "knowledgeScope": "organization",
+          "model": "chat",
+          "name": "Onboarding guide",
+          "tools": []
+        }
+      ],
+      "fields": [
+        {
+          "description": "Whether the agent also gets the read-only tools of the organization's connectors.",
+          "name": "connectorTools",
+          "pii": "none",
+          "required": false
+        },
+        {
+          "description": "Names of the platform skills the agent loads.",
+          "name": "coreSkills",
+          "pii": "none",
+          "required": false
+        },
+        {
+          "description": "Ids of the organization's own skills the agent loads; disabled or deleted ones are ignored.",
+          "name": "customSkills",
+          "pii": "none",
+          "required": false
+        },
+        {
+          "description": "What the agent is for.",
+          "name": "description",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Whether members can chat with the agent.",
+          "name": "enabled",
+          "pii": "none",
+          "required": false
+        },
+        {
+          "description": "Markdown instructions written by the organization; untrusted input placed after the platform's own instructions.",
+          "name": "instructions",
+          "pii": "personal",
+          "required": true
+        },
+        {
+          "description": "What the agent may search in the knowledge base.",
+          "name": "knowledgeScope",
+          "pii": "none",
+          "required": false
+        },
+        {
+          "description": "Model role the agent runs on, from the platform's allowlist.",
+          "name": "model",
+          "pii": "none",
+          "required": false
+        },
+        {
+          "description": "Display name of the agent.",
+          "name": "name",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Ids of the tools the agent may call, from the tools the organization already has; unknown ids are ignored at run time.",
+          "name": "tools",
+          "pii": "none",
+          "required": false
+        }
+      ],
+      "id": "agents.CreateCustomAgentInput",
+      "jsonSchema": {
+        "additionalProperties": false,
+        "description": "Creates an agent of the organization.",
+        "examples": [
+          {
+            "connectorTools": false,
+            "coreSkills": [
+              "knowledge-citations"
+            ],
+            "customSkills": [
+              "Sk7cX9zA1sD3fG5hJ7kL"
+            ],
+            "description": "Answers questions of new members from the organization's handbook.",
+            "instructions": "[redacted]",
+            "knowledgeScope": "organization",
+            "model": "chat",
+            "name": "Onboarding guide",
+            "tools": []
+          }
+        ],
+        "properties": {
+          "connectorTools": {
+            "description": "Whether the agent also gets the read-only tools of the organization's connectors.",
+            "type": "boolean",
+            "x-pii": "none"
+          },
+          "coreSkills": {
+            "description": "Names of the platform skills the agent loads.",
+            "items": {
+              "maxLength": 100,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 20,
+            "type": "array",
+            "x-pii": "none"
+          },
+          "customSkills": {
+            "description": "Ids of the organization's own skills the agent loads; disabled or deleted ones are ignored.",
+            "items": {
+              "pattern": "^[A-Za-z0-9]{20}$",
+              "type": "string"
+            },
+            "maxItems": 20,
+            "type": "array",
+            "x-pii": "none"
+          },
+          "description": {
+            "description": "What the agent is for.",
+            "maxLength": 1000,
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "enabled": {
+            "description": "Whether members can chat with the agent.",
+            "type": "boolean",
+            "x-pii": "none"
+          },
+          "instructions": {
+            "description": "Markdown instructions written by the organization; untrusted input placed after the platform's own instructions.",
+            "maxLength": 20000,
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "personal"
+          },
+          "knowledgeScope": {
+            "description": "What the agent may search in the knowledge base.",
+            "enum": [
+              "none",
+              "organization",
+              "project",
+              "all"
+            ],
+            "type": "string",
+            "x-pii": "none"
+          },
+          "model": {
+            "description": "Model role the agent runs on, from the platform's allowlist.",
+            "enum": [
+              "chat",
+              "reasoning"
+            ],
+            "type": "string",
+            "x-pii": "none"
+          },
+          "name": {
+            "description": "Display name of the agent.",
+            "maxLength": 100,
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "tools": {
+            "description": "Ids of the tools the agent may call, from the tools the organization already has; unknown ids are ignored at run time.",
+            "items": {
+              "maxLength": 200,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 50,
+            "type": "array",
+            "x-pii": "none"
+          }
+        },
+        "required": [
+          "name",
+          "description",
+          "instructions"
+        ],
+        "type": "object",
+        "x-kind": "command",
+        "x-permission": "core.agent-settings.update",
+        "x-pii": "personal",
+        "x-relations": [],
+        "x-tenancyScope": "organization"
+      },
+      "kind": "command",
+      "name": "CreateCustomAgentInput",
+      "permission": "core.agent-settings.update",
+      "pii": "personal",
+      "relations": [],
+      "tenancyScope": "organization"
+    },
+    {
+      "context": "agents",
+      "description": "Creates a skill of the organization.",
+      "examples": [
+        {
+          "description": "How to write the weekly status report of a project.",
+          "instructions": "[redacted]",
+          "name": "weekly-report"
+        }
+      ],
+      "fields": [
+        {
+          "description": "When an agent should use the skill; the model routes by it.",
+          "name": "description",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Defaults to true.",
+          "name": "enabled",
+          "pii": "none",
+          "required": false
+        },
+        {
+          "description": "Markdown instructions the skill gives an agent; written by the organization, so they may mention people.",
+          "name": "instructions",
+          "pii": "personal",
+          "required": true
+        },
+        {
+          "description": "Kebab-case name, unique in the organization.",
+          "name": "name",
+          "pii": "none",
+          "required": true
+        }
+      ],
+      "id": "agents.CreateCustomSkillInput",
+      "jsonSchema": {
+        "additionalProperties": false,
+        "description": "Creates a skill of the organization.",
+        "examples": [
+          {
+            "description": "How to write the weekly status report of a project.",
+            "instructions": "[redacted]",
+            "name": "weekly-report"
+          }
+        ],
+        "properties": {
+          "description": {
+            "description": "When an agent should use the skill; the model routes by it.",
+            "maxLength": 1024,
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "enabled": {
+            "description": "Defaults to true.",
+            "type": "boolean",
+            "x-pii": "none"
+          },
+          "instructions": {
+            "description": "Markdown instructions the skill gives an agent; written by the organization, so they may mention people.",
+            "maxLength": 20000,
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "personal"
+          },
+          "name": {
+            "description": "Kebab-case name, unique in the organization.",
+            "maxLength": 60,
+            "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+            "type": "string",
+            "x-pii": "none"
+          }
+        },
+        "required": [
+          "name",
+          "description",
+          "instructions"
+        ],
+        "type": "object",
+        "x-kind": "command",
+        "x-permission": "core.agent-settings.update",
+        "x-pii": "personal",
+        "x-relations": [],
+        "x-tenancyScope": "organization"
+      },
+      "kind": "command",
+      "name": "CreateCustomSkillInput",
+      "permission": "core.agent-settings.update",
+      "pii": "personal",
+      "relations": [],
+      "tenancyScope": "organization"
+    },
+    {
+      "context": "agents",
       "description": "Writes a new prompt version; nothing is ever updated in place.",
       "examples": [
         {
@@ -5274,6 +5704,747 @@
       "kind": "command",
       "name": "CreatePromptVersionInput",
       "permission": "core.prompt.write",
+      "pii": "personal",
+      "relations": [],
+      "tenancyScope": "organization"
+    },
+    {
+      "context": "agents",
+      "description": "An agent an organization configured: instructions, a model role, tools, skills and a knowledge scope.",
+      "examples": [
+        {
+          "connectorTools": false,
+          "coreSkills": [
+            "knowledge-citations"
+          ],
+          "createdAt": "2026-09-29T14:30:00.000Z",
+          "createdBy": "[redacted]",
+          "customSkills": [
+            "Sk7cX9zA1sD3fG5hJ7kL"
+          ],
+          "description": "Answers questions of new members from the organization's handbook.",
+          "enabled": true,
+          "id": "Ag4sK2lPq0WnR5tYu3bV",
+          "instructions": "[redacted]",
+          "knowledgeScope": "organization",
+          "model": "chat",
+          "name": "Onboarding guide",
+          "tenantId": "Jd8sK2lPq0WnR5tYu3bV",
+          "tools": [],
+          "updatedAt": "2026-09-29T14:30:00.000Z"
+        }
+      ],
+      "fields": [
+        {
+          "description": "Whether the agent also gets the read-only tools of the organization's connectors.",
+          "name": "connectorTools",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Names of the platform skills the agent loads.",
+          "name": "coreSkills",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "When the agent was created (UTC).",
+          "name": "createdAt",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Uid of the admin who created it.",
+          "name": "createdBy",
+          "pii": "personal",
+          "required": true
+        },
+        {
+          "description": "Ids of the organization's own skills the agent loads; disabled or deleted ones are ignored.",
+          "name": "customSkills",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "What the agent is for.",
+          "name": "description",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Whether members can chat with the agent.",
+          "name": "enabled",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Firestore automatic id; also the agent's chat id.",
+          "name": "id",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Markdown instructions written by the organization; untrusted input placed after the platform's own instructions.",
+          "name": "instructions",
+          "pii": "personal",
+          "required": true
+        },
+        {
+          "description": "What the agent may search in the knowledge base.",
+          "name": "knowledgeScope",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Model role the agent runs on, from the platform's allowlist.",
+          "name": "model",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Display name of the agent.",
+          "name": "name",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Owning organization.",
+          "name": "tenantId",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Ids of the tools the agent may call, from the tools the organization already has; unknown ids are ignored at run time.",
+          "name": "tools",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "When the agent last changed (UTC).",
+          "name": "updatedAt",
+          "pii": "none",
+          "required": true
+        }
+      ],
+      "id": "agents.CustomAgent",
+      "jsonSchema": {
+        "additionalProperties": false,
+        "description": "An agent an organization configured: instructions, a model role, tools, skills and a knowledge scope.",
+        "examples": [
+          {
+            "connectorTools": false,
+            "coreSkills": [
+              "knowledge-citations"
+            ],
+            "createdAt": "2026-09-29T14:30:00.000Z",
+            "createdBy": "[redacted]",
+            "customSkills": [
+              "Sk7cX9zA1sD3fG5hJ7kL"
+            ],
+            "description": "Answers questions of new members from the organization's handbook.",
+            "enabled": true,
+            "id": "Ag4sK2lPq0WnR5tYu3bV",
+            "instructions": "[redacted]",
+            "knowledgeScope": "organization",
+            "model": "chat",
+            "name": "Onboarding guide",
+            "tenantId": "Jd8sK2lPq0WnR5tYu3bV",
+            "tools": [],
+            "updatedAt": "2026-09-29T14:30:00.000Z"
+          }
+        ],
+        "properties": {
+          "connectorTools": {
+            "description": "Whether the agent also gets the read-only tools of the organization's connectors.",
+            "type": "boolean",
+            "x-pii": "none"
+          },
+          "coreSkills": {
+            "description": "Names of the platform skills the agent loads.",
+            "items": {
+              "maxLength": 100,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 20,
+            "type": "array",
+            "x-pii": "none"
+          },
+          "createdAt": {
+            "description": "When the agent was created (UTC).",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "type": "string",
+            "x-pii": "none"
+          },
+          "createdBy": {
+            "description": "Uid of the admin who created it.",
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "personal"
+          },
+          "customSkills": {
+            "description": "Ids of the organization's own skills the agent loads; disabled or deleted ones are ignored.",
+            "items": {
+              "pattern": "^[A-Za-z0-9]{20}$",
+              "type": "string"
+            },
+            "maxItems": 20,
+            "type": "array",
+            "x-pii": "none"
+          },
+          "description": {
+            "description": "What the agent is for.",
+            "maxLength": 1000,
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "enabled": {
+            "description": "Whether members can chat with the agent.",
+            "type": "boolean",
+            "x-pii": "none"
+          },
+          "id": {
+            "description": "Firestore automatic id; also the agent's chat id.",
+            "pattern": "^[A-Za-z0-9]{20}$",
+            "type": "string",
+            "x-pii": "none"
+          },
+          "instructions": {
+            "description": "Markdown instructions written by the organization; untrusted input placed after the platform's own instructions.",
+            "maxLength": 20000,
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "personal"
+          },
+          "knowledgeScope": {
+            "description": "What the agent may search in the knowledge base.",
+            "enum": [
+              "none",
+              "organization",
+              "project",
+              "all"
+            ],
+            "type": "string",
+            "x-pii": "none"
+          },
+          "model": {
+            "description": "Model role the agent runs on, from the platform's allowlist.",
+            "enum": [
+              "chat",
+              "reasoning"
+            ],
+            "type": "string",
+            "x-pii": "none"
+          },
+          "name": {
+            "description": "Display name of the agent.",
+            "maxLength": 100,
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "tenantId": {
+            "description": "Owning organization.",
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "tools": {
+            "description": "Ids of the tools the agent may call, from the tools the organization already has; unknown ids are ignored at run time.",
+            "items": {
+              "maxLength": 200,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 50,
+            "type": "array",
+            "x-pii": "none"
+          },
+          "updatedAt": {
+            "description": "When the agent last changed (UTC).",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "type": "string",
+            "x-pii": "none"
+          }
+        },
+        "required": [
+          "id",
+          "tenantId",
+          "name",
+          "description",
+          "instructions",
+          "model",
+          "tools",
+          "connectorTools",
+          "coreSkills",
+          "customSkills",
+          "knowledgeScope",
+          "enabled",
+          "createdBy",
+          "createdAt",
+          "updatedAt"
+        ],
+        "type": "object",
+        "x-kind": "entity",
+        "x-permission": "core.agent-settings.read",
+        "x-pii": "personal",
+        "x-relations": [],
+        "x-tenancyScope": "organization"
+      },
+      "kind": "entity",
+      "name": "CustomAgent",
+      "permission": "core.agent-settings.read",
+      "pii": "personal",
+      "relations": [],
+      "tenancyScope": "organization"
+    },
+    {
+      "context": "agents",
+      "description": "The models, tools and platform skills an organization's agent may select, with the plan limits and their use.",
+      "examples": [
+        {
+          "coreSkills": [
+            {
+              "description": "How to cite knowledge base passages.",
+              "name": "knowledge-citations"
+            }
+          ],
+          "limits": {
+            "maxAgents": 5,
+            "maxInstructionChars": 8000,
+            "maxSkills": 10
+          },
+          "models": [
+            "chat",
+            "reasoning"
+          ],
+          "tools": [
+            {
+              "description": "Lists the data entities the caller may read.",
+              "id": "catalog.listEntities",
+              "kind": "read",
+              "source": "core"
+            }
+          ],
+          "usage": {
+            "agents": 1,
+            "skills": 2
+          }
+        }
+      ],
+      "fields": [
+        {
+          "description": "Platform skills an agent may load.",
+          "name": "coreSkills",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Limits of the organization's plan.",
+          "name": "limits",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Model roles an agent may run on.",
+          "name": "models",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Tools an agent may select; every call still needs the caller's own permission.",
+          "name": "tools",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "How much of the limits is used.",
+          "name": "usage",
+          "pii": "none",
+          "required": true
+        }
+      ],
+      "id": "agents.CustomAgentOptions",
+      "jsonSchema": {
+        "additionalProperties": false,
+        "description": "The models, tools and platform skills an organization's agent may select, with the plan limits and their use.",
+        "examples": [
+          {
+            "coreSkills": [
+              {
+                "description": "How to cite knowledge base passages.",
+                "name": "knowledge-citations"
+              }
+            ],
+            "limits": {
+              "maxAgents": 5,
+              "maxInstructionChars": 8000,
+              "maxSkills": 10
+            },
+            "models": [
+              "chat",
+              "reasoning"
+            ],
+            "tools": [
+              {
+                "description": "Lists the data entities the caller may read.",
+                "id": "catalog.listEntities",
+                "kind": "read",
+                "source": "core"
+              }
+            ],
+            "usage": {
+              "agents": 1,
+              "skills": 2
+            }
+          }
+        ],
+        "properties": {
+          "coreSkills": {
+            "description": "Platform skills an agent may load.",
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "description": {
+                  "description": "What the skill teaches the agent.",
+                  "maxLength": 1024,
+                  "type": "string",
+                  "x-pii": "none"
+                },
+                "name": {
+                  "description": "Skill name to store in the agent's coreSkills.",
+                  "maxLength": 100,
+                  "minLength": 1,
+                  "type": "string",
+                  "x-pii": "none"
+                }
+              },
+              "required": [
+                "name",
+                "description"
+              ],
+              "type": "object"
+            },
+            "maxItems": 100,
+            "type": "array",
+            "x-pii": "none"
+          },
+          "limits": {
+            "additionalProperties": false,
+            "description": "Limits of the organization's plan.",
+            "properties": {
+              "maxAgents": {
+                "description": "Most custom agents the organization may have.",
+                "maximum": 9007199254740991,
+                "minimum": 0,
+                "type": "integer",
+                "x-pii": "none"
+              },
+              "maxInstructionChars": {
+                "description": "Longest instructions of one agent or skill, in characters.",
+                "maximum": 9007199254740991,
+                "minimum": 0,
+                "type": "integer",
+                "x-pii": "none"
+              },
+              "maxSkills": {
+                "description": "Most custom skills the organization may have.",
+                "maximum": 9007199254740991,
+                "minimum": 0,
+                "type": "integer",
+                "x-pii": "none"
+              }
+            },
+            "required": [
+              "maxAgents",
+              "maxSkills",
+              "maxInstructionChars"
+            ],
+            "type": "object",
+            "x-pii": "none"
+          },
+          "models": {
+            "description": "Model roles an agent may run on.",
+            "items": {
+              "enum": [
+                "chat",
+                "reasoning"
+              ],
+              "type": "string"
+            },
+            "type": "array",
+            "x-pii": "none"
+          },
+          "tools": {
+            "description": "Tools an agent may select; every call still needs the caller's own permission.",
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "description": {
+                  "description": "When the tool is used.",
+                  "maxLength": 2000,
+                  "type": "string",
+                  "x-pii": "none"
+                },
+                "id": {
+                  "description": "Tool id to store in the agent's tools.",
+                  "maxLength": 200,
+                  "minLength": 1,
+                  "type": "string",
+                  "x-pii": "none"
+                },
+                "kind": {
+                  "description": "Mutations ask the user for a confirmation or an approval.",
+                  "enum": [
+                    "read",
+                    "mutation"
+                  ],
+                  "type": "string",
+                  "x-pii": "none"
+                },
+                "source": {
+                  "description": "Shipped with the core or with an installed module.",
+                  "enum": [
+                    "core",
+                    "module"
+                  ],
+                  "type": "string",
+                  "x-pii": "none"
+                }
+              },
+              "required": [
+                "id",
+                "kind",
+                "source",
+                "description"
+              ],
+              "type": "object"
+            },
+            "maxItems": 500,
+            "type": "array",
+            "x-pii": "none"
+          },
+          "usage": {
+            "additionalProperties": false,
+            "description": "How much of the limits is used.",
+            "properties": {
+              "agents": {
+                "description": "Custom agents the organization has.",
+                "maximum": 9007199254740991,
+                "minimum": 0,
+                "type": "integer",
+                "x-pii": "none"
+              },
+              "skills": {
+                "description": "Custom skills the organization has.",
+                "maximum": 9007199254740991,
+                "minimum": 0,
+                "type": "integer",
+                "x-pii": "none"
+              }
+            },
+            "required": [
+              "agents",
+              "skills"
+            ],
+            "type": "object",
+            "x-pii": "none"
+          }
+        },
+        "required": [
+          "models",
+          "tools",
+          "coreSkills",
+          "limits",
+          "usage"
+        ],
+        "type": "object",
+        "x-kind": "view",
+        "x-permission": "core.agent-settings.read",
+        "x-pii": "none",
+        "x-relations": [],
+        "x-tenancyScope": "organization"
+      },
+      "kind": "view",
+      "name": "CustomAgentOptions",
+      "permission": "core.agent-settings.read",
+      "pii": "none",
+      "relations": [],
+      "tenancyScope": "organization"
+    },
+    {
+      "context": "agents",
+      "description": "A skill (named markdown instructions) an organization wrote for its agents.",
+      "examples": [
+        {
+          "createdAt": "2026-09-29T14:30:00.000Z",
+          "createdBy": "[redacted]",
+          "description": "How to write the weekly status report of a project.",
+          "enabled": true,
+          "id": "Sk7cX9zA1sD3fG5hJ7kL",
+          "instructions": "[redacted]",
+          "name": "weekly-report",
+          "tenantId": "Jd8sK2lPq0WnR5tYu3bV",
+          "updatedAt": "2026-09-29T14:30:00.000Z"
+        }
+      ],
+      "fields": [
+        {
+          "description": "When the skill was created (UTC).",
+          "name": "createdAt",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Uid of the admin who created it.",
+          "name": "createdBy",
+          "pii": "personal",
+          "required": true
+        },
+        {
+          "description": "When an agent should use the skill; the model routes by it.",
+          "name": "description",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Whether agents that select the skill get it.",
+          "name": "enabled",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Firestore automatic id of the skill.",
+          "name": "id",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Markdown instructions the skill gives an agent; written by the organization, so they may mention people.",
+          "name": "instructions",
+          "pii": "personal",
+          "required": true
+        },
+        {
+          "description": "Kebab-case name, unique in the organization.",
+          "name": "name",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Owning organization.",
+          "name": "tenantId",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "When the skill last changed (UTC).",
+          "name": "updatedAt",
+          "pii": "none",
+          "required": true
+        }
+      ],
+      "id": "agents.CustomSkill",
+      "jsonSchema": {
+        "additionalProperties": false,
+        "description": "A skill (named markdown instructions) an organization wrote for its agents.",
+        "examples": [
+          {
+            "createdAt": "2026-09-29T14:30:00.000Z",
+            "createdBy": "[redacted]",
+            "description": "How to write the weekly status report of a project.",
+            "enabled": true,
+            "id": "Sk7cX9zA1sD3fG5hJ7kL",
+            "instructions": "[redacted]",
+            "name": "weekly-report",
+            "tenantId": "Jd8sK2lPq0WnR5tYu3bV",
+            "updatedAt": "2026-09-29T14:30:00.000Z"
+          }
+        ],
+        "properties": {
+          "createdAt": {
+            "description": "When the skill was created (UTC).",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "type": "string",
+            "x-pii": "none"
+          },
+          "createdBy": {
+            "description": "Uid of the admin who created it.",
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "personal"
+          },
+          "description": {
+            "description": "When an agent should use the skill; the model routes by it.",
+            "maxLength": 1024,
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "enabled": {
+            "description": "Whether agents that select the skill get it.",
+            "type": "boolean",
+            "x-pii": "none"
+          },
+          "id": {
+            "description": "Firestore automatic id of the skill.",
+            "pattern": "^[A-Za-z0-9]{20}$",
+            "type": "string",
+            "x-pii": "none"
+          },
+          "instructions": {
+            "description": "Markdown instructions the skill gives an agent; written by the organization, so they may mention people.",
+            "maxLength": 20000,
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "personal"
+          },
+          "name": {
+            "description": "Kebab-case name, unique in the organization.",
+            "maxLength": 60,
+            "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+            "type": "string",
+            "x-pii": "none"
+          },
+          "tenantId": {
+            "description": "Owning organization.",
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "updatedAt": {
+            "description": "When the skill last changed (UTC).",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "type": "string",
+            "x-pii": "none"
+          }
+        },
+        "required": [
+          "id",
+          "tenantId",
+          "name",
+          "description",
+          "instructions",
+          "enabled",
+          "createdBy",
+          "createdAt",
+          "updatedAt"
+        ],
+        "type": "object",
+        "x-kind": "entity",
+        "x-permission": "core.agent-settings.read",
+        "x-pii": "personal",
+        "x-relations": [],
+        "x-tenancyScope": "organization"
+      },
+      "kind": "entity",
+      "name": "CustomSkill",
+      "permission": "core.agent-settings.read",
       "pii": "personal",
       "relations": [],
       "tenancyScope": "organization"
@@ -6098,6 +7269,281 @@
       "tenancyScope": "organization"
     },
     {
+      "context": "agents",
+      "description": "Changes an agent's configuration or enabled state.",
+      "examples": [
+        {
+          "enabled": false
+        },
+        {
+          "knowledgeScope": "all",
+          "tools": [
+            "catalog.listEntities"
+          ]
+        }
+      ],
+      "fields": [
+        {
+          "description": "Whether the agent also gets the read-only tools of the organization's connectors.",
+          "name": "connectorTools",
+          "pii": "none",
+          "required": false
+        },
+        {
+          "description": "Names of the platform skills the agent loads.",
+          "name": "coreSkills",
+          "pii": "none",
+          "required": false
+        },
+        {
+          "description": "Ids of the organization's own skills the agent loads; disabled or deleted ones are ignored.",
+          "name": "customSkills",
+          "pii": "none",
+          "required": false
+        },
+        {
+          "description": "What the agent is for.",
+          "name": "description",
+          "pii": "none",
+          "required": false
+        },
+        {
+          "description": "Whether members can chat with the agent.",
+          "name": "enabled",
+          "pii": "none",
+          "required": false
+        },
+        {
+          "description": "Markdown instructions written by the organization; untrusted input placed after the platform's own instructions.",
+          "name": "instructions",
+          "pii": "personal",
+          "required": false
+        },
+        {
+          "description": "What the agent may search in the knowledge base.",
+          "name": "knowledgeScope",
+          "pii": "none",
+          "required": false
+        },
+        {
+          "description": "Model role the agent runs on, from the platform's allowlist.",
+          "name": "model",
+          "pii": "none",
+          "required": false
+        },
+        {
+          "description": "Display name of the agent.",
+          "name": "name",
+          "pii": "none",
+          "required": false
+        },
+        {
+          "description": "Ids of the tools the agent may call, from the tools the organization already has; unknown ids are ignored at run time.",
+          "name": "tools",
+          "pii": "none",
+          "required": false
+        }
+      ],
+      "id": "agents.UpdateCustomAgentInput",
+      "jsonSchema": {
+        "additionalProperties": false,
+        "description": "Changes an agent's configuration or enabled state.",
+        "examples": [
+          {
+            "enabled": false
+          },
+          {
+            "knowledgeScope": "all",
+            "tools": [
+              "catalog.listEntities"
+            ]
+          }
+        ],
+        "properties": {
+          "connectorTools": {
+            "description": "Whether the agent also gets the read-only tools of the organization's connectors.",
+            "type": "boolean",
+            "x-pii": "none"
+          },
+          "coreSkills": {
+            "description": "Names of the platform skills the agent loads.",
+            "items": {
+              "maxLength": 100,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 20,
+            "type": "array",
+            "x-pii": "none"
+          },
+          "customSkills": {
+            "description": "Ids of the organization's own skills the agent loads; disabled or deleted ones are ignored.",
+            "items": {
+              "pattern": "^[A-Za-z0-9]{20}$",
+              "type": "string"
+            },
+            "maxItems": 20,
+            "type": "array",
+            "x-pii": "none"
+          },
+          "description": {
+            "description": "What the agent is for.",
+            "maxLength": 1000,
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "enabled": {
+            "description": "Whether members can chat with the agent.",
+            "type": "boolean",
+            "x-pii": "none"
+          },
+          "instructions": {
+            "description": "Markdown instructions written by the organization; untrusted input placed after the platform's own instructions.",
+            "maxLength": 20000,
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "personal"
+          },
+          "knowledgeScope": {
+            "description": "What the agent may search in the knowledge base.",
+            "enum": [
+              "none",
+              "organization",
+              "project",
+              "all"
+            ],
+            "type": "string",
+            "x-pii": "none"
+          },
+          "model": {
+            "description": "Model role the agent runs on, from the platform's allowlist.",
+            "enum": [
+              "chat",
+              "reasoning"
+            ],
+            "type": "string",
+            "x-pii": "none"
+          },
+          "name": {
+            "description": "Display name of the agent.",
+            "maxLength": 100,
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "tools": {
+            "description": "Ids of the tools the agent may call, from the tools the organization already has; unknown ids are ignored at run time.",
+            "items": {
+              "maxLength": 200,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 50,
+            "type": "array",
+            "x-pii": "none"
+          }
+        },
+        "type": "object",
+        "x-kind": "command",
+        "x-permission": "core.agent-settings.update",
+        "x-pii": "personal",
+        "x-relations": [],
+        "x-tenancyScope": "organization"
+      },
+      "kind": "command",
+      "name": "UpdateCustomAgentInput",
+      "permission": "core.agent-settings.update",
+      "pii": "personal",
+      "relations": [],
+      "tenancyScope": "organization"
+    },
+    {
+      "context": "agents",
+      "description": "Changes a skill's name, description, instructions or enabled state.",
+      "examples": [
+        {
+          "enabled": false
+        }
+      ],
+      "fields": [
+        {
+          "description": "When an agent should use the skill; the model routes by it.",
+          "name": "description",
+          "pii": "none",
+          "required": false
+        },
+        {
+          "description": "Enable or disable the skill.",
+          "name": "enabled",
+          "pii": "none",
+          "required": false
+        },
+        {
+          "description": "Markdown instructions the skill gives an agent; written by the organization, so they may mention people.",
+          "name": "instructions",
+          "pii": "personal",
+          "required": false
+        },
+        {
+          "description": "Kebab-case name, unique in the organization.",
+          "name": "name",
+          "pii": "none",
+          "required": false
+        }
+      ],
+      "id": "agents.UpdateCustomSkillInput",
+      "jsonSchema": {
+        "additionalProperties": false,
+        "description": "Changes a skill's name, description, instructions or enabled state.",
+        "examples": [
+          {
+            "enabled": false
+          }
+        ],
+        "properties": {
+          "description": {
+            "description": "When an agent should use the skill; the model routes by it.",
+            "maxLength": 1024,
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "enabled": {
+            "description": "Enable or disable the skill.",
+            "type": "boolean",
+            "x-pii": "none"
+          },
+          "instructions": {
+            "description": "Markdown instructions the skill gives an agent; written by the organization, so they may mention people.",
+            "maxLength": 20000,
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "personal"
+          },
+          "name": {
+            "description": "Kebab-case name, unique in the organization.",
+            "maxLength": 60,
+            "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+            "type": "string",
+            "x-pii": "none"
+          }
+        },
+        "type": "object",
+        "x-kind": "command",
+        "x-permission": "core.agent-settings.update",
+        "x-pii": "personal",
+        "x-relations": [],
+        "x-tenancyScope": "organization"
+      },
+      "kind": "command",
+      "name": "UpdateCustomSkillInput",
+      "permission": "core.agent-settings.update",
+      "pii": "personal",
+      "relations": [],
+      "tenancyScope": "organization"
+    },
+    {
       "context": "audit",
       "description": "An append-only audit record of an organization; lists changed field names, never values.",
       "examples": [
@@ -6295,7 +7741,13 @@
               "WORKFLOW_RUN_CANCELED",
               "SCHEDULE_PAUSED",
               "SCHEDULE_RESUMED",
-              "SCHEDULE_RUN_REQUESTED"
+              "SCHEDULE_RUN_REQUESTED",
+              "CUSTOM_AGENT_CREATED",
+              "CUSTOM_AGENT_UPDATED",
+              "CUSTOM_AGENT_DELETED",
+              "CUSTOM_SKILL_CREATED",
+              "CUSTOM_SKILL_UPDATED",
+              "CUSTOM_SKILL_DELETED"
             ],
             "type": "string",
             "x-pii": "none"
@@ -6748,7 +8200,13 @@
               "WORKFLOW_RUN_CANCELED",
               "SCHEDULE_PAUSED",
               "SCHEDULE_RESUMED",
-              "SCHEDULE_RUN_REQUESTED"
+              "SCHEDULE_RUN_REQUESTED",
+              "CUSTOM_AGENT_CREATED",
+              "CUSTOM_AGENT_UPDATED",
+              "CUSTOM_AGENT_DELETED",
+              "CUSTOM_SKILL_CREATED",
+              "CUSTOM_SKILL_UPDATED",
+              "CUSTOM_SKILL_DELETED"
             ],
             "type": "string",
             "x-pii": "none"
@@ -6997,7 +8455,13 @@
               "WORKFLOW_RUN_CANCELED",
               "SCHEDULE_PAUSED",
               "SCHEDULE_RESUMED",
-              "SCHEDULE_RUN_REQUESTED"
+              "SCHEDULE_RUN_REQUESTED",
+              "CUSTOM_AGENT_CREATED",
+              "CUSTOM_AGENT_UPDATED",
+              "CUSTOM_AGENT_DELETED",
+              "CUSTOM_SKILL_CREATED",
+              "CUSTOM_SKILL_UPDATED",
+              "CUSTOM_SKILL_DELETED"
             ],
             "type": "string",
             "x-pii": "none"
@@ -9277,11 +10741,17 @@
         ],
         "properties": {
           "agentId": {
-            "description": "Chat agent of a new conversation (default assistant).",
-            "enum": [
-              "assistant"
+            "anyOf": [
+              {
+                "const": "assistant",
+                "type": "string"
+              },
+              {
+                "pattern": "^[A-Za-z0-9]{20}$",
+                "type": "string"
+              }
             ],
-            "type": "string",
+            "description": "Chat agent of a new conversation (default assistant).",
             "x-pii": "none"
           },
           "attachments": {
@@ -9690,11 +11160,17 @@
             "x-pii": "none"
           },
           "agentId": {
-            "description": "Chat agent that answers.",
-            "enum": [
-              "assistant"
+            "anyOf": [
+              {
+                "const": "assistant",
+                "type": "string"
+              },
+              {
+                "pattern": "^[A-Za-z0-9]{20}$",
+                "type": "string"
+              }
             ],
-            "type": "string",
+            "description": "Chat agent that answers.",
             "x-pii": "none"
           },
           "archivedAt": {
@@ -10279,11 +11755,17 @@
         ],
         "properties": {
           "agentId": {
-            "description": "Agent that answered.",
-            "enum": [
-              "assistant"
+            "anyOf": [
+              {
+                "const": "assistant",
+                "type": "string"
+              },
+              {
+                "pattern": "^[A-Za-z0-9]{20}$",
+                "type": "string"
+              }
             ],
-            "type": "string",
+            "description": "Agent that answered.",
             "x-pii": "none"
           },
           "attachments": {
@@ -19242,6 +20724,27 @@
                 "type": "integer",
                 "x-pii": "none"
               },
+              "maxCustomAgents": {
+                "description": "Most custom agents an organization may have; absent means the platform default.",
+                "maximum": 9007199254740991,
+                "minimum": 0,
+                "type": "integer",
+                "x-pii": "none"
+              },
+              "maxCustomInstructionChars": {
+                "description": "Longest instructions of a custom agent or skill, in characters; absent means the platform default.",
+                "maximum": 9007199254740991,
+                "minimum": 0,
+                "type": "integer",
+                "x-pii": "none"
+              },
+              "maxCustomSkills": {
+                "description": "Most custom skills an organization may have; absent means the platform default.",
+                "maximum": 9007199254740991,
+                "minimum": 0,
+                "type": "integer",
+                "x-pii": "none"
+              },
               "monthlyMicroUsd": {
                 "description": "Monthly model spend cap in micro-USD.",
                 "maximum": 9007199254740991,
@@ -19642,6 +21145,27 @@
               },
               "maxConnectors": {
                 "description": "Most connectors an organization may configure.",
+                "maximum": 9007199254740991,
+                "minimum": 0,
+                "type": "integer",
+                "x-pii": "none"
+              },
+              "maxCustomAgents": {
+                "description": "Most custom agents an organization may have; absent means the platform default.",
+                "maximum": 9007199254740991,
+                "minimum": 0,
+                "type": "integer",
+                "x-pii": "none"
+              },
+              "maxCustomInstructionChars": {
+                "description": "Longest instructions of a custom agent or skill, in characters; absent means the platform default.",
+                "maximum": 9007199254740991,
+                "minimum": 0,
+                "type": "integer",
+                "x-pii": "none"
+              },
+              "maxCustomSkills": {
+                "description": "Most custom skills an organization may have; absent means the platform default.",
                 "maximum": 9007199254740991,
                 "minimum": 0,
                 "type": "integer",

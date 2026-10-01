@@ -1,0 +1,68 @@
+{
+  "additionalProperties": false,
+  "description": "An agent a member of the organization can start a conversation with.",
+  "examples": [
+    {
+      "description": "Plans the work and delegates to the organization's specialists.",
+      "id": "assistant",
+      "name": "Assistant",
+      "source": "core"
+    },
+    {
+      "description": "Answers questions of new members.",
+      "id": "Ag4sK2lPq0WnR5tYu3bV",
+      "name": "Onboarding guide",
+      "source": "custom"
+    }
+  ],
+  "properties": {
+    "description": {
+      "description": "What the agent is for.",
+      "maxLength": 1000,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "id": {
+      "anyOf": [
+        {
+          "const": "assistant",
+          "type": "string"
+        },
+        {
+          "pattern": "^[A-Za-z0-9]{20}$",
+          "type": "string"
+        }
+      ],
+      "description": "Chat agent id to send as `agentId` of a new conversation.",
+      "x-pii": "none"
+    },
+    "name": {
+      "description": "Display name.",
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "source": {
+      "description": "Shipped with the platform, or configured by the organization.",
+      "enum": [
+        "core",
+        "custom"
+      ],
+      "type": "string",
+      "x-pii": "none"
+    }
+  },
+  "required": [
+    "id",
+    "name",
+    "description",
+    "source"
+  ],
+  "type": "object",
+  "x-kind": "view",
+  "x-permission": "core.chat.use",
+  "x-pii": "none",
+  "x-relations": [],
+  "x-tenancyScope": "organization"
+}

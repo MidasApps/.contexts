@@ -85,7 +85,13 @@
         "WORKFLOW_RUN_CANCELED",
         "SCHEDULE_PAUSED",
         "SCHEDULE_RESUMED",
-        "SCHEDULE_RUN_REQUESTED"
+        "SCHEDULE_RUN_REQUESTED",
+        "CUSTOM_AGENT_CREATED",
+        "CUSTOM_AGENT_UPDATED",
+        "CUSTOM_AGENT_DELETED",
+        "CUSTOM_SKILL_CREATED",
+        "CUSTOM_SKILL_UPDATED",
+        "CUSTOM_SKILL_DELETED"
       ],
       "type": "string",
       "x-pii": "none"

@@ -18,11 +18,17 @@
   ],
   "properties": {
     "agentId": {
-      "description": "Agent that answered.",
-      "enum": [
-        "assistant"
+      "anyOf": [
+        {
+          "const": "assistant",
+          "type": "string"
+        },
+        {
+          "pattern": "^[A-Za-z0-9]{20}$",
+          "type": "string"
+        }
       ],
-      "type": "string",
+      "description": "Agent that answered.",
       "x-pii": "none"
     },
     "attachments": {

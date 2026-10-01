@@ -1,0 +1,200 @@
+{
+  "additionalProperties": false,
+  "description": "The models, tools and platform skills an organization's agent may select, with the plan limits and their use.",
+  "examples": [
+    {
+      "coreSkills": [
+        {
+          "description": "How to cite knowledge base passages.",
+          "name": "knowledge-citations"
+        }
+      ],
+      "limits": {
+        "maxAgents": 5,
+        "maxInstructionChars": 8000,
+        "maxSkills": 10
+      },
+      "models": [
+        "chat",
+        "reasoning"
+      ],
+      "tools": [
+        {
+          "description": "Lists the data entities the caller may read.",
+          "id": "catalog.listEntities",
+          "kind": "read",
+          "source": "core"
+        }
+      ],
+      "usage": {
+        "agents": 1,
+        "skills": 2
+      }
+    }
+  ],
+  "properties": {
+    "coreSkills": {
+      "description": "Platform skills an agent may load.",
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "description": {
+            "description": "What the skill teaches the agent.",
+            "maxLength": 1024,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "name": {
+            "description": "Skill name to store in the agent's coreSkills.",
+            "maxLength": 100,
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          }
+        },
+        "required": [
+          "name",
+          "description"
+        ],
+        "type": "object"
+      },
+      "maxItems": 100,
+      "type": "array",
+      "x-pii": "none"
+    },
+    "limits": {
+      "additionalProperties": false,
+      "description": "Limits of the organization's plan.",
+      "properties": {
+        "maxAgents": {
+          "description": "Most custom agents the organization may have.",
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "type": "integer",
+          "x-pii": "none"
+        },
+        "maxInstructionChars": {
+          "description": "Longest instructions of one agent or skill, in characters.",
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "type": "integer",
+          "x-pii": "none"
+        },
+        "maxSkills": {
+          "description": "Most custom skills the organization may have.",
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "type": "integer",
+          "x-pii": "none"
+        }
+      },
+      "required": [
+        "maxAgents",
+        "maxSkills",
+        "maxInstructionChars"
+      ],
+      "type": "object",
+      "x-pii": "none"
+    },
+    "models": {
+      "description": "Model roles an agent may run on.",
+      "items": {
+        "enum": [
+          "chat",
+          "reasoning"
+        ],
+        "type": "string"
+      },
+      "type": "array",
+      "x-pii": "none"
+    },
+    "tools": {
+      "description": "Tools an agent may select; every call still needs the caller's own permission.",
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "description": {
+            "description": "When the tool is used.",
+            "maxLength": 2000,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "id": {
+            "description": "Tool id to store in the agent's tools.",
+            "maxLength": 200,
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "kind": {
+            "description": "Mutations ask the user for a confirmation or an approval.",
+            "enum": [
+              "read",
+              "mutation"
+            ],
+            "type": "string",
+            "x-pii": "none"
+          },
+          "source": {
+            "description": "Shipped with the core or with an installed module.",
+            "enum": [
+              "core",
+              "module"
+            ],
+            "type": "string",
+            "x-pii": "none"
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "source",
+          "description"
+        ],
+        "type": "object"
+      },
+      "maxItems": 500,
+      "type": "array",
+      "x-pii": "none"
+    },
+    "usage": {
+      "additionalProperties": false,
+      "description": "How much of the limits is used.",
+      "properties": {
+        "agents": {
+          "description": "Custom agents the organization has.",
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "type": "integer",
+          "x-pii": "none"
+        },
+        "skills": {
+          "description": "Custom skills the organization has.",
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "type": "integer",
+          "x-pii": "none"
+        }
+      },
+      "required": [
+        "agents",
+        "skills"
+      ],
+      "type": "object",
+      "x-pii": "none"
+    }
+  },
+  "required": [
+    "models",
+    "tools",
+    "coreSkills",
+    "limits",
+    "usage"
+  ],
+  "type": "object",
+  "x-kind": "view",
+  "x-permission": "core.agent-settings.read",
+  "x-pii": "none",
+  "x-relations": [],
+  "x-tenancyScope": "organization"
+}

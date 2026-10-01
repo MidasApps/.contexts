@@ -620,3 +620,25 @@ export {
   ADMIN_USER_LOOKUP_MAX, AdminUserSearchBySchema, AdminUserSummaryContract, AdminUserSummarySchema,
   type AdminUserSearchBy, type AdminUserSummary,
 } from "./contracts/platform/admin-user.schema.ts";
+// Tenant-defined agents and skills (decision 0046).
+export {
+  CreateCustomSkillInputContract, CreateCustomSkillInputSchema, CustomSkillContract, CustomSkillIdSchema, CustomSkillNameSchema, CustomSkillSchema,
+  EXAMPLE_CUSTOM_SKILL_ID, MAX_CUSTOM_INSTRUCTION_CHARS, UpdateCustomSkillInputContract, UpdateCustomSkillInputSchema, type CreateCustomSkillInput,
+  type CustomSkill, type CustomSkillId, type UpdateCustomSkillInput,
+} from "./contracts/agents/custom-skill.schema.ts";
+export {
+  CreateCustomAgentInputContract, CreateCustomAgentInputSchema, CUSTOM_AGENT_KNOWLEDGE_SCOPES, CUSTOM_AGENT_MODELS, CUSTOM_AGENT_RUNTIME_ID,
+  CustomAgentContract, CustomAgentIdSchema, CustomAgentKnowledgeScopeSchema, CustomAgentModelSchema, CustomAgentSchema, EXAMPLE_CUSTOM_AGENT_ID,
+  MAX_CUSTOM_AGENT_SKILLS, MAX_CUSTOM_AGENT_TOOLS, UpdateCustomAgentInputContract, UpdateCustomAgentInputSchema, type CreateCustomAgentInput,
+  type CustomAgent, type CustomAgentId, type CustomAgentKnowledgeScope, type CustomAgentModel, type UpdateCustomAgentInput,
+} from "./contracts/agents/custom-agent.schema.ts";
+export {
+  ChatAgentOptionContract, ChatAgentOptionSchema, CUSTOM_AGENT_LIMIT_DEFAULTS, CustomAgentLimitsSchema, CustomAgentOptionsContract,
+  CustomAgentOptionsSchema, CustomAgentRuntimeOptionsSchema, type ChatAgentOption, type CustomAgentLimits, type CustomAgentOptions,
+  type CustomAgentRuntimeOptions,
+} from "./contracts/agents/custom-agent-options.schema.ts";
+export {
+  createCustomAgentEndpoint, createCustomSkillEndpoint, CUSTOM_AGENT_CONTRACTS, CUSTOM_AGENT_ENDPOINTS, deleteCustomAgentEndpoint,
+  deleteCustomSkillEndpoint, getCustomAgentEndpoint, getCustomAgentOptionsEndpoint, getCustomSkillEndpoint, listChatAgentsEndpoint,
+  listCustomSkillsEndpoint, updateCustomAgentEndpoint, updateCustomSkillEndpoint,
+} from "./contracts/agents/custom-endpoints.ts";

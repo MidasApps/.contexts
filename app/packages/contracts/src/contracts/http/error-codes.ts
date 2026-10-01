@@ -41,6 +41,8 @@ export const CORE_ERROR_CODES = [
   // SP5 prompt store (decision 0038): activation needs a passing eval; an agent without an eval set.
   "EVAL_REQUIRED",
   "EVAL_DATASET_MISSING",
+  // 422: the plan's cap of custom agents or skills is reached (decision 0046).
+  "CUSTOM_LIMIT_REACHED",
 ] as const;
 
 export const CoreErrorCodeSchema = z.enum(CORE_ERROR_CODES);

@@ -52,6 +52,27 @@
           "type": "integer",
           "x-pii": "none"
         },
+        "maxCustomAgents": {
+          "description": "Most custom agents an organization may have; absent means the platform default.",
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "type": "integer",
+          "x-pii": "none"
+        },
+        "maxCustomInstructionChars": {
+          "description": "Longest instructions of a custom agent or skill, in characters; absent means the platform default.",
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "type": "integer",
+          "x-pii": "none"
+        },
+        "maxCustomSkills": {
+          "description": "Most custom skills an organization may have; absent means the platform default.",
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "type": "integer",
+          "x-pii": "none"
+        },
         "monthlyMicroUsd": {
           "description": "Monthly model spend cap in micro-USD.",
           "maximum": 9007199254740991,

@@ -92,6 +92,13 @@ export const AUDIT_ACTIONS = [
   "SCHEDULE_PAUSED",
   "SCHEDULE_RESUMED",
   "SCHEDULE_RUN_REQUESTED",
+  // Tenant-defined agents and skills (decision 0046): field names only, never the instructions.
+  "CUSTOM_AGENT_CREATED",
+  "CUSTOM_AGENT_UPDATED",
+  "CUSTOM_AGENT_DELETED",
+  "CUSTOM_SKILL_CREATED",
+  "CUSTOM_SKILL_UPDATED",
+  "CUSTOM_SKILL_DELETED",
 ] as const;
 
 export const AuditActionSchema = z.enum(AUDIT_ACTIONS);

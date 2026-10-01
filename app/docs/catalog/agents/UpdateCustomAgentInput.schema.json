@@ -1,0 +1,106 @@
+{
+  "additionalProperties": false,
+  "description": "Changes an agent's configuration or enabled state.",
+  "examples": [
+    {
+      "enabled": false
+    },
+    {
+      "knowledgeScope": "all",
+      "tools": [
+        "catalog.listEntities"
+      ]
+    }
+  ],
+  "properties": {
+    "connectorTools": {
+      "description": "Whether the agent also gets the read-only tools of the organization's connectors.",
+      "type": "boolean",
+      "x-pii": "none"
+    },
+    "coreSkills": {
+      "description": "Names of the platform skills the agent loads.",
+      "items": {
+        "maxLength": 100,
+        "minLength": 1,
+        "type": "string"
+      },
+      "maxItems": 20,
+      "type": "array",
+      "x-pii": "none"
+    },
+    "customSkills": {
+      "description": "Ids of the organization's own skills the agent loads; disabled or deleted ones are ignored.",
+      "items": {
+        "pattern": "^[A-Za-z0-9]{20}$",
+        "type": "string"
+      },
+      "maxItems": 20,
+      "type": "array",
+      "x-pii": "none"
+    },
+    "description": {
+      "description": "What the agent is for.",
+      "maxLength": 1000,
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "enabled": {
+      "description": "Whether members can chat with the agent.",
+      "type": "boolean",
+      "x-pii": "none"
+    },
+    "instructions": {
+      "description": "Markdown instructions written by the organization; untrusted input placed after the platform's own instructions.",
+      "maxLength": 20000,
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "personal"
+    },
+    "knowledgeScope": {
+      "description": "What the agent may search in the knowledge base.",
+      "enum": [
+        "none",
+        "organization",
+        "project",
+        "all"
+      ],
+      "type": "string",
+      "x-pii": "none"
+    },
+    "model": {
+      "description": "Model role the agent runs on, from the platform's allowlist.",
+      "enum": [
+        "chat",
+        "reasoning"
+      ],
+      "type": "string",
+      "x-pii": "none"
+    },
+    "name": {
+      "description": "Display name of the agent.",
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "tools": {
+      "description": "Ids of the tools the agent may call, from the tools the organization already has; unknown ids are ignored at run time.",
+      "items": {
+        "maxLength": 200,
+        "minLength": 1,
+        "type": "string"
+      },
+      "maxItems": 50,
+      "type": "array",
+      "x-pii": "none"
+    }
+  },
+  "type": "object",
+  "x-kind": "command",
+  "x-permission": "core.agent-settings.update",
+  "x-pii": "personal",
+  "x-relations": [],
+  "x-tenancyScope": "organization"
+}

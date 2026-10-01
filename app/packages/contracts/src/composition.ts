@@ -4,6 +4,7 @@
 import { ACCESS_CONTRACTS } from "./contracts/access/contracts.ts";
 import { ACCESS_ENDPOINTS } from "./contracts/access/endpoints.ts";
 import { AGENTS_ENDPOINTS } from "./contracts/agents/endpoints.ts";
+import { CUSTOM_AGENT_CONTRACTS, CUSTOM_AGENT_ENDPOINTS } from "./contracts/agents/custom-endpoints.ts";
 import { AgentRequestContextContract } from "./contracts/agents/agent-request-context.schema.ts";
 import { AgentSettingsContract } from "./contracts/agents/agent-settings.schema.ts";
 import { AgentApprovalRequestContract } from "./contracts/agents/approval-request.schema.ts";
@@ -87,6 +88,8 @@ export const CORE_CONTRACTS: readonly ContractDefinition[] = [
   // SP5 workflows, prompts, platform console and observability.
   ...SP5_CONTRACTS,
   ...SP5_SETTINGS_CONTRACTS,
+  // Tenant-defined agents and skills (decision 0046).
+  ...CUSTOM_AGENT_CONTRACTS,
   // SP4 chat: conversations, generative UI props and voice.
   ConversationContract,
   ChatRequestContract,
@@ -124,6 +127,8 @@ export const CORE_ENDPOINTS: readonly EndpointDefinition[] = [
   ...SP5_ADMIN_ENDPOINTS,
   // SP5 tenant settings: agent and workflow catalogs, usage summary.
   ...SP5_SETTINGS_ENDPOINTS,
+  // Tenant-defined agents and skills (decision 0046).
+  ...CUSTOM_AGENT_ENDPOINTS,
 ];
 
 /** Builds a fresh registry with the core contracts (catalog scripts, apps at startup). */
