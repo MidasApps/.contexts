@@ -177,7 +177,7 @@
     "environmentSwitch": "Value of {key} in the environment",
     "organizationLabel": "Override per organization",
     "organizationHint": "Choose an organization to see and set its override for each flag.",
-    "overrideHint": "The override applies only to the chosen organization. An override cannot be removed yet, only switched.",
+    "overrideHint": "The override applies only to the chosen organization. Remove it to make the organization follow the environment value again.",
     "overridesErrorTitle": "The organization's overrides could not be loaded.",
     "reload": "Reload",
     "emptyTitle": "No flags registered",
@@ -615,7 +615,7 @@
       "targetsOf": "Agents evaluated by {name}",
       "cardMeta": "Version {version} · {when}",
       "emptyTitle": "No datasets yet",
-      "emptyDescription": "Datasets appear when evals are published or an organization creates its own.",
+      "emptyDescription": "Datasets appear when the eval sets are loaded into the agent service (pnpm evals:seed) or when an organization saves rated answers.",
       "emptyAction": "See experiments",
       "columns": {
         "name": "Dataset",

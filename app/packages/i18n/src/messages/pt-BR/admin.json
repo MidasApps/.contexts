@@ -177,7 +177,7 @@
     "environmentSwitch": "Valor de {key} no ambiente",
     "organizationLabel": "Ajuste por organização",
     "organizationHint": "Escolha uma organização para ver e definir o ajuste dela em cada flag.",
-    "overrideHint": "O ajuste vale só para a organização escolhida. Ainda não é possível remover um ajuste, apenas trocar o valor.",
+    "overrideHint": "O ajuste vale só para a organização escolhida. Remova o ajuste para ela voltar a seguir o valor do ambiente.",
     "overridesErrorTitle": "Não foi possível carregar os ajustes da organização.",
     "reload": "Recarregar",
     "emptyTitle": "Nenhuma flag registrada",
@@ -615,7 +615,7 @@
       "targetsOf": "Agentes avaliados por {name}",
       "cardMeta": "Versão {version} · {when}",
       "emptyTitle": "Nenhum dataset ainda",
-      "emptyDescription": "Os datasets aparecem quando as avaliações são publicadas ou uma organização cria o seu.",
+      "emptyDescription": "Os datasets aparecem quando os conjuntos de avaliação são carregados no serviço de agentes (pnpm evals:seed) ou quando uma organização guarda respostas avaliadas.",
       "emptyAction": "Ver experimentos",
       "columns": {
         "name": "Dataset",
