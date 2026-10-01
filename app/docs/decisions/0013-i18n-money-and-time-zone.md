@@ -24,6 +24,7 @@
 - `@core/i18n` depends on no internal package (lint boundary); `@core/contracts` cannot import it, so module manifests accept any canonical BCP 47 locale and `i18n:check` enforces the supported set.
 - Translators edit JSON; the source catalog is written by developers alongside the code (extraction tooling is out of scope for v1).
 - `es-419` and `en-US` ship complete at every commit because the gate requires key parity; fallback is a safety net, not a workflow.
+- **Amended 2026-09-29 (SP2 Task 1–3 review):** the runtime fallback of `loadMessages` is silent by design — it does not report which keys fell back. `pnpm i18n:check` (CI) is the only place that reports missing keys; a runtime warning would repeat that check on every render. `negotiateLocale` canonicalizes the saved choice (`pt-br` → `pt-BR`), and `parseMoneyInput` reads group/decimal separators from the locale's plain number format, never from the currency format (zero-digit currencies such as JPY have no decimal part there).
 
 ## Alternatives rejected
 

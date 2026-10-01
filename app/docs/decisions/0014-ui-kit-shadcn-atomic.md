@@ -50,6 +50,85 @@ The framework standardizes shadcn/ui with Radix primitives and the `new-york` st
 - The stylesheet declares `@source "../../.."` so any app that imports `@core/client/styles.css` scans the client sources; apps still add `@source` for `modules/*/src` (SP2 Task 18/20).
 - `tw-animate-css` (the `animate-in`/`fade-in-0` utilities used by shadcn overlays) is not installed yet; SP2 Task 4/5 decide whether to add it or accept no enter/exit animation.
 
+## Amendment — text-safe tokens (review of SP2 Tasks 1–3, 2026-09-29)
+
+The light DESIGN.md values miss WCAG AA as text on some surfaces: `--muted-foreground` (#737373) on
+`--muted`/`--secondary`/`--accent` (#f5f5f5) is 4.35:1, and the light status accents as text on the page or on
+their 14% pill tint are 3.0–4.3:1 (amber, emerald, cyan, blue, violet, destructive). DESIGN.md stays read-only;
+`globals.css` adds derived text tokens instead (same hue, darker in light; dark values alias the raw token because
+they already pass):
+
+| Raw token (non-text only: icons, dots, borders, tints) | Text token | Tailwind utility | Light value |
+|---|---|---|---|
+| `--status-blue/emerald/amber/cyan/violet` | `--status-<name>-foreground` | `text-<name>-foreground` | #0057d4 / #00703c / #9c4700 / #006a81 / #753dd0 |
+| `--destructive` | `--destructive-text` | `text-destructive-text` | #c90012 |
+| `--muted-foreground` (on `background`/`card` only) | `--muted-foreground-strong` | `text-muted-foreground-strong` | #6b6b6b |
+
+Rules: text in a status colour (pills, inline status, error messages, destructive menu items) uses the text token;
+`text-<name>` / `text-destructive` stay for icons and decorative marks (≥ 3:1 non-text contrast). Muted text placed on
+`muted`, `secondary` or `accent` surfaces (tab lists, kbd, avatar fallback, secondary badges) uses
+`text-muted-foreground-strong`. `tokens.test.ts` checks every text token against `background`, `card`, `muted` and
+the 14% tint (sRGB approximation of the `color-mix(in oklab …)` tint) in both themes.
+
+## Outcome of SP2 Tasks 4–6 (2026-09-29)
+
+- **CLI in a scratch copy.** `shadcn add` (4.21.0) was run in a scratch project holding a copy of this
+  `components.json`, `globals.css` and `cn.ts`, then the generated files were moved into the Atomic folders. Run in
+  `packages/client` it would edit `package.json`, add the npm `cn` package and run `pnpm install` in a workspace other
+  agents share. The generated `globals.css` edits (shadcn's own `--sidebar-*` HSL values) were discarded: the tokens
+  above already define that family. Upstream comparison stays `shadcn view <name>`.
+- **`tw-animate-css` adopted** (1.4.0, CSS only): the `animate-in`/`fade-in-0`/`zoom-in-95`/`slide-in-from-*`
+  utilities of the overlays. Surfaces enter in 240 ms with `--ease-surface` (motion.html); reduced motion collapses
+  them (`globals.css`).
+- **Extra theme values** from the design pages: `--radius-xs` 8 px (menu items), `--radius-2xs` 6 px (kbd, small
+  controls), `--shadow-hover|popover|modal` (elevacao.html: flat content, shadows only on popovers and modals),
+  `--ease-surface`. `cn` teaches tailwind-merge the new shadow and radius names.
+- **Focus.** Buttons, checkboxes, radios, switches and links keep the global `:focus-visible` outline (2 px `--ring`,
+  offset 2 px; ≥ 3:1 in both themes) instead of shadcn's 50 % ring (≈ 2.6:1 on the dark page). Text controls follow
+  componentes.html (border to `--ring` + soft halo). Menu and listbox items add an inset outline on keyboard focus.
+- **Deviations from the catalogue, for AA:** checkbox and radio outlines use `--muted-foreground` (the `--input`
+  hairline is ≈ 1.4:1 and is the only thing identifying the control); avatar fallbacks use the 14 % tint + text token
+  instead of white initials on saturated gradients (≈ 2.4–3.3:1). Text inputs keep the `--input` hairline of the
+  design system (label + placeholder identify them) — flagged for the UX review.
+
+## Outcome of SP2 Tasks 7–8 (2026-09-30)
+
+- **SchemaForm field-meta conventions** (`organisms/SchemaForm`, SP2 spec §3.1; SP4 `renderForm` relies on them):
+  `ui.labelKey` is required on every rendered field (a missing one throws `SchemaFormDefinitionError`); the optional
+  hint is `<labelKey>Hint` (shown before the control when the key exists); enum option labels are
+  `<labelKey>Options.<value>`; `ui.group` is an i18n key used as the fieldset legend, and consecutive fields with the
+  same group share one fieldset; `ui.order` then declaration order sorts fields. Widgets are inferred when
+  `ui.widget` is absent (enum → select, boolean → switch, number → number, `{ amountMinor, currency }` → money, ISO
+  datetime → datetime, ISO date → date, other strings → text); arrays and other objects are not rendered and pass
+  through from `defaultValues`, like `hidden` widgets and `ui.visibleWith` fields the viewer cannot see. A declared
+  widget that does not fit the type throws.
+- **Validation copy.** SchemaForm validates with the contract schema through its own RHF resolver
+  (`contract-resolver.ts`) instead of `@hookform/resolvers/zod`: the zod resolver surfaces the schema's English
+  messages and drops the issue limits the translated copy (`common.form.errors.*`) needs. `@hookform/resolvers` is
+  therefore not a dependency. Server `VALIDATION_FAILED.details[].field` maps to the top-level field (first issue per
+  field); other codes, and details for fields not on screen, show a focused `alert` with `errors.<code>` and the
+  request reference.
+- **Dates.** A `datetime` field shows `datetime-local` in the intl provider's time zone (the display zone) and stores
+  UTC ISO (`zonedWallTimeToUtc` / the new `utcToZonedWallTime` in `@core/i18n`).
+- **Theme.** `next-themes` 0.4.6 with `attribute="data-theme"`, `defaultTheme="system"`, themes `light|dark`; the web
+  passes the CSP nonce to its pre-paint script.
+
+## Outcome of SP2 Tasks 22–23 (2026-09-30) — text tokens re-derived on the real tint
+
+The Playwright axe run (WCAG 2.2 AA tags, both themes) failed `color-contrast` on avatar initials in the sidebar
+switchers: 4.43–4.46:1 for amber, blue, emerald and violet in light (e.g. `#ac4e00` on `#f6e5d7`). The table above
+was derived with an **sRGB average** of the 14% tint over `--background`; browsers mix `color-mix(in oklab, …)`,
+which gives a darker tint, and the tint also sits on `--sidebar`/`--sidebar-accent`, not only on the page.
+Changes (this amends the amendment's values and its "dark values alias the raw token" note):
+
+- `tokens.test.ts` mixes in Oklab and checks every text token on its 14% tint over `--background`, `--card`,
+  `--sidebar` and `--sidebar-accent` in both themes (AA 4.5).
+- Light text tokens: blue `#0057d4`, emerald `#00703c`, amber `#9c4700`, cyan `#006a81`, violet `#753dd0` (≥ 4.8:1
+  on the tint over the highlighted sidebar, ≥ 6.2:1 on white).
+- Dark text tokens: blue `#5ba3ff`, amber `#f6853f`, violet `#b48cff`, `--destructive-text` `#ff7778` (the raw
+  accents were 3.9–4.7:1 on the tint over `#262626`); emerald and cyan still alias their raw token.
+- Raw accents (icons, dots, borders, tints) are unchanged, so DESIGN.md stays the source of every raw value.
+
 ## Consequences
 
 - Components consume only semantic utilities (`bg-primary`, `text-muted-foreground`, `text-blue`); a theme change never edits a component.

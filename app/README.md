@@ -127,6 +127,8 @@ to the demo organization.
 | Pub/Sub emulator | 8085 | `firebase.json` |
 | Postgres | 5432 | `POSTGRES_PORT` (keep `DATABASE_URL` in sync) |
 | Desktop Vite dev server | 1420 | `apps/desktop` |
+| e2e: web / desktop preview | 3100 / 1420 | `E2E_WEB_PORT` / `E2E_DESKTOP_PORT` (`pnpm test:e2e`) |
+| e2e: Auth / Firestore emulators | 9391 / 8391 | `firebase.e2e.json` |
 
 Health checks: `GET /v1/health` (web), `GET /health` (Mastra),
 `GET /demo-core/southamerica-east1/healthz` (Functions emulator).
@@ -136,15 +138,44 @@ Health checks: `GET /v1/health` (web), `GET /health` (Mastra),
 ```bash
 pnpm lint
 pnpm typecheck
-pnpm test              # unit tests, no external service
+pnpm test              # unit and component tests (jsdom + axe), no external service
 pnpm test:emulators    # *.emulator.test.ts inside `firebase emulators:exec` (needs Java 21)
 pnpm test:postgres     # *.postgres.test.ts; needs `docker compose up -d --wait`
 pnpm contracts:check   # the generated catalog matches the contracts
+pnpm i18n:check        # every message key in pt-BR, en-US and es-419, valid ICU
+pnpm test:e2e          # Playwright journeys on their own emulator stack (see below)
 ```
 
 The file suffix says what a test needs (`.test.ts`, `.emulator.test.ts`,
-`.postgres.test.ts`); see `.contexts/engineering/rules/testing.md`.
-CI runs all of them (`.github/workflows/app-ci.yml`).
+`.postgres.test.ts`, Playwright `e2e/*.spec.ts`); see
+`.contexts/engineering/rules/testing.md`. CI runs all of them
+(`.github/workflows/app-ci.yml`), plus `desktop-check` (desktop `vite build` and
+`cargo check --locked` on Linux).
+
+### End-to-end (Playwright)
+
+`pnpm test:e2e` (`scripts/e2e.ts`) starts the Auth and Firestore emulators of
+`firebase.e2e.json` (project `demo-core-e2e`, ports apart from `pnpm dev`, so both
+can run at once), builds web and desktop with the e2e public config and runs:
+
+- `apps/web/e2e/*.spec.ts` on chromium, firefox, webkit and a phone (Pixel 7):
+  sign-in, organization/project switching, profile, settings, `/admin` (staff with
+  SMS MFA from the emulator) and axe (WCAG 2.2 AA) on every page, light and dark;
+- `apps/desktop/e2e/` (`desktop-web`): the desktop frontend served by `vite preview`.
+
+The setup project seeds its own world (`packages/e2e/src/seed-users.ts`, same
+`owner@demo.local` and `member@demo.local` accounts as `pnpm seed:local`). Ports:
+`E2E_WEB_PORT` (default 3100) and `E2E_DESKTOP_PORT` (default 1420).
+`pnpm test:e2e -- <command>` runs another command inside the same stack, e.g.
+`pnpm test:e2e -- pnpm -F @core/web exec playwright test e2e/auth.spec.ts`.
+Browsers once: `pnpm -F @core/web exec playwright install chromium firefox webkit`.
+
+### Native desktop smoke (local only)
+
+`pnpm -F @core/desktop test:native` drives the real Tauri window with WebdriverIO
+and `@wdio/tauri-service` (decision 0017 §4): it signs in as `owner@demo.local`
+and checks the user area. It needs a debug build of the app and the e2e stack;
+see `apps/desktop/README.md`. It is evidence gathered per release, not a CI gate.
 
 ## Contracts and data catalog
 
@@ -165,25 +196,91 @@ pnpm contracts:check     # fails on drift, missing field meta or dangling relati
 ```
 app/
   apps/
-    web/        Next 16: routing only; /v1 re-exports driving adapters
-    desktop/    Tauri 2 + Vite + React 19 shell
+    web/        Next 16: locale routes of the user area and /admin, /v1 route files
+                (re-export driving adapters), proxy (request id, CORS, locale, CSP)
+    desktop/    Tauri 2 + Vite + TanStack Router: the same user area, OS keychain session
     mastra/     Mastra server and Studio
     functions/  Firebase Functions Gen 2 (nodejs24, ADR 0004 E1)
   packages/
-    config/     shared tsconfig presets, ESLint flat config, Vitest preset
-    contracts/  Zod primitives, contract registry and data catalog
-    services/   hexagonal backend (env, logging, HTTP boundary, health)
-  scripts/      `pnpm dev` and `pnpm seed:local` (@core/scripts)
-  infra/        local Postgres init scripts
+    config/     shared tsconfig presets, ESLint flat config (+ import boundaries), Vitest preset
+    contracts/  Zod primitives, endpoint descriptors, defineModule(), data catalog
+    services/   hexagonal backend: identity, tenancy, access, audit, files, knowledge, ...
+    agents/     agent runtime (Mastra agents, tools, workflows, guardrails)
+    client/     @core/client: shared FSD client for web and desktop, Atomic UI kit
+    i18n/       @core/i18n: locales, negotiation, money/time formatters, message catalogs
+    e2e/        @core/e2e: Playwright harness shared by the web and desktop e2e runs
+  modules/
+    example/    reference module: manifest, settings contract, client pages, messages
+  scripts/      `pnpm dev`, `pnpm seed:local`, `pnpm test:e2e` (@core/scripts)
+  infra/        local Postgres init scripts and migrations
   docs/         decisions, generated catalog and OpenAPI
 ```
 
-`packages/client`, `packages/agents`, `packages/i18n` and `modules/` are planned
-(spec §3) and do not exist yet. Import boundaries are already enforced by
-`eslint-plugin-boundaries` (`packages/config/eslint/boundaries.js`): apps only
-compose; `client` does not import `services` or `agents`; `services` and `agents`
-do not import `client`; `agents` reach `services` only through use cases;
-`contracts` depends on nothing.
+Import boundaries are enforced by `eslint-plugin-boundaries`
+(`packages/config/eslint/boundaries.js`): apps only compose; `client` imports only
+`contracts` and `i18n`; `services` and `agents` do not import `client`; `agents`
+reach `services` only through use cases; `contracts` depends on nothing; no core
+package imports a module (apps list the installed modules).
+
+## Client, UI and modules (SP2)
+
+- **`@core/client`** (`packages/client/src`, decision 0011): FSD layers `app-shell`
+  (providers, module registry, navigation, session), `views` (one per page), `widgets`
+  (sidebar, topbar, switchers, command palette), `features`, `entities` and `shared`
+  (`shared/ui` is the Atomic kit: shadcn new-york on Radix + Tailwind 4 with the
+  `.design-system` tokens, decision 0014). Server state lives in TanStack Query over
+  `/v1` (Bearer); product mutations never use Server Actions. The apps implement the
+  ports (`router`, `session-bridge`, `secure-store`, `platform`) and pass them to
+  `createClientApp`; views never import `next/*` or `@tanstack/*` (decision 0012).
+  Every component has a colocated `*.test.tsx` that also runs axe.
+- **Routes** (one map, `shared/lib/router/route-paths.ts`): `/sign-in`, `/invite`,
+  `/organizations`, `/o/:organizationId[/p/:projectId[/m/:moduleId/*]]`,
+  `/o/:organizationId/settings/:section`, `/profile/:section`; the web prefixes
+  `/{locale}` and adds `/admin` (platform staff with MFA). A member whose only grant
+  is on a project lands on that project when they open the organization
+  (decision 0030 A5).
+- **Desktop session** (decision 0017): the Firebase ID token stays in memory; a
+  desktop session secret lives in the OS keychain (Windows Credential Manager, macOS
+  Keychain, Secret Service) through the Tauri commands `secure_store_get|set|delete`,
+  rotated on every start. Details in `apps/desktop/README.md`.
+
+### i18n workflow
+
+UI copy is never hard-coded (decision 0013). Core messages live in
+`packages/i18n/src/messages/<locale>/<namespace>.json`; `pt-BR` is the source,
+`en-US` and `es-419` must have the same keys and ICU placeholders. A module ships
+its own `src/messages/<locale>.json` under its id as namespace. Add the key to the
+three files, use it through `useTranslations("<namespace>")`, then run
+`pnpm i18n:check` (CI gate). Money is `{ amountMinor, currency }` formatted with
+`Intl`; dates are stored in UTC and shown in the display time zone of the node
+(user, then project, then organization).
+
+### Creating a module (copy `modules/example`)
+
+1. **Package:** copy `modules/example` to `modules/<id>` and rename the package
+   (`@core/module-<id>`); keep the `exports` (`./manifest`, `./contracts`,
+   `./client`). Modules may import `@core/contracts` and `@core/client`, never
+   another module or an app.
+2. **Manifest** (`src/manifest.ts`, data only, decision 0015): `defineModule()` with
+   the `id`, permissions (`<id>.<resource>.<action>` plus default roles), unit types,
+   navigation items (slot `project` or `organization`, permission, order), the
+   settings contract and the messages of the three locales. SP3 capabilities
+   (agents, tools, workflows, skills) hang off the same manifest (`capabilities.ts`).
+3. **Contracts** (`src/contracts/`): Zod schemas with `defineContract` catalog meta;
+   the module settings page renders the settings contract with `SchemaForm`.
+4. **Client** (`src/client.ts`): `defineClientModule({ manifest, pages })`; `pages`
+   maps the path after `/m/<id>/` to a lazily loaded page component (module pages
+   need no route files in the apps).
+5. **Messages:** `src/messages/{pt-BR,en-US,es-419}.json`; `pnpm i18n:check`.
+6. **Install it** in the composition files (the only places that name modules):
+   `apps/web/src/modules.ts` (server manifests), `apps/web/src/client/modules.ts`
+   and `apps/desktop/src/modules.ts` (client modules), `catalog.modules.ts`
+   (contracts in the generated catalog), `transpilePackages` in
+   `apps/web/next.config.ts`, and the workspace dependency in each app's
+   `package.json`. Tailwind already scans `modules/*/src`.
+7. **Verify:** `pnpm -F @core/module-<id> test`, `pnpm contracts:catalog` (commit the
+   regenerated `docs/catalog`), `pnpm lint && pnpm typecheck && pnpm i18n:check`,
+   and an e2e journey through its page when it has one.
 
 ## Starting a new app from this core
 
@@ -195,8 +292,8 @@ do not import `client`; `agents` reach `services` only through use cases;
    project ids for remote environments (local stays `demo-*`).
 3. Keep `.contexts/` and `.claude/` read-only; record app decisions in
    `docs/decisions/`.
-4. Business capabilities will plug in as modules under `modules/` through
-   `defineModule()`, which arrives in SP2. Until then there is no module API.
+4. Business capabilities plug in as modules under `modules/` through
+   `defineModule()` (see "Creating a module" above).
 
 ## Decisions and plans
 
@@ -217,6 +314,7 @@ do not import `client`; `agents` reach `services` only through use cases;
 - Framework ADRs: `../.contexts/engineering/decisions/`.
 - Design spec: `../docs/superpowers/specs/2026-09-29-agentic-app-core-design.md`.
 - SP0 plan, reports and follow-ups: `../docs/plans/2026-09-29-sp0-app-foundation/`.
+- SP2 plan, reports and gate: `../docs/plans/2026-09-29-sp2-app-shell-ui/`.
 
 Per-app details: `apps/web/README.md`, `apps/mastra/README.md`,
 `apps/functions/README.md`, `apps/desktop/README.md`.

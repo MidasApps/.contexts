@@ -1,6 +1,6 @@
 # 0016. Web Content Security Policy (nonce or documented fallback) and Firebase origins
 
-- **Status:** proposed (SP2 Task 18 confirms nonce vs fallback with evidence and sets the final status)
+- **Status:** accepted — static fallback (§2), per the SP2 Task 18 evidence below
 - **Date:** 2026-09-29
 - **Scope:** `app/apps/web` (`src/proxy.ts`, `src/http/create-proxy.ts`, `src/config/security-headers.ts`) (local decision; the framework is unchanged)
 - **Refines:** SP2 spec §10; `.contexts/engineering/rules/security.md` §6
@@ -29,3 +29,10 @@
 - **No CSP until SP deploy.** Violates `rules/security.md` §6.
 - **`'unsafe-inline'` scripts.** Defeats the main XSS protection; not needed with nonces or hashed framework scripts.
 - **Hash-based CSP.** Next's inline bootstrap scripts change per build and per page; hashes are impractical to maintain.
+
+## Outcome of SP2 Task 18 (2026-09-30): static fallback
+
+- **Evidence.** With the nonce variant, `pnpm -F @core/web build` succeeded and `GET /pt-BR/sign-in` carried a fresh nonce per request, but the HTML is a Cache Components static shell (`x-nextjs-postponed: 1`) prerendered at build time: of its 30 `<script>` tags only the 11 in the request-time part carried the nonce; the 18 framework chunk tags and the inline `$RT` bootstrap of the shell did not. Chromium (Playwright) blocked all of them (`'strict-dynamic'` disables `'self'`) and the page did not hydrate. Next's CSP guide states the same: nonces need dynamic rendering and "Partial Prerendering is incompatible with nonce-based CSP".
+- **Chosen variant.** `src/proxy.ts` sets `cspMode: "static"`: `script-src 'self' 'unsafe-inline'` (the inline bootstrap scripts of the static shell change per build and page, see *Alternatives*), `style-src 'self' 'unsafe-inline'` (Radix/sonner inline `style` attributes, which no nonce can cover), `connect-src 'self'` + the two Firebase Auth origins + the Auth Emulator origin only when `APP_ENV=local` (from validated env, `NEXT_PUBLIC_FIREBASE_AUTH_EMULATOR_URL`), no `'unsafe-eval'` outside `next dev`. The rest of §1 is unchanged. Verified: sign-in, organizations, project, module, profile and settings pages hydrate with no CSP violation in the console.
+- **Where it is set.** The proxy sets the CSP per request (it needs the validated env); `/v1` JSON responses get `default-src 'none'; frame-ancestors 'none'`; `next.config.ts` keeps only the other static headers (`src/config/security-headers.ts`).
+- **Kept for later.** `createProxy` still implements the nonce variant (`cspMode: "nonce"`, covered by tests: nonce per request, forwarded as `x-nonce` and in the request CSP header) and `createClientApp` accepts `themeNonce`. Revisit when Next can nonce a prerendered shell or when the app stops prerendering shells; experimental SRI (`experimental.sri`) is the other candidate.
