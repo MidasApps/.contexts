@@ -12445,6 +12445,69 @@ paths:
       tags:
         - usage
       x-auth: principal
+  /v1/voice/availability:
+    get:
+      operationId: voice.getAvailability
+      parameters:
+        - description: Organization the call is billed to.
+          in: query
+          name: organizationId
+          required: true
+          schema:
+            minLength: 1
+            type: string
+            x-pii: none
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: "#/components/schemas/voice.VoiceAvailability"
+                required:
+                  - data
+                type: object
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: VALIDATION_FAILED
+          x-error-codes:
+            - VALIDATION_FAILED
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UNAUTHORIZED
+          x-error-codes:
+            - UNAUTHORIZED
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: FORBIDDEN
+          x-error-codes:
+            - FORBIDDEN
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: INTERNAL_ERROR
+          x-error-codes:
+            - INTERNAL_ERROR
+      security:
+        - bearerAuth: []
+      summary: Tells whether voice and realtime voice are on for the organization; never answers 503 (core.voice.use).
+      tags:
+        - voice
+      x-auth: user
   /v1/voice/realtime-sessions:
     post:
       operationId: voice.createRealtimeSession
@@ -25456,6 +25519,32 @@ components:
       x-pii: personal
       x-relations: []
       x-tenancyScope: user
+    voice.VoiceAvailability:
+      additionalProperties: false
+      description: Whether voice and realtime voice are switched on for the caller's organization.
+      examples:
+        - realtime: false
+          voice: true
+        - realtime: false
+          voice: false
+      properties:
+        realtime:
+          description: Realtime sessions are on too (flag chat.voice.realtime); the session route still needs real mode and a provider key.
+          type: boolean
+          x-pii: none
+        voice:
+          description: Push-to-talk and read aloud are on for the organization (flag chat.voice).
+          type: boolean
+          x-pii: none
+      required:
+        - voice
+        - realtime
+      type: object
+      x-kind: view
+      x-permission: core.voice.use
+      x-pii: none
+      x-relations: []
+      x-tenancyScope: organization
     workflows.CreateScheduleInput:
       additionalProperties: false
       description: Creates a tenant schedule for a schedulable workflow.

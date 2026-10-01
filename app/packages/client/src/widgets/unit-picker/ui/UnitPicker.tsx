@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from "use-intl";
 import { useCan } from "#/entities/permission/index.ts";
 import { useAccessContext, useCurrentNode } from "#/entities/session/index.ts";
 import { buildUnitTree, UnitBreadcrumb, unitPathIn, useUnitPath, useUnitTree } from "#/entities/unit/index.ts";
+import { parseRoute } from "#/shared/lib/router/parse-route.ts";
 import { useRouter } from "#/shared/lib/router/router-context.tsx";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
 import { Icon } from "#/shared/ui/atoms/Icon/Icon.tsx";
@@ -48,6 +49,7 @@ export function UnitPicker() {
   const t = useTranslations("shell.units");
   const router = useRouter();
   const params = router.useRouteParams();
+  const routeId = parseRoute(router.useLocationPath())?.id;
   const node = useCurrentNode();
   const projectNode = node?.projectId === undefined ? null : { organizationId: node.organizationId, projectId: node.projectId };
   const context = useAccessContext(node);
@@ -59,7 +61,7 @@ export function UnitPicker() {
   const path = useUnitPath(node?.organizationId, current);
   if (projectNode === null || !canRead) return null;
   const select = (unitId: string | undefined) => {
-    const route = withUnit(params, unitId);
+    const route = withUnit(params, unitId, routeId);
     setOpen(false);
     if (route !== null) router.navigate(route);
   };

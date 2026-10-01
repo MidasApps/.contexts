@@ -85,7 +85,8 @@
       "evals": "Avaliações",
       "logs": "Logs",
       "workflows": "Workflows"
-    }
+    },
+    "chat": "Chat"
   },
   "routeAnnouncer": {
     "fallback": "Nova página carregada"
@@ -211,7 +212,9 @@
     "forbiddenDescription": "Peça a quem administra a organização para liberar o acesso."
   },
   "rightPanel": {
-    "label": "Painel lateral"
+    "label": "Painel lateral",
+    "toggle": "Assistente",
+    "chatUnavailable": "Abra um projeto para conversar com o assistente."
   },
   "configError": {
     "title": "Erro de configuração",

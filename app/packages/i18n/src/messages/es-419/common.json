@@ -120,7 +120,8 @@
     "settings": "Configuración",
     "profile": "Perfil",
     "admin": "Administración",
-    "notFound": "Página no encontrada"
+    "notFound": "Página no encontrada",
+    "chat": "Chat"
   },
   "approvals": {
     "status": {

@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment } from "react";
+import { Fragment, type ReactNode } from "react";
 import { useTranslations } from "use-intl";
 import { useAccessContext, useCurrentNode } from "#/entities/session/index.ts";
 import { useUnitPath } from "#/entities/unit/index.ts";
@@ -69,13 +69,15 @@ function Breadcrumbs() {
 export type AppTopbarProps = {
   /** Opens the command palette (the app layout owns its state). */
   onOpenCommandPalette: () => void;
+  /** Controls after the palette trigger (the right panel toggle). */
+  actions?: ReactNode;
 };
 
 /**
  * Topbar of the user area (layout.html, 56 px): sidebar toggle, breadcrumbs and the command
  * palette trigger with its shortcut (⌘K on Apple platforms, Ctrl+K elsewhere).
  */
-export function AppTopbar({ onOpenCommandPalette }: AppTopbarProps) {
+export function AppTopbar({ onOpenCommandPalette, actions }: AppTopbarProps) {
   const t = useTranslations("shell.commandPalette");
   const modifier = useModifierKey();
   return (
@@ -92,6 +94,7 @@ export function AppTopbar({ onOpenCommandPalette }: AppTopbarProps) {
             <Kbd>K</Kbd>
           </KbdGroup>
         </Button>
+        {actions}
       </div>
     </>
   );

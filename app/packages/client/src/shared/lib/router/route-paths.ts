@@ -45,6 +45,8 @@ export type Route =
   | { id: "organization"; organizationId: string }
   | { id: "project"; organizationId: string; projectId: string; unit?: string | undefined }
   | { id: "module"; organizationId: string; projectId: string; moduleId: string; rest: string; unit?: string | undefined }
+  /** The chat of a project (SP4): a new conversation, or the stored one named in the path. */
+  | { id: "chat"; organizationId: string; projectId: string; conversationId?: string | undefined; unit?: string | undefined }
   | { id: "settings"; organizationId: string; section: SettingsSection; rest?: string | undefined }
   | { id: "settings-module"; organizationId: string; moduleId: string }
   | { id: "profile"; section: ProfileSection }
@@ -60,6 +62,7 @@ export const ROUTE_IDS = [
   "organization",
   "project",
   "module",
+  "chat",
   "settings",
   "settings-module",
   "profile",
@@ -103,6 +106,10 @@ export const routeHref = (route: Route): string => {
       return withSearch(`${organizationPath(route.organizationId)}/p/${seg(route.projectId)}`, { unit: route.unit });
     case "module": {
       const base = `${organizationPath(route.organizationId)}/p/${seg(route.projectId)}/m/${seg(route.moduleId)}${tail(route.rest)}`;
+      return withSearch(base, { unit: route.unit });
+    }
+    case "chat": {
+      const base = `${organizationPath(route.organizationId)}/p/${seg(route.projectId)}/chat${route.conversationId === undefined ? "" : `/${seg(route.conversationId)}`}`;
       return withSearch(base, { unit: route.unit });
     }
     case "settings":

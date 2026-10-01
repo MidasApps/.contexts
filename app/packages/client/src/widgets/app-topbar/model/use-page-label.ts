@@ -19,6 +19,8 @@ export const usePageLabel = (): string | undefined => {
       return t("shell.nav.organizationHome");
     case "project":
       return t("shell.nav.projectHome");
+    case "chat":
+      return t("shell.nav.chat");
     case "settings":
       return t(`shell.nav.settings.${route.section}`);
     case "profile":

@@ -2,6 +2,7 @@
 
 import { createClientApp, type CreatedClientApp } from "@core/client/app-shell";
 import { createFirebaseAuthClient } from "@core/client/shared/lib/auth";
+import { CHAT_SHELL_SLOTS } from "@core/client/widgets/chat-panel";
 import type { SupportedLocale } from "@core/i18n";
 import { useState, type ReactNode } from "react";
 import { createSession, exchangeSession, signOut } from "@/app/[locale]/(auth)/actions";
@@ -34,6 +35,8 @@ const createWebClient = (locale: SupportedLocale): WebClient => {
   const app = createClientApp({
     config,
     modules: WEB_CLIENT_MODULES,
+    // The chat in the shell's right panel (SP4 Task 13); the chat page is a route of its own.
+    slots: CHAT_SHELL_SLOTS,
     adapters: {
       auth: isBrowser() ? createFirebaseAuthClient(config) : createServerRenderAuth(),
       router,

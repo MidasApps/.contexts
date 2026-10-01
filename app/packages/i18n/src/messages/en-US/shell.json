@@ -85,7 +85,8 @@
       "evals": "Evals",
       "logs": "Logs",
       "workflows": "Workflows"
-    }
+    },
+    "chat": "Chat"
   },
   "routeAnnouncer": {
     "fallback": "New page loaded"
@@ -211,7 +212,9 @@
     "forbiddenDescription": "Ask an organization admin to grant you access."
   },
   "rightPanel": {
-    "label": "Side panel"
+    "label": "Side panel",
+    "toggle": "Assistant",
+    "chatUnavailable": "Open a project to chat with the assistant."
   },
   "configError": {
     "title": "Configuration error",

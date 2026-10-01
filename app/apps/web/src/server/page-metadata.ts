@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 
 /** Keys of `common.pageTitles` (one per route id of SP2 spec §4). */
-export type PageTitleKey = "signIn" | "invite" | "home" | "organizations" | "organization" | "project" | "module" | "settings" | "profile" | "admin" | "notFound";
+export type PageTitleKey = "signIn" | "invite" | "home" | "organizations" | "organization" | "project" | "module" | "chat" | "settings" | "profile" | "admin" | "notFound";
 
 /**
  * `generateMetadata` of a route file: the translated page title and `noindex` (the app is private;

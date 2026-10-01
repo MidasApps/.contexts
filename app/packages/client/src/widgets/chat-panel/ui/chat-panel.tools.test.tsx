@@ -154,7 +154,7 @@ describe("ChatPanel — approvals and generative UI", () => {
     expect(await screen.findByRole("button", { name: /Ferramenta module_fancyWidget/ })).toBeTruthy();
     expect(context.container.querySelector("script")).toBeNull();
     const pending = await screen.findByRole("region", { name: "Aguardando aprovação de outra pessoa" });
-    expect(within(pending).getByRole("link", { name: "Abrir aprovações" }).getAttribute("href")).toBe("/approvals/Ap3rQ9vLr3TnB7pWc1aZ");
+    expect(within(pending).getByRole("link", { name: "Abrir aprovações" }).getAttribute("href")).toBe(`/o/${IDS.organization}/settings/approvals/Ap3rQ9vLr3TnB7pWc1aZ`);
     await expectNoAxeViolations(context.container);
   });
 });

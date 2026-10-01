@@ -28,6 +28,7 @@ const parseOrganizationRoute = ([organizationId, ...rest]: string[], search: URL
   if (kind !== "p" || second === undefined) return null;
   const unit = optional(search.get("unit"));
   if (third === undefined) return { id: "project", organizationId, projectId: second, unit };
+  if (third === "chat") return more.length > 0 ? null : { id: "chat", organizationId, projectId: second, conversationId: fourth, unit };
   if (third !== "m" || fourth === undefined) return null;
   return { id: "module", organizationId, projectId: second, moduleId: fourth, rest: more.join("/"), unit };
 };

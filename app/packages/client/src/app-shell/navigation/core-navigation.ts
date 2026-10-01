@@ -52,8 +52,9 @@ const ADMIN: { name: string; icon: IconName; permission: Permission }[] = [
 const HOMES: ShellNavItem[] = [
   { id: "core.organization.home", slot: "organization", labelKey: "shell.nav.organizationHome", icon: "home", permission: "core.organization.read", order: 0, target: { kind: "organization-home" } },
   { id: "core.organization.settings", slot: "organization", labelKey: "shell.nav.organizationSettings", icon: "settings", permission: "core.organization.read", order: 1000, target: { kind: "settings", section: "general" } },
-  // SP4 adds its chat entry to this slot; modules add theirs between 1 and 999.
+  // Modules add theirs between 1 and 999, after the chat (SP4 Task 13).
   { id: "core.project.home", slot: "project", labelKey: "shell.nav.projectHome", icon: "layout-dashboard", permission: "core.project.read", order: 0, target: { kind: "project-home" } },
+  { id: "core.project.chat", slot: "project", labelKey: "shell.nav.chat", icon: "message", permission: "core.conversation.send", order: 1, target: { kind: "chat" } },
 ];
 
 /**

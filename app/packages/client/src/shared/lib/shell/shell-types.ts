@@ -11,6 +11,7 @@ import type { IconName } from "#/shared/ui/atoms/Icon/icon-registry.ts";
 export type NavTarget =
   | { readonly kind: "organization-home" }
   | { readonly kind: "project-home" }
+  | { readonly kind: "chat" }
   | { readonly kind: "settings"; readonly section: SettingsSection }
   | { readonly kind: "profile"; readonly section: ProfileSection }
   | { readonly kind: "admin"; readonly rest: string }
@@ -79,4 +80,11 @@ export type ModuleRegistry = {
 };
 
 /** Content the app contributes to fixed places of the shell (SP4 mounts chat in `rightPanel`). */
-export type ShellSlots = { readonly rightPanel?: ComponentType | undefined };
+export type ShellSlots = {
+  readonly rightPanel?: ComponentType | undefined;
+  /**
+   * A hook that says whether the right panel applies to the current page and viewer (the chat:
+   * inside a project, with the permission, not on the chat page). Absent = always.
+   */
+  readonly useRightPanelAvailable?: (() => boolean) | undefined;
+};

@@ -18,6 +18,7 @@ import { Route as OOrganizationIdIndexRouteImport } from './routes/o/$organizati
 import { Route as OOrganizationIdPProjectIdIndexRouteImport } from './routes/o/$organizationId/p/$projectId/index'
 import { Route as OOrganizationIdSettingsSectionSplatRouteImport } from './routes/o/$organizationId/settings/$section/$'
 import { Route as OOrganizationIdSettingsMModuleIdRouteImport } from './routes/o/$organizationId/settings/m/$moduleId'
+import { Route as OOrganizationIdPProjectIdChatChar123ConversationIdChar125RouteImport } from './routes/o/$organizationId/p/$projectId/chat/{-$conversationId}'
 import { Route as OOrganizationIdPProjectIdMModuleIdSplatRouteImport } from './routes/o/$organizationId/p/$projectId/m/$moduleId/$'
 
 const IndexRoute = IndexRouteImport.update({
@@ -68,6 +69,12 @@ const OOrganizationIdSettingsMModuleIdRoute =
     path: '/o/$organizationId/settings/m/$moduleId',
     getParentRoute: () => rootRouteImport,
   } as any)
+const OOrganizationIdPProjectIdChatChar123ConversationIdChar125Route =
+  OOrganizationIdPProjectIdChatChar123ConversationIdChar125RouteImport.update({
+    id: '/o/$organizationId/p/$projectId/chat/{-$conversationId}',
+    path: '/o/$organizationId/p/$projectId/chat/{-$conversationId}',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const OOrganizationIdPProjectIdMModuleIdSplatRoute =
   OOrganizationIdPProjectIdMModuleIdSplatRouteImport.update({
     id: '/o/$organizationId/p/$projectId/m/$moduleId/$',
@@ -85,6 +92,7 @@ export interface FileRoutesByFullPath {
   '/o/$organizationId/settings/$section/$': typeof OOrganizationIdSettingsSectionSplatRoute
   '/o/$organizationId/settings/m/$moduleId': typeof OOrganizationIdSettingsMModuleIdRoute
   '/o/$organizationId/p/$projectId/': typeof OOrganizationIdPProjectIdIndexRoute
+  '/o/$organizationId/p/$projectId/chat/{-$conversationId}': typeof OOrganizationIdPProjectIdChatChar123ConversationIdChar125Route
   '/o/$organizationId/p/$projectId/m/$moduleId/$': typeof OOrganizationIdPProjectIdMModuleIdSplatRoute
 }
 export interface FileRoutesByTo {
@@ -97,6 +105,7 @@ export interface FileRoutesByTo {
   '/o/$organizationId/settings/$section/$': typeof OOrganizationIdSettingsSectionSplatRoute
   '/o/$organizationId/settings/m/$moduleId': typeof OOrganizationIdSettingsMModuleIdRoute
   '/o/$organizationId/p/$projectId': typeof OOrganizationIdPProjectIdIndexRoute
+  '/o/$organizationId/p/$projectId/chat/{-$conversationId}': typeof OOrganizationIdPProjectIdChatChar123ConversationIdChar125Route
   '/o/$organizationId/p/$projectId/m/$moduleId/$': typeof OOrganizationIdPProjectIdMModuleIdSplatRoute
 }
 export interface FileRoutesById {
@@ -110,6 +119,7 @@ export interface FileRoutesById {
   '/o/$organizationId/settings/$section/$': typeof OOrganizationIdSettingsSectionSplatRoute
   '/o/$organizationId/settings/m/$moduleId': typeof OOrganizationIdSettingsMModuleIdRoute
   '/o/$organizationId/p/$projectId/': typeof OOrganizationIdPProjectIdIndexRoute
+  '/o/$organizationId/p/$projectId/chat/{-$conversationId}': typeof OOrganizationIdPProjectIdChatChar123ConversationIdChar125Route
   '/o/$organizationId/p/$projectId/m/$moduleId/$': typeof OOrganizationIdPProjectIdMModuleIdSplatRoute
 }
 export interface FileRouteTypes {
@@ -124,6 +134,7 @@ export interface FileRouteTypes {
     | '/o/$organizationId/settings/$section/$'
     | '/o/$organizationId/settings/m/$moduleId'
     | '/o/$organizationId/p/$projectId/'
+    | '/o/$organizationId/p/$projectId/chat/{-$conversationId}'
     | '/o/$organizationId/p/$projectId/m/$moduleId/$'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -136,6 +147,7 @@ export interface FileRouteTypes {
     | '/o/$organizationId/settings/$section/$'
     | '/o/$organizationId/settings/m/$moduleId'
     | '/o/$organizationId/p/$projectId'
+    | '/o/$organizationId/p/$projectId/chat/{-$conversationId}'
     | '/o/$organizationId/p/$projectId/m/$moduleId/$'
   id:
     | '__root__'
@@ -148,6 +160,7 @@ export interface FileRouteTypes {
     | '/o/$organizationId/settings/$section/$'
     | '/o/$organizationId/settings/m/$moduleId'
     | '/o/$organizationId/p/$projectId/'
+    | '/o/$organizationId/p/$projectId/chat/{-$conversationId}'
     | '/o/$organizationId/p/$projectId/m/$moduleId/$'
   fileRoutesById: FileRoutesById
 }
@@ -161,6 +174,7 @@ export interface RootRouteChildren {
   OOrganizationIdSettingsSectionSplatRoute: typeof OOrganizationIdSettingsSectionSplatRoute
   OOrganizationIdSettingsMModuleIdRoute: typeof OOrganizationIdSettingsMModuleIdRoute
   OOrganizationIdPProjectIdIndexRoute: typeof OOrganizationIdPProjectIdIndexRoute
+  OOrganizationIdPProjectIdChatChar123ConversationIdChar125Route: typeof OOrganizationIdPProjectIdChatChar123ConversationIdChar125Route
   OOrganizationIdPProjectIdMModuleIdSplatRoute: typeof OOrganizationIdPProjectIdMModuleIdSplatRoute
 }
 
@@ -229,6 +243,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OOrganizationIdSettingsMModuleIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/o/$organizationId/p/$projectId/chat/{-$conversationId}': {
+      id: '/o/$organizationId/p/$projectId/chat/{-$conversationId}'
+      path: '/o/$organizationId/p/$projectId/chat/{-$conversationId}'
+      fullPath: '/o/$organizationId/p/$projectId/chat/{-$conversationId}'
+      preLoaderRoute: typeof OOrganizationIdPProjectIdChatChar123ConversationIdChar125RouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/o/$organizationId/p/$projectId/m/$moduleId/$': {
       id: '/o/$organizationId/p/$projectId/m/$moduleId/$'
       path: '/o/$organizationId/p/$projectId/m/$moduleId/$'
@@ -250,6 +271,8 @@ const rootRouteChildren: RootRouteChildren = {
     OOrganizationIdSettingsSectionSplatRoute,
   OOrganizationIdSettingsMModuleIdRoute: OOrganizationIdSettingsMModuleIdRoute,
   OOrganizationIdPProjectIdIndexRoute: OOrganizationIdPProjectIdIndexRoute,
+  OOrganizationIdPProjectIdChatChar123ConversationIdChar125Route:
+    OOrganizationIdPProjectIdChatChar123ConversationIdChar125Route,
   OOrganizationIdPProjectIdMModuleIdSplatRoute:
     OOrganizationIdPProjectIdMModuleIdSplatRoute,
 }

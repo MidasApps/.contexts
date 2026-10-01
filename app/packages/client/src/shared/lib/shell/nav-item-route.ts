@@ -23,6 +23,8 @@ export const navItemRoute = (target: NavTarget, context: NavContext): Route | nu
       return organizationId === undefined ? null : { id: "settings-module", organizationId, moduleId: target.moduleId };
     case "project-home":
       return organizationId === undefined || projectId === undefined ? null : { id: "project", organizationId, projectId, unit: unitId };
+    case "chat":
+      return organizationId === undefined || projectId === undefined ? null : { id: "chat", organizationId, projectId, unit: unitId };
     case "module":
       return organizationId === undefined || projectId === undefined
         ? null

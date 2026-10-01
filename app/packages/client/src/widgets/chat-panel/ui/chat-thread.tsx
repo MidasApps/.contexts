@@ -7,9 +7,11 @@ import { useEffect, useRef, useState, type KeyboardEvent, type ReactNode } from 
 import type { UseUploadQueueArgs } from "#/features/chat-upload/index.ts";
 import { ReadAloudAction, type ComposerVoiceProps, type ReadAloudActionProps } from "#/features/chat-voice/index.ts";
 import { useTranslations } from "use-intl";
+import { approvalRequestRoute } from "#/entities/approval-request/index.ts";
 import { ChatMessage, formatUiSubmission, textOf, type UiSubmission } from "#/entities/message/index.ts";
 import { GenerativeUiProvider, type UiRegistry } from "#/features/generative-ui/index.ts";
 import type { ChatScope } from "#/shared/api/chat-transport.ts";
+import { routeHref } from "#/shared/lib/router/route-paths.ts";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
 import { Conversation, ConversationEmptyState, ConversationScrollButton } from "#/shared/ui/ai/conversation.tsx";
 import { Message, MessageAction, MessageActions, MessageContent } from "#/shared/ui/ai/message.tsx";
@@ -135,6 +137,9 @@ export function ChatThread(props: ChatThreadProps) {
     if (props.focusOnMount === true) inputRef.current?.focus();
   }, [props.focusOnMount]);
 
+  // Without a router-built href from the app, the link is the inbox route itself (no locale prefix).
+  const approvalHref = props.approvalHref ?? ((approvalId: string) => routeHref(approvalRequestRoute(props.scope.organizationId, approvalId)));
+
   const stop = () => {
     session.stop();
     inputRef.current?.focus();
@@ -157,7 +162,7 @@ export function ChatThread(props: ChatThreadProps) {
   const retry = phase === "lost" && props.onRecover !== undefined && session.conversationId !== undefined ? props.onRecover : session.retry;
 
   return (
-    <GenerativeUiProvider registry={props.uiRegistry} contracts={props.contracts} submit={submitUi} approvalHref={props.approvalHref} can={props.can} defaultCurrency={props.defaultCurrency}>
+    <GenerativeUiProvider registry={props.uiRegistry} contracts={props.contracts} submit={submitUi} approvalHref={approvalHref} can={props.can} defaultCurrency={props.defaultCurrency}>
       {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions -- Esc is a shortcut of the whole thread; every action it triggers also has a button */}
       <div data-slot="chat-thread" className="flex min-h-0 flex-1 flex-col" onKeyDown={onKeyDown}>
         <Conversation label={t("panel.logLabel")} overlay={<ConversationScrollButton />} scrollElementRef={older.scrollElementRef}>

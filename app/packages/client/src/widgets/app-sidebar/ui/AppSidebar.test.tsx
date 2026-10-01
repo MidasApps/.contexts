@@ -68,5 +68,7 @@ describe("AppSidebar", () => {
     expect(isRouteActive({ id: "settings", organizationId: "o", section: "general" }, "/o/o/settings/roles")).toBe(true);
     expect(isRouteActive({ id: "module", organizationId: "o", projectId: "p", moduleId: "m", rest: "" }, "/o/o/p/p/m/m/items/1")).toBe(true);
     expect(isRouteActive({ id: "project", organizationId: "o", projectId: "p" }, "/o/o/p/p/m/m")).toBe(false);
+    expect(isRouteActive({ id: "chat", organizationId: "o", projectId: "p" }, "/o/o/p/p/chat/c1")).toBe(true);
+    expect(isRouteActive({ id: "project", organizationId: "o", projectId: "p" }, "/o/o/p/p/chat")).toBe(false);
   });
 });

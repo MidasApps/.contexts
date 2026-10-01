@@ -2,6 +2,7 @@ import { createClientApp, type ReportError } from "@core/client/app-shell";
 import type { FetchLike } from "@core/client/shared/api";
 import { createFirebaseAuthClient, type AuthPort } from "@core/client/shared/lib/auth";
 import type { SessionBridgePort } from "@core/client/shared/lib/session-bridge";
+import { CHAT_SHELL_SLOTS } from "@core/client/widgets/chat-panel";
 import type { RouterHistory } from "@tanstack/react-router";
 import { toClientConfig } from "@/adapters/desktop-client-config.ts";
 import { createLocaleStore, resolveDesktopLocale } from "@/adapters/desktop-locale.ts";
@@ -69,6 +70,8 @@ export const createDesktopRuntime = (args: DesktopRuntimeArgs): DesktopRuntime =
   const client = createClientApp({
     config,
     modules: DESKTOP_MODULES,
+    // The chat in the shell's right panel (SP4 Task 13), the same widget as on web.
+    slots: CHAT_SHELL_SLOTS,
     adapters: {
       auth,
       router: routerPort,

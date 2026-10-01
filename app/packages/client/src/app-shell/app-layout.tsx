@@ -4,6 +4,8 @@ import { useState, type ReactNode } from "react";
 import { useTranslations } from "use-intl";
 import { BREAKPOINTS, useMediaQuery } from "#/shared/lib/media/use-media-query.ts";
 import { useShellSlots } from "#/shared/lib/shell/shell-registry-context.tsx";
+import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
+import { Icon } from "#/shared/ui/atoms/Icon/Icon.tsx";
 import { AppShellTemplate } from "#/shared/ui/templates/AppShellTemplate/AppShellTemplate.tsx";
 import { AppSidebar } from "#/widgets/app-sidebar/index.ts";
 import { AppTopbar } from "#/widgets/app-topbar/index.ts";
@@ -23,19 +25,31 @@ export type AppLayoutProps = {
   persistSidebarState?: (open: boolean) => void;
 };
 
+const alwaysAvailable = (): boolean => true;
+
 /**
  * Layout of every signed-in page of the user area (SP2 spec §9): the app composes the shell widgets
  * here (FSD app layer), so widgets never import each other. Sidebar with switchers, unit picker,
  * navigation and user menu; topbar with breadcrumbs and the palette trigger; the offline banner; the
  * impersonation banner (support access as a user, SP1 spec §6.6);
- * the command palette (⌘K / Ctrl+K); the right-panel slot SP4 fills with chat.
+ * the command palette (⌘K / Ctrl+K); the right-panel slot SP4 fills with chat. The panel starts
+ * closed and is opened from the topbar; the slot's own hook says where it applies, and its content
+ * mounts only while it is open.
  */
 export function AppLayout({ children, sidebarDefaultOpen, persistSidebarState }: AppLayoutProps) {
   const t = useTranslations("shell");
   const [paletteOpen, setPaletteOpen] = useState(false);
-  const [panelOpen, setPanelOpen] = useState(true);
+  const [panelOpen, setPanelOpen] = useState(false);
   const compactPanel = useMediaQuery(`(max-width: ${BREAKPOINTS.lg - 1}px)`);
-  const { rightPanel: RightPanel } = useShellSlots();
+  // The registries are built once per app, so this is the same hook on every render.
+  const { rightPanel: RightPanel, useRightPanelAvailable = alwaysAvailable } = useShellSlots();
+  const panelAvailable = useRightPanelAvailable() && RightPanel !== undefined;
+  const panelToggle = panelAvailable ? (
+    <Button variant={panelOpen ? "secondary" : "ghost"} size="sm" aria-pressed={panelOpen} onClick={() => setPanelOpen((open) => !open)}>
+      <Icon name="message" />
+      <span className="max-sm:sr-only">{t("rightPanel.toggle")}</span>
+    </Button>
+  ) : null;
   return (
     <>
       <AppShellTemplate
@@ -51,8 +65,8 @@ export function AppLayout({ children, sidebarDefaultOpen, persistSidebarState }:
             footer={<UserMenu />}
           />
         }
-        topbar={<AppTopbar onOpenCommandPalette={() => setPaletteOpen(true)} />}
-        rightPanel={RightPanel === undefined ? undefined : { label: t("rightPanel.label"), content: <RightPanel />, open: panelOpen, onOpenChange: setPanelOpen }}
+        topbar={<AppTopbar onOpenCommandPalette={() => setPaletteOpen(true)} actions={panelToggle} />}
+        rightPanel={panelAvailable ? { label: t("rightPanel.label"), content: panelOpen ? <RightPanel /> : null, open: panelOpen, onOpenChange: setPanelOpen } : undefined}
         compactRightPanel={compactPanel}
         {...(sidebarDefaultOpen === undefined ? {} : { sidebarDefaultOpen })}
         {...(persistSidebarState === undefined ? {} : { persistSidebarState })}

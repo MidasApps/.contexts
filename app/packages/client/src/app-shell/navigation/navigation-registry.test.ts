@@ -72,7 +72,9 @@ describe("core navigation", () => {
       ["core.admin.flags", "platform.flag.manage"],
     ]);
     expect(registry.visibleItems("organization", all).map((entry) => entry.id)).toEqual(["core.organization.home", "core.organization.settings"]);
-    expect(registry.visibleItems("project", all).map((entry) => entry.id)).toEqual(["core.project.home"]);
+    expect(registry.visibleItems("project", all).map((entry) => entry.id)).toEqual(["core.project.home", "core.project.chat"]);
+    // The chat entry is for members who may chat (SP4 Task 13).
+    expect(registry.visibleItems("project", (permission) => permission !== "core.conversation.send").map((entry) => entry.id)).toEqual(["core.project.home"]);
   });
 });
 
@@ -87,11 +89,13 @@ describe("navItemRoute", () => {
     expect(navItemRoute({ kind: "admin", rest: "users" }, {})).toEqual({ id: "admin", rest: "users" });
     expect(navItemRoute({ kind: "organization-home" }, context)).toEqual({ id: "organization", organizationId: "o1" });
     expect(navItemRoute({ kind: "project-home" }, context)).toEqual({ id: "project", organizationId: "o1", projectId: "p1", unit: "u1" });
+    expect(navItemRoute({ kind: "chat" }, context)).toEqual({ id: "chat", organizationId: "o1", projectId: "p1", unit: "u1" });
   });
 
   it("returns null when the context lacks the organization or project the target needs", () => {
     expect(navItemRoute({ kind: "module", moduleId: "sample", path: "" }, { organizationId: "o1" })).toBeNull();
     expect(navItemRoute({ kind: "settings", section: "roles" }, {})).toBeNull();
     expect(navItemRoute({ kind: "project-home" }, { organizationId: "o1" })).toBeNull();
+    expect(navItemRoute({ kind: "chat" }, { organizationId: "o1" })).toBeNull();
   });
 });
