@@ -18,6 +18,7 @@ const STREAMS_RETRY_AFTER_SECONDS = 5;
 export const sendChatErrorResponse = (error: SendChatError, requestId: string): Response => {
   switch (error.code) {
     case "CONVERSATION_NOT_FOUND":
+    case "AGENT_NOT_FOUND":
       return apiError(404, "NOT_FOUND", requestId);
     case "ACCESS_DENIED":
       return deniedResponse(error.reason, requestId);
@@ -50,6 +51,7 @@ const buildSendRoute = (deps: ChatRoutesDeps): RouteHandler =>
       gateway: deps.chat,
       resolveAttachments: makeResolveAttachments(deps.files),
       recordToolDecisions: makeRecordToolDecisions({ audit }),
+      ...(deps.isChatAgentEnabled === undefined ? {} : { isChatAgentEnabled: deps.isChatAgentEnabled }),
     });
     const scopeOf = (conversation: Parameters<typeof chatScopeOf>[0]["conversation"]) => chatScopeOf({ deps, principal, conversation, request, requestId });
     const sent = await send({ principal, request: input.body, requestId, authorize, scopeOf });

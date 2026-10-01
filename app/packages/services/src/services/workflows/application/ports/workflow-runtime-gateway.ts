@@ -1,4 +1,4 @@
-import type { AgentCatalogEntry, Schedule, WorkflowCatalogEntry, WorkflowEvent, WorkflowRun, WorkflowRunStatus } from "@core/contracts";
+import type { AgentCatalogEntry, CustomAgentRuntimeOptions, Schedule, WorkflowCatalogEntry, WorkflowEvent, WorkflowRun, WorkflowRunStatus } from "@core/contracts";
 import type { AgentCallScope } from "../../../agents/application/ports/agent-runtime-gateway.ts";
 
 /**
@@ -54,4 +54,8 @@ export type WorkflowRuntimeGateway = {
   readonly listAgentCatalog: (scope: AgentCallScope) => Promise<WorkflowGatewayResult<AgentCatalogEntry[]>>;
   /** The workflows the tenant may start or schedule (`/tenant-catalog/workflows`, SP5 Task 14). */
   readonly listWorkflowCatalog: (scope: AgentCallScope) => Promise<WorkflowGatewayResult<WorkflowCatalogEntry[]>>;
+  /** The models, tools and platform skills a custom agent may select (`/tenant-catalog/agent-options`, decision 0046). */
+  readonly getCustomAgentOptions: (scope: AgentCallScope) => Promise<WorkflowGatewayResult<CustomAgentRuntimeOptions>>;
+  /** Drops the runtime's cached custom agents of the caller's tenant (`/tenant-catalog/custom-agents/invalidate`). */
+  readonly invalidateCustomAgents: (scope: AgentCallScope) => Promise<WorkflowGatewayResult<null>>;
 };

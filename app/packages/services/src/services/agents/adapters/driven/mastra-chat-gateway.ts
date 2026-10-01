@@ -1,3 +1,4 @@
+import { CUSTOM_AGENT_RUNTIME_ID } from "@core/contracts";
 import { z } from "zod";
 import type { GatewayResult } from "../../application/ports/agent-runtime-gateway.ts";
 import type { ChatMessagesPage, ChatRuntimeGateway, ChatStreamAnswer } from "../../application/ports/chat-runtime-gateway.ts";
@@ -13,6 +14,12 @@ export const CHAT_ROUTES = {
   messages: (agentId: string, page: number, perPage: number) => `/chat/${encodeURIComponent(agentId)}/messages?page=${page}&perPage=${perPage}`,
   summary: (agentId: string) => `/chat/${encodeURIComponent(agentId)}/summary`,
 } as const;
+
+/**
+ * Agent whose memory holds the thread of a conversation: every custom agent runs on one
+ * registered Mastra agent (decision 0046), so the memory routes of Mastra know only that id.
+ */
+export const memoryAgentIdOf = (agentId: string): string => (agentId === "assistant" ? agentId : CUSTOM_AGENT_RUNTIME_ID);
 
 const SSE = "text/event-stream";
 
@@ -40,7 +47,7 @@ const jsonOf = async <T>(result: GatewayResult<Response>, schema: z.ZodType<T>):
 const threadTitleOf = (connection: MastraConnection): ChatRuntimeGateway["threadTitle"] => (input) =>
   withDeadline(input.scope, connection.timeouts.jsonMs, async (signal) => {
     const client = await clientFor(connection, input.scope, signal);
-    const parsed = ThreadSchema.safeParse(await client.getMemoryThread({ threadId: input.threadId, agentId: input.agentId }).get());
+    const parsed = ThreadSchema.safeParse(await client.getMemoryThread({ threadId: input.threadId, agentId: memoryAgentIdOf(input.agentId) }).get());
     return parsed.success ? (parsed.data.title ?? null) : null;
   });
 
@@ -73,7 +80,8 @@ export const createMastraChatGateway = (options: MastraGatewayOptions): ChatRunt
     deleteThread: (input) =>
       withDeadline(input.scope, connection.timeouts.jsonMs, async (signal) => {
         const client = await clientFor(connection, input.scope, signal);
-        await client.getMemoryThread({ threadId: input.threadId, agentId: input.agentId }).delete({ agentId: input.agentId });
+        const agentId = memoryAgentIdOf(input.agentId);
+        await client.getMemoryThread({ threadId: input.threadId, agentId }).delete({ agentId });
         return null;
       }),
     listMessages: async ({ scope, agentId, page, perPage }): Promise<GatewayResult<ChatMessagesPage>> => {

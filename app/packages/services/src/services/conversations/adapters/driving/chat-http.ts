@@ -5,7 +5,7 @@ import type { GetReadyFile, ReadFileBytes } from "../../../files/application/use
 import type { ResolveAccessContext } from "../../../identity/application/use-cases/resolve-access-context.ts";
 import type { ApiRouteDeps } from "../../../shared/http/api-route.ts";
 import type { Logger } from "../../../shared/observability/logger.ts";
-import { conversationNode } from "../../application/use-cases/send-chat-message.ts";
+import { conversationNode, type SendChatDeps } from "../../application/use-cases/send-chat-message.ts";
 import type { ConversationsServices } from "../../composition.ts";
 import { trackRunStream } from "./run-stream.ts";
 
@@ -16,6 +16,8 @@ export type ChatRoutesDeps = {
   readonly conversations: ConversationsServices;
   readonly resolveAccessContext: ResolveAccessContext;
   readonly files: { readonly getReadyFile: GetReadyFile; readonly readFileBytes: ReadFileBytes };
+  /** Custom agents members may chat with (decision 0046); absent: only the assistant answers. */
+  readonly isChatAgentEnabled?: SendChatDeps["isChatAgentEnabled"];
 };
 
 const BEARER = /^Bearer\s+(\S+)$/i;

@@ -184,3 +184,53 @@ describe("GET /v1/chat/{id}/stream and POST /v1/chat/{id}/stop", () => {
     expect(repository.all()[0]).toMatchObject({ activeRunId: null, messageCount: 2 });
   });
 });
+
+describe("POST /v1/chat with a custom agent (decision 0046)", () => {
+  const CUSTOM_AGENT = "Ag000000000000000001";
+  const setupCustom = (enabled: { value: boolean }) => {
+    const context = setupChatRoutes();
+    const checks: { tenantId: string; agentId: string }[] = [];
+    const isChatAgentEnabled = (input: { tenantId: string; agentId: string }) => {
+      checks.push(input);
+      return Promise.resolve(enabled.value && input.tenantId === ORG_A && input.agentId === CUSTOM_AGENT);
+    };
+    return { ...context, checks, routes: buildChatRoutes({ ...context.deps, isChatAgentEnabled }) };
+  };
+
+  it("starts a conversation on an enabled custom agent of the organization", async () => {
+    const { routes, repository, checks } = setupCustom({ value: true });
+    const response = await send(routes, userTurn("Hello", { agentId: CUSTOM_AGENT }));
+    expect(response.status).toBe(200);
+    expect(repository.all()[0]).toMatchObject({ tenantId: ORG_A, agentId: CUSTOM_AGENT });
+    expect(checks).toEqual([{ tenantId: ORG_A, agentId: CUSTOM_AGENT }]);
+  });
+
+  it("answers 404 for an unknown or disabled agent, or one of another organization, without a conversation or a run", async () => {
+    const { routes, repository, chat } = setupCustom({ value: true });
+    expect((await send(routes, userTurn("Hello", { agentId: "Ag000000000000000002" }))).status).toBe(404);
+    expect((await send(routes, { ...userTurn("Hello", { agentId: CUSTOM_AGENT }), organizationId: ORG_B }, "bob")).status).toBe(404);
+    expect((await send(setupCustom({ value: false }).routes, userTurn("Hello", { agentId: CUSTOM_AGENT }))).status).toBe(404);
+    expect((await send(routes, userTurn("Hello", { agentId: "not-an-agent" }))).status).toBe(400);
+    expect(repository.all()).toEqual([]);
+    expect(chat.calls).toEqual([]);
+  });
+
+  it("answers 404 on the next turn once the agent is disabled or deleted", async () => {
+    const enabled = { value: true };
+    const { routes, chat } = setupCustom(enabled);
+    const first = await send(routes, userTurn("Hello", { agentId: CUSTOM_AGENT }));
+    const conversationId = first.headers.get("x-conversation-id") ?? "";
+    await first.text();
+    enabled.value = false;
+    const next = await send(routes, { conversationId, message: { id: "m2", role: "user", parts: [{ type: "text", text: "Again" }] } });
+    expect(next.status).toBe(404);
+    expect((await errorOf(next)).code).toBe("NOT_FOUND");
+    expect(chat.calls.filter((call) => call.kind === "send")).toHaveLength(1);
+  });
+
+  it("refuses every custom agent when the check is not wired, and keeps the assistant", async () => {
+    const { routes } = setup();
+    expect((await send(routes, userTurn("Hello", { agentId: CUSTOM_AGENT }))).status).toBe(404);
+    expect((await send(routes, userTurn("Hello", { agentId: "assistant" }))).status).toBe(200);
+  });
+});

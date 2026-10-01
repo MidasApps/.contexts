@@ -58,3 +58,17 @@ describe("createMastraWorkflowGateway", () => {
     expect(await gatewayAnswering(200, { data: { runId: 1 } }).gateway.getRun(scope, "run-1")).toEqual({ ok: false, error: { code: "UPSTREAM_UNAVAILABLE", status: 502 } });
   });
 });
+
+describe("custom agent runtime routes (decision 0046)", () => {
+  it("reads the agent options and posts the cache invalidation", async () => {
+    const options = { models: ["chat"], tools: [{ id: "catalog.listEntities", kind: "read", source: "core", description: "Lists." }], coreSkills: [] };
+    const read = gatewayAnswering(200, { data: options });
+    expect(await read.gateway.getCustomAgentOptions(scope)).toEqual({ ok: true, data: options });
+    expect(read.seen[0]?.url).toBe("http://mastra:4111/tenant-catalog/agent-options");
+    const leaky = gatewayAnswering(200, { data: { ...options, instructions: "system prompt" } });
+    expect(await leaky.gateway.getCustomAgentOptions(scope)).toEqual({ ok: false, error: { code: "UPSTREAM_UNAVAILABLE", status: 502 } });
+    const dropped = gatewayAnswering(204, null);
+    expect(await dropped.gateway.invalidateCustomAgents(scope)).toEqual({ ok: true, data: null });
+    expect(dropped.seen[0]).toMatchObject({ url: "http://mastra:4111/tenant-catalog/custom-agents/invalidate" });
+  });
+});

@@ -1,4 +1,4 @@
-import type { ChatRequest, Conversation, NodeRef, ProjectId, TenantId, UserPrincipal } from "@core/contracts";
+import type { ChatAgentId, ChatRequest, Conversation, CustomAgentId, NodeRef, ProjectId, TenantId, UserPrincipal } from "@core/contracts";
 import type { Authorize } from "../../../access/application/ports/driving/authorize.ts";
 import type { DenyReason } from "../../../access/domain/authorization.ts";
 import type { AgentCallScope, GatewayError } from "../../../agents/application/ports/agent-runtime-gateway.ts";
@@ -12,6 +12,7 @@ export const CONVERSATION_SEND_PERMISSION = "core.conversation.send";
 
 export type SendChatError =
   | { readonly code: "CONVERSATION_NOT_FOUND" }
+  | { readonly code: "AGENT_NOT_FOUND" }
   | { readonly code: "ACCESS_DENIED"; readonly reason: DenyReason }
   | { readonly code: "STREAMS_EXHAUSTED" }
   | { readonly code: "ATTACHMENTS_INVALID"; readonly details: readonly AttachmentIssue[] }
@@ -26,6 +27,11 @@ export type SendChatDeps = {
   readonly gateway: ChatRuntimeGateway;
   readonly resolveAttachments: ResolveAttachments;
   readonly recordToolDecisions: RecordToolDecisions;
+  /**
+   * Whether a custom agent is enabled in the tenant (decision 0046). Without it only the
+   * assistant answers: a custom agent id is refused (fail closed).
+   */
+  readonly isChatAgentEnabled?: (input: { readonly tenantId: TenantId; readonly agentId: CustomAgentId }) => Promise<boolean>;
 };
 
 export type SendChatMessage = (input: {
@@ -85,6 +91,13 @@ const checkAccess = async (deps: SendChatDeps, input: Parameters<SendChatMessage
   return null;
 };
 
+// A custom agent must be enabled in the tenant of the conversation on every turn, new or not.
+const isAgentAvailable = async (deps: SendChatDeps, input: Parameters<SendChatMessage>[0], target: Target): Promise<boolean> => {
+  const agentId: ChatAgentId = target.existing?.agentId ?? input.request.agentId ?? "assistant";
+  if (agentId === "assistant") return true;
+  return (await deps.isChatAgentEnabled?.({ tenantId: target.tenantId, agentId })) ?? false;
+};
+
 /**
  * One `/v1/chat` turn (spec §4.1–§4.4): owner check → authorize `core.conversation.send` →
  * stream cap → attachments (or approval audit) → conversation (created on the first turn) →
@@ -97,6 +110,7 @@ export const makeSendChatMessage =
     if (target === null) return err({ code: "CONVERSATION_NOT_FOUND" });
     const denied = await checkAccess(deps, input, target);
     if (denied !== null) return err(denied);
+    if (!(await isAgentAvailable(deps, input, target))) return err({ code: "AGENT_NOT_FOUND" });
     // Approval responses exist only for an existing conversation (checkAccess), so a new one needs no id here.
     const prepared = await prepareMessage(deps, input, { tenantId: target.tenantId, conversationId: target.existing?.id ?? "" });
     if (!prepared.ok) return prepared;

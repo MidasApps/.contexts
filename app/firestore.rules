@@ -110,6 +110,15 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
+    // Tenant-defined agents and skills (decision 0046): managed through `/v1/agents` and
+    // `/v1/skills` only; the agent runtime reads them with the Admin SDK.
+    match /custom-agents/{agentId} {
+      allow read, write: if false;
+    }
+    match /custom-skills/{skillId} {
+      allow read, write: if false;
+    }
+
     // Local secret store (Firestore emulator, APP_ENV=local only): never a client.
     match /local-secrets/{secretName} {
       allow read, write: if false;

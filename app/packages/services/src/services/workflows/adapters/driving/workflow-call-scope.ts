@@ -32,14 +32,28 @@ type ScopeArgs = {
  * Bearer. The runtime authorizes again from the same Bearer.
  */
 export const workflowCallScope = async (args: ScopeArgs): Promise<AgentCallScope | Response> => {
-  const { principal, authorize, requestId, request } = args.ctx;
+  const { principal, authorize, requestId } = args.ctx;
   const tenantId = tenantOfCall(principal, args.organizationId, requestId);
   if (tenantId instanceof Response) return tenantId;
   const denied = await authorizeOrganization({ authorize, principal: principal, tenantId, permission: args.permission, requestId });
   if (denied !== null) return denied;
+  return (await runtimeCallScope({ ctx: args.ctx, tenantId, resolveAccessContext: args.resolveAccessContext })) ?? apiError(403, "FORBIDDEN", requestId);
+};
+
+/**
+ * The Mastra call scope of a caller already authorized at the organization: its access context
+ * and its own Bearer. `null` without either.
+ */
+export const runtimeCallScope = async (args: {
+  readonly ctx: Pick<ScopeArgs["ctx"], "principal" | "requestId" | "request">;
+  readonly tenantId: TenantId;
+  readonly resolveAccessContext: ResolveAccessContext;
+}): Promise<AgentCallScope | null> => {
+  const { principal, requestId, request } = args.ctx;
+  const { tenantId } = args;
   const context = await args.resolveAccessContext({ principal: principal, node: { level: "organization", tenantId } });
   const bearer = BEARER.exec(request.headers.get(FORWARDED_HEADERS.authorization) ?? "")?.[1];
-  if (context === null || bearer === undefined) return apiError(403, "FORBIDDEN", requestId);
+  if (context === null || bearer === undefined) return null;
   const traceparent = request.headers.get(FORWARDED_HEADERS.traceparent);
   return { bearer, tenantId, regional: context.regional, requestId, ...(traceparent === null ? {} : { traceparent }), signal: request.signal };
 };

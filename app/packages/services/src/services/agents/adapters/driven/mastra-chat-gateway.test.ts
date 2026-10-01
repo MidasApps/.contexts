@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { AgentCallScope } from "../../application/ports/agent-runtime-gateway.ts";
-import { createMastraChatGateway } from "./mastra-chat-gateway.ts";
+import { createMastraChatGateway, memoryAgentIdOf } from "./mastra-chat-gateway.ts";
 
 const SCOPE: AgentCallScope = {
   bearer: "user-token",
@@ -75,5 +75,12 @@ describe("Mastra chat gateway", () => {
     for (let index = 0; index < 3; index += 1) {
       expect(await gateway.abort({ scope: SCOPE, runId: "run-1" })).toEqual({ ok: false, error: { code: "UPSTREAM_UNAVAILABLE", status: 502 } });
     }
+  });
+});
+
+describe("memoryAgentIdOf", () => {
+  it("keeps the assistant and maps every custom agent to the one runtime agent that holds its memory", () => {
+    expect(memoryAgentIdOf("assistant")).toBe("assistant");
+    expect(memoryAgentIdOf("Ag4sK2lPq0WnR5tYu3bV")).toBe("custom-agent");
   });
 });

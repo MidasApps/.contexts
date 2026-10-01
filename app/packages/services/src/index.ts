@@ -822,3 +822,37 @@ export {
 export { backfillUserSearchNames, type BackfillUserSearchNamesResult } from "./services/shared/firestore/backfill-user-search-names.ts";
 export { USER_SEARCH_NAME_FIELD, userSearchFields } from "./services/shared/firestore/user-search-fields.ts";
 export { normalizeSearchText } from "./services/shared/text/search-text.ts";
+// Tenant-defined agents and skills (decision 0046): `/v1/agents`, `/v1/skills`, the runtime reads.
+export {
+  ASSISTANT_CHAT_AGENT,
+  buildCustomAgentsRoutes,
+  buildCustomSkillsRoutes,
+  createCustomAgentsServices,
+  createFirebaseCustomAgentsServices,
+  createFirestoreCustomAgentRepository,
+  createFirestoreCustomSkillRepository,
+  createInMemoryCustomAgentRepository,
+  createInMemoryCustomSkillRepository,
+  createPlanCustomLimitsReader,
+  CUSTOM_AGENTS_COLLECTION,
+  CUSTOM_AGENTS_READ_PERMISSION,
+  CUSTOM_AGENTS_WRITE_PERMISSION,
+  CUSTOM_SKILLS_COLLECTION,
+  CustomAgentNotFoundError,
+  CustomLimitReachedError,
+  customLimitsOfPlan,
+  CustomSkillNameTakenError,
+  CustomSkillNotFoundError,
+  fixedCustomLimits,
+  InvalidCustomDefinitionError,
+  type CustomAgentRepository,
+  type CustomAgentsCommand,
+  type CustomAgentsDeps,
+  type CustomAgentsRouteDeps,
+  type CustomAgentsRuntimeReads,
+  type CustomAgentsServices,
+  type CustomAgentUsage,
+  type CustomLimitsReader,
+  type CustomSkillRepository,
+  type IsChatAgentEnabled,
+} from "./services/custom-agents/index.ts";
