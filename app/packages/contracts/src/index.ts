@@ -543,6 +543,14 @@ export {
 } from "./contracts/platform/feature-flag.schema.ts";
 export { SP5_ADMIN_ENDPOINTS } from "./contracts/sp5-admin-endpoints.ts";
 export {
+  getUsageSummaryEndpoint, listAgentCatalogEndpoint, listWorkflowCatalogEndpoint, SP5_SETTINGS_CONTRACTS, SP5_SETTINGS_ENDPOINTS,
+} from "./contracts/sp5-settings-endpoints.ts";
+export {
+  AgentCatalogEntryContract, AgentCatalogEntrySchema, AgentCatalogSkillSchema, AgentCatalogToolSchema, type AgentCatalogEntry,
+  type AgentCatalogSkill, type AgentCatalogTool,
+} from "./contracts/agents/agent-catalog.schema.ts";
+export { WorkflowCatalogEntryContract, WorkflowCatalogEntrySchema, type WorkflowCatalogEntry } from "./contracts/workflows/workflow-catalog.schema.ts";
+export {
   BudgetCapsSchema, BudgetSourceSchema, OrganizationAdminDetailContract, OrganizationAdminDetailSchema, OrganizationAdminSummaryContract, OrganizationAdminSummarySchema, SetTenantBudgetInputContract,
   SetTenantBudgetInputSchema, UpdateOrganizationAdminInputContract, UpdateOrganizationAdminInputSchema, type BudgetCaps,
   type OrganizationAdminDetail, type OrganizationAdminSummary, type SetTenantBudgetInput, type UpdateOrganizationAdminInput,

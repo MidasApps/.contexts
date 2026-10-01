@@ -1,0 +1,70 @@
+{
+  "additionalProperties": false,
+  "description": "A workflow the organization may start or put on a schedule, with the JSON Schema of its input.",
+  "examples": [
+    {
+      "description": "Aggregates the organization's model usage and checks its budget.",
+      "id": "usage-report",
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {},
+        "type": "object"
+      },
+      "schedulable": true,
+      "startable": false
+    }
+  ],
+  "properties": {
+    "description": {
+      "description": "What the workflow does.",
+      "maxLength": 1000,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "id": {
+      "description": "Workflow id.",
+      "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+      "type": "string",
+      "x-pii": "none"
+    },
+    "inputSchema": {
+      "anyOf": [
+        {
+          "additionalProperties": {},
+          "propertyNames": {
+            "type": "string"
+          },
+          "type": "object"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "JSON Schema of the workflow input, when the workflow declares one; the server validates the input again.",
+      "x-pii": "none"
+    },
+    "schedulable": {
+      "description": "A tenant schedule may start it.",
+      "type": "boolean",
+      "x-pii": "none"
+    },
+    "startable": {
+      "description": "POST /v1/workflows/{workflowId}/runs may start it.",
+      "type": "boolean",
+      "x-pii": "none"
+    }
+  },
+  "required": [
+    "id",
+    "description",
+    "startable",
+    "schedulable",
+    "inputSchema"
+  ],
+  "type": "object",
+  "x-kind": "view",
+  "x-permission": "core.workflow-run.read",
+  "x-pii": "none",
+  "x-relations": [],
+  "x-tenancyScope": "organization"
+}

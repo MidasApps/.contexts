@@ -3143,6 +3143,71 @@ paths:
       tags:
         - agent-settings
       x-auth: user
+  /v1/agents:
+    get:
+      operationId: agents.listCatalog
+      parameters:
+        - description: Organization to act in; required for users, and when given it must be an API key's own organization.
+          in: query
+          name: organizationId
+          required: false
+          schema:
+            minLength: 1
+            type: string
+            x-pii: none
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    items:
+                      $ref: "#/components/schemas/agents.AgentCatalogEntry"
+                    type: array
+                required:
+                  - data
+                type: object
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: VALIDATION_FAILED
+          x-error-codes:
+            - VALIDATION_FAILED
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UNAUTHORIZED
+          x-error-codes:
+            - UNAUTHORIZED
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: FORBIDDEN
+          x-error-codes:
+            - FORBIDDEN
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: INTERNAL_ERROR
+          x-error-codes:
+            - INTERNAL_ERROR
+      security:
+        - bearerAuth: []
+      summary: Lists the subagents available to the organization with their enabled state, tools and skills (core.agent-settings.read).
+      tags:
+        - agents
+      x-auth: principal
   /v1/agents/{agentId}/prompt-addendum/activations:
     get:
       operationId: prompts.listAddendumActivations
@@ -9001,6 +9066,14 @@ paths:
             minLength: 1
             type: string
             x-pii: none
+        - description: Project of the organization to index the source for (namespace project:<id>); the whole organization when absent.
+          in: query
+          name: projectId
+          required: false
+          schema:
+            minLength: 1
+            type: string
+            x-pii: none
         - description: ULID; a retry with the same key and body replays the first response (24 h).
           in: header
           name: Idempotency-Key
@@ -9089,7 +9162,7 @@ paths:
             - INTERNAL_ERROR
       security:
         - bearerAuth: []
-      summary: Starts the knowledge-ingest workflow for a ready knowledge file or a public https URL (core.knowledge.write).
+      summary: Starts the knowledge-ingest workflow for a ready knowledge file or a public https URL, for the organization or one of its projects (core.knowledge.write).
       tags:
         - knowledge
       x-auth: principal
@@ -12238,6 +12311,77 @@ paths:
       tags:
         - tenancy
       x-auth: principal
+  /v1/usage:
+    get:
+      operationId: usage.getSummary
+      parameters:
+        - description: Organization to act in; required for users, and when given it must be an API key's own organization.
+          in: query
+          name: organizationId
+          required: false
+          schema:
+            minLength: 1
+            type: string
+            x-pii: none
+        - description: Calendar month in UTC, YYYY-MM; defaults to the current month.
+          in: query
+          name: month
+          required: false
+          schema:
+            pattern: ^\d{4}-(?:0[1-9]|1[0-2])$
+            type: string
+            x-pii: none
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: "#/components/schemas/usage.UsageSummary"
+                required:
+                  - data
+                type: object
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: VALIDATION_FAILED
+          x-error-codes:
+            - VALIDATION_FAILED
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UNAUTHORIZED
+          x-error-codes:
+            - UNAUTHORIZED
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: FORBIDDEN
+          x-error-codes:
+            - FORBIDDEN
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: INTERNAL_ERROR
+          x-error-codes:
+            - INTERNAL_ERROR
+      security:
+        - bearerAuth: []
+      summary: Reads the organization's model usage and cost for a month against its budget caps (core.usage.read).
+      tags:
+        - usage
+      x-auth: principal
   /v1/voice/realtime-sessions:
     post:
       operationId: voice.createRealtimeSession
@@ -12524,6 +12668,71 @@ paths:
         - voice
       x-auth: user
       x-rate-limit: voice-call
+  /v1/workflows:
+    get:
+      operationId: workflows.listCatalog
+      parameters:
+        - description: Organization to act in; required for users, and when given it must be an API key's own organization.
+          in: query
+          name: organizationId
+          required: false
+          schema:
+            minLength: 1
+            type: string
+            x-pii: none
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    items:
+                      $ref: "#/components/schemas/workflows.WorkflowCatalogEntry"
+                    type: array
+                required:
+                  - data
+                type: object
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: VALIDATION_FAILED
+          x-error-codes:
+            - VALIDATION_FAILED
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UNAUTHORIZED
+          x-error-codes:
+            - UNAUTHORIZED
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: FORBIDDEN
+          x-error-codes:
+            - FORBIDDEN
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: INTERNAL_ERROR
+          x-error-codes:
+            - INTERNAL_ERROR
+      security:
+        - bearerAuth: []
+      summary: Lists the workflows the organization may start or schedule, with their input schema (core.workflow-run.read).
+      tags:
+        - workflows
+      x-auth: principal
   /v1/workflows/runs:
     get:
       operationId: workflows.listRuns
@@ -15472,6 +15681,140 @@ components:
       x-kind: command
       x-permission: core.prompt.write
       x-pii: personal
+      x-relations: []
+      x-tenancyScope: organization
+    agents.AgentCatalogEntry:
+      additionalProperties: false
+      description: A subagent available to an organization with its enabled state, tools and skills.
+      examples:
+        - description: Answers from the organization's knowledge base with citations.
+          enabled: true
+          key: knowledge
+          moduleId: null
+          name: Knowledge
+          skills:
+            - description: How to cite knowledge base passages.
+              name: knowledge-citations
+              source: core
+          source: core
+          tools:
+            - id: knowledge.search
+              kind: read
+              source: core
+      properties:
+        description:
+          description: What the agent does.
+          maxLength: 1000
+          type: string
+          x-pii: none
+        enabled:
+          description: Whether the supervisor may delegate to it in this organization.
+          type: boolean
+          x-pii: none
+        key:
+          description: Agent key used in agent-settings.enabledAgents.
+          pattern: ^[a-z][a-z0-9-]*$
+          type: string
+          x-pii: none
+        moduleId:
+          anyOf:
+            - maxLength: 100
+              minLength: 1
+              type: string
+            - type: "null"
+          description: Module that ships the agent; null for core agents.
+          x-pii: none
+        name:
+          description: Display name of the agent.
+          maxLength: 100
+          minLength: 1
+          type: string
+          x-pii: none
+        skills:
+          description: Skills attached to the agent in this organization.
+          items:
+            additionalProperties: false
+            properties:
+              description:
+                description: What the skill teaches the agent, from its SKILL.md.
+                maxLength: 1024
+                type: string
+                x-pii: none
+              name:
+                description: Skill name (its SKILL.md directory, or <module>-<skill>).
+                maxLength: 100
+                minLength: 1
+                type: string
+                x-pii: none
+              source:
+                description: Shipped with the core or with an installed module.
+                enum:
+                  - core
+                  - module
+                type: string
+                x-pii: none
+            required:
+              - name
+              - description
+              - source
+            type: object
+          maxItems: 100
+          type: array
+          x-pii: none
+        source:
+          description: Shipped with the core or with an installed module.
+          enum:
+            - core
+            - module
+          type: string
+          x-pii: none
+        tools:
+          description: Tools the agent has in this organization, connector tools included.
+          items:
+            additionalProperties: false
+            properties:
+              id:
+                description: Tool id, e.g. knowledge.search or command.tenancy.CreateProjectInput.
+                maxLength: 200
+                minLength: 1
+                type: string
+                x-pii: none
+              kind:
+                description: Whether the tool only reads or changes data (mutations are confirmed or approved).
+                enum:
+                  - read
+                  - mutation
+                type: string
+                x-pii: none
+              source:
+                description: "Where the tool comes from: the core, an installed module or one of the organization's connectors."
+                enum:
+                  - core
+                  - module
+                  - connector
+                type: string
+                x-pii: none
+            required:
+              - id
+              - kind
+              - source
+            type: object
+          maxItems: 500
+          type: array
+          x-pii: none
+      required:
+        - key
+        - name
+        - description
+        - source
+        - moduleId
+        - enabled
+        - tools
+        - skills
+      type: object
+      x-kind: view
+      x-permission: core.agent-settings.read
+      x-pii: none
       x-relations: []
       x-tenancyScope: organization
     agents.AgentRequestContext:
@@ -25296,6 +25639,58 @@ components:
       x-kind: command
       x-permission: core.schedule.write
       x-pii: personal
+      x-relations: []
+      x-tenancyScope: organization
+    workflows.WorkflowCatalogEntry:
+      additionalProperties: false
+      description: A workflow the organization may start or put on a schedule, with the JSON Schema of its input.
+      examples:
+        - description: Aggregates the organization's model usage and checks its budget.
+          id: usage-report
+          inputSchema:
+            additionalProperties: false
+            properties: {}
+            type: object
+          schedulable: true
+          startable: false
+      properties:
+        description:
+          description: What the workflow does.
+          maxLength: 1000
+          type: string
+          x-pii: none
+        id:
+          description: Workflow id.
+          pattern: ^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$
+          type: string
+          x-pii: none
+        inputSchema:
+          anyOf:
+            - additionalProperties: {}
+              propertyNames:
+                type: string
+              type: object
+            - type: "null"
+          description: JSON Schema of the workflow input, when the workflow declares one; the server validates the input again.
+          x-pii: none
+        schedulable:
+          description: A tenant schedule may start it.
+          type: boolean
+          x-pii: none
+        startable:
+          description: POST /v1/workflows/{workflowId}/runs may start it.
+          type: boolean
+          x-pii: none
+      required:
+        - id
+        - description
+        - startable
+        - schedulable
+        - inputSchema
+      type: object
+      x-kind: view
+      x-permission: core.workflow-run.read
+      x-pii: none
       x-relations: []
       x-tenancyScope: organization
     workflows.WorkflowEvent:

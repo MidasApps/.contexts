@@ -48,6 +48,7 @@ import { createContractRegistry, type ContractRegistry } from "./contracts/regis
 import { TENANCY_CONTRACTS } from "./contracts/tenancy/contracts.ts";
 import { TENANCY_ENDPOINTS } from "./contracts/tenancy/endpoints.ts";
 import { SP5_ADMIN_ENDPOINTS } from "./contracts/sp5-admin-endpoints.ts";
+import { SP5_SETTINGS_CONTRACTS, SP5_SETTINGS_ENDPOINTS } from "./contracts/sp5-settings-endpoints.ts";
 import { SP5_CONTRACTS } from "./contracts/sp5-contracts.ts";
 import { VOICE_ENDPOINTS } from "./contracts/voice/endpoints.ts";
 import { SCHEDULE_ENDPOINTS, WORKFLOW_RUN_ENDPOINTS } from "./contracts/workflows/endpoints.ts";
@@ -85,6 +86,7 @@ export const CORE_CONTRACTS: readonly ContractDefinition[] = [
   FileReadUrlContract,
   // SP5 workflows, prompts, platform console and observability.
   ...SP5_CONTRACTS,
+  ...SP5_SETTINGS_CONTRACTS,
   // SP4 chat: conversations, generative UI props and voice.
   ConversationContract,
   ChatRequestContract,
@@ -119,6 +121,8 @@ export const CORE_ENDPOINTS: readonly EndpointDefinition[] = [
   ...SCHEDULE_ENDPOINTS,
   // SP5 console APIs: flags, prompts, plans and organizations, traces, evals.
   ...SP5_ADMIN_ENDPOINTS,
+  // SP5 tenant settings: agent and workflow catalogs, usage summary.
+  ...SP5_SETTINGS_ENDPOINTS,
 ];
 
 /** Builds a fresh registry with the core contracts (catalog scripts, apps at startup). */
