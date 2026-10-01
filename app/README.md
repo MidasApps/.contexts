@@ -93,6 +93,26 @@ to the demo organization.
   active-organization switch and claims sync 10 / min per principal; invitation
   preview and accept 20 / min per principal. A refusal is `429` with `Retry-After`.
 
+### Agent runtime (SP3)
+
+- `packages/agents` (`@core/agents`) holds the runtime; `apps/mastra` composes it with the
+  app's modules and serves it privately (Cloud Run); `/v1` reaches it only through the
+  `MastraGateway` (decisions 0019–0029).
+- `AI_MODE=fake` (default in `.env.example` for local) runs agents, tools, memory,
+  knowledge, guardrails and evals offline with scripted models; `AI_MODE=real` needs the
+  provider keys of the `AI_MODEL_*` roles.
+- Agents: `assistant` (supervisor, the only entry) delegates to `knowledge`, `data`,
+  `action` and `web`. A module adds tools, commands (mutations with approval), agents and
+  skills with one `defineAgentModule(...)` listed in `apps/mastra/src/modules.ts`; see
+  `packages/agents/README.md` ("How to add a capability from a module").
+- Evals: `pnpm evals` (fake models, CI gate against `packages/agents/evals/baselines`),
+  `pnpm evals:real` (real providers, opt-in), `pnpm evals:seed` (Mastra datasets).
+  Reports land in `app/.evals/`.
+- `pnpm test:emulators` includes the SP3 gate suite
+  (`apps/mastra/src/mastra/sp3-gate.emulator.test.ts`), which also needs Postgres
+  (`docker compose up -d --wait` and `pnpm db:migrate`).
+- Gate evidence: `../docs/plans/2026-09-29-sp3-agentic-runtime/reports/sp3-gate.md`.
+
 ### Ports
 
 | Service | Port | Set by |

@@ -10,16 +10,30 @@ SP1/SP3 services and `src/modules.ts` lists the agent modules (decision 0019).
 - Every `/api/*` request goes through the route allowlist (other built-in routes answer 404)
   and the context middleware, which builds the typed `AgentRequestContext` from the
   principal `FirebaseMastraAuth` verified (Bearer only). Client-sent context keys are dropped.
-- Access decisions are SP1's (`verifyBearer`, `authorize`, `getEffectivePermissions`).
-  Regional settings wait for SP1's `resolveAccessContext` (SP1 Task 12): until then the
-  regional port rejects, so agent requests fail closed with 401.
-- Approvals, usage, knowledge, connectors, secrets and agent settings are fail-closed
-  stand-ins (`src/runtime/unwired-ports.ts`) until their tasks bind them.
+- Access decisions are SP1's (`verifyBearer`, `authorize`, `getEffectivePermissions`,
+  `resolveAccessContext` for permissions and regional settings at the node); a caller
+  without a membership or without `core.chat.use` gets 403.
+- Ports bound in `src/runtime/create-runtime-ports.ts`: access, audit (Firestore
+  `audit-logs`), approvals (SP1 approval requests, kind `agent-command`), commands
+  (at-most-once per `runId:toolCallId`), semantic SQL (Postgres; no semantic view is
+  registered yet, so `sql.querySemanticSql` refuses every view until a module adds one),
+  knowledge, files, usage, projects, connectors, secrets and web content. Only agent
+  settings is still a fail-closed stand-in (`src/runtime/unwired-ports.ts`, SP5): tenants
+  get the default subagents (`knowledge`, `data`, `action`; `web` off).
 - Agents: `assistant` (supervisor over the knowledge, data, action and web subagents;
-  send `X-Conversation-Id`, the supervisor owns the conversation memory) and `ping`
+  the supervisor owns the conversation memory; a run without `X-Conversation-Id` gets a new
+  conversation, returned in that header) and `ping`
   (health check on the fast model role). Try them with `POST /api/agents/<id>/generate`
   + `Authorization: Bearer <ID token>` + `X-Tenant-Id`. `pnpm build` copies the agent
   instructions and skills of `@core/agents` into `src/mastra/public/`.
+
+## Adding agents, tools, skills and commands
+
+Modules plug in through `defineAgentModule(...)` values listed in `src/modules.ts`
+(`APP_MODULES`); the core never imports a module. The recipe and the rules per capability
+(tool, command, agent, skill, workflow, connector) are in
+`../../packages/agents/README.md`. After adding one, run `pnpm build` (copies instructions
+and skills into `src/mastra/public/`) and the module's eval set.
 
 ## When to use
 
@@ -83,7 +97,8 @@ Both steps are idempotent; locally they run without `--confirm-env`
 
 ```bash
 pnpm -F mastra test                        # unit
-pnpm test:emulators                        # from app/: includes src/mastra/runtime.emulator.test.ts
+pnpm test:emulators                        # from app/: runtime, chat routes and the SP3 gate suite
+                                           # (sp3-gate.emulator.test.ts also needs Postgres + pnpm db:migrate)
 pnpm -F mastra lint
 pnpm -F mastra typecheck
 ```

@@ -53,6 +53,6 @@ Memory must be bounded (`stacks/ai/mastra-sdk.md`: `lastMessages` always capped)
   The harness (`src/evals/memory-comparison.ts`, dataset `evals/datasets/memory.v1.jsonl`,
   config A = default memory, config B = the same with the flag on) runs in `pnpm evals` with
   fake models to prove it works; a fake run never recommends enabling. Enabling needs a real
-  run (`pnpm -F @core/agents evals:real -- memory-comparison`) where B scores ≥ A at ≤ 1.2× A's
+  run (`pnpm -F @core/agents exec vitest run --project evals-real memory-comparison`) where B scores ≥ A at ≤ 1.2× A's
   cost, on conversations long enough to cross OM's 30 000-token observation threshold
   (memory.v1 is not). Report: `docs/plans/2026-09-29-sp3-agentic-runtime/reports/om-comparison.md`.

@@ -65,7 +65,7 @@ tokens per resource), or record why a lower `messageTokens` is the value to ship
 
 ```bash
 cd app/packages/agents
-AI_MODE=real GOOGLE_GENERATIVE_AI_API_KEY=… pnpm evals:real -- memory-comparison
+GOOGLE_GENERATIVE_AI_API_KEY=… pnpm exec vitest run --project evals-real memory-comparison   # this file only; `pnpm evals:real` runs every real set + judge
 # then apply the rule; if it says enable, flip the default of AI_MEMORY_OBSERVATIONAL and amend decision 0029
 ```
 

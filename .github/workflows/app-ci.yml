@@ -97,7 +97,26 @@ jobs:
   emulators:
     name: emulator tests
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    timeout-minutes: 25
+    # The SP3 gate suite (apps/mastra sp3-gate.emulator.test.ts) also needs Postgres:
+    # Mastra storage and memory, the knowledge base and the usage ledger.
+    services:
+      postgres:
+        image: pgvector/pgvector:0.8.6-pg18
+        env:
+          POSTGRES_USER: app
+          POSTGRES_PASSWORD: app
+          POSTGRES_DB: app
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -h 127.0.0.1 -U app -d app"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 20
+    env:
+      # CI-only credentials of the throwaway service container above.
+      DATABASE_URL: postgresql://app:app@127.0.0.1:5432/app
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -114,6 +133,14 @@ jobs:
         run: npm install -g pnpm@${{ env.PNPM_VERSION }}
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+      - name: Apply local init scripts and migrations
+        run: |
+          for file in infra/postgres/init/*.sql; do
+            psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f "$file"
+          done
+          pnpm db:migrate
+        env:
+          APP_ENV: local
       # Builds apps/functions, then runs every *.emulator.test.ts inside
       # `firebase emulators:exec --only auth,firestore,functions,storage` (demo-core).
       - name: Emulator tests

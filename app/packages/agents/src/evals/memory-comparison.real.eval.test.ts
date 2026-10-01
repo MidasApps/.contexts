@@ -3,7 +3,7 @@ import { evalEnvOf, evalModeOf } from "./eval-harness.ts";
 import { loadMemoryDataset, runMemoryComparison } from "./memory-comparison.ts";
 
 // SP3 Task 28. `pnpm evals` runs it with fake models to prove the harness (no quality
-// claim); `pnpm -F @core/agents evals:real -- memory-comparison` produces the numbers
+// claim); `pnpm -F @core/agents exec vitest run --project evals-real memory-comparison` produces the numbers
 // that decide AI_MEMORY_OBSERVATIONAL, and skips without provider keys.
 const mode = evalModeOf(process.env);
 
