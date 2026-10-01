@@ -576,6 +576,7 @@ export {
   createBigQueryLlmCallsTable,
   createBigQueryUsageSink,
   createNoopUsageSink,
+  createPostgresTraceCosts,
   createPostgresUsageRepository,
   createUsageServices,
   createUsageSink,

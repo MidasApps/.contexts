@@ -9,6 +9,8 @@ export type ConsoleResult<T> = Result<T, ConsoleError>;
 /** `null` tenant = staff: every tenant. A tenant endpoint always passes its organization. */
 export type TenantFilter = { readonly tenantId: string | null };
 export type PageNumber = { readonly page: number; readonly perPage: number };
+/** ISO instants: traces that started in `[startedAfter, startedBefore)`. */
+export type TraceTimeRange = { readonly startedAfter?: string; readonly startedBefore?: string };
 
 /**
  * The runtime's console routes (decision 0040): traces, experiments and datasets read from Mastra
@@ -16,7 +18,7 @@ export type PageNumber = { readonly page: number; readonly perPage: number };
  * tenant other than the caller's organization.
  */
 export type ConsoleGateway = {
-  readonly listTraces: (query: TenantFilter & PageNumber & { readonly agentId?: string; readonly status?: "ok" | "error" }) => Promise<ConsoleResult<{ readonly traces: TraceSummary[]; readonly hasMore: boolean }>>;
+  readonly listTraces: (query: TenantFilter & PageNumber & TraceTimeRange & { readonly agentId?: string; readonly status?: "ok" | "error" }) => Promise<ConsoleResult<{ readonly traces: TraceSummary[]; readonly hasMore: boolean }>>;
   readonly getTrace: (query: TenantFilter & { readonly traceId: string }) => Promise<ConsoleResult<TraceDetail>>;
   readonly listExperiments: (query: TenantFilter & PageNumber) => Promise<ConsoleResult<{ readonly experiments: EvalExperimentSummary[]; readonly hasMore: boolean }>>;
   readonly listDatasets: (query: TenantFilter) => Promise<ConsoleResult<EvalDataset[]>>;

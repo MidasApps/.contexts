@@ -35,6 +35,7 @@ import {
   createMastraOperationsGateway,
   createObservabilityServices,
   createPostgresPromptServices,
+  createPostgresTraceCosts,
   flagEnvironmentDefaults,
   createFirestoreConversationsServices,
   createKnowledgeServices,
@@ -121,6 +122,8 @@ export const buildRuntimeRoutes = async (core: CoreServer): Promise<CoreRoutes> 
       feedback: createFirestoreMessageFeedbackStore({ firestore: firebase.firestore }),
       clock: core.pipeline.clock,
       logger: processLogger,
+      // The cost of a trace is what the usage ledger recorded for it (decision 0044).
+      costs: createPostgresTraceCosts(sql),
     }),
   };
   const chatDeps = {

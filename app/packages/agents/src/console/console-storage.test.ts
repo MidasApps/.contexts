@@ -8,10 +8,11 @@ const TENANT_B = "TenantBbbbbbbbbbbbbbb";
 const hex = (seed: string, length: number) => seed.repeat(length).slice(0, length);
 
 // A root agent run and one model generation per trace, in the real in-memory observability store.
-const seedTrace = async (storage: InMemoryStore, args: { traceSeed: string; tenantId: string; secretInput?: unknown }) => {
+const seedTrace = async (storage: InMemoryStore, args: { traceSeed: string; tenantId: string; secretInput?: unknown; startedAt?: string }) => {
   const observability = (await storage.getStore("observability")) as unknown as { createSpan: (args: { span: Record<string, unknown> }) => Promise<void> };
   const traceId = hex(args.traceSeed, 32);
-  const base = { traceId, isEvent: false, startedAt: new Date("2026-10-01T12:00:00.000Z"), endedAt: new Date("2026-10-01T12:00:02.000Z"), metadata: { tenantId: args.tenantId } };
+  const startedAt = new Date(args.startedAt ?? "2026-10-01T12:00:00.000Z");
+  const base = { traceId, isEvent: false, startedAt, endedAt: new Date(startedAt.getTime() + 2000), metadata: { tenantId: args.tenantId } };
   await observability.createSpan({ span: { ...base, spanId: hex(args.traceSeed, 16), parentSpanId: null, name: "agent run: assistant", spanType: "agent_run", entityType: "agent", entityId: "assistant", input: args.secretInput ?? null } });
   await observability.createSpan({
     span: { ...base, spanId: hex(`${args.traceSeed}1`, 16), parentSpanId: hex(args.traceSeed, 16), name: "llm: gemini", spanType: "model_generation", attributes: { model: "gemini-3.5-flash", usage: { inputTokens: 120, outputTokens: 30 } } },
@@ -45,6 +46,33 @@ describe("trace reader over Mastra observability storage (decision 0040)", () =>
     expect((await reader.list({ tenantId: null, page: 0, perPage: 20 })).traces).toHaveLength(2);
     expect(await reader.get({ traceId: traceA, tenantId: TENANT_B })).toBeNull();
     expect((await reader.get({ traceId: traceA, tenantId: TENANT_A }))?.spans.map((span) => span.type)).toEqual(["agent_run", "model_generation"]);
+  });
+
+  it("lists the traces that started in a time range: start inclusive, end exclusive", async () => {
+    const storage = new InMemoryStore();
+    const early = await seedTrace(storage, { traceSeed: "a", tenantId: TENANT_A, startedAt: "2026-09-29T10:00:00.000Z" });
+    const middle = await seedTrace(storage, { traceSeed: "b", tenantId: TENANT_A, startedAt: "2026-09-30T10:00:00.000Z" });
+    const late = await seedTrace(storage, { traceSeed: "c", tenantId: TENANT_B, startedAt: "2026-10-01T10:00:00.000Z" });
+    const store = (await storage.getStore("observability")) as unknown as TraceStore;
+    const ids = async (reader: ReturnType<typeof createTraceReader>, range: { startedAfter?: string; startedBefore?: string }) =>
+      (
+        await reader.list({
+          tenantId: null,
+          page: 0,
+          perPage: 20,
+          ...(range.startedAfter === undefined ? {} : { startedAfter: new Date(range.startedAfter) }),
+          ...(range.startedBefore === undefined ? {} : { startedBefore: new Date(range.startedBefore) }),
+        })
+      ).traces
+        .map((trace) => trace.traceId)
+        .sort();
+    const reader = createTraceReader(store);
+    expect(await ids(reader, { startedAfter: "2026-09-30T10:00:00.000Z" })).toEqual([middle, late].sort());
+    expect(await ids(reader, { startedBefore: "2026-09-30T10:00:00.000Z" })).toEqual([early]);
+    expect(await ids(reader, { startedAfter: "2026-09-29T10:00:00.000Z", startedBefore: "2026-10-01T10:00:00.000Z" })).toEqual([early, middle].sort());
+    // A store that ignores the range still never widens the answer.
+    const ignoring: TraceStore = { listTraces: (args) => store.listTraces({ ...args, filters: {} }), getTrace: (args) => store.getTrace(args) };
+    expect(await ids(createTraceReader(ignoring), { startedAfter: "2026-10-01T00:00:00.000Z" })).toEqual([late]);
   });
 
   it("never returns another tenant's trace even when the storage filter is ignored", async () => {

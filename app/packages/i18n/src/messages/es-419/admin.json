@@ -509,7 +509,10 @@
       "agentInvalid": "Usa minúsculas, números y guiones, empezando por una letra.",
       "status": "Estado",
       "anyStatus": "Todos los estados",
-      "apply": "Filtrar"
+      "apply": "Filtrar",
+      "from": "Desde",
+      "to": "Hasta",
+      "dateHint": "Días completos, en la zona horaria de este navegador."
     },
     "detail": {
       "title": "Trace",

@@ -20,7 +20,7 @@ const TRACE = "4bf92f3577b34da6a3ce929d0e0e4736";
 const fakeConsole = () => {
   const calls: { op: string; tenantId: string | null; extra?: unknown }[] = [];
   const gateway: ConsoleGateway = {
-    listTraces: (query) => (calls.push({ op: "listTraces", tenantId: query.tenantId }), Promise.resolve({ ok: true, data: { traces: [], hasMore: false } })),
+    listTraces: (query) => (calls.push({ op: "listTraces", tenantId: query.tenantId, extra: { startedAfter: query.startedAfter, startedBefore: query.startedBefore } }), Promise.resolve({ ok: true, data: { traces: [], hasMore: false } })),
     getTrace: (query) => {
       calls.push({ op: "getTrace", tenantId: query.tenantId });
       return Promise.resolve(query.tenantId === ORG_B ? { ok: false, error: { code: "NOT_FOUND", status: 404 } } : { ok: true, data: { summary: {}, spans: [] } as unknown as TraceDetail });
@@ -80,6 +80,31 @@ describe("/v1/traces and /v1/admin/traces", () => {
     expect((await callRoute(routes, "traces.adminList", `/v1/admin/traces?organizationId=${ORG_B}`, { as: "sam" })).status).toBe(200);
     expect((await callRoute(routes, "traces.adminGet", `/v1/admin/traces/${TRACE}`, { as: "alice" })).status).toBe(403);
     expect(calls.map((call) => call.tenantId)).toEqual([null, ORG_B]);
+  });
+});
+
+describe("trace time range", () => {
+  const AFTER = "2026-09-29T03:00:00.000Z";
+  const BEFORE = "2026-10-01T03:00:00.000Z";
+
+  it("passes the range to the runtime for staff and for a tenant", async () => {
+    const { routes, calls } = await setup();
+    expect((await callRoute(routes, "traces.adminList", `/v1/admin/traces?startedAfter=${AFTER}&startedBefore=${BEFORE}`, { as: "sam" })).status).toBe(200);
+    expect((await callRoute(routes, "traces.list", `/v1/traces?organizationId=${ORG_A}&startedAfter=${AFTER}`, { as: "alice" })).status).toBe(200);
+    expect(calls.map((call) => [call.tenantId, call.extra])).toEqual([
+      [null, { startedAfter: AFTER, startedBefore: BEFORE }],
+      [ORG_A, { startedAfter: AFTER, startedBefore: undefined }],
+    ]);
+  });
+
+  it("refuses an inverted or empty range and a value that is not an instant, without calling the runtime", async () => {
+    const { routes, calls } = await setup();
+    const inverted = await callRoute(routes, "traces.adminList", `/v1/admin/traces?startedAfter=${BEFORE}&startedBefore=${AFTER}`, { as: "sam" });
+    expect(inverted.status).toBe(400);
+    expect(await inverted.json()).toMatchObject({ error: { code: "VALIDATION_FAILED", details: [{ field: "startedBefore", issue: "NOT_AFTER_START" }] } });
+    expect((await callRoute(routes, "traces.adminList", `/v1/admin/traces?startedAfter=${AFTER}&startedBefore=${AFTER}`, { as: "sam" })).status).toBe(400);
+    expect((await callRoute(routes, "traces.adminList", "/v1/admin/traces?startedAfter=yesterday", { as: "sam" })).status).toBe(400);
+    expect(calls).toEqual([]);
   });
 });
 

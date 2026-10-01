@@ -95,7 +95,27 @@ export const summarizeTrace = (spans: readonly StoredSpan[]): TraceSummary | nul
   return parsed.success ? parsed.data : null;
 };
 
-export type TraceQuery = { readonly tenantId: string | null; readonly agentId?: string; readonly status?: "ok" | "error"; readonly page: number; readonly perPage: number };
+export type TraceQuery = {
+  readonly tenantId: string | null;
+  readonly agentId?: string;
+  readonly status?: "ok" | "error";
+  /** Traces whose root span started in `[startedAfter, startedBefore)` (decision 0044). */
+  readonly startedAfter?: Date;
+  readonly startedBefore?: Date;
+  readonly page: number;
+  readonly perPage: number;
+};
+
+const startedAtFilter = (query: TraceQuery): { startedAt?: { start?: Date; end?: Date; endExclusive: true } } =>
+  query.startedAfter === undefined && query.startedBefore === undefined
+    ? {}
+    : { startedAt: { ...(query.startedAfter === undefined ? {} : { start: query.startedAfter }), ...(query.startedBefore === undefined ? {} : { end: query.startedBefore }), endExclusive: true } };
+
+// Checked again per trace, like the tenant: a store that ignores the range never widens the answer.
+const inRange = (query: TraceQuery, startedAt: string): boolean => {
+  const at = Date.parse(startedAt);
+  return (query.startedAfter === undefined || at >= query.startedAfter.getTime()) && (query.startedBefore === undefined || at < query.startedBefore.getTime());
+};
 
 /**
  * Traces for the console (decision 0040). A tenant query filters on the root span's
@@ -108,11 +128,12 @@ export const createTraceReader = (store: TraceStore) => ({
       ...(query.tenantId === null ? {} : { metadata: { tenantId: query.tenantId } }),
       ...(query.agentId === undefined ? {} : { entityType: "agent", entityId: query.agentId }),
       ...(query.status === undefined ? {} : { status: query.status === "error" ? "error" : "success" }),
+      ...startedAtFilter(query),
     };
     const listed = await store.listTraces({ filters, pagination: { page: query.page, perPage: query.perPage } });
     const roots = listed.spans.filter((span) => query.tenantId === null || tenantOf(span) === query.tenantId);
     const traces = await Promise.all(roots.map(async (root) => summarizeTrace((await store.getTrace({ traceId: root.traceId }))?.spans ?? [root])));
-    return { traces: traces.filter((trace): trace is TraceSummary => trace !== null && (query.tenantId === null || trace.tenantId === query.tenantId)), hasMore: listed.pagination?.hasMore ?? false };
+    return { traces: traces.filter((trace): trace is TraceSummary => trace !== null && (query.tenantId === null || trace.tenantId === query.tenantId) && inRange(query, trace.startedAt)), hasMore: listed.pagination?.hasMore ?? false };
   },
   get: async (input: { readonly traceId: string; readonly tenantId: string | null }): Promise<TraceDetail | null> => {
     const trace = await store.getTrace({ traceId: input.traceId });

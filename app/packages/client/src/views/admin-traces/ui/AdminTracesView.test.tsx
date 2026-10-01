@@ -1,4 +1,4 @@
-import { screen, waitFor, within } from "@testing-library/react";
+import { fireEvent, screen, waitFor, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { renderAdmin } from "#/app-shell/testing/render-admin.tsx";
 import { buildOrganizationSummary } from "#/shared/testing/admin-fixtures.ts";
@@ -49,6 +49,27 @@ describe("AdminTracesView", () => {
     const { api } = render({ path: `/admin/traces?status=error&agentId=assistant&organizationId=${IDS.organization}&page=3` });
     await screen.findByRole("table", { name: "Traces de execução" });
     expect(traceCalls(api)).toEqual([`?page=2&perPage=20&organizationId=${IDS.organization}&agentId=assistant&status=error`]);
+  });
+
+  it("sends the days of the URL as instants: from the start of the first to the end of the last, in the browser's zone", async () => {
+    const { api } = render({ path: "/admin/traces?from=2026-09-29&to=2026-09-30" });
+    await screen.findByRole("table", { name: "Traces de execução" });
+    const sent = new URLSearchParams(traceCalls(api)[0]);
+    expect(sent.get("startedAfter")).toBe(new Date(2026, 8, 29).toISOString());
+    expect(sent.get("startedBefore")).toBe(new Date(2026, 9, 1).toISOString());
+    expect(screen.getByLabelText<HTMLInputElement>("De").value).toBe("2026-09-29");
+    expect(screen.getByLabelText<HTMLInputElement>("Até").value).toBe("2026-09-30");
+  });
+
+  it("writes a picked day to the URL, back on the first page, and ignores a day that does not exist", async () => {
+    const { router, api } = render({ path: "/admin/traces?page=2&from=2026-02-31" });
+    await screen.findByRole("table", { name: "Traces de execução" });
+    expect(new URLSearchParams(traceCalls(api)[0]).has("startedAfter")).toBe(false);
+    fireEvent.change(screen.getByLabelText("Até"), { target: { value: "2026-09-30" } });
+    await waitFor(() => expect(router.current()).toBe("/admin/traces?from=2026-02-31&to=2026-09-30"));
+    await waitFor(() => expect(new URLSearchParams(traceCalls(api).at(-1)).get("startedBefore")).toBe(new Date(2026, 9, 1).toISOString()));
+    fireEvent.change(screen.getByLabelText("Até"), { target: { value: "" } });
+    await waitFor(() => expect(router.current()).toBe("/admin/traces?from=2026-02-31"));
   });
 
   it("applies a typed agent on submit, refuses an invalid key and writes the status to the URL", async () => {

@@ -1,6 +1,7 @@
 // Public API of the usage context (SP3 Task 16): ledger usage.llm_calls, budgets and the warehouse sink.
 export type { ModelTotals, StoredBudget, UsageRepository, UsageTotals } from "./application/ports/usage-repository.ts";
 export type { UsageSink } from "./application/ports/usage-sink.ts";
+export { createPostgresTraceCosts } from "./adapters/driven/postgres-trace-costs.ts";
 export { makeRecordLlmCalls, MAX_LLM_CALLS_PER_BATCH, type RecordLlmCalls, type UsageValidationError } from "./application/use-cases/record-llm-calls.ts";
 export { BudgetTenantMissingError, type CheckTenantBudget, makeCheckTenantBudget } from "./application/use-cases/check-tenant-budget.ts";
 export { type GetUsageSummary, type GetUsageSummaryInput, GetUsageSummaryInputSchema, makeGetUsageSummary } from "./application/use-cases/get-usage-summary.ts";

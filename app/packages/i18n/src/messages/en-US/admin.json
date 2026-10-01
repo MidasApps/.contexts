@@ -509,7 +509,10 @@
       "agentInvalid": "Use lowercase letters, numbers and hyphens, starting with a letter.",
       "status": "Status",
       "anyStatus": "Any status",
-      "apply": "Filter"
+      "apply": "Filter",
+      "from": "From",
+      "to": "To",
+      "dateHint": "Whole days, in this browser's time zone."
     },
     "detail": {
       "title": "Trace",

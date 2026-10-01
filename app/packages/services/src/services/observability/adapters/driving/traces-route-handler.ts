@@ -30,21 +30,41 @@ const errorResponse = (error: ConsoleError, requestId: string): Response =>
 const answer = <T>(result: ConsoleResult<T>, requestId: string, body: (data: T) => { data: unknown; meta?: unknown }, status: 200 | 202 = 200): Response =>
   result.ok ? dataResponse(body(result.data), { status }) : errorResponse(result.error, requestId);
 
-const filtersOf = (query: { agentId?: string | undefined; status?: "ok" | "error" | undefined; page: number; perPage: number }) => ({
+type TraceListQuery = {
+  agentId?: string | undefined;
+  status?: "ok" | "error" | undefined;
+  startedAfter?: string | undefined;
+  startedBefore?: string | undefined;
+  page: number;
+  perPage: number;
+};
+
+const filtersOf = (query: TraceListQuery) => ({
   page: query.page,
   perPage: query.perPage,
   ...(query.agentId === undefined ? {} : { agentId: query.agentId }),
   ...(query.status === undefined ? {} : { status: query.status }),
+  ...(query.startedAfter === undefined ? {} : { startedAfter: query.startedAfter }),
+  ...(query.startedBefore === undefined ? {} : { startedBefore: query.startedBefore }),
 });
+
+// An empty or inverted range is a client mistake, told as one (never a silently empty list).
+const invalidRange = (query: TraceListQuery, requestId: string): Response | null =>
+  query.startedAfter !== undefined && query.startedBefore !== undefined && Date.parse(query.startedAfter) >= Date.parse(query.startedBefore)
+    ? apiError(400, "VALIDATION_FAILED", requestId, [{ field: "startedBefore", issue: "NOT_AFTER_START" }])
+    : null;
 
 /**
  * `/v1/traces` (tenant: the organization of the call, never one the query names) and
  * `/v1/admin/traces` (staff, `platform.trace.read`, optional organization filter), decision 0040.
+ * Both take a time range (`startedAfter`, `startedBefore`) and carry the ledger's cost (decision 0044).
  */
 const buildTraceRoutes = (deps: { readonly pipeline: ApiRouteDeps; readonly observability: ObservabilityServices }): Record<string, RouteHandler> => ({
   [listTracesEndpoint.id]: withApiRoute(listTracesEndpoint, deps.pipeline, async (ctx) => {
     const tenantId = await requireTenant(ctx, { organizationId: ctx.input.query.organizationId, permission: OBSERVABILITY_PERMISSIONS.traceRead });
     if (tenantId instanceof Response) return tenantId;
+    const invalid = invalidRange(ctx.input.query, ctx.requestId);
+    if (invalid !== null) return invalid;
     const result = await deps.observability.listTraces({ tenantId, ...filtersOf(ctx.input.query) });
     return answer(result, ctx.requestId, (data) => ({ data: data.traces, meta: { hasMore: data.hasMore } }));
   }),
@@ -57,6 +77,8 @@ const buildTraceRoutes = (deps: { readonly pipeline: ApiRouteDeps; readonly obse
     const tenantId = ctx.input.query.organizationId ?? null;
     const denied = await requireStaff(ctx, { permission: OBSERVABILITY_PERMISSIONS.platformTraces, ...(tenantId === null ? {} : { targetTenantId: tenantId }) });
     if (denied !== null) return denied;
+    const invalid = invalidRange(ctx.input.query, ctx.requestId);
+    if (invalid !== null) return invalid;
     const result = await deps.observability.listTraces({ tenantId, ...filtersOf(ctx.input.query) });
     return answer(result, ctx.requestId, (data) => ({ data: data.traces, meta: { hasMore: data.hasMore } }));
   }),

@@ -9,6 +9,7 @@ import { makeStartExperiment, type StartExperiment } from "../evals/application/
 import type { Clock } from "../shared/clock/clock.ts";
 import type { Logger } from "../shared/observability/logger.ts";
 import type { ConsoleGateway } from "./application/ports/console-gateway.ts";
+import type { TraceCostReader } from "./application/ports/trace-cost-reader.ts";
 import { type GetTrace, makeGetTrace } from "./application/use-cases/get-trace.ts";
 import { type ListTraces, makeListTraces } from "./application/use-cases/list-traces.ts";
 
@@ -29,6 +30,8 @@ export const createObservabilityServices = (deps: {
   readonly feedback: MessageFeedbackStore;
   readonly clock: Clock;
   readonly logger: Pick<Logger, "warn">;
+  /** Cost of traces from the usage ledger (decision 0044); absent: the cost stays unknown. */
+  readonly costs?: TraceCostReader;
 }): ObservabilityServices => ({
   listTraces: makeListTraces(deps),
   getTrace: makeGetTrace(deps),

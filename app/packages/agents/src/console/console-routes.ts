@@ -54,6 +54,14 @@ const fail = (status: number, code: string): Response => json(status, { error: {
 const tenantOf = (ctx: Ctx): string | null => ctx.query("tenantId") ?? null;
 const pageOf = (ctx: Ctx) => ({ page: Math.max(0, Number(ctx.query("page") ?? 0) || 0), perPage: Math.min(100, Math.max(1, Number(ctx.query("perPage") ?? 20) || 20)) });
 
+// `undefined` = not asked; `null` = asked with something that is not an instant.
+const instantOf = (ctx: Ctx, key: string): Date | undefined | null => {
+  const raw = ctx.query(key);
+  if (raw === undefined) return undefined;
+  const at = new Date(raw);
+  return Number.isNaN(at.getTime()) ? null : at;
+};
+
 const storeOf = async <T>(ctx: Ctx, name: "observability" | "experiments"): Promise<T | null> =>
   ((await ctx.mastra.getStorage()?.getStore(name)) as T | undefined) ?? null;
 
@@ -76,11 +84,16 @@ const traceRoutes = (deps: ConsoleRouteDeps): ApiRoute[] => [
       if (store === null) return json(200, { data: [], meta: { hasMore: false } });
       const status = ctx.query("status");
       const agentId = ctx.query("agentId");
+      const startedAfter = instantOf(ctx, "startedAfter");
+      const startedBefore = instantOf(ctx, "startedBefore");
+      if (startedAfter === null || startedBefore === null) return fail(400, "VALIDATION_FAILED");
       const listed = await createTraceReader(store).list({
         tenantId: tenantOf(ctx),
         ...pageOf(ctx),
         ...(agentId === undefined ? {} : { agentId }),
         ...(status === "ok" || status === "error" ? { status } : {}),
+        ...(startedAfter === undefined ? {} : { startedAfter }),
+        ...(startedBefore === undefined ? {} : { startedBefore }),
       });
       return json(200, { data: listed.traces, meta: { hasMore: listed.hasMore } });
     }),

@@ -509,7 +509,10 @@
       "agentInvalid": "Use letras minúsculas, números e hífens, começando por uma letra.",
       "status": "Status",
       "anyStatus": "Todos os status",
-      "apply": "Filtrar"
+      "apply": "Filtrar",
+      "from": "De",
+      "to": "Até",
+      "dateHint": "Dias inteiros, no fuso horário deste navegador."
     },
     "detail": {
       "title": "Trace",

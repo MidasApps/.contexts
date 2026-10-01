@@ -50,7 +50,7 @@ export const createMastraConsoleGateway = (options: {
   const unwrapPage = <T>(result: ConsoleResult<{ data: T[]; meta: { hasMore: boolean } }>) => (result.ok ? { ok: true as const, data: { items: result.data.data, hasMore: result.data.meta.hasMore } } : result);
   return {
     listTraces: async (query) => {
-      const result = unwrapPage(await call({ method: "GET", path: "/traces", query: { ...tenant(query.tenantId), page: query.page, perPage: query.perPage, agentId: query.agentId, status: query.status } }, paged(TraceSummarySchema)));
+      const result = unwrapPage(await call({ method: "GET", path: "/traces", query: { ...tenant(query.tenantId), page: query.page, perPage: query.perPage, agentId: query.agentId, status: query.status, startedAfter: query.startedAfter, startedBefore: query.startedBefore } }, paged(TraceSummarySchema)));
       return result.ok ? { ok: true, data: { traces: result.data.items, hasMore: result.data.hasMore } } : result;
     },
     getTrace: async (query) => {

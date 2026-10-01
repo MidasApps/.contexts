@@ -2332,6 +2332,24 @@ paths:
               - error
             type: string
             x-pii: none
+        - description: Only traces that started at or after this instant (UTC).
+          in: query
+          name: startedAfter
+          required: false
+          schema:
+            format: date-time
+            pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z))$
+            type: string
+            x-pii: none
+        - description: Only traces that started before this instant (UTC); must be after `startedAfter`.
+          in: query
+          name: startedBefore
+          required: false
+          schema:
+            format: date-time
+            pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z))$
+            type: string
+            x-pii: none
         - description: Only this organization's traces.
           in: query
           name: organizationId
@@ -2403,7 +2421,7 @@ paths:
             - INTERNAL_ERROR
       security:
         - bearerAuth: []
-      summary: Lists traces of every tenant, optionally one (staff, platform.trace.read).
+      summary: Lists traces of every tenant, optionally one and of a time range, with the cost the usage ledger recorded (staff, platform.trace.read).
       tags:
         - traces
       x-auth: user
@@ -11573,6 +11591,24 @@ paths:
               - error
             type: string
             x-pii: none
+        - description: Only traces that started at or after this instant (UTC).
+          in: query
+          name: startedAfter
+          required: false
+          schema:
+            format: date-time
+            pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z))$
+            type: string
+            x-pii: none
+        - description: Only traces that started before this instant (UTC); must be after `startedAfter`.
+          in: query
+          name: startedBefore
+          required: false
+          schema:
+            format: date-time
+            pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z))$
+            type: string
+            x-pii: none
       responses:
         "200":
           content:
@@ -11635,7 +11671,7 @@ paths:
             - INTERNAL_ERROR
       security:
         - bearerAuth: []
-      summary: Lists the organization's traces, newest first; filtered by tenant on the server (core.trace.read).
+      summary: Lists the organization's traces, newest first, optionally of a time range; filtered by tenant on the server, cost from the usage ledger (core.trace.read).
       tags:
         - traces
       x-auth: principal

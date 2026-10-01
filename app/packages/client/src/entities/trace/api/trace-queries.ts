@@ -15,6 +15,9 @@ export type AdminTraceFilters = {
   readonly organizationId?: string | undefined;
   readonly agentId?: string | undefined;
   readonly status?: "ok" | "error" | undefined;
+  /** ISO instants: traces that started in `[startedAfter, startedBefore)`. */
+  readonly startedAfter?: string | undefined;
+  readonly startedBefore?: string | undefined;
 };
 
 export type TracePage = { readonly data: readonly TraceSummary[]; readonly meta: { readonly hasMore: boolean } };
@@ -37,6 +40,8 @@ export const adminTracesQuery = (callEndpoint: CallEndpoint, filters: AdminTrace
           ...(filters.organizationId === undefined ? {} : { organizationId: filters.organizationId }),
           ...(filters.agentId === undefined ? {} : { agentId: filters.agentId }),
           ...(filters.status === undefined ? {} : { status: filters.status }),
+          ...(filters.startedAfter === undefined ? {} : { startedAfter: filters.startedAfter }),
+          ...(filters.startedBefore === undefined ? {} : { startedBefore: filters.startedBefore }),
         },
         signal,
       }),

@@ -13,7 +13,14 @@ const ANY_STATUS = "any";
 /** Agent keys are kebab-case (`adminListTracesEndpoint` refuses anything else with 400). */
 export const AGENT_ID = /^[a-z][a-z0-9-]*$/u;
 
-export type TraceFilterValues = { organizationId: string | undefined; agentId: string | undefined; status: "ok" | "error" | undefined };
+export type TraceFilterValues = {
+  organizationId: string | undefined;
+  agentId: string | undefined;
+  status: "ok" | "error" | undefined;
+  /** Calendar days (`2026-09-30`) in the browser's time zone; both ends are included. */
+  from: string | undefined;
+  to: string | undefined;
+};
 
 export type TraceFiltersProps = {
   values: TraceFilterValues;
@@ -21,8 +28,8 @@ export type TraceFiltersProps = {
 };
 
 /**
- * Filters of the trace list: organization and status apply at once; the agent is typed, so it
- * applies on submit and only when it is a valid agent key (the error names the format).
+ * Filters of the trace list: organization, status and the days apply at once; the agent is typed,
+ * so it applies on submit and only when it is a valid agent key (the error names the format).
  */
 export function TraceFilters({ values, onChange }: TraceFiltersProps) {
   const t = useTranslations("admin.traces.filters");
@@ -30,6 +37,8 @@ export function TraceFilters({ values, onChange }: TraceFiltersProps) {
   const agentId = useId();
   const errorId = useId();
   const statusId = useId();
+  const fromId = useId();
+  const toId = useId();
   const [draft, setDraft] = useState(values.agentId ?? "");
   const [invalid, setInvalid] = useState(false);
   const submit = (event: FormEvent<HTMLFormElement>): void => {
@@ -54,6 +63,14 @@ export function TraceFilters({ values, onChange }: TraceFiltersProps) {
             <SelectItem value="error">{statusText("error")}</SelectItem>
           </SelectContent>
         </Select>
+      </div>
+      <div className="flex flex-col gap-1.5">
+        <Label htmlFor={fromId}>{t("from")}</Label>
+        <Input id={fromId} type="date" className="lg:w-40" value={values.from ?? ""} max={values.to} title={t("dateHint")} onChange={(event) => onChange({ from: event.target.value })} />
+      </div>
+      <div className="flex flex-col gap-1.5">
+        <Label htmlFor={toId}>{t("to")}</Label>
+        <Input id={toId} type="date" className="lg:w-40" value={values.to ?? ""} min={values.from} title={t("dateHint")} onChange={(event) => onChange({ to: event.target.value })} />
       </div>
       <div className="flex flex-col gap-1.5">
         <Label htmlFor={agentId}>{t("agent")}</Label>

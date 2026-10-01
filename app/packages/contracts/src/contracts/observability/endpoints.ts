@@ -4,6 +4,7 @@ import { MessageFeedbackInputSchema, MessageFeedbackSchema } from "../conversati
 import { none } from "../field-docs.ts";
 import { defineEndpoint, type EndpointDefinition } from "../http/endpoint.ts";
 import { dataEnvelope } from "../http/envelopes.schema.ts";
+import { IsoDateTimeSchema } from "../primitives/iso-datetime.schema.ts";
 import { OrganizationIdSchema } from "../tenancy/ids.schema.ts";
 import { OrganizationQuerySchema } from "../workflows/endpoints.ts";
 import { EvalDatasetSchema, StartEvalExperimentInputSchema } from "./eval-dataset.schema.ts";
@@ -26,6 +27,8 @@ const pagedEnvelope = <Schema extends z.ZodType>(schema: Schema) =>
 const traceFilters = PageNumberQuerySchema.extend({
   agentId: z.string().regex(/^[a-z][a-z0-9-]*$/).optional().meta(none("Only traces of this agent.")),
   status: TraceStatusSchema.optional().meta(none("Only traces in this status.")),
+  startedAfter: IsoDateTimeSchema.optional().meta(none("Only traces that started at or after this instant (UTC).")),
+  startedBefore: IsoDateTimeSchema.optional().meta(none("Only traces that started before this instant (UTC); must be after `startedAfter`.")),
 });
 const traceParams = z.object({ traceId: TraceIdSchema.meta(none("Trace id.")) });
 
@@ -36,8 +39,8 @@ export const listTracesEndpoint = defineEndpoint({
   auth: "principal",
   query: OrganizationQuerySchema.extend(traceFilters.shape),
   responses: { 200: pagedEnvelope(TraceSummarySchema) },
-  errors: { 403: ["FORBIDDEN"] },
-  summary: "Lists the organization's traces, newest first; filtered by tenant on the server (core.trace.read).",
+  errors: { 400: ["VALIDATION_FAILED"], 403: ["FORBIDDEN"] },
+  summary: "Lists the organization's traces, newest first, optionally of a time range; filtered by tenant on the server, cost from the usage ledger (core.trace.read).",
 });
 
 export const getTraceEndpoint = defineEndpoint({
@@ -59,8 +62,8 @@ export const adminListTracesEndpoint = defineEndpoint({
   auth: "user",
   query: traceFilters.extend({ organizationId: OrganizationIdSchema.optional().meta(none("Only this organization's traces.")) }),
   responses: { 200: pagedEnvelope(TraceSummarySchema) },
-  errors: STAFF,
-  summary: "Lists traces of every tenant, optionally one (staff, platform.trace.read).",
+  errors: { 400: ["VALIDATION_FAILED"], ...STAFF },
+  summary: "Lists traces of every tenant, optionally one and of a time range, with the cost the usage ledger recorded (staff, platform.trace.read).",
 });
 
 export const adminGetTraceEndpoint = defineEndpoint({
