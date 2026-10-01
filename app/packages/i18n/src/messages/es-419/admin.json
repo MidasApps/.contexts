@@ -244,8 +244,6 @@
     "emptyTitle": "No hay costos para mostrar",
     "emptyDescription": "Los costos aparecen cuando haya organizaciones en la plataforma.",
     "emptyAction": "Ver organizaciones",
-    "gapTitle": "El costo por día y por modelo todavía no está disponible",
-    "gapDescription": "Esta página muestra el total del mes por organización. El detalle por día y por modelo llega cuando exista la API de uso de la plataforma.",
     "filters": {
       "level": "Nivel de uso",
       "all": "Todas",
@@ -275,6 +273,37 @@
       "source": "Origen del límite",
       "usage": "Uso del límite",
       "actions": "Acciones"
+    },
+    "usage": {
+      "title": "Uso por día y por modelo",
+      "description": "Costo y llamadas del período, directo del registro de uso. Sin fechas, es el mes actual hasta hoy. Los días están en UTC, como en el registro.",
+      "filtersLabel": "Filtrar el uso",
+      "from": "Desde",
+      "to": "Hasta",
+      "loading": "Cargando el uso…",
+      "totals": "Del {from} al {to}: {cost} en {calls} llamadas y {tokens} tokens.",
+      "unpricedNote": "{count, plural, one {# llamada sin precio conocido: sus tokens cuentan, el costo no.} other {# llamadas sin precio conocido: sus tokens cuentan, el costo no.}}",
+      "truncatedTitle": "No todas las organizaciones entraron en la suma",
+      "truncatedDescription": "La respuesta leyó {count} organizaciones, el límite de una consulta. Filtra por organización para ver las demás.",
+      "byDayTitle": "Costo por día",
+      "byDayDescription": "Un valor por día del período; los días sin llamadas quedan en cero.",
+      "byModelTitle": "Costo por modelo",
+      "byModelDescription": "De mayor a menor costo.",
+      "byModelDescriptionTop": "Los {shown} de mayor costo entre {total} modelos; la tabla de abajo los lista todos.",
+      "modelsCaption": "Uso por modelo",
+      "columns": {
+        "day": "Día",
+        "model": "Modelo",
+        "provider": "Proveedor",
+        "calls": "Llamadas",
+        "inputTokens": "Tokens de entrada",
+        "outputTokens": "Tokens de salida",
+        "cost": "Costo",
+        "unpriced": "Sin precio"
+      },
+      "emptyTitle": "Ningún uso en el período",
+      "emptyDescription": "No se registró ninguna llamada de modelo con estos filtros.",
+      "clear": "Volver al mes actual"
     }
   },
   "organizationDetail": {

@@ -244,8 +244,6 @@
     "emptyTitle": "No costs to show",
     "emptyDescription": "Costs appear once there are organizations on the platform.",
     "emptyAction": "See organizations",
-    "gapTitle": "Cost by day and by model is not available yet",
-    "gapDescription": "This page shows the month's total per organization. The breakdown by day and by model arrives when the platform usage API exists.",
     "filters": {
       "level": "Usage level",
       "all": "All",
@@ -275,6 +273,37 @@
       "source": "Cap source",
       "usage": "Cap used",
       "actions": "Actions"
+    },
+    "usage": {
+      "title": "Usage by day and by model",
+      "description": "Cost and calls of the range, straight from the usage ledger. Without dates, it is the current month to date. Days are in UTC, as in the ledger.",
+      "filtersLabel": "Filter the usage",
+      "from": "From",
+      "to": "To",
+      "loading": "Loading the usage…",
+      "totals": "From {from} to {to}: {cost} in {calls} calls and {tokens} tokens.",
+      "unpricedNote": "{count, plural, one {# call without a known price: its tokens count, its cost does not.} other {# calls without a known price: their tokens count, their cost does not.}}",
+      "truncatedTitle": "Not every organization is in the sum",
+      "truncatedDescription": "The answer read {count} organizations, the limit of one query. Filter by organization to see the others.",
+      "byDayTitle": "Cost by day",
+      "byDayDescription": "One value per day of the range; days without calls are zero.",
+      "byModelTitle": "Cost by model",
+      "byModelDescription": "Highest cost first.",
+      "byModelDescriptionTop": "The {shown} with the highest cost of {total} models; the table below lists all.",
+      "modelsCaption": "Usage by model",
+      "columns": {
+        "day": "Day",
+        "model": "Model",
+        "provider": "Provider",
+        "calls": "Calls",
+        "inputTokens": "Input tokens",
+        "outputTokens": "Output tokens",
+        "cost": "Cost",
+        "unpriced": "Unpriced"
+      },
+      "emptyTitle": "No usage in the range",
+      "emptyDescription": "No model call was recorded with these filters.",
+      "clear": "Back to the current month"
     }
   },
   "organizationDetail": {

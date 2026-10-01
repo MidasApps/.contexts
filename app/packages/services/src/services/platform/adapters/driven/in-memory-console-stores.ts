@@ -1,6 +1,7 @@
 import type { BudgetCaps, OrganizationStatus, Plan } from "@core/contracts";
 import { PlanIdSchema } from "@core/contracts";
 import { pageFromOverfetch } from "../../../shared/pagination/page.ts";
+import type { UsageBucket } from "../../application/ports/console-ports.ts";
 import type { AgentSettingsRepository, ConsoleUsage, OrganizationAdminStore, OrganizationPlan, PlanRepository, StoredAgentSettings } from "../../application/ports/console-ports.ts";
 
 /** In-memory console stores for unit tests; every map is inspectable. */
@@ -18,6 +19,8 @@ export const createInMemoryConsoleStores = (
   const budgets = new Map<string, BudgetCaps>();
   const costs = new Map<string, number>();
   const activity: { tenantId: string; userId: string; at: Date }[] = [];
+  /** Ledger rows already grouped by tenant, UTC day and model (what the Postgres adapter answers). */
+  const usageRows: (UsageBucket & { tenantId: string })[] = [];
   let sequence = 0;
   const planRepository: PlanRepository = {
     list: () => Promise.resolve([...plans.values()].sort((a, b) => a.name.localeCompare(b.name))),
@@ -69,7 +72,13 @@ export const createInMemoryConsoleStores = (
       return Promise.resolve();
     },
     monthCostMicroUsd: ({ tenantId }) => Promise.resolve(costs.get(tenantId) ?? 0),
+    usageBuckets: ({ tenantId, from, to }) =>
+      Promise.resolve(
+        usageRows
+          .filter((row) => row.tenantId === tenantId && row.day >= from.toISOString().slice(0, 10) && new Date(`${row.day}T00:00:00.000Z`) < to)
+          .map((row): UsageBucket => ({ day: row.day, provider: row.provider, model: row.model, calls: row.calls, inputTokens: row.inputTokens, outputTokens: row.outputTokens, costMicroUsd: row.costMicroUsd, unpricedCalls: row.unpricedCalls })),
+      ),
     activeUserIds: ({ tenantId, since }) => Promise.resolve([...new Set(activity.filter((row) => row.tenantId === tenantId && row.at >= since).map((row) => row.userId))]),
   };
-  return { stores: { plans: planRepository, organizations: organizationStore, agentSettings: settingsRepository, usage }, plans, organizations, assignments, settings, budgets, costs, activity };
+  return { stores: { plans: planRepository, organizations: organizationStore, agentSettings: settingsRepository, usage }, plans, organizations, assignments, settings, budgets, costs, activity, usageRows };
 };

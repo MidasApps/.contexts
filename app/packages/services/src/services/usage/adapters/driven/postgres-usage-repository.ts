@@ -130,6 +130,29 @@ export const listActiveUserIds = (sql: Sql) => (input: { readonly tenantId: stri
     return rows.map((row) => row.user_id);
   });
 
+type BucketRow = TotalsRow & { day: string; provider: string; model: string };
+
+/**
+ * A tenant's calls in `[from, to)` grouped by UTC day, provider and model (`/v1/admin/usage`,
+ * decision 0044): one grouped read on `llm_calls_tenant_occurred_idx`, under the tenant's row
+ * level security like every other read here.
+ */
+export const listUsageBuckets =
+  (sql: Sql) =>
+  (input: { readonly tenantId: string; readonly from: Date; readonly to: Date }): Promise<readonly (UsageTotals & { readonly day: string; readonly provider: string; readonly model: string })[]> =>
+    withTenantTransaction(sql, { tenantId: input.tenantId, readOnly: true }, async (tx) => {
+      await asRuntime(tx);
+      const rows = await tx<BucketRow[]>`
+        SELECT to_char(occurred_at AT TIME ZONE 'UTC', 'YYYY-MM-DD') AS day, provider, model, count(*) AS calls,
+               coalesce(sum(input_tokens), 0) AS input_tokens, coalesce(sum(output_tokens), 0) AS output_tokens,
+               coalesce(sum(cost_micro_usd), 0) AS cost_micro_usd, count(*) FILTER (WHERE cost_micro_usd IS NULL) AS unpriced_calls
+        FROM usage.llm_calls
+        WHERE tenant_id = ${input.tenantId} AND occurred_at >= ${input.from} AND occurred_at < ${input.to}
+        GROUP BY 1, provider, model
+        ORDER BY 1, provider, model`;
+      return rows.map((row) => ({ day: row.day, provider: row.provider, model: row.model, ...toTotals(row) }));
+    });
+
 export const createPostgresUsageRepository = (sql: Sql): UsageRepository => ({
   insertCalls: insertCalls(sql),
   getMonthSpend: getMonthSpend(sql),

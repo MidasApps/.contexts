@@ -6,12 +6,13 @@ import type { AuditWriter } from "../audit/application/use-cases/record-audit.ts
 import type { Clock } from "../shared/clock/clock.ts";
 import type { FirebaseAdmin } from "../shared/firebase/firebase-admin.ts";
 import type { ConsoleGateway } from "../observability/application/ports/console-gateway.ts";
-import { createPostgresUsageRepository, listActiveUserIds } from "../usage/adapters/driven/postgres-usage-repository.ts";
+import { createPostgresUsageRepository, listActiveUserIds, listUsageBuckets } from "../usage/adapters/driven/postgres-usage-repository.ts";
 import { createFirestoreApprovalStats } from "./adapters/driven/firestore-approval-stats.ts";
 import { createFirestoreAgentSettingsRepository, createFirestoreOrganizationAdminStore, createFirestorePlanRepository } from "./adapters/driven/firestore-console-stores.ts";
 import type { ConsoleDeps } from "./application/console-deps.ts";
 import type { ConsoleUsage } from "./application/ports/console-ports.ts";
 import { type GetAdminOverview, makeGetAdminOverview } from "./application/use-cases/get-admin-overview.ts";
+import { type GetAdminUsage, makeGetAdminUsage } from "./application/use-cases/get-admin-usage.ts";
 import { type GetOrganizationAdmin, type ListOrganizationsAdmin, makeGetOrganizationAdmin, makeListOrganizationsAdmin } from "./application/use-cases/list-organizations-admin.ts";
 import { type ListPlans, makeListPlans } from "./application/use-cases/list-plans.ts";
 import {
@@ -31,6 +32,7 @@ export type ConsoleServices = {
   readonly updateOrganization: UpdateOrganizationAdmin;
   readonly setOrganizationBudget: SetOrganizationBudget;
   readonly getOverview: GetAdminOverview;
+  readonly getUsage: GetAdminUsage;
   readonly getAgentSettings: GetAgentSettings;
   readonly updateAgentSettings: UpdateAgentSettings;
 };
@@ -45,6 +47,7 @@ export const createConsoleServices = (deps: ConsoleDeps): ConsoleServices => ({
   updateOrganization: makeUpdateOrganizationAdmin(deps),
   setOrganizationBudget: makeSetOrganizationBudget(deps),
   getOverview: makeGetAdminOverview(deps),
+  getUsage: makeGetAdminUsage(deps),
   getAgentSettings: makeGetAgentSettings(deps),
   updateAgentSettings: makeUpdateAgentSettings(deps),
 });
@@ -56,6 +59,7 @@ export const createPostgresConsoleUsage = (sql: Sql): ConsoleUsage => {
     setTenantBudget: repository.setTenantBudget,
     monthCostMicroUsd: async (input) => (await repository.getMonthSpend(input)).costMicroUsd,
     activeUserIds: listActiveUserIds(sql),
+    usageBuckets: listUsageBuckets(sql),
   };
 };
 

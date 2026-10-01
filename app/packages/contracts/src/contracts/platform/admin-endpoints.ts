@@ -8,6 +8,7 @@ import { dataEnvelope, listEnvelope, PageQuerySchema } from "../http/envelopes.s
 import { OrganizationIdSchema } from "../tenancy/ids.schema.ts";
 import { OrganizationQuerySchema } from "../workflows/endpoints.ts";
 import { AdminOverviewSchema } from "./admin-overview.schema.ts";
+import { AdminUsageSchema, UsageDaySchema } from "./admin-usage.schema.ts";
 import { OrganizationStatusSchema } from "../tenancy/organization.schema.ts";
 import { OrganizationAdminDetailSchema, OrganizationAdminSummarySchema, SetTenantBudgetInputSchema, UpdateOrganizationAdminInputSchema } from "./organization-admin.schema.ts";
 import { PlanIdSchema, PlanSchema, UpsertPlanInputSchema } from "./plan.schema.ts";
@@ -131,6 +132,21 @@ export const getAdminOverviewEndpoint = defineEndpoint({
   summary: "Platform overview numbers (staff, platform.usage.read).",
 });
 
+export const getAdminUsageEndpoint = defineEndpoint({
+  id: "admin.getUsage",
+  method: "GET",
+  path: "/v1/admin/usage",
+  auth: "user",
+  query: z.object({
+    from: UsageDaySchema.optional().meta(none("First UTC day (`2026-09-01`); default: the first day of the month of `to`.")),
+    to: UsageDaySchema.optional().meta(none("Last UTC day, included; default: today (UTC). At most 92 days after `from`.")),
+    organizationId: OrganizationIdSchema.optional().meta(none("Only this organization; without it, every live organization.")),
+  }),
+  responses: { 200: dataEnvelope(AdminUsageSchema) },
+  errors: { 400: ["VALIDATION_FAILED"], ...STAFF_ERRORS, 404: ["NOT_FOUND"] },
+  summary: "Model usage and cost by UTC day and by model from the usage ledger, of every live organization or of one (staff, platform.usage.read).",
+});
+
 export const getAgentSettingsEndpoint = defineEndpoint({
   id: "agent-settings.get",
   method: "GET",
@@ -165,6 +181,7 @@ export const ADMIN_PLATFORM_ENDPOINTS: readonly EndpointDefinition[] = [
   getOrganizationAgentSettingsEndpoint,
   updateOrganizationAgentSettingsEndpoint,
   getAdminOverviewEndpoint,
+  getAdminUsageEndpoint,
   getAgentSettingsEndpoint,
   updateAgentSettingsEndpoint,
 ];

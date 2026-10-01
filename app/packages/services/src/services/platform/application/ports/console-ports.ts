@@ -42,12 +42,27 @@ export type AgentSettingsRepository = {
   readonly save: (stored: StoredAgentSettings) => Promise<void>;
 };
 
+/** Calls of one tenant on one UTC day with one model (`usage.llm_calls` grouped; decision 0044). */
+export type UsageBucket = {
+  readonly day: string;
+  readonly provider: string;
+  readonly model: string;
+  readonly calls: number;
+  readonly inputTokens: number;
+  readonly outputTokens: number;
+  /** Priced calls only. */
+  readonly costMicroUsd: number;
+  readonly unpricedCalls: number;
+};
+
 /** What the console writes to the usage ledger's budget table, and reads for the cost columns. */
 export type ConsoleUsage = {
   readonly setTenantBudget: (input: { readonly tenantId: string; readonly budget: BudgetCaps }) => Promise<void>;
   readonly monthCostMicroUsd: (input: { readonly tenantId: string; readonly monthStart: Date }) => Promise<number>;
   /** Distinct users of the tenant's ledger rows since an instant (the overview's active users). */
   readonly activeUserIds: (input: { readonly tenantId: string; readonly since: Date }) => Promise<readonly string[]>;
+  /** The tenant's calls in `[from, to)` grouped by UTC day, provider and model (`/v1/admin/usage`). */
+  readonly usageBuckets: (input: { readonly tenantId: string; readonly from: Date; readonly to: Date }) => Promise<readonly UsageBucket[]>;
 };
 
 /** Settled approval requests since an instant, across tenants (the overview's approval rate). */

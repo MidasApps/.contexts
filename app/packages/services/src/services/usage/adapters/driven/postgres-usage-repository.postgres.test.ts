@@ -6,7 +6,7 @@ import { createPostgresClient } from "../../../shared/postgres/postgres-client.t
 import { makeCheckTenantBudget } from "../../application/use-cases/check-tenant-budget.ts";
 import { makeGetUsageSummary } from "../../application/use-cases/get-usage-summary.ts";
 import { makeRecordLlmCalls } from "../../application/use-cases/record-llm-calls.ts";
-import { createPostgresUsageRepository, listActiveUserIds, USAGE_RUNTIME_ROLE } from "./postgres-usage-repository.ts";
+import { createPostgresUsageRepository, listActiveUserIds, listUsageBuckets, USAGE_RUNTIME_ROLE } from "./postgres-usage-repository.ts";
 
 // Needs the compose container and `pnpm db:migrate` (migrations 0006/0007).
 const LOCAL_DATABASE_URL = "postgresql://app:app@127.0.0.1:5432/app";
@@ -136,6 +136,23 @@ describe("postgres usage repository", () => {
     await record([call({ costMicroUsd: 150 })]);
     expect(await check({ tenantId: TENANT_A })).toEqual({ allowed: false, reason: "BUDGET_EXCEEDED" });
     expect(await check({ tenantId: TENANT_B })).toEqual({ allowed: true, alert: false });
+  });
+
+  it("groups a tenant's calls of a range by UTC day and model, counting unpriced ones", async () => {
+    await repository.insertCalls([
+      call(),
+      call({ costMicroUsd: 400 }),
+      call({ occurredAt: "2026-09-15T23:59:59.000Z", model: "gemini-3.5-flash-lite", costMicroUsd: null }),
+      call({ occurredAt: "2026-09-16T00:00:00.000Z", costMicroUsd: 5 }),
+      call({ occurredAt: "2026-09-17T00:00:00.000Z", costMicroUsd: 9_000 }),
+      call({ tenantId: TENANT_B, costMicroUsd: 777 }),
+    ]);
+    const buckets = await listUsageBuckets(sql)({ tenantId: TENANT_A, from: new Date("2026-09-15T00:00:00.000Z"), to: new Date("2026-09-17T00:00:00.000Z") });
+    expect(buckets).toEqual([
+      { day: "2026-09-15", provider: "google", model: "gemini-3.5-flash", calls: 2, inputTokens: 200, outputTokens: 100, costMicroUsd: 1000, unpricedCalls: 0 },
+      { day: "2026-09-15", provider: "google", model: "gemini-3.5-flash-lite", calls: 1, inputTokens: 100, outputTokens: 50, costMicroUsd: 0, unpricedCalls: 1 },
+      { day: "2026-09-16", provider: "google", model: "gemini-3.5-flash", calls: 1, inputTokens: 100, outputTokens: 50, costMicroUsd: 5, unpricedCalls: 0 },
+    ]);
   });
 
   it("summarizes the month by model against the caps", async () => {

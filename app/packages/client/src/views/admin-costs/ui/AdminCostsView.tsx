@@ -9,16 +9,15 @@ import { usePlatformPermissions } from "#/entities/permission/index.ts";
 import { useFormatMicroUsd } from "#/shared/lib/format/use-format-micro-usd.ts";
 import { RouteLink } from "#/shared/lib/router/router-context.tsx";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
-import { Icon } from "#/shared/ui/atoms/Icon/Icon.tsx";
 import { Label } from "#/shared/ui/atoms/Label/Label.tsx";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "#/shared/ui/atoms/Select/Select.tsx";
-import { Alert, AlertDescription, AlertTitle } from "#/shared/ui/molecules/Alert/Alert.tsx";
 import { EmptyState } from "#/shared/ui/molecules/EmptyState/EmptyState.tsx";
 import { DataTable } from "#/shared/ui/organisms/DataTable/DataTable.tsx";
 import { dataTableColumnHelper } from "#/shared/ui/organisms/DataTable/data-table-columns.ts";
 import { KpiCard } from "#/widgets/admin-kpi-cards/index.ts";
 import { AdminPageFrame, AdminQuerySection, numberedPagination, useAdminSearch } from "#/widgets/admin-nav/index.ts";
 import { CostCharts } from "#/widgets/cost-charts/index.ts";
+import { UsageBreakdown } from "./UsageBreakdown.tsx";
 
 const PAGE_SIZE = 20;
 const LEVELS = ["all", "alert", "over"] as const;
@@ -211,11 +210,7 @@ function CostsContent({ organizations, overviewTotal }: { organizations: readonl
         totalCostMicroUsd={total}
         rows={organizations.map((organization) => ({ id: organization.id, label: organization.name, costMicroUsd: organization.costMtdMicroUsd, capMicroUsd: organization.budget.caps.monthlyMicroUsd }))}
       />
-      <Alert role={undefined}>
-        <Icon name="info" />
-        <AlertTitle>{t("gapTitle")}</AlertTitle>
-        <AlertDescription>{t("gapDescription")}</AlertDescription>
-      </Alert>
+      <UsageBreakdown />
       <Attention organizations={organizations} />
       <Budgets organizations={organizations} />
     </div>
@@ -225,8 +220,8 @@ function CostsContent({ organizations, overviewTotal }: { organizations: readonl
 /**
  * `/admin/costs` (SP5 spec §6, platform.usage.read): cost month to date of the platform and of
  * each organization against its cap, who is at or over the 80 % alert threshold, and the budgets
- * in force with their source. Budgets are edited on the organization's page. Cost by day and by
- * model is not shown: no usage endpoint serves it yet.
+ * in force with their source, and the usage by day and by model of a range (decision 0044).
+ * Budgets are edited on the organization's page.
  */
 export function AdminCostsView() {
   const t = useTranslations("admin.costs");

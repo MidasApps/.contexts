@@ -141,6 +141,41 @@ describe("GET /v1/admin/organizations?query=&status=", () => {
   });
 });
 
+describe("GET /v1/admin/usage", () => {
+  const seed = (memory: ReturnType<typeof setup>["memory"]): void => {
+    const row = { provider: "google", model: "gemini-3.5-flash", calls: 2, inputTokens: 200, outputTokens: 20, costMicroUsd: 300, unpricedCalls: 0 };
+    memory.usageRows.push({ tenantId: ORG_A, day: "2026-10-01", ...row }, { tenantId: ORG_B, day: "2026-09-30", ...row, costMicroUsd: 40 });
+  };
+
+  it("is staff only (support may read) and answers the month to date by day and by model", async () => {
+    const { routes, memory } = setup();
+    seed(memory);
+    expect((await callRoute(routes, "admin.getUsage", "/v1/admin/usage", { as: "alice" })).status).toBe(403);
+    expect(await json(await callRoute(routes, "admin.getUsage", "/v1/admin/usage", { as: "nomfa" }))).toMatchObject({ error: { code: "MFA_REQUIRED" } });
+    const usage = await callRoute(routes, "admin.getUsage", "/v1/admin/usage", { as: "sue" });
+    expect(usage.status).toBe(200);
+    expect(await json(usage)).toMatchObject({
+      data: { from: "2026-10-01", to: "2026-10-01", organizationId: null, organizations: 2, totals: { calls: 2, costMicroUsd: 300 }, byDay: [{ day: "2026-10-01", costMicroUsd: 300 }], byModel: [{ model: "gemini-3.5-flash", costMicroUsd: 300 }] },
+    });
+  });
+
+  it("filters by organization and range, and refuses a bad range, a bad day and an unknown organization", async () => {
+    const { routes, memory } = setup();
+    seed(memory);
+    const one = await json<{ data: { totals: { costMicroUsd: number }; byDay: unknown[] } }>(
+      await callRoute(routes, "admin.getUsage", `/v1/admin/usage?organizationId=${ORG_B}&from=2026-09-29&to=2026-10-01`, { as: "sam" }),
+    );
+    expect(one.data.totals.costMicroUsd).toBe(40);
+    expect(one.data.byDay).toHaveLength(3);
+    const inverted = await callRoute(routes, "admin.getUsage", "/v1/admin/usage?from=2026-10-02&to=2026-10-01", { as: "sam" });
+    expect(inverted.status).toBe(400);
+    expect(await json(inverted)).toMatchObject({ error: { code: "VALIDATION_FAILED", details: [{ field: "from", issue: "AFTER_TO" }] } });
+    expect((await callRoute(routes, "admin.getUsage", "/v1/admin/usage?from=2026-01-01&to=2026-10-01", { as: "sam" })).status).toBe(400);
+    expect((await callRoute(routes, "admin.getUsage", "/v1/admin/usage?from=yesterday", { as: "sam" })).status).toBe(400);
+    expect((await callRoute(routes, "admin.getUsage", "/v1/admin/usage?organizationId=OrgCccccccccccccccccc", { as: "sam" })).status).toBe(404);
+  });
+});
+
 describe("agent settings", () => {
   it("serves defaults, lets the tenant lower its own cap but never raise it above the plan", async () => {
     const { routes, memory, auditLog } = setup();

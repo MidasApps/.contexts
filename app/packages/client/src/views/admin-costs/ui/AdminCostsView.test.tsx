@@ -1,7 +1,7 @@
-import { screen, waitFor, within } from "@testing-library/react";
+import { fireEvent, screen, waitFor, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { renderAdmin } from "#/app-shell/testing/render-admin.tsx";
-import { buildAdminOverview, buildOrganizationSummary } from "#/shared/testing/admin-fixtures.ts";
+import { buildAdminOverview, buildAdminUsage, buildOrganizationSummary } from "#/shared/testing/admin-fixtures.ts";
 import { expectNoAxeViolations } from "#/shared/testing/axe.ts";
 import { apiError, FAKE_REQUEST_ID, ok, page, type FakeRoutes } from "#/shared/testing/fake-api.ts";
 import { IDS } from "#/shared/testing/fixtures.ts";
@@ -17,6 +17,7 @@ const FABRIKAM = buildOrganizationSummary({ id: "Fab0000000000000000A", name: "F
 const routes = (extra: FakeRoutes = {}): FakeRoutes => ({
   "GET /v1/admin/organizations": page([NORTHWIND, CONTOSO, FABRIKAM]),
   "GET /v1/admin/overview": ok(buildAdminOverview({ costMtdMicroUsd: 21_750_000 })),
+  "GET /v1/admin/usage": ok(buildAdminUsage()),
   ...extra,
 });
 
@@ -44,8 +45,57 @@ describe("AdminCostsView", () => {
     expect(plain(row.textContent)).toContain("20.000.000");
     expect(within(row).getByText("Do plano")).toBeDefined();
     expect(within(row).getByRole("link", { name: "Ajustar o orçamento de Fabrikam" }).getAttribute("href")).toBe("/admin/organizations/Fab0000000000000000A");
-    expect(screen.getByText("Custo por dia e por modelo ainda não disponível")).toBeDefined();
+    expect(await screen.findByRole("region", { name: "Uso por dia e por modelo" })).toBeDefined();
     await expectNoAxeViolations(container);
+  });
+
+  it("shows the usage of the month to date by day and by model, as the API reports it", async () => {
+    const { api, container } = render();
+    const usage = await screen.findByRole("region", { name: "Uso por dia e por modelo" });
+    const byDay = await within(usage).findByRole("table", { name: "Custo por dia" });
+    expect(within(byDay).getAllByRole("row")).toHaveLength(3);
+    expect(plain(within(byDay).getByRole("row", { name: /29\/09/u }).textContent)).toContain("US$ 1,00");
+    const byModel = within(usage).getByRole("table", { name: "Custo por modelo" });
+    expect(plain(within(byModel).getByRole("row", { name: /gemini-3\.5-flash/u }).textContent)).toContain("US$ 3,00");
+    const models = within(usage).getByRole("table", { name: "Uso por modelo" });
+    const haiku = within(models).getByRole("row", { name: /claude-haiku/u });
+    expect(plain(haiku.textContent)).toContain("anthropic");
+    expect(plain(haiku.textContent)).toContain("US$ 0,50");
+    expect(plain(within(usage).getByRole("status").textContent)).toContain("US$ 3,50");
+    expect(within(usage).getByText(/1 chamada sem preço/u)).toBeDefined();
+    const calls = api.calls.filter((call) => call.path === "/v1/admin/usage");
+    expect(calls.map((call) => call.query)).toEqual([""]);
+    await expectNoAxeViolations(container);
+  });
+
+  it("sends the organization and the days of the URL, writes a picked day back and warns when truncated", async () => {
+    const { api, router } = render({
+      path: `/admin/costs?organizationId=${IDS.organization}&from=2026-09-01&to=2026-09-30`,
+      routes: routes({ "GET /v1/admin/usage": ok(buildAdminUsage({ truncated: true, organizations: 2000 })) }),
+    });
+    const usage = await screen.findByRole("region", { name: "Uso por dia e por modelo" });
+    expect(await within(usage).findByText("Nem todas as organizações entraram na soma")).toBeDefined();
+    const first = new URLSearchParams(api.calls.find((call) => call.path === "/v1/admin/usage")?.query);
+    expect(Object.fromEntries(first)).toEqual({ from: "2026-09-01", to: "2026-09-30", organizationId: IDS.organization });
+    fireEvent.change(within(usage).getByLabelText("Até"), { target: { value: "2026-09-15" } });
+    await waitFor(() => expect(router.current()).toBe(`/admin/costs?organizationId=${IDS.organization}&from=2026-09-01&to=2026-09-15`));
+    await waitFor(() => expect(new URLSearchParams(api.calls.filter((call) => call.path === "/v1/admin/usage").at(-1)?.query).get("to")).toBe("2026-09-15"));
+  });
+
+  it("explains a range without usage and an unreadable ledger, without hiding the budgets", async () => {
+    const zero = { calls: 0, inputTokens: 0, outputTokens: 0, costMicroUsd: 0, unpricedCalls: 0 };
+    const empty = render({ path: "/admin/costs?from=2026-09-29", routes: routes({ "GET /v1/admin/usage": ok(buildAdminUsage({ totals: zero, byDay: [], byModel: [] })) }) });
+    expect(await screen.findByRole("heading", { level: 3, name: "Nenhum uso no período" })).toBeDefined();
+    await empty.user.click(screen.getByRole("button", { name: "Voltar ao mês atual" }));
+    expect(empty.router.current()).toBe("/admin/costs");
+    empty.unmount();
+    const failing = render({ routes: routes({ "GET /v1/admin/usage": apiError(409, "CONFLICT") }) });
+    const usage = await screen.findByRole("region", { name: "Uso por dia e por modelo" });
+    expect((await within(usage).findByRole("alert")).textContent).toContain(FAKE_REQUEST_ID);
+    expect(screen.getByRole("heading", { level: 2, name: "Resumo do mês" })).toBeDefined();
+    failing.api.route("GET /v1/admin/usage", ok(buildAdminUsage()));
+    await failing.user.click(within(usage).getByRole("button", { name: "Tentar novamente" }));
+    expect(await within(usage).findByRole("table", { name: "Custo por dia" })).toBeDefined();
   });
 
   it("falls back to the sum of the listed organizations when the overview fails", async () => {

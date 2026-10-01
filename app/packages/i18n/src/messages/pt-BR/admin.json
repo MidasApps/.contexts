@@ -244,8 +244,6 @@
     "emptyTitle": "Nenhum custo para mostrar",
     "emptyDescription": "Os custos aparecem quando houver organizações na plataforma.",
     "emptyAction": "Ver organizações",
-    "gapTitle": "Custo por dia e por modelo ainda não disponível",
-    "gapDescription": "Esta página mostra o total do mês por organização. O detalhamento por dia e por modelo chega quando a API de uso da plataforma existir.",
     "filters": {
       "level": "Nível de uso",
       "all": "Todas",
@@ -275,6 +273,37 @@
       "source": "Origem do limite",
       "usage": "Uso do limite",
       "actions": "Ações"
+    },
+    "usage": {
+      "title": "Uso por dia e por modelo",
+      "description": "Custo e chamadas do período, direto do registro de uso. Sem datas, vale o mês atual até hoje. Os dias são em UTC, como no registro.",
+      "filtersLabel": "Filtrar o uso",
+      "from": "De",
+      "to": "Até",
+      "loading": "Carregando o uso…",
+      "totals": "De {from} a {to}: {cost} em {calls} chamadas e {tokens} tokens.",
+      "unpricedNote": "{count, plural, one {# chamada sem preço conhecido: seus tokens contam, o custo não.} other {# chamadas sem preço conhecido: seus tokens contam, o custo não.}}",
+      "truncatedTitle": "Nem todas as organizações entraram na soma",
+      "truncatedDescription": "A resposta leu {count} organizações, o limite de uma consulta. Filtre por organização para ver as demais.",
+      "byDayTitle": "Custo por dia",
+      "byDayDescription": "Um valor por dia do período; dias sem chamadas ficam em zero.",
+      "byModelTitle": "Custo por modelo",
+      "byModelDescription": "Do maior para o menor custo.",
+      "byModelDescriptionTop": "Os {shown} de maior custo entre {total} modelos; a tabela abaixo lista todos.",
+      "modelsCaption": "Uso por modelo",
+      "columns": {
+        "day": "Dia",
+        "model": "Modelo",
+        "provider": "Provedor",
+        "calls": "Chamadas",
+        "inputTokens": "Tokens de entrada",
+        "outputTokens": "Tokens de saída",
+        "cost": "Custo",
+        "unpriced": "Sem preço"
+      },
+      "emptyTitle": "Nenhum uso no período",
+      "emptyDescription": "Nenhuma chamada de modelo foi registrada com esses filtros.",
+      "clear": "Voltar ao mês atual"
     }
   },
   "organizationDetail": {

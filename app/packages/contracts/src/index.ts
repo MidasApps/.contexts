@@ -583,6 +583,10 @@ export {
 } from "./contracts/platform/admin-operations.schema.ts";
 // SP5 admin gaps (decision 0044): staff user search and batched name lookup.
 export { ADMIN_USER_ENDPOINTS, adminListUsersEndpoint } from "./contracts/platform/admin-user-endpoints.ts";
+export { getAdminUsageEndpoint } from "./contracts/platform/admin-endpoints.ts";
+export {
+  ADMIN_USAGE_MAX_DAYS, AdminUsageContract, AdminUsageSchema, AdminUsageTotalsSchema, UsageDaySchema, type AdminUsage, type AdminUsageTotals,
+} from "./contracts/platform/admin-usage.schema.ts";
 export { ADMIN_AGENT_ENDPOINTS, adminListAgentsEndpoint } from "./contracts/platform/admin-agent-endpoints.ts";
 export {
   AdminAgentContract, AdminAgentEnablementSchema, AdminAgentRoleSchema, AdminAgentSchema, type AdminAgent, type AdminAgentRole,

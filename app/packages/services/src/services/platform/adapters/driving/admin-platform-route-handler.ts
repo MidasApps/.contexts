@@ -1,6 +1,7 @@
 import {
   createPlanEndpoint,
   getAdminOverviewEndpoint,
+  getAdminUsageEndpoint,
   getOrganizationAdminEndpoint,
   listOrganizationsAdminEndpoint,
   listPlansEndpoint,
@@ -82,5 +83,15 @@ export const buildAdminPlatformRoutes = (deps: { readonly pipeline: ApiRouteDeps
   [getAdminOverviewEndpoint.id]: withApiRoute(getAdminOverviewEndpoint, deps.pipeline, async (ctx) => {
     const denied = await requireStaff(ctx, { permission: CONSOLE_PERMISSIONS.usage });
     return denied ?? dataResponse({ data: await deps.console.getOverview() });
+  }),
+  [getAdminUsageEndpoint.id]: withApiRoute(getAdminUsageEndpoint, deps.pipeline, async (ctx) => {
+    const { from, to, organizationId } = ctx.input.query;
+    const denied = await requireStaff(ctx, { permission: CONSOLE_PERMISSIONS.usage, ...(organizationId === undefined ? {} : { targetTenantId: organizationId }) });
+    if (denied !== null) return denied;
+    const result = await deps.console.getUsage({ from, to, tenantId: organizationId ?? null });
+    if (result.ok) return dataResponse({ data: result.data });
+    return result.error.code === "NOT_FOUND"
+      ? apiError(404, "NOT_FOUND", ctx.requestId)
+      : apiError(400, "VALIDATION_FAILED", ctx.requestId, [{ field: result.error.field, issue: result.error.issue }]);
   }),
 });

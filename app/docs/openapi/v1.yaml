@@ -2554,6 +2554,96 @@ paths:
       tags:
         - traces
       x-auth: user
+  /v1/admin/usage:
+    get:
+      operationId: admin.getUsage
+      parameters:
+        - description: "First UTC day (`2026-09-01`); default: the first day of the month of `to`."
+          in: query
+          name: from
+          required: false
+          schema:
+            format: date
+            pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))$
+            type: string
+            x-pii: none
+        - description: "Last UTC day, included; default: today (UTC). At most 92 days after `from`."
+          in: query
+          name: to
+          required: false
+          schema:
+            format: date
+            pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))$
+            type: string
+            x-pii: none
+        - description: Only this organization; without it, every live organization.
+          in: query
+          name: organizationId
+          required: false
+          schema:
+            minLength: 1
+            type: string
+            x-pii: none
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: "#/components/schemas/platform.AdminUsage"
+                required:
+                  - data
+                type: object
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: VALIDATION_FAILED
+          x-error-codes:
+            - VALIDATION_FAILED
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UNAUTHORIZED
+          x-error-codes:
+            - UNAUTHORIZED
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: FORBIDDEN, MFA_REQUIRED
+          x-error-codes:
+            - FORBIDDEN
+            - MFA_REQUIRED
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: NOT_FOUND
+          x-error-codes:
+            - NOT_FOUND
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: INTERNAL_ERROR
+          x-error-codes:
+            - INTERNAL_ERROR
+      security:
+        - bearerAuth: []
+      summary: Model usage and cost by UTC day and by model from the usage ledger, of every live organization or of one (staff, platform.usage.read).
+      tags:
+        - admin
+      x-auth: user
   /v1/admin/users:
     get:
       operationId: admin.listUsers
@@ -22489,6 +22579,246 @@ components:
       x-kind: view
       x-permission: platform.workflow.manage
       x-pii: personal
+      x-relations: []
+      x-tenancyScope: platform
+    platform.AdminUsage:
+      additionalProperties: false
+      description: Model usage and cost for staff, by UTC day and by model, of every organization or of one.
+      examples:
+        - byDay:
+            - calls: 0
+              costMicroUsd: 0
+              day: "2026-09-29"
+              inputTokens: 0
+              outputTokens: 0
+              unpricedCalls: 0
+            - calls: 240
+              costMicroUsd: 1250000
+              day: "2026-09-30"
+              inputTokens: 310000
+              outputTokens: 42000
+              unpricedCalls: 0
+          byModel:
+            - calls: 240
+              costMicroUsd: 1250000
+              inputTokens: 310000
+              model: gemini-3.5-flash
+              outputTokens: 42000
+              provider: google
+              unpricedCalls: 0
+          from: "2026-09-29"
+          generatedAt: "2026-09-30T12:00:00.000Z"
+          organizationId: Jd8sK2lPq0WnR5tYu3bV
+          organizations: 1
+          to: "2026-09-30"
+          totals:
+            calls: 240
+            costMicroUsd: 1250000
+            inputTokens: 310000
+            outputTokens: 42000
+            unpricedCalls: 0
+          truncated: false
+      properties:
+        byDay:
+          description: One row per day of the range, in order; days without calls are zero.
+          items:
+            additionalProperties: false
+            properties:
+              calls:
+                description: Model calls.
+                maximum: 9007199254740991
+                minimum: 0
+                type: integer
+                x-pii: none
+              costMicroUsd:
+                description: Cost of the priced calls, in micro-USD.
+                maximum: 9007199254740991
+                minimum: 0
+                type: integer
+                x-pii: none
+              day:
+                description: UTC day.
+                format: date
+                pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))$
+                type: string
+                x-pii: none
+              inputTokens:
+                description: Prompt tokens.
+                maximum: 9007199254740991
+                minimum: 0
+                type: integer
+                x-pii: none
+              outputTokens:
+                description: Completion tokens.
+                maximum: 9007199254740991
+                minimum: 0
+                type: integer
+                x-pii: none
+              unpricedCalls:
+                description: "Calls whose model had no verified price: their tokens count, their cost is unknown."
+                maximum: 9007199254740991
+                minimum: 0
+                type: integer
+                x-pii: none
+            required:
+              - day
+              - calls
+              - inputTokens
+              - outputTokens
+              - costMicroUsd
+              - unpricedCalls
+            type: object
+          maxItems: 92
+          type: array
+          x-pii: none
+        byModel:
+          description: One row per provider and model, highest cost first.
+          items:
+            additionalProperties: false
+            properties:
+              calls:
+                description: Model calls.
+                maximum: 9007199254740991
+                minimum: 0
+                type: integer
+                x-pii: none
+              costMicroUsd:
+                description: Cost of the priced calls, in micro-USD.
+                maximum: 9007199254740991
+                minimum: 0
+                type: integer
+                x-pii: none
+              inputTokens:
+                description: Prompt tokens.
+                maximum: 9007199254740991
+                minimum: 0
+                type: integer
+                x-pii: none
+              model:
+                description: Model id.
+                minLength: 1
+                type: string
+                x-pii: none
+              outputTokens:
+                description: Completion tokens.
+                maximum: 9007199254740991
+                minimum: 0
+                type: integer
+                x-pii: none
+              provider:
+                description: Model provider.
+                minLength: 1
+                type: string
+                x-pii: none
+              unpricedCalls:
+                description: "Calls whose model had no verified price: their tokens count, their cost is unknown."
+                maximum: 9007199254740991
+                minimum: 0
+                type: integer
+                x-pii: none
+            required:
+              - provider
+              - model
+              - calls
+              - inputTokens
+              - outputTokens
+              - costMicroUsd
+              - unpricedCalls
+            type: object
+          maxItems: 500
+          type: array
+          x-pii: none
+        from:
+          description: First UTC day of the range.
+          format: date
+          pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))$
+          type: string
+          x-pii: none
+        generatedAt:
+          description: When the numbers were computed (UTC).
+          format: date-time
+          pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z))$
+          type: string
+          x-pii: none
+        organizationId:
+          anyOf:
+            - minLength: 1
+              type: string
+            - type: "null"
+          description: Organization the numbers are of; null = every live organization.
+          x-pii: none
+        organizations:
+          description: Organizations whose ledger was read.
+          maximum: 9007199254740991
+          minimum: 0
+          type: integer
+          x-pii: none
+        to:
+          description: Last UTC day of the range, included.
+          format: date
+          pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))$
+          type: string
+          x-pii: none
+        totals:
+          additionalProperties: false
+          description: Totals of the range.
+          properties:
+            calls:
+              description: Model calls.
+              maximum: 9007199254740991
+              minimum: 0
+              type: integer
+              x-pii: none
+            costMicroUsd:
+              description: Cost of the priced calls, in micro-USD.
+              maximum: 9007199254740991
+              minimum: 0
+              type: integer
+              x-pii: none
+            inputTokens:
+              description: Prompt tokens.
+              maximum: 9007199254740991
+              minimum: 0
+              type: integer
+              x-pii: none
+            outputTokens:
+              description: Completion tokens.
+              maximum: 9007199254740991
+              minimum: 0
+              type: integer
+              x-pii: none
+            unpricedCalls:
+              description: "Calls whose model had no verified price: their tokens count, their cost is unknown."
+              maximum: 9007199254740991
+              minimum: 0
+              type: integer
+              x-pii: none
+          required:
+            - calls
+            - inputTokens
+            - outputTokens
+            - costMicroUsd
+            - unpricedCalls
+          type: object
+          x-pii: none
+        truncated:
+          description: True when there are more organizations than one answer reads; the totals then cover only the ones read.
+          type: boolean
+          x-pii: none
+      required:
+        - from
+        - to
+        - organizationId
+        - totals
+        - byDay
+        - byModel
+        - organizations
+        - truncated
+        - generatedAt
+      type: object
+      x-kind: view
+      x-permission: platform.usage.read
+      x-pii: none
       x-relations: []
       x-tenancyScope: platform
     platform.AdminUserSummary:
