@@ -1,4 +1,7 @@
 {
+  "unitTypes": {
+    "unit": "Unidad"
+  },
   "actions": {
     "save": "Guardar",
     "cancel": "Cancelar",
@@ -19,6 +22,106 @@
   },
   "errorWithReference": "Algo salió mal. Referencia: {requestId}",
   "itemCount": "{count, plural, =0 {Ningún elemento} one {# elemento} other {# elementos}}",
+  "presence": {
+    "online": "En línea",
+    "away": "Ausente",
+    "busy": "Ocupado",
+    "offline": "Desconectado"
+  },
+  "copy": {
+    "copy": "Copiar",
+    "copied": "Copiado al portapapeles.",
+    "failed": "No se pudo copiar. Selecciona el texto y cópialo manualmente.",
+    "reveal": "Mostrar valor",
+    "hide": "Ocultar valor"
+  },
+  "search": {
+    "label": "Buscar",
+    "placeholder": "Buscar…",
+    "clear": "Borrar búsqueda",
+    "noResults": "No se encontraron resultados.",
+    "results": "Resultados"
+  },
+  "navigation": {
+    "breadcrumb": "Ruta de navegación",
+    "more": "Más"
+  },
+  "pickers": {
+    "currency": {
+      "placeholder": "Selecciona una moneda",
+      "search": "Buscar moneda",
+      "empty": "No se encontró ninguna moneda."
+    },
+    "timeZone": {
+      "placeholder": "Selecciona una zona horaria",
+      "search": "Buscar zona horaria",
+      "empty": "No se encontró ninguna zona horaria."
+    },
+    "locale": {
+      "placeholder": "Selecciona un idioma"
+    }
+  },
+  "money": {
+    "invalid": "Ingresa un monto válido, por ejemplo {example}.",
+    "tooManyDigits": "Usa como máximo {digits, plural, =0 {ningún decimal} one {# decimal} other {# decimales}}."
+  },
+  "errorState": {
+    "title": "No pudimos cargar esto",
+    "description": "Algo salió mal de nuestro lado. Inténtalo de nuevo en un momento.",
+    "reference": "Referencia: {requestId}",
+    "messageWithReference": "{message} Referencia: {requestId}"
+  },
+  "noAccess": {
+    "title": "No tienes acceso a esta página",
+    "description": "Pide a un administrador de la organización que te dé acceso."
+  },
+  "notifications": {
+    "region": "Notificaciones",
+    "dismiss": "Descartar notificación"
+  },
+  "pagination": {
+    "label": "Paginación",
+    "previous": "Anterior",
+    "next": "Siguiente"
+  },
+  "form": {
+    "required": "obligatorio",
+    "submitFailedTitle": "No se pudo guardar",
+    "savedTitle": "Cambios guardados",
+    "unavailableFields": "Algunos datos que no se pueden editar aquí no son válidos. Recarga la página e inténtalo de nuevo.",
+    "selectPlaceholder": "Selecciona una opción",
+    "timeZoneHint": "Fecha y hora en la zona horaria {timeZone}.",
+    "errors": {
+      "required": "Completa este campo.",
+      "tooShort": "Usa al menos {minimum, plural, one {# carácter} other {# caracteres}}.",
+      "tooLong": "Usa como máximo {maximum, plural, one {# carácter} other {# caracteres}}.",
+      "tooSmall": "Ingresa un valor mayor o igual a {minimum}.",
+      "tooBig": "Ingresa un valor menor o igual a {maximum}.",
+      "notInteger": "Ingresa un número entero.",
+      "invalidFormat": "El formato de este campo no es válido.",
+      "invalidOption": "Elige una de las opciones disponibles.",
+      "invalid": "Revisa este campo."
+    }
+  },
+  "password": {
+    "show": "Mostrar contraseña"
+  },
+  "oneTimeSecret": {
+    "confirmFirst": "Confirma que guardaste el secreto para terminar."
+  },
+  "pageTitles": {
+    "signIn": "Iniciar sesión",
+    "invite": "Invitación",
+    "home": "Inicio",
+    "organizations": "Organizaciones",
+    "organization": "Organización",
+    "project": "Proyecto",
+    "module": "Módulo",
+    "settings": "Configuración",
+    "profile": "Perfil",
+    "admin": "Administración",
+    "notFound": "Página no encontrada"
+  },
   "approvals": {
     "status": {
       "pending": "Pendiente",

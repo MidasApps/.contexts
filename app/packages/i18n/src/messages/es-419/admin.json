@@ -1,0 +1,40 @@
+{
+  "surface": "Administración de la plataforma",
+  "sidebar": {
+    "title": "Administración",
+    "navLabel": "Áreas de la administración",
+    "group": "Plataforma",
+    "backToApp": "Volver a la app",
+    "loading": "Cargando áreas…",
+    "retry": "Intentar de nuevo"
+  },
+  "topbar": {
+    "badge": "Equipo de la plataforma"
+  },
+  "home": {
+    "title": "Administración de la plataforma",
+    "description": "Herramientas del equipo que opera la plataforma. Las áreas de abajo reciben contenido en las próximas versiones.",
+    "sectionsTitle": "Áreas",
+    "emptyTitle": "No hay áreas disponibles",
+    "emptyDescription": "Tu rol en el equipo no da acceso a ninguna área de la administración.",
+    "loading": "Cargando la administración…"
+  },
+  "slot": {
+    "eyebrow": "Administración",
+    "emptyTitle": "Todavía no disponible",
+    "emptyDescription": "Esta área de la administración llega en una próxima versión.",
+    "backToHome": "Volver a la administración",
+    "loading": "Cargando el área…"
+  },
+  "descriptions": {
+    "organizations": "Organizaciones de la plataforma y quiénes las administran.",
+    "users": "Cuentas de usuario, equipo y acceso de soporte.",
+    "agents": "Agentes disponibles y sus versiones.",
+    "prompts": "Prompts y sus versiones publicadas.",
+    "connectors": "Conectores e integraciones configurados.",
+    "datasets": "Conjuntos de datos y evaluaciones de los agentes.",
+    "traces": "Trazas de ejecución y registros.",
+    "costs": "Uso y costos por organización.",
+    "flags": "Flags de funcionalidades por entorno."
+  }
+}

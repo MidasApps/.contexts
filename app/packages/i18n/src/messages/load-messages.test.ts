@@ -19,4 +19,9 @@ describe("loadMessages", () => {
     const messages = loadMessages("en-US", { demo: { "pt-BR": { a: "A-pt", b: "B-pt" }, "en-US": { a: "A-en" } } });
     expect(messages["demo"]).toEqual({ a: "A-en", b: "B-pt" });
   });
+
+  it("rejects extra namespaces that shadow a core namespace", () => {
+    expect(() => loadMessages("pt-BR", { common: { "pt-BR": { a: "A" } } })).toThrow(/reserved/);
+    expect(() => loadMessages("pt-BR", { errors: { "pt-BR": { a: "A" } } })).toThrow(/reserved/);
+  });
 });

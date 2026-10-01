@@ -1,0 +1,82 @@
+{
+  "core": {
+    "organization": {
+      "read": "Ver la organización",
+      "update": "Cambiar el nombre y los valores predeterminados de la organización",
+      "delete": "Eliminar la organización"
+    },
+    "project": {
+      "read": "Ver proyectos",
+      "create": "Crear proyectos",
+      "update": "Cambiar proyectos",
+      "delete": "Eliminar proyectos"
+    },
+    "unit": {
+      "read": "Ver unidades",
+      "create": "Crear unidades",
+      "update": "Renombrar y mover unidades",
+      "delete": "Eliminar unidades"
+    },
+    "member": {
+      "read": "Ver miembros",
+      "invite": "Invitar a personas",
+      "update": "Cambiar los roles de los miembros",
+      "remove": "Quitar miembros"
+    },
+    "role": {
+      "read": "Ver roles",
+      "create": "Crear roles",
+      "update": "Cambiar roles",
+      "delete": "Eliminar roles"
+    },
+    "api-key": {
+      "read": "Ver claves de API",
+      "create": "Crear claves de API",
+      "revoke": "Revocar claves de API"
+    },
+    "device": {
+      "read": "Ver dispositivos",
+      "create": "Activar dispositivos",
+      "revoke": "Revocar dispositivos"
+    },
+    "audit-log": {
+      "read": "Ver el registro de auditoría"
+    },
+    "approval": {
+      "read": "Ver solicitudes de aprobación",
+      "decide": "Aprobar o rechazar solicitudes"
+    },
+    "chat": {
+      "use": "Usar el chat"
+    },
+    "mcp": {
+      "use": "Usar herramientas MCP"
+    },
+    "web-tools": {
+      "use": "Usar herramientas de búsqueda web"
+    },
+    "knowledge": {
+      "read": "Consultar la base de conocimiento",
+      "write": "Agregar a la base de conocimiento",
+      "delete": "Eliminar de la base de conocimiento"
+    },
+    "catalog": {
+      "read": "Ver el catálogo de datos",
+      "query": "Consultar datos del catálogo"
+    },
+    "connector": {
+      "read": "Ver conectores",
+      "write": "Configurar conectores"
+    },
+    "agent-settings": {
+      "read": "Ver la configuración de agentes",
+      "update": "Cambiar la configuración de agentes"
+    },
+    "usage": {
+      "read": "Ver el uso"
+    },
+    "file": {
+      "upload": "Subir archivos"
+    }
+  }
+}

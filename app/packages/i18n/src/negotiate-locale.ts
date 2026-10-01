@@ -4,7 +4,7 @@ import { SUPPORTED_LOCALES, isSupportedLocale, type SupportedLocale } from "./lo
 export type NegotiateLocaleInput = {
   /** Requested tags in preference order (`Accept-Language`, `navigator.languages`). */
   requested: readonly string[];
-  /** Explicit choice (profile preference or the cookie mirroring it); wins when supported. */
+  /** Explicit choice (profile preference or the cookie mirroring it); wins when supported, any case. */
   saved?: string | undefined;
   fallback: SupportedLocale;
 };
@@ -25,7 +25,8 @@ const canonicalTags = (tags: readonly string[]): string[] =>
  * requested list is matched with RFC 4647 best fit (`es-MX` → `es-419`, `pt` → `pt-BR`).
  */
 export const negotiateLocale = ({ requested, saved, fallback }: NegotiateLocaleInput): SupportedLocale => {
-  if (saved !== undefined && isSupportedLocale(saved)) return saved;
+  const [savedTag] = saved === undefined ? [] : canonicalTags([saved]);
+  if (savedTag !== undefined && isSupportedLocale(savedTag)) return savedTag;
   const tags = canonicalTags(requested);
   if (tags.length === 0) return fallback;
   for (const tag of tags) {

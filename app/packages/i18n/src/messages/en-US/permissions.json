@@ -1,0 +1,82 @@
+{
+  "core": {
+    "organization": {
+      "read": "View the organization",
+      "update": "Change the organization name and defaults",
+      "delete": "Delete the organization"
+    },
+    "project": {
+      "read": "View projects",
+      "create": "Create projects",
+      "update": "Change projects",
+      "delete": "Delete projects"
+    },
+    "unit": {
+      "read": "View units",
+      "create": "Create units",
+      "update": "Rename and move units",
+      "delete": "Delete units"
+    },
+    "member": {
+      "read": "View members",
+      "invite": "Invite people",
+      "update": "Change member roles",
+      "remove": "Remove members"
+    },
+    "role": {
+      "read": "View roles",
+      "create": "Create roles",
+      "update": "Change roles",
+      "delete": "Delete roles"
+    },
+    "api-key": {
+      "read": "View API keys",
+      "create": "Create API keys",
+      "revoke": "Revoke API keys"
+    },
+    "device": {
+      "read": "View devices",
+      "create": "Activate devices",
+      "revoke": "Revoke devices"
+    },
+    "audit-log": {
+      "read": "View the audit log"
+    },
+    "approval": {
+      "read": "View approval requests",
+      "decide": "Approve or reject requests"
+    },
+    "chat": {
+      "use": "Use the chat"
+    },
+    "mcp": {
+      "use": "Use MCP tools"
+    },
+    "web-tools": {
+      "use": "Use web search tools"
+    },
+    "knowledge": {
+      "read": "Read the knowledge base",
+      "write": "Add to the knowledge base",
+      "delete": "Delete from the knowledge base"
+    },
+    "catalog": {
+      "read": "View the data catalog",
+      "query": "Query catalog data"
+    },
+    "connector": {
+      "read": "View connectors",
+      "write": "Configure connectors"
+    },
+    "agent-settings": {
+      "read": "View agent settings",
+      "update": "Change agent settings"
+    },
+    "usage": {
+      "read": "View usage"
+    },
+    "file": {
+      "upload": "Upload files"
+    }
+  }
+}

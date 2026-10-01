@@ -1,4 +1,4 @@
-import { fallbackChain, type SupportedLocale } from "../locales.ts";
+import { SOURCE_LOCALE, fallbackChain, type SupportedLocale } from "../locales.ts";
 import { CORE_MESSAGES, type CoreMessages, type MessageTree } from "./core-catalog.ts";
 
 /** Extra namespaces (one per module id), each with its catalogs per locale. */
@@ -23,12 +23,22 @@ const mergeTrees = (base: MessageTree, override: MessageTree): MessageTree => {
 const resolveChain = (chain: readonly SupportedLocale[], pick: (locale: SupportedLocale) => MessageTree | undefined): MessageTree =>
   chain.toReversed().reduce<MessageTree>((merged, locale) => mergeTrees(merged, pick(locale) ?? {}), {});
 
+const assertNoReservedNamespace = (extra: ExtraNamespaces): void => {
+  const clash = Object.keys(extra).find((namespace) => Object.hasOwn(CORE_MESSAGES[SOURCE_LOCALE], namespace));
+  if (clash !== undefined) throw new RangeError(`Namespace "${clash}" is reserved by the core catalogs`);
+};
+
 /**
  * Messages for `locale`: the core namespaces plus `extra` (module catalogs keyed by module id),
  * each deep-merged over its fallback chain (decision 0013: `en-US`/`es-419` → `pt-BR`), so a key
- * missing in the locale shows the source text instead of the raw key.
+ * missing in the locale shows the source text instead of the raw key. The fallback is silent at
+ * runtime; `pnpm i18n:check` is the gate that reports missing keys (decision 0013). A module id
+ * equal to a core namespace (`common`, `errors`, …) is rejected (decision 0015).
+ *
+ * @throws {RangeError} an extra namespace shadows a core namespace.
  */
 export const loadMessages = (locale: SupportedLocale, extra: ExtraNamespaces = {}): LoadedMessages => {
+  assertNoReservedNamespace(extra);
   const chain = fallbackChain(locale);
   const core = resolveChain(chain, (candidate) => CORE_MESSAGES[candidate]) as LoadedMessages;
   const modules = Object.fromEntries(

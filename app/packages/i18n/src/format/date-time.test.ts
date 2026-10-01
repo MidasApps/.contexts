@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatDateTime, zonedWallTimeToUtc } from "./date-time.ts";
+import { formatDateTime, utcToZonedWallTime, zonedWallTimeToUtc } from "./date-time.ts";
 
 const plain = (text: string): string => text.replace(/[\u00a0\u202f]/g, " ");
 
@@ -45,7 +45,26 @@ describe("zonedWallTimeToUtc", () => {
 
   it("rejects malformed wall times and unknown zones", () => {
     expect(() => zonedWallTimeToUtc("2026-13-01T00:00", "UTC")).toThrow(RangeError);
+    expect(() => zonedWallTimeToUtc("2026-01-01T10:60", "UTC")).toThrow(RangeError);
+    expect(() => zonedWallTimeToUtc("2026-01-01T10:00:61", "UTC")).toThrow(RangeError);
     expect(() => zonedWallTimeToUtc("2026-01-01T00:00Z", "UTC")).toThrow(RangeError);
     expect(() => zonedWallTimeToUtc("2026-01-01T00:00", "Mars/Olympus")).toThrow(RangeError);
+  });
+});
+
+describe("utcToZonedWallTime", () => {
+  it("shows a UTC instant as the wall time of the zone (datetime-local value)", () => {
+    expect(utcToZonedWallTime("2026-01-15T12:00:00.000Z", "America/Sao_Paulo")).toBe("2026-01-15T09:00");
+    expect(utcToZonedWallTime("2026-01-15T12:00:00Z", "Asia/Kolkata")).toBe("2026-01-15T17:30");
+  });
+
+  it("crosses midnight and round-trips with zonedWallTimeToUtc", () => {
+    expect(utcToZonedWallTime("2026-01-16T01:15:00.000Z", "America/Sao_Paulo")).toBe("2026-01-15T22:15");
+    const wall = "2026-03-08T01:30";
+    expect(utcToZonedWallTime(zonedWallTimeToUtc(wall, "America/New_York"), "America/New_York")).toBe(wall);
+  });
+
+  it("rejects instants that are not UTC ISO", () => {
+    expect(() => utcToZonedWallTime("2026-01-15T12:00:00-03:00", "UTC")).toThrow(RangeError);
   });
 });

@@ -9,12 +9,20 @@ type Separators = { group: string; decimal: string; currencyLiterals: string[] }
 
 const SPACES = /[\s\u00a0\u202f]/g;
 
-/** Group/decimal separators and currency symbols of the locale, read from `Intl` (never assumed). */
+/**
+ * Group/decimal separators of the locale and the currency's symbols, read from `Intl` (never
+ * assumed). Separators come from a plain number formatter: a zero-digit currency (JPY, CLP, KRW)
+ * has no decimal part in its currency format, so reading it there would guess wrong.
+ */
 const readSeparators = (locale: string, currency: string): Separators => {
-  const parts = new Intl.NumberFormat(locale, { style: "currency", currency }).formatToParts(1234567.891);
+  const numberParts = new Intl.NumberFormat(locale).formatToParts(1234567.8);
   const find = (type: Intl.NumberFormatPartTypes): string =>
-    parts.find((part) => part.type === type)?.value.replace(SPACES, " ") ?? "";
-  const currencyLiterals = [find("currency"), currency].filter((literal) => literal !== "");
+    numberParts.find((part) => part.type === type)?.value.replace(SPACES, " ") ?? "";
+  const symbol = new Intl.NumberFormat(locale, { style: "currency", currency })
+    .formatToParts(1)
+    .find((part) => part.type === "currency")
+    ?.value.replace(SPACES, " ");
+  const currencyLiterals = [symbol ?? "", currency].filter((literal) => literal !== "");
   return { group: find("group"), decimal: find("decimal") || ".", currencyLiterals };
 };
 

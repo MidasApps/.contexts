@@ -1,0 +1,435 @@
+{
+  "navLabel": "Seções das configurações",
+  "navLoading": "Carregando as seções…",
+  "noAccessDescription": "Peça a um administrador da organização para liberar esta seção.",
+  "nodes": {
+    "organizationGroup": "Organização",
+    "projectGroup": "Projetos",
+    "wholeOrganization": "Toda a organização ({name})",
+    "organizationLevel": "Toda a organização",
+    "projectLevel": "Projeto:",
+    "unitLevel": "Unidade:",
+    "hiddenProject": "Projeto oculto",
+    "hiddenUnit": "Unidade oculta",
+    "placeholder": "Selecione onde vale",
+    "search": "Buscar projeto",
+    "loading": "Carregando projetos…",
+    "empty": "Nenhum projeto encontrado."
+  },
+  "general": {
+    "eyebrow": "Configurações de {organization}",
+    "title": "Geral",
+    "description": "Nome e padrões regionais da organização.",
+    "loading": "Carregando a organização…",
+    "suspended": "Suspensa",
+    "detailsTitle": "Organização",
+    "detailsDescription": "Idioma, fuso horário e moeda padrão valem para quem não escolheu os seus e para valores novos.",
+    "readOnlyDescription": "Somente administradores podem alterar estes dados.",
+    "createdAt": "Criada em {date}.",
+    "form": {
+      "name": "Nome",
+      "regional": "Padrões regionais",
+      "locale": "Idioma padrão",
+      "timeZone": "Fuso horário padrão",
+      "currency": "Moeda padrão"
+    }
+  },
+  "members": {
+    "eyebrow": "Configurações de {organization}",
+    "title": "Membros",
+    "description": "Quem tem acesso à organização e com quais papéis.",
+    "loading": "Carregando membros…",
+    "caption": "Membros de {organization}",
+    "pagination": "Páginas de membros",
+    "invite": "Convidar",
+    "you": "Você",
+    "columns": {
+      "member": "Membro",
+      "access": "Acesso",
+      "actions": "Ações"
+    },
+    "editRolesOf": "Editar papéis de {name}",
+    "removeAction": "Remover",
+    "emptyTitle": "Nenhum membro ainda",
+    "emptyDescription": "Convide pessoas para trabalhar com você nesta organização.",
+    "emptyDescriptionNoPermission": "Peça a um administrador para convidar pessoas.",
+    "editRoles": {
+      "title": "Papéis de {name}",
+      "description": "Os papéis valem em:",
+      "rolesLegend": "Papéis",
+      "rolesRequired": "Escolha pelo menos um papel.",
+      "cancel": "Cancelar",
+      "submit": "Salvar papéis",
+      "saved": "Papéis de {name} atualizados."
+    },
+    "remove": {
+      "title": "Remover {name} da organização?",
+      "description": "Todos os acessos desta pessoa na organização e as chaves de API dela serão revogados.",
+      "confirm": "Remover membro",
+      "done": "{name} foi removido da organização."
+    },
+    "removeNamed": "Remover {name}"
+  },
+  "invitations": {
+    "eyebrow": "Configurações de {organization}",
+    "title": "Convites",
+    "description": "Convide pessoas por e-mail e acompanhe os convites enviados.",
+    "loading": "Carregando convites…",
+    "invite": "Convidar",
+    "filterLabel": "Filtrar convites",
+    "filters": {
+      "pending": "Pendentes",
+      "all": "Todos"
+    },
+    "captionPending": "Convites pendentes",
+    "captionAll": "Todos os convites",
+    "pagination": "Páginas de convites",
+    "columns": {
+      "email": "E-mail",
+      "node": "Onde vale",
+      "roles": "Papéis",
+      "status": "Situação",
+      "expires": "Expira em",
+      "actions": "Ações"
+    },
+    "status": {
+      "pending": "Pendente",
+      "accepted": "Aceito",
+      "revoked": "Revogado",
+      "expired": "Expirado"
+    },
+    "expiresOn": "Expira em {date}",
+    "revokeAction": "Revogar",
+    "revokeNamed": "Revogar convite de {email}",
+    "emptyPendingTitle": "Nenhum convite pendente",
+    "emptyTitle": "Nenhum convite enviado",
+    "emptyDescription": "Os convites aparecem aqui até serem aceitos ou expirarem.",
+    "inviteDialog": {
+      "title": "Convidar pessoa",
+      "description": "A pessoa recebe acesso a {organization} ao aceitar o convite com este e-mail.",
+      "email": "E-mail",
+      "node": "Onde vale",
+      "nodeHint": "O acesso vale no nível escolhido e em tudo abaixo dele.",
+      "roles": "Papéis",
+      "errors": {
+        "required": "Digite o e-mail da pessoa.",
+        "invalid": "Digite um e-mail válido, por exemplo nome@empresa.com.",
+        "roles": "Escolha pelo menos um papel."
+      },
+      "cancel": "Cancelar",
+      "submit": "Enviar convite",
+      "createdTitle": "Convite criado para {email}",
+      "createdDescription": "Envie o link abaixo para a pessoa. Por segurança, ele não será mostrado de novo.",
+      "link": "Link do convite",
+      "linkHint": "Vale por 7 dias e só pode ser usado uma vez, com o e-mail convidado.",
+      "another": "Convidar outra pessoa",
+      "done": "Concluir"
+    },
+    "revoke": {
+      "title": "Revogar este convite?",
+      "description": "O link enviado para {email} deixa de funcionar imediatamente.",
+      "confirm": "Revogar convite",
+      "done": "Convite de {email} revogado."
+    }
+  },
+  "roles": {
+    "eyebrow": "Configurações de {organization}",
+    "title": "Papéis",
+    "description": "O que cada papel permite fazer na organização.",
+    "loading": "Carregando papéis…",
+    "create": "Novo papel",
+    "edit": "Editar",
+    "editNamed": "Editar papel {name}",
+    "deleteAction": "Excluir",
+    "deleteNamed": "Excluir papel {name}",
+    "customTitle": "Papéis personalizados",
+    "customDescription": "Combine permissões para criar papéis sob medida.",
+    "customCaption": "Papéis personalizados da organização",
+    "systemTitle": "Papéis do sistema",
+    "systemDescription": "Existem em toda organização e não podem ser alterados.",
+    "columns": {
+      "name": "Papel",
+      "permissions": "Permissões",
+      "actions": "Ações"
+    },
+    "permissionCount": "{count, plural, one {# permissão} other {# permissões}}",
+    "emptyTitle": "Nenhum papel personalizado",
+    "emptyDescription": "Crie um papel quando os papéis do sistema não bastarem.",
+    "emptyDescriptionNoPermission": "Os papéis do sistema abaixo estão disponíveis.",
+    "unknownRole": "Papel removido",
+    "checklistHint": "Escolha até {max} papéis.",
+    "system": {
+      "owner": {
+        "name": "Proprietário",
+        "description": "Acesso total, inclusive excluir a organização."
+      },
+      "admin": {
+        "name": "Administrador",
+        "description": "Gerencia membros, papéis, projetos e configurações."
+      },
+      "member": {
+        "name": "Membro",
+        "description": "Trabalha nos projetos e unidades a que tem acesso."
+      },
+      "viewer": {
+        "name": "Leitor",
+        "description": "Vê, mas não altera."
+      },
+      "device": {
+        "name": "Dispositivo",
+        "description": "Acesso de um dispositivo ativado, sem permissões de pessoa."
+      }
+    },
+    "picker": {
+      "coreModule": "Plataforma",
+      "selectedCount": "({count} de {total})"
+    },
+    "editor": {
+      "createTitle": "Novo papel",
+      "editTitle": "Editar {name}",
+      "description": "Você só pode conceder permissões que você mesmo tem.",
+      "name": "Nome",
+      "descriptionField": "Descrição",
+      "permissions": "Permissões",
+      "errors": {
+        "required": "Dê um nome ao papel.",
+        "tooLong": "Use no máximo 80 caracteres.",
+        "permissions": "Escolha pelo menos uma permissão."
+      },
+      "cancel": "Cancelar",
+      "create": "Criar papel",
+      "save": "Salvar papel",
+      "created": "Papel {name} criado.",
+      "updated": "Papel {name} atualizado."
+    },
+    "delete": {
+      "title": "Excluir o papel {name}?",
+      "description": "Só é possível excluir papéis que ninguém tem. Esta ação não pode ser desfeita.",
+      "confirm": "Excluir papel",
+      "done": "Papel {name} excluído."
+    }
+  },
+  "units": {
+    "eyebrow": "Configurações de {organization}",
+    "title": "Unidades",
+    "description": "A estrutura de cada projeto: unidades dentro de unidades.",
+    "loading": "Carregando…",
+    "loadingProjects": "Carregando projetos…",
+    "loadingTree": "Carregando unidades…",
+    "project": "Projeto",
+    "treeTitle": "Unidades de {project}",
+    "treeDescription": "Selecione uma unidade para criar subunidades, renomear, mover ou excluir.",
+    "treeLabel": "Unidades de {project}",
+    "noSelection": "Nenhuma unidade selecionada",
+    "createRoot": "Nova unidade",
+    "createChild": "Nova subunidade",
+    "rename": "Renomear",
+    "moveAction": "Mover para…",
+    "deleteAction": "Excluir",
+    "emptyTitle": "Nenhuma unidade ainda",
+    "emptyDescription": "Crie a primeira unidade de {project}.",
+    "emptyDescriptionNoPermission": "Peça a um administrador para criar unidades.",
+    "truncated": "Mostrando as primeiras {max} unidades.",
+    "noProjectsTitle": "Nenhum projeto ainda",
+    "noProjectsDescription": "As unidades ficam dentro de projetos. Crie um projeto primeiro.",
+    "goToProjects": "Ver projetos",
+    "projectRoot": "Direto em {project}",
+    "createTitle": "Nova unidade",
+    "createUnderProject": "A unidade fica direto em {project}.",
+    "createUnder": "A unidade fica dentro de {parent}.",
+    "createSubmit": "Criar unidade",
+    "created": "Unidade {name} criada.",
+    "renameTitle": "Renomear unidade",
+    "renameDescription": "O novo nome aparece em todo lugar onde a unidade é usada.",
+    "renameSubmit": "Salvar nome",
+    "renamed": "Unidade renomeada para {name}.",
+    "moved": "{name} foi movida.",
+    "deleteTitle": "Excluir {name}?",
+    "deleteDescription": "{count, plural, =0 {A unidade será excluída.} one {A unidade e # subunidade serão excluídas.} other {A unidade e # subunidades serão excluídas.}} Os acessos concedidos nelas deixam de valer.",
+    "deleteConfirm": "Excluir unidade",
+    "deleted": "Unidade {name} excluída.",
+    "form": {
+      "name": "Nome",
+      "type": "Tipo",
+      "typePlaceholder": "Selecione um tipo",
+      "noTypes": "Nenhum tipo de unidade pode ficar aqui.",
+      "nameRequired": "Dê um nome à unidade.",
+      "nameTooLong": "Use no máximo {max} caracteres.",
+      "typeRequired": "Escolha o tipo da unidade.",
+      "cancel": "Cancelar"
+    },
+    "move": {
+      "title": "Mover {name}",
+      "description": "Escolha para onde a unidade vai. As subunidades vão junto.",
+      "destination": "Destino",
+      "placeholder": "Selecione o destino",
+      "search": "Buscar unidade",
+      "empty": "Nenhum destino encontrado.",
+      "noTargets": "Não há outro lugar para onde esta unidade possa ir.",
+      "required": "Escolha o destino.",
+      "cancel": "Cancelar",
+      "submit": "Mover"
+    }
+  },
+  "apiKeys": {
+    "eyebrow": "Configurações de {organization}",
+    "title": "Chaves de API",
+    "description": "Integrações acessam a API com chaves limitadas a um nível e a permissões.",
+    "loading": "Carregando chaves…",
+    "create": "Nova chave",
+    "caption": "Chaves de API de {organization}",
+    "pagination": "Páginas de chaves",
+    "columns": {
+      "name": "Chave",
+      "node": "Onde vale",
+      "scopes": "Permissões",
+      "lastUsed": "Último uso",
+      "expires": "Expira em",
+      "status": "Situação",
+      "actions": "Ações"
+    },
+    "status": {
+      "active": "Ativa",
+      "revoked": "Revogada",
+      "expired": "Expirada",
+      "ownerRemoved": "Revogada (dono removido)"
+    },
+    "scopeCount": "{count, plural, one {# permissão} other {# permissões}}",
+    "neverUsed": "Nunca usada",
+    "cardMeta": "{scopes, plural, one {# permissão} other {# permissões}} · expira em {date}",
+    "revokeAction": "Revogar",
+    "revokeNamed": "Revogar chave {name}",
+    "emptyTitle": "Nenhuma chave de API",
+    "emptyDescription": "Crie uma chave para conectar uma integração à API.",
+    "emptyDescriptionNoPermission": "Peça a um administrador para criar chaves.",
+    "createDialog": {
+      "title": "Nova chave de API",
+      "description": "A chave age em seu nome, só com as permissões escolhidas e só onde vale.",
+      "name": "Nome",
+      "nameHint": "Para reconhecer a chave depois, por exemplo \"Exportação de relatórios\".",
+      "node": "Onde vale",
+      "nodeHint": "A chave só funciona no nível escolhido e abaixo dele.",
+      "expiry": "Validade",
+      "expiryOption": "{days} dias",
+      "expiresOn": "Expira em {date}.",
+      "scopes": "Permissões",
+      "loadingScopes": "Carregando permissões…",
+      "errors": {
+        "required": "Dê um nome à chave.",
+        "tooLong": "Use no máximo 80 caracteres.",
+        "scopes": "Escolha pelo menos uma permissão."
+      },
+      "cancel": "Cancelar",
+      "submit": "Criar chave",
+      "createdTitle": "Chave {name} criada",
+      "createdDescription": "Copie a chave agora e guarde em um cofre de segredos.",
+      "secretTitle": "Esta é a única vez que a chave aparece",
+      "secretWarning": "Guardamos apenas um resumo dela. Se perder, revogue e crie outra.",
+      "secretLabel": "Chave de API",
+      "secretHint": "Use no cabeçalho Authorization: Bearer da integração.",
+      "stored": "Copiei e guardei a chave em lugar seguro",
+      "done": "Concluir"
+    },
+    "revoke": {
+      "title": "Revogar a chave {name}?",
+      "description": "As integrações que usam esta chave param de funcionar imediatamente.",
+      "confirm": "Revogar chave",
+      "done": "Chave {name} revogada."
+    }
+  },
+  "devices": {
+    "eyebrow": "Configurações de {organization}",
+    "title": "Dispositivos",
+    "description": "Dispositivos compartilhados que entram com um código de ativação.",
+    "loading": "Carregando dispositivos…",
+    "create": "Ativar dispositivo",
+    "caption": "Dispositivos de {organization}",
+    "pagination": "Páginas de dispositivos",
+    "columns": {
+      "label": "Dispositivo",
+      "node": "Onde vale",
+      "lastSeen": "Última atividade",
+      "activated": "Ativado em",
+      "status": "Situação",
+      "actions": "Ações"
+    },
+    "status": {
+      "active": "Ativo",
+      "revoked": "Revogado"
+    },
+    "neverSeen": "Sem atividade",
+    "lastSeenOn": "Última atividade em {date}",
+    "revokeAction": "Revogar",
+    "revokeNamed": "Revogar dispositivo {name}",
+    "emptyTitle": "Nenhum dispositivo ativado",
+    "emptyDescription": "Gere um código de ativação e digite-o no dispositivo.",
+    "emptyDescriptionNoPermission": "Peça a um administrador para ativar dispositivos.",
+    "createDialog": {
+      "title": "Ativar dispositivo",
+      "description": "Gere um código de uso único para digitar no dispositivo.",
+      "label": "Nome do dispositivo",
+      "labelHint": "Por exemplo \"Tablet da recepção\".",
+      "node": "Onde vale",
+      "nodeHint": "O dispositivo só acessa o nível escolhido e o que está abaixo dele.",
+      "roles": "Papéis do dispositivo",
+      "errors": {
+        "labelRequired": "Dê um nome ao dispositivo.",
+        "labelTooLong": "Use no máximo {max} caracteres.",
+        "roles": "Escolha pelo menos um papel."
+      },
+      "cancel": "Cancelar",
+      "submit": "Gerar código",
+      "codeTitle": "Código para {label}",
+      "codeDescription": "O código aparece só agora e vale por 10 minutos."
+    },
+    "activation": {
+      "instructions": "No dispositivo {label}, abra a tela de ativação e digite o código:",
+      "codeLabel": "Código de ativação",
+      "codeHint": "Uso único. Letras maiúsculas ou minúsculas, com ou sem hífen.",
+      "countdown": "Expira em {clock}",
+      "expiresIn": "{minutes, plural, one {O código expira em # minuto.} other {O código expira em # minutos.}}",
+      "done": "Concluir",
+      "expiredTitle": "O código expirou",
+      "expiredDescription": "Gere um novo código para ativar o dispositivo.",
+      "another": "Gerar novo código",
+      "close": "Fechar"
+    },
+    "revoke": {
+      "title": "Revogar o dispositivo {name}?",
+      "description": "O dispositivo perde o acesso imediatamente e não consegue entrar de novo.",
+      "confirm": "Revogar dispositivo",
+      "done": "Dispositivo {name} revogado."
+    }
+  },
+  "module": {
+    "eyebrow": "Configurações de {organization}",
+    "description": "Configurações de {module} nesta organização.",
+    "loading": "Carregando configurações…",
+    "formTitle": "Configurações",
+    "neverSaved": "Ainda não foram salvas; os valores abaixo são os padrões.",
+    "readOnly": "Você pode ver estas configurações, mas não alterá-las."
+  },
+  "slots": {
+    "eyebrow": "Configurações de {organization}",
+    "loading": "Carregando…",
+    "backToGeneral": "Ir para Geral",
+    "connectors": {
+      "title": "Conectores",
+      "description": "Serviços externos que os agentes podem usar.",
+      "emptyTitle": "Nenhum conector disponível ainda",
+      "emptyDescription": "Os conectores aparecem aqui quando forem habilitados para a organização."
+    },
+    "agents": {
+      "title": "Agentes",
+      "description": "Como os agentes trabalham nesta organização.",
+      "emptyTitle": "Nenhuma configuração de agentes ainda",
+      "emptyDescription": "As opções dos agentes aparecem aqui quando forem habilitadas."
+    },
+    "usage": {
+      "title": "Uso",
+      "description": "Consumo e limites da organização.",
+      "emptyTitle": "Nenhum dado de uso ainda",
+      "emptyDescription": "O consumo aparece aqui assim que houver atividade."
+    }
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "surface": "Platform administration",
+  "sidebar": {
+    "title": "Administration",
+    "navLabel": "Administration areas",
+    "group": "Platform",
+    "backToApp": "Back to the app",
+    "loading": "Loading areas…",
+    "retry": "Try again"
+  },
+  "topbar": {
+    "badge": "Platform team"
+  },
+  "home": {
+    "title": "Platform administration",
+    "description": "Tools for the team that runs the platform. The areas below get their content in upcoming releases.",
+    "sectionsTitle": "Areas",
+    "emptyTitle": "No areas available",
+    "emptyDescription": "Your team role does not give access to any administration area.",
+    "loading": "Loading the administration…"
+  },
+  "slot": {
+    "eyebrow": "Administration",
+    "emptyTitle": "Not available yet",
+    "emptyDescription": "This administration area arrives in an upcoming release.",
+    "backToHome": "Back to the administration",
+    "loading": "Loading the area…"
+  },
+  "descriptions": {
+    "organizations": "Organizations on the platform and who runs them.",
+    "users": "User accounts, staff and support access.",
+    "agents": "Available agents and their versions.",
+    "prompts": "Prompts and their published versions.",
+    "connectors": "Configured connectors and integrations.",
+    "datasets": "Datasets and agent evaluations.",
+    "traces": "Execution traces and logs.",
+    "costs": "Usage and costs per organization.",
+    "flags": "Feature flags per environment."
+  }
+}

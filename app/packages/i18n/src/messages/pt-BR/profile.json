@@ -1,0 +1,182 @@
+{
+  "navLabel": "Seções do perfil",
+  "account": {
+    "title": "Conta",
+    "description": "Seus dados de acesso e como os outros membros veem você.",
+    "loading": "Carregando sua conta…",
+    "identityTitle": "Acesso",
+    "identityDescription": "A conta usada para entrar.",
+    "emailLabel": "E-mail",
+    "mfaLabel": "Verificação em duas etapas",
+    "mfaOn": "Verificação em duas etapas ativa",
+    "mfaOff": "Verificação em duas etapas desativada",
+    "emailHint": "O e-mail vem da sua conta de acesso e não pode ser alterado aqui.",
+    "profileTitle": "Perfil",
+    "profileDescription": "O nome aparece para os membros das suas organizações.",
+    "form": {
+      "displayName": "Nome de exibição"
+    }
+  },
+  "preferences": {
+    "title": "Preferências",
+    "description": "Idioma, fuso horário, moeda e tema da interface.",
+    "loading": "Carregando suas preferências…",
+    "regional": {
+      "title": "Idioma e região",
+      "description": "Datas aparecem no seu fuso horário; valores novos usam a moeda escolhida.",
+      "locale": "Idioma",
+      "timeZone": "Fuso horário",
+      "currency": "Moeda"
+    },
+    "theme": {
+      "title": "Aparência",
+      "legend": "Tema",
+      "description": "Aplicado na hora e salvo no seu perfil.",
+      "options": {
+        "system": "Automático (sistema)",
+        "light": "Claro",
+        "dark": "Escuro"
+      },
+      "saveFailed": "O tema foi aplicado aqui, mas não foi salvo no seu perfil.",
+      "retry": "Tentar novamente"
+    }
+  },
+  "security": {
+    "title": "Segurança",
+    "description": "Verificação em duas etapas e senha.",
+    "mfa": {
+      "title": "Verificação em duas etapas",
+      "description": "Além da senha, peça um código a cada entrada.",
+      "statusOn": "Ativa",
+      "statusOff": "Desativada",
+      "emptyTitle": "Nenhum segundo fator cadastrado",
+      "emptyDescription": "Adicione um app autenticador ou um telefone para proteger sua conta.",
+      "unavailable": "A verificação em duas etapas não está disponível neste ambiente.",
+      "listLabel": "Fatores cadastrados",
+      "kindTotp": "App autenticador",
+      "kindSms": "SMS",
+      "enrolledAt": "cadastrado em {date}",
+      "addTotp": "Adicionar app autenticador",
+      "addSms": "Adicionar telefone",
+      "remove": "Remover",
+      "removeNamed": "Remover {name}",
+      "removeTitle": "Remover este fator?",
+      "removeDescription": "Você não poderá mais usá-lo para entrar.",
+      "removeLastDescription": "É o seu único fator: depois de removê-lo, a entrada volta a pedir só a senha.",
+      "removed": "Fator removido.",
+      "enrolled": "Verificação em duas etapas atualizada.",
+      "totpTitle": "Adicionar app autenticador",
+      "totpDescription": "Use um app como Google Authenticator, 1Password ou Authy.",
+      "preparing": "Preparando o cadastro…",
+      "retry": "Tentar novamente",
+      "totpStepScan": "Abra o link no app autenticador deste dispositivo ou digite a chave de configuração.",
+      "totpStepCode": "Digite o código de 6 dígitos que o app mostrar.",
+      "openAuthenticator": "Abrir no app autenticador",
+      "setupKey": "Chave de configuração",
+      "setupKeyHint": "Mostrada só durante o cadastro. Não compartilhe.",
+      "totpCodeHint": "O código muda a cada 30 segundos.",
+      "totpDefaultName": "App autenticador",
+      "smsTitle": "Adicionar telefone",
+      "smsDescription": "Enviaremos um código por SMS a cada entrada.",
+      "smsDefaultName": "Telefone",
+      "phone": "Número de telefone",
+      "phoneHint": "Formato internacional, com + e código do país. Ex.: +55 11 91234-5678.",
+      "phoneInvalid": "Digite o número no formato internacional, começando com +.",
+      "sendCode": "Enviar código",
+      "codeSent": "Código enviado para {phone}.",
+      "changePhone": "Trocar número",
+      "smsCodeHint": "O código chega por SMS em alguns segundos.",
+      "code": "Código de verificação",
+      "codeRequired": "Digite o código de verificação.",
+      "codeInvalid": "O código tem 6 dígitos.",
+      "codeWrong": "Código incorreto ou expirado. Tente de novo.",
+      "factorName": "Nome do fator",
+      "factorNameHint": "Ajuda você a reconhecer este fator depois.",
+      "cancel": "Cancelar",
+      "verify": "Confirmar"
+    },
+    "password": {
+      "title": "Senha",
+      "description": "Por segurança, confirme a senha atual antes de trocar.",
+      "fields": {
+        "current": "Senha atual",
+        "next": "Nova senha",
+        "confirmation": "Confirme a nova senha"
+      },
+      "hint": "Use pelo menos {min} caracteres.",
+      "errors": {
+        "required": "Preencha este campo.",
+        "tooShort": "Use pelo menos {min} caracteres.",
+        "sameAsCurrent": "A nova senha precisa ser diferente da atual.",
+        "mismatch": "As senhas não conferem.",
+        "wrongPassword": "Senha atual incorreta.",
+        "weak": "Esta senha é fraca demais. Use mais caracteres e misture letras, números e símbolos."
+      },
+      "submit": "Trocar senha",
+      "changed": "Senha alterada.",
+      "mfaTitle": "Confirme que é você",
+      "mfaDescription": "Digite o código do seu segundo fator para trocar a senha.",
+      "cancelMfa": "Cancelar"
+    }
+  },
+  "sessions": {
+    "title": "Sessões",
+    "description": "Onde sua conta está conectada agora.",
+    "listTitle": "Sessões ativas",
+    "listDescription": "Revogue as sessões que você não reconhece. Para encerrar a deste dispositivo, use Sair.",
+    "caption": "Sessões da sua conta",
+    "pagination": "Páginas de sessões",
+    "unknownDevice": "Dispositivo desconhecido",
+    "kinds": {
+      "web": "Navegador",
+      "desktop": "App para desktop"
+    },
+    "mfa": "Com 2 etapas",
+    "current": "Este dispositivo",
+    "columns": {
+      "device": "Dispositivo",
+      "lastSeen": "Última atividade",
+      "created": "Início",
+      "expires": "Expira em",
+      "actions": "Ações"
+    },
+    "revokeAction": "Revogar",
+    "revokeNamed": "Revogar sessão de {name}",
+    "signOutCurrent": "Sair deste dispositivo",
+    "emptyTitle": "Nenhuma sessão ativa",
+    "emptyDescription": "As sessões aparecem aqui quando você entra em um navegador ou no app.",
+    "revoke": {
+      "title": "Revogar esta sessão?",
+      "description": "{name} será desconectado na próxima atividade.",
+      "confirm": "Revogar sessão",
+      "done": "Sessão de {name} revogada."
+    },
+    "revokeAll": {
+      "title": "Sair de todos os dispositivos",
+      "sectionDescription": "Encerra todas as sessões, inclusive esta. Use se perdeu um dispositivo ou suspeita de acesso indevido.",
+      "button": "Sair de todos os dispositivos",
+      "description": "Todas as sessões serão encerradas, inclusive esta, e você voltará para a tela de entrada.",
+      "confirm": "Sair de todos",
+      "done": "Você saiu de todos os dispositivos."
+    }
+  },
+  "notifications": {
+    "title": "Notificações",
+    "description": "Escolha o que você quer receber.",
+    "loading": "Carregando suas notificações…",
+    "emailTitle": "Avisos por e-mail",
+    "emailDescription": "Enviados para o e-mail da sua conta.",
+    "productUpdates": {
+      "label": "Novidades do produto",
+      "description": "Novos recursos e melhorias, no máximo uma vez por semana.",
+      "enabled": "Você vai receber as novidades do produto.",
+      "disabled": "Você não vai mais receber as novidades do produto."
+    },
+    "securityAlerts": {
+      "label": "Alertas de segurança",
+      "description": "Sempre ativos: avisam sobre novas entradas e mudanças na sua conta."
+    },
+    "saveFailed": "Não foi possível salvar a preferência.",
+    "reference": "Referência: {requestId}"
+  }
+}

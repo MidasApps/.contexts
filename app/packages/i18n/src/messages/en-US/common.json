@@ -1,4 +1,7 @@
 {
+  "unitTypes": {
+    "unit": "Unit"
+  },
   "actions": {
     "save": "Save",
     "cancel": "Cancel",
@@ -19,6 +22,106 @@
   },
   "errorWithReference": "Something went wrong. Reference: {requestId}",
   "itemCount": "{count, plural, =0 {No items} one {# item} other {# items}}",
+  "presence": {
+    "online": "Online",
+    "away": "Away",
+    "busy": "Busy",
+    "offline": "Offline"
+  },
+  "copy": {
+    "copy": "Copy",
+    "copied": "Copied to clipboard.",
+    "failed": "Couldn't copy. Select the text and copy it manually.",
+    "reveal": "Show value",
+    "hide": "Hide value"
+  },
+  "search": {
+    "label": "Search",
+    "placeholder": "Search…",
+    "clear": "Clear search",
+    "noResults": "No results found.",
+    "results": "Results"
+  },
+  "navigation": {
+    "breadcrumb": "Breadcrumb",
+    "more": "More"
+  },
+  "pickers": {
+    "currency": {
+      "placeholder": "Select a currency",
+      "search": "Search currency",
+      "empty": "No currency found."
+    },
+    "timeZone": {
+      "placeholder": "Select a time zone",
+      "search": "Search time zone",
+      "empty": "No time zone found."
+    },
+    "locale": {
+      "placeholder": "Select a language"
+    }
+  },
+  "money": {
+    "invalid": "Enter a valid amount, for example {example}.",
+    "tooManyDigits": "Use at most {digits, plural, =0 {no decimal places} one {# decimal place} other {# decimal places}}."
+  },
+  "errorState": {
+    "title": "We couldn't load this",
+    "description": "Something went wrong on our side. Try again in a moment.",
+    "reference": "Reference: {requestId}",
+    "messageWithReference": "{message} Reference: {requestId}"
+  },
+  "noAccess": {
+    "title": "You don't have access to this page",
+    "description": "Ask an organization administrator to grant you access."
+  },
+  "notifications": {
+    "region": "Notifications",
+    "dismiss": "Dismiss notification"
+  },
+  "pagination": {
+    "label": "Pagination",
+    "previous": "Previous",
+    "next": "Next"
+  },
+  "form": {
+    "required": "required",
+    "submitFailedTitle": "Could not save",
+    "savedTitle": "Changes saved",
+    "unavailableFields": "Some values that cannot be edited here are invalid. Reload the page and try again.",
+    "selectPlaceholder": "Select an option",
+    "timeZoneHint": "Date and time in the {timeZone} time zone.",
+    "errors": {
+      "required": "Fill in this field.",
+      "tooShort": "Use at least {minimum, plural, one {# character} other {# characters}}.",
+      "tooLong": "Use at most {maximum, plural, one {# character} other {# characters}}.",
+      "tooSmall": "Enter a value greater than or equal to {minimum}.",
+      "tooBig": "Enter a value less than or equal to {maximum}.",
+      "notInteger": "Enter a whole number.",
+      "invalidFormat": "The format of this field is invalid.",
+      "invalidOption": "Choose one of the available options.",
+      "invalid": "Check this field."
+    }
+  },
+  "password": {
+    "show": "Show password"
+  },
+  "oneTimeSecret": {
+    "confirmFirst": "Confirm you stored the secret to finish."
+  },
+  "pageTitles": {
+    "signIn": "Sign in",
+    "invite": "Invitation",
+    "home": "Home",
+    "organizations": "Organizations",
+    "organization": "Organization",
+    "project": "Project",
+    "module": "Module",
+    "settings": "Settings",
+    "profile": "Profile",
+    "admin": "Administration",
+    "notFound": "Page not found"
+  },
   "approvals": {
     "status": {
       "pending": "Pending",

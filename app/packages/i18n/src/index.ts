@@ -3,6 +3,7 @@ export { listCurrencies, type CurrencyOption } from "./catalog/currencies.ts";
 export { listTimeZonesByRegion, type TimeZoneGroup } from "./catalog/time-zones.ts";
 export {
   formatDateTime,
+  utcToZonedWallTime,
   zonedWallTimeToUtc,
   type DateTimeStyle,
   type FormatDateTimeOptions,

@@ -1,0 +1,435 @@
+{
+  "navLabel": "Settings sections",
+  "navLoading": "Loading sections…",
+  "noAccessDescription": "Ask an organization administrator to give you access to this section.",
+  "nodes": {
+    "organizationGroup": "Organization",
+    "projectGroup": "Projects",
+    "wholeOrganization": "Whole organization ({name})",
+    "organizationLevel": "Whole organization",
+    "projectLevel": "Project:",
+    "unitLevel": "Unit:",
+    "hiddenProject": "Hidden project",
+    "hiddenUnit": "Hidden unit",
+    "placeholder": "Choose where it applies",
+    "search": "Search projects",
+    "loading": "Loading projects…",
+    "empty": "No projects found."
+  },
+  "general": {
+    "eyebrow": "{organization} settings",
+    "title": "General",
+    "description": "The organization's name and regional defaults.",
+    "loading": "Loading the organization…",
+    "suspended": "Suspended",
+    "detailsTitle": "Organization",
+    "detailsDescription": "The default language, time zone and currency apply to people who haven't picked their own and to new amounts.",
+    "readOnlyDescription": "Only administrators can change these details.",
+    "createdAt": "Created on {date}.",
+    "form": {
+      "name": "Name",
+      "regional": "Regional defaults",
+      "locale": "Default language",
+      "timeZone": "Default time zone",
+      "currency": "Default currency"
+    }
+  },
+  "members": {
+    "eyebrow": "{organization} settings",
+    "title": "Members",
+    "description": "Who can access the organization, and with which roles.",
+    "loading": "Loading members…",
+    "caption": "Members of {organization}",
+    "pagination": "Member pages",
+    "invite": "Invite",
+    "you": "You",
+    "columns": {
+      "member": "Member",
+      "access": "Access",
+      "actions": "Actions"
+    },
+    "editRolesOf": "Edit roles of {name}",
+    "removeAction": "Remove",
+    "emptyTitle": "No members yet",
+    "emptyDescription": "Invite people to work with you in this organization.",
+    "emptyDescriptionNoPermission": "Ask an administrator to invite people.",
+    "editRoles": {
+      "title": "Roles of {name}",
+      "description": "The roles apply at:",
+      "rolesLegend": "Roles",
+      "rolesRequired": "Choose at least one role.",
+      "cancel": "Cancel",
+      "submit": "Save roles",
+      "saved": "Roles of {name} updated."
+    },
+    "remove": {
+      "title": "Remove {name} from the organization?",
+      "description": "All of this person's access in the organization and their API keys will be revoked.",
+      "confirm": "Remove member",
+      "done": "{name} was removed from the organization."
+    },
+    "removeNamed": "Remove {name}"
+  },
+  "invitations": {
+    "eyebrow": "{organization} settings",
+    "title": "Invitations",
+    "description": "Invite people by email and follow the invitations you sent.",
+    "loading": "Loading invitations…",
+    "invite": "Invite",
+    "filterLabel": "Filter invitations",
+    "filters": {
+      "pending": "Pending",
+      "all": "All"
+    },
+    "captionPending": "Pending invitations",
+    "captionAll": "All invitations",
+    "pagination": "Invitation pages",
+    "columns": {
+      "email": "Email",
+      "node": "Applies to",
+      "roles": "Roles",
+      "status": "Status",
+      "expires": "Expires",
+      "actions": "Actions"
+    },
+    "status": {
+      "pending": "Pending",
+      "accepted": "Accepted",
+      "revoked": "Revoked",
+      "expired": "Expired"
+    },
+    "expiresOn": "Expires on {date}",
+    "revokeAction": "Revoke",
+    "revokeNamed": "Revoke invitation for {email}",
+    "emptyPendingTitle": "No pending invitations",
+    "emptyTitle": "No invitations sent",
+    "emptyDescription": "Invitations show up here until they're accepted or expire.",
+    "inviteDialog": {
+      "title": "Invite someone",
+      "description": "They get access to {organization} when they accept the invitation with this email.",
+      "email": "Email",
+      "node": "Applies to",
+      "nodeHint": "Access applies at the chosen level and everything below it.",
+      "roles": "Roles",
+      "errors": {
+        "required": "Enter the person's email.",
+        "invalid": "Enter a valid email, e.g. name@company.com.",
+        "roles": "Choose at least one role."
+      },
+      "cancel": "Cancel",
+      "submit": "Send invitation",
+      "createdTitle": "Invitation created for {email}",
+      "createdDescription": "Send the link below to the person. For security, it won't be shown again.",
+      "link": "Invitation link",
+      "linkHint": "Valid for 7 days and usable once, with the invited email.",
+      "another": "Invite someone else",
+      "done": "Done"
+    },
+    "revoke": {
+      "title": "Revoke this invitation?",
+      "description": "The link sent to {email} stops working right away.",
+      "confirm": "Revoke invitation",
+      "done": "Invitation for {email} revoked."
+    }
+  },
+  "roles": {
+    "eyebrow": "{organization} settings",
+    "title": "Roles",
+    "description": "What each role lets people do in the organization.",
+    "loading": "Loading roles…",
+    "create": "New role",
+    "edit": "Edit",
+    "editNamed": "Edit role {name}",
+    "deleteAction": "Delete",
+    "deleteNamed": "Delete role {name}",
+    "customTitle": "Custom roles",
+    "customDescription": "Combine permissions into roles that fit your team.",
+    "customCaption": "Custom roles of the organization",
+    "systemTitle": "System roles",
+    "systemDescription": "Every organization has them, and they can't be changed.",
+    "columns": {
+      "name": "Role",
+      "permissions": "Permissions",
+      "actions": "Actions"
+    },
+    "permissionCount": "{count, plural, one {# permission} other {# permissions}}",
+    "emptyTitle": "No custom roles",
+    "emptyDescription": "Create a role when the system roles aren't enough.",
+    "emptyDescriptionNoPermission": "The system roles below are available.",
+    "unknownRole": "Removed role",
+    "checklistHint": "Choose up to {max} roles.",
+    "system": {
+      "owner": {
+        "name": "Owner",
+        "description": "Full access, including deleting the organization."
+      },
+      "admin": {
+        "name": "Administrator",
+        "description": "Manages members, roles, projects and settings."
+      },
+      "member": {
+        "name": "Member",
+        "description": "Works in the projects and units they can access."
+      },
+      "viewer": {
+        "name": "Viewer",
+        "description": "Can see, but not change."
+      },
+      "device": {
+        "name": "Device",
+        "description": "Access of an activated device, with no person permissions."
+      }
+    },
+    "picker": {
+      "coreModule": "Platform",
+      "selectedCount": "({count} of {total})"
+    },
+    "editor": {
+      "createTitle": "New role",
+      "editTitle": "Edit {name}",
+      "description": "You can only grant permissions you hold yourself.",
+      "name": "Name",
+      "descriptionField": "Description",
+      "permissions": "Permissions",
+      "errors": {
+        "required": "Give the role a name.",
+        "tooLong": "Use at most 80 characters.",
+        "permissions": "Choose at least one permission."
+      },
+      "cancel": "Cancel",
+      "create": "Create role",
+      "save": "Save role",
+      "created": "Role {name} created.",
+      "updated": "Role {name} updated."
+    },
+    "delete": {
+      "title": "Delete the role {name}?",
+      "description": "Only roles nobody holds can be deleted. This can't be undone.",
+      "confirm": "Delete role",
+      "done": "Role {name} deleted."
+    }
+  },
+  "units": {
+    "eyebrow": "{organization} settings",
+    "title": "Units",
+    "description": "The structure of each project: units within units.",
+    "loading": "Loading…",
+    "loadingProjects": "Loading projects…",
+    "loadingTree": "Loading units…",
+    "project": "Project",
+    "treeTitle": "Units of {project}",
+    "treeDescription": "Select a unit to add sub-units, rename, move or delete it.",
+    "treeLabel": "Units of {project}",
+    "noSelection": "No unit selected",
+    "createRoot": "New unit",
+    "createChild": "New sub-unit",
+    "rename": "Rename",
+    "moveAction": "Move to…",
+    "deleteAction": "Delete",
+    "emptyTitle": "No units yet",
+    "emptyDescription": "Create the first unit of {project}.",
+    "emptyDescriptionNoPermission": "Ask an administrator to create units.",
+    "truncated": "Showing the first {max} units.",
+    "noProjectsTitle": "No projects yet",
+    "noProjectsDescription": "Units live inside projects. Create a project first.",
+    "goToProjects": "See projects",
+    "projectRoot": "Directly in {project}",
+    "createTitle": "New unit",
+    "createUnderProject": "The unit goes directly in {project}.",
+    "createUnder": "The unit goes inside {parent}.",
+    "createSubmit": "Create unit",
+    "created": "Unit {name} created.",
+    "renameTitle": "Rename unit",
+    "renameDescription": "The new name shows everywhere the unit is used.",
+    "renameSubmit": "Save name",
+    "renamed": "Unit renamed to {name}.",
+    "moved": "{name} was moved.",
+    "deleteTitle": "Delete {name}?",
+    "deleteDescription": "{count, plural, =0 {The unit will be deleted.} one {The unit and # sub-unit will be deleted.} other {The unit and # sub-units will be deleted.}} Access granted there stops applying.",
+    "deleteConfirm": "Delete unit",
+    "deleted": "Unit {name} deleted.",
+    "form": {
+      "name": "Name",
+      "type": "Type",
+      "typePlaceholder": "Choose a type",
+      "noTypes": "No unit type can go here.",
+      "nameRequired": "Give the unit a name.",
+      "nameTooLong": "Use at most {max} characters.",
+      "typeRequired": "Choose the unit's type.",
+      "cancel": "Cancel"
+    },
+    "move": {
+      "title": "Move {name}",
+      "description": "Choose where the unit goes. Its sub-units move with it.",
+      "destination": "Destination",
+      "placeholder": "Choose the destination",
+      "search": "Search units",
+      "empty": "No destination found.",
+      "noTargets": "There's nowhere else this unit can go.",
+      "required": "Choose the destination.",
+      "cancel": "Cancel",
+      "submit": "Move"
+    }
+  },
+  "apiKeys": {
+    "eyebrow": "{organization} settings",
+    "title": "API keys",
+    "description": "Integrations call the API with keys limited to one level and a set of permissions.",
+    "loading": "Loading keys…",
+    "create": "New key",
+    "caption": "API keys of {organization}",
+    "pagination": "Key pages",
+    "columns": {
+      "name": "Key",
+      "node": "Applies to",
+      "scopes": "Permissions",
+      "lastUsed": "Last used",
+      "expires": "Expires",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "status": {
+      "active": "Active",
+      "revoked": "Revoked",
+      "expired": "Expired",
+      "ownerRemoved": "Revoked (owner removed)"
+    },
+    "scopeCount": "{count, plural, one {# permission} other {# permissions}}",
+    "neverUsed": "Never used",
+    "cardMeta": "{scopes, plural, one {# permission} other {# permissions}} · expires on {date}",
+    "revokeAction": "Revoke",
+    "revokeNamed": "Revoke key {name}",
+    "emptyTitle": "No API keys",
+    "emptyDescription": "Create a key to connect an integration to the API.",
+    "emptyDescriptionNoPermission": "Ask an administrator to create keys.",
+    "createDialog": {
+      "title": "New API key",
+      "description": "The key acts on your behalf, only with the chosen permissions and only where it applies.",
+      "name": "Name",
+      "nameHint": "To recognize the key later, e.g. \"Report export\".",
+      "node": "Applies to",
+      "nodeHint": "The key only works at the chosen level and below it.",
+      "expiry": "Lifetime",
+      "expiryOption": "{days} days",
+      "expiresOn": "Expires on {date}.",
+      "scopes": "Permissions",
+      "loadingScopes": "Loading permissions…",
+      "errors": {
+        "required": "Give the key a name.",
+        "tooLong": "Use at most 80 characters.",
+        "scopes": "Choose at least one permission."
+      },
+      "cancel": "Cancel",
+      "submit": "Create key",
+      "createdTitle": "Key {name} created",
+      "createdDescription": "Copy the key now and keep it in a secrets vault.",
+      "secretTitle": "This is the only time the key is shown",
+      "secretWarning": "We only keep a digest of it. If you lose it, revoke it and create another.",
+      "secretLabel": "API key",
+      "secretHint": "Send it in the integration's Authorization: Bearer header.",
+      "stored": "I copied the key and stored it safely",
+      "done": "Done"
+    },
+    "revoke": {
+      "title": "Revoke the key {name}?",
+      "description": "Integrations using this key stop working right away.",
+      "confirm": "Revoke key",
+      "done": "Key {name} revoked."
+    }
+  },
+  "devices": {
+    "eyebrow": "{organization} settings",
+    "title": "Devices",
+    "description": "Shared devices that sign in with an activation code.",
+    "loading": "Loading devices…",
+    "create": "Activate device",
+    "caption": "Devices of {organization}",
+    "pagination": "Device pages",
+    "columns": {
+      "label": "Device",
+      "node": "Applies to",
+      "lastSeen": "Last active",
+      "activated": "Activated",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "status": {
+      "active": "Active",
+      "revoked": "Revoked"
+    },
+    "neverSeen": "No activity",
+    "lastSeenOn": "Last active on {date}",
+    "revokeAction": "Revoke",
+    "revokeNamed": "Revoke device {name}",
+    "emptyTitle": "No activated devices",
+    "emptyDescription": "Generate an activation code and type it on the device.",
+    "emptyDescriptionNoPermission": "Ask an administrator to activate devices.",
+    "createDialog": {
+      "title": "Activate device",
+      "description": "Generate a one-time code to type on the device.",
+      "label": "Device name",
+      "labelHint": "E.g. \"Front desk tablet\".",
+      "node": "Applies to",
+      "nodeHint": "The device only reaches the chosen level and what's below it.",
+      "roles": "Device roles",
+      "errors": {
+        "labelRequired": "Give the device a name.",
+        "labelTooLong": "Use at most {max} characters.",
+        "roles": "Choose at least one role."
+      },
+      "cancel": "Cancel",
+      "submit": "Generate code",
+      "codeTitle": "Code for {label}",
+      "codeDescription": "The code is shown only now and is valid for 10 minutes."
+    },
+    "activation": {
+      "instructions": "On {label}, open the activation screen and type the code:",
+      "codeLabel": "Activation code",
+      "codeHint": "Single use. Upper or lower case, with or without the dash.",
+      "countdown": "Expires in {clock}",
+      "expiresIn": "{minutes, plural, one {The code expires in # minute.} other {The code expires in # minutes.}}",
+      "done": "Done",
+      "expiredTitle": "The code expired",
+      "expiredDescription": "Generate a new code to activate the device.",
+      "another": "Generate new code",
+      "close": "Close"
+    },
+    "revoke": {
+      "title": "Revoke the device {name}?",
+      "description": "The device loses access right away and can't sign in again.",
+      "confirm": "Revoke device",
+      "done": "Device {name} revoked."
+    }
+  },
+  "module": {
+    "eyebrow": "{organization} settings",
+    "description": "{module} settings in this organization.",
+    "loading": "Loading settings…",
+    "formTitle": "Settings",
+    "neverSaved": "Not saved yet; the values below are the defaults.",
+    "readOnly": "You can see these settings but not change them."
+  },
+  "slots": {
+    "eyebrow": "{organization} settings",
+    "loading": "Loading…",
+    "backToGeneral": "Go to General",
+    "connectors": {
+      "title": "Connectors",
+      "description": "External services the agents can use.",
+      "emptyTitle": "No connectors available yet",
+      "emptyDescription": "Connectors show up here once they're enabled for the organization."
+    },
+    "agents": {
+      "title": "Agents",
+      "description": "How agents work in this organization.",
+      "emptyTitle": "No agent settings yet",
+      "emptyDescription": "Agent options show up here once they're enabled."
+    },
+    "usage": {
+      "title": "Usage",
+      "description": "The organization's consumption and limits.",
+      "emptyTitle": "No usage data yet",
+      "emptyDescription": "Usage shows up here as soon as there's activity."
+    }
+  }
+}

@@ -37,7 +37,13 @@ const wallTimeAsUtcMs = (local: string): number => {
   ];
   const ms = Date.UTC(year, month - 1, day, hour, minute, second);
   const check = new Date(ms);
-  if (check.getUTCMonth() !== month - 1 || check.getUTCDate() !== day || check.getUTCHours() !== hour) {
+  const roundTrips =
+    check.getUTCMonth() === month - 1 &&
+    check.getUTCDate() === day &&
+    check.getUTCHours() === hour &&
+    check.getUTCMinutes() === minute &&
+    check.getUTCSeconds() === second;
+  if (!roundTrips) {
     throw new RangeError(`Invalid wall time: ${local}`);
   }
   return ms;
@@ -82,4 +88,21 @@ export const zonedWallTimeToUtc = (local: string, timeZone: string): string => {
     .sort((a, b) => a - b);
   const resolved = candidates[0] ?? wallMs - offsetBefore;
   return new Date(resolved).toISOString();
+};
+
+const pad2 = (value: number | undefined): string => String(value ?? 0).padStart(2, "0");
+
+/**
+ * The wall time (`YYYY-MM-DDTHH:mm`, the `datetime-local` input value) that a UTC instant shows
+ * in `timeZone`; the inverse of `zonedWallTimeToUtc` for editing dates in the display zone.
+ *
+ * @throws {RangeError} not a UTC ISO instant, or unknown time zone.
+ */
+export const utcToZonedWallTime = (iso: string, timeZone: string): string => {
+  const parts = Object.fromEntries(
+    offsetFormatter(timeZone)
+      .formatToParts(parseUtcIso(iso))
+      .map((part) => [part.type, Number(part.value)]),
+  );
+  return `${String(parts["year"])}-${pad2(parts["month"])}-${pad2(parts["day"])}T${pad2(parts["hour"])}:${pad2(parts["minute"])}`;
 };

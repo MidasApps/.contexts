@@ -1,0 +1,182 @@
+{
+  "navLabel": "Profile sections",
+  "account": {
+    "title": "Account",
+    "description": "Your sign-in details and how other members see you.",
+    "loading": "Loading your account…",
+    "identityTitle": "Sign-in",
+    "identityDescription": "The account you sign in with.",
+    "emailLabel": "Email",
+    "mfaLabel": "Two-step verification",
+    "mfaOn": "Two-step verification on",
+    "mfaOff": "Two-step verification off",
+    "emailHint": "Your email comes from your sign-in account and can't be changed here.",
+    "profileTitle": "Profile",
+    "profileDescription": "Members of your organizations see this name.",
+    "form": {
+      "displayName": "Display name"
+    }
+  },
+  "preferences": {
+    "title": "Preferences",
+    "description": "Language, time zone, currency and theme.",
+    "loading": "Loading your preferences…",
+    "regional": {
+      "title": "Language and region",
+      "description": "Dates show in your time zone; new amounts use the currency you pick.",
+      "locale": "Language",
+      "timeZone": "Time zone",
+      "currency": "Currency"
+    },
+    "theme": {
+      "title": "Appearance",
+      "legend": "Theme",
+      "description": "Applied right away and saved to your profile.",
+      "options": {
+        "system": "Automatic (system)",
+        "light": "Light",
+        "dark": "Dark"
+      },
+      "saveFailed": "The theme is applied here but wasn't saved to your profile.",
+      "retry": "Try again"
+    }
+  },
+  "security": {
+    "title": "Security",
+    "description": "Two-step verification and password.",
+    "mfa": {
+      "title": "Two-step verification",
+      "description": "Ask for a code besides your password every time you sign in.",
+      "statusOn": "On",
+      "statusOff": "Off",
+      "emptyTitle": "No second factor yet",
+      "emptyDescription": "Add an authenticator app or a phone to protect your account.",
+      "unavailable": "Two-step verification isn't available in this environment.",
+      "listLabel": "Enrolled factors",
+      "kindTotp": "Authenticator app",
+      "kindSms": "SMS",
+      "enrolledAt": "added on {date}",
+      "addTotp": "Add authenticator app",
+      "addSms": "Add phone",
+      "remove": "Remove",
+      "removeNamed": "Remove {name}",
+      "removeTitle": "Remove this factor?",
+      "removeDescription": "You won't be able to use it to sign in anymore.",
+      "removeLastDescription": "It's your only factor: once removed, signing in asks for your password only.",
+      "removed": "Factor removed.",
+      "enrolled": "Two-step verification updated.",
+      "totpTitle": "Add authenticator app",
+      "totpDescription": "Use an app such as Google Authenticator, 1Password or Authy.",
+      "preparing": "Getting things ready…",
+      "retry": "Try again",
+      "totpStepScan": "Open the link in the authenticator app on this device, or type the setup key.",
+      "totpStepCode": "Enter the 6-digit code the app shows.",
+      "openAuthenticator": "Open in authenticator app",
+      "setupKey": "Setup key",
+      "setupKeyHint": "Shown only while you set it up. Don't share it.",
+      "totpCodeHint": "The code changes every 30 seconds.",
+      "totpDefaultName": "Authenticator app",
+      "smsTitle": "Add phone",
+      "smsDescription": "We'll text you a code every time you sign in.",
+      "smsDefaultName": "Phone",
+      "phone": "Phone number",
+      "phoneHint": "International format, with + and the country code. E.g. +1 415 555 0132.",
+      "phoneInvalid": "Enter the number in international format, starting with +.",
+      "sendCode": "Send code",
+      "codeSent": "Code sent to {phone}.",
+      "changePhone": "Change number",
+      "smsCodeHint": "The text arrives in a few seconds.",
+      "code": "Verification code",
+      "codeRequired": "Enter the verification code.",
+      "codeInvalid": "The code has 6 digits.",
+      "codeWrong": "Wrong or expired code. Try again.",
+      "factorName": "Factor name",
+      "factorNameHint": "Helps you recognize this factor later.",
+      "cancel": "Cancel",
+      "verify": "Confirm"
+    },
+    "password": {
+      "title": "Password",
+      "description": "For your security, confirm your current password first.",
+      "fields": {
+        "current": "Current password",
+        "next": "New password",
+        "confirmation": "Confirm new password"
+      },
+      "hint": "Use at least {min} characters.",
+      "errors": {
+        "required": "Fill in this field.",
+        "tooShort": "Use at least {min} characters.",
+        "sameAsCurrent": "The new password must differ from the current one.",
+        "mismatch": "The passwords don't match.",
+        "wrongPassword": "Wrong current password.",
+        "weak": "This password is too weak. Use more characters and mix letters, numbers and symbols."
+      },
+      "submit": "Change password",
+      "changed": "Password changed.",
+      "mfaTitle": "Confirm it's you",
+      "mfaDescription": "Enter the code from your second factor to change your password.",
+      "cancelMfa": "Cancel"
+    }
+  },
+  "sessions": {
+    "title": "Sessions",
+    "description": "Where your account is signed in right now.",
+    "listTitle": "Active sessions",
+    "listDescription": "Revoke the sessions you do not recognize. To end the one on this device, sign out.",
+    "caption": "Sessions of your account",
+    "pagination": "Session pages",
+    "unknownDevice": "Unknown device",
+    "kinds": {
+      "web": "Browser",
+      "desktop": "Desktop app"
+    },
+    "mfa": "Two-step",
+    "current": "This device",
+    "columns": {
+      "device": "Device",
+      "lastSeen": "Last active",
+      "created": "Started",
+      "expires": "Expires",
+      "actions": "Actions"
+    },
+    "revokeAction": "Revoke",
+    "revokeNamed": "Revoke session on {name}",
+    "signOutCurrent": "Sign out of this device",
+    "emptyTitle": "No active sessions",
+    "emptyDescription": "Sessions show up here when you sign in on a browser or the app.",
+    "revoke": {
+      "title": "Revoke this session?",
+      "description": "{name} will be signed out on its next activity.",
+      "confirm": "Revoke session",
+      "done": "Session on {name} revoked."
+    },
+    "revokeAll": {
+      "title": "Sign out everywhere",
+      "sectionDescription": "Ends every session, this one included. Use it if you lost a device or suspect someone else signed in.",
+      "button": "Sign out everywhere",
+      "description": "Every session will end, this one included, and you'll be taken to the sign-in page.",
+      "confirm": "Sign out everywhere",
+      "done": "You're signed out on every device."
+    }
+  },
+  "notifications": {
+    "title": "Notifications",
+    "description": "Choose what you want to receive.",
+    "loading": "Loading your notifications…",
+    "emailTitle": "Email notices",
+    "emailDescription": "Sent to your account's email.",
+    "productUpdates": {
+      "label": "Product updates",
+      "description": "New features and improvements, at most once a week.",
+      "enabled": "You'll receive product updates.",
+      "disabled": "You won't receive product updates anymore."
+    },
+    "securityAlerts": {
+      "label": "Security alerts",
+      "description": "Always on: they tell you about new sign-ins and account changes."
+    },
+    "saveFailed": "Couldn't save the preference.",
+    "reference": "Reference: {requestId}"
+  }
+}

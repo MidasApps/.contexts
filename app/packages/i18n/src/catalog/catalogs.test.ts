@@ -16,4 +16,12 @@ describe("listTimeZonesByRegion", () => {
     expect(groups.find((group) => group.region === "America")?.zones).toContain("America/Sao_Paulo");
     expect(groups.find((group) => group.region === "UTC")?.zones).toEqual(["UTC"]);
   });
+
+  it("lists current IANA names instead of CLDR's legacy ids", () => {
+    const zones = listTimeZonesByRegion().flatMap((group) => group.zones);
+    expect(zones).toContain("Asia/Kolkata");
+    expect(zones).toContain("Europe/Kyiv");
+    expect(zones).not.toContain("Asia/Calcutta");
+    expect(new Set(zones).size).toBe(zones.length);
+  });
 });

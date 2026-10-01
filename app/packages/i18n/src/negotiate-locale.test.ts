@@ -6,6 +6,12 @@ describe("negotiateLocale", () => {
     expect(negotiateLocale({ requested: ["en-US"], saved: "es-419", fallback: "pt-BR" })).toBe("es-419");
   });
 
+  it("canonicalizes the case of a saved locale", () => {
+    expect(negotiateLocale({ requested: ["en-US"], saved: "pt-br", fallback: "en-US" })).toBe("pt-BR");
+    expect(negotiateLocale({ requested: ["en-US"], saved: "ES-419", fallback: "pt-BR" })).toBe("es-419");
+    expect(negotiateLocale({ requested: ["en-US"], saved: "not a tag!!", fallback: "pt-BR" })).toBe("en-US");
+  });
+
   it("ignores an unsupported saved locale", () => {
     expect(negotiateLocale({ requested: ["en-US"], saved: "fr-FR", fallback: "pt-BR" })).toBe("en-US");
   });
