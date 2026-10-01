@@ -12,6 +12,7 @@ import { createQueryClient } from "#/shared/api/query-client.ts";
 import type { ClientConfig } from "#/shared/config/client-config.schema.ts";
 import { ClientConfigProvider } from "#/shared/config/config-context.tsx";
 import { AuthProvider } from "#/shared/lib/auth/auth-context.tsx";
+import { ErrorReporterProvider } from "#/shared/lib/errors/error-reporter.tsx";
 import type { AuthPort } from "#/shared/lib/auth/auth-port.ts";
 import { PlatformProvider } from "#/shared/lib/platform/platform-context.tsx";
 import type { PlatformPort } from "#/shared/lib/platform/platform-port.ts";
@@ -116,7 +117,9 @@ export const createClientApp = (args: CreateClientAppArgs): CreatedClientApp => 
                         <ShellIntlProvider locale={locale} messages={messages} onError={adapters.onIntlError ?? ignoreIntlError}>
                           <ThemeProvider nonce={adapters.themeNonce} prePaintScript={adapters.platform.kind === "web"}>
                             <TooltipProvider>
-                              <ShellErrorBoundary reportError={reportError}>{children}</ShellErrorBoundary>
+                              <ErrorReporterProvider reportError={reportError}>
+                                <ShellErrorBoundary reportError={reportError}>{children}</ShellErrorBoundary>
+                              </ErrorReporterProvider>
                               <Toaster />
                               <ProfileThemeSync />
                               {adapters.platform.kind === "desktop" ? <RouteAnnouncer /> : null}

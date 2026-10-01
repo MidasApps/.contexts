@@ -1,4 +1,4 @@
-import type { ModuleManifest, NavSlot } from "@core/contracts";
+import type { ContractDefinition, ModuleManifest, NavSlot } from "@core/contracts";
 import { lazy } from "react";
 import type { ClientModule, ModulePageLoader } from "#/shared/lib/shell/shell-types.ts";
 import { isIconName } from "#/shared/ui/atoms/Icon/icon-registry.ts";
@@ -32,20 +32,31 @@ const checkNavigation = (manifest: ModuleManifest, pageKeys: readonly string[]):
     ...(ROUTABLE_SLOTS.has(item.slot) ? [] : [`navigation ${item.id}: modules cannot add items to the ${item.slot} slot (no module route there)`]),
   ]);
 
+const checkContracts = (manifest: ModuleManifest, contracts: readonly ContractDefinition[]): string[] =>
+  contracts.filter((contract) => !contract.id.startsWith(`${manifest.id}.`)).map((contract) => `contract ${contract.id} must start with ${manifest.id}.`);
+
 /**
  * Pairs a `defineModule()` manifest with its lazily loaded pages (decision 0015 §3). Pages are
  * keyed by the rest path after `/m/:moduleId/`; keep keys stable, deep links depend on them.
  * @throws {ClientModuleError} for a malformed page key, an icon outside the client registry, a
- *   project navigation item without a page, or an item in a slot modules cannot route to.
+ *   project navigation item without a page, an item in a slot modules cannot route to, or a
+ *   contract of another namespace.
  * @example export const exampleClientModule = defineClientModule({ manifest, pages: { "": () => import("./ui/ExampleHomePage.tsx") } });
  */
-export const defineClientModule = (args: { manifest: ModuleManifest; pages: Readonly<Record<string, ModulePageLoader>> }): ClientModule => {
+export const defineClientModule = (args: {
+  manifest: ModuleManifest;
+  pages: Readonly<Record<string, ModulePageLoader>>;
+  /** Contracts the chat may render forms for (the module's commands). */
+  contracts?: readonly ContractDefinition[] | undefined;
+}): ClientModule => {
+  const contracts = args.contracts ?? [];
   const pageKeys = Object.keys(args.pages);
   const problems = [
     ...pageKeys.filter((key) => !PAGE_KEY.test(key)).map((key) => `page key ${key} must be a relative path of segments or :params`),
     ...checkNavigation(args.manifest, pageKeys),
+    ...checkContracts(args.manifest, contracts),
   ];
   if (problems.length > 0) throw new ClientModuleError({ moduleId: args.manifest.id, problems });
   const lazyPages = Object.fromEntries(Object.entries(args.pages).map(([key, load]) => [key, lazy(load)]));
-  return { manifest: args.manifest, pages: args.pages, lazyPages };
+  return { manifest: args.manifest, pages: args.pages, contracts, lazyPages };
 };

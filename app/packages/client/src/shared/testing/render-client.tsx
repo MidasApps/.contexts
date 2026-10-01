@@ -1,7 +1,7 @@
 // Test helper: renders client code (entities, features) inside the ports the app shell provides —
 // router (memory), auth (fake), the typed `/v1` caller over a fake API and a hand-made session —
 // plus `use-intl` and TanStack Query. Widgets and views use the full app harness instead.
-import { loadMessages, type SupportedLocale } from "@core/i18n";
+import { loadMessages, type ExtraNamespaces, type SupportedLocale } from "@core/i18n";
 import { QueryClientProvider, type QueryClient } from "@tanstack/react-query";
 import { render, renderHook, type RenderHookResult, type RenderOptions, type RenderResult } from "@testing-library/react";
 import { userEvent, type UserEvent } from "@testing-library/user-event";
@@ -50,6 +50,8 @@ export type ClientTestOptions = {
   locale?: SupportedLocale;
   timeZone?: string;
   queryClient?: QueryClient;
+  /** Module or fixture namespaces merged over the core catalogs. */
+  extraMessages?: ExtraNamespaces;
 };
 
 export type ClientTestContext = {
@@ -73,7 +75,7 @@ export const createClientTestContext = (options: ClientTestOptions = {}): Client
   const session = options.session ?? createRecordingSession();
   const queryClient = options.queryClient ?? createTestQueryClient();
   const locale = options.locale ?? "pt-BR";
-  const messages = loadMessages(locale);
+  const messages = loadMessages(locale, options.extraMessages ?? {});
   const connection = { baseUrl: "", getIdToken: auth.getIdToken, fetch: api.fetch };
   const callEndpoint = createEndpointCaller(createHttpClient(connection));
   function Wrapper({ children }: { children: ReactNode }) {

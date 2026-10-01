@@ -739,5 +739,222 @@
       "reasonHint": "Obligatorio. Queda en el historial y en la auditoría.",
       "reasonRequired": "Indica el motivo de la activación forzada."
     }
+  },
+  "workflows": {
+    "title": "Workflows",
+    "description": "Ejecuciones de todas las organizaciones, las que esperan aprobación y las programaciones de la plataforma y de las organizaciones.",
+    "platform": "Plataforma",
+    "tabs": {
+      "label": "Secciones de workflows",
+      "runs": "Ejecuciones",
+      "schedules": "Programaciones"
+    },
+    "cancel": {
+      "title": "¿Cancelar la ejecución de {workflow}?",
+      "description": "La ejecución se detiene ahora y no se puede reanudar.",
+      "descriptionSuspended": "La ejecución se detiene ahora y no se puede reanudar. La solicitud de aprobación que esperaba sigue abierta y vence sola; nadie recibe aviso.",
+      "confirm": "Cancelar ejecución",
+      "keep": "Mantener ejecución",
+      "done": "Ejecución de {workflow} cancelada."
+    },
+    "runNow": {
+      "title": "¿Ejecutar {workflow} ahora?",
+      "descriptionTenant": "Una ejecución extra empieza ahora, en nombre de quien creó la programación y con los permisos actuales de esa persona. El próximo disparo del cron no cambia.",
+      "descriptionPlatform": "Una ejecución extra de este job de la plataforma empieza ahora, para todas las organizaciones. El próximo disparo del cron no cambia.",
+      "confirm": "Ejecutar ahora",
+      "done": "Ejecución de {workflow} solicitada."
+    },
+    "scheduleActions": {
+      "paused": "Programación de {workflow} pausada.",
+      "resumed": "Programación de {workflow} reanudada.",
+      "pauseFailed": "No se pudo pausar la programación de {workflow}.",
+      "resumeFailed": "No se pudo reanudar la programación de {workflow}."
+    },
+    "runs": {
+      "caption": "Ejecuciones de workflows",
+      "pagination": "Páginas de ejecuciones",
+      "loading": "Cargando ejecuciones…",
+      "bySchedule": "Programación {schedule}",
+      "byUser": "Usuario {user}",
+      "byPlatform": "Plataforma",
+      "waitsApproval": "Espera la aprobación {id}",
+      "details": "Detalles",
+      "detailsNamed": "Detalles de la ejecución {id} de {workflow}",
+      "cancel": "Cancelar",
+      "cancelNamed": "Cancelar la ejecución {id} de {workflow}",
+      "detailsTitle": "Ejecución de {workflow}",
+      "detailsDescription": "{organization} · {id}",
+      "timelineLabel": "Línea de tiempo de la ejecución",
+      "noStepEvents": "Los eventos de cada paso no están disponibles en la administración; la línea de tiempo muestra lo que registra la ejecución.",
+      "noMatchTitle": "Ninguna ejecución con esos filtros",
+      "noMatchDescription": "Revisa los filtros o límpialos para verlas todas.",
+      "clearFilters": "Limpiar filtros",
+      "emptyTitle": "Todavía no hay ejecuciones",
+      "emptyDescription": "Las ejecuciones aparecen aquí cuando alguien o una programación inicia un workflow.",
+      "emptyAction": "Ver programaciones",
+      "columns": {
+        "run": "Workflow",
+        "organization": "Organización",
+        "status": "Estado",
+        "origin": "Iniciada por",
+        "createdAt": "Inicio",
+        "updatedAt": "Último cambio",
+        "actions": "Acciones"
+      },
+      "filters": {
+        "label": "Filtrar ejecuciones",
+        "workflow": "Workflow",
+        "workflowPlaceholder": "usage-report",
+        "workflowInvalid": "Usa el id del workflow: minúsculas, números y guiones.",
+        "apply": "Aplicar",
+        "status": "Estado",
+        "anyStatus": "Todos los estados",
+        "suspendedOnly": "Esperando aprobación"
+      }
+    },
+    "schedules": {
+      "filtersLabel": "Filtrar programaciones",
+      "loading": "Cargando programaciones…",
+      "caption": "Programaciones de la plataforma y de las organizaciones",
+      "emptyTitle": "No hay programaciones",
+      "emptyDescription": "Las programaciones de la plataforma se crean cuando inicia el servicio de agentes.",
+      "reload": "Recargar",
+      "noMatchTitle": "Esta organización no tiene programaciones",
+      "noMatchDescription": "Las programaciones de la plataforma aparecen cuando no hay una organización elegida.",
+      "seeAll": "Ver todas"
+    }
+  },
+  "runTimeline": {
+    "status": {
+      "pending": "Pendiente",
+      "running": "En ejecución",
+      "waiting": "En espera",
+      "suspended": "Suspendida",
+      "paused": "Pausada",
+      "success": "Completada",
+      "failed": "Falló",
+      "canceled": "Cancelada",
+      "tripwire": "Detenida por guardrail"
+    },
+    "started": "Iniciada",
+    "startedBySchedule": "Por la programación {schedule}",
+    "startedByUser": "Por el usuario {user}",
+    "startedByPlatform": "Por la plataforma",
+    "waitingApproval": "Espera aprobación",
+    "current": "Estado actual",
+    "updatedAt": "Desde {when}"
+  },
+  "scheduleTable": {
+    "noFire": "—",
+    "inZone": "{when} ({zone})",
+    "inYourZone": "{when} en tu zona horaria ({zone})",
+    "scope": {
+      "platform": "Plataforma",
+      "tenant": "Organización"
+    },
+    "status": {
+      "active": "Activa",
+      "paused": "Pausada"
+    },
+    "pause": "Pausar",
+    "pauseNamed": "Pausar la programación {id} de {name}",
+    "resume": "Reanudar",
+    "resumeNamed": "Reanudar la programación {id} de {name}",
+    "runNow": "Ejecutar ahora",
+    "runNowNamed": "Ejecutar ahora la programación {id} de {name}",
+    "columns": {
+      "workflow": "Workflow",
+      "cron": "Cron y zona horaria",
+      "status": "Estado",
+      "nextFire": "Próximo disparo",
+      "lastFire": "Último disparo",
+      "actions": "Acciones"
+    }
+  },
+  "connectors": {
+    "title": "Conectores",
+    "description": "Sistemas externos que cada organización habilitó para sus agentes. Los secretos nunca aparecen aquí.",
+    "filtersLabel": "Elegir organización",
+    "readOnlyNotice": "Solo lectura: el equipo de la plataforma no modifica ni desactiva conectores. Quienes administran la organización lo hacen en su configuración.",
+    "chooseTitle": "Elige una organización",
+    "chooseDescription": "Los conectores se listan por organización.",
+    "chooseAction": "Ver organizaciones",
+    "loading": "Cargando conectores…",
+    "caption": "Conectores de la organización",
+    "pagination": "Páginas de conectores",
+    "emptyTitle": "Esta organización no tiene conectores",
+    "emptyDescription": "Los conectores se crean en la configuración de la organización por quienes la administran.",
+    "emptyAction": "Abrir la organización",
+    "moreReach": "{count, plural, one {y # más} other {y # más}}",
+    "tools": "{allowed, plural, =0 {ninguna herramienta} one {# herramienta} other {# herramientas}}, {readOnly} sin aprobación",
+    "noSecret": "Sin secreto",
+    "hasSecret": "Secreto configurado",
+    "status": {
+      "active": "Activo",
+      "disabled": "Desactivado",
+      "error": "Con error"
+    },
+    "types": {
+      "openapi": "API (OpenAPI)",
+      "mcp": "Servidor MCP",
+      "postgres": "Postgres (lectura)",
+      "browser": "Navegador"
+    },
+    "columns": {
+      "name": "Conector",
+      "type": "Tipo",
+      "status": "Estado",
+      "reach": "Alcance",
+      "tools": "Herramientas",
+      "secret": "Secreto",
+      "updatedAt": "Actualizado el"
+    }
+  },
+  "logs": {
+    "title": "Logs",
+    "description": "Líneas de log recientes del proceso web en el entorno local, de la más nueva a la más antigua.",
+    "refresh": "Actualizar",
+    "loading": "Cargando logs…",
+    "listLabel": "Líneas de log",
+    "count": "{count, plural, one {# línea} other {# líneas}} (como máximo {limit})",
+    "openTrace": "Abrir el trace {id}",
+    "fields": "{count, plural, one {# campo} other {# campos}}",
+    "fieldsOf": "Campos de la línea {position}: {message}",
+    "service": "{service} · {env}",
+    "requestId": "Solicitud",
+    "traceId": "Trace",
+    "levels": {
+      "debug": "Debug",
+      "info": "Info",
+      "warn": "Aviso",
+      "error": "Error"
+    },
+    "noMatchTitle": "Ninguna línea con esos filtros",
+    "noMatchDescription": "El buffer guarda solo las últimas 500 líneas. Limpia los filtros o repite la acción y actualiza.",
+    "clearFilters": "Limpiar filtros",
+    "emptyTitle": "Todavía no hay líneas de log",
+    "emptyDescription": "Las líneas aparecen a medida que el proceso web atiende solicitudes.",
+    "filters": {
+      "label": "Filtrar logs",
+      "level": "Nivel mínimo",
+      "anyLevel": "Todos los niveles",
+      "levelOptions": {
+        "debug": "Debug o superior",
+        "info": "Info o superior",
+        "warn": "Aviso o superior",
+        "error": "Solo errores"
+      },
+      "q": "Texto del mensaje",
+      "traceId": "Trace",
+      "requestId": "Solicitud",
+      "apply": "Aplicar"
+    },
+    "remote": {
+      "title": "Fuera del entorno local, los logs están en Cloud Logging",
+      "description": "Esta página solo lee el buffer del entorno local. Abre Cloud Logging y elige el proyecto de este entorno.",
+      "descriptionFiltered": "Esta página solo lee el buffer del entorno local. El enlace abre Cloud Logging con el trace y la solicitud del filtro; elige el proyecto de este entorno.",
+      "open": "Abrir Cloud Logging",
+      "newTab": "(se abre en una pestaña nueva)"
+    }
   }
 }

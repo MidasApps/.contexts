@@ -88,6 +88,7 @@ export const createModuleRegistry = (modules: readonly ClientModule[]): ModuleRe
       const module = byId.get(moduleId);
       return module === undefined ? null : resolveIn(module, rest);
     },
+    contracts: () => modules.flatMap((module) => module.contracts ?? []),
     navItems: () => modules.flatMap(navItemsOf),
   };
 };

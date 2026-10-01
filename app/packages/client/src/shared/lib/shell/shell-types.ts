@@ -1,4 +1,4 @@
-import type { ModuleManifest, NavSlot, Permission } from "@core/contracts";
+import type { ContractDefinition, ModuleManifest, NavSlot, Permission } from "@core/contracts";
 import type { ExtraNamespaces } from "@core/i18n";
 import type { ComponentType, LazyExoticComponent } from "react";
 import type { ProfileSection, SettingsSection } from "#/shared/lib/router/route-paths.ts";
@@ -49,6 +49,11 @@ export type ClientModule = {
   readonly manifest: ModuleManifest;
   /** Page key → loader, e.g. `""` (module root) or `items/:itemId`. */
   readonly pages: Readonly<Record<string, ModulePageLoader>>;
+  /**
+   * Command and entity contracts the client renders forms for (chat `renderForm`, decision 0032);
+   * ids start with the module id.
+   */
+  readonly contracts?: readonly ContractDefinition[] | undefined;
   /** One `React.lazy` per page key, created once so renders never re-create them. */
   readonly lazyPages: Readonly<Record<string, LazyExoticComponent<ComponentType<ModulePageProps>>>>;
 };
@@ -67,6 +72,8 @@ export type ModuleRegistry = {
   readonly messages: () => ExtraNamespaces;
   /** The page for `/m/:moduleId/<rest>` (`rest` decoded, `""` for the root), or `null` (not found). */
   readonly resolvePage: (moduleId: string, rest: string) => ResolvedModulePage | null;
+  /** Contracts of every module, for forms rendered from a contract id. */
+  readonly contracts: () => readonly ContractDefinition[];
   /** Module navigation plus one settings entry per module with settings, as shell items. */
   readonly navItems: () => readonly ShellNavItem[];
 };

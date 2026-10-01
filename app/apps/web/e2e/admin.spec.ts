@@ -61,8 +61,6 @@ test.describe("platform staff", () => {
       // On phones the sheet closes by itself after the navigation.
       await expect(page.getByRole("dialog", { name: "Navegação" })).toBeHidden();
       await expect(page.getByRole("heading", { level: 1, name: "Usuários" })).toBeVisible();
-      // During the client transition the previous area can still be mounted for a frame.
-      await expect(page.getByRole("heading", { level: 2, name: "Ainda não disponível" }).first()).toBeVisible();
       await showSidebar(page);
       await page.getByRole("link", { name: "Voltar ao app" }).click();
       await expect(page).not.toHaveURL(/\/admin/);

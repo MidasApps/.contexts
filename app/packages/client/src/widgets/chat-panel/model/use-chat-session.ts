@@ -71,7 +71,6 @@ export type ChatSession = {
   /** Asks for a new answer to the last member message. */
   readonly regenerate: () => void;
   readonly respondToApproval: (decision: { id: string; approved: boolean; reason?: string | undefined }) => void;
-  readonly addToolOutput: (answer: { tool: string; toolCallId: string; output: unknown }) => void;
   readonly setMessages: (update: (messages: UIMessage[]) => UIMessage[]) => void;
 };
 
@@ -215,10 +214,6 @@ export const useChatSession = (args: UseChatSessionArgs): ChatSession => {
     void chat.addToolApprovalResponse({ id: decision.id, approved: decision.approved, ...(decision.reason === undefined ? {} : { reason: decision.reason }) });
   };
 
-  const addToolOutput = (answer: { tool: string; toolCallId: string; output: unknown }) => {
-    void chat.addToolOutput({ tool: answer.tool as never, toolCallId: answer.toolCallId, output: answer.output as never });
-  };
-
   return {
     messages,
     status,
@@ -232,7 +227,6 @@ export const useChatSession = (args: UseChatSessionArgs): ChatSession => {
     retry,
     regenerate,
     respondToApproval,
-    addToolOutput,
     setMessages: chat.setMessages,
   };
 };

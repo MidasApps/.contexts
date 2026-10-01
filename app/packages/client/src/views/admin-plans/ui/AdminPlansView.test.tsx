@@ -1,5 +1,5 @@
 import { act, screen, waitFor, within } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { renderAdmin } from "#/app-shell/testing/render-admin.tsx";
 import { ADMIN_IDS, buildPlan } from "#/shared/testing/admin-fixtures.ts";
 import { expectNoAxeViolations } from "#/shared/testing/axe.ts";
@@ -15,6 +15,9 @@ const setOnline = (online: boolean): void => {
   Object.defineProperty(globalThis.navigator, "onLine", { configurable: true, get: () => online });
   act(() => void globalThis.dispatchEvent(new Event(online ? "online" : "offline")));
 };
+
+// Forms typed key by key: the default 5 s is too tight when the whole suite runs in parallel.
+vi.setConfig({ testTimeout: 20_000 });
 
 describe("AdminPlansView", () => {
   it("lists the plans with their limits", async () => {

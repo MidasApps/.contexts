@@ -739,5 +739,222 @@
       "reasonHint": "Required. It stays in the history and the audit log.",
       "reasonRequired": "Give the reason for the forced activation."
     }
+  },
+  "workflows": {
+    "title": "Workflows",
+    "description": "Runs of every organization, the ones waiting for approval, and the platform and organization schedules.",
+    "platform": "Platform",
+    "tabs": {
+      "label": "Workflow sections",
+      "runs": "Runs",
+      "schedules": "Schedules"
+    },
+    "cancel": {
+      "title": "Cancel the run of {workflow}?",
+      "description": "The run stops now and cannot be resumed.",
+      "descriptionSuspended": "The run stops now and cannot be resumed. The approval request it was waiting for stays open and expires on its own; nobody is notified.",
+      "confirm": "Cancel run",
+      "keep": "Keep run",
+      "done": "Run of {workflow} cancelled."
+    },
+    "runNow": {
+      "title": "Run {workflow} now?",
+      "descriptionTenant": "An extra run starts now, on behalf of whoever created the schedule and with that person's current permissions. The next cron fire does not change.",
+      "descriptionPlatform": "An extra run of this platform job starts now, for every organization. The next cron fire does not change.",
+      "confirm": "Run now",
+      "done": "Run of {workflow} requested."
+    },
+    "scheduleActions": {
+      "paused": "Schedule of {workflow} paused.",
+      "resumed": "Schedule of {workflow} resumed.",
+      "pauseFailed": "Could not pause the schedule of {workflow}.",
+      "resumeFailed": "Could not resume the schedule of {workflow}."
+    },
+    "runs": {
+      "caption": "Workflow runs",
+      "pagination": "Run pages",
+      "loading": "Loading runs…",
+      "bySchedule": "Schedule {schedule}",
+      "byUser": "User {user}",
+      "byPlatform": "Platform",
+      "waitsApproval": "Waits for approval {id}",
+      "details": "Details",
+      "detailsNamed": "Details of run {id} of {workflow}",
+      "cancel": "Cancel",
+      "cancelNamed": "Cancel run {id} of {workflow}",
+      "detailsTitle": "Run of {workflow}",
+      "detailsDescription": "{organization} · {id}",
+      "timelineLabel": "Run timeline",
+      "noStepEvents": "Step-by-step events are not available in the administration; the timeline shows what the run records.",
+      "noMatchTitle": "No run matches these filters",
+      "noMatchDescription": "Check the filters or clear them to see all runs.",
+      "clearFilters": "Clear filters",
+      "emptyTitle": "No runs yet",
+      "emptyDescription": "Runs appear here once someone or a schedule starts a workflow.",
+      "emptyAction": "See schedules",
+      "columns": {
+        "run": "Workflow",
+        "organization": "Organization",
+        "status": "Status",
+        "origin": "Started by",
+        "createdAt": "Started",
+        "updatedAt": "Last change",
+        "actions": "Actions"
+      },
+      "filters": {
+        "label": "Filter runs",
+        "workflow": "Workflow",
+        "workflowPlaceholder": "usage-report",
+        "workflowInvalid": "Use the workflow id: lowercase letters, digits and hyphens.",
+        "apply": "Apply",
+        "status": "Status",
+        "anyStatus": "Any status",
+        "suspendedOnly": "Waiting for approval"
+      }
+    },
+    "schedules": {
+      "filtersLabel": "Filter schedules",
+      "loading": "Loading schedules…",
+      "caption": "Platform and organization schedules",
+      "emptyTitle": "No schedules",
+      "emptyDescription": "Platform schedules are created when the agent service starts.",
+      "reload": "Reload",
+      "noMatchTitle": "This organization has no schedules",
+      "noMatchDescription": "Platform schedules show when no organization is chosen.",
+      "seeAll": "See all"
+    }
+  },
+  "runTimeline": {
+    "status": {
+      "pending": "Pending",
+      "running": "Running",
+      "waiting": "Waiting",
+      "suspended": "Suspended",
+      "paused": "Paused",
+      "success": "Completed",
+      "failed": "Failed",
+      "canceled": "Cancelled",
+      "tripwire": "Stopped by guardrail"
+    },
+    "started": "Started",
+    "startedBySchedule": "By the schedule {schedule}",
+    "startedByUser": "By the user {user}",
+    "startedByPlatform": "By the platform",
+    "waitingApproval": "Waits for approval",
+    "current": "Current state",
+    "updatedAt": "Since {when}"
+  },
+  "scheduleTable": {
+    "noFire": "—",
+    "inZone": "{when} ({zone})",
+    "inYourZone": "{when} in your time zone ({zone})",
+    "scope": {
+      "platform": "Platform",
+      "tenant": "Organization"
+    },
+    "status": {
+      "active": "Active",
+      "paused": "Paused"
+    },
+    "pause": "Pause",
+    "pauseNamed": "Pause the schedule {id} of {name}",
+    "resume": "Resume",
+    "resumeNamed": "Resume the schedule {id} of {name}",
+    "runNow": "Run now",
+    "runNowNamed": "Run the schedule {id} of {name} now",
+    "columns": {
+      "workflow": "Workflow",
+      "cron": "Cron and time zone",
+      "status": "Status",
+      "nextFire": "Next fire",
+      "lastFire": "Last fire",
+      "actions": "Actions"
+    }
+  },
+  "connectors": {
+    "title": "Connectors",
+    "description": "External systems each organization opened to its agents. Secrets never appear here.",
+    "filtersLabel": "Choose an organization",
+    "readOnlyNotice": "Read only: the platform team does not change or disable connectors. The organization's administrators do that in its settings.",
+    "chooseTitle": "Choose an organization",
+    "chooseDescription": "Connectors are listed per organization.",
+    "chooseAction": "See organizations",
+    "loading": "Loading connectors…",
+    "caption": "Connectors of the organization",
+    "pagination": "Connector pages",
+    "emptyTitle": "This organization has no connectors",
+    "emptyDescription": "Connectors are created in the organization's settings by its administrators.",
+    "emptyAction": "Open the organization",
+    "moreReach": "{count, plural, one {and # more} other {and # more}}",
+    "tools": "{allowed, plural, =0 {no tools} one {# tool} other {# tools}}, {readOnly} without approval",
+    "noSecret": "No secret",
+    "hasSecret": "Secret configured",
+    "status": {
+      "active": "Active",
+      "disabled": "Disabled",
+      "error": "Error"
+    },
+    "types": {
+      "openapi": "API (OpenAPI)",
+      "mcp": "MCP server",
+      "postgres": "Postgres (read only)",
+      "browser": "Browser"
+    },
+    "columns": {
+      "name": "Connector",
+      "type": "Type",
+      "status": "Status",
+      "reach": "Reach",
+      "tools": "Tools",
+      "secret": "Secret",
+      "updatedAt": "Updated"
+    }
+  },
+  "logs": {
+    "title": "Logs",
+    "description": "Recent log lines of the web process in the local environment, newest first.",
+    "refresh": "Refresh",
+    "loading": "Loading logs…",
+    "listLabel": "Log lines",
+    "count": "{count, plural, one {# line} other {# lines}} (at most {limit})",
+    "openTrace": "Open the trace {id}",
+    "fields": "{count, plural, one {# field} other {# fields}}",
+    "fieldsOf": "Fields of line {position}: {message}",
+    "service": "{service} · {env}",
+    "requestId": "Request",
+    "traceId": "Trace",
+    "levels": {
+      "debug": "Debug",
+      "info": "Info",
+      "warn": "Warning",
+      "error": "Error"
+    },
+    "noMatchTitle": "No line matches these filters",
+    "noMatchDescription": "The buffer keeps only the last 500 lines. Clear the filters, or repeat the action and refresh.",
+    "clearFilters": "Clear filters",
+    "emptyTitle": "No log lines yet",
+    "emptyDescription": "Lines appear as the web process serves requests.",
+    "filters": {
+      "label": "Filter logs",
+      "level": "Minimum level",
+      "anyLevel": "Any level",
+      "levelOptions": {
+        "debug": "Debug and above",
+        "info": "Info and above",
+        "warn": "Warning and above",
+        "error": "Errors only"
+      },
+      "q": "Message text",
+      "traceId": "Trace",
+      "requestId": "Request",
+      "apply": "Apply"
+    },
+    "remote": {
+      "title": "Outside the local environment, logs live in Cloud Logging",
+      "description": "This page only reads the buffer of the local environment. Open Cloud Logging and choose this environment's project.",
+      "descriptionFiltered": "This page only reads the buffer of the local environment. The link opens Cloud Logging with the trace and request of the filter; choose this environment's project.",
+      "open": "Open Cloud Logging",
+      "newTab": "(opens in a new tab)"
+    }
   }
 }

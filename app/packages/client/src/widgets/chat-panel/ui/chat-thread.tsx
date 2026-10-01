@@ -1,11 +1,13 @@
 "use client";
 
+import type { ContractDefinition } from "@core/contracts";
 import type { ChatTransport, UIMessage } from "ai";
 import { CheckIcon, CopyIcon, RefreshCwIcon, SparklesIcon } from "lucide-react";
 import { useEffect, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
 import { useTranslations } from "use-intl";
-import { ChatMessage, textOf, type RenderToolPart } from "#/entities/message/index.ts";
+import { ChatMessage, formatUiSubmission, textOf, type UiSubmission } from "#/entities/message/index.ts";
 import { ChatInput } from "#/features/chat-send/index.ts";
+import { GenerativeUiProvider, type UiRegistry } from "#/features/generative-ui/index.ts";
 import { useCallEndpoint } from "#/shared/api/api-context.tsx";
 import type { ChatScope } from "#/shared/api/chat-transport.ts";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
@@ -13,8 +15,9 @@ import { Conversation, ConversationEmptyState, ConversationScrollButton } from "
 import { Message, MessageAction, MessageActions, MessageContent } from "#/shared/ui/ai/message.tsx";
 import { Shimmer } from "#/shared/ui/ai/shimmer.tsx";
 import { Suggestion, Suggestions } from "#/shared/ui/ai/suggestion.tsx";
-import { useChatSession, type ChatSession } from "../model/use-chat-session.ts";
+import { useChatSession } from "../model/use-chat-session.ts";
 import { fetchMessagePage } from "../model/use-conversation-thread.ts";
+import { createCoreToolRenderer } from "./chat-tool-part.tsx";
 import { StatusLine } from "./status-line.tsx";
 
 /** A quick-start card of the empty conversation (chat.html §23.1). */
@@ -34,8 +37,13 @@ export type ChatThreadProps = {
   onConversationStarted?: ((conversationId: string) => void) | undefined;
   /** Reloads the conversation from the server (a lost stream may still be running there). */
   onRecover?: (() => void) | undefined;
-  /** Builds the tool-part slot for a session (approvals, generative UI). */
-  createToolRenderer?: ((session: ChatSession) => RenderToolPart) | undefined;
+  /** Generative UI components the chat may render (core plus modules). */
+  uiRegistry: UiRegistry;
+  /** Contracts forms may render (core plus modules). */
+  contracts: readonly ContractDefinition[];
+  approvalHref?: ((approvalId: string) => string) | undefined;
+  can?: ((permission: string) => boolean) | undefined;
+  defaultCurrency?: string | undefined;
   /** Composer tools (attachments, voice). */
   tools?: ReactNode;
   transport?: ChatTransport<UIMessage> | undefined;
@@ -98,7 +106,12 @@ export function ChatThread(props: ChatThreadProps) {
   const [olderCursor, setOlderCursor] = useState(props.olderCursor);
   const [loadingOlder, setLoadingOlder] = useState(false);
   const { messages, phase, busy } = session;
-  const renderTool = props.createToolRenderer?.(session);
+  const renderTool = createCoreToolRenderer(session);
+
+  // What the member answers in a form or a picker goes as the next user turn: the tools that
+  // render them already returned (`catalog.renderForm` runs on the server) and `/v1/chat` takes
+  // only text in a user message (decision 0032, amendment of SP4 Task 10).
+  const submitUi = (submission: UiSubmission) => session.send(formatUiSubmission(submission));
 
   useEffect(() => {
     if (props.focusOnMount === true) inputRef.current?.focus();
@@ -140,51 +153,53 @@ export function ChatThread(props: ChatThreadProps) {
   const retry = phase === "lost" && props.onRecover !== undefined && session.conversationId !== undefined ? props.onRecover : session.retry;
 
   return (
-    // eslint-disable-next-line jsx-a11y/no-static-element-interactions -- Esc is a shortcut of the whole thread; every action it triggers also has a button
-    <div data-slot="chat-thread" className="flex min-h-0 flex-1 flex-col" onKeyDown={onKeyDown}>
-      <Conversation label={t("panel.logLabel")} overlay={<ConversationScrollButton />}>
-        {olderCursor === undefined ? null : (
-          <Button variant="ghost" size="sm" className="self-center" pending={loadingOlder} onClick={() => void loadOlder()}>
-            {t("panel.loadEarlier")}
-          </Button>
-        )}
-        {messages.length === 0 ? (
-          <ConversationEmptyState title={t("panel.empty.title")} description={t("panel.empty.description")} icon={<SparklesIcon className="size-5" />}>
-            <Suggestions label={t("panel.empty.suggestionsLabel")}>
-              {props.suggestions.map((suggestion) => (
-                <Suggestion key={suggestion.id} title={suggestion.title} description={suggestion.description} prompt={suggestion.prompt} onSelect={send} disabled={phase === "offline"} />
-              ))}
-            </Suggestions>
-          </ConversationEmptyState>
-        ) : (
-          messages.map((message) => {
-            const last = message.id === lastId;
-            const settled = !(busy && last);
-            return (
-              <ChatMessage
-                key={message.id}
-                message={message}
-                streaming={busy && last && message.role === "assistant"}
-                interrupted={message.id === session.interruptedMessageId}
-                showReasoning={props.showReasoning}
-                renderTool={renderTool}
-                actions={message.role === "assistant" && settled ? <AnswerActions message={message} canRegenerate={last && phase !== "awaiting-approval"} onRegenerate={session.regenerate} /> : undefined}
-              />
-            );
-          })
-        )}
-        {waitingFirstChunk ? (
-          <Message from="assistant" author={t("message.assistant")} aria-hidden="true" data-slot="pending-answer">
-            <MessageContent>
-              <Shimmer>{t("status.responding")}</Shimmer>
-            </MessageContent>
-          </Message>
-        ) : null}
-      </Conversation>
-      <div className="flex flex-col gap-2 border-t border-border px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
-        <StatusLine phase={phase} failure={session.failure} onRetry={retry} />
-        <ChatInput status={session.status} onSend={send} onStop={stop} offline={phase === "offline"} inputRef={inputRef} tools={props.tools} />
+    <GenerativeUiProvider registry={props.uiRegistry} contracts={props.contracts} submit={submitUi} approvalHref={props.approvalHref} can={props.can} defaultCurrency={props.defaultCurrency}>
+      {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions -- Esc is a shortcut of the whole thread; every action it triggers also has a button */}
+      <div data-slot="chat-thread" className="flex min-h-0 flex-1 flex-col" onKeyDown={onKeyDown}>
+        <Conversation label={t("panel.logLabel")} overlay={<ConversationScrollButton />}>
+          {olderCursor === undefined ? null : (
+            <Button variant="ghost" size="sm" className="self-center" pending={loadingOlder} onClick={() => void loadOlder()}>
+              {t("panel.loadEarlier")}
+            </Button>
+          )}
+          {messages.length === 0 ? (
+            <ConversationEmptyState title={t("panel.empty.title")} description={t("panel.empty.description")} icon={<SparklesIcon className="size-5" />}>
+              <Suggestions label={t("panel.empty.suggestionsLabel")}>
+                {props.suggestions.map((suggestion) => (
+                  <Suggestion key={suggestion.id} title={suggestion.title} description={suggestion.description} prompt={suggestion.prompt} onSelect={send} disabled={phase === "offline"} />
+                ))}
+              </Suggestions>
+            </ConversationEmptyState>
+          ) : (
+            messages.map((message) => {
+              const last = message.id === lastId;
+              const settled = !(busy && last);
+              return (
+                <ChatMessage
+                  key={message.id}
+                  message={message}
+                  streaming={busy && last && message.role === "assistant"}
+                  interrupted={message.id === session.interruptedMessageId}
+                  showReasoning={props.showReasoning}
+                  renderTool={renderTool}
+                  actions={message.role === "assistant" && settled ? <AnswerActions message={message} canRegenerate={last && phase !== "awaiting-approval"} onRegenerate={session.regenerate} /> : undefined}
+                />
+              );
+            })
+          )}
+          {waitingFirstChunk ? (
+            <Message from="assistant" author={t("message.assistant")} aria-hidden="true" data-slot="pending-answer">
+              <MessageContent>
+                <Shimmer>{t("status.responding")}</Shimmer>
+              </MessageContent>
+            </Message>
+          ) : null}
+        </Conversation>
+        <div className="flex flex-col gap-2 border-t border-border px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+          <StatusLine phase={phase} failure={session.failure} onRetry={retry} />
+          <ChatInput status={session.status} onSend={send} onStop={stop} offline={phase === "offline"} inputRef={inputRef} tools={props.tools} />
+        </div>
       </div>
-    </div>
+    </GenerativeUiProvider>
   );
 }

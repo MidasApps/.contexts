@@ -1,10 +1,11 @@
 "use client";
 
+import { CORE_CONTRACTS, type ContractDefinition } from "@core/contracts";
 import type { ChatTransport, UIMessage } from "ai";
 import { SquarePenIcon } from "lucide-react";
-import { useId, useState, type ReactNode } from "react";
+import { useId, useMemo, useState, type ReactNode } from "react";
 import { useTranslations } from "use-intl";
-import type { RenderToolPart } from "#/entities/message/index.ts";
+import { CORE_UI_COMPONENTS, createUiRegistry, type UiRegistry, type UiRegistryEntry } from "#/features/generative-ui/index.ts";
 import { ApiError } from "#/shared/api/api-error.ts";
 import type { ChatScope } from "#/shared/api/chat-transport.ts";
 import { cn } from "#/shared/lib/cn.ts";
@@ -12,7 +13,6 @@ import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
 import { EmptyState } from "#/shared/ui/molecules/EmptyState/EmptyState.tsx";
 import { ErrorState } from "#/shared/ui/molecules/ErrorState/ErrorState.tsx";
 import { LoadingState } from "#/shared/ui/molecules/LoadingState/LoadingState.tsx";
-import type { ChatSession } from "../model/use-chat-session.ts";
 import { useConversationThread } from "../model/use-conversation-thread.ts";
 import { ChatThread, type ChatSuggestion } from "./chat-thread.tsx";
 
@@ -27,8 +27,15 @@ export type ChatPanelProps = {
   suggestions?: readonly ChatSuggestion[] | undefined;
   /** `false` hides the model's reasoning (tenant setting). */
   showReasoning?: boolean | undefined;
-  /** Tool-part slot per session (approvals, generative UI); the widget's default covers the core. */
-  createToolRenderer?: ((session: ChatSession) => RenderToolPart) | undefined;
+  /** Generative UI components of the installed modules, added to the core ones (decision 0032). */
+  uiComponents?: Readonly<Record<string, UiRegistryEntry>> | undefined;
+  /** Contracts of the installed modules, so `renderForm` can draw their commands (`modules.contracts()`). */
+  contracts?: readonly ContractDefinition[] | undefined;
+  /** Href of an approval request in the approvals inbox (the app's router builds it). */
+  approvalHref?: ((approvalId: string) => string) | undefined;
+  /** Permission check and currency for forms (`can()` and `regional.currency` of the access context). */
+  can?: ((permission: string) => boolean) | undefined;
+  defaultCurrency?: string | undefined;
   /** Composer tools (attachments, voice). */
   tools?: ReactNode;
   className?: string | undefined;
@@ -55,7 +62,9 @@ const threadFor = (key: number, conversationId: string | undefined): Thread => (
 
 const CORE_SUGGESTIONS = ["capabilities", "knowledge", "data", "create"] as const;
 
-function StoredThread(props: { thread: Thread; conversationId: string; panel: ChatPanelProps; suggestions: readonly ChatSuggestion[]; onStarted: (id: string) => void; onRecover: () => void }) {
+type ThreadEnvironment = { readonly uiRegistry: UiRegistry; readonly contracts: readonly ContractDefinition[] };
+
+function StoredThread(props: { thread: Thread; conversationId: string; panel: ChatPanelProps; environment: ThreadEnvironment; suggestions: readonly ChatSuggestion[]; onStarted: (id: string) => void; onRecover: () => void }) {
   const t = useTranslations("chat");
   const history = useConversationThread({ organizationId: props.panel.scope.organizationId, conversationId: props.conversationId, attempt: props.thread.attempt });
   if (history.isPending) return <LoadingState label={t("panel.loadingHistory")} rows={5} className="p-4" />;
@@ -82,7 +91,11 @@ function StoredThread(props: { thread: Thread; conversationId: string; panel: Ch
       suggestions={props.suggestions}
       onConversationStarted={props.onStarted}
       onRecover={props.onRecover}
-      createToolRenderer={props.panel.createToolRenderer}
+      uiRegistry={props.environment.uiRegistry}
+      contracts={props.environment.contracts}
+      approvalHref={props.panel.approvalHref}
+      can={props.panel.can}
+      defaultCurrency={props.panel.defaultCurrency}
       tools={props.panel.tools}
       transport={props.panel.transport}
     />
@@ -99,6 +112,11 @@ export function ChatPanel(props: ChatPanelProps) {
   const t = useTranslations("chat");
   const { conversationId, onConversationChange } = props;
   const titleId = useId();
+  const { uiComponents, contracts } = props;
+  const environment = useMemo<ThreadEnvironment>(
+    () => ({ uiRegistry: createUiRegistry(CORE_UI_COMPONENTS, uiComponents ?? {}), contracts: [...CORE_CONTRACTS, ...(contracts ?? [])] }),
+    [uiComponents, contracts],
+  );
   const [thread, setThread] = useState<Thread>(() => threadFor(0, conversationId));
 
   // The owner of the URL moved to another conversation: start that thread. When it only caught
@@ -141,12 +159,16 @@ export function ChatPanel(props: ChatPanelProps) {
           suggestions={suggestions}
           onConversationStarted={started}
           onRecover={recover}
-          createToolRenderer={props.createToolRenderer}
+          uiRegistry={environment.uiRegistry}
+          contracts={environment.contracts}
+          approvalHref={props.approvalHref}
+          can={props.can}
+          defaultCurrency={props.defaultCurrency}
           tools={props.tools}
           transport={props.transport}
         />
       ) : (
-        <StoredThread key={thread.key} thread={thread} conversationId={thread.storedId} panel={props} suggestions={suggestions} onStarted={started} onRecover={recover} />
+        <StoredThread key={thread.key} thread={thread} conversationId={thread.storedId} panel={props} environment={environment} suggestions={suggestions} onStarted={started} onRecover={recover} />
       )}
     </section>
   );

@@ -60,3 +60,35 @@ rendering, and every approval decision must be audited.
   An audit failure answers 500 and nothing is forwarded. The permission is not in this entry: `/v1`
   only has the client's copy of the part; `AGENT_TOOL_EXECUTED`, written by the tool pipeline when
   the call runs, carries it.
+- **2026-10-01 — the client side (SP4 Task 10).**
+  - **Registry.** `features/generative-ui` pairs each `CHAT_UI_COMPONENTS` schema with its component
+    (`CORE_UI_COMPONENTS`); modules add entries through `ChatPanel` `uiComponents` and cannot replace a core
+    id. An unknown id, props the schema rejects, a form whose contract the client does not have, or a
+    component that throws while rendering all show the generic tool view, and report one
+    `GenerativeUiError` (code and component id only, never the props) to the app's `reportError`.
+  - **Where a component comes from.** `catalog.renderForm` runs inside the data subagent, so its
+    `{ ui: { component, props } }` arrives in `subAgentToolResults` of the `tool-agent-data` part, not as a
+    part of its own. The chat reads the output of the part and of every subagent tool call. A command
+    output `{ status: "pending-approval", approvalId }` is shown as `approval-pending`.
+  - **How the member's answer travels — a user turn, not a tool output.** The spec had `addToolOutput` for
+    a submitted form or a picker choice. That cannot work with this backend: the tool already returned
+    (server-executed), a nested call has no part to answer, and `ChatRequest` accepts only text in a user
+    message and only approval responses in an assistant message. The answer is therefore the next user
+    turn, written by `formatUiSubmission`: a marker (`[ui:schema-form]` / `[ui:picker]`), one instruction
+    sentence for the agent, and the values as a JSON block. The chat shows that turn as a chip
+    ("Formulário enviado: …"), not as JSON. The form validates with the command contract before sending;
+    the agent still has to call the command, which asks for approval. Sending is behind
+    `GenerativeUiEnvironment.submit`, so a backend that later accepts tool outputs changes one function.
+  - **Forms need the command contract on the client.** `defineClientModule({ contracts })` and
+    `ModuleRegistry.contracts()` carry module contracts; `ChatPanel` `contracts` receives them. The form
+    renders `commandId` (the command's input) and falls back to `contractId`.
+  - **Approval card.** `features/chat-approval` renders the AI Elements `Confirmation` for any tool part
+    with an `approval`: title and summary from `data-tool-preview`, the permission, the arguments of
+    `data-tool-call-approval`, and the before/after as the `approval-diff` component (fields of `after`
+    that differ from `before`). Approve sends at once; decline asks for an optional reason (≤ 500
+    characters) first. A decision is sent once, only from the latest turn and never while an answer
+    streams; `sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithApprovalResponses` posts it. A
+    failed post keeps the answered part and "Tentar novamente" sends it again as it is.
+  - **Approvals inbox link.** `approval-pending` links to `approvalHref(approvalId)`; the default is
+    `/approvals/{approvalId}` as a plain href, because the route map has no approvals route yet. The app
+    passes a router-built href once SP5 adds that route.

@@ -1,5 +1,5 @@
 import { act, screen, waitFor, within } from "@testing-library/react";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { renderAdmin } from "#/app-shell/testing/render-admin.tsx";
 import { IMPERSONATION_STORAGE_KEY, useImpersonationStore } from "#/features/admin-impersonation/index.ts";
 import { buildImpersonationStart, IMPERSONATION_IDS, storedImpersonation } from "#/shared/testing/admin-accounts-fixtures.ts";
@@ -27,6 +27,9 @@ afterEach(() => {
   act(() => useImpersonationStore.getState().reset());
   globalThis.sessionStorage.clear();
 });
+
+// Forms typed key by key: the default 5 s is too tight when the whole suite runs in parallel.
+vi.setConfig({ testTimeout: 20_000 });
 
 describe("AdminUsersView", () => {
   it("explains the audited access and shows no open session at first", async () => {

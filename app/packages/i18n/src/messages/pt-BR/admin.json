@@ -739,5 +739,222 @@
       "reasonHint": "Obrigatório. Fica no histórico e na auditoria.",
       "reasonRequired": "Informe o motivo da ativação forçada."
     }
+  },
+  "workflows": {
+    "title": "Workflows",
+    "description": "Execuções de todas as organizações, as que aguardam aprovação e os agendamentos da plataforma e das organizações.",
+    "platform": "Plataforma",
+    "tabs": {
+      "label": "Seções de workflows",
+      "runs": "Execuções",
+      "schedules": "Agendamentos"
+    },
+    "cancel": {
+      "title": "Cancelar a execução de {workflow}?",
+      "description": "A execução para agora e não pode ser retomada.",
+      "descriptionSuspended": "A execução para agora e não pode ser retomada. A solicitação de aprovação que ela aguardava continua aberta e expira sozinha; ninguém é avisado.",
+      "confirm": "Cancelar execução",
+      "keep": "Manter execução",
+      "done": "Execução de {workflow} cancelada."
+    },
+    "runNow": {
+      "title": "Executar {workflow} agora?",
+      "descriptionTenant": "Uma execução extra começa agora, em nome de quem criou o agendamento e com as permissões atuais dessa pessoa. O próximo disparo do cron não muda.",
+      "descriptionPlatform": "Uma execução extra deste job da plataforma começa agora, para todas as organizações. O próximo disparo do cron não muda.",
+      "confirm": "Executar agora",
+      "done": "Execução de {workflow} solicitada."
+    },
+    "scheduleActions": {
+      "paused": "Agendamento de {workflow} pausado.",
+      "resumed": "Agendamento de {workflow} retomado.",
+      "pauseFailed": "Não foi possível pausar o agendamento de {workflow}.",
+      "resumeFailed": "Não foi possível retomar o agendamento de {workflow}."
+    },
+    "runs": {
+      "caption": "Execuções de workflows",
+      "pagination": "Páginas de execuções",
+      "loading": "Carregando execuções…",
+      "bySchedule": "Agendamento {schedule}",
+      "byUser": "Usuário {user}",
+      "byPlatform": "Plataforma",
+      "waitsApproval": "Aguarda a aprovação {id}",
+      "details": "Detalhes",
+      "detailsNamed": "Detalhes da execução {id} de {workflow}",
+      "cancel": "Cancelar",
+      "cancelNamed": "Cancelar a execução {id} de {workflow}",
+      "detailsTitle": "Execução de {workflow}",
+      "detailsDescription": "{organization} · {id}",
+      "timelineLabel": "Linha do tempo da execução",
+      "noStepEvents": "Os eventos de cada etapa não estão disponíveis na administração; a linha do tempo mostra o que a execução registra.",
+      "noMatchTitle": "Nenhuma execução com esses filtros",
+      "noMatchDescription": "Confira os filtros ou limpe-os para ver todas.",
+      "clearFilters": "Limpar filtros",
+      "emptyTitle": "Nenhuma execução ainda",
+      "emptyDescription": "As execuções aparecem aqui quando um workflow é iniciado por alguém ou por um agendamento.",
+      "emptyAction": "Ver agendamentos",
+      "columns": {
+        "run": "Workflow",
+        "organization": "Organização",
+        "status": "Status",
+        "origin": "Iniciada por",
+        "createdAt": "Início",
+        "updatedAt": "Última mudança",
+        "actions": "Ações"
+      },
+      "filters": {
+        "label": "Filtrar execuções",
+        "workflow": "Workflow",
+        "workflowPlaceholder": "usage-report",
+        "workflowInvalid": "Use o id do workflow: minúsculas, números e hifens.",
+        "apply": "Aplicar",
+        "status": "Status",
+        "anyStatus": "Todos os status",
+        "suspendedOnly": "Aguardando aprovação"
+      }
+    },
+    "schedules": {
+      "filtersLabel": "Filtrar agendamentos",
+      "loading": "Carregando agendamentos…",
+      "caption": "Agendamentos da plataforma e das organizações",
+      "emptyTitle": "Nenhum agendamento",
+      "emptyDescription": "Os agendamentos da plataforma são criados quando o serviço de agentes inicia.",
+      "reload": "Recarregar",
+      "noMatchTitle": "Esta organização não tem agendamentos",
+      "noMatchDescription": "Os agendamentos da plataforma aparecem quando nenhuma organização está escolhida.",
+      "seeAll": "Ver todos"
+    }
+  },
+  "runTimeline": {
+    "status": {
+      "pending": "Pendente",
+      "running": "Em execução",
+      "waiting": "Em espera",
+      "suspended": "Suspensa",
+      "paused": "Pausada",
+      "success": "Concluída",
+      "failed": "Falhou",
+      "canceled": "Cancelada",
+      "tripwire": "Parada por guardrail"
+    },
+    "started": "Iniciada",
+    "startedBySchedule": "Pelo agendamento {schedule}",
+    "startedByUser": "Pelo usuário {user}",
+    "startedByPlatform": "Pela plataforma",
+    "waitingApproval": "Aguarda aprovação",
+    "current": "Estado atual",
+    "updatedAt": "Desde {when}"
+  },
+  "scheduleTable": {
+    "noFire": "—",
+    "inZone": "{when} ({zone})",
+    "inYourZone": "{when} no seu fuso ({zone})",
+    "scope": {
+      "platform": "Plataforma",
+      "tenant": "Organização"
+    },
+    "status": {
+      "active": "Ativo",
+      "paused": "Pausado"
+    },
+    "pause": "Pausar",
+    "pauseNamed": "Pausar o agendamento {id} de {name}",
+    "resume": "Retomar",
+    "resumeNamed": "Retomar o agendamento {id} de {name}",
+    "runNow": "Executar agora",
+    "runNowNamed": "Executar agora o agendamento {id} de {name}",
+    "columns": {
+      "workflow": "Workflow",
+      "cron": "Cron e fuso",
+      "status": "Status",
+      "nextFire": "Próximo disparo",
+      "lastFire": "Último disparo",
+      "actions": "Ações"
+    }
+  },
+  "connectors": {
+    "title": "Conectores",
+    "description": "Sistemas externos que cada organização liberou para seus agentes. Segredos nunca aparecem aqui.",
+    "filtersLabel": "Escolher organização",
+    "readOnlyNotice": "Somente leitura: a equipe da plataforma não altera nem desativa conectores. Quem administra a organização faz isso nas configurações dela.",
+    "chooseTitle": "Escolha uma organização",
+    "chooseDescription": "Os conectores são listados por organização.",
+    "chooseAction": "Ver organizações",
+    "loading": "Carregando conectores…",
+    "caption": "Conectores da organização",
+    "pagination": "Páginas de conectores",
+    "emptyTitle": "Esta organização não tem conectores",
+    "emptyDescription": "Conectores são criados nas configurações da organização por quem a administra.",
+    "emptyAction": "Abrir a organização",
+    "moreReach": "{count, plural, one {e mais #} other {e mais #}}",
+    "tools": "{allowed, plural, =0 {nenhuma ferramenta} one {# ferramenta} other {# ferramentas}}, {readOnly} sem aprovação",
+    "noSecret": "Sem segredo",
+    "hasSecret": "Segredo configurado",
+    "status": {
+      "active": "Ativo",
+      "disabled": "Desativado",
+      "error": "Com erro"
+    },
+    "types": {
+      "openapi": "API (OpenAPI)",
+      "mcp": "Servidor MCP",
+      "postgres": "Postgres (leitura)",
+      "browser": "Navegador"
+    },
+    "columns": {
+      "name": "Conector",
+      "type": "Tipo",
+      "status": "Status",
+      "reach": "Alcance",
+      "tools": "Ferramentas",
+      "secret": "Segredo",
+      "updatedAt": "Atualizado em"
+    }
+  },
+  "logs": {
+    "title": "Logs",
+    "description": "Linhas de log recentes do processo web no ambiente local, das mais novas para as mais antigas.",
+    "refresh": "Atualizar",
+    "loading": "Carregando logs…",
+    "listLabel": "Linhas de log",
+    "count": "{count, plural, one {# linha} other {# linhas}} (no máximo {limit})",
+    "openTrace": "Abrir o trace {id}",
+    "fields": "{count, plural, one {# campo} other {# campos}}",
+    "fieldsOf": "Campos da linha {position}: {message}",
+    "service": "{service} · {env}",
+    "requestId": "Requisição",
+    "traceId": "Trace",
+    "levels": {
+      "debug": "Debug",
+      "info": "Info",
+      "warn": "Aviso",
+      "error": "Erro"
+    },
+    "noMatchTitle": "Nenhuma linha com esses filtros",
+    "noMatchDescription": "O buffer guarda só as últimas 500 linhas. Limpe os filtros ou repita a ação e atualize.",
+    "clearFilters": "Limpar filtros",
+    "emptyTitle": "Nenhuma linha de log ainda",
+    "emptyDescription": "As linhas aparecem conforme o processo web atende requisições.",
+    "filters": {
+      "label": "Filtrar logs",
+      "level": "Nível mínimo",
+      "anyLevel": "Todos os níveis",
+      "levelOptions": {
+        "debug": "Debug ou acima",
+        "info": "Info ou acima",
+        "warn": "Aviso ou acima",
+        "error": "Só erros"
+      },
+      "q": "Texto da mensagem",
+      "traceId": "Trace",
+      "requestId": "Requisição",
+      "apply": "Aplicar"
+    },
+    "remote": {
+      "title": "Fora do ambiente local, os logs ficam no Cloud Logging",
+      "description": "Esta página só lê o buffer do ambiente local. Abra o Cloud Logging e escolha o projeto deste ambiente.",
+      "descriptionFiltered": "Esta página só lê o buffer do ambiente local. O link abre o Cloud Logging com o trace e a requisição do filtro; escolha o projeto deste ambiente.",
+      "open": "Abrir o Cloud Logging",
+      "newTab": "(abre em nova aba)"
+    }
   }
 }
