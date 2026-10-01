@@ -543,15 +543,15 @@ export {
 } from "./contracts/platform/feature-flag.schema.ts";
 export { SP5_ADMIN_ENDPOINTS } from "./contracts/sp5-admin-endpoints.ts";
 export {
-  BudgetCapsSchema, BudgetSourceSchema, OrganizationAdminSummaryContract, OrganizationAdminSummarySchema, SetTenantBudgetInputContract,
+  BudgetCapsSchema, BudgetSourceSchema, OrganizationAdminDetailContract, OrganizationAdminDetailSchema, OrganizationAdminSummaryContract, OrganizationAdminSummarySchema, SetTenantBudgetInputContract,
   SetTenantBudgetInputSchema, UpdateOrganizationAdminInputContract, UpdateOrganizationAdminInputSchema, type BudgetCaps,
-  type OrganizationAdminSummary, type SetTenantBudgetInput, type UpdateOrganizationAdminInput,
+  type OrganizationAdminDetail, type OrganizationAdminSummary, type SetTenantBudgetInput, type UpdateOrganizationAdminInput,
 } from "./contracts/platform/organization-admin.schema.ts";
 export {
   UpdateAgentSettingsInputContract, UpdateAgentSettingsInputSchema, type UpdateAgentSettingsInput,
 } from "./contracts/agents/update-agent-settings.schema.ts";
 export {
-  ADMIN_PLATFORM_ENDPOINTS, createPlanEndpoint, getAdminOverviewEndpoint, getAgentSettingsEndpoint, getOrganizationAgentSettingsEndpoint,
+  ADMIN_PLATFORM_ENDPOINTS, createPlanEndpoint, getAdminOverviewEndpoint, getAgentSettingsEndpoint, getOrganizationAdminEndpoint, getOrganizationAgentSettingsEndpoint,
   listOrganizationsAdminEndpoint, listPlansEndpoint, setOrganizationBudgetEndpoint, updateAgentSettingsEndpoint,
   updateOrganizationAdminEndpoint, updateOrganizationAgentSettingsEndpoint, updatePlanEndpoint,
 } from "./contracts/platform/admin-endpoints.ts";

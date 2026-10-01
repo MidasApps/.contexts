@@ -1,6 +1,7 @@
 import {
   createPlanEndpoint,
   getAdminOverviewEndpoint,
+  getOrganizationAdminEndpoint,
   listOrganizationsAdminEndpoint,
   listPlansEndpoint,
   setOrganizationBudgetEndpoint,
@@ -54,7 +55,15 @@ export const buildAdminPlatformRoutes = (deps: { readonly pipeline: ApiRouteDeps
     if (denied !== null) return denied;
     const page = pageRequestOf(ctx.input.query);
     if (page === null) return invalidCursorResponse(ctx.requestId);
-    return listResponse(await deps.console.listOrganizations(page), page.limit);
+    const { query, status } = ctx.input.query;
+    return listResponse(await deps.console.listOrganizations({ page, filter: { query, status } }), page.limit);
+  }),
+  [getOrganizationAdminEndpoint.id]: withApiRoute(getOrganizationAdminEndpoint, deps.pipeline, async (ctx) => {
+    const tenantId = ctx.input.params.organizationId;
+    const denied = await requireStaff(ctx, { permission: CONSOLE_PERMISSIONS.organizationRead, targetTenantId: tenantId });
+    if (denied !== null) return denied;
+    const organization = await deps.console.getOrganization(tenantId);
+    return organization === null ? apiError(404, "NOT_FOUND", ctx.requestId) : dataResponse({ data: organization });
   }),
   [updateOrganizationAdminEndpoint.id]: withApiRoute(updateOrganizationAdminEndpoint, deps.pipeline, async (ctx) => {
     const tenantId = ctx.input.params.organizationId;

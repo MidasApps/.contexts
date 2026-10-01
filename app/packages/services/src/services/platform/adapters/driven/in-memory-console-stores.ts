@@ -4,7 +4,13 @@ import { pageFromOverfetch } from "../../../shared/pagination/page.ts";
 import type { AgentSettingsRepository, ConsoleUsage, OrganizationAdminStore, OrganizationPlan, PlanRepository, StoredAgentSettings } from "../../application/ports/console-ports.ts";
 
 /** In-memory console stores for unit tests; every map is inspectable. */
-export const createInMemoryConsoleStores = (seed: { organizations?: readonly { id: string; name?: string; status?: OrganizationStatus }[] } = {}) => {
+export const createInMemoryConsoleStores = (
+  seed: {
+    organizations?: readonly { id: string; name?: string; status?: OrganizationStatus }[];
+    /** User ids holding a grant, per organization (one entry per grant: repeats are the same person). */
+    members?: Readonly<Record<string, readonly string[]>>;
+  } = {},
+) => {
   const plans = new Map<string, Plan>();
   const organizations = new Map(seed.organizations?.map((org) => [org.id, { id: org.id, name: org.name ?? org.id, status: org.status ?? "active" }]) ?? []);
   const assignments = new Map<string, OrganizationPlan>();
@@ -47,6 +53,7 @@ export const createInMemoryConsoleStores = (seed: { organizations?: readonly { i
       assignments.set(tenantId, { tenantId, planId, budgetOverride });
       return Promise.resolve();
     },
+    countMembers: (tenantId) => Promise.resolve(new Set(seed.members?.[tenantId] ?? []).size),
     tenantsOnPlan: (planId) => Promise.resolve([...assignments.values()].filter((row) => row.planId === planId).map((row) => row.tenantId)),
   };
   const settingsRepository: AgentSettingsRepository = {

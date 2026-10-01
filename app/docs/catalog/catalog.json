@@ -18726,6 +18726,249 @@
     },
     {
       "context": "platform",
+      "description": "One organization for staff: status, plan, budget caps, cost month to date and member count.",
+      "examples": [
+        {
+          "budget": {
+            "caps": {
+              "monthlyMicroUsd": 50000000,
+              "monthlyTokens": 20000000
+            },
+            "override": null,
+            "source": "plan"
+          },
+          "costMtdMicroUsd": 1250000,
+          "id": "Jd8sK2lPq0WnR5tYu3bV",
+          "memberCount": 12,
+          "name": "Northwind",
+          "planId": "Pl1aB2cD3eF4gH5iJ6kL",
+          "status": "active"
+        }
+      ],
+      "fields": [
+        {
+          "description": "Monthly budget of the organization.",
+          "name": "budget",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Model cost month to date, in micro-USD.",
+          "name": "costMtdMicroUsd",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Organization id (= tenant id).",
+          "name": "id",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Distinct users holding a live grant at any node of the organization.",
+          "name": "memberCount",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Display name.",
+          "name": "name",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Assigned plan; null = platform default caps.",
+          "name": "planId",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "`active` or `suspended`.",
+          "name": "status",
+          "pii": "none",
+          "required": true
+        }
+      ],
+      "id": "platform.OrganizationAdminDetail",
+      "jsonSchema": {
+        "additionalProperties": false,
+        "description": "One organization for staff: status, plan, budget caps, cost month to date and member count.",
+        "examples": [
+          {
+            "budget": {
+              "caps": {
+                "monthlyMicroUsd": 50000000,
+                "monthlyTokens": 20000000
+              },
+              "override": null,
+              "source": "plan"
+            },
+            "costMtdMicroUsd": 1250000,
+            "id": "Jd8sK2lPq0WnR5tYu3bV",
+            "memberCount": 12,
+            "name": "Northwind",
+            "planId": "Pl1aB2cD3eF4gH5iJ6kL",
+            "status": "active"
+          }
+        ],
+        "properties": {
+          "budget": {
+            "additionalProperties": false,
+            "description": "Monthly budget of the organization.",
+            "properties": {
+              "caps": {
+                "additionalProperties": false,
+                "description": "Caps in force (after the tenant's own lower cap).",
+                "properties": {
+                  "monthlyMicroUsd": {
+                    "description": "Monthly model spend cap in micro-USD.",
+                    "maximum": 9007199254740991,
+                    "minimum": 0,
+                    "type": "integer",
+                    "x-pii": "none"
+                  },
+                  "monthlyTokens": {
+                    "description": "Monthly model token cap.",
+                    "maximum": 9007199254740991,
+                    "minimum": 0,
+                    "type": "integer",
+                    "x-pii": "none"
+                  }
+                },
+                "required": [
+                  "monthlyMicroUsd",
+                  "monthlyTokens"
+                ],
+                "type": "object",
+                "x-pii": "none"
+              },
+              "override": {
+                "anyOf": [
+                  {
+                    "additionalProperties": false,
+                    "properties": {
+                      "monthlyMicroUsd": {
+                        "description": "Monthly model spend cap in micro-USD.",
+                        "maximum": 9007199254740991,
+                        "minimum": 0,
+                        "type": "integer",
+                        "x-pii": "none"
+                      },
+                      "monthlyTokens": {
+                        "description": "Monthly model token cap.",
+                        "maximum": 9007199254740991,
+                        "minimum": 0,
+                        "type": "integer",
+                        "x-pii": "none"
+                      }
+                    },
+                    "required": [
+                      "monthlyMicroUsd",
+                      "monthlyTokens"
+                    ],
+                    "type": "object"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "description": "Staff override, if any.",
+                "x-pii": "none"
+              },
+              "source": {
+                "description": "`override`, `plan` or `default`.",
+                "enum": [
+                  "override",
+                  "plan",
+                  "default"
+                ],
+                "type": "string",
+                "x-pii": "none"
+              }
+            },
+            "required": [
+              "caps",
+              "source",
+              "override"
+            ],
+            "type": "object",
+            "x-pii": "none"
+          },
+          "costMtdMicroUsd": {
+            "description": "Model cost month to date, in micro-USD.",
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer",
+            "x-pii": "none"
+          },
+          "id": {
+            "description": "Organization id (= tenant id).",
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "memberCount": {
+            "description": "Distinct users holding a live grant at any node of the organization.",
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer",
+            "x-pii": "none"
+          },
+          "name": {
+            "description": "Display name.",
+            "maxLength": 120,
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "planId": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Assigned plan; null = platform default caps.",
+            "x-pii": "none"
+          },
+          "status": {
+            "description": "`active` or `suspended`.",
+            "enum": [
+              "active",
+              "suspended"
+            ],
+            "type": "string",
+            "x-pii": "none"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "status",
+          "planId",
+          "budget",
+          "costMtdMicroUsd",
+          "memberCount"
+        ],
+        "type": "object",
+        "x-kind": "view",
+        "x-permission": "platform.organization.read",
+        "x-pii": "none",
+        "x-relations": [],
+        "x-tenancyScope": "platform"
+      },
+      "kind": "view",
+      "name": "OrganizationAdminDetail",
+      "permission": "platform.organization.read",
+      "pii": "none",
+      "relations": [],
+      "tenancyScope": "platform"
+    },
+    {
+      "context": "platform",
       "description": "An organization for staff: status, plan, budget caps and their source, cost month to date.",
       "examples": [
         {

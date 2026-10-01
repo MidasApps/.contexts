@@ -55,6 +55,24 @@ export const OrganizationAdminSummaryContract = defineContract(OrganizationAdmin
   permission: "platform.organization.read",
 });
 
+/** One organization as `/admin/organizations/{id}` shows it: the list row plus its member count (decision 0044). */
+export const OrganizationAdminDetailSchema = z.strictObject({
+  ...OrganizationAdminSummarySchema.shape,
+  memberCount: z.int().nonnegative().meta(none("Distinct users holding a live grant at any node of the organization.")),
+});
+export type OrganizationAdminDetail = z.infer<typeof OrganizationAdminDetailSchema>;
+
+export const OrganizationAdminDetailContract = defineContract(OrganizationAdminDetailSchema, {
+  id: "platform.OrganizationAdminDetail",
+  kind: "view",
+  description: "One organization for staff: status, plan, budget caps, cost month to date and member count.",
+  examples: [{ ...SUMMARY_EXAMPLE, memberCount: 12 }],
+  pii: "none",
+  tenancyScope: "platform",
+  relations: [],
+  permission: "platform.organization.read",
+});
+
 export const UpdateOrganizationAdminInputSchema = z
   .strictObject({
     planId: PlanIdSchema.nullable().optional().meta(none("Plan to assign; null removes it (platform default caps).")),

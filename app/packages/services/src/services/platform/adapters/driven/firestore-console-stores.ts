@@ -52,6 +52,9 @@ const overrideOf = (value: unknown): OrganizationPlan["budgetOverride"] => {
   return parsed.success ? parsed.data : null;
 };
 
+/** Most grants read to count an organization's members; beyond it the count stops growing (decision 0044). */
+export const MEMBER_COUNT_GRANT_LIMIT = 10_000;
+
 const listItemOf = (id: string, data: StoredFields): { id: string; name: string; status: OrganizationStatus } => ({
   id,
   name: typeof data["name"] === "string" ? data["name"] : "",
@@ -80,6 +83,20 @@ export const createFirestoreOrganizationAdminStore = (deps: { readonly firestore
         tx.update(ref, { status, updatedAt: stamp(at), updatedBy: actorId });
         return true;
       }),
+    // `count()` cannot count distinct values and one person may hold grants at several nodes, so the
+    // live user grants are read with only `principalId` and deduplicated here. Equality filters
+    // only: the automatic single-field indexes serve it.
+    countMembers: async (tenantId) => {
+      const snapshot = await deps.firestore
+        .collection(CORE_COLLECTIONS.memberships)
+        .where("tenantId", "==", tenantId)
+        .where("principalType", "==", "user")
+        .where("deletedAt", "==", null)
+        .select("principalId")
+        .limit(MEMBER_COUNT_GRANT_LIMIT)
+        .get();
+      return new Set(snapshot.docs.map((doc) => doc.get("principalId") as unknown).filter((id) => typeof id === "string")).size;
+    },
     getPlan: async (tenantId) => {
       const data = (await assignments().doc(tenantId).get()).data();
       return { tenantId, planId: typeof data?.["planId"] === "string" ? data["planId"] : null, budgetOverride: overrideOf(data?.["budgetOverride"]) };

@@ -11,6 +11,7 @@ import { AdminOverviewContract } from "./platform/admin-overview.schema.ts";
 import { FeatureFlagContract, FeatureFlagDefinitionContract, SetFeatureFlagValueInputContract, TenantFlagValueInputContract } from "./platform/feature-flag.schema.ts";
 import { PlanContract, UpsertPlanInputContract } from "./platform/plan.schema.ts";
 import {
+  OrganizationAdminDetailContract,
   OrganizationAdminSummaryContract,
   SetTenantBudgetInputContract,
   UpdateOrganizationAdminInputContract,
@@ -49,6 +50,7 @@ export const SP5_CONTRACTS: readonly ContractDefinition[] = [
   TraceDetailContract,
   EvalExperimentSummaryContract,
   UsageDailyRollupContract,
+  OrganizationAdminDetailContract,
   OrganizationAdminSummaryContract,
   UpdateOrganizationAdminInputContract,
   SetTenantBudgetInputContract,

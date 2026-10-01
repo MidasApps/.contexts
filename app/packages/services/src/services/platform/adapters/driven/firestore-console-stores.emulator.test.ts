@@ -45,6 +45,23 @@ describe("Firestore console stores (emulator)", () => {
     expect(await store.getPlan(`none${RUN}`)).toEqual({ tenantId: `none${RUN}`, planId: null, budgetOverride: null });
   });
 
+  it("counts the distinct users with a live grant at any node, not devices or removed grants", async () => {
+    const store = createFirestoreOrganizationAdminStore({ firestore: firebase.firestore });
+    const tenantId = `members${RUN}`;
+    const grants = firebase.firestore.collection(CORE_COLLECTIONS.memberships);
+    const grant = (principalId: string, extra: Record<string, unknown> = {}) => grants.doc().set({ tenantId, principalType: "user", principalId, nodeId: tenantId, deletedAt: null, ...extra });
+    await Promise.all([
+      grant("ana"),
+      grant("ana", { nodeId: `project${RUN}` }),
+      grant("bia", { nodeId: `project${RUN}` }),
+      grant("caio", { deletedAt: AT }),
+      grant("device-1", { principalType: "device" }),
+      grants.doc().set({ tenantId: `other${RUN}`, principalType: "user", principalId: "dora", deletedAt: null }),
+    ]);
+    expect(await store.countMembers(tenantId)).toBe(2);
+    expect(await store.countMembers(`empty${RUN}`)).toBe(0);
+  });
+
   it("stores agent settings under the tenant id with the storage-only self cap", async () => {
     const repository = createFirestoreAgentSettingsRepository({ firestore: firebase.firestore });
     const tenantId = TenantIdSchema.parse(`settings${RUN}`);

@@ -24,6 +24,11 @@ export type OrganizationAdminStore = {
   readonly setStatus: (input: { readonly tenantId: string; readonly status: OrganizationStatus; readonly at: string; readonly actorId: string }) => Promise<boolean>;
   readonly getPlan: (tenantId: string) => Promise<OrganizationPlan>;
   readonly setPlan: (input: OrganizationPlan & { readonly at: string; readonly actorId: string }) => Promise<void>;
+  /**
+   * Distinct users holding a live grant at any node of the organization (decision 0044): the same
+   * people the organization's members list shows; devices are not counted.
+   */
+  readonly countMembers: (tenantId: string) => Promise<number>;
   /** Organizations assigned to a plan (budgets follow a plan change). */
   readonly tenantsOnPlan: (planId: string) => Promise<readonly string[]>;
 };

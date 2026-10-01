@@ -8,7 +8,8 @@ import { dataEnvelope, listEnvelope, PageQuerySchema } from "../http/envelopes.s
 import { OrganizationIdSchema } from "../tenancy/ids.schema.ts";
 import { OrganizationQuerySchema } from "../workflows/endpoints.ts";
 import { AdminOverviewSchema } from "./admin-overview.schema.ts";
-import { OrganizationAdminSummarySchema, SetTenantBudgetInputSchema, UpdateOrganizationAdminInputSchema } from "./organization-admin.schema.ts";
+import { OrganizationStatusSchema } from "../tenancy/organization.schema.ts";
+import { OrganizationAdminDetailSchema, OrganizationAdminSummarySchema, SetTenantBudgetInputSchema, UpdateOrganizationAdminInputSchema } from "./organization-admin.schema.ts";
 import { PlanIdSchema, PlanSchema, UpsertPlanInputSchema } from "./plan.schema.ts";
 
 const STAFF_ERRORS = { 403: ["FORBIDDEN", "MFA_REQUIRED"] } as const;
@@ -52,10 +53,25 @@ export const listOrganizationsAdminEndpoint = defineEndpoint({
   method: "GET",
   path: "/v1/admin/organizations",
   auth: "user",
-  query: PageQuerySchema,
+  query: PageQuerySchema.extend({
+    query: z.string().trim().min(1).max(200).optional().meta(none("Words the name or id must contain (case and accents ignored); an exact organization id always comes first.")),
+    status: OrganizationStatusSchema.optional().meta(none("Only organizations in this status.")),
+  }),
   responses: { 200: listEnvelope(OrganizationAdminSummarySchema) },
   errors: { 400: ["VALIDATION_FAILED"], ...STAFF_ERRORS },
-  summary: "Lists live organizations with plan, budget and cost month to date (staff, platform.organization.read).",
+  summary:
+    "Lists live organizations with plan, budget and cost month to date, optionally filtered by text and status; a filtered page may hold fewer rows than `limit` while `hasMore` is true (staff, platform.organization.read).",
+});
+
+export const getOrganizationAdminEndpoint = defineEndpoint({
+  id: "admin.getOrganization",
+  method: "GET",
+  path: "/v1/admin/organizations/{organizationId}",
+  auth: "user",
+  params: organizationParams,
+  responses: { 200: dataEnvelope(OrganizationAdminDetailSchema) },
+  errors: { ...STAFF_ERRORS, 404: ["NOT_FOUND"] },
+  summary: "Reads one live organization with plan, budget, cost month to date and member count (staff, platform.organization.read).",
 });
 
 export const updateOrganizationAdminEndpoint = defineEndpoint({
@@ -143,6 +159,7 @@ export const ADMIN_PLATFORM_ENDPOINTS: readonly EndpointDefinition[] = [
   createPlanEndpoint,
   updatePlanEndpoint,
   listOrganizationsAdminEndpoint,
+  getOrganizationAdminEndpoint,
   updateOrganizationAdminEndpoint,
   setOrganizationBudgetEndpoint,
   getOrganizationAgentSettingsEndpoint,

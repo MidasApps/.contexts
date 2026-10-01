@@ -12,7 +12,7 @@ import { createFirestoreAgentSettingsRepository, createFirestoreOrganizationAdmi
 import type { ConsoleDeps } from "./application/console-deps.ts";
 import type { ConsoleUsage } from "./application/ports/console-ports.ts";
 import { type GetAdminOverview, makeGetAdminOverview } from "./application/use-cases/get-admin-overview.ts";
-import { type ListOrganizationsAdmin, makeListOrganizationsAdmin } from "./application/use-cases/list-organizations-admin.ts";
+import { type GetOrganizationAdmin, type ListOrganizationsAdmin, makeGetOrganizationAdmin, makeListOrganizationsAdmin } from "./application/use-cases/list-organizations-admin.ts";
 import { type ListPlans, makeListPlans } from "./application/use-cases/list-plans.ts";
 import {
   makeSetOrganizationBudget,
@@ -27,6 +27,7 @@ export type ConsoleServices = {
   readonly createPlan: CreatePlan;
   readonly updatePlan: UpdatePlan;
   readonly listOrganizations: ListOrganizationsAdmin;
+  readonly getOrganization: GetOrganizationAdmin;
   readonly updateOrganization: UpdateOrganizationAdmin;
   readonly setOrganizationBudget: SetOrganizationBudget;
   readonly getOverview: GetAdminOverview;
@@ -40,6 +41,7 @@ export const createConsoleServices = (deps: ConsoleDeps): ConsoleServices => ({
   createPlan: makeCreatePlan(deps),
   updatePlan: makeUpdatePlan(deps),
   listOrganizations: makeListOrganizationsAdmin(deps),
+  getOrganization: makeGetOrganizationAdmin(deps),
   updateOrganization: makeUpdateOrganizationAdmin(deps),
   setOrganizationBudget: makeSetOrganizationBudget(deps),
   getOverview: makeGetAdminOverview(deps),

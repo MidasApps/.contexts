@@ -10,7 +10,7 @@ const ORG_A = "OrgAaaaaaaaaaaaaaaaaa";
 const ORG_B = "OrgBbbbbbbbbbbbbbbbbb";
 const LIMITS = { monthlyMicroUsd: 80_000_000, monthlyTokens: 30_000_000, maxConnectors: 5, features: [] };
 
-const setup = () => {
+const setup = (seed: Parameters<typeof createInMemoryConsoleStores>[0] = {}) => {
   const { pipeline, auditLog, clock } = makeInMemoryPipeline({
     now: "2026-10-01T12:00:00.000Z",
     members: [
@@ -24,7 +24,7 @@ const setup = () => {
       { uid: "sue", role: "platform-support", mfa: true },
     ],
   });
-  const memory = createInMemoryConsoleStores({ organizations: [{ id: ORG_A, name: "A" }, { id: ORG_B, name: "B" }] });
+  const memory = createInMemoryConsoleStores({ organizations: [{ id: ORG_A, name: "A" }, { id: ORG_B, name: "B" }], ...seed });
   const consoleServices = createConsoleServices({ ...memory.stores, audit: makeRecordAudit({ writer: auditLog, clock }), clock });
   const routes = { ...buildAdminPlatformRoutes({ pipeline, console: consoleServices }), ...buildAgentSettingsRoutes({ pipeline, console: consoleServices }) };
   return { routes, memory, auditLog };
@@ -82,6 +82,62 @@ describe("/v1/admin plans and organizations", () => {
     expect(list.meta).toMatchObject({ page: { hasMore: true } });
     const overview = await json(await callRoute(routes, "admin.getOverview", "/v1/admin/overview", { as: "sam" }));
     expect(overview).toMatchObject({ data: { organizations: 2, costMtdMicroUsd: 1_500, evalStatus: "unknown" } });
+  });
+});
+
+describe("GET /v1/admin/organizations/{organizationId}", () => {
+  it("answers the summary with the distinct member count, staff only, 404 for an unknown organization", async () => {
+    const { routes, memory, auditLog } = setup({ members: { [ORG_A]: ["alice", "mia", "alice"] } });
+    memory.costs.set(ORG_A, 700);
+    const read = await callRoute(routes, "admin.getOrganization", `/v1/admin/organizations/${ORG_A}`, { as: "sue" });
+    expect(read.status).toBe(200);
+    expect(await json(read)).toMatchObject({ data: { id: ORG_A, name: "A", status: "active", costMtdMicroUsd: 700, memberCount: 2, budget: { source: "default" } } });
+    expect(await json(await callRoute(routes, "admin.getOrganization", `/v1/admin/organizations/${ORG_B}`, { as: "sam" }))).toMatchObject({ data: { memberCount: 0 } });
+    expect((await callRoute(routes, "admin.getOrganization", "/v1/admin/organizations/OrgCccccccccccccccccc", { as: "sam" })).status).toBe(404);
+    expect((await callRoute(routes, "admin.getOrganization", `/v1/admin/organizations/${ORG_A}`, { as: "alice" })).status).toBe(403);
+    expect(await json(await callRoute(routes, "admin.getOrganization", `/v1/admin/organizations/${ORG_A}`, { as: "nomfa" }))).toMatchObject({ error: { code: "MFA_REQUIRED" } });
+    expect(auditLog.entries("platform").at(-1)).toMatchObject({ action: "PLATFORM_ACCESS_DENIED", targetTenantId: ORG_A });
+  });
+});
+
+describe("GET /v1/admin/organizations?query=&status=", () => {
+  const ORGS = [
+    { id: "Org1aaaaaaaaaaaaaaaa", name: "Ácme Norte" },
+    { id: "Org2aaaaaaaaaaaaaaaa", name: "Borealis", status: "suspended" as const },
+    { id: "Org3aaaaaaaaaaaaaaaa", name: "Grupo ACME Sul" },
+    { id: "Org4aaaaaaaaaaaaaaaa", name: "Acme Leste", status: "suspended" as const },
+  ];
+  type ListBody = { data: { id: string }[]; meta: { page: { cursor: string | null; hasMore: boolean } } };
+  const list = async (routes: ReturnType<typeof setup>["routes"], search: string) => json<ListBody>(await callRoute(routes, "admin.listOrganizations", `/v1/admin/organizations?${search}`, { as: "sam" }));
+
+  it("matches every word anywhere in the name or id, ignoring case and accents, and filters by status", async () => {
+    const { routes } = setup({ organizations: ORGS });
+    expect((await list(routes, "query=acme")).data.map((org) => org.id)).toEqual([ORGS[0]!.id, ORGS[2]!.id, ORGS[3]!.id]);
+    expect((await list(routes, "query=sul%20grupo")).data.map((org) => org.id)).toEqual([ORGS[2]!.id]);
+    expect((await list(routes, "query=acme&status=suspended")).data.map((org) => org.id)).toEqual([ORGS[3]!.id]);
+    expect((await list(routes, "status=suspended")).data.map((org) => org.id)).toEqual([ORGS[1]!.id, ORGS[3]!.id]);
+    expect((await list(routes, "query=org2aaa")).data.map((org) => org.id)).toEqual([ORGS[1]!.id]);
+    expect(await list(routes, "query=nothing")).toMatchObject({ data: [], meta: { page: { hasMore: false, cursor: null } } });
+    expect((await callRoute(routes, "admin.listOrganizations", "/v1/admin/organizations?status=deleted", { as: "sam" })).status).toBe(400);
+  });
+
+  it("pages the matches by cursor without repeating or losing one", async () => {
+    const { routes } = setup({ organizations: ORGS });
+    const first = await list(routes, "query=acme&limit=2");
+    expect(first.data.map((org) => org.id)).toEqual([ORGS[0]!.id, ORGS[2]!.id]);
+    expect(first.meta.page.hasMore).toBe(true);
+    const second = await list(routes, `query=acme&limit=2&cursor=${first.meta.page.cursor ?? ""}`);
+    expect(second.data.map((org) => org.id)).toEqual([ORGS[3]!.id]);
+    expect(second.meta.page).toMatchObject({ hasMore: false, cursor: null });
+  });
+
+  it("always answers the organization whose id is the text first, once", async () => {
+    const { routes } = setup({ organizations: [...ORGS, { id: "Org5aaaaaaaaaaaaaaaa", name: `About ${ORGS[3]!.id}` }] });
+    const found = await list(routes, `query=${ORGS[3]!.id}&limit=1`);
+    expect(found.data.map((org) => org.id)).toEqual([ORGS[3]!.id]);
+    const rest = await list(routes, `query=${ORGS[3]!.id}&limit=1&cursor=${found.meta.page.cursor ?? ""}`);
+    expect(rest.data.map((org) => org.id)).toEqual(["Org5aaaaaaaaaaaaaaaa"]);
+    expect(rest.meta.page.hasMore).toBe(false);
   });
 });
 
