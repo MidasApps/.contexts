@@ -8,6 +8,7 @@ import { buildWorkflowCatalogEntry, buildWorkflowRun } from "#/entities/workflow
 import { expectNoAxeViolations } from "#/shared/testing/axe.ts";
 import { apiError, noContent, ok, page, type FakeRequest, type FakeRoutes } from "#/shared/testing/fake-api.ts";
 import { IDS } from "#/shared/testing/fixtures.ts";
+import { buildMember } from "#/shared/testing/settings-fixtures.ts";
 import { SettingsWorkflowsView } from "./SettingsWorkflowsView.tsx";
 
 // The machine runs several suites at once; user-event flows through dialogs need room.
@@ -54,6 +55,13 @@ describe("SettingsWorkflowsView: runs", () => {
     expect(within(table).getByRole("link", { name: "Abrir a execução run-1 de approval-demo" }).getAttribute("href")).toBe(`${SETTINGS_PATH}/runs/run-1`);
     expect(new URLSearchParams(lastCall(api, "GET", "/v1/workflows/runs")?.query).get("organizationId")).toBe(IDS.organization);
     await expectNoAxeViolations(container);
+  });
+
+  it("names the member who started a run instead of the user id", async () => {
+    renderView({ [`GET /v1/organizations/${IDS.organization}/members`]: page([buildMember({ uid: IDS.user, displayName: "Ana Souza" })]) }, [...ADMIN, "core.member.read"]);
+    const table = await screen.findByRole("table", { name: "Execuções de fluxos de Northwind" });
+    expect(await within(table).findByText("Pelo usuário Ana Souza")).toBeDefined();
+    expect(within(table).queryByText(`Pelo usuário ${IDS.user}`)).toBeNull();
   });
 
   it("filters by status on the server, for this organization", async () => {

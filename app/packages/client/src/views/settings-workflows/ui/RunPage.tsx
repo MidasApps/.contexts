@@ -16,6 +16,7 @@ import { QuerySection } from "#/widgets/page-state/index.ts";
 import { RunTimeline } from "#/widgets/run-timeline/index.ts";
 import { SettingsPageFrame } from "#/widgets/settings-nav/index.ts";
 import { useRunEvents } from "../model/use-run-events.ts";
+import { useStarterNames } from "../model/use-starter-names.ts";
 
 function RunEvents({ events }: { events: readonly WorkflowEvent[] }) {
   const t = useTranslations("settings.workflows.run");
@@ -43,7 +44,7 @@ function RunEvents({ events }: { events: readonly WorkflowEvent[] }) {
   );
 }
 
-function RunDetails({ run, organizationId, canSeeApprovals }: { run: WorkflowRun; organizationId: string; canSeeApprovals: boolean }) {
+function RunDetails({ run, organizationId, canSeeApprovals, starterLabel }: { run: WorkflowRun; organizationId: string; canSeeApprovals: boolean; starterLabel: string | undefined }) {
   const t = useTranslations("settings.workflows.run");
   const events = useRunEvents(organizationId, run.runId);
   const live = isRunCancelable(run.status);
@@ -63,6 +64,7 @@ function RunDetails({ run, organizationId, canSeeApprovals }: { run: WorkflowRun
         <RunTimeline
           run={run}
           label={t("timelineLabel", { id: run.runId })}
+          starterLabel={starterLabel}
           renderApproval={(approvalRequestId) => (
             <span className="flex flex-col gap-1">
               <span>{t("approvalHint")}</span>
@@ -91,6 +93,7 @@ export function RunPage({ context, runId }: { context: AccessContext; runId: str
   const online = useOnlineStatus();
   const { organization } = context;
   const run = useTenantWorkflowRun(organization.id, runId);
+  const starterName = useStarterNames({ organizationId: organization.id, canReadMembers: context.permissions.includes("core.member.read") });
   const [canceling, setCanceling] = useState(false);
   const canCancel = context.permissions.includes("core.workflow-run.cancel") && run.data !== undefined && isRunCancelable(run.data.status);
   return (
@@ -119,7 +122,7 @@ export function RunPage({ context, runId }: { context: AccessContext; runId: str
     >
       {online ? null : <OfflineNotice className="mb-4" />}
       <QuerySection query={run} loadingLabel={t("run.loading")}>
-        {(data) => <RunDetails run={data} organizationId={organization.id} canSeeApprovals={context.permissions.includes("core.approval.read")} />}
+        {(data) => <RunDetails run={data} organizationId={organization.id} canSeeApprovals={context.permissions.includes("core.approval.read")} starterLabel={starterName(data.startedBy)} />}
       </QuerySection>
       <CancelWorkflowRunDialog organizationId={organization.id} run={canceling && run.data !== undefined ? run.data : null} onOpenChange={(open) => !open && setCanceling(false)} />
     </SettingsPageFrame>

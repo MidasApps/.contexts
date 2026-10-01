@@ -15,12 +15,14 @@ import { EmptyState } from "#/shared/ui/molecules/EmptyState/EmptyState.tsx";
 import { DataTable } from "#/shared/ui/organisms/DataTable/DataTable.tsx";
 import { dataTableColumnHelper } from "#/shared/ui/organisms/DataTable/data-table-columns.ts";
 import { QuerySection } from "#/widgets/page-state/index.ts";
+import { useStarterNames } from "../model/use-starter-names.ts";
 
 const ANY = "any";
 const isStatus = (value: string): value is WorkflowRunStatus => (WORKFLOW_RUN_STATUSES as readonly string[]).includes(value);
 const column = dataTableColumnHelper<WorkflowRun>();
 
 type RowActions = { organizationId: string; onCancel: ((run: WorkflowRun) => void) | null };
+type StarterName = (uid: string | null) => string | undefined;
 
 function RunName({ run }: { run: WorkflowRun }) {
   return (
@@ -32,10 +34,10 @@ function RunName({ run }: { run: WorkflowRun }) {
 }
 
 /** Who or what started the run, and whether it waits for an approval. */
-function Origin({ run }: { run: WorkflowRun }) {
+function Origin({ run, starterName }: { run: WorkflowRun; starterName: StarterName }) {
   const t = useTranslations("settings.workflows.runs");
   const tTimeline = useTranslations("common.runTimeline");
-  const origin = run.scheduleId !== null ? tTimeline("startedBySchedule", { schedule: run.scheduleId }) : run.startedBy !== null ? tTimeline("startedByUser", { user: run.startedBy }) : tTimeline("startedByPlatform");
+  const origin = run.scheduleId !== null ? tTimeline("startedBySchedule", { schedule: run.scheduleId }) : run.startedBy !== null ? tTimeline("startedByUser", { user: starterName(run.startedBy) ?? run.startedBy }) : tTimeline("startedByPlatform");
   return (
     <span className="flex min-w-0 flex-col">
       <span className="break-all">{origin}</span>
@@ -66,18 +68,18 @@ function RunActions({ run, organizationId, onCancel }: RowActions & { run: Workf
   );
 }
 
-const useColumns = ({ organizationId, onCancel }: RowActions) => {
+const useColumns = ({ organizationId, onCancel }: RowActions, starterName: StarterName) => {
   const t = useTranslations("settings.workflows.runs");
   return useMemo(
     () => [
       column.display({ id: "run", header: () => t("columns.run"), cell: ({ row }) => <RunName run={row.original} /> }),
       column.accessor("status", { header: () => t("columns.status"), cell: ({ getValue }) => <RunStatusPill status={getValue()} /> }),
-      column.display({ id: "origin", header: () => t("columns.origin"), cell: ({ row }) => <Origin run={row.original} /> }),
+      column.display({ id: "origin", header: () => t("columns.origin"), cell: ({ row }) => <Origin run={row.original} starterName={starterName} /> }),
       column.accessor("createdAt", { header: () => t("columns.createdAt"), cell: ({ getValue }) => <When iso={getValue()} /> }),
       column.accessor("updatedAt", { header: () => t("columns.updatedAt"), cell: ({ getValue }) => <When iso={getValue()} /> }),
       column.display({ id: "actions", header: () => t("columns.actions"), meta: { headerHidden: true }, cell: ({ row }) => <RunActions run={row.original} organizationId={organizationId} onCancel={onCancel} /> }),
     ],
-    [t, organizationId, onCancel],
+    [t, organizationId, onCancel, starterName],
   );
 };
 
@@ -148,7 +150,8 @@ export function RunsSection({ context, workflows, onStart, online }: RunsSection
   const paged = useCursorPages(runs, TENANT_RUNS_PAGE_LIMIT, t("pagination"));
   const canCancel = context.permissions.includes("core.workflow-run.cancel") && online;
   const actions: RowActions = { organizationId: organization.id, onCancel: canCancel ? setCanceling : null };
-  const columns = useColumns(actions);
+  const starterName = useStarterNames({ organizationId: organization.id, canReadMembers: context.permissions.includes("core.member.read") });
+  const columns = useColumns(actions, starterName);
   const filtering = filters.workflowId !== undefined || filters.status !== undefined;
   return (
     <div className="flex flex-col gap-4">
@@ -170,7 +173,7 @@ export function RunsSection({ context, workflows, onStart, online }: RunsSection
                   <RunStatusPill status={run.status} />
                 </span>
                 <span className="text-xs text-muted-foreground">
-                  <Origin run={run} />
+                  <Origin run={run} starterName={starterName} />
                 </span>
                 <span className="text-xs text-muted-foreground">{formatDateTime(run.createdAt)}</span>
                 <span className="self-start">
