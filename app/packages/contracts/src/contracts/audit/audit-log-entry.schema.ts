@@ -71,6 +71,7 @@ export const AuditMetadataSchema = z.strictObject({
     .optional()
     .meta(none("Id of the tool call an approval decision answers (SP4).")),
   durationMs: z.int().min(0).max(86_400_000).optional().meta(none("How long the attempt took, in milliseconds.")),
+  thresholdPercent: z.int().min(1).max(100).optional().meta(none("Budget threshold reached, in percent of a monthly cap (SP5).")),
   endpointId: z
     .string()
     .regex(/^[a-z][a-z0-9-]{0,63}\.[a-z][A-Za-z0-9]{0,63}$/, { error: "Expected an endpoint id." })

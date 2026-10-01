@@ -32,6 +32,8 @@ export type {
   NodeRef,
   NotificationPort,
   RegionalSettings,
+  TenantUsageReportResult,
+  UsageReportPort,
   SecretStore,
   SemanticQueryPort,
   ProjectsPort,
@@ -421,3 +423,12 @@ export {
   SCHEDULE_WRITE_PERMISSION,
   ScheduleCreatorForbiddenError,
 } from "./workflows/steps/reauthorize-schedule-creator.step.ts";
+export {
+  createUsageReportWorkflow,
+  USAGE_REPORT_CONCURRENCY,
+  USAGE_REPORT_PLATFORM_CRON,
+  USAGE_REPORT_WORKFLOW_ID,
+  type UsageReportDeps,
+  type UsageReportResult,
+  UsageReportResultSchema,
+} from "./workflows/usage-report.workflow.ts";

@@ -5708,7 +5708,8 @@
               "AGENT_TOOL_CALL_DECLINED",
               "CONVERSATION_DELETED",
               "VOICE_TRANSCRIBED",
-              "VOICE_SYNTHESIZED"
+              "VOICE_SYNTHESIZED",
+              "BUDGET_THRESHOLD_REACHED"
             ],
             "type": "string",
             "x-pii": "none"
@@ -5803,6 +5804,13 @@
                 "description": "Id of the agent or workflow run.",
                 "pattern": "^[A-Za-z0-9_-]{1,128}$",
                 "type": "string",
+                "x-pii": "none"
+              },
+              "thresholdPercent": {
+                "description": "Budget threshold reached, in percent of a monthly cap (SP5).",
+                "maximum": 100,
+                "minimum": 1,
+                "type": "integer",
                 "x-pii": "none"
               },
               "toolCallId": {
@@ -6136,7 +6144,8 @@
               "AGENT_TOOL_CALL_DECLINED",
               "CONVERSATION_DELETED",
               "VOICE_TRANSCRIBED",
-              "VOICE_SYNTHESIZED"
+              "VOICE_SYNTHESIZED",
+              "BUDGET_THRESHOLD_REACHED"
             ],
             "type": "string",
             "x-pii": "none"
@@ -6367,7 +6376,8 @@
               "AGENT_TOOL_CALL_DECLINED",
               "CONVERSATION_DELETED",
               "VOICE_TRANSCRIBED",
-              "VOICE_SYNTHESIZED"
+              "VOICE_SYNTHESIZED",
+              "BUDGET_THRESHOLD_REACHED"
             ],
             "type": "string",
             "x-pii": "none"
@@ -6462,6 +6472,13 @@
                 "description": "Id of the agent or workflow run.",
                 "pattern": "^[A-Za-z0-9_-]{1,128}$",
                 "type": "string",
+                "x-pii": "none"
+              },
+              "thresholdPercent": {
+                "description": "Budget threshold reached, in percent of a monthly cap (SP5).",
+                "maximum": 100,
+                "minimum": 1,
+                "type": "integer",
                 "x-pii": "none"
               },
               "toolCallId": {

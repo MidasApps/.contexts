@@ -631,3 +631,14 @@ export {
   type WorkflowGatewayResult,
   type WorkflowRuntimeGateway,
 } from "./services/workflows/index.ts";
+// SP5 usage report (decision 0039): rollups, warehouse export, budget alerts; live tenant ids.
+export {
+  BUDGET_ALERT_THRESHOLDS,
+  type BudgetAlertThreshold,
+  createPostgresUsageReportRepository,
+  makeReportTenantUsage,
+  type ReportTenantUsage,
+  type TenantUsageReport,
+  type UsageReportRepository,
+} from "./services/usage/index.ts";
+export { listLiveOrganizationIds } from "./services/tenancy/adapters/driven/firestore-live-organization-ids.ts";

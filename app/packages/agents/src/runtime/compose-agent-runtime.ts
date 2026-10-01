@@ -28,6 +28,7 @@ import { threadOwnerFromStorage } from "../auth/thread-ownership.ts";
 import { createCatalogReindexWorkflow } from "../knowledge/workflows/catalog-reindex.workflow.ts";
 import { createKnowledgeIngestWorkflow } from "../knowledge/workflows/knowledge-ingest.workflow.ts";
 import { createApprovalDemoWorkflow } from "../workflows/approval-demo.workflow.ts";
+import { createUsageReportWorkflow, USAGE_REPORT_PLATFORM_CRON } from "../workflows/usage-report.workflow.ts";
 import { createWorkflowApprovalRoutes } from "../workflows/workflow-approval-routes.ts";
 import { createWorkflowRunRoutes, WORKFLOW_RUN_ROUTES_PATTERN } from "../workflows/runs/workflow-run-routes.ts";
 import { createWorkflowChatRoutes } from "../chat/workflow-chat-route.ts";
@@ -177,7 +178,7 @@ const collectAgents = (args: ComposeAgentRuntimeArgs, commands: readonly AgentCo
   return all;
 };
 
-/** Core workflows: knowledge ingestion, the platform catalog reindex (SP3 §11) and the HITL demo (SP5, decision 0036). */
+/** Core workflows: knowledge ingestion, the catalog reindex (SP3 §11), the HITL demo (decision 0036) and the usage report (decision 0039). */
 const coreWorkflowMap = (args: ComposeAgentRuntimeArgs, models: AgentModels): Record<string, AnyWorkflow> => {
   const indexing = { knowledge: args.ports.knowledge, embedding: models.embedding, embeddingModelId: embeddingModelIdOf(args.env) };
   const ingest = createKnowledgeIngestWorkflow({
@@ -189,7 +190,8 @@ const coreWorkflowMap = (args: ComposeAgentRuntimeArgs, models: AgentModels): Re
   });
   const reindex = createCatalogReindexWorkflow({ ...indexing, ...(args.aiCatalog === undefined ? {} : { aiCatalog: args.aiCatalog }) });
   const approvalDemo = createApprovalDemoWorkflow({ approvals: args.ports.workflowApprovals, commands: args.ports.workflowCommands, access: args.ports.access });
-  return { [ingest.id]: ingest, [reindex.id]: reindex, [approvalDemo.id]: approvalDemo };
+  const usageReport = createUsageReportWorkflow({ access: args.ports.access, notifications: args.ports.notifications, usageReport: args.ports.usageReport });
+  return { [ingest.id]: ingest, [reindex.id]: reindex, [approvalDemo.id]: approvalDemo, [usageReport.id]: usageReport };
 };
 
 /**
@@ -199,6 +201,7 @@ const coreWorkflowMap = (args: ComposeAgentRuntimeArgs, models: AgentModels): Re
 const CORE_WORKFLOW_FLAGS: Readonly<Record<string, { startable?: boolean; schedulable?: boolean; platformCron?: string }>> = {
   "approval-demo": { startable: true },
   "catalog-reindex": { platformCron: "0 3 * * *" },
+  "usage-report": { schedulable: true, platformCron: USAGE_REPORT_PLATFORM_CRON },
 };
 
 /** Core and module workflows with the catalog of their policies (decisions 0037, 0040). */

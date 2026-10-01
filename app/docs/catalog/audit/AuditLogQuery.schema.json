@@ -67,7 +67,8 @@
         "AGENT_TOOL_CALL_DECLINED",
         "CONVERSATION_DELETED",
         "VOICE_TRANSCRIBED",
-        "VOICE_SYNTHESIZED"
+        "VOICE_SYNTHESIZED",
+        "BUDGET_THRESHOLD_REACHED"
       ],
       "type": "string",
       "x-pii": "none"

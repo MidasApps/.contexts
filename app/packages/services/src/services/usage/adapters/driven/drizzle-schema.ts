@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { bigint, check, index, integer, pgPolicy, text, timestamp, unique, uuid } from "drizzle-orm/pg-core";
+import { bigint, check, date, index, integer, pgPolicy, text, timestamp, unique, uuid } from "drizzle-orm/pg-core";
 import { usageSchema } from "../../../shared/postgres/drizzle-schemas.ts";
 
 /**
@@ -69,5 +69,69 @@ export const usageTenantBudgets = usageSchema
       check("tenant_budgets_caps_check", sql`${table.monthlyMicroUsd} >= 0 AND ${table.monthlyTokens} >= 0`),
       tenantPolicy("tenant_budgets"),
     ],
+  )
+  .enableRLS();
+
+/**
+ * Usage per tenant, UTC day, model and agent (SP5 spec §3.2, decision 0039): rebuilt from
+ * `llm_calls` by the `usage-report` workflow with an idempotent upsert on the natural key.
+ */
+export const usageDailyRollups = usageSchema
+  .table(
+    "daily_rollups",
+    {
+      id: uuid("id").primaryKey().default(sql`uuidv7()`),
+      tenantId: text("tenant_id").notNull(),
+      day: date("day", { mode: "string" }).notNull(),
+      model: text("model").notNull(),
+      agentId: text("agent_id").notNull(),
+      calls: bigint("calls", { mode: "number" }).notNull(),
+      inputTokens: bigint("input_tokens", { mode: "number" }).notNull(),
+      outputTokens: bigint("output_tokens", { mode: "number" }).notNull(),
+      // Known cost only (unpriced calls add tokens, not cost).
+      costMicroUsd: bigint("cost_micro_usd", { mode: "number" }).notNull(),
+      createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+      updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+    },
+    (table) => [
+      unique("daily_rollups_tenant_day_model_agent_key").on(table.tenantId, table.day, table.model, table.agentId),
+      check("daily_rollups_counts_check", sql`${table.calls} >= 0 AND ${table.inputTokens} >= 0 AND ${table.outputTokens} >= 0 AND ${table.costMicroUsd} >= 0`),
+      tenantPolicy("daily_rollups"),
+    ],
+  )
+  .enableRLS();
+
+/** One row per tenant, UTC month and threshold reached: budget alerts go out once (decision 0039). */
+export const usageBudgetAlerts = usageSchema
+  .table(
+    "budget_alerts",
+    {
+      id: uuid("id").primaryKey().default(sql`uuidv7()`),
+      tenantId: text("tenant_id").notNull(),
+      month: date("month", { mode: "string" }).notNull(),
+      thresholdPercent: integer("threshold_percent").notNull(),
+      createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+      updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+    },
+    (table) => [
+      unique("budget_alerts_tenant_month_threshold_key").on(table.tenantId, table.month, table.thresholdPercent),
+      check("budget_alerts_threshold_check", sql`${table.thresholdPercent} IN (80, 100)`),
+      tenantPolicy("budget_alerts"),
+    ],
+  )
+  .enableRLS();
+
+/** How far each tenant's ledger rows were exported to the warehouse (by `created_at`, so late rows still go). */
+export const usageExportCursors = usageSchema
+  .table(
+    "export_cursors",
+    {
+      id: uuid("id").primaryKey().default(sql`uuidv7()`),
+      tenantId: text("tenant_id").notNull(),
+      exportedUntil: timestamp("exported_until", { withTimezone: true }).notNull(),
+      createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+      updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+    },
+    (table) => [unique("export_cursors_tenant_key").on(table.tenantId), tenantPolicy("export_cursors")],
   )
   .enableRLS();

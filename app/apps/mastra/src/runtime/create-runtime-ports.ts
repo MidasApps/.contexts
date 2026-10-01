@@ -36,9 +36,11 @@ import { bindProjectsPort } from "./projects-port-binding.ts";
 import { bindUsagePort } from "./usage-port-binding.ts";
 import { UNWIRED_PORTS } from "./unwired-ports.ts";
 import { createLogNotificationPort } from "./notifications-port-binding.ts";
+import { bindUsageReportPort, type UsageReportBindingEnv } from "./usage-report-port-binding.ts";
 import { bindWorkflowApprovalsPort, bindWorkflowCommandsPort, RUNTIME_SIDE_SETTLER } from "./workflow-ports-binding.ts";
 
-export type RuntimePortsEnv = Pick<ServicesEnv, "API_KEY_PREFIX" | "DATABASE_URL" | "APP_ENV" | "AI_MODE" | "FIREBASE_STORAGE_EMULATOR_HOST" | "FIREBASE_PROJECT_ID"> & {
+export type RuntimePortsEnv = Pick<ServicesEnv, "API_KEY_PREFIX" | "DATABASE_URL" | "APP_ENV" | "AI_MODE" | "FIREBASE_STORAGE_EMULATOR_HOST" | "FIREBASE_PROJECT_ID"> &
+  Partial<Pick<UsageReportBindingEnv, "USAGE_SINK" | "BIGQUERY_DATASET_AI_OBSERVABILITY">> & {
   /** Model id of the stored vectors in real mode; search only compares vectors of this model (decision 0022). */
   readonly AI_MODEL_EMBEDDING: string;
   /** Bucket of uploads (files context). */
@@ -142,5 +144,16 @@ export const createRuntimePorts = (args: {
     workflowApprovals: bindWorkflowApprovalsPort(core.approvals),
     workflowCommands: bindWorkflowCommandsPort({ executors: agentCommandExecutors(executors), access: core.access, commands }),
     notifications: createLogNotificationPort(args.logger),
+    usageReport: bindUsageReportPort({
+      env: {
+        USAGE_SINK: args.env.USAGE_SINK ?? "none",
+        BIGQUERY_DATASET_AI_OBSERVABILITY: args.env.BIGQUERY_DATASET_AI_OBSERVABILITY ?? "ai_observability",
+        FIREBASE_PROJECT_ID: args.env.FIREBASE_PROJECT_ID,
+      },
+      sql,
+      firestore: args.firebase.firestore,
+      audit: core.audit,
+      logger: args.logger,
+    }),
   };
 };

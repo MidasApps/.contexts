@@ -299,6 +299,25 @@ export type WorkflowNotification = {
 
 export type NotificationPort = { readonly notify: (notification: WorkflowNotification) => Promise<void> };
 
+/** One tenant's run of the `usage-report` workflow (SP5 Task 6, `makeReportTenantUsage`). */
+export type TenantUsageReportResult = {
+  readonly tenantId: string;
+  readonly rollups: number;
+  readonly exportedCalls: number;
+  /** Budget thresholds reached for the first time this month (already stored and audited). */
+  readonly newAlerts: readonly (80 | 100)[];
+  readonly usedPercent: number;
+};
+
+/**
+ * Usage reporting (decision 0039): live tenant ids for the platform run, and the per-tenant step
+ * (rollups, warehouse export, budget thresholds). Both run as the platform, never as a caller.
+ */
+export type UsageReportPort = {
+  readonly listTenantIds: () => Promise<readonly string[]>;
+  readonly reportTenant: (input: { readonly tenantId: string; readonly requestId: string }) => Promise<TenantUsageReportResult>;
+};
+
 export type AgentRuntimePorts = {
   readonly access: AccessPort;
   readonly audit: AuditPort;
@@ -319,4 +338,5 @@ export type AgentRuntimePorts = {
   readonly workflowCommands: WorkflowCommandPort;
   /** SP5 notices of scheduled and platform workflows (decisions 0037, 0039). */
   readonly notifications: NotificationPort;
+  readonly usageReport: UsageReportPort;
 };

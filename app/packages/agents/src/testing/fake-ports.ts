@@ -22,6 +22,8 @@ import type {
   WebContentPort,
   WebPage,
   NotificationPort,
+  TenantUsageReportResult,
+  UsageReportPort,
   WorkflowNotification,
 } from "../runtime/runtime-ports.ts";
 import type { StoredFile } from "@core/contracts";
@@ -270,6 +272,7 @@ export const createFakeRuntimePorts = (overrides: Partial<AgentRuntimePorts> = {
   workflowApprovals: createFakeWorkflowApprovalPort(),
   workflowCommands: createFakeWorkflowCommandPort(),
   notifications: createRecordingNotificationPort(),
+  usageReport: createFakeUsageReportPort(),
   ...overrides,
 });
 
@@ -350,6 +353,25 @@ export const createFakeWorkflowCommandPort = (options: { readonly refuse?: Reado
       const output = { id: `created-${runs.length}` };
       results.set(key, output);
       return Promise.resolve({ ok: true, output, replayed: false });
+    },
+  };
+};
+
+export type FakeUsageReportPort = UsageReportPort & { readonly reported: string[] };
+
+/** Usage report over fixed tenants; `alerts` gives the thresholds a tenant reaches for the first time. */
+export const createFakeUsageReportPort = (options: { readonly tenantIds?: readonly string[]; readonly alerts?: Readonly<Record<string, readonly (80 | 100)[]>> } = {}): FakeUsageReportPort => {
+  const reported: string[] = [];
+  const sent = new Set<string>();
+  return {
+    reported,
+    listTenantIds: () => Promise.resolve(options.tenantIds ?? []),
+    reportTenant: ({ tenantId }) => {
+      reported.push(tenantId);
+      const newAlerts = (options.alerts?.[tenantId] ?? []).filter((threshold) => !sent.has(`${tenantId}:${threshold}`));
+      for (const threshold of newAlerts) sent.add(`${tenantId}:${threshold}`);
+      const result: TenantUsageReportResult = { tenantId, rollups: 1, exportedCalls: 0, newAlerts, usedPercent: newAlerts.at(-1) ?? 0 };
+      return Promise.resolve(result);
     },
   };
 };

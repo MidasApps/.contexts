@@ -136,4 +136,26 @@ describe("workflow runs API (Auth emulator, real Mastra server)", () => {
     const canceled = await eventsUntil(runId, "canceled");
     expect(canceled.events.at(-1)).toMatchObject({ type: "workflow-canceled", status: "canceled" });
   }, 60_000);
+
+  it("manages tenant schedules of schedulable workflows for the tenant only", async () => {
+    const gateway = createMastraWorkflowGateway({ baseUrl, serverlessToken: null });
+    const input = { workflowId: "usage-report", slug: "daily-usage", cron: "0 9 * * *", timezone: "America/Sao_Paulo", inputData: {} };
+    expect(await gateway.createSchedule(scopeOf(member), input)).toMatchObject({ ok: false, error: { code: "FORBIDDEN" } });
+    expect(await gateway.createSchedule(scopeOf(admin), { ...input, workflowId: "approval-demo" })).toMatchObject({ ok: false, error: { code: "WORKFLOW_NOT_SCHEDULABLE", status: 422 } });
+    expect(await gateway.createSchedule(scopeOf(admin), { ...input, cron: "* * * * *" })).toMatchObject({ ok: false, error: { code: "SCHEDULE_INTERVAL_TOO_SHORT", status: 422 } });
+    const created = await gateway.createSchedule(scopeOf(admin), input);
+    if (!created.ok) throw new Error(`create failed: ${JSON.stringify(created.error)}`);
+    expect(created.data).toMatchObject({ tenantId: TENANT, workflowId: "usage-report", createdBy: admin.uid, status: "active", timezone: "America/Sao_Paulo" });
+    expect(created.data.nextFireAt?.endsWith("T12:00:00.000Z")).toBe(true);
+    expect(await gateway.createSchedule(scopeOf(admin), input)).toMatchObject({ ok: false, error: { code: "CONFLICT" } });
+
+    const listed = await gateway.listSchedules(scopeOf(admin));
+    expect(listed.ok && listed.data.map((schedule) => schedule.id)).toEqual([created.data.id]);
+    expect(await gateway.listSchedules(scopeOf(outsider, OTHER_TENANT))).toEqual({ ok: true, data: [] });
+    expect(await gateway.getSchedule(scopeOf(outsider, OTHER_TENANT), created.data.id)).toMatchObject({ ok: false, error: { code: "NOT_FOUND" } });
+
+    expect(await gateway.actOnSchedule(scopeOf(admin), created.data.id, "pause")).toMatchObject({ ok: true, data: { status: "paused", nextFireAt: null } });
+    expect(await gateway.deleteSchedule(scopeOf(admin), created.data.id)).toEqual({ ok: true, data: null });
+    expect(await gateway.getSchedule(scopeOf(admin), created.data.id)).toMatchObject({ ok: false, error: { code: "NOT_FOUND" } });
+  }, 60_000);
 });

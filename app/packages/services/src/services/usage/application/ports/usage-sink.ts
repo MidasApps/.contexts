@@ -1,8 +1,12 @@
-import type { LlmCall } from "@core/contracts";
+import type { LlmCall, UsageDailyRollup } from "@core/contracts";
 
 /**
- * Export of ledger rows to the warehouse (BigQuery `ai_observability.llm_calls`,
- * contracts/bigquery.md §14) outside `local`; a no-op that logs in `local`.
- * SP5's usage report workflow reads the ledger and calls it. Idempotent by row id.
+ * Export of usage to the warehouse (BigQuery `ai_observability`, contracts/bigquery.md §14)
+ * outside `local`; a no-op that logs in `local`. The `usage-report` workflow (SP5) reads the
+ * ledger and the rollups and calls it. Ledger rows are idempotent by row id; a rollup row is
+ * deduplicated by its content (the latest `exported_at` per key is the current value).
  */
-export type UsageSink = { readonly exportCalls: (calls: readonly LlmCall[]) => Promise<void> };
+export type UsageSink = {
+  readonly exportCalls: (calls: readonly LlmCall[]) => Promise<void>;
+  readonly exportRollups: (rollups: readonly UsageDailyRollup[]) => Promise<void>;
+};

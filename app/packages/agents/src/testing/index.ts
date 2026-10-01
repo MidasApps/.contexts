@@ -16,6 +16,8 @@ export {
   type FakeWorkflowCommandPort,
   createRecordingKnowledgeEvents,
   createRecordingNotificationPort,
+  createFakeUsageReportPort,
+  type FakeUsageReportPort,
   type RecordingNotificationPort,
   defaultAgentSettings,
   FAKE_REGIONAL,

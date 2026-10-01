@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
-import { type LlmCall, LlmCallContract, LlmCallSchema } from "@core/contracts";
+import { type LlmCall, LlmCallContract, LlmCallSchema, type UsageDailyRollup } from "@core/contracts";
 import { describe, expect, it } from "vitest";
-import { type BigQueryTableLike, createBigQueryUsageSink, LLM_CALLS_TABLE } from "./bigquery-usage-sink.ts";
+import { type BigQueryDailyRollupRow, type BigQueryTableLike, createBigQueryUsageSink, DAILY_ROLLUPS_TABLE, LLM_CALLS_TABLE } from "./bigquery-usage-sink.ts";
 import { createNoopUsageSink } from "./noop-usage-sink.ts";
 
 const [example] = LlmCallContract.meta.examples as [LlmCall];
@@ -76,11 +76,57 @@ describe("bigquery usage sink", () => {
   });
 });
 
+describe("bigquery usage sink: daily rollups", () => {
+  const rollup: UsageDailyRollup = { tenantId: "OrgAaaaaaaaaaaaaaaaaa", day: "2026-09-30", model: "gemini-3.5-flash", agentId: "assistant", calls: 3, inputTokens: 300, outputTokens: 150, costMicroUsd: 6_000 } as UsageDailyRollup;
+
+  const rollupTable = () => {
+    const inserts: Parameters<BigQueryTableLike<BigQueryDailyRollupRow>["insert"]>[] = [];
+    const table: BigQueryTableLike<BigQueryDailyRollupRow> = {
+      insert: (rows, options) => {
+        inserts.push([rows, options]);
+        return Promise.resolve();
+      },
+    };
+    return { table, inserts };
+  };
+
+  it("maps a rollup to the ai_observability.daily_rollups columns with its export time", async () => {
+    const { table: rollupsTable, inserts } = rollupTable();
+    const sink = createBigQueryUsageSink({ table: fakeTable().table, rollupsTable, now: () => new Date("2026-09-30T12:15:00.000Z") });
+    await sink.exportRollups([rollup]);
+    expect(DAILY_ROLLUPS_TABLE).toBe("daily_rollups");
+    expect(inserts[0]?.[0][0]?.json).toEqual({
+      tenant_id: rollup.tenantId,
+      day: "2026-09-30",
+      model: "gemini-3.5-flash",
+      agent_id: "assistant",
+      calls: 3,
+      input_tokens: 300,
+      output_tokens: 150,
+      cost_micro_usd: 6_000,
+      exported_at: "2026-09-30T12:15:00.000Z",
+    });
+  });
+
+  it("deduplicates an identical rollup by content and sends a changed one as a new row", async () => {
+    const { table: rollupsTable, inserts } = rollupTable();
+    const sink = createBigQueryUsageSink({ table: fakeTable().table, rollupsTable });
+    await sink.exportRollups([rollup, rollup, { ...rollup, calls: 4 }]);
+    const [first, retry, changed] = inserts[0]?.[0].map((row) => row.insertId) ?? [];
+    expect(first).toBe(retry);
+    expect(changed).not.toBe(first);
+  });
+
+  it("refuses rollups when the table is not configured", async () => {
+    await expect(createBigQueryUsageSink({ table: fakeTable().table }).exportRollups([rollup])).rejects.toThrow("daily_rollups");
+  });
+});
+
 describe("noop usage sink", () => {
   it("logs the skipped row count and sends nothing", async () => {
     const lines: { message: string; fields: unknown }[] = [];
     const record = (message: string, fields?: unknown) => lines.push({ message, fields });
     await createNoopUsageSink({ debug: record, info: record, warn: record, error: record }).exportCalls([example]);
-    expect(lines).toEqual([{ message: "usage_export_skipped", fields: { rowCount: 1, sink: "none" } }]);
+    expect(lines).toEqual([{ message: "usage_export_skipped", fields: { rowCount: 1, sink: "none", table: "llm_calls" } }]);
   });
 });

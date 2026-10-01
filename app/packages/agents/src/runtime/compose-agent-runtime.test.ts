@@ -60,7 +60,11 @@ describe("composeAgentRuntime", () => {
     expect(runtime.chat.chatAgents).toEqual({ assistant: "assistant-chat" });
     expect(Object.keys(runtime.subagents)).toEqual(["knowledge", "data", "action", "web"]);
     expect(runtime.auth).toBeInstanceOf(FirebaseMastraAuth);
-    expect(runtime.platformSchedules).toEqual([{ workflowId: "catalog-reindex", cron: "0 3 * * *" }]);
+    expect(runtime.platformSchedules).toEqual([
+      { workflowId: "catalog-reindex", cron: "0 3 * * *" },
+      { workflowId: "usage-report", cron: "15 * * * *" },
+    ]);
+    expect(runtime.workflowCatalog.get("usage-report")).toMatchObject({ schedulable: true, startable: false });
     expect(runtime.workflowCatalog.get("approval-demo")).toEqual({ id: "approval-demo", startable: true, schedulable: false });
     expect(runtime.middleware.map((entry) => entry.path)).toEqual(["/api/*", "/api/*", "/chat/*", "/workflow-runs/*", "/tenant-schedules/*"]);
     expect(runtime.tools.ids()).toEqual([
@@ -99,7 +103,7 @@ describe("composeAgentRuntime", () => {
       "POST /tenant-schedules/:scheduleId/run",
     ]);
     expect(runtime.voice?.capabilities).toEqual({ transcription: true, speech: true, realtime: false });
-    expect(Object.keys(runtime.workflows).sort()).toEqual(["approval-demo", "catalog-reindex", "knowledge-ingest"]);
+    expect(Object.keys(runtime.workflows).sort()).toEqual(["approval-demo", "catalog-reindex", "knowledge-ingest", "usage-report"]);
   });
 
   it("registers module tools and agents", () => {

@@ -11715,6 +11715,7 @@ components:
             - CONVERSATION_DELETED
             - VOICE_TRANSCRIBED
             - VOICE_SYNTHESIZED
+            - BUDGET_THRESHOLD_REACHED
           type: string
           x-pii: none
         actor:
@@ -11792,6 +11793,12 @@ components:
               description: Id of the agent or workflow run.
               pattern: ^[A-Za-z0-9_-]{1,128}$
               type: string
+              x-pii: none
+            thresholdPercent:
+              description: Budget threshold reached, in percent of a monthly cap (SP5).
+              maximum: 100
+              minimum: 1
+              type: integer
               x-pii: none
             toolCallId:
               description: Id of the tool call an approval decision answers (SP4).
@@ -12015,6 +12022,7 @@ components:
             - CONVERSATION_DELETED
             - VOICE_TRANSCRIBED
             - VOICE_SYNTHESIZED
+            - BUDGET_THRESHOLD_REACHED
           type: string
           x-pii: none
         actorId:
@@ -12134,6 +12142,7 @@ components:
             - CONVERSATION_DELETED
             - VOICE_TRANSCRIBED
             - VOICE_SYNTHESIZED
+            - BUDGET_THRESHOLD_REACHED
           type: string
           x-pii: none
         actor:
@@ -12211,6 +12220,12 @@ components:
               description: Id of the agent or workflow run.
               pattern: ^[A-Za-z0-9_-]{1,128}$
               type: string
+              x-pii: none
+            thresholdPercent:
+              description: Budget threshold reached, in percent of a monthly cap (SP5).
+              maximum: 100
+              minimum: 1
+              type: integer
               x-pii: none
             toolCallId:
               description: Id of the tool call an approval decision answers (SP4).

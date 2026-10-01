@@ -66,6 +66,8 @@ export const AUDIT_ACTIONS = [
   "CONVERSATION_DELETED",
   "VOICE_TRANSCRIBED",
   "VOICE_SYNTHESIZED",
+  // SP5 workflows: a tenant reached 80 % or 100 % of a monthly budget cap (decision 0039).
+  "BUDGET_THRESHOLD_REACHED",
 ] as const;
 
 export const AuditActionSchema = z.enum(AUDIT_ACTIONS);

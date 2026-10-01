@@ -6,7 +6,7 @@ import type { UsageSink } from "./application/ports/usage-sink.ts";
 import { type CheckTenantBudget, makeCheckTenantBudget } from "./application/use-cases/check-tenant-budget.ts";
 import { type GetUsageSummary, makeGetUsageSummary } from "./application/use-cases/get-usage-summary.ts";
 import { makeRecordLlmCalls, type RecordLlmCalls } from "./application/use-cases/record-llm-calls.ts";
-import { createBigQueryLlmCallsTable, createBigQueryUsageSink } from "./adapters/driven/bigquery-usage-sink.ts";
+import { type BigQueryDailyRollupRow, createBigQueryLlmCallsTable, createBigQueryUsageSink, DAILY_ROLLUPS_TABLE } from "./adapters/driven/bigquery-usage-sink.ts";
 import { createNoopUsageSink } from "./adapters/driven/noop-usage-sink.ts";
 
 export type UsageServices = {
@@ -22,7 +22,7 @@ export const createUsageServices = (deps: { readonly repository: UsageRepository
 });
 
 /**
- * `USAGE_SINK` → adapter: `bigquery` exports to `<dataset>.llm_calls`; `none` (the
+ * `USAGE_SINK` → adapter: `bigquery` exports to `<dataset>.llm_calls` and `<dataset>.daily_rollups`; `none` (the
  * default, and the only sensible value in `local`) logs and drops.
  */
 export const createUsageSink = (config: {
@@ -34,5 +34,10 @@ export const createUsageSink = (config: {
   config.kind === "bigquery"
     ? createBigQueryUsageSink({
         table: createBigQueryLlmCallsTable({ dataset: config.dataset, ...(config.projectId === undefined ? {} : { projectId: config.projectId }) }),
+        rollupsTable: createBigQueryLlmCallsTable<BigQueryDailyRollupRow>({
+          dataset: config.dataset,
+          table: DAILY_ROLLUPS_TABLE,
+          ...(config.projectId === undefined ? {} : { projectId: config.projectId }),
+        }),
       })
     : createNoopUsageSink(config.logger);
