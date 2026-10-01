@@ -15,6 +15,10 @@ import { uuidv7 } from "./uuidv7.ts";
  * because a caller's `tracingOptions.metadata` can override metadata keys.
  * The exporter sees every model call: it must be registered unsampled
  * (`create-observability.ts` samples only the export to storage and OTLP).
+ *
+ * A durable agent (the chat wrappers, decision 0031) ends its generation span from a rebuilt span
+ * that carries no request context (`@mastra/core` 1.71.0), so the snapshot of the span's own start
+ * event is kept by span id (server-generated) and used when the end has none.
  */
 
 export const USAGE_LEDGER_EXPORTER_NAME = "usage-ledger";
@@ -22,6 +26,8 @@ export const LEDGER_FLUSH_ROWS = 50;
 export const LEDGER_FLUSH_MS = 2000;
 /** Rows kept while the ledger is unreachable; the oldest are dropped (and logged) beyond it. */
 export const LEDGER_MAX_BUFFERED_ROWS = 1000;
+/** Started generation spans whose context is remembered; the oldest are forgotten beyond it. */
+export const LEDGER_MAX_OPEN_SPANS = 5000;
 
 export type LedgerLogger = {
   readonly warn: (message: string, fields?: Record<string, unknown>) => void;
@@ -53,9 +59,10 @@ type GenerationAttributes = {
 
 type RowParts = { readonly row: LlmCall; readonly priced: boolean } | { readonly row: null; readonly priced: false };
 
-const toRow = (span: AnyExportedSpan, tenantId: string, id: string): RowParts => {
+type SpanContext = Readonly<Record<string, unknown>>;
+
+const toRow = (span: AnyExportedSpan, context: SpanContext, tenantId: string, id: string): RowParts => {
   const attributes = (span.attributes ?? {}) as GenerationAttributes;
-  const context = span.requestContext ?? {};
   const provider = vendorOf(stringOf(attributes.provider) ?? "unknown");
   const model = stringOf(attributes.model) ?? "unknown";
   const inputTokens = countOf(attributes.usage?.inputTokens);
@@ -119,13 +126,33 @@ export const createUsageLedgerExporter = (options: UsageLedgerExporterOptions): 
     return flushing;
   };
 
+  // Request context of started generation spans, by span id (insertion order = age).
+  const started = new Map<string, SpanContext>();
+
+  const remember = (span: AnyExportedSpan): void => {
+    const context = span.requestContext;
+    if (context === undefined || stringOf(context["tenantId"]) === null) return;
+    started.set(span.id, context);
+    if (started.size <= LEDGER_MAX_OPEN_SPANS) return;
+    const oldest = started.keys().next();
+    if (oldest.done !== true) started.delete(oldest.value);
+  };
+
+  /** The end event's own snapshot, else the one its start event carried. */
+  const contextOf = (span: AnyExportedSpan): SpanContext => {
+    const atStart = started.get(span.id);
+    started.delete(span.id);
+    return stringOf(span.requestContext?.["tenantId"]) === null ? (atStart ?? {}) : (span.requestContext ?? {});
+  };
+
   const enqueue = (span: AnyExportedSpan): void => {
-    const tenantId = stringOf(span.requestContext?.["tenantId"]);
+    const context = contextOf(span);
+    const tenantId = stringOf(context["tenantId"]);
     if (tenantId === null) {
       logger.warn("usage_span_without_tenant", { agentId: span.entityId ?? null });
       return;
     }
-    const { row, priced } = toRow(span, tenantId, newId());
+    const { row, priced } = toRow(span, context, tenantId, newId());
     if (row === null) {
       logger.warn("usage_span_invalid", { agentId: span.entityId ?? null });
       return;
@@ -146,7 +173,9 @@ export const createUsageLedgerExporter = (options: UsageLedgerExporterOptions): 
       if (options.logger === undefined) logger = mastraLogger;
     },
     exportTracingEvent: (event: TracingEvent) => {
-      if (event.type === TracingEventType.SPAN_ENDED && event.exportedSpan.type === SpanType.MODEL_GENERATION) enqueue(event.exportedSpan);
+      if (event.exportedSpan.type !== SpanType.MODEL_GENERATION) return Promise.resolve();
+      if (event.type === TracingEventType.SPAN_STARTED) remember(event.exportedSpan);
+      if (event.type === TracingEventType.SPAN_ENDED) enqueue(event.exportedSpan);
       return Promise.resolve();
     },
     flush,

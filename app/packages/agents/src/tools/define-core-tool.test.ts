@@ -124,6 +124,29 @@ describe("runCoreTool", () => {
     expect(error.code).toBe("FORBIDDEN");
   });
 
+  it("asks the run's ceiling resolver first, so an agent without a static ceiling is still capped", async () => {
+    const seen: unknown[] = [];
+    const runCeilingOf: CoreToolDeps["runCeilingOf"] = (info) => {
+      seen.push(info.agentId);
+      return Promise.resolve(new Set(["example.note.create"]));
+    };
+    const { deps } = setup({ runCeilingOf });
+    const error = await rejection(runCoreTool(listNotes, deps, { limit: 1 }, { ...call(), agentId: "custom-agent" }));
+    expect(error.code).toBe("FORBIDDEN");
+    expect(seen).toEqual(["custom-agent"]);
+  });
+
+  it("falls back to the static agent ceiling when the resolver has none for the run", async () => {
+    const { deps } = setup({ runCeilingOf: () => Promise.resolve(undefined), agentCeilings: { action: new Set(["example.note.read"]) } });
+    await expect(runCoreTool(listNotes, deps, { limit: 1 }, call())).resolves.toEqual({ count: 1 });
+  });
+
+  it("fails closed when the run's ceiling resolver fails", async () => {
+    const { deps } = setup({ runCeilingOf: () => Promise.reject(new Error("store down")) });
+    const error = await rejection(runCoreTool(listNotes, deps, { limit: 1 }, call()));
+    expect(error.code).toBe("AUTHORIZATION_UNAVAILABLE");
+  });
+
   it("fails closed when authorize itself fails", async () => {
     const base = setup();
     const { deps } = setup({ access: { ...base.access, authorize: () => Promise.reject(new Error("firestore down: secret-detail")) } });

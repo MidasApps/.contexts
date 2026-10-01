@@ -69,6 +69,12 @@ export type CoreToolDeps = {
   readonly commands?: CommandIdempotencyPort;
   /** Permission ceiling per agent key; intersected with the context permissions. */
   readonly agentCeilings?: Readonly<Record<string, ReadonlySet<string>>>;
+  /**
+   * Ceiling decided per run (decision 0046: one registered agent runs every custom agent, so its
+   * ceiling depends on the record of the run). Asked first; `undefined` means the static
+   * `agentCeilings` entry applies. A rejection fails the call closed.
+   */
+  readonly runCeilingOf?: (info: { readonly agentId: string; readonly requestContext: RequestContextReader | undefined }) => Promise<ReadonlySet<string> | undefined>;
   /** Timer seam for tests; defaults to `AbortSignal.timeout`. */
   readonly timeoutSignal?: (ms: number) => AbortSignal;
   /** Fallback tool call id outside agent runs; defaults to `crypto.randomUUID`. */

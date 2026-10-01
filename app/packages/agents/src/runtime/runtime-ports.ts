@@ -5,6 +5,8 @@ import type {
   Citation,
   EvalExperimentSummary,
   Connector,
+  CustomAgent,
+  CustomSkill,
   KnowledgeDocument,
   KnowledgeDocumentSource,
   LlmCall,
@@ -347,6 +349,18 @@ export type EvalExportPort = {
   readonly exportSummaries: (summaries: readonly EvalExperimentSummary[]) => Promise<number>;
 };
 
+/**
+ * Tenant-defined agents and skills (decision 0046), read server side: the tenant always comes
+ * from the verified context. A record of another tenant reads as missing. Reads reject on a store
+ * failure (the runtime then fails the run closed).
+ */
+export type CustomAgentsPort = {
+  /** The tenant's agent, enabled or not; `null` when it does not exist there. */
+  readonly getAgent: (input: { readonly tenantId: string; readonly agentId: string }) => Promise<CustomAgent | null>;
+  readonly listAgents: (input: { readonly tenantId: string }) => Promise<readonly CustomAgent[]>;
+  readonly listSkills: (input: { readonly tenantId: string }) => Promise<readonly CustomSkill[]>;
+};
+
 export type AgentRuntimePorts = {
   readonly access: AccessPort;
   readonly audit: AuditPort;
@@ -381,4 +395,6 @@ export type AgentRuntimePorts = {
   readonly flags: FlagsPort;
   /** SP5 prompt store (Task 9, decision 0038); read through `createInstructionsResolver` (60 s cache). */
   readonly prompts: PromptStorePort;
+  /** Tenant-defined agents and skills (decision 0046); read through `createCustomAgentLoader` (60 s cache). */
+  readonly customAgents: CustomAgentsPort;
 };

@@ -59,7 +59,9 @@ import { createListEntitiesTool } from "../tools/catalog/list-entities.tool.ts";
 import { createRenderFormTool } from "../tools/catalog/render-form.tool.ts";
 import { type AgentCommand, commandIdOf, formCommandsOf } from "../tools/commands/agent-command.ts";
 import { commandToolsOf } from "../tools/commands/command-tools.ts";
-import { CORE_SKILL_DIRS, createSkillsResolver, loadSkill } from "../skills/resolve-skills.ts";
+import { CORE_SKILL_DIRS, CORE_SKILLS, createSkillsResolver, loadSkill } from "../skills/resolve-skills.ts";
+import { composeCustomAgents, createCustomAgentAccess, CUSTOM_AGENT_RUN_IDS, type CustomAgentRuntime } from "../custom/compose-custom-agents.ts";
+import { CUSTOM_AGENT_ID } from "../custom/custom-agent-tools.ts";
 import { createMemory } from "../memory/create-memory.ts";
 import { type CoreScorer, createCoreScorers } from "../scorers/core-scorers.ts";
 import { createSearchKnowledgeTool } from "../tools/knowledge/search-knowledge.tool.ts";
@@ -265,7 +267,7 @@ const collectWorkflows = (
 const SUPERVISOR_CEILING = ["core.chat.use"];
 
 // Ceilings are data, known before any tool is bound: every call is capped by its agent's.
-const toolDepsOf = (args: ComposeAgentRuntimeArgs, agents: readonly AgentDefinition[]): CoreToolDeps => {
+const toolDepsOf = (args: ComposeAgentRuntimeArgs, agents: readonly AgentDefinition[], runCeilingOf: NonNullable<CoreToolDeps["runCeilingOf"]>): CoreToolDeps => {
   const ceilings = [
     ...agents.map((agent) => [agent.id, new Set(agent.ceiling)] as const), [SUPERVISOR_AGENT_ID, new Set(SUPERVISOR_CEILING)] as const,
     [MCP_CALLER_ID, new Set(MCP_CEILING)] as const,
@@ -276,6 +278,8 @@ const toolDepsOf = (args: ComposeAgentRuntimeArgs, agents: readonly AgentDefinit
     approvals: args.ports.approvals,
     commands: args.ports.commands,
     agentCeilings: Object.fromEntries(ceilings),
+    // Custom agents (decision 0046): the ceiling of the record the run names; empty without one.
+    runCeilingOf,
   };
 };
 
@@ -312,18 +316,26 @@ const buildMcpServers = (args: ComposeAgentRuntimeArgs, tools: ToolRegistry, too
 /** Chat entry agents (spec §4.2): the supervisor gets a durable wrapper served by `/chat/*`. */
 const CHAT_AGENT_IDS = [SUPERVISOR_AGENT_ID];
 
-const buildChat = (agents: Record<string, Agent>, deps: { tools: ToolRegistry; toolDeps: CoreToolDeps; summarizer: Agent }) => {
+const buildChat = (agents: Record<string, Agent>, deps: { tools: ToolRegistry; toolDeps: CoreToolDeps; summarizer: Agent; custom: CustomAgentRuntime }) => {
   const durable = CHAT_AGENT_IDS.flatMap((id) => (agents[id] === undefined ? [] : [[id, createDurableChatAgent(agents[id])] as const]));
   const runtime: ChatRuntime = {
     chatAgents: Object.fromEntries(durable.map(([id]) => [id, chatAgentIdOf(id)])),
     owners: createChatRunOwners(),
     previewer: createToolPreviewer({ tools: deps.tools, toolDeps: deps.toolDeps }),
     summarizer: deps.summarizer,
+    // Decision 0046: an enabled custom agent of the caller's tenant runs on the generic durable agent.
+    resolveCustomAgent: deps.custom.resolveChatAgent,
   };
   // DurableAgent extends Agent; Mastra registers it (workflow, cache, PubSub) like any agent. The
   // summarizer is registered too (spans, usage ledger) but, like the wrappers, only custom routes reach it.
-  const registered = { ...Object.fromEntries(durable.map(([id, agent]) => [chatAgentIdOf(id), agent as unknown as Agent])), [SUMMARIZER_AGENT_ID]: deps.summarizer };
-  return { runtime, agents: { ...agents, ...registered }, hiddenAgentIds: Object.keys(registered) };
+  // The custom agent and its wrapper are reachable through `/chat/:agentId` only, never `/api/agents/*`.
+  const registered = {
+    ...Object.fromEntries(durable.map(([id, agent]) => [chatAgentIdOf(id), agent as unknown as Agent])),
+    [SUMMARIZER_AGENT_ID]: deps.summarizer,
+    [CUSTOM_AGENT_ID]: deps.custom.agent,
+    [chatAgentIdOf(CUSTOM_AGENT_ID)]: createDurableChatAgent(deps.custom.agent) as unknown as Agent,
+  };
+  return { runtime, agents: { ...agents, ...registered }, hiddenAgentIds: [...new Set([...Object.keys(registered), ...CUSTOM_AGENT_RUN_IDS])] };
 };
 
 /**
@@ -337,7 +349,9 @@ export const composeAgentRuntime = (args: ComposeAgentRuntimeArgs): RuntimeParts
   const definitions = collectAgents(args, commands);
   const models = args.models ?? createModelProvider(args.env);
   registerFakeRules(models, commands);
-  const toolDeps = toolDepsOf(args, definitions);
+  // Decision 0046: the loader and per-run ceiling of custom agents; the registry is read lazily (it is bound to these deps).
+  const customAccess = createCustomAgentAccess({ customAgents: args.ports.customAgents, subagents: definitions.filter((definition) => !isEntry(definition)), registry: () => tools });
+  const toolDeps = toolDepsOf(args, definitions, customAccess.runCeilingOf);
   const webTools = args.webTools ?? createWebToolsRuntime({ env: args.env, secrets: args.ports.secrets });
   const tools = buildToolRegistry(args, toolDeps, models, commands, webTools);
   const connectorTools = createConnectorToolResolver({
@@ -363,7 +377,19 @@ export const composeAgentRuntime = (args: ComposeAgentRuntimeArgs): RuntimeParts
   const auth = new FirebaseMastraAuth({ access: args.ports.access, ...(apiPrefix === undefined ? {} : { apiPrefix }) });
   const prefix = apiPrefix === undefined ? {} : { apiPrefix };
   const { voice, routes: voiceRoutes } = composeVoice({ env: args.env, models, ports: args.ports, flags, supervisor: agents[SUPERVISOR_AGENT_ID], logger: processLogger });
-  const chat = buildChat(agents, { tools, toolDeps, summarizer: createConversationSummarizer({ models, guardrails: guardrails("delegated") }) });
+  const custom = composeCustomAgents({
+    deps,
+    loader: customAccess.loader,
+    registry: tools,
+    toolDeps,
+    customAgents: args.ports.customAgents,
+    access: args.ports.access,
+    moduleIds: args.modules.map((module) => module.id),
+    coreSkills: Object.fromEntries(Object.values(CORE_SKILLS).map((name) => [name, loadSkill(name, skillDirs)])),
+    ...dirsOption(args.instructionsDirs),
+    logger: processLogger,
+  });
+  const chat = buildChat(agents, { tools, toolDeps, summarizer: createConversationSummarizer({ models, guardrails: guardrails("delegated") }), custom });
   const { workflows, catalog: workflowCatalog, platformSchedules } = collectWorkflows(args, models, memory);
   // Decision 0039: `ai.kill-switch` stops agent, chat and voice runs (fails closed on a store failure).
   const killSwitch = {
@@ -435,8 +461,11 @@ export const composeAgentRuntime = (args: ComposeAgentRuntimeArgs): RuntimeParts
         isRegisteredTool: tools.has,
         settings: args.ports.settings,
         catalog: workflowCatalog,
+        customEntries: custom.catalogEntries,
         logger: processLogger,
       }),
+      // Decision 0046: what a custom agent may select here, and the cache invalidation `/v1` asks for after a write.
+      ...custom.routes,
     ],
     tools,
     voice,

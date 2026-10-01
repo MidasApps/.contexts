@@ -9,7 +9,7 @@ const supervisorOf = (harness: ReturnType<typeof buildSupervisorHarness>) => har
 describe("assistant supervisor (fake mode, in-process Mastra)", { timeout: 30_000 }, () => {
   it("is the entry agent over the knowledge, data, action and web subagents", async () => {
     const { runtime } = buildSupervisorHarness();
-    expect(Object.keys(runtime.agents).sort()).toEqual([SUPERVISOR_AGENT_ID, "assistant-chat", "conversation-summarizer", "ping"]);
+    expect(Object.keys(runtime.agents).sort()).toEqual([SUPERVISOR_AGENT_ID, "assistant-chat", "conversation-summarizer", "custom-agent", "custom-agent-chat", "ping"]);
     expect(Object.keys(runtime.subagents).sort()).toEqual(["action", "data", "knowledge", "web"]);
     const supervisor = runtime.agents[SUPERVISOR_AGENT_ID];
     const options = await supervisor?.getDefaultOptions({ requestContext: memberContext() });

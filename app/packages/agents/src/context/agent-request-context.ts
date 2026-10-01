@@ -14,6 +14,15 @@ export const AGENT_CONTEXT_KEYS = Object.keys(AgentRequestContextSchema.def.shap
 /** Key of the verified SP1 principal (passed back to `authorize()`); set only by the server. */
 export const AGENT_PRINCIPAL_KEY = "corePrincipal";
 
+/**
+ * Key naming the custom agent of a run (decision 0046). Only the chat route writes it, after
+ * loading the caller's tenant's enabled record.
+ */
+export const CUSTOM_AGENT_ID_KEY = "customAgentId";
+
+/** Keys only server routes may write; the context middleware clears them with its own keys. */
+export const SERVER_ONLY_CONTEXT_KEYS: readonly string[] = [CUSTOM_AGENT_ID_KEY];
+
 /** Minimal read surface of Mastra's `RequestContext` (also satisfied by a `Map`). */
 export type RequestContextReader = { readonly get: (key: string) => unknown };
 

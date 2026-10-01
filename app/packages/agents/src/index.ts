@@ -30,6 +30,7 @@ export type {
   FilesPort,
   FlagsPort,
   PromptBody,
+  CustomAgentsPort,
   PromptStorePort,
   PromptVersionRecord,
   KnowledgeChunkInput,
@@ -463,3 +464,8 @@ export { CONSOLE_ROUTES_PREFIX, createConsoleRoutes, type ConsoleRouteDeps } fro
 export { addFeedbackItem, FEEDBACK_DATASET_NAME, listDatasets } from "./console/dataset-console.ts";
 export { EvalRunRecordSchema, type EvalRunRecord, type ExperimentStore, listExperimentSummaries, listFinishedSince, recordEvalRun, summarizeExperiment } from "./console/eval-console.ts";
 export { createTraceReader, dropSensitive, summarizeTrace, type StoredSpan, type TraceReader, type TraceStore } from "./console/trace-reader.ts";
+// Tenant-defined agents and skills (decision 0046).
+export { createCustomAgentLoader, CUSTOM_AGENT_CACHE_TTL_MS, CUSTOM_AGENT_ID_KEY, type CustomAgentLoader, type LoadedCustomAgent } from "./custom/custom-agent-loader.ts";
+export { CUSTOM_AGENT_ID } from "./custom/custom-agent-tools.ts";
+export { CUSTOM_AGENT_INVALIDATE_PATH, CUSTOM_AGENT_OPTIONS_PATH, CUSTOM_AGENT_PERMISSIONS } from "./custom/custom-agent-routes.ts";
+export { CUSTOM_SKILL_PREFIX, CustomAgentUnavailableError } from "./custom/custom-agent.ts";

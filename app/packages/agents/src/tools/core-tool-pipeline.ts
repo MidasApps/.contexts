@@ -38,15 +38,19 @@ const buildContext = (definition: CoreToolDefinition, deps: CoreToolDeps, call: 
   return { agent: context, principal, node: nodeOfContext(context), agentId: call.agentId, toolCallId, runId, idempotencyKey: `${runId}:${toolCallId}` };
 };
 
-/** Effective ceiling: context permissions (principal ∩ supervisor ceiling) ∩ the calling agent's ceiling. */
-const ceilingOf = (deps: CoreToolDeps, ctx: Omit<CoreToolContext, "abortSignal">): ReadonlySet<string> => {
-  const agentCeiling = deps.agentCeilings?.[ctx.agentId];
+/**
+ * Effective ceiling: context permissions (principal ∩ supervisor ceiling) ∩ the calling agent's
+ * ceiling, which is the run's own one when the resolver has it (custom agents, decision 0046).
+ */
+const ceilingOf = async (deps: CoreToolDeps, ctx: Omit<CoreToolContext, "abortSignal">, requestContext: ToolCallInfo["requestContext"]): Promise<ReadonlySet<string>> => {
+  const agentCeiling = (await deps.runCeilingOf?.({ agentId: ctx.agentId, requestContext })) ?? deps.agentCeilings?.[ctx.agentId];
   return new Set(ctx.agent.permissions.filter((permission) => agentCeiling?.has(permission) ?? true));
 };
 
-const authorizeCall = async (definition: CoreToolDefinition, deps: CoreToolDeps, ctx: Omit<CoreToolContext, "abortSignal">) => {
+const authorizeCall = async (definition: CoreToolDefinition, deps: CoreToolDeps, ctx: Omit<CoreToolContext, "abortSignal">, requestContext: ToolCallInfo["requestContext"]) => {
   try {
-    return await deps.access.authorize({ principal: ctx.principal, permission: definition.permission, node: ctx.node, ceiling: ceilingOf(deps, ctx) });
+    const ceiling = await ceilingOf(deps, ctx, requestContext);
+    return await deps.access.authorize({ principal: ctx.principal, permission: definition.permission, node: ctx.node, ceiling });
   } catch (error: unknown) {
     throw fail(definition, "AUTHORIZATION_UNAVAILABLE", error);
   }
@@ -167,7 +171,7 @@ const executeAndAudit = async (definition: CoreToolDefinition, deps: CoreToolDep
 export const runCoreTool = async (definition: CoreToolDefinition, deps: CoreToolDeps, rawInput: unknown, call: ToolCallInfo): Promise<unknown> => {
   const input = parseInput(definition, rawInput);
   const base = buildContext(definition, deps, call);
-  const decision = await authorizeCall(definition, deps, base);
+  const decision = await authorizeCall(definition, deps, base, call.requestContext);
   if (!decision.allowed) {
     await recordAudit({ definition, deps, ctx: base, input, outcome: "denied", extras: { errorCode: "FORBIDDEN", reason: decision.reason } });
     throw fail(definition, "FORBIDDEN", undefined, { reason: decision.reason });
@@ -196,6 +200,6 @@ export const previewCoreToolCall = async (
   const input = parseInput(definition, rawInput);
   const base = buildContext(definition, deps, call);
   const summary = definition.summarize?.(input) ?? `Run ${definition.id}`;
-  if (definition.preview === undefined || !(await authorizeCall(definition, deps, base)).allowed) return { summary, preview: null };
+  if (definition.preview === undefined || !(await authorizeCall(definition, deps, base, call.requestContext)).allowed) return { summary, preview: null };
   return { summary, preview: await definition.preview(input, { ...base, abortSignal: call.abortSignal ?? new AbortController().signal }) };
 };

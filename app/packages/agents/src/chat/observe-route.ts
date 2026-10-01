@@ -3,7 +3,7 @@ import type { DurableAgent } from "@mastra/core/agent/durable";
 import type { Mastra } from "@mastra/core/mastra";
 import type { RequestContext } from "@mastra/core/request-context";
 import { createUIMessageStreamResponse, type UIMessageChunk } from "ai";
-import { callerOf, chatError, type ChatRouteDeps, noContent } from "./chat-http.ts";
+import { callerOf, chatError, type ChatRouteDeps, durableIdOf, noContent } from "./chat-http.ts";
 import { createChatStreamTap } from "./tool-preview.ts";
 
 /**
@@ -24,7 +24,7 @@ export type ObserveInput = { readonly agentId: string; readonly runId: string; r
  * even when the client that started it had disconnected before.
  */
 export const handleObserve = async (input: ObserveInput, deps: ChatRouteDeps): Promise<Response> => {
-  const durableId = deps.chatAgents[input.agentId];
+  const durableId = await durableIdOf(deps, input.agentId, input.requestContext);
   if (durableId === undefined) return chatError("NOT_FOUND", input.requestContext);
   const { resourceId, threadId } = callerOf(input.requestContext);
   if (resourceId === undefined || threadId === undefined || !deps.owners.isOwnedBy(input.runId, { resourceId, threadId })) return noContent();

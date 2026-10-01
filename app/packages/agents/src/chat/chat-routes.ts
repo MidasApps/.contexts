@@ -5,7 +5,7 @@ import type { RequestContext } from "@mastra/core/request-context";
 import { type ApiRoute, registerApiRoute } from "@mastra/core/server";
 import { createUIMessageStreamResponse, type UIMessage } from "ai";
 import { handleAbort } from "./abort-route.ts";
-import { callerOf, chatError, type ChatRouteDeps, readCappedJson } from "./chat-http.ts";
+import { callerOf, chatError, type ChatRouteDeps, durableIdOf, readCappedJson } from "./chat-http.ts";
 import { type ChatRouteBody, ChatRouteBodySchema } from "./chat-request.schema.ts";
 import { approvalRunIdsOf } from "./chat-run-owners.ts";
 import { handleMessages, handleSummary, MESSAGES_ROUTE_PATH, SUMMARY_ROUTE_PATH } from "./history-routes.ts";
@@ -85,7 +85,7 @@ const streamRun = async (input: ChatPostInput, deps: ChatRouteDeps, args: { dura
  */
 export const handleChatPost = async (input: ChatPostInput, deps: ChatRouteDeps): Promise<Response> => {
   const { requestContext } = input;
-  const durableId = deps.chatAgents[input.agentId];
+  const durableId = await durableIdOf(deps, input.agentId, requestContext);
   if (durableId === undefined) return chatError("NOT_FOUND", requestContext);
   const { resourceId, threadId } = callerOf(requestContext);
   if (resourceId === undefined) return chatError("FORBIDDEN", requestContext);

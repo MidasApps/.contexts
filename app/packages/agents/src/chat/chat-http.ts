@@ -1,5 +1,5 @@
 import { type Logger, resolveRequestId } from "@core/services";
-import { MASTRA_RESOURCE_ID_KEY, MASTRA_THREAD_ID_KEY } from "@mastra/core/request-context";
+import { MASTRA_RESOURCE_ID_KEY, MASTRA_THREAD_ID_KEY, type RequestContext } from "@mastra/core/request-context";
 import type { RequestContextReader } from "../context/agent-request-context.ts";
 import type { Agent } from "@mastra/core/agent";
 import type { ChatRunOwners } from "./chat-run-owners.ts";
@@ -13,7 +13,20 @@ export type ChatRuntime = {
   readonly previewer: ToolPreviewer;
   /** Hidden `fast` agent of the summary route (SP4 Task 6). */
   readonly summarizer: Agent;
+  /**
+   * Custom agents (decision 0046): resolves a chat agent id that is not in `chatAgents` to the
+   * durable id that runs it, after loading the caller's tenant's enabled record and naming it in
+   * the request context. `undefined` when there is no such agent for the caller.
+   */
+  readonly resolveCustomAgent?: (agentId: string, requestContext: RequestContext<unknown>) => Promise<string | undefined>;
 };
+
+/** Mastra id of the durable agent that serves a public chat agent id, for this caller. */
+export const durableIdOf = async (
+  deps: Pick<ChatRuntime, "chatAgents" | "resolveCustomAgent">,
+  agentId: string,
+  requestContext: RequestContext<unknown>,
+): Promise<string | undefined> => deps.chatAgents[agentId] ?? (await deps.resolveCustomAgent?.(agentId, requestContext));
 
 export type ChatRouteDeps = ChatRuntime & {
   readonly logger: Logger;

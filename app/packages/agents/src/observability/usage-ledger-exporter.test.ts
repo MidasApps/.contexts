@@ -31,6 +31,13 @@ const generationSpan = (overrides: Partial<AnyExportedSpan> = {}, attributes: Re
     ...overrides,
   }) as AnyExportedSpan;
 
+/** A span as a durable agent ends it: rebuilt, without the request-context snapshot. */
+const withoutContext = (span: AnyExportedSpan): AnyExportedSpan => {
+  const rebuilt = { ...span };
+  delete rebuilt.requestContext;
+  return rebuilt;
+};
+
 const ended = (span: AnyExportedSpan): TracingEvent => ({ type: TracingEventType.SPAN_ENDED, exportedSpan: span });
 
 const recordingLogger = () => {
@@ -120,6 +127,35 @@ describe("usage ledger exporter", () => {
     await exporter.flush();
     expect(batches).toEqual([]);
     expect(lines).toEqual([{ level: "warn", message: "usage_span_without_tenant", fields: { agentId: "knowledge" } }]);
+  });
+
+  it("uses the context of the span's own start when the end carries none (durable agents)", async () => {
+    const { exporter, batches, lines } = setup();
+    const start = generationSpan({ id: "span-durable" });
+    await exporter.exportTracingEvent({ type: TracingEventType.SPAN_STARTED, exportedSpan: start });
+    await exporter.exportTracingEvent(ended(withoutContext(generationSpan({ id: "span-durable", entityId: "assistant-chat" }))));
+    await exporter.flush();
+    expect(batches[0]?.map((row) => [row.tenantId, row.userId, row.requestId, row.agentId])).toEqual([["tenantA", "uid-1", REQUEST_ID, "assistant-chat"]]);
+    expect(lines).toEqual([]);
+  });
+
+  it("never borrows the context of another span, and forgets a start once its end arrived", async () => {
+    const { exporter, batches, lines } = setup();
+    await exporter.exportTracingEvent({ type: TracingEventType.SPAN_STARTED, exportedSpan: generationSpan({ id: "span-a" }) });
+    await exporter.exportTracingEvent(ended(withoutContext(generationSpan({ id: "span-b" }))));
+    await exporter.exportTracingEvent(ended(withoutContext(generationSpan({ id: "span-a" }))));
+    await exporter.exportTracingEvent(ended(withoutContext(generationSpan({ id: "span-a" }))));
+    await exporter.flush();
+    expect(batches.flat()).toHaveLength(1);
+    expect(lines.map((line) => line.message)).toEqual(["usage_span_without_tenant", "usage_span_without_tenant"]);
+  });
+
+  it("prefers the end event's own context over the one seen at start", async () => {
+    const { exporter, batches } = setup();
+    await exporter.exportTracingEvent({ type: TracingEventType.SPAN_STARTED, exportedSpan: generationSpan({ requestContext: { tenantId: "tenantStart" } }) });
+    await exporter.exportTracingEvent(ended(generationSpan()));
+    await exporter.flush();
+    expect(batches[0]?.[0]?.tenantId).toBe("tenantA");
   });
 
   it(`flushes as soon as ${LEDGER_FLUSH_ROWS} rows are buffered`, async () => {

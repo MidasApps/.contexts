@@ -1,7 +1,7 @@
 import { type DurableAgent, publishAbortRequest } from "@mastra/core/agent/durable";
 import type { Mastra } from "@mastra/core/mastra";
 import type { RequestContext } from "@mastra/core/request-context";
-import { callerOf, type ChatRouteDeps, noContent } from "./chat-http.ts";
+import { callerOf, type ChatRouteDeps, durableIdOf, noContent } from "./chat-http.ts";
 
 export type AbortInput = { readonly runId: string; readonly requestContext: RequestContext<unknown>; readonly mastra: Mastra };
 
@@ -14,7 +14,7 @@ export const handleAbort = async (input: AbortInput, deps: ChatRouteDeps): Promi
   const { resourceId, threadId } = callerOf(input.requestContext);
   if (resourceId === undefined || threadId === undefined || !deps.owners.isOwnedBy(input.runId, { resourceId, threadId })) return noContent();
   const owner = deps.owners.ownerOf(input.runId);
-  const durableId = owner === undefined ? undefined : deps.chatAgents[owner.agentId];
+  const durableId = owner === undefined ? undefined : await durableIdOf(deps, owner.agentId, input.requestContext);
   if (durableId === undefined) return noContent();
   const agent = input.mastra.getAgentById(durableId) as unknown as DurableAgent;
   await publishAbortRequest(agent.pubsub, input.runId);

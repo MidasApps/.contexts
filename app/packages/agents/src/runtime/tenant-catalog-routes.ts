@@ -32,6 +32,8 @@ export type TenantCatalogRouteDeps = {
   readonly isRegisteredTool: (toolId: string) => boolean;
   readonly settings: SettingsPort;
   readonly catalog: WorkflowCatalog;
+  /** The tenant's own agents (decision 0046) as catalog entries; listed after the code-defined ones. */
+  readonly customEntries?: (input: { readonly tenantId: string; readonly requestContext: RequestContext<unknown> }) => Promise<AgentCatalogEntry[]>;
   readonly logger: Pick<Logger, "info" | "error">;
 };
 
@@ -84,7 +86,7 @@ const guarded = (deps: TenantCatalogRouteDeps, event: string, handle: (inputs: R
   }
 };
 
-/** `GET /tenant-catalog/agents` (`core.agent-settings.read`): the subagents as the caller's organization has them. */
+/** `GET /tenant-catalog/agents` (`core.agent-settings.read`): the subagents as the caller's organization has them, then its own agents. */
 export const handleListAgentCatalog = (deps: TenantCatalogRouteDeps) =>
   guarded(deps, "tenant_catalog_agents_failed", async (inputs) => {
     const caller = await authorizeCaller({ access: deps.access, requestContext: inputs.requestContext, permission: TENANT_CATALOG_PERMISSIONS.agents });
@@ -92,7 +94,12 @@ export const handleListAgentCatalog = (deps: TenantCatalogRouteDeps) =>
     const settings = await deps.settings.getAgentSettings({ tenantId: caller.data.context.tenantId });
     const enabled = new Set<string>(settings.enabledAgents);
     const entries = await Promise.all(Object.entries(deps.subagents).map(([key, agent]) => entryOf(key, agent, enabled.has(key), inputs, deps)));
-    return dataJson(entries);
+    // A failing custom agent store must not hide the code-defined agents.
+    const custom = await (deps.customEntries?.({ tenantId: caller.data.context.tenantId, requestContext: inputs.requestContext }) ?? Promise.resolve([])).catch((error: unknown) => {
+      deps.logger.error("tenant_catalog_custom_agents_failed", { requestId: inputs.requestContext.get("requestId"), err: error });
+      return [];
+    });
+    return dataJson([...entries, ...custom]);
   });
 
 const isZodType = (schema: unknown): schema is z.ZodType => schema instanceof z.ZodType;

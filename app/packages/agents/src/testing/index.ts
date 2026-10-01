@@ -4,6 +4,8 @@ export {
   createFakeApprovalPort,
   createFakeAuditPort,
   createFakeCommandIdempotency,
+  createFakeCustomAgentsPort,
+  type FakeCustomAgentsPort,
   createFakeFilesPort,
   createFakeFlagsPort,
   createFakePromptStorePort,

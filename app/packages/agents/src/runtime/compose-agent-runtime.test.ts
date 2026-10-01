@@ -57,7 +57,7 @@ const echoTool = (id: string) =>
 describe("composeAgentRuntime", () => {
   it("returns the entry agents, the subagents, the auth provider, both middlewares and the core tools", () => {
     const runtime = compose();
-    expect(Object.keys(runtime.agents)).toEqual([PING_AGENT_ID, "assistant", "assistant-chat", "conversation-summarizer"]);
+    expect(Object.keys(runtime.agents)).toEqual([PING_AGENT_ID, "assistant", "assistant-chat", "conversation-summarizer", "custom-agent", "custom-agent-chat"]);
     expect(runtime.chat.chatAgents).toEqual({ assistant: "assistant-chat" });
     expect(Object.keys(runtime.subagents)).toEqual(["knowledge", "data", "action", "web"]);
     expect(runtime.auth).toBeInstanceOf(FirebaseMastraAuth);
@@ -125,6 +125,8 @@ describe("composeAgentRuntime", () => {
       "POST /tenant-schedules/:scheduleId/run",
       "GET /tenant-catalog/agents",
       "GET /tenant-catalog/workflows",
+      "GET /tenant-catalog/agent-options",
+      "POST /tenant-catalog/custom-agents/invalidate",
     ]);
     expect(runtime.voice?.capabilities).toEqual({ transcription: true, speech: true, realtime: false });
     expect(Object.keys(runtime.workflows).sort()).toEqual(["approval-demo", "approval-expiry-sweep", "catalog-reindex", "conversation-purge", "eval-export", "knowledge-ingest", "usage-report"]);
@@ -169,7 +171,7 @@ describe("composeAgentRuntime", () => {
     }
   });
 
-  it("attaches the tenant-scoped memory to the supervisor only", () => {
+  it("attaches the tenant-scoped memory to the supervisor and the custom agent, never to a subagent", () => {
     const runtime = composeAgentRuntime({
       env: ENV,
       ports: createFakeRuntimePorts(),
@@ -180,6 +182,7 @@ describe("composeAgentRuntime", () => {
       aiCatalog: FIXTURE_AI_CATALOG,
     });
     expect(runtime.agents.assistant?.hasOwnMemory()).toBe(true);
+    expect(runtime.agents["custom-agent"]?.hasOwnMemory()).toBe(true);
     expect(Object.values(runtime.subagents).some((agent) => agent.hasOwnMemory())).toBe(false);
   });
 

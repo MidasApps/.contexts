@@ -9,6 +9,7 @@ import type {
   ApprovalPort,
   AuditEntry,
   CommandIdempotencyPort,
+  CustomAgentsPort,
   AuditPort,
   BudgetCheck,
   FilesPort,
@@ -31,7 +32,7 @@ import type {
   UsageReportPort,
   WorkflowNotification,
 } from "../runtime/runtime-ports.ts";
-import type { StoredFile } from "@core/contracts";
+import type { CustomAgent, CustomSkill, StoredFile } from "@core/contracts";
 
 /**
  * In-memory fakes for every runtime port (exported as `@core/agents/testing`).
@@ -315,6 +316,26 @@ export const createFakeProjectCommands = (): FakeProjectCommands => {
 const notWired = (name: string) => () => Promise.reject(new Error(`${name} is not faked in this test`));
 
 /** Every port faked; override any of them per test. */
+export type FakeCustomAgentsPort = CustomAgentsPort & { readonly agents: CustomAgent[]; readonly skills: CustomSkill[]; readonly reads: string[] };
+
+/** In-memory custom agents and skills; `reads` records every `getAgent` (cache tests). */
+export const createFakeCustomAgentsPort = (seed: { agents?: readonly CustomAgent[]; skills?: readonly CustomSkill[] } = {}): FakeCustomAgentsPort => {
+  const agents = [...(seed.agents ?? [])];
+  const skills = [...(seed.skills ?? [])];
+  const reads: string[] = [];
+  return {
+    agents,
+    skills,
+    reads,
+    getAgent: ({ tenantId, agentId }) => {
+      reads.push(`${tenantId}:${agentId}`);
+      return Promise.resolve(agents.find((agent) => agent.tenantId === tenantId && agent.id === agentId) ?? null);
+    },
+    listAgents: ({ tenantId }) => Promise.resolve(agents.filter((agent) => agent.tenantId === tenantId)),
+    listSkills: ({ tenantId }) => Promise.resolve(skills.filter((skill) => skill.tenantId === tenantId)),
+  };
+};
+
 export const createFakeRuntimePorts = (overrides: Partial<AgentRuntimePorts> = {}): AgentRuntimePorts => ({
   access: createFakeAccessPort({}),
   audit: createFakeAuditPort(),
@@ -328,6 +349,7 @@ export const createFakeRuntimePorts = (overrides: Partial<AgentRuntimePorts> = {
   connectors: { listActive: () => Promise.resolve([]) },
   secrets: { get: () => Promise.resolve(null) },
   settings: createFakeSettingsPort(),
+  customAgents: createFakeCustomAgentsPort(),
   catalog: { runSemanticQuery: () => Promise.resolve({ ok: false, error: { code: "CONNECTOR_DISABLED" } }) },
   commandRegistry: createFakeProjectCommands().commands,
   workflowApprovals: createFakeWorkflowApprovalPort(),

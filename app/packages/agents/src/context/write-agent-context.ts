@@ -4,7 +4,7 @@ import { z } from "zod";
 import { type AgentPrincipal, resourceIdOf } from "../auth/agent-principal.ts";
 import { CONVERSATION_ID_PATTERN } from "../auth/conversation-id.ts";
 import type { AccessPrincipal } from "../runtime/runtime-ports.ts";
-import { AGENT_CONTEXT_KEYS, AGENT_PRINCIPAL_KEY } from "./agent-request-context.ts";
+import { AGENT_CONTEXT_KEYS, AGENT_PRINCIPAL_KEY, SERVER_ONLY_CONTEXT_KEYS } from "./agent-request-context.ts";
 
 /**
  * Write side of the typed agent context (spec §4.3, decision 0019): only the
@@ -65,7 +65,7 @@ export const buildAgentRequestContext = (args: {
 
 /** Removes every key the middleware owns, so a client-sent value never survives. */
 export const clearAgentContext = (store: RequestContextStore): void => {
-  for (const key of [...AGENT_CONTEXT_KEYS, AGENT_PRINCIPAL_KEY, MASTRA_RESOURCE_ID_KEY, MASTRA_THREAD_ID_KEY]) store.delete(key);
+  for (const key of [...AGENT_CONTEXT_KEYS, AGENT_PRINCIPAL_KEY, MASTRA_RESOURCE_ID_KEY, MASTRA_THREAD_ID_KEY, ...SERVER_ONLY_CONTEXT_KEYS]) store.delete(key);
 };
 
 /**

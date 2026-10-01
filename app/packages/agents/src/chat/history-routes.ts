@@ -4,7 +4,7 @@ import type { Mastra } from "@mastra/core/mastra";
 import type { RequestContext } from "@mastra/core/request-context";
 import { safeValidateUIMessages, type UIMessage } from "ai";
 import { withAnswerConfidence } from "./answer-confidence.ts";
-import { callerOf, chatError, type ChatRouteDeps } from "./chat-http.ts";
+import { callerOf, chatError, type ChatRouteDeps, durableIdOf } from "./chat-http.ts";
 
 /** `GET /chat/:agentId/messages?page&perPage` and `POST /chat/:agentId/summary` (SP4 Task 6). */
 export const MESSAGES_ROUTE_PATH = "/chat/:agentId/messages";
@@ -48,8 +48,8 @@ const toUiMessages = async (stored: Parameters<typeof toAISdkMessages>[0]): Prom
  * the newest page. Messages that fail `validateUIMessages` make the page empty rather than reach
  * the client malformed.
  */
-export const handleMessages = async (input: HistoryInput, deps: Pick<ChatRouteDeps, "chatAgents" | "logger">): Promise<Response> => {
-  if (deps.chatAgents[input.agentId] === undefined) return chatError("NOT_FOUND", input.requestContext);
+export const handleMessages = async (input: HistoryInput, deps: Pick<ChatRouteDeps, "chatAgents" | "resolveCustomAgent" | "logger">): Promise<Response> => {
+  if ((await durableIdOf(deps, input.agentId, input.requestContext)) === undefined) return chatError("NOT_FOUND", input.requestContext);
   const page = pageParam(input.url, "page", 0, 100_000);
   const perPage = pageParam(input.url, "perPage", 50, MAX_MESSAGES_PER_PAGE);
   if (page === null || perPage === null || perPage === 0) return chatError("VALIDATION_FAILED", input.requestContext, [{ field: "page", issue: "INVALID" }]);
@@ -73,8 +73,8 @@ const transcriptOf = (messages: readonly UIMessage[]): string =>
  * agent without tools or memory, guarded by the tenant budget, so the call is traced, billed in
  * the usage ledger and capped like any other model call. 409 when there is nothing to summarize.
  */
-export const handleSummary = async (input: HistoryInput, deps: Pick<ChatRouteDeps, "chatAgents" | "logger"> & { readonly summarizer: Agent }): Promise<Response> => {
-  if (deps.chatAgents[input.agentId] === undefined) return chatError("NOT_FOUND", input.requestContext);
+export const handleSummary = async (input: HistoryInput, deps: Pick<ChatRouteDeps, "chatAgents" | "resolveCustomAgent" | "logger"> & { readonly summarizer: Agent }): Promise<Response> => {
+  if ((await durableIdOf(deps, input.agentId, input.requestContext)) === undefined) return chatError("NOT_FOUND", input.requestContext);
   const window = await readWindow(input, 0, SUMMARY_MESSAGE_WINDOW);
   if (window === null) return chatError("FORBIDDEN", input.requestContext);
   const transcript = transcriptOf(await toUiMessages(window.messages));

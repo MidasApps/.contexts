@@ -125,6 +125,32 @@ describe("tenant catalog routes", () => {
     expect(seen.every((asked) => asked === requestContext)).toBe(true);
   });
 
+  it("lists the organization's own agents after the code-defined ones, for the caller's tenant", async () => {
+    const { deps } = setup(["core.agent-settings.read"]);
+    const asked: string[] = [];
+    const custom = { key: "Ag4sK2lPq0WnR5tYu3bV", name: "Guide", description: "Helps.", source: "custom" as const, moduleId: null, enabled: true, tools: [], skills: [] };
+    const customEntries: TenantCatalogRouteDeps["customEntries"] = ({ tenantId }) => {
+      asked.push(tenantId);
+      return Promise.resolve([custom]);
+    };
+    const response = await handleListAgentCatalog({ ...deps, customEntries })({ mastra: NO_MASTRA, requestContext: context() });
+    const body = (await response.json()) as { data: { key: string; source: string }[] };
+    expect(body.data.map((entry) => [entry.key, entry.source])).toEqual([
+      ["knowledge", "core"],
+      ["action", "core"],
+      ["example-helper", "module"],
+      ["Ag4sK2lPq0WnR5tYu3bV", "custom"],
+    ]);
+    expect(asked).toEqual([TEST_TENANT]);
+  });
+
+  it("still lists the code-defined agents when the custom agent store fails", async () => {
+    const { deps } = setup(["core.agent-settings.read"]);
+    const response = await handleListAgentCatalog({ ...deps, customEntries: () => Promise.reject(new Error("store down")) })({ mastra: NO_MASTRA, requestContext: context() });
+    expect(response.status).toBe(200);
+    expect(((await response.json()) as { data: unknown[] }).data).toHaveLength(3);
+  });
+
   it("refuses the agent catalog without core.agent-settings.read and reads nothing", async () => {
     const { deps, seen, settingsReads } = setup(["core.workflow-run.read"]);
     expect((await handleListAgentCatalog(deps)({ mastra: NO_MASTRA, requestContext: context() })).status).toBe(403);
