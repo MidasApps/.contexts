@@ -10,7 +10,10 @@ afterEach(() => {
 const noop = (): void => undefined;
 
 const defineIfMissing = (target: object, name: string, value: unknown): void => {
-  if (!(name in target)) Object.defineProperty(target, name, { value, configurable: true, writable: true });
+  // jsdom declares some of these (matchMedia) without implementing them, so check the value, not the key.
+  if (typeof (target as Record<string, unknown>)[name] !== "function") {
+    Object.defineProperty(target, name, { value, configurable: true, writable: true });
+  }
 };
 
 if (typeof window !== "undefined") {
@@ -36,4 +39,5 @@ if (typeof window !== "undefined") {
   defineIfMissing(Element.prototype, "scrollIntoView", noop);
   defineIfMissing(Element.prototype, "hasPointerCapture", () => false);
   defineIfMissing(Element.prototype, "releasePointerCapture", noop);
+  defineIfMissing(Element.prototype, "setPointerCapture", noop);
 }

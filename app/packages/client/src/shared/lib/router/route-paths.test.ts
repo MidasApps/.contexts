@@ -1,0 +1,50 @@
+import { describe, expect, it } from "vitest";
+import { parseRoute } from "./parse-route.ts";
+import { ROUTE_IDS, routeHref, type Route, type RouteId } from "./route-paths.ts";
+
+/** One or more sample routes per id, including awkward characters. */
+const SAMPLES: Record<RouteId, Route[]> = {
+  "sign-in": [{ id: "sign-in", next: undefined }, { id: "sign-in", next: "/o/a b/p/c?unit=d" }],
+  invite: [{ id: "invite", token: undefined }, { id: "invite", token: "tok+/=en" }],
+  home: [{ id: "home" }],
+  organizations: [{ id: "organizations" }],
+  organization: [{ id: "organization", organizationId: "Xk2mQ9vLr3TnB7pWc1aZ" }],
+  project: [
+    { id: "project", organizationId: "org", projectId: "p 1", unit: undefined },
+    { id: "project", organizationId: "org", projectId: "p1", unit: "unit/7" },
+  ],
+  module: [
+    { id: "module", organizationId: "org", projectId: "p1", moduleId: "example", rest: "", unit: undefined },
+    { id: "module", organizationId: "org", projectId: "p1", moduleId: "example", rest: "items/a%b", unit: "u1" },
+  ],
+  settings: [
+    { id: "settings", organizationId: "org", section: "members" },
+    { id: "settings", organizationId: "org", section: "api-keys" },
+  ],
+  "settings-module": [{ id: "settings-module", organizationId: "org", moduleId: "example" }],
+  profile: [{ id: "profile", section: "preferences" }],
+  admin: [{ id: "admin", rest: "" }, { id: "admin", rest: "organizations/org-1" }],
+};
+
+describe("route paths", () => {
+  it.each(ROUTE_IDS)("round-trips %s through routeHref and parseRoute", (id) => {
+    for (const route of SAMPLES[id]) expect(parseRoute(routeHref(route))).toEqual(route);
+  });
+
+  it("builds the SP2 spec §4 paths", () => {
+    expect(routeHref({ id: "project", organizationId: "a", projectId: "b", unit: "c" })).toBe("/o/a/p/b?unit=c");
+    expect(routeHref({ id: "module", organizationId: "a", projectId: "b", moduleId: "example", rest: "items/1" })).toBe("/o/a/p/b/m/example/items/1");
+    expect(routeHref({ id: "settings-module", organizationId: "a", moduleId: "example" })).toBe("/o/a/settings/m/example");
+    expect(routeHref({ id: "sign-in", next: "/organizations" })).toBe("/sign-in?next=%2Forganizations");
+    expect(routeHref({ id: "invite", token: "t1" })).toBe("/invite#token=t1");
+    expect(routeHref({ id: "admin", rest: "" })).toBe("/admin");
+  });
+
+  it("returns null for paths outside the map and unknown sections", () => {
+    expect(parseRoute("/nope")).toBeNull();
+    expect(parseRoute("/o")).toBeNull();
+    expect(parseRoute("/o/a/settings/billing")).toBeNull();
+    expect(parseRoute("/profile/unknown")).toBeNull();
+    expect(parseRoute("/o/a/p/b/x")).toBeNull();
+  });
+});

@@ -15,4 +15,9 @@ describe("cn", () => {
   it("keeps token colors and font sizes apart", () => {
     expect(cn("text-sm text-muted-foreground", "text-blue")).toBe("text-sm text-blue");
   });
+
+  it("knows the design-system shadow and radius values", () => {
+    expect(cn("shadow-popover rounded-2xs", "shadow-modal rounded-sm")).toBe("shadow-modal rounded-sm");
+    expect(cn("text-xs text-muted-foreground", "text-muted-foreground-strong")).toBe("text-xs text-muted-foreground-strong");
+  });
 });

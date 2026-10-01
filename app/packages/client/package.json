@@ -12,10 +12,17 @@
   "exports": {
     "./app-shell": "./src/app-shell/index.ts",
     "./views/*": "./src/views/*/index.ts",
+    "./widgets/*": "./src/widgets/*/index.ts",
+    "./entities/*": "./src/entities/*/index.ts",
     "./shared/ui/*": "./src/shared/ui/*.tsx",
+    "./shared/ui/notify": "./src/shared/ui/molecules/Toaster/notify.ts",
+    "./shared/api": "./src/shared/api/index.ts",
+    "./shared/config": "./src/shared/config/index.ts",
     "./shared/lib/*": "./src/shared/lib/*/index.ts",
     "./shared/lib/cn": "./src/shared/lib/cn.ts",
-    "./styles.css": "./src/shared/ui/styles/globals.css"
+    "./styles.css": "./src/shared/ui/styles/globals.css",
+    "./testing": "./src/app-shell/testing/index.ts",
+    "./testing/setup": "./src/shared/testing/setup.ts"
   },
   "imports": {
     "#/*": "./src/*"
@@ -28,20 +35,32 @@
   "dependencies": {
     "@core/contracts": "workspace:*",
     "@core/i18n": "workspace:*",
-    "@tanstack/react-query": "catalog:",
+    "@tanstack/react-table": "catalog:",
     "class-variance-authority": "catalog:",
     "clsx": "catalog:",
+    "cmdk": "catalog:",
+    "firebase": "catalog:",
     "lucide-react": "catalog:",
+    "next-themes": "catalog:",
     "radix-ui": "catalog:",
+    "react-hook-form": "catalog:",
+    "sonner": "catalog:",
+    "tailwind-merge": "catalog:",
+    "tw-animate-css": "catalog:",
+    "ulid": "catalog:",
+    "zod": "catalog:",
+    "zustand": "catalog:"
+  },
+  "peerDependencies": {
+    "@tanstack/react-query": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
-    "tailwind-merge": "catalog:",
-    "use-intl": "catalog:",
-    "zod": "catalog:"
+    "use-intl": "catalog:"
   },
   "devDependencies": {
     "@core/config": "workspace:*",
     "@tailwindcss/node": "catalog:",
+    "@tanstack/react-query": "catalog:",
     "@testing-library/dom": "catalog:",
     "@testing-library/react": "catalog:",
     "@testing-library/user-event": "catalog:",
@@ -51,8 +70,11 @@
     "axe-core": "catalog:",
     "eslint": "catalog:",
     "jsdom": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
     "tailwindcss": "catalog:",
     "typescript": "catalog:",
+    "use-intl": "catalog:",
     "vitest": "catalog:"
   }
 }

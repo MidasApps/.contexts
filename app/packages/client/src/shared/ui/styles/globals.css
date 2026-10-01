@@ -5,6 +5,8 @@
  * Apps import this file (`@core/client/styles.css`).
  */
 @import "tailwindcss";
+/* Enter/exit utilities (animate-in, fade-in-0, zoom-in-95, slide-in-from-*) used by the overlays; CSS only. */
+@import "tw-animate-css";
 
 /* Scan the client sources wherever this stylesheet is imported from (path relative to this file). */
 @source "../../..";
@@ -40,6 +42,17 @@
   --status-amber: #f2823b;
   --status-cyan: #00b2d1;
   --status-violet: #a37aff;
+  /* Text-safe variants (AA 4.5 on background, card, muted and the 14% tint over the page, cards
+     and the idle or highlighted sidebar; decision 0014). Raw accents above are for icons, dots,
+     borders and tints only; blue, violet, amber and destructive are lighter here because their
+     raw value misses AA on a tint over the accent surface (#262626). */
+  --status-blue-foreground: #5ba3ff;
+  --status-emerald-foreground: var(--status-emerald);
+  --status-amber-foreground: #f6853f;
+  --status-cyan-foreground: var(--status-cyan);
+  --status-violet-foreground: #b48cff;
+  --destructive-text: #ff7778;
+  --muted-foreground-strong: var(--muted-foreground);
   --chart-1: var(--status-blue);
   --chart-2: var(--status-emerald);
   --chart-3: var(--status-amber);
@@ -81,6 +94,15 @@
   --status-amber: #dc6400;
   --status-cyan: #008ba6;
   --status-violet: #824ae4;
+  /* DESIGN.md light accents and muted-foreground miss AA as text on tints/muted surfaces:
+     darker derivations of the same hue (decision 0014). */
+  --status-blue-foreground: #0057d4;
+  --status-emerald-foreground: #00703c;
+  --status-amber-foreground: #9c4700;
+  --status-cyan-foreground: #006a81;
+  --status-violet-foreground: #753dd0;
+  --destructive-text: #c90012;
+  --muted-foreground-strong: #6b6b6b;
   --chart-1: var(--status-blue);
   --chart-2: var(--status-emerald);
   --chart-3: var(--status-amber);
@@ -137,6 +159,13 @@
   --color-amber: var(--status-amber);
   --color-cyan: var(--status-cyan);
   --color-violet: var(--status-violet);
+  --color-blue-foreground: var(--status-blue-foreground);
+  --color-emerald-foreground: var(--status-emerald-foreground);
+  --color-amber-foreground: var(--status-amber-foreground);
+  --color-cyan-foreground: var(--status-cyan-foreground);
+  --color-violet-foreground: var(--status-violet-foreground);
+  --color-destructive-text: var(--destructive-text);
+  --color-muted-foreground-strong: var(--muted-foreground-strong);
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
   --color-chart-3: var(--chart-3);
@@ -151,6 +180,8 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
 
+  --radius-2xs: calc(var(--radius) - 8px);
+  --radius-xs: calc(var(--radius) - 6px);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -162,7 +193,14 @@
   --spacing: 0.25rem;
   --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
   --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  /* motion.html: surfaces (sheet, dropdown, popover) enter in 240ms with this curve. */
+  --ease-surface: cubic-bezier(0.22, 1, 0.36, 1);
   --default-transition-duration: var(--duration-fast);
+
+  /* elevacao.html: flat by default; shadows only on hover, popovers and modals. */
+  --shadow-hover: 0 1px 2px #0000000d;
+  --shadow-popover: 0 4px 12px #00000026;
+  --shadow-modal: 0 20px 40px #00000040;
 
   --breakpoint-sm: 40rem;
   --breakpoint-md: 48rem;
