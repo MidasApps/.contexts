@@ -1,4 +1,4 @@
-import { coreVitestConfig } from "@core/config/vitest";
+import { coreVitestConfig, EMULATOR_PROJECT_DEFAULTS } from "@core/config/vitest";
 import { defineConfig } from "vitest/config";
 
 /**
@@ -22,9 +22,11 @@ const defineProject = (args: {
   include: string[];
   exclude?: string[];
   env?: Record<string, string>;
+  overrides?: typeof EMULATOR_PROJECT_DEFAULTS;
 }) => ({
   test: {
     ...presetDefaults,
+    ...args.overrides,
     name: args.name,
     include: args.include,
     exclude: [...exclude, ...(args.exclude ?? [])],
@@ -39,7 +41,7 @@ export default defineConfig({
     projects: [
       defineProject({ name: "unit", include, exclude: [EMULATOR_TESTS, POSTGRES_TESTS, EVAL_TESTS] }),
       defineProject({ name: "postgres", include: [POSTGRES_TESTS] }),
-      defineProject({ name: "emulators", include: [EMULATOR_TESTS] }),
+      defineProject({ name: "emulators", include: [EMULATOR_TESTS], overrides: EMULATOR_PROJECT_DEFAULTS }),
       defineProject({ name: "evals", include: [EVAL_TESTS] }),
       defineProject({ name: "evals-real", include: [EVAL_TESTS], env: { AI_MODE: "real" } }),
     ],

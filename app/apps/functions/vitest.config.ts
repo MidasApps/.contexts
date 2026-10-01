@@ -1,4 +1,4 @@
-import { coreVitestConfig } from "@core/config/vitest";
+import { coreVitestConfig, EMULATOR_PROJECT_DEFAULTS } from "@core/config/vitest";
 
 /**
  * Same split as `@core/services` (file suffix = what the test needs):
@@ -12,10 +12,10 @@ const EMULATOR_TESTS = "src/**/*.emulator.test.ts";
 // arrays, so the preset's `include` would leak unit tests into every project.
 const { coverage, include = [], exclude = [], ...presetDefaults } = coreVitestConfig.test ?? {};
 
-const defineProject = (args: { name: string; include: string[]; exclude?: string[]; testTimeout?: number }) => ({
+const defineProject = (args: { name: string; include: string[]; exclude?: string[]; overrides?: typeof EMULATOR_PROJECT_DEFAULTS }) => ({
   test: {
     ...presetDefaults,
-    ...(args.testTimeout === undefined ? {} : { testTimeout: args.testTimeout }),
+    ...args.overrides,
     name: args.name,
     include: args.include,
     exclude: [...exclude, "**/lib/**", ...(args.exclude ?? [])],
@@ -32,7 +32,7 @@ export default {
     projects: [
       defineProject({ name: "unit", include, exclude: [EMULATOR_TESTS] }),
       // The first request boots the emulator worker, which can take seconds on a cold machine.
-      defineProject({ name: "emulators", include: [EMULATOR_TESTS], testTimeout: 30_000 }),
+      defineProject({ name: "emulators", include: [EMULATOR_TESTS], overrides: EMULATOR_PROJECT_DEFAULTS }),
     ],
   },
 };

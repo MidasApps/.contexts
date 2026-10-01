@@ -1,4 +1,4 @@
-import { coreVitestConfig } from "@core/config/vitest";
+import { coreVitestConfig, EMULATOR_PROJECT_DEFAULTS } from "@core/config/vitest";
 import { defineConfig } from "vitest/config";
 
 /**
@@ -17,13 +17,13 @@ const POSTGRES_TESTS = "src/**/*.postgres.test.ts";
 // arrays, so the preset's `include` would leak unit tests into every project.
 const { coverage, include = [], exclude = [], ...presetDefaults } = coreVitestConfig.test ?? {};
 
-const defineProject = (args: { name: string; include: string[]; exclude?: string[]; fileParallelism?: boolean }) => ({
+const defineProject = (args: { name: string; include: string[]; exclude?: string[]; overrides?: typeof EMULATOR_PROJECT_DEFAULTS }) => ({
   test: {
     ...presetDefaults,
     name: args.name,
     include: args.include,
     exclude: [...exclude, ...(args.exclude ?? [])],
-    ...(args.fileParallelism === undefined ? {} : { fileParallelism: args.fileParallelism }),
+    ...args.overrides,
   },
 });
 
@@ -34,7 +34,7 @@ export default defineConfig({
     projects: [
       defineProject({ name: "unit", include, exclude: [EMULATOR_TESTS, POSTGRES_TESTS] }),
       // One emulator per run: files that clear or reuse its data must not interleave.
-      defineProject({ name: "emulators", include: [EMULATOR_TESTS], fileParallelism: false }),
+      defineProject({ name: "emulators", include: [EMULATOR_TESTS], overrides: EMULATOR_PROJECT_DEFAULTS }),
       defineProject({ name: "postgres", include: [POSTGRES_TESTS] }),
     ],
   },

@@ -1,4 +1,4 @@
-import { coreVitestConfig } from "@core/config/vitest";
+import { coreVitestConfig, EMULATOR_PROJECT_DEFAULTS } from "@core/config/vitest";
 import { defineConfig } from "vitest/config";
 
 const EMULATOR_TESTS = "src/**/*.emulator.test.ts";
@@ -16,7 +16,7 @@ export default defineConfig({
       // axe-core); server and agent tests opt into node with `// @vitest-environment node`.
       { test: { ...presetDefaults, name: "unit", include, exclude: [...exclude, EMULATOR_TESTS], environment: "jsdom", setupFiles: ["./src/testing/setup.ts"] } },
       // `*.emulator.test.ts` needs the Firebase Emulator Suite (root `pnpm test:emulators`).
-      { test: { ...presetDefaults, name: "emulators", include: [EMULATOR_TESTS], exclude, fileParallelism: false } },
+      { test: { ...presetDefaults, ...EMULATOR_PROJECT_DEFAULTS, name: "emulators", include: [EMULATOR_TESTS], exclude } },
     ],
   },
 });

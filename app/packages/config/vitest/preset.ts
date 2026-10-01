@@ -21,5 +21,17 @@ export const coreVitestConfig: ViteUserConfig = defineConfig({
   },
 });
 
-export const defineCoreVitestConfig = (overrides: ViteUserConfig = {}): ViteUserConfig =>
+/**
+ * Defaults of every `emulators` project (root `pnpm test:emulators`). One Emulator Suite serves
+ * every package, which turbo runs one at a time, and files that seed, clear or reuse its data
+ * must not interleave either, so files run serially. The first rules load or Admin SDK call on
+ * a cold emulator takes seconds on a busy machine, past Vitest's 5 s / 10 s defaults.
+ */
+export const EMULATOR_PROJECT_DEFAULTS = {
+  fileParallelism: false,
+  testTimeout: 30_000,
+  hookTimeout: 60_000,
+} as const;
+
+export const defineCoreVitestConfig =(overrides: ViteUserConfig = {}): ViteUserConfig =>
   mergeConfig(coreVitestConfig, overrides);

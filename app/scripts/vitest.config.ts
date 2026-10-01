@@ -1,4 +1,4 @@
-import { coreVitestConfig } from "@core/config/vitest";
+import { coreVitestConfig, EMULATOR_PROJECT_DEFAULTS } from "@core/config/vitest";
 import { defineConfig } from "vitest/config";
 
 /**
@@ -13,9 +13,10 @@ const EMULATOR_TESTS = "src/**/*.emulator.test.ts";
 // arrays, so the preset's `include` would leak unit tests into every project.
 const { coverage, include = [], exclude = [], ...presetDefaults } = coreVitestConfig.test ?? {};
 
-const defineProject = (args: { name: string; include: string[]; exclude?: string[] }) => ({
+const defineProject = (args: { name: string; include: string[]; exclude?: string[]; overrides?: typeof EMULATOR_PROJECT_DEFAULTS }) => ({
   test: {
     ...presetDefaults,
+    ...args.overrides,
     name: args.name,
     include: args.include,
     exclude: [...exclude, ...(args.exclude ?? [])],
@@ -28,7 +29,7 @@ export default defineConfig({
     ...(coverage ? { coverage } : {}),
     projects: [
       defineProject({ name: "unit", include, exclude: [EMULATOR_TESTS] }),
-      defineProject({ name: "emulators", include: [EMULATOR_TESTS] }),
+      defineProject({ name: "emulators", include: [EMULATOR_TESTS], overrides: EMULATOR_PROJECT_DEFAULTS }),
     ],
   },
 });
