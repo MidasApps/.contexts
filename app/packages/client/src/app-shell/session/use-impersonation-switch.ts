@@ -38,10 +38,14 @@ export const useImpersonationSwitch = (args: {
     [sessionBridge, switchUser],
   );
 
+  // Leaving only ends the impersonation on the server; the caller then loads `/admin` as a new
+  // document, whose session exchange signs the staff account in. Switching the Firebase user in
+  // place made the still-mounted user area refetch the user's organization as staff (404s seen in
+  // the e2e) before the navigation landed.
   const leaveImpersonation = useCallback(async () => {
     if (sessionBridge.leaveImpersonation === undefined) throw new ImpersonationUnsupportedError();
-    await switchUser((await sessionBridge.leaveImpersonation()).customToken);
-  }, [sessionBridge, switchUser]);
+    await sessionBridge.leaveImpersonation();
+  }, [sessionBridge]);
 
   return { enterImpersonation, leaveImpersonation };
 };

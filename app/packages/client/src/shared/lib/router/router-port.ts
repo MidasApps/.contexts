@@ -21,8 +21,11 @@ export type RouterPort = {
    * chat once its conversation has an id). The address changes and the route params follow, but
    * the page is not built again, so its live state (a streaming answer) stays. An adapter whose
    * router keeps the page for such a change by itself navigates as usual.
+   * `reload`: load the route as a new document (the web makes a full page load), so nothing the
+   * previous screen held survives; used after the tab changed account (support access). An
+   * adapter without documents navigates as usual.
    */
-  navigate: (route: Route, options?: { replace?: boolean; samePage?: boolean }) => void;
+  navigate: (route: Route, options?: { replace?: boolean; samePage?: boolean; reload?: boolean }) => void;
   Link: ComponentType<RouterLinkProps>;
   /** Params of the current route (`organizationId`, `projectId`, `section`, …). */
   useRouteParams: () => Readonly<Record<string, string | undefined>>;

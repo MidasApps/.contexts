@@ -26,7 +26,7 @@ export function LeaveImpersonationButton() {
     try {
       await session.leaveImpersonation();
       reset();
-      router.navigate({ id: "admin", rest: "users" }, { replace: true });
+      router.navigate({ id: "admin", rest: "users" }, { replace: true, reload: true });
     } catch {
       reset();
       await session.signOut().catch(() => undefined);

@@ -19,7 +19,7 @@ export type WebRouterHooks = {
   /** Current pathname without the locale prefix (next-intl `usePathname`). */
   readonly usePathname: () => string;
   readonly useSearch: () => string;
-  readonly Link: ComponentType<{ href: string; replace?: boolean | undefined; children?: ReactNode } & Omit<RouterLinkProps, "to" | "replace">>;
+  readonly Link: ComponentType<{ href: string; replace?: boolean | undefined; prefetch?: boolean | undefined; children?: ReactNode } & Omit<RouterLinkProps, "to" | "replace">>;
 };
 
 export type WebRouterAdapter = RouterPort & {
@@ -69,13 +69,17 @@ export const createWebRouterAdapter = ({ locale, assign, hooks = NEXT_HOOKS, rep
   const localized = (href: string, target: SupportedLocale = locale): string => `/${target}${href === "/" ? "" : href}`;
   const navigate: RouterPort["navigate"] = (route, options) => {
     const href = routeHref(route);
-    if (navigator === null) return assign(localized(href));
+    if (navigator === null || options?.reload === true) return assign(localized(href));
     if (options?.replace === true && options.samePage === true) return replaceAddress(localized(href));
     if (options?.replace === true) navigator.replace(href);
     else navigator.push(href);
   };
   function Link({ to, replace, ...props }: RouterLinkProps) {
-    return <hooks.Link href={routeHref(to)} replace={replace === true} {...props} />;
+    // `/admin` is gated per request by the staff session of that moment (and 404s otherwise): a
+    // prefetch fired while a session is being exchanged or switched (sign-in, support access)
+    // answered 404 into the console and the client cache. Its pages are dynamic anyway.
+    const prefetch = to.id === "admin" ? false : undefined;
+    return <hooks.Link href={routeHref(to)} replace={replace === true} prefetch={prefetch} {...props} />;
   }
   const useCurrentHref = (): string => withSearch(hooks.usePathname(), hooks.useSearch());
   return {

@@ -8,8 +8,8 @@ import { createWebRouterAdapter, stripLocalePrefix, type WebNavigator, type WebR
 const fakeHooks = (pathname: string, search = ""): WebRouterHooks => ({
   usePathname: () => pathname,
   useSearch: () => search,
-  Link: ({ href, replace, children, ...props }: { href: string; replace?: boolean | undefined } & Omit<RouterLinkProps, "to" | "replace">) => (
-    <a data-href={href} data-replace={String(replace === true)} {...props}>
+  Link: ({ href, replace, prefetch, children, ...props }: { href: string; replace?: boolean | undefined; prefetch?: boolean | undefined } & Omit<RouterLinkProps, "to" | "replace">) => (
+    <a data-href={href} data-replace={String(replace === true)} data-prefetch={String(prefetch)} {...props}>
       {children}
     </a>
   ),
@@ -60,6 +60,18 @@ describe("createWebRouterAdapter", () => {
     expect(navigator.calls).toEqual([]);
   });
 
+  it("loads the route as a new document when asked to reload, even with the bridge attached", () => {
+    const assign = vi.fn();
+    const router = createWebRouterAdapter({ locale: "pt-BR", assign, hooks: fakeHooks("/") });
+    const navigator = fakeNavigator();
+    router.attach(navigator);
+
+    router.navigate({ id: "admin", rest: "users" }, { replace: true, reload: true });
+
+    expect(assign).toHaveBeenCalledWith("/pt-BR/admin/users");
+    expect(navigator.calls).toEqual([]);
+  });
+
   it("falls back to a full navigation with the locale before the bridge attaches", () => {
     const assign = vi.fn();
     const router = createWebRouterAdapter({ locale: "es-419", assign, hooks: fakeHooks("/") });
@@ -96,6 +108,20 @@ describe("createWebRouterAdapter", () => {
 
     expect(screen.getByText("Members")).toHaveProperty("dataset.href", "/o/a/settings/members");
     expect(screen.getByText("Members")).toHaveProperty("dataset.replace", "true");
+  });
+
+  it("never prefetches the staff console, whose access follows the session of the moment", () => {
+    const router = createWebRouterAdapter({ locale: "pt-BR", assign: vi.fn(), hooks: fakeHooks("/") });
+
+    render(
+      <>
+        <router.Link to={{ id: "admin", rest: "users" }}>Users</router.Link>
+        <router.Link to={{ id: "settings", organizationId: "a", section: "members" }}>Members</router.Link>
+      </>,
+    );
+
+    expect(screen.getByText("Users")).toHaveProperty("dataset.prefetch", "false");
+    expect(screen.getByText("Members")).toHaveProperty("dataset.prefetch", "undefined");
   });
 
   it("switches locale on the current path and search", () => {
