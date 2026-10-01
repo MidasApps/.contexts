@@ -13,6 +13,8 @@ import {
   buildChatRoutes,
   buildFlagsRoutes,
   buildConnectorsRoutes,
+  buildCustomAgentsRoutes,
+  buildCustomSkillsRoutes,
   buildConversationsRoutes,
   buildFilesRoutes,
   buildKnowledgeDocumentsRoutes,
@@ -28,6 +30,7 @@ import {
   createFirebaseAdmin,
   createFirestoreAdminUserDirectory,
   createFirebaseConnectorsServices,
+  createFirebaseCustomAgentsServices,
   createFirebaseFilesServices,
   createFirebaseConsoleServices,
   createFirebaseFlagsServices,
@@ -110,6 +113,9 @@ export const buildRuntimeRoutes = async (core: CoreServer): Promise<CoreRoutes> 
   // SP5 workflow runs and tenant schedules (decisions 0037, 0040): custom Mastra routes with the caller's Bearer.
   const workflowGateway = createMastraWorkflowGateway({ baseUrl: env.MASTRA_URL, serverlessToken });
   const workflowDeps = { pipeline: core.pipeline, gateway: workflowGateway, resolveAccessContext: core.resolveAccessContext };
+  // Tenant-defined agents and skills (decision 0046): Firestore records, limits from the plan of the organization.
+  const customAgents = createFirebaseCustomAgentsServices({ firebase, audit: core.audit, clock: core.pipeline.clock });
+  const customAgentsDeps = { ...workflowDeps, customAgents };
   const flagsDeps = {
     pipeline: core.pipeline,
     flags: createFirebaseFlagsServices({ firebase, appEnv: env.APP_ENV, audit: core.audit, clock: core.pipeline.clock, environmentDefaults: flagEnvironmentDefaults(env) }),
@@ -136,6 +142,7 @@ export const buildRuntimeRoutes = async (core: CoreServer): Promise<CoreRoutes> 
     conversations: createFirestoreConversationsServices({ firestore: firebase.firestore, clock: core.pipeline.clock }),
     resolveAccessContext: core.resolveAccessContext,
     files: { getReadyFile: files.getReadyFile, readFileBytes: files.readFileBytes },
+    isChatAgentEnabled: customAgents.isChatAgentEnabled,
   };
   return {
     ...buildConnectorsRoutes({ pipeline: core.pipeline, connectors }),
@@ -148,6 +155,8 @@ export const buildRuntimeRoutes = async (core: CoreServer): Promise<CoreRoutes> 
     ...buildSchedulesRoutes(workflowDeps),
     // SP5 tenant settings (Task 14): the runtime's agent and workflow catalogs, and the usage summary of the ledger.
     ...buildTenantCatalogRoutes(workflowDeps),
+    ...buildCustomAgentsRoutes(customAgentsDeps),
+    ...buildCustomSkillsRoutes(customAgentsDeps),
     ...buildUsageRoutes({ pipeline: core.pipeline, getUsageSummary: createUsageServices({ repository: createPostgresUsageRepository(sql), clock: core.pipeline.clock }).getUsageSummary }),
     // SP4 chat (decisions 0031-0033): conversation metadata in Firestore, the stream from Mastra.
     ...buildChatRoutes(chatDeps),
