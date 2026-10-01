@@ -224,6 +224,41 @@ const runSubmittedFormRule = (commands: readonly FakeCommandRef[]): FakeScenario
   };
 };
 
+const NAMED_COMMAND = /\brun\s+([a-z][\w-]*(?:\.[A-Za-z][\w-]*)+)\s+with\s+(\{[\s\S]*\})/;
+
+const namedCommandOf = (text: string): SubmittedForm | undefined => {
+  const match = NAMED_COMMAND.exec(text);
+  if (match === null) return undefined;
+  try {
+    const values: unknown = JSON.parse(match[2] ?? "");
+    return isRecord(values) ? { commandId: match[1] ?? "", values } : undefined;
+  } catch {
+    // Not JSON: an ordinary message.
+    return undefined;
+  }
+};
+
+/**
+ * The action agent runs a command the member names with its values ("run <commandId> with
+ * {json}"), for commands no form renders (e.g. one that archives a record by id).
+ */
+const runNamedCommandRule = (commands: readonly FakeCommandRef[]): FakeScenarioRule => {
+  const callFor = (text: string, toolNames: readonly string[]): FakeToolCall | undefined => {
+    const named = namedCommandOf(text);
+    const command = named === undefined ? undefined : commands.find((candidate) => candidate.commandId === named.commandId);
+    const toolName = command === undefined ? undefined : modelToolName(toolNames, command.toolId);
+    return named === undefined || toolName === undefined ? undefined : { toolName, input: named.values };
+  };
+  return {
+    id: "action-run-named-command",
+    matches: ({ text, toolNames }) => callFor(text, toolNames) !== undefined,
+    respond: ({ text, toolNames }) => {
+      const call = callFor(text, toolNames);
+      return call === undefined ? { text: echoText(text) } : { toolCalls: [call] };
+    },
+  };
+};
+
 const listEntitiesRule: FakeScenarioRule = {
   id: "data-list-entities",
   matches: ({ text, toolNames }) => modelToolName(toolNames, "catalog.listEntities") !== undefined && /\b(entities|which data)\b/i.test(text),
@@ -245,6 +280,21 @@ const webSearchRule: FakeScenarioRule = {
   respond: ({ text, toolNames }) => ({ toolCalls: [{ toolName: modelToolName(toolNames, "web.search") ?? "web.search", input: { query: stripFakeDirectives(text).slice(0, 400), limit: 3 } }] }),
 };
 
+// The member's message ends where the answer or the result of a delegation starts.
+const TITLE_PROMPT = /^User:\s*([\s\S]*?)(?:\s+(?:Assistant|Tool Result [^:\s]+):|$)/;
+const MAX_FAKE_TITLE_CHARS = 60;
+
+/**
+ * Memory's title generator (the `fast` role as agent `memory`) gets the first exchange as
+ * "User: … Assistant: …": the fake names the conversation after the member's message, so the
+ * history of a local or e2e run reads like a real one instead of "Fake answer …".
+ */
+const conversationTitleRule: FakeScenarioRule = {
+  id: "memory-conversation-title",
+  matches: ({ text }) => stripFakeDirectives(TITLE_PROMPT.exec(text)?.[1] ?? "") !== "",
+  respond: ({ text }) => ({ text: stripFakeDirectives(TITLE_PROMPT.exec(text)?.[1] ?? "").slice(0, MAX_FAKE_TITLE_CHARS).trim() }),
+};
+
 /**
  * Keyword rules of the core agents in fake mode (spec §5.3, SP3 Task 20). The supervisor
  * delegates: a confirmation → `agent-action`, "create a <record>" / data words →
@@ -263,7 +313,9 @@ export const coreFakeRules = (commands: readonly FakeCommandRef[]): readonly (re
   ["data", renderFormRule(commands)],
   ["data", listEntitiesRule],
   ["action", runSubmittedFormRule(commands)],
+  ["action", runNamedCommandRule(commands)],
   ["action", runCommandRule],
   ["knowledge", searchKnowledgeRule],
   ["web", webSearchRule],
+  ["memory", conversationTitleRule],
 ];

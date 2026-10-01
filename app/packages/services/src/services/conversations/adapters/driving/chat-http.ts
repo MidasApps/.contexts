@@ -18,11 +18,21 @@ export type ChatRoutesDeps = {
   readonly files: { readonly getReadyFile: GetReadyFile; readonly readFileBytes: ReadFileBytes };
   /** Custom agents members may chat with (decision 0046); absent: only the assistant answers. */
   readonly isChatAgentEnabled?: SendChatDeps["isChatAgentEnabled"];
+  /** Pause between two title reads; tests pass one that does not sleep. */
+  readonly wait?: ((ms: number) => Promise<void>) | undefined;
 };
 
 const BEARER = /^Bearer\s+(\S+)$/i;
 /** The title copy after a run must not hold the end of the stream for long. */
 const TITLE_TIMEOUT_MS = 3000;
+/**
+ * Mastra writes the generated title a moment after it closes the stream of the first turn
+ * (measured: about 400 ms with the fake models). An untitled conversation asks again for a short
+ * while, so the first turn names it instead of the second; later turns ask once.
+ */
+const TITLE_ATTEMPTS = 6;
+const TITLE_RETRY_MS = 250;
+const sleep = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms));
 const SSE = "text/event-stream";
 
 /**
@@ -58,7 +68,7 @@ export const chatScopeOf = async (args: {
  * effort, bounded) and clears `activeRunId`. Failures are logged, never thrown into the stream.
  */
 export const endRunOnClose = (args: {
-  readonly deps: Pick<ChatRoutesDeps, "chat" | "conversations">;
+  readonly deps: Pick<ChatRoutesDeps, "chat" | "conversations" | "wait">;
   readonly logger: Logger;
   readonly scope: AgentCallScope;
   readonly conversation: Conversation;
@@ -74,14 +84,18 @@ export const endRunOnClose = (args: {
   }
 };
 
-const titleOf = async (args: { readonly deps: Pick<ChatRoutesDeps, "chat">; readonly scope: AgentCallScope; readonly conversation: Conversation }): Promise<string | undefined> => {
+const titleOf = async (args: { readonly deps: Pick<ChatRoutesDeps, "chat" | "wait">; readonly scope: AgentCallScope; readonly conversation: Conversation }): Promise<string | undefined> => {
+  const signal = AbortSignal.timeout(TITLE_TIMEOUT_MS);
+  const attempts = args.conversation.title === null ? TITLE_ATTEMPTS : 1;
   try {
-    const answer = await args.deps.chat.threadTitle({
-      scope: { ...args.scope, signal: AbortSignal.timeout(TITLE_TIMEOUT_MS) },
-      agentId: args.conversation.agentId,
-      threadId: args.conversation.id,
-    });
-    return answer.ok && answer.data !== null ? answer.data : undefined;
+    for (let attempt = 1; attempt <= attempts; attempt += 1) {
+      const answer = await args.deps.chat.threadTitle({ scope: { ...args.scope, signal }, agentId: args.conversation.agentId, threadId: args.conversation.id });
+      if (!answer.ok) return undefined;
+      if (answer.data !== null && answer.data.trim() !== "") return answer.data;
+      if (attempt < attempts) await (args.deps.wait ?? sleep)(TITLE_RETRY_MS);
+    }
+    // Not written in the wait: the title arrives with the next turn.
+    return undefined;
   } catch {
     // Timed out: the title arrives with the next turn.
     return undefined;

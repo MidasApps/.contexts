@@ -37,6 +37,8 @@ export const createFakeChatGateway = () => {
     sendResult: undefined as GatewayResult<ChatStreamAnswer> | undefined,
     observeRun: true,
     title: "Generated title" as string | null,
+    /** Answers of the first title reads, in order (Mastra writes the title a moment after the stream closes). */
+    earlierTitles: [] as (string | null)[],
     messages: [] as unknown[],
     summary: "A short summary of the plan." as string,
     summaryResult: undefined as GatewayResult<{ readonly summary: string }> | undefined,
@@ -58,7 +60,7 @@ export const createFakeChatGateway = () => {
     },
     threadTitle: ({ scope }) => {
       calls.push({ kind: "title", scope });
-      return Promise.resolve({ ok: true, data: script.title });
+      return Promise.resolve({ ok: true, data: script.earlierTitles.length > 0 ? (script.earlierTitles.shift() ?? null) : script.title });
     },
     deleteThread: ({ scope }) => {
       calls.push({ kind: "deleteThread", scope });
@@ -122,6 +124,7 @@ export const setupChatRoutes = () => {
     conversations,
     resolveAccessContext: resolveAccessContextFor(new Map(members.map((member) => [member.uid, member.tenantId]))),
     files: { getReadyFile: makeGetReadyFile({ files }), readFileBytes: makeReadFileBytes({ files, objects }) },
+    wait: () => Promise.resolve(),
   };
   return { deps, repository, conversations, files, objects, chat, auditLog };
 };

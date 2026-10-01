@@ -22,6 +22,32 @@ const send = (routes: ReturnType<typeof setup>["routes"], body: unknown, as: str
 const errorOf = async (response: Response) => ((await response.json()) as ErrorEnvelope).error;
 
 describe("POST /v1/chat", () => {
+  it("waits for the title Mastra writes right after the stream closes, so the first turn names the conversation", async () => {
+    const { routes, chat, repository } = setup();
+    chat.script.earlierTitles = [null, null];
+    await (await send(routes, userTurn())).text();
+    expect(repository.all()[0]).toMatchObject({ activeRunId: null, title: "Generated title" });
+    expect(chat.calls.filter((call) => call.kind === "title")).toHaveLength(3);
+  });
+
+  it("ends the run without a title when none arrives in the wait, and asks only once for a titled conversation", async () => {
+    const { routes, chat, repository } = setup();
+    chat.script.title = null;
+    const first = await send(routes, userTurn());
+    await first.text();
+    expect(repository.all()[0]).toMatchObject({ activeRunId: null, title: null, messageCount: 2 });
+    const asked = chat.calls.filter((call) => call.kind === "title").length;
+    expect(asked).toBeGreaterThan(1);
+    expect(asked).toBeLessThanOrEqual(8);
+
+    chat.script.title = "Generated title";
+    const conversationId = first.headers.get("x-conversation-id") ?? "";
+    await (await send(routes, { conversationId, message: { id: "m2", role: "user", parts: [{ type: "text", text: "More" }] } })).text();
+    expect(repository.all()[0]).toMatchObject({ title: "Generated title" });
+    await (await send(routes, { conversationId, message: { id: "m3", role: "user", parts: [{ type: "text", text: "Again" }] } })).text();
+    expect(chat.calls.filter((call) => call.kind === "title")).toHaveLength(asked + 2);
+  });
+
   it("starts a conversation, passes the stream bytes through and ends the run when it closes", async () => {
     const { routes, chat, repository } = setup();
     const response = await send(routes, userTurn());
