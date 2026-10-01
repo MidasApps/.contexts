@@ -32,7 +32,14 @@ export type WebRouterAdapterArgs = {
   /** Full-page navigation, used before the bridge attaches (never in practice after hydration). */
   readonly assign: (href: string) => void;
   readonly hooks?: WebRouterHooks | undefined;
+  /** Writes the address bar without a navigation; tests pass a fake. */
+  readonly replaceAddress?: ((href: string) => void) | undefined;
 };
+
+// The App Router keeps `usePathname`/`useSearchParams` in sync with a native `replaceState` and
+// leaves the page tree alone. `router.replace` to another value of a dynamic segment would build
+// a new page instance instead (and drop a streaming chat thread).
+const replaceBrowserAddress = (href: string): void => globalThis.history.replaceState(null, "", href);
 
 /** `/pt-BR/o/a` → `/o/a`, `/pt-BR` → `/` (every page path carries the locale, `localePrefix: "always"`). */
 export const stripLocalePrefix = (pathname: string): string => pathname.replace(/^\/[^/]+/, "") || "/";
@@ -57,12 +64,13 @@ const withSearch = (path: string, search: string): string => (search === "" ? pa
  * (`routeHref`/`parseRoute`) so views see the same params on web, desktop and tests; the web only
  * adds `/{locale}`. Navigation goes through next-intl's router once `WebRouterBridge` attaches it.
  */
-export const createWebRouterAdapter = ({ locale, assign, hooks = NEXT_HOOKS }: WebRouterAdapterArgs): WebRouterAdapter => {
+export const createWebRouterAdapter = ({ locale, assign, hooks = NEXT_HOOKS, replaceAddress = replaceBrowserAddress }: WebRouterAdapterArgs): WebRouterAdapter => {
   let navigator: WebNavigator | null = null;
   const localized = (href: string, target: SupportedLocale = locale): string => `/${target}${href === "/" ? "" : href}`;
   const navigate: RouterPort["navigate"] = (route, options) => {
     const href = routeHref(route);
     if (navigator === null) return assign(localized(href));
+    if (options?.replace === true && options.samePage === true) return replaceAddress(localized(href));
     if (options?.replace === true) navigator.replace(href);
     else navigator.push(href);
   };

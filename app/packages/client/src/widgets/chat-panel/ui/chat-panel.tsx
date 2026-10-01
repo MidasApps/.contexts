@@ -25,6 +25,8 @@ export type ChatPanelProps = {
   conversationId?: string | undefined;
   /** The panel started a conversation (its id) or the member asked for a new one (`undefined`). */
   onConversationChange?: ((conversationId: string | undefined) => void) | undefined;
+  /** A turn ended (answered, stopped, failed or lost): the server's view of the conversation changed. */
+  onTurnSettled?: (() => void) | undefined;
   /** Quick-start cards of the empty state; defaults to the generic core suggestions. */
   suggestions?: readonly ChatSuggestion[] | undefined;
   /** `false` hides the model's reasoning (tenant setting). */
@@ -95,6 +97,7 @@ function StoredThread(props: { thread: Thread; conversationId: string; panel: Ch
       showReasoning={props.panel.showReasoning}
       suggestions={props.suggestions}
       onConversationStarted={props.onStarted}
+      onTurnSettled={props.panel.onTurnSettled}
       onRecover={props.onRecover}
       uiRegistry={props.environment.uiRegistry}
       contracts={props.environment.contracts}
@@ -166,6 +169,7 @@ export function ChatPanel(props: ChatPanelProps) {
           showReasoning={props.showReasoning}
           suggestions={suggestions}
           onConversationStarted={started}
+          onTurnSettled={props.onTurnSettled}
           onRecover={recover}
           uiRegistry={environment.uiRegistry}
           contracts={environment.contracts}

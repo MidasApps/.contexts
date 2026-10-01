@@ -8,7 +8,7 @@ import type { ShellSlots } from "#/shared/lib/shell/shell-types.ts";
 import { useChatEnvironment, useChatSidePanelAvailable } from "../model/use-chat-environment.ts";
 import { ChatPanel, type ChatPanelProps } from "./chat-panel.tsx";
 
-export type ProjectChatPanelProps = Pick<ChatPanelProps, "conversationId" | "onConversationChange" | "className" | "transport"> & {
+export type ProjectChatPanelProps = Pick<ChatPanelProps, "conversationId" | "onConversationChange" | "onTurnSettled" | "className" | "transport"> & {
   organizationId: string;
   projectId: string;
 };

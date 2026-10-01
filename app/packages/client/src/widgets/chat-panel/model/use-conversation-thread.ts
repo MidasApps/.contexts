@@ -32,6 +32,17 @@ export const fetchMessagePage = async (callEndpoint: CallEndpoint, conversationI
 };
 
 /**
+ * The stored messages without the answer a running run is still writing. Memory stores an answer
+ * step by step, and the stream the thread re-attaches to replays the run from its start under
+ * the same message id: with the stored copy kept, `useChat` would hold that answer twice (the
+ * same parts again, or two messages with one id and React's duplicate-key warning).
+ */
+export const withoutAnswerInFlight = (messages: UIMessage[]): UIMessage[] => {
+  const lastUser = messages.findLastIndex((message) => message.role === "user");
+  return lastUser === messages.length - 1 ? messages : messages.slice(0, lastUser + 1);
+};
+
+/**
  * Loads a conversation to continue it: its metadata (is a run streaming?) and its newest
  * messages, in parallel. `data === null` means it is not visible to the caller (404). The
  * result seeds `useChat` once; it is never refetched under a live thread — `attempt` asks for a
@@ -53,7 +64,8 @@ export const useConversationThread = (args: { organizationId: string; conversati
           callEndpoint(getConversationEndpoint, { params: { conversationId }, signal }),
           fetchMessagePage(callEndpoint, conversationId, undefined, signal),
         ]);
-        return { ...page, resume: conversation.data.activeRunId !== null };
+        const resume = conversation.data.activeRunId !== null;
+        return { ...page, messages: resume ? withoutAnswerInFlight(page.messages) : page.messages, resume };
       }),
   });
 };

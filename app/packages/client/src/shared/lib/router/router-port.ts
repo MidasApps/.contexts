@@ -16,7 +16,13 @@ export type RouterLinkProps = Omit<ComponentProps<"a">, "href"> & {
 export type RouterPort = {
   /** Href for `<a>` and copy-link (the web adds `/{locale}`). */
   href: (route: Route) => string;
-  navigate: (route: Route, options?: { replace?: boolean }) => void;
+  /**
+   * `samePage` (with `replace`): the route is another address of the page already on screen (the
+   * chat once its conversation has an id). The address changes and the route params follow, but
+   * the page is not built again, so its live state (a streaming answer) stays. An adapter whose
+   * router keeps the page for such a change by itself navigates as usual.
+   */
+  navigate: (route: Route, options?: { replace?: boolean; samePage?: boolean }) => void;
   Link: ComponentType<RouterLinkProps>;
   /** Params of the current route (`organizationId`, `projectId`, `section`, …). */
   useRouteParams: () => Readonly<Record<string, string | undefined>>;

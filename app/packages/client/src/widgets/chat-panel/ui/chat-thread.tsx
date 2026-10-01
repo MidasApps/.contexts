@@ -39,6 +39,8 @@ export type ChatThreadProps = {
   showReasoning?: boolean | undefined;
   suggestions: readonly ChatSuggestion[];
   onConversationStarted?: ((conversationId: string) => void) | undefined;
+  /** The turn on screen stopped being busy (answered, stopped, failed or lost). */
+  onTurnSettled?: (() => void) | undefined;
   /** Reloads the conversation from the server (a lost stream may still be running there). */
   onRecover?: (() => void) | undefined;
   /** Generative UI components the chat may render (core plus modules). */
@@ -136,6 +138,15 @@ export function ChatThread(props: ChatThreadProps) {
   useEffect(() => {
     if (props.focusOnMount === true) inputRef.current?.focus();
   }, [props.focusOnMount]);
+
+  // The run ended on the server before the stream closed (`/v1/chat` clears it first), so what
+  // the host shows about this conversation (answering, its generated title) is stale now.
+  const { onTurnSettled } = props;
+  const wasBusy = useRef(false);
+  useEffect(() => {
+    if (wasBusy.current && !busy) onTurnSettled?.();
+    wasBusy.current = busy;
+  }, [busy, onTurnSettled]);
 
   // Without a router-built href from the app, the link is the inbox route itself (no locale prefix).
   const approvalHref = props.approvalHref ?? ((approvalId: string) => routeHref(approvalRequestRoute(props.scope.organizationId, approvalId)));

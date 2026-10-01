@@ -146,6 +146,21 @@ describe("ChatPanel", () => {
     await expectNoAxeViolations(container);
   });
 
+  it("tells the host each time a turn settles, so what it shows about the conversation can be read again", async () => {
+    const onTurnSettled = vi.fn();
+    const { user, transport, field } = setup({ onTurnSettled });
+    await user.type(field(), "Qual é o prazo?{Enter}");
+    const stream = await firstStream(transport);
+    act(() => stream.emit(...textChunks(["O prazo "], { finish: false })));
+    await waitFor(() => expect(status()).toBe("Respondendo…"));
+    expect(onTurnSettled).not.toHaveBeenCalled();
+    act(() => {
+      stream.emit({ type: "text-end", id: "t-1" }, { type: "finish" });
+      stream.close();
+    });
+    await waitFor(() => expect(onTurnSettled).toHaveBeenCalledTimes(1));
+  });
+
   it("resumes the answer on mount when the conversation has an active run", async () => {
     const transport = createFakeChatTransport();
     transport.resumable = true;
@@ -289,13 +304,31 @@ describe("ChatPanel", () => {
     expect(await screen.findByText("O prazo é de 30 dias.")).toBeTruthy();
   });
 
-  it("shows a message once when the history hands it over twice", async () => {
-    const api = historyApi();
-    const [question, answer] = stored;
-    api.route(`GET /v1/conversations/${CONVERSATION_ID}/messages`, page([question, answer, answer]));
-    setup({ conversationId: CONVERSATION_ID }, api);
-    expect(await screen.findByText("O prazo é de 30 dias.")).toBeTruthy();
-    expect(screen.getAllByRole("article")).toHaveLength(2);
+  it("resumes an answer whose first steps are already stored without showing them twice", async () => {
+    // Memory stores an answer step by step, and the resumed stream replays the run from its
+    // start under the same message id: the stored copy of the answer in flight must give way.
+    const errors = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    const api = historyApi({ activeRunId: "run-7", activeStreamStartedAt: "2026-09-30T12:00:00.000Z" });
+    const partial: UIMessage = { id: "a-7", role: "assistant", parts: [{ type: "text", text: "Primeira etapa." }] };
+    api.route(`GET /v1/conversations/${CONVERSATION_ID}/messages`, page([...stored, { id: "u-7", role: "user", parts: [{ type: "text", text: "E depois?" }] }, partial]));
+    const transport = createFakeChatTransport();
+    transport.resumable = true;
+    setup({ conversationId: CONVERSATION_ID, transport }, api);
+    const stream = await firstStream(transport);
+    expect(stream.trigger).toBe("resume");
+    expect(await screen.findByText("E depois?")).toBeTruthy();
+    expect(screen.queryByText("Primeira etapa.")).toBeNull();
+    act(() => {
+      stream.emit(...textChunks(["Primeira etapa. ", "Segunda etapa."], { messageId: "a-7" }));
+      stream.close();
+    });
+    await waitFor(() => expect(status()).toBe("Resposta concluída."));
+    const answers = screen.getAllByRole("article", { name: "Assistente" });
+    expect(answers).toHaveLength(2);
+    expect(answers[1]?.textContent).toContain("Primeira etapa. Segunda etapa.");
+    expect(answers[1]?.textContent?.match(/Primeira etapa/g)).toHaveLength(1);
+    expect(errors.mock.calls.filter((call) => String(call[0]).includes("same key"))).toEqual([]);
+    errors.mockRestore();
   });
 
   it("loads earlier messages on demand", async () => {

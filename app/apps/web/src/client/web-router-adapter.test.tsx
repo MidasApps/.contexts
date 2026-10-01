@@ -48,6 +48,18 @@ describe("createWebRouterAdapter", () => {
     expect(assign).not.toHaveBeenCalled();
   });
 
+  it("changes the address in place for a same-page navigation, without asking the router for a new page", () => {
+    const replaceAddress = vi.fn();
+    const router = createWebRouterAdapter({ locale: "pt-BR", assign: vi.fn(), hooks: fakeHooks("/o/a/p/b/chat"), replaceAddress });
+    const navigator = fakeNavigator();
+    router.attach(navigator);
+
+    router.navigate({ id: "chat", organizationId: "a", projectId: "b", conversationId: "c1" }, { replace: true, samePage: true });
+
+    expect(replaceAddress).toHaveBeenCalledWith("/pt-BR/o/a/p/b/chat/c1");
+    expect(navigator.calls).toEqual([]);
+  });
+
   it("falls back to a full navigation with the locale before the bridge attaches", () => {
     const assign = vi.fn();
     const router = createWebRouterAdapter({ locale: "es-419", assign, hooks: fakeHooks("/") });

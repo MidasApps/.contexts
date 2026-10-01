@@ -28,9 +28,11 @@ function ChatWorkspace({ place }: { place: ChatPlace }) {
   const refreshHistory = () => void queryClient.invalidateQueries({ queryKey: conversationListsKey(organizationId) });
 
   // The panel named a new conversation (or the member asked for a new one): the URL follows, so
-  // a reload or a shared link opens the same thread, and the history shows the new row.
+  // a reload or a shared link opens the same thread, and the history shows the new row. Naming
+  // the conversation is the same page under its lasting address: the thread on screen is
+  // streaming its first answer and must not be built again.
   const onConversationChange = (next: string | undefined) => {
-    router.navigate({ id: "chat", organizationId, projectId, conversationId: next }, { replace: next !== undefined });
+    router.navigate({ id: "chat", organizationId, projectId, conversationId: next }, next === undefined ? undefined : { replace: true, samePage: true });
     refreshHistory();
   };
 
@@ -62,7 +64,7 @@ function ChatWorkspace({ place }: { place: ChatPlace }) {
       </div>
       <div className="flex min-h-0 flex-1 overflow-hidden rounded-lg border border-border">
         {compact ? null : history}
-        <ProjectChatPanel organizationId={organizationId} projectId={projectId} conversationId={conversationId} onConversationChange={onConversationChange} className="min-w-0 flex-1" />
+        <ProjectChatPanel organizationId={organizationId} projectId={projectId} conversationId={conversationId} onConversationChange={onConversationChange} onTurnSettled={refreshHistory} className="min-w-0 flex-1" />
       </div>
       {compact ? (
         <Sheet open={historyOpen} onOpenChange={setHistoryOpen}>
