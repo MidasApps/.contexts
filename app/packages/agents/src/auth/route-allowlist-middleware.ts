@@ -14,8 +14,9 @@ const AGENT_ACTIONS = "generate|stream|approve-tool-call|decline-tool-call|appro
  * Everything else under the prefix answers 404, so a route added by a Mastra
  * upgrade stays closed until it is listed here. Closed on purpose: `/vectors`,
  * `/vector`, `/tools` (direct execution), `/v1/responses`, `/v1/conversations`,
- * `/stored/*`, memory writes, the REST tool execution of MCP servers and `/schedules` (a raw
- * schedule carries any request context; tenant schedules go through `/tenant-schedules`, SP5).
+ * `/stored/*`, memory writes, the REST tool execution of MCP servers, `/schedules` (a raw
+ * schedule carries any request context; tenant schedules go through `/tenant-schedules`, SP5) and
+ * every workflow but `knowledge-ingest` (SP5: runs go through `/workflow-runs`).
  */
 const ALLOWED_ROUTES: readonly RouteRule[] = [
   { methods: READ, pattern: /^\/agents$/ },
@@ -24,7 +25,11 @@ const ALLOWED_ROUTES: readonly RouteRule[] = [
   { methods: READ, pattern: /^\/memory(?:\/[^/]+)*$/ },
   // The gateway deletes a conversation's thread (`deleteThread`).
   { methods: DELETE, pattern: /^\/memory\/threads\/[^/]+$/ },
-  { methods: "any", pattern: /^\/workflows(?:\/[^/]+)*$/ },
+  // Only the knowledge ingestion is launched by `/v1` with the caller's Bearer (SP3 Task 14). Every
+  // other workflow is started, resumed and read through the custom routes (`/workflow-runs`,
+  // `/workflow-approvals`, `/tenant-schedules`), which re-authorize; a raw run would skip that
+  // (e.g. `usage-report` without `core.usage.read`).
+  { methods: "any", pattern: /^\/workflows\/knowledge-ingest(?:\/[^/]+)*$/ },
   { methods: "any", pattern: /^\/mcp\/[^/]+\/(?:mcp|sse|messages)$/ },
   { methods: READ, pattern: /^\/mcp\/[^/]+\/(?:tools|resources)$/ },
   { methods: "any", pattern: /^\/observability(?:\/[^/]+)*$/ },

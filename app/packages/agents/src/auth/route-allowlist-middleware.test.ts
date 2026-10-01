@@ -42,6 +42,11 @@ describe("createRouteAllowlistMiddleware", () => {
       ["GET", "/api/schedules"],
       ["POST", "/api/schedules"],
       ["POST", "/api/schedules/schedule_x/run"],
+      // Workflows other than the knowledge ingestion go through the custom run routes (SP5).
+      ["POST", "/api/workflows/usage-report/start-async"],
+      ["POST", "/api/workflows/approval-demo/resume"],
+      ["GET", "/api/workflows"],
+      ["GET", "/api/workflows/approval-demo/runs"],
     ] as const) {
       expect(await run(method, path), `${method} ${path}`).toEqual({ nextCalled: false, status: 404 });
     }

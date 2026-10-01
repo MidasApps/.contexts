@@ -5,7 +5,7 @@ import {
   createAccessCore,
   createFirebaseAdmin,
   createInMemoryAccessStore,
-  createMastraGateway,
+  createMastraWorkflowGateway,
   createMastraWorkflowApprovalSettler,
   defineAgentCommandExecutor,
   processLogger,
@@ -129,12 +129,22 @@ afterAll(async () => {
 
 const userOf = (uid: string): UserPrincipal => ({ type: "user", uid: UserIdSchema.parse(uid), mfa: false });
 
+// The run route starts asynchronously (202): poll the stored run until it reaches the approval step.
+const waitForStatus = async (runId: string, status: string): Promise<void> => {
+  for (let attempt = 0; attempt < 100; attempt += 1) {
+    if ((await mastra?.getWorkflow("approval-demo").getWorkflowRunById(runId))?.status === status) return;
+    await new Promise((resolve) => setTimeout(resolve, 100));
+  }
+  throw new Error(`run ${runId} never reached ${status}`);
+};
+
 const startDemo = async (title: string) => {
-  const gateway = createMastraGateway({ baseUrl, serverlessToken: null });
+  // Like `/v1/workflows/approval-demo/runs`: the custom run route, which re-authorizes the caller (SP5 Task 4).
+  const gateway = createMastraWorkflowGateway({ baseUrl, serverlessToken: null });
   const scope = { bearer: member.idToken, tenantId: TENANT, regional: REGIONAL, requestId: `01J8Z3K4M5N6P7Q8R9S0T1V2${String(notes.length).padStart(2, "0")}` };
-  const started = await gateway.startWorkflow({ scope, workflowId: "approval-demo", inputData: { title } });
+  const started = await gateway.startRun(scope, { workflowId: "approval-demo", inputData: { title } });
   if (!started.ok) throw new Error(`start failed: ${JSON.stringify(started.error)}`);
-  expect(started.data.result).toMatchObject({ status: "suspended" });
+  await waitForStatus(started.data.runId, "suspended");
   const pending = await core.approvals.listApprovalRequests({ actor: userOf(admin.uid), access: core.access.forRequest(), tenantId: TenantIdSchema.parse(TENANT), status: "pending", page: { after: undefined, limit: 50 } });
   if (!pending.ok) throw new Error("list failed");
   const request = pending.data.items.find((item) => (item.action.input as { runId?: string }).runId === started.data.runId);
@@ -183,7 +193,8 @@ describe("workflow HITL with four eyes (Auth + Firestore emulators, real Mastra 
       headers,
       body: JSON.stringify({ step: "request-human-approval", resumeData: { decision: "approved" } }),
     });
-    expect(forged.status).toBeLessThan(500);
+    // The built-in workflow routes are closed but for the knowledge ingestion (route allowlist).
+    expect(forged.status).toBe(404);
     await new Promise((resolve) => setTimeout(resolve, 500));
     const state = await mastra?.getWorkflow("approval-demo").getWorkflowRunById(runId);
     expect(state?.status).toBe("suspended");
