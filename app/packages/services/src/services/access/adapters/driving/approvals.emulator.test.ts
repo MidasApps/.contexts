@@ -117,3 +117,19 @@ describe("approval requests (emulator)", () => {
     expect((await requestDeletion("apr-owner", { invoiceId: 7 })).status).toBe(400);
   });
 });
+
+describe("approval requests inbox queries (emulator)", () => {
+  // The user menu badge asks for `?limit=100&status=pending` on every page of an organization.
+  it("lists pending requests with a page limit, for the requester, an approver and the owner", { timeout: 60_000 }, async () => {
+    const request = (await body(await requestDeletion("apr-member"))).data;
+    if (request === undefined) throw new Error("no request");
+    for (const as of ["apr-member", "apr-admin", "apr-owner"]) {
+      for (const query of ["limit=100&status=pending", "limit=10", "limit=10&status=pending", "limit=1&status=expired"]) {
+        const response = await harness.call("access.listApprovalRequests", { method: "GET", path: `/v1/organizations/${tenantId}/approval-requests?${query}`, as });
+        expect(`${as} ${query} ${String(response.status)}`).toBe(`${as} ${query} 200`);
+      }
+    }
+    const listed = await harness.call("access.listApprovalRequests", { method: "GET", path: `/v1/organizations/${tenantId}/approval-requests?limit=100&status=pending`, as: "apr-owner" });
+    expect(((await listed.json()) as { data: { id: string }[] }).data).toMatchObject([{ id: request.id, status: "pending" }]);
+  });
+});
