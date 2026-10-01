@@ -8,6 +8,9 @@ export type VoiceModels = Pick<AgentModels, "transcription" | "speech">;
 
 export type VoiceCapabilities = { readonly transcription: boolean; readonly speech: boolean; readonly realtime: boolean };
 
+/** Provider and model of a voice role, for the usage ledger (SP3 follow-up #29). */
+export type VoiceModelRef = { readonly provider: string; readonly modelId: string };
+
 /**
  * Voice of the runtime (spec §5.1, §14; SP4 attaches `voice` to chat agents and
  * exposes the routes). `transcribe`/`synthesize` return what the HTTP routes need
@@ -16,6 +19,7 @@ export type VoiceCapabilities = { readonly transcription: boolean; readonly spee
 export type CoreVoice = {
   readonly voice: CompositeVoice;
   readonly capabilities: VoiceCapabilities;
+  readonly models: { readonly transcription: VoiceModelRef | null; readonly speech: VoiceModelRef | null };
   readonly transcribe: (input: { readonly audio: Uint8Array; readonly mediaType: string; readonly abortSignal?: AbortSignal }) => Promise<Transcript>;
   readonly synthesize: (input: { readonly text: string; readonly voice?: string; readonly abortSignal?: AbortSignal }) => Promise<SynthesizedAudio>;
 };
@@ -31,6 +35,10 @@ export class VoiceUnavailableError extends Error {
     this.capability = capability;
   }
 }
+
+// AI SDK model ids are `<provider>.<api>` (e.g. `openai.transcription`); the ledger keeps the vendor.
+const refOf = (model: { readonly provider: string; readonly modelId: string } | null): VoiceModelRef | null =>
+  model === null ? null : { provider: model.provider.split(".")[0] ?? model.provider, modelId: model.modelId };
 
 const requireModel = <TModel>(model: TModel | null, capability: keyof VoiceCapabilities): TModel => {
   if (model === null) throw new VoiceUnavailableError(capability);
@@ -55,6 +63,7 @@ export const createVoice = (args: { readonly models: VoiceModels; readonly realt
   return {
     voice,
     capabilities: { transcription: transcription !== null, speech: speech !== null, realtime: args.realtime !== undefined },
+    models: { transcription: refOf(transcription), speech: refOf(speech) },
     transcribe: async (input) => {
       const model = requireModel(transcription, "transcription");
       return transcribeAudio(model, { audio: input.audio, ...(input.abortSignal === undefined ? {} : { abortSignal: input.abortSignal }) });

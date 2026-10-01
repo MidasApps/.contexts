@@ -31,3 +31,30 @@ answers 503 `FEATURE_UNAVAILABLE`. Permission `core.voice.use`; 30 transcription
 
 - **Mastra `OpenAIRealtimeVoice` over WebSocket.** Needs a WebSocket terminator outside Next.
 - **Realtime with tools.** Skips the per-call authorize and approval pipeline.
+
+## Amendments
+
+- **2026-09-30 — voice is gated and governed (SP4 Task 7, SP3 follow-ups #29 and #30).**
+  - **Platform flag `AI_VOICE_ENABLED`** (agent env). Unset, voice is on in `local` only. While it
+    is off, every Mastra voice route answers 503 before the body is read, and `/v1/voice/*` answers
+    503 `FEATURE_UNAVAILABLE`. It stays off outside local until compliance approves sending member
+    audio to the provider (DPA, legal basis, training opt-out, region; follow-up #30). A per-tenant
+    switch is not built: it belongs with the SP5 feature flags.
+  - **Ledger, budget and audit.** `transcribe` and `generateSpeech` produce no Mastra span, so the
+    voice routes do it themselves. A context middleware on `/voice/*` writes the caller's context and
+    caps the body at 5 MiB. Before the provider call, the tenant budget is checked (429
+    `BUDGET_EXCEEDED`; a failing check answers 503, fail-closed). After it, a `usage.llm_calls` row
+    is written (`agentId` `voice-transcription|voice-speech`, the role's provider and model,
+    0 tokens, cost `null` until audio is priced), and `VOICE_TRANSCRIBED|VOICE_SYNTHESIZED` is
+    audited with the duration. Ledger and audit write failures are logged; the call already happened.
+  - **`/v1/voice`.** Users only, permission `core.voice.use` at the organization (`organizationId`
+    query), rate limit `voice-call` (30/min per user). Transcriptions are `multipart/form-data` with
+    one `audio` field. The declared length is checked before the form is parsed, and the type comes
+    from the magic bytes (webm, ogg, mp4, wav), never from the declared type. Audio that is too
+    large, of another type or longer than 60 s answers 400 `VALIDATION_FAILED`.
+  - **Realtime.** `POST /v1/voice/realtime-sessions` → Mastra `/voice/realtime-sessions`. A secret is
+    minted only when `AI_VOICE_REALTIME_ENABLED=true`, voice is on, the mode is real and the
+    realtime role is OpenAI with a key: `POST /v1/realtime/client_secrets`, 60 s, the supervisor's
+    instructions, `tools: []`. Otherwise the route answers 503. The realtime audio then flows
+    between the browser and the provider, outside the usage ledger, so realtime needs its own
+    metering before it is enabled anywhere.

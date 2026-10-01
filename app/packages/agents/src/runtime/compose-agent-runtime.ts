@@ -57,8 +57,9 @@ import { createQuerySemanticSqlTool } from "../tools/sql/query-semantic-sql.tool
 import { createToolRegistry, type ToolRegistry } from "../tools/tool-registry.ts";
 import type { WebClientEnv } from "../tools/web/firecrawl-client.ts";
 import { createFirecrawlTools, createWebToolsRuntime, type WebToolsRuntime } from "../tools/web/web-tools-runtime.ts";
-import { type CoreVoice, createVoice } from "../voice/create-voice.ts";
-import { createVoiceRoutes } from "../voice/voice-routes.ts";
+import { composeVoice, type VoiceEnv } from "../voice/compose-voice.ts";
+import type { CoreVoice } from "../voice/create-voice.ts";
+import { MAX_AUDIO_BYTES, VOICE_ROUTES_PATTERN } from "../voice/voice-routes.ts";
 import type { MCPServerBase } from "@mastra/core/mcp";
 import { createCoreMcpServer, CORE_MCP_SERVER_ID, MCP_CALLER_ID, MCP_CEILING } from "../mcp-server/core-mcp-server.ts";
 import { setMcpRequestAuth } from "../mcp-server/mcp-request-context.ts";
@@ -72,7 +73,8 @@ export const MEMORY_VECTOR_KEY = "memory";
 export type ComposeAgentRuntimeArgs = {
   readonly env: ModelFactoryEnv &
     Pick<ObservabilityEnv, "OTEL_EXPORTER_OTLP_ENDPOINT"> &
-    Pick<WebClientEnv, "FIRECRAWL_API_KEY" | "FIRECRAWL_API_URL"> & {
+    Pick<WebClientEnv, "FIRECRAWL_API_KEY" | "FIRECRAWL_API_URL"> &
+    Pick<VoiceEnv, "AI_VOICE_ENABLED" | "AI_VOICE_REALTIME_ENABLED" | "AI_MODEL_REALTIME"> & {
       readonly AI_MEMORY_OBSERVATIONAL?: boolean;
       readonly MCP_REQUEST_STATE_KEY?: string;
       readonly SCHEDULE_MIN_INTERVAL_MINUTES?: number | undefined;
@@ -323,7 +325,7 @@ export const composeAgentRuntime = (args: ComposeAgentRuntimeArgs): RuntimeParts
   const apiPrefix = args.apiPrefix;
   const auth = new FirebaseMastraAuth({ access: args.ports.access, ...(apiPrefix === undefined ? {} : { apiPrefix }) });
   const prefix = apiPrefix === undefined ? {} : { apiPrefix };
-  const voice = createVoice({ models });
+  const { voice, routes: voiceRoutes } = composeVoice({ env: args.env, models, ports: args.ports, supervisor: agents[SUPERVISOR_AGENT_ID], logger: processLogger });
   const chat = buildChat(agents, { tools, toolDeps, summarizer: createConversationSummarizer({ models, guardrails: guardrails("delegated") }) });
   const { workflows, catalog: workflowCatalog, platformSchedules } = collectWorkflows(args, models);
   const contextMiddleware = (path?: string, maxBodyBytes?: number) =>
@@ -360,9 +362,11 @@ export const composeAgentRuntime = (args: ComposeAgentRuntimeArgs): RuntimeParts
       contextMiddleware(CHAT_ROUTES_PATTERN, MAX_CHAT_BODY_BYTES),
       contextMiddleware(WORKFLOW_RUN_ROUTES_PATTERN),
       contextMiddleware(TENANT_SCHEDULE_ROUTES_PATTERN),
+      // Voice routes (SP4 Task 7): the caller's context for the budget, ledger and audit; body capped first.
+      contextMiddleware(VOICE_ROUTES_PATTERN, MAX_AUDIO_BYTES),
     ],
     apiRoutes: [
-      ...createVoiceRoutes({ voice, logger: processLogger }),
+      ...voiceRoutes,
       ...createChatRoutes({ ...chat.runtime, logger: processLogger }),
       ...createWorkflowApprovalRoutes({ approvals: args.ports.workflowApprovals, logger: processLogger }),
       ...createWorkflowRunRoutes({ access: args.ports.access, catalog: workflowCatalog, logger: processLogger }),

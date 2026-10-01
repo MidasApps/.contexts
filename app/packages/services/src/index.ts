@@ -662,8 +662,12 @@ export {
   type ChatRoutesDeps,
 } from "./services/conversations/index.ts";
 export {
+  buildVoiceRoutes,
   CHAT_ROUTES,
   createMastraChatGateway,
+  createMastraVoiceGateway,
   type ChatRuntimeGateway,
   type ChatStreamAnswer,
+  type VoiceRoutesDeps,
+  type VoiceRuntimeGateway,
 } from "./services/agents/index.ts";

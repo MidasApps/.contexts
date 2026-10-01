@@ -34,11 +34,12 @@ const speechRequest = (body: unknown) =>
 const errorOf = async (response: Response) => ((await response.json()) as { error: { code: string; requestId: string } }).error;
 
 describe("voice routes", () => {
-  it("registers both routes as authenticated POST routes outside the API prefix", () => {
+  it("registers the voice routes as authenticated POST routes outside the API prefix", () => {
     const routes = createVoiceRoutes(deps());
     expect(routes.map((route) => [route.method, route.path, route.requiresAuth])).toEqual([
       ["POST", "/voice/transcriptions", true],
       ["POST", "/voice/speech", true],
+      ["POST", "/voice/realtime-sessions", true],
     ]);
   });
 

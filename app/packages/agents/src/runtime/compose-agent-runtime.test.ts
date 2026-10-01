@@ -66,7 +66,7 @@ describe("composeAgentRuntime", () => {
     ]);
     expect(runtime.workflowCatalog.get("usage-report")).toMatchObject({ schedulable: true, startable: false });
     expect(runtime.workflowCatalog.get("approval-demo")).toEqual({ id: "approval-demo", startable: true, schedulable: false });
-    expect(runtime.middleware.map((entry) => entry.path)).toEqual(["/api/*", "/api/*", "/chat/*", "/workflow-runs/*", "/tenant-schedules/*"]);
+    expect(runtime.middleware.map((entry) => entry.path)).toEqual(["/api/*", "/api/*", "/chat/*", "/workflow-runs/*", "/tenant-schedules/*", "/voice/*"]);
     expect(runtime.tools.ids()).toEqual([
       "catalog.listEntities",
       "catalog.describeEntity",
@@ -83,6 +83,7 @@ describe("composeAgentRuntime", () => {
     expect(runtime.apiRoutes.map((route) => `${route.method} ${route.path}`)).toEqual([
       "POST /voice/transcriptions",
       "POST /voice/speech",
+      "POST /voice/realtime-sessions",
       "POST /chat/:agentId",
       "GET /chat/:agentId/runs/:runId/observe",
       "POST /chat/runs/:runId/abort",

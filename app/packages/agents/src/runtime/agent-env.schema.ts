@@ -49,6 +49,11 @@ export const AgentEnvSchema = z.object({
   // Observational Memory stays off until its comparative eval (decision 0029).
   AI_MEMORY_OBSERVATIONAL: booleanFlag(false),
   AI_KB_RERANK: booleanFlag(false),
+  // Voice sends member audio to the provider: off outside local until compliance approves it
+  // (decision 0034, SP3 follow-up #30). Unset: on in local only.
+  AI_VOICE_ENABLED: optionalValue(z.enum(["true", "false"]).transform((value) => value === "true")),
+  // Realtime voice (flag `chat.voice.realtime`): experimental, off unless set, never in fake mode.
+  AI_VOICE_REALTIME_ENABLED: booleanFlag(false),
   // MCPServer requestState key; local gets a fixed non-secret default.
   MCP_REQUEST_STATE_KEY: optionalValue(z.string().min(1)),
   OTEL_EXPORTER_OTLP_ENDPOINT: optionalValue(z.url({ protocol: /^https?$/ })),
@@ -73,8 +78,9 @@ export type AgentRuntimeFlags = {
   AI_MODE: "real" | "fake";
 };
 
-type ResolvedKeys = "MCP_REQUEST_STATE_KEY" | "MASTRA_STORAGE_INIT" | "MASTRA_PUBSUB";
+type ResolvedKeys = "MCP_REQUEST_STATE_KEY" | "MASTRA_STORAGE_INIT" | "MASTRA_PUBSUB" | "AI_VOICE_ENABLED";
 export type AgentEnv = Omit<AgentEnvInput, ResolvedKeys> & {
+  AI_VOICE_ENABLED: boolean;
   MCP_REQUEST_STATE_KEY: string;
   MASTRA_STORAGE_INIT: "auto" | "skip";
   MASTRA_PUBSUB: "memory" | "gcp";
@@ -162,5 +168,6 @@ export const resolveAgentEnv = <TEnv extends AgentEnvInput & AgentRuntimeFlags>(
     MCP_REQUEST_STATE_KEY: env.MCP_REQUEST_STATE_KEY ?? LOCAL_MCP_REQUEST_STATE_KEY,
     MASTRA_STORAGE_INIT: env.MASTRA_STORAGE_INIT ?? (env.APP_ENV === "local" ? "auto" : "skip"),
     MASTRA_PUBSUB: env.MASTRA_PUBSUB ?? (env.APP_ENV === "local" ? "memory" : "gcp"),
+    AI_VOICE_ENABLED: env.AI_VOICE_ENABLED ?? env.APP_ENV === "local",
   };
 };

@@ -142,6 +142,13 @@ describe("remote-only requirements", () => {
     expect(load({ ...PROD_SOURCE, MASTRA_PUBSUB: "memory" }, PROD_REAL).MASTRA_PUBSUB).toBe("memory");
   });
 
+  it("keeps voice off outside local until it is switched on, and realtime off everywhere by default (decision 0034)", () => {
+    expect(load({})).toMatchObject({ AI_VOICE_ENABLED: true, AI_VOICE_REALTIME_ENABLED: false });
+    expect(load(PROD_SOURCE, PROD_REAL)).toMatchObject({ AI_VOICE_ENABLED: false, AI_VOICE_REALTIME_ENABLED: false });
+    expect(load({ ...PROD_SOURCE, AI_VOICE_ENABLED: "true" }, PROD_REAL).AI_VOICE_ENABLED).toBe(true);
+    expect(load({ AI_VOICE_ENABLED: "false", AI_VOICE_REALTIME_ENABLED: "true" })).toMatchObject({ AI_VOICE_ENABLED: false, AI_VOICE_REALTIME_ENABLED: true });
+  });
+
   it("accepts a plain-http Firecrawl URL only in local (a self-hosted Firecrawl on the developer machine)", () => {
     expect(issueFields({ ...PROD_SOURCE, FIRECRAWL_API_URL: "http://firecrawl.internal.example.com" }, PROD_REAL)).toEqual(["FIRECRAWL_API_URL"]);
     expect(issueFields({ ...PROD_SOURCE, FIRECRAWL_API_URL: "https://firecrawl.internal.example.com" }, PROD_REAL)).toEqual([]);

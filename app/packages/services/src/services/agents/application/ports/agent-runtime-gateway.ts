@@ -35,11 +35,12 @@ export type GatewayErrorCode =
   | "VALIDATION_FAILED"
   | "CONFLICT"
   | "RATE_LIMITED"
-  | "UPSTREAM_UNAVAILABLE";
+  | "UPSTREAM_UNAVAILABLE"
+  | "FEATURE_UNAVAILABLE";
 
 export type GatewayError = {
   readonly code: GatewayErrorCode;
-  /** HTTP status for `/v1`: 401, 403, 404, 400, 409, 429, 502 or 504 (timeout). */
+  /** HTTP status for `/v1`: 401, 403, 404, 400, 409, 429, 502, 503 (voice off) or 504 (timeout). */
   readonly status: number;
   /** From Mastra's `Retry-After` on 429, when numeric. */
   readonly retryAfterSeconds?: number;

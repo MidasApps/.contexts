@@ -42,3 +42,21 @@ export type ChatRuntimeGateway = {
   /** `POST /chat/:agentId/summary`: summary of the last 100 messages with the `fast` role. */
   readonly summarize: (input: { readonly scope: AgentCallScope; readonly agentId: string }) => Promise<GatewayResult<{ readonly summary: string }>>;
 };
+
+/**
+ * Voice routes (`/voice/*`). Mastra's 503 (voice off or not configured) maps to
+ * `FEATURE_UNAVAILABLE`; its 413, 415 and 422 (audio too large, of another type, too long)
+ * map to `VALIDATION_FAILED`.
+ */
+export type VoiceRuntimeGateway = {
+  /** `POST /voice/transcriptions` with the raw audio body. */
+  readonly transcribe: (input: { readonly scope: AgentCallScope; readonly audio: Uint8Array<ArrayBuffer>; readonly mediaType: string }) => Promise<GatewayResult<unknown>>;
+  /** `POST /voice/speech`: the audio stream and its media type. */
+  readonly synthesize: (input: {
+    readonly scope: AgentCallScope;
+    readonly text: string;
+    readonly voice?: string;
+  }) => Promise<GatewayResult<{ readonly body: ReadableStream<Uint8Array>; readonly contentType: string }>>;
+  /** `POST /voice/realtime-sessions`: an ephemeral realtime secret (503 while the flag is off). */
+  readonly createRealtimeSession: (input: { readonly scope: AgentCallScope }) => Promise<GatewayResult<unknown>>;
+};
