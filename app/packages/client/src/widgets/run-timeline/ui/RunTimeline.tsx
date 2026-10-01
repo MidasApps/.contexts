@@ -20,6 +20,8 @@ export type RunTimelineProps = {
   run: RunTimelineRun;
   /** Accessible name of the list ("Linha do tempo da execução …"). */
   label: string;
+  /** Name of the person who started the run when the caller knows it; defaults to the user id. */
+  starterLabel?: string | undefined;
   /** Link (or text) for the approval request a suspended run waits for; defaults to its id. */
   renderApproval?: ((approvalRequestId: string) => ReactNode) | undefined;
 };
@@ -41,10 +43,10 @@ function Step({ title, when, children }: { title: string; when?: string | undefi
  * time of the last change. Step-by-step events come from the progress stream, which callers add
  * around this widget where an endpoint exists.
  */
-export function RunTimeline({ run, label, renderApproval }: RunTimelineProps) {
+export function RunTimeline({ run, label, starterLabel, renderApproval }: RunTimelineProps) {
   const t = useTranslations("common.runTimeline");
   const formatDateTime = useFormatDateTime();
-  const origin = run.scheduleId !== null ? t("startedBySchedule", { schedule: run.scheduleId }) : run.startedBy !== null ? t("startedByUser", { user: run.startedBy }) : t("startedByPlatform");
+  const origin = run.scheduleId !== null ? t("startedBySchedule", { schedule: run.scheduleId }) : run.startedBy !== null ? t("startedByUser", { user: starterLabel ?? run.startedBy }) : t("startedByPlatform");
   const waiting = run.status === "suspended" && run.approvalRequestId !== null;
   return (
     <ol aria-label={label} data-slot="run-timeline" className="flex flex-col">

@@ -1,6 +1,8 @@
 import { act, screen, waitFor, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { renderAdmin } from "#/app-shell/testing/render-admin.tsx";
+import { buildAdminUser } from "#/shared/testing/admin-accounts-fixtures.ts";
+import { IDS } from "#/shared/testing/fixtures.ts";
 import { buildPromptActivation, buildPromptEvalResult, buildPromptVersion, PROMPT_IDS } from "#/shared/testing/admin-agents-fixtures.ts";
 import { expectNoAxeViolations } from "#/shared/testing/axe.ts";
 import { apiError, FAKE_REQUEST_ID, ok, type FakeRoutes } from "#/shared/testing/fake-api.ts";
@@ -275,5 +277,24 @@ describe("AdminAgentPromptsView", () => {
     render({ locale: "es-419" });
     expect(await screen.findByRole("table", { name: "Versiones del prompt de Asistente" })).toBeDefined();
     expect(screen.getByText("La versión 2 está en producción.")).toBeDefined();
+  });
+});
+
+describe("AdminAgentPromptsView: authors", () => {
+  it("names authors and activators with one lookup for the whole page", async () => {
+    const { api } = render({ routes: routes({ "GET /v1/admin/users": { status: 200, body: { data: [buildAdminUser({ id: IDS.user, displayName: "Ana Souza" })], meta: { page: { cursor: null, hasMore: false, limit: 100 } } } } }) });
+    const table = await versionsTable();
+    await waitFor(() => expect(within(row(table, "v3")).getByText("Ana Souza")).toBeDefined());
+    expect(within(row(table, "v3")).getByText("Ana Souza").getAttribute("title")).toBe(IDS.user);
+    const history = screen.getByRole("table", { name: "Ativações do prompt de Assistente" });
+    expect(within(history).getAllByText("Ana Souza")).toHaveLength(ACTIVATIONS.length);
+    const lookups = api.calls.filter((call) => call.path === "/v1/admin/users");
+    expect(lookups.map((call) => new URLSearchParams(call.query).get("ids"))).toEqual([IDS.user]);
+  });
+
+  it("keeps the user id when the names cannot be read", async () => {
+    render();
+    const table = await versionsTable();
+    expect(within(row(table, "v3")).getByText(IDS.user)).toBeDefined();
   });
 });

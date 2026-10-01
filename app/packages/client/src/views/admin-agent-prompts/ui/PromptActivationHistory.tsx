@@ -3,6 +3,7 @@
 import type { PromptActivation, PromptVersion } from "@core/contracts";
 import { useMemo } from "react";
 import { useTranslations } from "use-intl";
+import { AdminUserRef } from "#/entities/admin-user/index.ts";
 import { useFormatDateTime } from "#/shared/lib/format/use-format-date-time.ts";
 import { StatusPill } from "#/shared/ui/molecules/StatusPill/StatusPill.tsx";
 import { DataTable } from "#/shared/ui/organisms/DataTable/DataTable.tsx";
@@ -25,7 +26,18 @@ function Kind({ forced }: { forced: boolean }) {
  * Activations of the platform prompt, newest (the active one) first: which version, who, when,
  * whether the eval gate was skipped and the recorded reason. Rollbacks are rows like any other.
  */
-export function PromptActivationHistory({ agentName, activations, versions }: { agentName: string; activations: readonly PromptActivation[]; versions: readonly PromptVersion[] }) {
+export function PromptActivationHistory({
+  agentName,
+  activations,
+  versions,
+  userLabel,
+}: {
+  agentName: string;
+  activations: readonly PromptActivation[];
+  versions: readonly PromptVersion[];
+  /** Name of a user id (who activated), or the id itself while unknown. */
+  userLabel: (userId: string) => string;
+}) {
   const t = useTranslations("admin.prompts.history");
   const formatDateTime = useFormatDateTime();
   const versionLabel = useMemo(() => {
@@ -39,11 +51,11 @@ export function PromptActivationHistory({ agentName, activations, versions }: { 
     () => [
       column.display({ id: "version", header: () => t("columns.version"), cell: ({ row }) => <span className="font-mono tabular-nums">{versionLabel(row.original)}</span> }),
       column.accessor("activatedAt", { header: () => t("columns.when"), cell: ({ getValue }) => formatDateTime(getValue()) }),
-      column.accessor("activatedBy", { header: () => t("columns.who"), cell: ({ getValue }) => <span className="font-mono text-[11.5px]">{getValue()}</span> }),
+      column.accessor("activatedBy", { header: () => t("columns.who"), cell: ({ getValue }) => <AdminUserRef id={getValue()} label={userLabel(getValue())} /> }),
       column.accessor("forced", { header: () => t("columns.kind"), cell: ({ getValue }) => <Kind forced={getValue()} /> }),
       column.accessor("reason", { header: () => t("columns.reason"), cell: ({ getValue }) => getValue() ?? <span className="text-muted-foreground">{t("noReason")}</span> }),
     ],
-    [formatDateTime, t, versionLabel],
+    [formatDateTime, t, userLabel, versionLabel],
   );
   if (activations.length === 0) return <p className="text-sm text-muted-foreground">{t("empty")}</p>;
   return (
@@ -60,7 +72,7 @@ export function PromptActivationHistory({ agentName, activations, versions }: { 
             <span className="font-mono font-medium tabular-nums">{versionLabel(activation)}</span>
             <Kind forced={activation.forced} />
           </span>
-          <span className="text-xs text-muted-foreground">{t("cardMeta", { who: activation.activatedBy, date: formatDateTime(activation.activatedAt) })}</span>
+          <span className="text-xs text-muted-foreground">{t("cardMeta", { who: userLabel(activation.activatedBy), date: formatDateTime(activation.activatedAt) })}</span>
           {activation.reason === null ? null : <span className="text-[13px]">{activation.reason}</span>}
         </div>
       )}

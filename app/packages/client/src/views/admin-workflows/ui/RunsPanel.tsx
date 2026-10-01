@@ -3,6 +3,8 @@
 import { WORKFLOW_RUN_STATUSES, type AdminWorkflowRun, type WorkflowRunStatus } from "@core/contracts";
 import { useId, useState, type FormEvent } from "react";
 import { useTranslations } from "use-intl";
+import { useAdminUserNames } from "#/entities/admin-user/index.ts";
+import { usePlatformPermissions } from "#/entities/permission/index.ts";
 import { useAdminWorkflowRuns, ADMIN_RUNS_PAGE_LIMIT } from "#/entities/workflow-run/index.ts";
 import { CancelRunDialog } from "#/features/admin-cancel-run/index.ts";
 import { useCursorPages } from "#/shared/lib/pagination/use-cursor-pages.ts";
@@ -83,7 +85,17 @@ function RunFilters({ values, onChange }: { values: RunFilterValues; onChange: (
   );
 }
 
-function RunDetailsDialog({ run, organizationLabel, onOpenChange }: { run: AdminWorkflowRun | null; organizationLabel: (tenantId: string | null) => string; onOpenChange: (open: boolean) => void }) {
+function RunDetailsDialog({
+  run,
+  organizationLabel,
+  userLabel,
+  onOpenChange,
+}: {
+  run: AdminWorkflowRun | null;
+  organizationLabel: (tenantId: string | null) => string;
+  userLabel: (userId: string) => string;
+  onOpenChange: (open: boolean) => void;
+}) {
   const t = useTranslations("admin.workflows.runs");
   return (
     <Dialog open={run !== null} onOpenChange={onOpenChange}>
@@ -92,7 +104,7 @@ function RunDetailsDialog({ run, organizationLabel, onOpenChange }: { run: Admin
           <DialogTitle>{t("detailsTitle", { workflow: run?.workflowId ?? "" })}</DialogTitle>
           <DialogDescription>{run === null ? "" : t("detailsDescription", { organization: organizationLabel(run.tenantId), id: run.runId })}</DialogDescription>
         </DialogHeader>
-        {run === null ? null : <RunTimeline run={run} label={t("timelineLabel")} />}
+        {run === null ? null : <RunTimeline run={run} label={t("timelineLabel")} starterLabel={run.startedBy === null ? undefined : userLabel(run.startedBy)} />}
         <p className="text-xs text-muted-foreground">{t("noStepEvents")}</p>
       </DialogContent>
     </Dialog>
@@ -129,6 +141,9 @@ export function RunsPanel({ values, onChange, organizationLabel, onSeeSchedules 
   };
   const runs = useAdminWorkflowRuns(filters);
   const paged = useCursorPages(runs, ADMIN_RUNS_PAGE_LIMIT, t("pagination"));
+  // One lookup for the starters of the page on screen (decision 0044), never one per row.
+  const canReadUsers = usePlatformPermissions().can("platform.user.read");
+  const userLabel = useAdminUserNames(paged.rows.map((run) => run.startedBy), { enabled: canReadUsers });
   const [details, setDetails] = useState<AdminWorkflowRun | null>(null);
   const [canceling, setCanceling] = useState<AdminWorkflowRun | null>(null);
   const filtering = Object.values(filters).some((value) => value !== undefined);
@@ -141,13 +156,14 @@ export function RunsPanel({ values, onChange, organizationLabel, onSeeSchedules 
             runs={paged.rows}
             pagination={paged.pagination}
             organizationLabel={organizationLabel}
+            userLabel={userLabel}
             onDetails={setDetails}
             onCancel={setCanceling}
             empty={<RunsEmpty filtering={filtering} onClear={() => onChange({ organizationId: undefined, workflowId: undefined, status: undefined })} onSchedules={onSeeSchedules} />}
           />
         )}
       </AdminQuerySection>
-      <RunDetailsDialog run={details} organizationLabel={organizationLabel} onOpenChange={(open) => !open && setDetails(null)} />
+      <RunDetailsDialog run={details} organizationLabel={organizationLabel} userLabel={userLabel} onOpenChange={(open) => !open && setDetails(null)} />
       <CancelRunDialog run={canceling} onOpenChange={(open) => !open && setCanceling(null)} />
     </div>
   );

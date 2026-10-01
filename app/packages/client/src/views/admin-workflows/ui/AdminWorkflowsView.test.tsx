@@ -1,6 +1,7 @@
 import { act, screen, waitFor, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { renderAdmin } from "#/app-shell/testing/render-admin.tsx";
+import { buildAdminUser } from "#/shared/testing/admin-accounts-fixtures.ts";
 import { buildOrganizationSummary } from "#/shared/testing/admin-fixtures.ts";
 import { buildAdminRun, buildAdminSchedule, buildPlatformSchedule, OPS_IDS } from "#/shared/testing/admin-operations-fixtures.ts";
 import { expectNoAxeViolations } from "#/shared/testing/axe.ts";
@@ -249,5 +250,31 @@ describe("AdminWorkflowsView: schedules", () => {
     render({ locale: "es-419" });
     expect(await screen.findByRole("table", { name: "Ejecuciones de workflows" })).toBeDefined();
     expect(screen.getByText("Suspendida")).toBeDefined();
+  });
+});
+
+describe("AdminWorkflowsView: who started a run", () => {
+  it("names the starters of the page with one lookup, and keeps the id when the lookup fails", async () => {
+    const other = buildAdminRun({ runId: "run_other_0001", workflowId: "onboarding", startedBy: "uOther", approvalRequestId: null, status: "running" });
+    const again = buildAdminRun({ runId: "run_again_0001", workflowId: "cleanup", approvalRequestId: null, status: "success" });
+    const { api, user } = render({
+      routes: routes({
+        "GET /v1/admin/workflow-runs": page([SUSPENDED, PLATFORM_DONE, other, again]),
+        "GET /v1/admin/users": page([buildAdminUser({ id: IDS.user, displayName: "Ana Souza" }), buildAdminUser({ id: "uOther", displayName: "", email: "bo@example.com" })]),
+      }),
+    });
+    const table = await screen.findByRole("table", { name: "Execuções de workflows" });
+    expect(await within(within(table).getByRole("row", { name: /approval-demo/u })).findByText("Usuário Ana Souza")).toBeDefined();
+    expect(within(within(table).getByRole("row", { name: /onboarding/u })).getByText("Usuário bo@example.com")).toBeDefined();
+    const lookups = api.calls.filter((call) => call.path === "/v1/admin/users");
+    expect(lookups.map((call) => new URLSearchParams(call.query).get("ids"))).toEqual([[IDS.user, "uOther"].sort().join(",")]);
+    await user.click(within(within(table).getByRole("row", { name: /approval-demo/u })).getByRole("button", { name: /^Detalhes/u }));
+    expect(await within(await screen.findByRole("dialog")).findByText("Pelo usuário Ana Souza")).toBeDefined();
+  });
+
+  it("shows the user id while the names are unknown", async () => {
+    render({ routes: routes({ "GET /v1/admin/users": apiError(403, "FORBIDDEN") }) });
+    const table = await screen.findByRole("table", { name: "Execuções de workflows" });
+    expect(await within(table).findByText(`Usuário ${IDS.user}`)).toBeDefined();
   });
 });

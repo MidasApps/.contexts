@@ -3,6 +3,7 @@
 import { PROMPT_AGENT_IDS, type PromptActivation, type PromptAgentId, type PromptVersion } from "@core/contracts";
 import { useState } from "react";
 import { useTranslations } from "use-intl";
+import { useAdminUserNames } from "#/entities/admin-user/index.ts";
 import { usePlatformPermissions } from "#/entities/permission/index.ts";
 import { activeVersionOf, usePromptActivations, usePromptVersions } from "#/entities/prompt-version/index.ts";
 import { PromptActivationDialog, PromptEvalResultTable, useRunPromptEval, type PromptActivationRequest, type RunPromptEval } from "#/features/admin-prompt-activation/index.ts";
@@ -89,10 +90,13 @@ function PromptSections({ agentId, agentName, data, online, onCreate }: { agentI
   const evalRun = useRunPromptEval(agentId);
   const diff = useDiffSelection(data.versions, active);
   const [request, setRequest] = useState<PromptActivationRequest | null>(null);
+  // One lookup for every author and activator on the page (decision 0044), never one per row.
+  const canReadUsers = usePlatformPermissions().can("platform.user.read");
+  const userLabel = useAdminUserNames([...data.versions.map((version) => version.createdBy), ...data.activations.map((activation) => activation.activatedBy)], { enabled: canReadUsers });
   return (
     <div className="flex flex-col gap-6">
       <SectionCard title={t("versions.title")} description={active === undefined ? t("versions.seedActive") : t("versions.description", { version: active.version })}>
-        <PromptVersionsTable agentName={agentName} versions={data.versions} activeVersion={active} evalRun={evalRun} online={online} onActivate={setRequest} onCompare={(version) => diff.setCompare(version.id)} onCreate={onCreate} />
+        <PromptVersionsTable agentName={agentName} versions={data.versions} activeVersion={active} evalRun={evalRun} online={online} onActivate={setRequest} onCompare={(version) => diff.setCompare(version.id)} onCreate={onCreate} userLabel={userLabel} />
       </SectionCard>
       {data.versions.length === 0 ? null : (
         <SectionCard title={t("eval.title")} description={t("eval.description")}>
@@ -105,7 +109,7 @@ function PromptSections({ agentId, agentName, data, online, onCreate }: { agentI
         </SectionCard>
       )}
       <SectionCard title={t("history.title")} description={t("history.description")}>
-        <PromptActivationHistory agentName={agentName} activations={data.activations} versions={data.versions} />
+        <PromptActivationHistory agentName={agentName} activations={data.activations} versions={data.versions} userLabel={userLabel} />
       </SectionCard>
       <PromptActivationDialog agentId={agentId} agentName={agentName} request={request} activeVersion={active} onOpenChange={(open) => !open && setRequest(null)} />
     </div>

@@ -3,6 +3,7 @@
 import type { PromptVersion } from "@core/contracts";
 import { useMemo } from "react";
 import { useTranslations } from "use-intl";
+import { AdminUserRef } from "#/entities/admin-user/index.ts";
 import { PromptVerdictPill } from "#/entities/prompt-version/index.ts";
 import { canActivatePrompt, isPromptRollback, type PromptActivationRequest, type RunPromptEval } from "#/features/admin-prompt-activation/index.ts";
 import { useFormatDateTime } from "#/shared/lib/format/use-format-date-time.ts";
@@ -23,10 +24,12 @@ export type PromptVersionsTableProps = {
   online: boolean;
   onActivate: (request: PromptActivationRequest) => void;
   onCompare: (version: PromptVersion) => void;
+  /** Name of a user id (the author), or the id itself while unknown. */
+  userLabel: (userId: string) => string;
   onCreate: () => void;
 };
 
-type RowContext = Pick<PromptVersionsTableProps, "activeVersion" | "evalRun" | "online" | "onActivate" | "onCompare">;
+type RowContext = Pick<PromptVersionsTableProps, "activeVersion" | "evalRun" | "online" | "onActivate" | "onCompare" | "userLabel">;
 
 function VersionLabel({ version, active }: { version: PromptVersion; active: boolean }) {
   const t = useTranslations("admin.prompts");
@@ -43,7 +46,7 @@ function VersionLabel({ version, active }: { version: PromptVersion; active: boo
 }
 
 /** Evaluate, activate (or roll back), force and compare for one version. */
-function VersionActions({ version, activeVersion, evalRun, online, onActivate, onCompare }: RowContext & { version: PromptVersion }) {
+function VersionActions({ version, activeVersion, evalRun, online, onActivate, onCompare }: Omit<RowContext, "userLabel"> & { version: PromptVersion }) {
   const t = useTranslations("admin.prompts");
   const n = version.version;
   const isActive = activeVersion?.id === version.id;
@@ -83,12 +86,12 @@ function VersionActions({ version, activeVersion, evalRun, online, onActivate, o
 const useColumns = (context: RowContext) => {
   const t = useTranslations("admin.prompts");
   const formatDateTime = useFormatDateTime();
-  const { activeVersion, evalRun, online, onActivate, onCompare } = context;
+  const { activeVersion, evalRun, online, onActivate, onCompare, userLabel } = context;
   return useMemo(
     () => [
       column.display({ id: "version", header: () => t("columns.version"), cell: ({ row }) => <VersionLabel version={row.original} active={activeVersion?.id === row.original.id} /> }),
       column.accessor("note", { header: () => t("columns.note"), cell: ({ getValue }) => getValue() ?? <span className="text-muted-foreground">{t("noNote")}</span> }),
-      column.accessor("createdBy", { header: () => t("columns.author"), cell: ({ getValue }) => <span className="font-mono text-[11.5px]">{getValue()}</span> }),
+      column.accessor("createdBy", { header: () => t("columns.author"), cell: ({ getValue }) => <AdminUserRef id={getValue()} label={userLabel(getValue())} /> }),
       column.accessor("createdAt", { header: () => t("columns.createdAt"), cell: ({ getValue }) => formatDateTime(getValue()) }),
       column.accessor("evalVerdict", { header: () => t("columns.verdict"), cell: ({ getValue }) => <PromptVerdictPill verdict={getValue()} /> }),
       column.display({
@@ -98,7 +101,7 @@ const useColumns = (context: RowContext) => {
         cell: ({ row }) => <VersionActions version={row.original} activeVersion={activeVersion} evalRun={evalRun} online={online} onActivate={onActivate} onCompare={onCompare} />,
       }),
     ],
-    [activeVersion, evalRun, formatDateTime, onActivate, onCompare, online, t],
+    [activeVersion, evalRun, formatDateTime, onActivate, onCompare, online, t, userLabel],
   );
 };
 
@@ -125,7 +128,7 @@ export function PromptVersionsTable({ agentName, versions, onCreate, ...context 
             <PromptVerdictPill verdict={version.evalVerdict} />
           </span>
           {version.note === null ? null : <span className="text-[13px]">{version.note}</span>}
-          <span className="text-xs text-muted-foreground">{t("cardMeta", { author: version.createdBy, date: formatDateTime(version.createdAt) })}</span>
+          <span className="text-xs text-muted-foreground">{t("cardMeta", { author: context.userLabel(version.createdBy), date: formatDateTime(version.createdAt) })}</span>
           <VersionActions version={version} {...context} />
         </div>
       )}

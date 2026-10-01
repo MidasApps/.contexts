@@ -14,11 +14,13 @@ import { dataTableColumnHelper } from "#/shared/ui/organisms/DataTable/data-tabl
 export type RunsTableState = {
   /** Organization name when the list knows it, else the id; "platform" for runs without one. */
   readonly organizationLabel: (tenantId: string | null) => string;
+  /** Name of the user who started a run, or the id itself while unknown. */
+  readonly userLabel: (userId: string) => string;
   readonly onDetails: (run: AdminWorkflowRun) => void;
   readonly onCancel: (run: AdminWorkflowRun) => void;
 };
 
-// Cells read late-loading state (organization names) from context, so the column definitions keep
+// Cells read late-loading state (organization and user names) from context, so the column definitions keep
 // their identity and TanStack never remounts a cell under a click.
 const RunsTableContext = createContext<RunsTableState | null>(null);
 const useRunsState = (): RunsTableState => {
@@ -45,7 +47,8 @@ function Organization({ run }: { run: AdminWorkflowRun }) {
 /** Who or what started the run, and the approval a suspended run waits for. */
 function Origin({ run }: { run: AdminWorkflowRun }) {
   const t = useTranslations("admin.workflows.runs");
-  const origin = run.scheduleId !== null ? t("bySchedule", { schedule: run.scheduleId }) : run.startedBy !== null ? t("byUser", { user: run.startedBy }) : t("byPlatform");
+  const { userLabel } = useRunsState();
+  const origin = run.scheduleId !== null ? t("bySchedule", { schedule: run.scheduleId }) : run.startedBy !== null ? t("byUser", { user: userLabel(run.startedBy) }) : t("byPlatform");
   return (
     <span className="flex min-w-0 flex-col">
       <span className="break-all">{origin}</span>
