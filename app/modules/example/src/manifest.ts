@@ -1,6 +1,7 @@
 import { defineModule } from "@core/contracts";
 import { EXAMPLE_CAPABILITIES } from "./capabilities.ts";
 import { ExampleSettingsContract } from "./contracts/example-settings.schema.ts";
+import { NOTE_PERMISSIONS } from "./contracts/note-commands.schema.ts";
 import enUS from "./messages/en-US.json" with { type: "json" };
 import es419 from "./messages/es-419.json" with { type: "json" };
 import ptBR from "./messages/pt-BR.json" with { type: "json" };
@@ -16,6 +17,17 @@ export const exampleManifest = defineModule({
   permissions: [
     { id: "example.item.read", descriptionKey: "example.permissions.item.read", kind: "read", scope: "tenant", defaultRoles: ["owner", "admin", "member", "viewer"] },
     { id: "example.item.write", descriptionKey: "example.permissions.item.write", kind: "write", scope: "tenant", defaultRoles: ["owner", "admin"] },
+    // Notes (SP3 Task 19): permissions of the commands in `contracts/note-commands.schema.ts`; archiving needs a second member (four eyes).
+    { id: NOTE_PERMISSIONS.read, descriptionKey: "example.permissions.note.read", kind: "read", scope: "tenant", defaultRoles: ["owner", "admin", "member", "viewer"] },
+    { id: NOTE_PERMISSIONS.create, descriptionKey: "example.permissions.note.create", kind: "write", scope: "tenant", defaultRoles: ["owner", "admin", "member"] },
+    {
+      id: NOTE_PERMISSIONS.archive,
+      descriptionKey: "example.permissions.note.archive",
+      kind: "write",
+      scope: "tenant",
+      defaultRoles: ["owner", "admin", "member"],
+      requiresApproval: true,
+    },
   ],
   unitTypes: [{ id: "example.area", labelKey: "example.unitTypes.area", allowedParents: ["project", "example.area"] }],
   navigation: [{ id: "home", slot: "project", labelKey: "example.nav.home", icon: "puzzle", path: "", permission: "example.item.read", order: 100 }],

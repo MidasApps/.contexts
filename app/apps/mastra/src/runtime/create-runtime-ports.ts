@@ -32,12 +32,12 @@ import {
   type ServicesEnv,
   systemClock,
 } from "@core/services";
-import { type CoreServerModule, createCoreServer } from "@core/services/composition";
+import { createCoreServer } from "@core/services/composition";
+import type { AppModule } from "../modules.ts";
 import { bindAccessPort } from "./access-port-binding.ts";
 import { bindApprovalsPort } from "./approvals-port-binding.ts";
 import { bindAuditPort } from "./audit-port-binding.ts";
 import { bindKnowledgePort } from "./knowledge-port-binding.ts";
-import { bindProjectsPort } from "./projects-port-binding.ts";
 import { bindUsagePort } from "./usage-port-binding.ts";
 import { createLogNotificationPort } from "./notifications-port-binding.ts";
 import { bindUsageReportPort, type UsageReportBindingEnv } from "./usage-report-port-binding.ts";
@@ -86,7 +86,7 @@ export type RuntimePortsAdapters = {
   readonly accessReaders?: AccessReaders;
   readonly apiKeyAuthenticator?: ApiKeyAuthenticator;
   readonly resolveAccessContext?: ResolveAccessContext;
-  /** Extra command executors (tests: a module command the workflow HITL applies). */
+  /** Extra executors outside the registry (tests: a command the approval handler and workflows run, without an agent tool). */
   readonly commandExecutors?: readonly AgentCommandExecutor[];
 };
 
@@ -103,7 +103,9 @@ export type RuntimePortsAdapters = {
  *   are structured log lines until the event bus exists.
  * - usage: ledger writes and tenant budget checks over `usage.llm_calls` / `usage.tenant_budgets`
  *   (row level security, role `usage_runtime`).
- * - projects: SP1 `createProject` (the action agent's core command, SP3 Task 20).
+ * - command registry: the core commands (`tenancy.CreateProjectInput` → SP1 `createProject`) and
+ *   the installed modules' (`AppModule.createCommands`); one definition per command for the agent
+ *   tool, the approval handler and the workflow command port (decision 0025, SP3 Task 19).
  * - connectors and secrets: active tenant connectors (Firestore) and the secret store (Secret
  *   Manager outside local, the emulator collection in local), read server-side only.
  * - approvals: SP1 `requestApproval` (kind `agent-command`, whose handler this runtime also
@@ -117,13 +119,14 @@ export type RuntimePortsAdapters = {
  * - flags: the SP5 flags services (Remote Config outside local, Firestore `feature-flags` in local,
  *   tenant overrides in Firestore; the env voice/memory switches only seed defaults, decision 0039).
  * - settings: SP5 agent settings (Firestore `agent-settings`, defaults when none are stored).
- * @param args.modules installed modules (their permissions join SP1's registry).
+ * @param args.modules installed modules: their manifests join SP1's registries (permissions, unit
+ *   types, settings) and their commands join the command registry.
  */
 export const createRuntimePorts = (args: {
   env: RuntimePortsEnv;
   firebase: FirebaseAdmin;
   logger: Logger;
-  modules?: readonly CoreServerModule[];
+  modules?: readonly Pick<AppModule, "manifest" | "createCommands">[];
   adapters?: RuntimePortsAdapters;
 }): AgentRuntimePorts => {
   const { adapters = {} } = args;
@@ -131,7 +134,7 @@ export const createRuntimePorts = (args: {
     env: { API_KEY_PREFIX: args.env.API_KEY_PREFIX },
     firebase: args.firebase,
     logger: args.logger,
-    ...(args.modules === undefined ? {} : { modules: args.modules }),
+    ...(args.modules === undefined ? {} : { modules: args.modules.map((module) => module.manifest) }),
     adapters: {
       ...(adapters.accessReaders === undefined ? {} : { accessReaders: adapters.accessReaders }),
       ...(adapters.apiKeyAuthenticator === undefined ? {} : { apiKeyAuthenticator: adapters.apiKeyAuthenticator }),
@@ -148,7 +151,12 @@ export const createRuntimePorts = (args: {
     BIGQUERY_DATASET_AI_OBSERVABILITY: args.env.BIGQUERY_DATASET_AI_OBSERVABILITY ?? "ai_observability",
     FIREBASE_PROJECT_ID: args.env.FIREBASE_PROJECT_ID,
   } as const;
-  const executors = [...createCoreAgentCommandExecutors({ tenancy: core.tenancy, access: core.access }), ...(adapters.commandExecutors ?? [])];
+  const moduleDeps = { firestore: args.firebase.firestore, access: core.access, audit: core.audit };
+  const commandRegistry = [
+    ...createCoreAgentCommandExecutors({ tenancy: core.tenancy, access: core.access }),
+    ...(args.modules ?? []).flatMap((module) => module.createCommands(moduleDeps)),
+  ];
+  const executors = [...commandRegistry, ...(adapters.commandExecutors ?? [])];
   const commands = registerAgentCommandApprovals({ approvals: core.approvals, executors, access: core.access, idempotency: core.pipeline.idempotency });
   // Decided in /v1; registered here so SP1 accepts requests of the kind (decision 0036).
   registerWorkflowApprovals({ approvals: core.approvals, settler: RUNTIME_SIDE_SETTLER });
@@ -170,7 +178,7 @@ export const createRuntimePorts = (args: {
     files: bindFilesPort(files),
     knowledgeEvents: createLogKnowledgeEventPublisher(args.logger),
     usage: bindUsagePort(createUsageServices({ repository: createPostgresUsageRepository(sql), clock: systemClock })),
-    projects: bindProjectsPort({ tenancy: core.tenancy, access: core.access }),
+    commandRegistry,
     workflowApprovals: bindWorkflowApprovalsPort(core.approvals),
     workflowCommands: bindWorkflowCommandsPort({ executors: agentCommandExecutors(executors), access: core.access, commands }),
     notifications: createLogNotificationPort(args.logger),

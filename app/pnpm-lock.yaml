@@ -666,6 +666,9 @@ importers:
       '@core/contracts':
         specifier: workspace:*
         version: link:../../packages/contracts
+      '@core/module-example':
+        specifier: workspace:*
+        version: link:../../modules/example
       '@core/services':
         specifier: workspace:*
         version: link:../../packages/services
@@ -800,16 +803,28 @@ importers:
 
   modules/example:
     dependencies:
-      '@core/client':
+      '@core/agents':
         specifier: workspace:*
-        version: link:../../packages/client
+        version: link:../../packages/agents
       '@core/contracts':
         specifier: workspace:*
         version: link:../../packages/contracts
+      '@core/services':
+        specifier: workspace:*
+        version: link:../../packages/services
+      '@mastra/core':
+        specifier: 'catalog:'
+        version: 1.71.0(@bufbuild/protobuf@2.16.0)(@grpc/grpc-js@1.14.5)(ai@7.0.122(zod@4.6.5))(express@5.2.1(supports-color@7.2.0))(rxjs@7.8.2)(supports-color@7.2.0)(zod-to-json-schema@3.25.2(zod@4.6.5))(zod@4.6.5)
+      firebase-admin:
+        specifier: 'catalog:'
+        version: 14.5.0(@firebase/app-compat@0.5.18)(@firebase/app@0.16.2)(supports-color@7.2.0)
       zod:
         specifier: 'catalog:'
         version: 4.6.5
     devDependencies:
+      '@core/client':
+        specifier: workspace:*
+        version: link:../../packages/client
       '@core/config':
         specifier: workspace:*
         version: link:../../packages/config

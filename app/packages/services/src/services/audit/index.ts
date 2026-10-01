@@ -8,6 +8,7 @@ export {
   type TenantAuditRecordInput,
 } from "./application/use-cases/record-audit.ts";
 export type { AuditLogAppend, AuditLogWriter, AuditTransaction } from "./application/ports/driven/audit-log-writer.ts";
+export { auditActorOf, type AuditActor } from "./domain/audit-actor.ts";
 export { AuditEntryRejectedError, type AuditEntryRejectedCode } from "./domain/audit-entry-rejected-error.ts";
 export {
   AUDIT_LOG_COLLECTIONS,

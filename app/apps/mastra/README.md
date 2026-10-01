@@ -29,8 +29,9 @@ SP1/SP3 services and `src/modules.ts` lists the agent modules (decision 0019).
 
 ## Adding agents, tools, skills and commands
 
-Modules plug in through `defineAgentModule(...)` values listed in `src/modules.ts`
-(`APP_MODULES`); the core never imports a module. The recipe and the rules per capability
+Modules plug in through `src/modules.ts` (`APP_MODULES`: each entry names the module's
+manifest, its command factory and its `defineAgentModule(...)` factory); the core never
+imports a module. The recipe and the rules per capability
 (tool, command, agent, skill, workflow, connector) are in
 `../../packages/agents/README.md`. After adding one, run `pnpm build` (copies instructions
 and skills into `src/mastra/public/`) and the module's eval set.

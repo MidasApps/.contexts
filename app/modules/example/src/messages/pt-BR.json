@@ -2,9 +2,11 @@
   "module": { "name": "Exemplo" },
   "nav": { "home": "Exemplo" },
   "permissions": {
-    "item": { "read": "Ver os itens do módulo de exemplo", "write": "Criar e alterar itens do módulo de exemplo" }
+    "item": { "read": "Ver os itens do módulo de exemplo", "write": "Criar e alterar itens do módulo de exemplo" },
+    "note": { "read": "Ver as notas do módulo de exemplo", "create": "Criar notas no módulo de exemplo", "archive": "Arquivar notas do módulo de exemplo (exige a aprovação de outra pessoa)" }
   },
   "unitTypes": { "area": "Área" },
+  "note": { "title": "Título", "body": "Texto", "noteId": "Nota" },
   "settings": {
     "greeting": "Saudação",
     "greetingHint": "Mostrada no início do módulo, para todos os membros.",

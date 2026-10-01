@@ -103,7 +103,8 @@ to the demo organization.
   provider keys of the `AI_MODEL_*` roles.
 - Agents: `assistant` (supervisor, the only entry) delegates to `knowledge`, `data`,
   `action` and `web`. A module adds tools, commands (mutations with approval), agents and
-  skills with one `defineAgentModule(...)` listed in `apps/mastra/src/modules.ts`; see
+  skills and workflows with one entry in `apps/mastra/src/modules.ts` (manifest, command
+  factory, `defineAgentModule(...)` factory; `modules/example` is the reference); see
   `packages/agents/README.md` ("How to add a capability from a module").
 - Evals: `pnpm evals` (fake models, CI gate against `packages/agents/evals/baselines`),
   `pnpm evals:real` (real providers, opt-in), `pnpm evals:seed` (Mastra datasets).

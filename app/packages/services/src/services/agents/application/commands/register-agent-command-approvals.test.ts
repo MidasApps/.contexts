@@ -7,6 +7,7 @@ import { createInMemoryIdempotencyStore } from "../../../shared/idempotency/in-m
 import { ok } from "../../../shared/result/result.ts";
 import { AccessDeniedError } from "../../../access/domain/errors/access-denied-error.ts";
 import { err } from "../../../shared/result/result.ts";
+import { agentCommandExecutors, DuplicateCommandError } from "./agent-command-executor.ts";
 import { CREATE_PROJECT_COMMAND_ID, createCoreAgentCommandExecutors } from "./core-agent-command-executors.ts";
 import { registerAgentCommandApprovals } from "./register-agent-command-approvals.ts";
 
@@ -28,7 +29,7 @@ describe("createCoreAgentCommandExecutors", () => {
     expect(executor?.commandId).toBe(CREATE_PROJECT_COMMAND_ID);
     expect(executor?.permission).toBe("core.project.create");
     const run = executor?.prepare({ name: "Launch" });
-    const output = await run?.({ principal: PRINCIPAL, tenantId: TENANT, node: { level: "organization", tenantId: TENANT }, requestId: "req-1" });
+    const output = await run?.({ principal: PRINCIPAL, tenantId: TENANT, node: { level: "organization", tenantId: TENANT }, requestId: "req-1", idempotencyKey: "run-1:call-1" });
     expect(output).toEqual({ projectId: "Pq8sK2lPq0WnR5tYu3bV", name: "Launch" });
     expect(calls).toEqual([{ actor: PRINCIPAL, tenantId: TENANT, input: { name: "Launch" }, requestId: "req-1" }]);
     expect(executor?.prepare({ name: "" })).toBeNull();
@@ -38,7 +39,17 @@ describe("createCoreAgentCommandExecutors", () => {
     const tenancy = tenancyWith(() => Promise.resolve(err(new AccessDeniedError("NOT_A_MEMBER"))));
     const [executor] = createCoreAgentCommandExecutors({ tenancy, access });
     const run = executor?.prepare({ name: "Launch" });
-    await expect(run?.({ principal: PRINCIPAL, tenantId: TENANT, node: { level: "organization", tenantId: TENANT }, requestId: "req-1" })).rejects.toMatchObject({ code: "COMMAND_REFUSED" });
+    await expect(run?.({ principal: PRINCIPAL, tenantId: TENANT, node: { level: "organization", tenantId: TENANT }, requestId: "req-1", idempotencyKey: "run-1:call-1" })).rejects.toMatchObject({ code: "COMMAND_REFUSED" });
+  });
+});
+
+describe("agentCommandExecutors", () => {
+  it("fails at boot when two commands share an id instead of letting one shadow the other", () => {
+    const tenancy = tenancyWith(() => Promise.reject(new Error("unused")));
+    const [executor] = createCoreAgentCommandExecutors({ tenancy, access });
+    if (executor === undefined) throw new Error("no core command");
+    expect(() => agentCommandExecutors([executor, executor])).toThrow(DuplicateCommandError);
+    expect(agentCommandExecutors([executor]).get(CREATE_PROJECT_COMMAND_ID)).toBe(executor);
   });
 });
 

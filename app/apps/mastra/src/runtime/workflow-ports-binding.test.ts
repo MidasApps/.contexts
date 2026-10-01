@@ -85,11 +85,12 @@ const recordingIdempotency = (fail?: Error) => {
   return { commands, keys };
 };
 
-const accessAllowing = (allowed: boolean) => ({ forRequest: () => ({ authorize: () => Promise.resolve(allowed ? { allowed: true, requiresApproval: false } : { allowed: false, reason: "PERMISSION_NOT_GRANTED" }) }) }) as never;
+const accessAllowing = (allowed: boolean, requiresApproval = false) =>
+  ({ forRequest: () => ({ authorize: () => Promise.resolve(allowed ? { allowed: true, requiresApproval } : { allowed: false, reason: "PERMISSION_NOT_GRANTED" }) }) }) as never;
 
-const runWith = (args: { allowed?: boolean; commandId?: string; input?: unknown; fail?: Error; tenantId?: string }) => {
+const runWith = (args: { allowed?: boolean; requiresApproval?: boolean; commandId?: string; input?: unknown; fail?: Error; tenantId?: string }) => {
   const { commands, keys } = recordingIdempotency(args.fail);
-  const port = bindWorkflowCommandsPort({ executors: agentCommandExecutors([NOTE]), access: accessAllowing(args.allowed ?? true), commands });
+  const port = bindWorkflowCommandsPort({ executors: agentCommandExecutors([NOTE]), access: accessAllowing(args.allowed ?? true, args.requiresApproval), commands });
   const result = port.run({
     principal: MEMBER,
     tenantId: args.tenantId ?? TENANT,
@@ -112,6 +113,9 @@ describe("bindWorkflowCommandsPort", () => {
   it("answers refusal codes instead of running", async () => {
     expect(await runWith({ commandId: "missing.Command" }).result).toEqual({ ok: false, code: "UNKNOWN_COMMAND" });
     expect(await runWith({ allowed: false }).result).toEqual({ ok: false, code: "REQUESTER_FORBIDDEN" });
+    const fourEyes = runWith({ requiresApproval: true });
+    expect(await fourEyes.result).toEqual({ ok: false, code: "APPROVAL_REQUIRED" });
+    expect(fourEyes.keys).toEqual([]);
     expect(await runWith({ input: { title: "" } }).result).toEqual({ ok: false, code: "COMMAND_INPUT_INVALID" });
     expect(await runWith({ tenantId: "OtherTenant000000001" }).result).toEqual({ ok: false, code: "TENANT_MISMATCH" });
     expect(await runWith({ fail: new AgentCommandError("COMMAND_IN_PROGRESS", "example.CreateNoteCommand") }).result).toEqual({ ok: false, code: "COMMAND_IN_PROGRESS" });

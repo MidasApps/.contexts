@@ -1,3 +1,4 @@
+import { createSkill } from "@mastra/core/skills";
 import { Mastra } from "@mastra/core";
 import { RequestContext } from "@mastra/core/request-context";
 import { InMemoryStore } from "@mastra/core/storage";
@@ -223,6 +224,14 @@ describe("defineAgentModule", () => {
     expect(() => defineAgentModule({ id: "sample", manifest: { id: "sample", tools: [{ id: "sample.missing" }] } })).toThrow(/UNKNOWN_CAPABILITY_REF/);
     expect(() => defineAgentModule({ id: "sample", manifest: { id: "sample" }, tools: [echoTool("sample.echo")] })).toThrow(/MANIFEST_MISMATCH/);
     expect(defineAgentModule({ id: "sample", manifest: { id: "sample", tools: [{ id: "sample.echo" }] }, tools: [echoTool("sample.echo")] }).id).toBe("sample");
+  });
+
+  it("requires an implementation for every skill and workflow ref of the manifest", () => {
+    const skill = createSkill({ name: "sample-notes", description: "Sample skill.", instructions: "Do it." });
+    expect(() => defineAgentModule({ id: "sample", manifest: { id: "sample", skills: [{ id: "sample-notes" }] } })).toThrow(/UNKNOWN_CAPABILITY_REF/);
+    expect(() => defineAgentModule({ id: "sample", manifest: { id: "sample", workflows: [{ id: "sample-flow" }] } })).toThrow(/UNKNOWN_CAPABILITY_REF/);
+    expect(() => defineAgentModule({ id: "sample", manifest: { id: "sample" }, skills: [skill] })).toThrow(/MANIFEST_MISMATCH/);
+    expect(defineAgentModule({ id: "sample", manifest: { id: "sample", skills: [{ id: "sample-notes" }] }, skills: [skill] }).id).toBe("sample");
   });
 });
 

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createFakeProjectsPort } from "../testing/fake-ports.ts";
+import { createFakeProjectCommands } from "../testing/fake-ports.ts";
 import { SUPERVISOR_AGENT_ID, SUPERVISOR_MAX_STEPS } from "./supervisor-agent.ts";
 import { buildSupervisorHarness, collectChunks, memberContext, toolNamesCalled } from "./supervisor.fixture.ts";
 
@@ -34,8 +34,8 @@ describe("assistant supervisor (fake mode, in-process Mastra)", { timeout: 30_00
   });
 
   it("stops at a tool-call approval and runs the command once after approval", async () => {
-    const projects = createFakeProjectsPort();
-    const harness = buildSupervisorHarness({ ports: { projects } });
+    const projects = createFakeProjectCommands();
+    const harness = buildSupervisorHarness({ ports: { commandRegistry: projects.commands } });
     const supervisor = supervisorOf(harness);
     const stream = await supervisor.stream('Confirm: create the project named "Launch"', { requestContext: memberContext() });
     const chunks = await collectChunks(stream);
@@ -48,8 +48,8 @@ describe("assistant supervisor (fake mode, in-process Mastra)", { timeout: 30_00
   });
 
   it("does not run a declined command and feeds the reason back", async () => {
-    const projects = createFakeProjectsPort();
-    const harness = buildSupervisorHarness({ ports: { projects } });
+    const projects = createFakeProjectCommands();
+    const harness = buildSupervisorHarness({ ports: { commandRegistry: projects.commands } });
     const supervisor = supervisorOf(harness);
     const stream = await supervisor.stream('Confirm: create the project named "Launch"', { requestContext: memberContext() });
     const approval = (await collectChunks(stream)).find((chunk) => chunk.type === "tool-call-approval");

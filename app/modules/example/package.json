@@ -9,25 +9,39 @@
   "exports": {
     "./manifest": "./src/manifest.ts",
     "./contracts": "./src/contracts/index.ts",
-    "./client": "./src/client.ts"
+    "./client": "./src/client.ts",
+    "./server": "./src/server/index.ts",
+    "./agents": "./src/agents/index.ts"
   },
   "scripts": {
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run --project unit",
+    "test:emulators": "vitest run --project emulators"
   },
   "dependencies": {
-    "@core/client": "workspace:*",
+    "@core/agents": "workspace:*",
     "@core/contracts": "workspace:*",
+    "@core/services": "workspace:*",
+    "@mastra/core": "catalog:",
+    "firebase-admin": "catalog:",
     "zod": "catalog:"
   },
+  "//peerDependencies": "@core/client is an optional peer: only the apps that render the module's pages (web, desktop) install it; the agent runtime loads ./manifest, ./server and ./agents without the client tree.",
   "peerDependencies": {
+    "@core/client": "workspace:*",
     "@tanstack/react-query": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
     "use-intl": "catalog:"
   },
+  "peerDependenciesMeta": {
+    "@core/client": {
+      "optional": true
+    }
+  },
   "devDependencies": {
+    "@core/client": "workspace:*",
     "@core/config": "workspace:*",
     "@tanstack/react-query": "catalog:",
     "@testing-library/dom": "catalog:",

@@ -43,7 +43,6 @@ export type {
   UsageReportPort,
   SecretStore,
   SemanticQueryPort,
-  ProjectsPort,
   SettingsPort,
   UsagePort,
   WebContentPort,
@@ -290,7 +289,7 @@ export {
 } from "./agents/tenant-agent-settings.ts";
 export { CORE_SKILL_DIRS, CORE_SKILLS, createSkillsResolver, isModuleEnabled, loadSkill, SkillLoadError, skillFromContent } from "./skills/resolve-skills.ts";
 export { type AgentCommand, commandIdOf, formCommandsOf } from "./tools/commands/agent-command.ts";
-export { CREATE_PROJECT_PERMISSION, createCreateProjectCommand } from "./tools/commands/create-project-command.tool.ts";
+export { commandToolIdOf, commandToolOf, commandToolsOf } from "./tools/commands/command-tools.ts";
 export { coreFakeRules, type FakeCommandRef } from "./models/fake/fake-scenarios.ts";
 // SP3 OpenAPI, MCP client, browser and Postgres connectors; SSRF guard (Task 22).
 export {

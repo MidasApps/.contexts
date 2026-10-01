@@ -2,7 +2,7 @@ import { MASTRA_RESOURCE_ID_KEY, MASTRA_THREAD_ID_KEY, RequestContext } from "@m
 import { describe, expect, it } from "vitest";
 import { buildSupervisorHarness, MEMBER_PERMISSIONS } from "../agents/supervisor.fixture.ts";
 import { buildAgentContextEntries, TEST_TENANT, TEST_UID } from "../testing/agent-context-fixture.ts";
-import { createFakeProjectsPort } from "../testing/fake-ports.ts";
+import { createFakeProjectCommands } from "../testing/fake-ports.ts";
 import {
   ABORT_ROUTE_PATH,
   CHAT_ROUTE_PATH,
@@ -28,8 +28,8 @@ const contextFor = (resource: string | null = RESOURCE, thread: string | null = 
 };
 
 const setup = () => {
-  const projects = createFakeProjectsPort();
-  const harness = buildSupervisorHarness({ ports: { projects } });
+  const projects = createFakeProjectCommands();
+  const harness = buildSupervisorHarness({ ports: { commandRegistry: projects.commands } });
   let counter = 0;
   const deps = { ...harness.runtime.chat, logger: silentLogger, newRunId: () => `run-${++counter}` };
   return { harness, projects, deps };

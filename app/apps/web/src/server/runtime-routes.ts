@@ -49,6 +49,7 @@ import {
   registerWorkflowApprovals,
 } from "@core/services";
 import type { CoreRoutes, CoreServer } from "@core/services/composition";
+import { createModuleCommands } from "./modules";
 
 // The model id only matters for search, which runs in Mastra; the web routes list, read and delete.
 const UNUSED_SEARCH_MODEL = "web/no-search";
@@ -66,13 +67,17 @@ const UNUSED_SEARCH_MODEL = "web/no-search";
  */
 export const buildRuntimeRoutes = async (core: CoreServer): Promise<CoreRoutes> => {
   const { env, processEnvForFirebaseGuard } = await import("@/env");
+  const firebase = createFirebaseAdmin({ env, processEnv: processEnvForFirebaseGuard });
+  // The command registry: core commands plus the installed modules' (SP3 Task 19).
   registerAgentCommandApprovals({
     approvals: core.approvals,
-    executors: createCoreAgentCommandExecutors({ tenancy: core.tenancy, access: core.access }),
+    executors: [
+      ...createCoreAgentCommandExecutors({ tenancy: core.tenancy, access: core.access }),
+      ...createModuleCommands({ firestore: firebase.firestore, access: core.access, audit: core.audit }),
+    ],
     access: core.access,
     idempotency: core.pipeline.idempotency,
   });
-  const firebase = createFirebaseAdmin({ env, processEnv: processEnvForFirebaseGuard });
   const files = createFirebaseFilesServices({
     firebase,
     env: { APP_ENV: env.APP_ENV, FILES_BUCKET: env.FILES_BUCKET, FIREBASE_STORAGE_EMULATOR_HOST: env.FIREBASE_STORAGE_EMULATOR_HOST },

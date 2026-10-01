@@ -1,0 +1,40 @@
+{
+  "additionalProperties": false,
+  "description": "Archives a note of the organization (`example.note.archive`, which needs a second member's approval).",
+  "examples": [
+    {
+      "noteId": "Xk2mQ9vLr3TnB7pWc1aZ"
+    }
+  ],
+  "properties": {
+    "noteId": {
+      "description": "Id of the note to archive.",
+      "examples": [
+        "Xk2mQ9vLr3TnB7pWc1aZ"
+      ],
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none",
+      "x-ui": {
+        "labelKey": "example.note.noteId",
+        "order": 1,
+        "widget": "text"
+      }
+    }
+  },
+  "required": [
+    "noteId"
+  ],
+  "type": "object",
+  "x-kind": "command",
+  "x-permission": "example.note.archive",
+  "x-pii": "none",
+  "x-relations": [
+    {
+      "field": "noteId",
+      "target": "example.Note",
+      "type": "references"
+    }
+  ],
+  "x-tenancyScope": "organization"
+}

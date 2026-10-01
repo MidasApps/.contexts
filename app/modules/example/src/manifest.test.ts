@@ -13,7 +13,11 @@ describe("exampleManifest", () => {
     expect(exampleManifest.permissions.map(({ id, kind, defaultRoles }) => ({ id, kind, defaultRoles }))).toEqual([
       { id: "example.item.read", kind: "read", defaultRoles: ["owner", "admin", "member", "viewer"] },
       { id: "example.item.write", kind: "write", defaultRoles: ["owner", "admin"] },
+      { id: "example.note.read", kind: "read", defaultRoles: ["owner", "admin", "member", "viewer"] },
+      { id: "example.note.create", kind: "write", defaultRoles: ["owner", "admin", "member"] },
+      { id: "example.note.archive", kind: "write", defaultRoles: ["owner", "admin", "member"] },
     ]);
+    expect(exampleManifest.permissions.filter((permission) => "requiresApproval" in permission && permission.requiresApproval).map((permission) => permission.id)).toEqual(["example.note.archive"]);
     const coreIds = new Set(CORE_PERMISSIONS.map((permission) => permission.id));
     expect(exampleManifest.permissions.some((permission) => coreIds.has(permission.id))).toBe(false);
   });
@@ -46,12 +50,22 @@ describe("exampleManifest", () => {
     expect(keysOf(exampleManifest.messages["es-419"]).sort()).toEqual(source);
   });
 
-  it("reserves typed, empty capability lists that SP3 fills with their implementations", () => {
+  it("names the skill and the workflow its agent entry implements; commands are contracts, not tool refs", () => {
     expect({ agents: exampleManifest.agents, tools: exampleManifest.tools, workflows: exampleManifest.workflows, skills: exampleManifest.skills }).toEqual({
       agents: [],
       tools: [],
-      workflows: [],
-      skills: [],
+      workflows: [{ id: "example-note-intake" }],
+      skills: [{ id: "example-notes" }],
     });
+  });
+
+  it("lists its command contracts for the catalog with permissions the manifest declares", () => {
+    const commands = EXAMPLE_CONTRACTS.filter((contract) => contract.meta.kind === "command");
+    expect(commands.map((contract) => [contract.id, contract.meta.permission])).toEqual([
+      ["example.CreateNoteCommand", "example.note.create"],
+      ["example.ArchiveNoteCommand", "example.note.archive"],
+    ]);
+    const declared = new Set<string>(exampleManifest.permissions.map((permission) => permission.id));
+    expect(commands.every((contract) => contract.meta.permission !== undefined && declared.has(contract.meta.permission))).toBe(true);
   });
 });

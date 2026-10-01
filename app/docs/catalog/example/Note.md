@@ -16,6 +16,7 @@ A free-text note inside an organization. Sample contract; remove it in derived a
 
 | Field | Required | PII | Description | UI |
 |---|---|---|---|---|
+| `archivedAt` | no | `none` | When the note was archived (UTC); absent while it is active. | widget: hidden |
 | `authorId` | yes | `personal` | Firebase Auth uid of the author. | widget: hidden |
 | `body` | yes | `personal` | Free text written by the author; may mention people. | widget: textarea, labelKey: example.note.body, order: 2 |
 | `createdAt` | yes | `none` | When the note was created (UTC). | widget: hidden |

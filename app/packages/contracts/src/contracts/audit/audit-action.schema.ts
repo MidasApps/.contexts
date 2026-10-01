@@ -17,6 +17,10 @@ export const AUDIT_ACTIONS = [
   "UNIT_MOVED",
   "UNIT_DELETED",
   "MODULE_SETTINGS_UPDATED",
+  // Records a module owns (SP3 Task 19): `target.type` names the record kind (`example-note`), so a
+  // module audits its own use cases without adding action names to the core.
+  "MODULE_RECORD_CREATED",
+  "MODULE_RECORD_UPDATED",
   "ROLE_CREATED",
   "ROLE_UPDATED",
   "ROLE_DELETED",

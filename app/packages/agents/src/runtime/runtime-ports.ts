@@ -4,7 +4,6 @@ import type {
   AgentSettings,
   Citation,
   EvalExperimentSummary,
-  CreateProjectInput,
   Connector,
   KnowledgeDocument,
   KnowledgeDocumentSource,
@@ -12,7 +11,7 @@ import type {
   StoredFile,
   WorkflowResumeActionInput,
 } from "@core/contracts";
-import type { RunSemanticQuery } from "@core/services";
+import type { ContractCommand, RunSemanticQuery } from "@core/services";
 
 /**
  * Ports through which `@core/agents` consumes SP1/SP3 services (decision 0019).
@@ -222,19 +221,6 @@ export type SecretStore = {
 /** SP3 `catalog` context: read-only SQL over semantic views (bound to `makeRunSemanticQuery`). */
 export type SemanticQueryPort = { readonly runSemanticQuery: RunSemanticQuery };
 
-/**
- * SP1 tenancy commands the core action agent runs (SP3 Task 20; module commands arrive
- * with Task 19). The binding calls the same use case as `/v1`, which authorizes again.
- */
-export type ProjectsPort = {
-  readonly createProject: (input: {
-    readonly principal: AccessPrincipal;
-    readonly tenantId: string;
-    readonly requestId: string;
-    readonly input: CreateProjectInput;
-  }) => Promise<{ readonly ok: true; readonly data: { readonly projectId: string; readonly name: string } } | { readonly ok: false; readonly error: "FORBIDDEN" }>;
-};
-
 export type SettingsPort = { readonly getAgentSettings: (input: { tenantId: string }) => Promise<AgentSettings> };
 
 /**
@@ -375,7 +361,12 @@ export type AgentRuntimePorts = {
   readonly secrets: SecretStore;
   readonly settings: SettingsPort;
   readonly catalog: SemanticQueryPort;
-  readonly projects: ProjectsPort;
+  /**
+   * The one command registry (decision 0025): core commands and the installed modules'. The
+   * action agent's tools are derived from it (`command-tools.ts`); the SP1 approval handler and
+   * the workflow command port run the same entries.
+   */
+  readonly commandRegistry: readonly ContractCommand[];
   /** SP5 workflow HITL (decision 0036). */
   readonly workflowApprovals: WorkflowApprovalPort;
   readonly workflowCommands: WorkflowCommandPort;

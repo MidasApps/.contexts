@@ -33,11 +33,20 @@ export { AgentCommandError, type AgentCommandErrorCode } from "./application/com
 export {
   agentCommandExecutors,
   defineAgentCommandExecutor,
+  DuplicateCommandError,
   type AgentCommandExecution,
   type AgentCommandExecutor,
   type AgentCommandExecutors,
   type AgentCommandExecutorSpec,
 } from "./application/commands/agent-command-executor.ts";
+export {
+  CommandContractError,
+  defineContractCommand,
+  type CommandContractErrorCode,
+  type CommandPreview,
+  type ContractCommand,
+  type ContractCommandSpec,
+} from "./application/commands/contract-command.ts";
 export { CREATE_PROJECT_COMMAND_ID, createCoreAgentCommandExecutors } from "./application/commands/core-agent-command-executors.ts";
 export { registerAgentCommandApprovals } from "./application/commands/register-agent-command-approvals.ts";
 export { createCommandIdempotency, type CommandIdempotency, type CommandRun, type CommandRunResult } from "./application/commands/run-command-once.ts";

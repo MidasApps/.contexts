@@ -58,7 +58,8 @@ const refuse = (code: string): Refusal => ({ ok: false, code });
 /**
  * Binds `WorkflowCommandPort` to SP3's command executors and idempotency records: the command
  * runs as the given principal after SP1 re-authorizes it at the node, at most once per
- * `workflow:<idempotencyKey>` (decisions 0025 and 0036). Expected refusals answer the
+ * `workflow:<idempotencyKey>` (decisions 0025 and 0036). A command whose permission needs four
+ * eyes is refused (`APPROVAL_REQUIRED`). Expected refusals answer the
  * `AgentCommandError` code; infrastructure errors reject.
  */
 export const bindWorkflowCommandsPort = (deps: {
@@ -74,6 +75,8 @@ export const bindWorkflowCommandsPort = (deps: {
     const actor = PrincipalSchema.parse(principal);
     const decision = await deps.access.forRequest().authorize({ principal: actor, permission: executor.permission, node: tenantNode.data });
     if (!decision.allowed) return refuse("REQUESTER_FORBIDDEN");
+    // A four-eyes command never runs straight from a workflow: it needs its own SP1 approval request.
+    if (decision.requiresApproval) return refuse("APPROVAL_REQUIRED");
     const run = executor.prepare(input);
     if (run === null) return refuse("COMMAND_INPUT_INVALID");
     const tenant = TenantIdSchema.parse(tenantId);
@@ -83,7 +86,7 @@ export const bindWorkflowCommandsPort = (deps: {
         commandId,
         idempotencyKey: `workflow:${idempotencyKey}`,
         input,
-        run: () => run({ principal: actor, tenantId: tenant, node: tenantNode.data, requestId }),
+        run: () => run({ principal: actor, tenantId: tenant, node: tenantNode.data, requestId, idempotencyKey: `workflow:${idempotencyKey}` }),
       });
       return { ok: true, output: result.output, replayed: result.replayed };
     } catch (error: unknown) {

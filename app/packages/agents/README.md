@@ -28,10 +28,13 @@ or `@core/client` (decision 0019).
 
 ## How to add a capability from a module
 
-A module never touches the core. Its server entry exports one `defineAgentModule(...)`
-value and the app lists it in `apps/mastra/src/modules.ts` (`APP_MODULES`); every id is
-prefixed with the module id, and a manifest ref without an implementation is a boot
-error (`AgentModuleError`).
+A module never touches the core. It exports its manifest, a command factory
+(`defineContractCommand`, server entry) and an agent entry that returns one
+`defineAgentModule(...)` value; the app lists the three in `apps/mastra/src/modules.ts`
+(`APP_MODULES`: `{ manifest, createCommands, createAgentModule }`). Every id is prefixed with
+the module id, and a manifest ref (agent, tool, skill, workflow) without an implementation,
+or the reverse, is a boot error (`AgentModuleError`). `modules/example` is the reference
+(`src/server/example-commands.ts`, `src/agents/example-agent-module.ts`).
 
 ```ts
 import { defineAgentModule, defineCoreTool } from "@core/agents";
@@ -51,18 +54,39 @@ export const notesAgentModule = defineAgentModule({
   id: "notes",
   tools: [listNotes],
   agents: [{ id: "notes-assistant", ceiling: ["notes.note.read"], create: (deps) => /* new Agent({...}) with deps.models, deps.guardrails("delegated") */ }],
-  commands: [/* { tool: defineCoreTool({ id: "command.notes.CreateNote", kind: "mutation", ... }), targetContractId: "notes.Note" } */],
-  skills: [/* createSkill({ name: "notes-writing", ... }) */],
+  skills: [/* skillFromContent(SKILL_MD, "notes-writing") */],
+  workflows: [/* { workflow: createWorkflow({ id: "notes-digest", ... }), startable: true } */],
 });
+```
+
+Commands are not written as tools. A command is declared once, from its contract, and joins
+the command registry (decision 0025):
+
+```ts
+import { AgentCommandError, defineContractCommand } from "@core/services";
+
+export const createNotesCommands = (deps: { firestore; access; audit }) => [
+  defineContractCommand({
+    contract: CreateNoteCommandContract, // kind "command" with a permission, else a boot error
+    targetContractId: "notes.Note",
+    outputSchema: z.strictObject({ noteId: z.string() }),
+    summarize: (input) => `Create the note "${input.title}"`,
+    execute: async ({ principal, tenantId, node, input, requestId, idempotencyKey }) => {
+      const result = await createNote({ actor: principal, tenantId, node, requestId, input }); // the use case authorizes and audits
+      if (!result.ok) throw new AgentCommandError("COMMAND_REFUSED", CreateNoteCommandContract.id, { cause: result.error });
+      return { noteId: result.data.id };
+    },
+  }),
+];
 ```
 
 | Capability | How | Notes |
 |---|---|---|
 | Tool | `tools: [defineCoreTool(...)]` | Strict, described input; permission `<module>.<resource>.<action>`; tenant, principal, run id and abort signal arrive in `ctx`. The pipeline authorizes, times out (15 s read / 30 s mutation), checks the output and audits. |
-| Command (mutation) | `commands: [{ tool, targetContractId }]`, tool id `command.<module>.<Name>` | Offered to the `action` agent; Mastra asks the user to approve every call; a permission flagged `requiresApproval` also creates an SP1 approval request (`agent-command`, four eyes); runs at most once per `runId:toolCallId` (decision 0025). `catalog.renderForm` renders its form when `targetContractId` is a catalog contract. |
+| Command (mutation) | `defineContractCommand({ contract, targetContractId, outputSchema, execute })` in the module's command factory; list the contract in the module's catalog contracts | The registry entry is the single definition: the runtime derives the tool `command.<contractId>` (input = the contract schema) for the `action` agent, the SP1 `agent-command` approval handler (`apps/web`) and the workflow command port run the same entry. Mastra asks the user to approve every call; a permission flagged `requiresApproval` also creates an SP1 approval request (four eyes); a command runs at most once per `runId:toolCallId` (decision 0025). `catalog.renderForm` renders its form when `targetContractId` is a catalog contract. Register the factory in `apps/web/src/server/modules.ts` too. |
 | Agent | `agents: [{ id, ceiling, role?, create }]` | `subagent` (default) is reached only through the supervisor, in tenants whose `enabledAgents` lists it; tool permissions = context ∩ `ceiling`. Spread `deps.guardrails("delegated")` (or `"entry"` for `role: "entry"`). |
 | Skill | `skills: [createSkill({ name: "<module>-<skill>", ... })]` | Attached inline (no Workspace, so no file-write tools); shown only to tenants that enabled the module (decision 0029). |
-| Workflow | not a module capability yet | `AgentModule` has no `workflows` field in SP3; core workflows (`knowledge-ingest`, `catalog-reindex`) are registered by `composeAgentRuntime`. SP5 owns module workflows and HITL steps (decision 0036). |
+| Workflow | `workflows: [{ workflow, startable?, schedulable? }]`, id `<module>-<name>` | Built over the runtime ports the agent entry receives (`createAgentModule({ ports })`); a step changes data only through `ports.workflowCommands.run` (re-authorizes the caller, runs once per run id, refuses four-eyes commands with `APPROVAL_REQUIRED`). `startable` exposes it to `/v1/workflows/{id}/runs`; HITL uses `createRequestHumanApprovalStep` (decision 0036). |
 | Connector | tenant data, not module code | OpenAPI, MCP (http; stdio only local), browser (Playwright MCP) and Postgres read-only connectors are created per tenant through `/v1/organizations/{organizationId}/connectors`; secrets go to the secret store; tools appear per run for the matching agent kind (decision 0027). |
 | Knowledge | not a module capability yet | Namespace `module:<moduleId>` is reserved (spec §11), but `searchKnowledge` allows only `tenant`, the active `project:*` and `catalog` until tenants can enable modules (SP5 agent settings). Tenant documents go through `/v1/organizations/{organizationId}/knowledge/sources`. |
 

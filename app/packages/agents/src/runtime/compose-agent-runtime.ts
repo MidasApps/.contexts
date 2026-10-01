@@ -56,7 +56,7 @@ import { createDescribeEntityTool } from "../tools/catalog/describe-entity.tool.
 import { createListEntitiesTool } from "../tools/catalog/list-entities.tool.ts";
 import { createRenderFormTool } from "../tools/catalog/render-form.tool.ts";
 import { type AgentCommand, commandIdOf, formCommandsOf } from "../tools/commands/agent-command.ts";
-import { createCreateProjectCommand } from "../tools/commands/create-project-command.tool.ts";
+import { commandToolsOf } from "../tools/commands/command-tools.ts";
 import { CORE_SKILL_DIRS, createSkillsResolver, loadSkill } from "../skills/resolve-skills.ts";
 import { createMemory } from "../memory/create-memory.ts";
 import { type CoreScorer, createCoreScorers } from "../scorers/core-scorers.ts";
@@ -162,9 +162,12 @@ const coreAgents = (args: ComposeAgentRuntimeArgs, commands: readonly AgentComma
   createWebAgentDefinition(dirsOption(args.instructionsDirs)),
 ];
 
-/** Core commands (SP1 tenancy) plus the modules' commands: the action agent's tools. */
+/**
+ * The action agent's tools: one per command of the registry (core first, then the installed
+ * modules', decision 0025), plus commands a module declares directly in `AgentModule.commands`.
+ */
 const collectCommands = (args: ComposeAgentRuntimeArgs): AgentCommand[] => [
-  createCreateProjectCommand({ projects: args.ports.projects }),
+  ...commandToolsOf(args.ports.commandRegistry),
   ...args.modules.flatMap((module) => module.commands ?? []),
 ];
 

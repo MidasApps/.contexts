@@ -9,7 +9,7 @@ import { composeAgentRuntime } from "../runtime/compose-agent-runtime.ts";
 import type { KnowledgePort, PromptStorePort } from "../runtime/runtime-ports.ts";
 import { type CoreScorer, createCoreScorers } from "../scorers/core-scorers.ts";
 import { buildAgentContextEntries } from "../testing/agent-context-fixture.ts";
-import { createFakeAccessPort, createFakeProjectsPort, createFakeRuntimePorts, createFakeSettingsPort } from "../testing/fake-ports.ts";
+import { createFakeAccessPort, createFakeRuntimePorts, createFakeSettingsPort } from "../testing/fake-ports.ts";
 import { FIXTURE_AI_CATALOG } from "../tools/catalog/catalog-fixture.ts";
 import { createCorpusKnowledgePort, EVAL_TENANT, FOREIGN_MARKERS } from "./eval-knowledge-corpus.ts";
 
@@ -70,7 +70,6 @@ export const buildEvalHarness = (args: {
     access,
     settings: createFakeSettingsPort(),
     knowledge: args.knowledge?.(models) ?? createCorpusKnowledgePort(embedWith(models)),
-    projects: createFakeProjectsPort(),
     ...(args.prompts === undefined ? {} : { prompts: args.prompts }),
   });
   const runtime = composeAgentRuntime({ env, ports, modules: [noteModule()], storage: new InMemoryStore(), serviceName: "evals", aiCatalog: FIXTURE_AI_CATALOG, models });

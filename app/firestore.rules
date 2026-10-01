@@ -126,5 +126,11 @@ service cloud.firestore {
     match /module-settings/{settingsId} {
       allow read, write: if false;
     }
+
+    // Notes of the example module (SP3 Task 19): written only by its commands (Admin SDK),
+    // through the agent runtime and `/v1` approvals. A derived app removes this with the module.
+    match /notes/{noteId} {
+      allow read, write: if false;
+    }
   }
 }

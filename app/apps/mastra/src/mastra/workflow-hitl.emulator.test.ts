@@ -1,13 +1,14 @@
+import { randomBytes } from "node:crypto";
 import { createServer } from "node:net";
 import type { RegionalSettings } from "@core/agents";
 import { ApprovalRequestIdSchema, TenantIdSchema, UserIdSchema, type UserPrincipal } from "@core/contracts";
 import {
   createAccessCore,
   createFirebaseAdmin,
+  type FirebaseAdmin,
   createInMemoryAccessStore,
   createMastraWorkflowGateway,
   createMastraWorkflowApprovalSettler,
-  defineAgentCommandExecutor,
   processLogger,
   registerWorkflowApprovals,
   type ResolveAccessContext,
@@ -17,7 +18,6 @@ import { Mastra } from "@mastra/core/mastra";
 import { InMemoryStore } from "@mastra/core/storage";
 import { createNodeServer } from "@mastra/deployer/server";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { z } from "zod";
 import { loadMastraEnv } from "../mastra-env.schema.ts";
 import { APP_MODULES } from "../modules.ts";
 import { createAgentRuntime } from "../runtime/create-agent-runtime.ts";
@@ -26,10 +26,10 @@ import { createAgentRuntime } from "../runtime/create-agent-runtime.ts";
 // to end (decision 0036): real Auth Emulator tokens, SP1 approval requests in the Firestore
 // emulator, the production runtime composition served by Mastra's Node server, the `/v1`
 // gateway starting the run with the member's token, and SP1's approve/reject use cases with
-// the `workflow-resume` handler calling the real settle route.
-const TENANT = "EmuTenantWorkflowHitl";
+// the `workflow-resume` handler calling the real settle route. The approved run applies the example
+// module's `example.CreateNoteCommand` (SP3 Task 19): a real note in the Firestore emulator.
+const TENANT = `EmuHitl${randomBytes(7).toString("hex")}`.slice(0, 20);
 const REGIONAL: RegionalSettings = { locale: "pt-BR", displayTimeZone: "America/Sao_Paulo", nodeTimeZone: "America/Sao_Paulo", currency: "BRL" };
-const NOTE_COMMAND = "example.CreateNoteCommand";
 
 const env = loadMastraEnv({
   APP_ENV: "local",
@@ -73,17 +73,12 @@ const resolveFromReaders = (readers: ReturnType<typeof createInMemoryAccessStore
   };
 };
 
-// The module note command SP3 Task 19 will bring; here it records who ran it.
-const notes: { title: string; principal: unknown; requestId: string }[] = [];
-const noteExecutor = defineAgentCommandExecutor({
-  commandId: NOTE_COMMAND,
-  permission: "core.workflow-run.start",
-  inputSchema: z.strictObject({ title: z.string().min(1), body: z.string().optional() }),
-  execute: ({ input, principal, requestId }) => {
-    notes.push({ title: input.title, principal, requestId });
-    return Promise.resolve({ id: `note-${notes.length}` });
-  },
-});
+let firebase: FirebaseAdmin;
+let runCounter = 0;
+
+/** Notes of the run's tenant, as the example module stores them (`notes`, `tenantId` on every document). */
+const notesOf = async (): Promise<{ title: string; authorId: string }[]> =>
+  (await firebase.firestore.collection("notes").where("tenantId", "==", TENANT).get()).docs.map((doc) => ({ title: String(doc.get("title")), authorId: String(doc.get("authorId")) }));
 
 let mastra: Mastra | undefined;
 let baseUrl = "";
@@ -99,12 +94,12 @@ beforeAll(async () => {
   for (const uid of [member.uid, admin.uid]) readers.putUser(uid);
   readers.putGrant({ tenantId: TENANT, principalId: admin.uid, nodeId: TENANT, roles: [{ kind: "system", key: "admin" }] });
   readers.putGrant({ tenantId: TENANT, principalId: member.uid, nodeId: TENANT, roles: [{ kind: "system", key: "member" }] });
-  const firebase = createFirebaseAdmin({ env, processEnv: process.env });
+  firebase = createFirebaseAdmin({ env, processEnv: process.env });
   const runtime = createAgentRuntime({
     env,
     processEnv: process.env,
     modules: APP_MODULES,
-    overrides: { firebase, storage: new InMemoryStore(), adapters: { accessReaders: readers, resolveAccessContext: resolveFromReaders(readers), commandExecutors: [noteExecutor] } },
+    overrides: { firebase, storage: new InMemoryStore(), adapters: { accessReaders: readers, resolveAccessContext: resolveFromReaders(readers) } },
   });
   const port = await freePort();
   mastra = new Mastra({
@@ -141,7 +136,7 @@ const waitForStatus = async (runId: string, status: string): Promise<void> => {
 const startDemo = async (title: string) => {
   // Like `/v1/workflows/approval-demo/runs`: the custom run route, which re-authorizes the caller (SP5 Task 4).
   const gateway = createMastraWorkflowGateway({ baseUrl, serverlessToken: null });
-  const scope = { bearer: member.idToken, tenantId: TENANT, regional: REGIONAL, requestId: `01J8Z3K4M5N6P7Q8R9S0T1V2${String(notes.length).padStart(2, "0")}` };
+  const scope = { bearer: member.idToken, tenantId: TENANT, regional: REGIONAL, requestId: `01J8Z3K4M5N6P7Q8R9S0T1V2${String((runCounter += 1)).padStart(2, "0")}` };
   const started = await gateway.startRun(scope, { workflowId: "approval-demo", inputData: { title } });
   if (!started.ok) throw new Error(`start failed: ${JSON.stringify(started.error)}`);
   await waitForStatus(started.data.runId, "suspended");
@@ -162,27 +157,28 @@ describe("workflow HITL with four eyes (Auth + Firestore emulators, real Mastra 
   it("suspends, refuses the requester's own approval, resumes once approved by a second person", async () => {
     const { runId, approvalRequestId } = await startDemo("Supplier follow-up");
     expect(await decide("approveRequest", member.uid, approvalRequestId)).toMatchObject({ ok: false, error: { code: "SELF_APPROVAL_FORBIDDEN" } });
-    expect(notes).toEqual([]);
+    expect(await notesOf()).toEqual([]);
     const approved = await decide("approveRequest", admin.uid, approvalRequestId);
     expect(approved).toMatchObject({ ok: true, data: { status: "executed", decidedBy: admin.uid } });
-    expect(notes).toHaveLength(1);
-    expect(notes[0]).toMatchObject({ title: "Supplier follow-up", principal: { type: "user", uid: member.uid } });
-    expect(await runResult(runId)).toMatchObject({ outcome: "applied", approvalRequestId, decidedBy: admin.uid });
+    // The note exists, written as the requester (the member), not as the approver.
+    expect(await notesOf()).toEqual([{ title: "Supplier follow-up", authorId: member.uid }]);
+    expect((await mastra?.getWorkflow("approval-demo").getWorkflowRunById(runId))?.status).toBe("success");
+    expect(await runResult(runId)).toMatchObject({ outcome: "applied", approvalRequestId, decidedBy: admin.uid, code: null });
     // A second approval is refused by SP1 and a replayed settle finds nothing to resume.
     expect(await decide("approveRequest", admin.uid, approvalRequestId)).toMatchObject({ ok: false, error: { code: "CONFLICT" } });
     const replay = await fetch(`${baseUrl}/workflow-approvals/${approvalRequestId}/settle`, { method: "POST" });
     expect(await replay.json()).toEqual({ data: { settled: false, reason: "NOT_SUSPENDED" } });
-    expect(notes).toHaveLength(1);
+    expect(await notesOf()).toHaveLength(1);
   }, 60_000);
 
   it("a rejection ends the run on record (settled as the trigger does) and applies nothing", async () => {
-    const before = notes.length;
+    const before = (await notesOf()).length;
     const { runId, approvalRequestId } = await startDemo("Rejected note");
     expect(await decide("rejectRequest", admin.uid, approvalRequestId)).toMatchObject({ ok: true, data: { status: "rejected" } });
     const settled = await createMastraWorkflowApprovalSettler({ baseUrl, serverlessToken: null }).settle({ approvalRequestId, requestId: "evt" });
     expect(settled).toEqual({ ok: true, data: { settled: true, runStatus: "success" } });
     expect(await runResult(runId)).toMatchObject({ outcome: "rejected", decidedBy: admin.uid });
-    expect(notes).toHaveLength(before);
+    expect(await notesOf()).toHaveLength(before);
   }, 60_000);
 
   it("a forged resume through the built-in route leaves the run suspended", async () => {
@@ -198,6 +194,6 @@ describe("workflow HITL with four eyes (Auth + Firestore emulators, real Mastra 
     await new Promise((resolve) => setTimeout(resolve, 500));
     const state = await mastra?.getWorkflow("approval-demo").getWorkflowRunById(runId);
     expect(state?.status).toBe("suspended");
-    expect(notes.map((note) => note.title)).not.toContain("Forged");
+    expect((await notesOf()).map((note) => note.title)).not.toContain("Forged");
   }, 60_000);
 });

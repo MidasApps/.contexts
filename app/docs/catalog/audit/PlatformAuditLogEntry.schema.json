@@ -39,6 +39,8 @@
         "UNIT_MOVED",
         "UNIT_DELETED",
         "MODULE_SETTINGS_UPDATED",
+        "MODULE_RECORD_CREATED",
+        "MODULE_RECORD_UPDATED",
         "ROLE_CREATED",
         "ROLE_UPDATED",
         "ROLE_DELETED",

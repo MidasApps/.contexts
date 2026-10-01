@@ -61,7 +61,7 @@ export const createAgentCommandApprovalHandler = (deps: AgentCommandApprovalDeps
       commandId: action.commandId,
       idempotencyKey: action.idempotencyKey,
       input: action.input,
-      run: () => run({ principal: requester, tenantId: context.request.tenantId, node: context.request.node, requestId: context.requestId }),
+      run: () => run({ principal: requester, tenantId: context.request.tenantId, node: context.request.node, requestId: context.requestId, idempotencyKey: action.idempotencyKey }),
     });
   },
 });

@@ -61,11 +61,13 @@ export type AgentCapabilityManifest = {
   readonly id: string;
   readonly agents?: readonly { readonly id: string }[];
   readonly tools?: readonly { readonly id: string }[];
+  readonly workflows?: readonly { readonly id: string }[];
+  readonly skills?: readonly { readonly id: string }[];
 };
 
 export type AgentModule = {
   readonly id: string;
-  /** The module's manifest: every agent and tool it names must be implemented here. */
+  /** The module's manifest: every agent, tool, workflow and skill it names must be implemented here. */
   readonly manifest?: AgentCapabilityManifest;
   readonly agents?: readonly AgentDefinition[];
   readonly tools?: readonly CoreToolDefinition[];
@@ -110,7 +112,7 @@ const checkCapabilities = (moduleId: string, ids: readonly string[]): void => {
 };
 
 // Every ref the manifest names needs an implementation, and nothing is implemented unnamed.
-const checkManifest = (module: AgentModule, kind: "agents" | "tools", implemented: readonly string[]): void => {
+const checkManifest = (module: AgentModule, kind: "agents" | "tools" | "workflows" | "skills", implemented: readonly string[]): void => {
   const manifest = module.manifest;
   if (manifest === undefined) return;
   const refs = new Set((manifest[kind] ?? []).map((ref) => ref.id));
@@ -148,7 +150,11 @@ export const defineAgentModule = (module: AgentModule): AgentModule => {
   checkManifest(module, "agents", agentIds);
   checkManifest(module, "tools", toolIds);
   checkCommands(module);
-  checkCapabilities(module.id, (module.skills ?? []).map((skill) => skill.name));
-  checkCapabilities(module.id, (module.workflows ?? []).map((entry) => workflowIdOf(entry.workflow)));
+  const skillNames = (module.skills ?? []).map((skill) => skill.name);
+  const workflowIds = (module.workflows ?? []).map((entry) => workflowIdOf(entry.workflow));
+  checkCapabilities(module.id, skillNames);
+  checkCapabilities(module.id, workflowIds);
+  checkManifest(module, "skills", skillNames);
+  checkManifest(module, "workflows", workflowIds);
   return module;
 };

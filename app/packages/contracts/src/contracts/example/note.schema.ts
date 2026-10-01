@@ -26,6 +26,7 @@ export const NoteSchema = z.object({
   }),
   createdAt: IsoDateTimeSchema.meta({ description: "When the note was created (UTC).", pii: "none", ui: { widget: "hidden" } }),
   updatedAt: IsoDateTimeSchema.meta({ description: "When the note last changed (UTC).", pii: "none", ui: { widget: "hidden" } }),
+  archivedAt: IsoDateTimeSchema.optional().meta({ description: "When the note was archived (UTC); absent while it is active.", pii: "none", ui: { widget: "hidden" } }),
 });
 export type Note = z.infer<typeof NoteSchema>;
 

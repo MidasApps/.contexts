@@ -1,5 +1,6 @@
-import { type AgentSettings, AgentSettingsSchema, type LlmCall } from "@core/contracts";
-import { CORE_FLAGS } from "@core/services";
+import { type AgentSettings, AgentSettingsSchema, CreateProjectInputContract, type LlmCall } from "@core/contracts";
+import { type ContractCommand, CORE_FLAGS, defineContractCommand } from "@core/services";
+import { z } from "zod";
 import type {
   AccessContext,
   AccessPort,
@@ -17,7 +18,6 @@ import type {
   PromptVersionRecord,
   KnowledgeEventsPort,
   NodeRef,
-  ProjectsPort,
   WorkflowApprovalPort,
   WorkflowApprovalRecord,
   WorkflowCommandPort,
@@ -291,18 +291,25 @@ export const createRecordingKnowledgeEvents = (): RecordingKnowledgeEvents => {
   };
 };
 
-export type FakeProjectsPort = ProjectsPort & { readonly created: Parameters<ProjectsPort["createProject"]>[0][] };
+type CommandCall = Parameters<NonNullable<ReturnType<ContractCommand["prepare"]>>>[0] & { readonly input: { readonly name: string } };
 
-/** Records every created project; ids are `project-<n>`. */
-export const createFakeProjectsPort = (): FakeProjectsPort => {
-  const created: Parameters<ProjectsPort["createProject"]>[0][] = [];
-  return {
-    created,
-    createProject: (input) => {
-      created.push(input);
-      return Promise.resolve({ ok: true, data: { projectId: `project-${created.length}`, name: input.input.name } });
+export type FakeProjectCommands = { readonly commands: readonly ContractCommand[]; readonly created: CommandCall[] };
+
+/** A registry with the core `tenancy.CreateProjectInput` command; records every created project (ids `project-<n>`). */
+export const createFakeProjectCommands = (): FakeProjectCommands => {
+  const created: CommandCall[] = [];
+  const command = defineContractCommand({
+    contract: CreateProjectInputContract,
+    targetContractId: "tenancy.Project",
+    outputSchema: z.strictObject({ projectId: z.string().min(1), name: z.string().min(1) }),
+    summarize: (input) => `Create the project "${input.name}"`,
+    preview: (input) => ({ before: null, after: { name: input.name, description: input.description ?? null } }),
+    execute: (call) => {
+      created.push(call);
+      return Promise.resolve({ projectId: `project-${created.length}`, name: call.input.name });
     },
-  };
+  });
+  return { commands: [command], created };
 };
 
 const notWired = (name: string) => () => Promise.reject(new Error(`${name} is not faked in this test`));
@@ -322,7 +329,7 @@ export const createFakeRuntimePorts = (overrides: Partial<AgentRuntimePorts> = {
   secrets: { get: () => Promise.resolve(null) },
   settings: createFakeSettingsPort(),
   catalog: { runSemanticQuery: () => Promise.resolve({ ok: false, error: { code: "CONNECTOR_DISABLED" } }) },
-  projects: createFakeProjectsPort(),
+  commandRegistry: createFakeProjectCommands().commands,
   workflowApprovals: createFakeWorkflowApprovalPort(),
   workflowCommands: createFakeWorkflowCommandPort(),
   notifications: createRecordingNotificationPort(),

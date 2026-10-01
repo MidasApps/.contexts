@@ -52,7 +52,8 @@ describe("catalog-reindex workflow (Postgres, fake embeddings)", () => {
     for (const contract of catalog.contracts) {
       const text = renderContractDocument(contract as never);
       for (const field of contract.fields.filter((candidate) => candidate.pii === "sensitive")) expect(text).not.toContain(`\`${field.name}\``);
-      expect(text).not.toContain("Example");
+      // No examples section (a contract may be named `ExampleSettings`, so the word alone proves nothing).
+      expect(text).not.toMatch(/^#+ Examples?(?: |$)/m);
     }
   });
 });

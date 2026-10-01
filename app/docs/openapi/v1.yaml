@@ -15603,6 +15603,8 @@ components:
             - UNIT_MOVED
             - UNIT_DELETED
             - MODULE_SETTINGS_UPDATED
+            - MODULE_RECORD_CREATED
+            - MODULE_RECORD_UPDATED
             - ROLE_CREATED
             - ROLE_UPDATED
             - ROLE_DELETED
@@ -15925,6 +15927,8 @@ components:
             - UNIT_MOVED
             - UNIT_DELETED
             - MODULE_SETTINGS_UPDATED
+            - MODULE_RECORD_CREATED
+            - MODULE_RECORD_UPDATED
             - ROLE_CREATED
             - ROLE_UPDATED
             - ROLE_DELETED
@@ -16060,6 +16064,8 @@ components:
             - UNIT_MOVED
             - UNIT_DELETED
             - MODULE_SETTINGS_UPDATED
+            - MODULE_RECORD_CREATED
+            - MODULE_RECORD_UPDATED
             - ROLE_CREATED
             - ROLE_UPDATED
             - ROLE_DELETED
@@ -18303,6 +18309,72 @@ components:
       x-pii: personal
       x-relations: []
       x-tenancyScope: user
+    example.ArchiveNoteCommand:
+      additionalProperties: false
+      description: Archives a note of the organization (`example.note.archive`, which needs a second member's approval).
+      examples:
+        - noteId: Xk2mQ9vLr3TnB7pWc1aZ
+      properties:
+        noteId:
+          description: Id of the note to archive.
+          examples:
+            - Xk2mQ9vLr3TnB7pWc1aZ
+          minLength: 1
+          type: string
+          x-pii: none
+          x-ui:
+            labelKey: example.note.noteId
+            order: 1
+            widget: text
+      required:
+        - noteId
+      type: object
+      x-kind: command
+      x-permission: example.note.archive
+      x-pii: none
+      x-relations:
+        - field: noteId
+          target: example.Note
+          type: references
+      x-tenancyScope: organization
+    example.CreateNoteCommand:
+      additionalProperties: false
+      description: Creates a note in the organization (`example.note.create`).
+      examples:
+        - body: Call Ana about the invoice on Monday.
+          title: Supplier follow-up
+      properties:
+        body:
+          description: Free text of the note; may mention people.
+          examples:
+            - Call Ana about the invoice on Monday.
+          maxLength: 10000
+          type: string
+          x-pii: personal
+          x-ui:
+            labelKey: example.note.body
+            order: 2
+            widget: textarea
+        title:
+          description: Short title shown in lists.
+          examples:
+            - Supplier follow-up
+          maxLength: 200
+          minLength: 1
+          type: string
+          x-pii: none
+          x-ui:
+            labelKey: example.note.title
+            order: 1
+            widget: text
+      required:
+        - title
+      type: object
+      x-kind: command
+      x-permission: example.note.create
+      x-pii: personal
+      x-relations: []
+      x-tenancyScope: organization
     example.ExampleSettings:
       additionalProperties: false
       description: Organization-wide settings of the example module (reference module of the module contract).
@@ -18372,6 +18444,14 @@ components:
           title: Supplier follow-up
           updatedAt: "2026-09-29T14:30:00.000Z"
       properties:
+        archivedAt:
+          description: When the note was archived (UTC); absent while it is active.
+          format: date-time
+          pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z))$
+          type: string
+          x-pii: none
+          x-ui:
+            widget: hidden
         authorId:
           description: Firebase Auth uid of the author.
           minLength: 1
