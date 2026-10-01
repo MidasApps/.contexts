@@ -84,7 +84,7 @@ describe("createProxy /v1", () => {
 
     expect(response.headers.get("x-middleware-next")).toBe("1");
     expect(response.headers.get("access-control-allow-origin")).toBe(DESKTOP_ORIGIN);
-    expect(response.headers.get("access-control-expose-headers")).toBe("x-request-id");
+    expect(response.headers.get("access-control-expose-headers")).toBe("x-request-id, x-conversation-id, retry-after");
     expect(response.headers.get("vary")).toBe("Origin");
   });
 
