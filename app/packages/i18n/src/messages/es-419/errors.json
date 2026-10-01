@@ -32,5 +32,6 @@
   "SCHEDULE_INTERVAL_TOO_SHORT": "La programación es demasiado frecuente. Elige un intervalo mayor.",
   "FEATURE_DISABLED": "Esta función está desactivada en este momento.",
   "EVAL_REQUIRED": "Ejecuta una evaluación aprobada antes de activar esta versión.",
-  "EVAL_DATASET_MISSING": "Este agente aún no tiene un conjunto de evaluación."
+  "EVAL_DATASET_MISSING": "Este agente aún no tiene un conjunto de evaluación.",
+  "CUSTOM_LIMIT_REACHED": "Se alcanzó el límite del plan. Elimine un elemento o hable con quien administra el plan."
 }

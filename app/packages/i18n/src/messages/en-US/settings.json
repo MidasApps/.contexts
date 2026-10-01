@@ -412,14 +412,13 @@
   "agents": {
     "eyebrow": "{organization}",
     "title": "Agents",
-    "description": "Turn on the agents the assistant may use, see the tools and skills of each one and write the organization's instructions.",
+    "description": "Create the organization's agents, turn on the platform agents the assistant may use and see the tools and skills of each one.",
     "loading": "Loading the agents",
-    "limit": "Agents are defined by the platform and the installed modules. The organization turns each agent on or off, limits its tools through connectors and adds its own instructions. A new agent cannot be created here.",
     "connectorsLink": "Open connectors",
     "skillsLink": "See skills",
     "saveFailed": "Could not save",
     "catalog": {
-      "title": "Available agents",
+      "title": "Platform agents",
       "emptyTitle": "No agent available",
       "emptyDescription": "The platform offers no agents to this organization right now.",
       "sourceCore": "Platform",
@@ -439,7 +438,9 @@
       "toolMutation": "changes data",
       "toolRead": "read only",
       "skillsTitle": "Skills",
-      "skillsEmpty": "This agent has no skills."
+      "skillsEmpty": "This agent has no skills.",
+      "description": "Defined by the platform and the installed modules. The assistant delegates to them when they are on.",
+      "sourceCustom": "Organization"
     },
     "assistant": {
       "name": "Assistant",
@@ -516,14 +517,125 @@
         "bodyUnchanged": "The text is the same as the active version.",
         "created": "Version {version} saved. Evaluate it to be able to activate."
       }
+    },
+    "intro": "The organization creates its own agents and also turns on, limits and instructs the agents of the platform and the installed modules. An organization's agent is chosen directly when starting a conversation; the assistant does not delegate tasks to it.",
+    "custom": {
+      "title": "Organization agents",
+      "description": "Agents the organization configured: instructions, model, tools, skills and knowledge base. They are chosen directly when starting a conversation; the assistant does not delegate to them.",
+      "loading": "Loading the organization's agents",
+      "create": "New agent",
+      "usage": "{used} of {maximum} agents of the plan in use.",
+      "capReached": "The plan's limit was reached: delete an agent to create another.",
+      "readOnly": "You can see the agents, but you cannot change them.",
+      "emptyTitle": "No organization agents",
+      "emptyDescription": "Create an agent to give people an assistant with its own instructions and tools.",
+      "emptyDescriptionNoPermission": "The organization has not created agents yet.",
+      "enabled": "On",
+      "disabled": "Off",
+      "actions": {
+        "edit": "Edit",
+        "editNamed": "Edit {name}",
+        "enable": "Turn on",
+        "enableNamed": "Turn on {name}",
+        "disable": "Turn off",
+        "disableNamed": "Turn off {name}",
+        "delete": "Delete",
+        "deleteNamed": "Delete {name}"
+      },
+      "editor": {
+        "createTitle": "New agent",
+        "editTitle": "Edit {name}",
+        "description": "The agent is configuration only: it follows the platform's safety rules, and each tool still needs the permission of the person chatting.",
+        "loading": "Loading the agent",
+        "retry": "Try again",
+        "cancel": "Cancel",
+        "submitCreate": "Create agent",
+        "submitSave": "Save",
+        "created": "Agent {name} created.",
+        "saved": "Agent {name} saved.",
+        "counter": "{count} of {maximum} characters.",
+        "toolRead": "read only",
+        "toolMutation": "changes data",
+        "skillDisabled": "Skill turned off: the agent does not get it.",
+        "unavailable": "No longer available; uncheck to remove it.",
+        "fields": {
+          "name": "Name",
+          "description": "Description",
+          "instructions": "Instructions",
+          "model": "Model",
+          "tools": "Tools",
+          "connectorTools": "Read-only tools of the connectors",
+          "coreSkills": "Platform skills",
+          "customSkills": "Organization skills",
+          "knowledgeScope": "Knowledge base",
+          "enabled": "Available for conversations"
+        },
+        "hints": {
+          "description": "What the agent is for. People see this text when choosing the agent.",
+          "instructions": "How the agent should act. The instructions come after the platform's rules and never replace them. Do not include passwords or personal data.",
+          "model": "The platform decides which model each option uses.",
+          "tools": "The agent only uses the checked tools. Those that change data ask for a confirmation or an approval.",
+          "connectorTools": "Includes the tools the organization's connectors mark as read only.",
+          "coreSkills": "Ready-made instructions of the platform the agent reads when it needs them.",
+          "customSkills": "Skills the organization wrote.",
+          "enabled": "While off, nobody starts or continues conversations with the agent."
+        },
+        "empty": {
+          "tools": "There are no tools to select.",
+          "coreSkills": "There are no platform skills to select.",
+          "customSkills": "The organization has not created skills yet."
+        },
+        "models": {
+          "chat": "Standard",
+          "reasoning": "Reasoning (stronger)"
+        },
+        "knowledgeScopes": {
+          "none": "Does not search",
+          "organization": "Organization documents",
+          "project": "Organization and active project",
+          "all": "Everything the person may search"
+        },
+        "knowledgeHints": {
+          "none": "The agent does not search the knowledge base.",
+          "organization": "The agent searches the organization's documents only.",
+          "project": "The agent searches the organization's documents and those of the project the conversation runs in.",
+          "all": "The agent searches everything the person chatting may search, the data catalog included."
+        },
+        "errors": {
+          "name": "Enter a name of up to 100 characters.",
+          "description": "Enter a description of up to 1000 characters.",
+          "instructions": "Write the instructions.",
+          "instructionsTooLong": "Use at most {maximum} characters.",
+          "model": "Choose a model from the list.",
+          "tools": "Review the selected tools.",
+          "coreSkills": "Review the selected platform skills.",
+          "customSkills": "Review the selected organization skills.",
+          "knowledgeScope": "Choose an option from the list."
+        }
+      },
+      "delete": {
+        "title": "Delete {name}?",
+        "description": "The agent stops existing and nobody can chat with it anymore. Past conversations stay available to read.",
+        "confirm": "Delete agent",
+        "done": "Agent {name} deleted."
+      },
+      "toggle": {
+        "disableTitle": "Turn off {name}?",
+        "disableDescription": "Nobody starts or continues conversations with the agent until it is turned on again. It can take up to a minute to apply.",
+        "disableConfirm": "Turn off",
+        "doneDisabled": "Agent {name} turned off.",
+        "enableTitle": "Turn on {name}?",
+        "enableDescription": "People of the organization will be able to choose the agent when starting a conversation.",
+        "enableConfirm": "Turn on",
+        "doneEnabled": "Agent {name} turned on."
+      }
     }
   },
   "skills": {
     "eyebrow": "{organization}",
     "title": "Skills",
-    "description": "Specialized instructions the agents read to carry out one kind of task.",
+    "description": "Specialized instructions the agents read to carry out one kind of task. The organization can write its own.",
     "loading": "Loading the skills",
-    "limit": "Skills ship with the platform and the installed modules. The organization cannot create or edit a skill here. A module skill becomes available when its agent is turned on.",
     "agentsLink": "Open agents",
     "emptyTitle": "No skill available",
     "emptyDescription": "The agents of this organization have no skills right now.",
@@ -538,7 +650,97 @@
     "sourceModule": "Module",
     "active": "In use",
     "inactive": "No agent turned on",
-    "agentOff": "{agent} (off)"
+    "agentOff": "{agent} (off)",
+    "sourceCustom": "Organization",
+    "inUse": {
+      "title": "Skills the agents use",
+      "description": "The skills of the platform, the modules and the organization that the agents carry. A module skill becomes available when its agent is turned on."
+    },
+    "custom": {
+      "title": "Organization skills",
+      "description": "Skills the organization wrote. An organization's agent uses a skill once it is selected in that agent.",
+      "loading": "Loading the organization's skills",
+      "create": "New skill",
+      "usage": "{used} of {maximum} skills of the plan in use.",
+      "capReached": "The plan's limit was reached: delete a skill to create another.",
+      "readOnly": "You can see the skills, but you cannot change them.",
+      "emptyTitle": "No organization skills",
+      "emptyDescription": "Create a skill to teach the agents how the organization carries out a task.",
+      "emptyDescriptionNoPermission": "The organization has not created skills yet.",
+      "caption": "Skills created by {organization}",
+      "columns": {
+        "name": "Skill",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "enabled": "On",
+      "disabled": "Off",
+      "actions": {
+        "edit": "Edit",
+        "editNamed": "Edit {name}",
+        "enable": "Turn on",
+        "enableNamed": "Turn on {name}",
+        "disable": "Turn off",
+        "disableNamed": "Turn off {name}",
+        "delete": "Delete",
+        "deleteNamed": "Delete {name}"
+      },
+      "editor": {
+        "createTitle": "New skill",
+        "editTitle": "Edit {name}",
+        "description": "A skill is a text of instructions. It runs no code and gives the agent no new tools.",
+        "cancel": "Cancel",
+        "submitCreate": "Create skill",
+        "submitSave": "Save",
+        "created": "Skill {name} created.",
+        "saved": "Skill {name} saved.",
+        "counter": "{count} of {maximum} characters.",
+        "fields": {
+          "name": "Name",
+          "description": "Description",
+          "instructions": "Instructions",
+          "enabled": "On"
+        },
+        "hints": {
+          "name": "Lowercase letters, digits and hyphens, for example weekly-report. Unique in the organization.",
+          "description": "When the agent should use the skill. The agent decides by this text.",
+          "instructions": "Markdown text with the steps. Do not include passwords or personal data."
+        },
+        "errors": {
+          "name": {
+            "invalid": "Use lowercase letters, digits and hyphens, starting with a letter (up to 60 characters).",
+            "tooLong": "Use lowercase letters, digits and hyphens, starting with a letter (up to 60 characters).",
+            "taken": "The organization already has a skill with this name."
+          },
+          "description": {
+            "invalid": "Enter a description of up to 1024 characters.",
+            "tooLong": "Enter a description of up to 1024 characters.",
+            "taken": "Enter a description of up to 1024 characters."
+          },
+          "instructions": {
+            "invalid": "Write the instructions.",
+            "tooLong": "Use at most {maximum} characters.",
+            "taken": "Write the instructions."
+          }
+        }
+      },
+      "delete": {
+        "title": "Delete {name}?",
+        "description": "The skill stops existing. The agents that selected it keep working without it.",
+        "confirm": "Delete skill",
+        "done": "Skill {name} deleted."
+      },
+      "toggle": {
+        "disableTitle": "Turn off {name}?",
+        "disableDescription": "The agents that selected the skill stop getting it until it is turned on again. It can take up to a minute to apply.",
+        "disableConfirm": "Turn off",
+        "doneDisabled": "Skill {name} turned off.",
+        "enableTitle": "Turn on {name}?",
+        "enableDescription": "The agents that selected the skill get it again.",
+        "enableConfirm": "Turn on",
+        "doneEnabled": "Skill {name} turned on."
+      }
+    }
   },
   "evals": {
     "eyebrow": "{organization} settings",

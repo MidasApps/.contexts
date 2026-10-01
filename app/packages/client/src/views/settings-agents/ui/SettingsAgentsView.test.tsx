@@ -4,8 +4,10 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { renderApp } from "#/app-shell/testing/render-app.tsx";
 import { shellRoutes } from "#/app-shell/testing/shell-routes.ts";
 import { buildCatalogAgent } from "#/entities/agent-catalog/agent-catalog.fixture.ts";
+import { buildCustomAgent, buildCustomAgentOptions, CUSTOM_AGENT_ID } from "#/entities/custom-agent/custom-agent.fixture.ts";
+import { buildCustomSkill, CUSTOM_SKILL_ID } from "#/entities/custom-skill/custom-skill.fixture.ts";
 import { expectNoAxeViolations } from "#/shared/testing/axe.ts";
-import { apiError, ok, type FakeRequest, type FakeRoutes } from "#/shared/testing/fake-api.ts";
+import { apiError, noContent, ok, page, type FakeRequest, type FakeRoutes } from "#/shared/testing/fake-api.ts";
 import { IDS } from "#/shared/testing/fixtures.ts";
 import { SettingsAgentsView } from "./SettingsAgentsView.tsx";
 
@@ -60,6 +62,16 @@ const CATALOG = [
   buildCatalogAgent({ key: "example-notes", name: "Notes", description: "Takes notes.", source: "module", moduleId: "example", enabled: false, tools: [], skills: [] }),
 ];
 
+const GUIDE = buildCatalogAgent({
+  key: CUSTOM_AGENT_ID as never,
+  name: "Onboarding guide",
+  description: "Answers questions of new members.",
+  source: "custom",
+  enabled: true,
+  tools: [{ id: "catalog.listEntities", kind: "read", source: "core" }],
+  skills: [{ name: "org-weekly-report", description: "How to write the weekly report.", source: "custom" }],
+});
+
 const renderView = (permissions: readonly Permission[] = ADMIN, routes: FakeRoutes = {}) =>
   renderApp(
     <main>
@@ -70,6 +82,8 @@ const renderView = (permissions: readonly Permission[] = ADMIN, routes: FakeRout
       routes: shellRoutes(permissions, {
         "GET /v1/agents": ok(CATALOG),
         "GET /v1/agent-settings": ok(settings()),
+        "GET /v1/agent-options": ok(buildCustomAgentOptions()),
+        "GET /v1/skills": page([buildCustomSkill()]),
         "GET /v1/agents/:agentId/prompt-addendum/versions": ok([]),
         "GET /v1/agents/:agentId/prompt-addendum/activations": ok([]),
         ...routes,
@@ -88,7 +102,7 @@ afterAll(() => {
 });
 
 describe("SettingsAgentsView", { timeout: 30_000 }, () => {
-  it("lists the agents with their tools and skills and says agents cannot be created here", async () => {
+  it("lists the platform agents with their tools and skills and says how the organization's agents are used", async () => {
     const { container, api } = renderView();
     const knowledge = await card("Knowledge");
     expect(within(knowledge).getByText("knowledge.search")).toBeDefined();
@@ -97,7 +111,10 @@ describe("SettingsAgentsView", { timeout: 30_000 }, () => {
     expect(within(action).getByText("command.tenancy.CreateProjectInput").closest("li")?.textContent).toContain("altera dados");
     expect(within(action).getByText("De conectores")).toBeDefined();
     expect(within(await card("Notes")).getByText("Módulo example")).toBeDefined();
-    expect(screen.getByText(/Não é possível criar um novo agente aqui\./u)).toBeDefined();
+    expect(screen.queryByText(/Não é possível criar um novo agente aqui\./u)).toBeNull();
+    expect(screen.getAllByText(/escolhido diretamente ao iniciar uma conversa; o assistente não delega/u).length).toBeGreaterThan(0);
+    expect(await screen.findByRole("heading", { name: "Nenhum agente da organização" })).toBeDefined();
+    expect(screen.getByText(/1 de 5 agentes do plano em uso\./u)).toBeDefined();
     expect(api.calls.find((call) => call.path === "/v1/agents")?.query).toContain(`organizationId=${IDS.organization}`);
     await expectNoAxeViolations(container);
   });
@@ -220,6 +237,116 @@ describe("SettingsAgentsView", { timeout: 30_000 }, () => {
     expect(within(knowledge).queryByRole("button", { name: /Escrever instruções/u })).toBeNull();
     expect(within(knowledge).queryByRole("button", { name: /Avaliar/u })).toBeNull();
     expect(within(await card("Notes")).getByText("Este agente ainda não aceita instruções da organização.")).toBeDefined();
+  });
+
+  it("creates an agent of the organization with a model, tools, skills and a knowledge scope", { timeout: 60_000 }, async () => {
+    const posts: FakeRequest[] = [];
+    const { user } = renderView(ADMIN, {
+      "POST /v1/agents": (request) => {
+        posts.push(request);
+        return ok(buildCustomAgent(), 201);
+      },
+    });
+    await user.click(await screen.findByRole("button", { name: "Novo agente" }));
+    const dialog = await screen.findByRole("dialog", { name: "Novo agente" });
+    await user.click(await within(dialog).findByRole("button", { name: "Criar agente" }));
+    expect(await within(dialog).findByText("Informe um nome com até 100 caracteres.")).toBeDefined();
+    expect(within(dialog).getByText("Escreva as instruções.")).toBeDefined();
+    expect(posts).toHaveLength(0);
+    await user.type(within(dialog).getByRole("textbox", { name: "Nome" }), "Guide");
+    await user.type(within(dialog).getByRole("textbox", { name: "Descrição" }), "Helps new members.");
+    await user.type(within(dialog).getByRole("textbox", { name: "Instruções" }), "Be brief.");
+    expect(within(dialog).getByText(/9 de 8000 caracteres\./u)).toBeDefined();
+    expect(within(dialog).getByRole("checkbox", { name: /command\.tenancy\.CreateProjectInput/u }).closest("[data-slot=field]")?.textContent).toContain("altera dados");
+    await user.click(within(dialog).getByRole("checkbox", { name: /catalog\.listEntities/u }));
+    await user.click(within(dialog).getByRole("checkbox", { name: /knowledge-citations/u }));
+    await user.click(within(dialog).getByRole("checkbox", { name: /weekly-report/u }));
+    await user.click(within(dialog).getByRole("switch", { name: "Ferramentas de leitura dos conectores" }));
+    await user.click(within(dialog).getByRole("button", { name: "Criar agente" }));
+    await waitFor(() => expect(posts).toHaveLength(1));
+    expect(posts[0]?.body).toEqual({
+      name: "Guide",
+      description: "Helps new members.",
+      instructions: "Be brief.",
+      model: "chat",
+      tools: ["catalog.listEntities"],
+      connectorTools: true,
+      coreSkills: ["knowledge-citations"],
+      customSkills: [CUSTOM_SKILL_ID],
+      knowledgeScope: "none",
+      enabled: true,
+    });
+    expect(posts[0]?.query.get("organizationId")).toBe(IDS.organization);
+    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+  });
+
+  it("edits an agent of the organization from its record and reports a refused save", { timeout: 60_000 }, async () => {
+    const patches: FakeRequest[] = [];
+    const { user } = renderView(ADMIN, {
+      "GET /v1/agents": ok([...CATALOG, GUIDE]),
+      "GET /v1/agents/:agentId": ok(buildCustomAgent({ tools: ["catalog.listEntities", "removed.tool"], knowledgeScope: "all" })),
+      "PATCH /v1/agents/:agentId": (request) => {
+        patches.push(request);
+        return apiError(400, "VALIDATION_FAILED", [{ field: "instructions", issue: "TOO_BIG" }]);
+      },
+    });
+    const guide = await card("Onboarding guide");
+    expect(within(guide).getByText("Organização")).toBeDefined();
+    expect(within(guide).getByText("org-weekly-report")).toBeDefined();
+    expect(within(guide).queryByText("Este agente ainda não aceita instruções da organização.")).toBeNull();
+    await user.click(within(guide).getByRole("button", { name: "Editar Onboarding guide" }));
+    const dialog = await screen.findByRole("dialog", { name: "Editar Onboarding guide" });
+    const instructions = await within(dialog).findByRole<HTMLTextAreaElement>("textbox", { name: "Instruções" });
+    expect(instructions.value).toBe("Answer from the handbook.");
+    expect(within(dialog).getByRole("checkbox", { name: /removed\.tool/u }).getAttribute("aria-checked")).toBe("true");
+    await user.click(within(dialog).getByRole("button", { name: "Salvar" }));
+    await waitFor(() => expect(patches).toHaveLength(1));
+    expect(patches[0]?.params["agentId"]).toBe(CUSTOM_AGENT_ID);
+    expect(patches[0]?.body).toMatchObject({ name: "Onboarding guide", knowledgeScope: "all", tools: ["catalog.listEntities", "removed.tool"] });
+    expect(await within(dialog).findByText("Use no máximo 8000 caracteres.")).toBeDefined();
+  });
+
+  it("disables and deletes an agent of the organization after a confirmation", async () => {
+    const requests: FakeRequest[] = [];
+    const { user } = renderView(ADMIN, {
+      "GET /v1/agents": ok([...CATALOG, GUIDE]),
+      "PATCH /v1/agents/:agentId": (request) => {
+        requests.push(request);
+        return ok(buildCustomAgent({ enabled: false }));
+      },
+      "DELETE /v1/agents/:agentId": (request) => {
+        requests.push(request);
+        return noContent();
+      },
+    });
+    await user.click(await screen.findByRole("button", { name: "Desativar Onboarding guide" }));
+    await user.click(within(await screen.findByRole("alertdialog", { name: "Desativar Onboarding guide?" })).getByRole("button", { name: "Desativar" }));
+    await waitFor(() => expect(requests).toHaveLength(1));
+    expect(requests[0]?.body).toEqual({ enabled: false });
+    await waitFor(() => expect(screen.queryByRole("alertdialog")).toBeNull());
+    await user.click(screen.getByRole("button", { name: "Excluir Onboarding guide" }));
+    await user.click(within(await screen.findByRole("alertdialog", { name: "Excluir Onboarding guide?" })).getByRole("button", { name: "Excluir agente" }));
+    await waitFor(() => expect(requests).toHaveLength(2));
+    expect(requests[1]?.method).toBe("DELETE");
+    expect(requests[1]?.params["agentId"]).toBe(CUSTOM_AGENT_ID);
+  });
+
+  it("stops creation at the plan limit and shows the organization's agents read-only to a reader", async () => {
+    const capped = renderView(ADMIN, { "GET /v1/agent-options": ok(buildCustomAgentOptions({ usage: { agents: 5, skills: 0 } })) });
+    expect(await screen.findByText(/O limite do plano foi atingido: exclua um agente/u)).toBeDefined();
+    expect(screen.getByRole<HTMLButtonElement>("button", { name: "Novo agente" }).disabled).toBe(true);
+    capped.unmount();
+    renderView(READ, { "GET /v1/agents": ok([...CATALOG, GUIDE]) });
+    const guide = await card("Onboarding guide");
+    expect(within(guide).getByText("Ativado")).toBeDefined();
+    expect(screen.getByText(/Você pode ver os agentes, mas não pode alterá-los\./u)).toBeDefined();
+    expect(screen.queryByRole("button", { name: /Novo agente|Editar Onboarding|Excluir Onboarding/u })).toBeNull();
+  });
+
+  it("shows the error of the options with a retry and keeps the platform agents", async () => {
+    renderView(ADMIN, { "GET /v1/agent-options": apiError(409, "CONFLICT") });
+    expect(await screen.findByRole("button", { name: "Tentar novamente" })).toBeDefined();
+    expect(await card("Knowledge")).toBeDefined();
   });
 
   it("shows the error with a retry when the catalog fails, and no access without the read permission", async () => {

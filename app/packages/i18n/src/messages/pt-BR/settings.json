@@ -412,14 +412,13 @@
   "agents": {
     "eyebrow": "{organization}",
     "title": "Agentes",
-    "description": "Ative os agentes que o assistente pode usar, veja as ferramentas e habilidades de cada um e escreva as instruções da organização.",
+    "description": "Crie os agentes da organização, ative os agentes da plataforma que o assistente pode usar e veja as ferramentas e habilidades de cada um.",
     "loading": "Carregando os agentes",
-    "limit": "Os agentes são definidos pela plataforma e pelos módulos instalados. A organização ativa ou desativa cada agente, limita as ferramentas dele por meio dos conectores e acrescenta as próprias instruções. Não é possível criar um novo agente aqui.",
     "connectorsLink": "Abrir conectores",
     "skillsLink": "Ver habilidades",
     "saveFailed": "Não foi possível salvar",
     "catalog": {
-      "title": "Agentes disponíveis",
+      "title": "Agentes da plataforma",
       "emptyTitle": "Nenhum agente disponível",
       "emptyDescription": "A plataforma não oferece agentes para esta organização no momento.",
       "sourceCore": "Plataforma",
@@ -439,7 +438,9 @@
       "toolMutation": "altera dados",
       "toolRead": "somente leitura",
       "skillsTitle": "Habilidades",
-      "skillsEmpty": "Este agente não tem habilidades."
+      "skillsEmpty": "Este agente não tem habilidades.",
+      "description": "Definidos pela plataforma e pelos módulos instalados. O assistente delega a eles quando estão ativados.",
+      "sourceCustom": "Organização"
     },
     "assistant": {
       "name": "Assistente",
@@ -516,14 +517,125 @@
         "bodyUnchanged": "O texto é igual ao da versão ativa.",
         "created": "Versão {version} salva. Avalie para poder ativar."
       }
+    },
+    "intro": "A organização cria os próprios agentes e também ativa, limita e instrui os agentes da plataforma e dos módulos instalados. Um agente da organização é escolhido diretamente ao iniciar uma conversa; o assistente não delega tarefas a ele.",
+    "custom": {
+      "title": "Agentes da organização",
+      "description": "Agentes configurados pela organização: instruções, modelo, ferramentas, habilidades e base de conhecimento. São escolhidos diretamente ao iniciar uma conversa; o assistente não delega a eles.",
+      "loading": "Carregando os agentes da organização",
+      "create": "Novo agente",
+      "usage": "{used} de {maximum} agentes do plano em uso.",
+      "capReached": "O limite do plano foi atingido: exclua um agente para criar outro.",
+      "readOnly": "Você pode ver os agentes, mas não pode alterá-los.",
+      "emptyTitle": "Nenhum agente da organização",
+      "emptyDescription": "Crie um agente para dar às pessoas um assistente com instruções e ferramentas próprias.",
+      "emptyDescriptionNoPermission": "A organização ainda não criou agentes.",
+      "enabled": "Ativado",
+      "disabled": "Desativado",
+      "actions": {
+        "edit": "Editar",
+        "editNamed": "Editar {name}",
+        "enable": "Ativar",
+        "enableNamed": "Ativar {name}",
+        "disable": "Desativar",
+        "disableNamed": "Desativar {name}",
+        "delete": "Excluir",
+        "deleteNamed": "Excluir {name}"
+      },
+      "editor": {
+        "createTitle": "Novo agente",
+        "editTitle": "Editar {name}",
+        "description": "O agente é só configuração: ele segue as regras de segurança da plataforma e cada ferramenta ainda exige a permissão de quem conversa.",
+        "loading": "Carregando o agente",
+        "retry": "Tentar novamente",
+        "cancel": "Cancelar",
+        "submitCreate": "Criar agente",
+        "submitSave": "Salvar",
+        "created": "Agente {name} criado.",
+        "saved": "Agente {name} salvo.",
+        "counter": "{count} de {maximum} caracteres.",
+        "toolRead": "somente leitura",
+        "toolMutation": "altera dados",
+        "skillDisabled": "Habilidade desativada: o agente não a recebe.",
+        "unavailable": "Não está mais disponível; desmarque para remover.",
+        "fields": {
+          "name": "Nome",
+          "description": "Descrição",
+          "instructions": "Instruções",
+          "model": "Modelo",
+          "tools": "Ferramentas",
+          "connectorTools": "Ferramentas de leitura dos conectores",
+          "coreSkills": "Habilidades da plataforma",
+          "customSkills": "Habilidades da organização",
+          "knowledgeScope": "Base de conhecimento",
+          "enabled": "Disponível para conversas"
+        },
+        "hints": {
+          "description": "Para que serve o agente. As pessoas veem este texto ao escolher o agente.",
+          "instructions": "Como o agente deve agir. As instruções vêm depois das regras da plataforma e nunca as substituem. Não inclua senhas nem dados pessoais.",
+          "model": "A plataforma define qual modelo cada opção usa.",
+          "tools": "O agente só usa as ferramentas marcadas. As que alteram dados pedem confirmação ou aprovação.",
+          "connectorTools": "Inclui as ferramentas que os conectores da organização marcam como somente leitura.",
+          "coreSkills": "Instruções prontas da plataforma que o agente consulta quando precisa.",
+          "customSkills": "Habilidades escritas pela organização.",
+          "enabled": "Quando desativado, ninguém inicia nem continua conversas com o agente."
+        },
+        "empty": {
+          "tools": "Não há ferramentas para selecionar.",
+          "coreSkills": "Não há habilidades da plataforma para selecionar.",
+          "customSkills": "A organização ainda não criou habilidades."
+        },
+        "models": {
+          "chat": "Padrão",
+          "reasoning": "Raciocínio (mais forte)"
+        },
+        "knowledgeScopes": {
+          "none": "Não pesquisa",
+          "organization": "Documentos da organização",
+          "project": "Organização e projeto ativo",
+          "all": "Tudo o que a pessoa pode pesquisar"
+        },
+        "knowledgeHints": {
+          "none": "O agente não pesquisa a base de conhecimento.",
+          "organization": "O agente pesquisa só os documentos da organização.",
+          "project": "O agente pesquisa os documentos da organização e os do projeto em que a conversa acontece.",
+          "all": "O agente pesquisa tudo o que quem conversa pode pesquisar, incluindo o catálogo de dados."
+        },
+        "errors": {
+          "name": "Informe um nome com até 100 caracteres.",
+          "description": "Informe uma descrição com até 1000 caracteres.",
+          "instructions": "Escreva as instruções.",
+          "instructionsTooLong": "Use no máximo {maximum} caracteres.",
+          "model": "Escolha um modelo da lista.",
+          "tools": "Revise as ferramentas selecionadas.",
+          "coreSkills": "Revise as habilidades da plataforma selecionadas.",
+          "customSkills": "Revise as habilidades da organização selecionadas.",
+          "knowledgeScope": "Escolha uma opção da lista."
+        }
+      },
+      "delete": {
+        "title": "Excluir {name}?",
+        "description": "O agente deixa de existir e ninguém mais conversa com ele. As conversas já feitas continuam disponíveis para leitura.",
+        "confirm": "Excluir agente",
+        "done": "Agente {name} excluído."
+      },
+      "toggle": {
+        "disableTitle": "Desativar {name}?",
+        "disableDescription": "Ninguém inicia nem continua conversas com o agente até ele ser ativado de novo. Pode levar até um minuto para valer.",
+        "disableConfirm": "Desativar",
+        "doneDisabled": "Agente {name} desativado.",
+        "enableTitle": "Ativar {name}?",
+        "enableDescription": "As pessoas da organização poderão escolher o agente ao iniciar uma conversa.",
+        "enableConfirm": "Ativar",
+        "doneEnabled": "Agente {name} ativado."
+      }
     }
   },
   "skills": {
     "eyebrow": "{organization}",
     "title": "Habilidades",
-    "description": "Instruções especializadas que os agentes consultam para executar um tipo de tarefa.",
+    "description": "Instruções especializadas que os agentes consultam para executar um tipo de tarefa. A organização pode escrever as próprias.",
     "loading": "Carregando as habilidades",
-    "limit": "As habilidades vêm com a plataforma e com os módulos instalados. A organização não pode criar nem editar uma habilidade aqui. A habilidade de um módulo fica disponível quando o agente dele é ativado.",
     "agentsLink": "Abrir agentes",
     "emptyTitle": "Nenhuma habilidade disponível",
     "emptyDescription": "Os agentes desta organização não têm habilidades no momento.",
@@ -538,7 +650,97 @@
     "sourceModule": "Módulo",
     "active": "Em uso",
     "inactive": "Sem agente ativado",
-    "agentOff": "{agent} (desativado)"
+    "agentOff": "{agent} (desativado)",
+    "sourceCustom": "Organização",
+    "inUse": {
+      "title": "Habilidades em uso pelos agentes",
+      "description": "As habilidades da plataforma, dos módulos e da organização que os agentes carregam. A habilidade de um módulo fica disponível quando o agente dele é ativado."
+    },
+    "custom": {
+      "title": "Habilidades da organização",
+      "description": "Habilidades escritas pela organização. Um agente da organização passa a usar uma habilidade quando ela é selecionada nele.",
+      "loading": "Carregando as habilidades da organização",
+      "create": "Nova habilidade",
+      "usage": "{used} de {maximum} habilidades do plano em uso.",
+      "capReached": "O limite do plano foi atingido: exclua uma habilidade para criar outra.",
+      "readOnly": "Você pode ver as habilidades, mas não pode alterá-las.",
+      "emptyTitle": "Nenhuma habilidade da organização",
+      "emptyDescription": "Crie uma habilidade para ensinar aos agentes como a organização executa uma tarefa.",
+      "emptyDescriptionNoPermission": "A organização ainda não criou habilidades.",
+      "caption": "Habilidades criadas por {organization}",
+      "columns": {
+        "name": "Habilidade",
+        "status": "Situação",
+        "actions": "Ações"
+      },
+      "enabled": "Ativada",
+      "disabled": "Desativada",
+      "actions": {
+        "edit": "Editar",
+        "editNamed": "Editar {name}",
+        "enable": "Ativar",
+        "enableNamed": "Ativar {name}",
+        "disable": "Desativar",
+        "disableNamed": "Desativar {name}",
+        "delete": "Excluir",
+        "deleteNamed": "Excluir {name}"
+      },
+      "editor": {
+        "createTitle": "Nova habilidade",
+        "editTitle": "Editar {name}",
+        "description": "Uma habilidade é um texto de instruções. Ela não executa código nem dá novas ferramentas ao agente.",
+        "cancel": "Cancelar",
+        "submitCreate": "Criar habilidade",
+        "submitSave": "Salvar",
+        "created": "Habilidade {name} criada.",
+        "saved": "Habilidade {name} salva.",
+        "counter": "{count} de {maximum} caracteres.",
+        "fields": {
+          "name": "Nome",
+          "description": "Descrição",
+          "instructions": "Instruções",
+          "enabled": "Ativada"
+        },
+        "hints": {
+          "name": "Letras minúsculas, números e hífens, por exemplo relatorio-semanal. Único na organização.",
+          "description": "Quando o agente deve usar a habilidade. O agente decide por este texto.",
+          "instructions": "Texto em Markdown com o passo a passo. Não inclua senhas nem dados pessoais."
+        },
+        "errors": {
+          "name": {
+            "invalid": "Use letras minúsculas, números e hífens, começando por uma letra (até 60 caracteres).",
+            "tooLong": "Use letras minúsculas, números e hífens, começando por uma letra (até 60 caracteres).",
+            "taken": "Já existe uma habilidade com este nome na organização."
+          },
+          "description": {
+            "invalid": "Informe uma descrição com até 1024 caracteres.",
+            "tooLong": "Informe uma descrição com até 1024 caracteres.",
+            "taken": "Informe uma descrição com até 1024 caracteres."
+          },
+          "instructions": {
+            "invalid": "Escreva as instruções.",
+            "tooLong": "Use no máximo {maximum} caracteres.",
+            "taken": "Escreva as instruções."
+          }
+        }
+      },
+      "delete": {
+        "title": "Excluir {name}?",
+        "description": "A habilidade deixa de existir. Os agentes que a selecionaram continuam funcionando sem ela.",
+        "confirm": "Excluir habilidade",
+        "done": "Habilidade {name} excluída."
+      },
+      "toggle": {
+        "disableTitle": "Desativar {name}?",
+        "disableDescription": "Os agentes que selecionaram a habilidade deixam de recebê-la até ela ser ativada de novo. Pode levar até um minuto para valer.",
+        "disableConfirm": "Desativar",
+        "doneDisabled": "Habilidade {name} desativada.",
+        "enableTitle": "Ativar {name}?",
+        "enableDescription": "Os agentes que selecionaram a habilidade voltam a recebê-la.",
+        "enableConfirm": "Ativar",
+        "doneEnabled": "Habilidade {name} ativada."
+      }
+    }
   },
   "evals": {
     "eyebrow": "Configurações de {organization}",

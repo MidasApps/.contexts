@@ -74,7 +74,11 @@ export function AgentCard({ organizationId, agent, status, prompt }: AgentCardPr
           </h3>
           <p className="text-sm text-muted-foreground">{agent.description}</p>
           <p className="text-xs text-muted-foreground-strong">
-            {agent.source === "module" && agent.moduleId !== null ? t("catalog.sourceModule", { module: agent.moduleId }) : t("catalog.sourceCore")}
+            {agent.source === "custom"
+              ? t("catalog.sourceCustom")
+              : agent.source === "module" && agent.moduleId !== null
+                ? t("catalog.sourceModule", { module: agent.moduleId })
+                : t("catalog.sourceCore")}
           </p>
         </div>
         {status}

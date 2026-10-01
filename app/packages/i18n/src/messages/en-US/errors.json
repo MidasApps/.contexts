@@ -32,5 +32,6 @@
   "SCHEDULE_INTERVAL_TOO_SHORT": "The schedule runs too often. Choose a longer interval.",
   "FEATURE_DISABLED": "This feature is turned off right now.",
   "EVAL_REQUIRED": "Run an evaluation that passes before activating this version.",
-  "EVAL_DATASET_MISSING": "This agent has no evaluation set yet."
+  "EVAL_DATASET_MISSING": "This agent has no evaluation set yet.",
+  "CUSTOM_LIMIT_REACHED": "The plan's limit was reached. Delete an item or talk to whoever manages the plan."
 }
