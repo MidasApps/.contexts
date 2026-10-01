@@ -51,3 +51,19 @@ read their own conversations (rules); every write goes through `/v1`.
     `useRightPanelAvailable`: the chat panel is offered inside a project, to a member with
     `core.conversation.send`, and not on the chat page. It starts closed and opens from a topbar button;
     its content mounts only while open.
+
+- **2026-10-01 — naming a conversation is a same-page navigation (SP4 Task 14).** The browser run
+  showed duplicate React keys and a second chat panel in the page: on the web, replacing the route
+  with the new `conversationId` changed a dynamic segment, so the App Router built a second page
+  whose thread loaded the conversation and resumed the run while the first one still streamed.
+  `RouterPort.navigate` gained `samePage` (with `replace`): the web adapter writes the address with
+  `history.replaceState`, which Next keeps in sync with `usePathname` without building the page again;
+  the desktop (TanStack Router keeps the route component for a param change) and the memory router
+  navigate as before. A thread that resumes a run also drops the stored copy of the answer in flight,
+  which the replayed stream sends again under the same message id. The history is read again as soon
+  as a turn settles (the run is cleared on the server before the stream closes), on top of the 4 s
+  poll while a row says it is answering.
+- **2026-10-01 — the agent of a conversation (decision 0046, follow-up 72).** The panel header offers
+  `GET /v1/chat-agents` while the conversation is new and sends the choice as `agentId`; a stored
+  conversation shows its agent instead (the server keeps it). History rows and answers carry the
+  agent's name; an agent no longer listed is shown as "the organization's agent".

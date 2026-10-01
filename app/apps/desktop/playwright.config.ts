@@ -1,6 +1,7 @@
 import path from "node:path";
 import { defineConfig, devices } from "@playwright/test";
 import { readE2eEnv } from "@core/e2e/e2e-env";
+import { e2eMastraServer } from "@core/e2e/mastra-server";
 import { e2eWebServer } from "@core/e2e/web-server";
 
 // Project `desktop-web` (SP2 spec §13 item 7): the desktop frontend built by Vite with the e2e
@@ -36,6 +37,8 @@ export default defineConfig({
   webServer: [
     // The web app is started by path (a command in its folder), never imported: apps stay apart.
     e2eWebServer(env, { webAppDir: path.resolve(import.meta.dirname, "../web") }),
+    // The chat journey reaches the agent runtime through the web's /v1 (fake models).
+    e2eMastraServer(env, { mastraAppDir: path.resolve(import.meta.dirname, "../mastra") }),
     {
       command: `pnpm exec vite preview --port ${String(env.E2E_DESKTOP_PORT)} --strictPort`,
       cwd: path.resolve(import.meta.dirname),
