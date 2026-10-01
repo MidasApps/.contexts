@@ -436,7 +436,7 @@ export {
   type DecideApprovalRequestInput,
 } from "./contracts/access/approval-request.schema.ts";
 export {
-  ACCESS_ENDPOINTS, acceptInvitationEndpoint, approveApprovalRequestEndpoint, createApprovalRequestEndpoint,
+  ACCESS_ENDPOINTS, acceptInvitationEndpoint, approveApprovalRequestEndpoint, createApprovalRequestEndpoint, getApprovalRequestEndpoint,
   createInvitationEndpoint, createRoleEndpoint, deleteRoleEndpoint, getRoleEndpoint, grantMembershipEndpoint,
   listApprovalRequestsEndpoint, listInvitationsEndpoint, listMembersEndpoint, listMembershipsEndpoint,
   listPermissionsEndpoint, listRolesEndpoint, previewInvitationEndpoint, rejectApprovalRequestEndpoint,

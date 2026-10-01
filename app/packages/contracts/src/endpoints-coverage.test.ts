@@ -59,6 +59,8 @@ const SP1_ROUTES = [
   "GET /v1/organizations/{organizationId}/audit-logs",
   "GET /v1/organizations/{organizationId}/approval-requests",
   "POST /v1/organizations/{organizationId}/approval-requests",
+  // Not in the spec table: the inbox detail page of SP5 Task 14 (the 201 Location of a new request).
+  "GET /v1/approval-requests/{approvalRequestId}",
   "POST /v1/approval-requests/{approvalRequestId}/approve",
   "POST /v1/approval-requests/{approvalRequestId}/reject",
   "POST /v1/platform/impersonation-sessions",

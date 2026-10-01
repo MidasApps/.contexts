@@ -3730,6 +3730,69 @@ paths:
       tags:
         - identity
       x-auth: user
+  /v1/approval-requests/{approvalRequestId}:
+    get:
+      operationId: access.getApprovalRequest
+      parameters:
+        - description: Approval request id.
+          in: path
+          name: approvalRequestId
+          required: true
+          schema:
+            minLength: 1
+            type: string
+            x-pii: none
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: "#/components/schemas/access.ApprovalRequest"
+                required:
+                  - data
+                type: object
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: VALIDATION_FAILED
+          x-error-codes:
+            - VALIDATION_FAILED
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UNAUTHORIZED
+          x-error-codes:
+            - UNAUTHORIZED
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: NOT_FOUND
+          x-error-codes:
+            - NOT_FOUND
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: INTERNAL_ERROR
+          x-error-codes:
+            - INTERNAL_ERROR
+      security:
+        - bearerAuth: []
+      summary: Reads one approval request (core.approval.read at its node; 404 when the caller cannot see it).
+      tags:
+        - access
+      x-auth: user
   /v1/approval-requests/{approvalRequestId}/approve:
     post:
       operationId: access.approveApprovalRequest

@@ -268,6 +268,17 @@ export const createApprovalRequestEndpoint = defineEndpoint({
   summary: "Asks for approval of an action (the caller must hold its permission at the node).",
 });
 
+export const getApprovalRequestEndpoint = defineEndpoint({
+  id: "access.getApprovalRequest",
+  method: "GET",
+  path: "/v1/approval-requests/{approvalRequestId}",
+  auth: "user",
+  params: approvalParams,
+  responses: { 200: dataEnvelope(ApprovalRequestSchema) },
+  errors: { 404: NOT_FOUND },
+  summary: "Reads one approval request (core.approval.read at its node; 404 when the caller cannot see it).",
+});
+
 export const approveApprovalRequestEndpoint = defineEndpoint({
   id: "access.approveApprovalRequest",
   method: "POST",
@@ -312,6 +323,7 @@ export const ACCESS_ENDPOINTS: readonly EndpointDefinition[] = [
   acceptInvitationEndpoint,
   listApprovalRequestsEndpoint,
   createApprovalRequestEndpoint,
+  getApprovalRequestEndpoint,
   approveApprovalRequestEndpoint,
   rejectApprovalRequestEndpoint,
 ];
