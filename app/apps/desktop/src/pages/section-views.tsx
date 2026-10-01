@@ -11,8 +11,17 @@ import { SettingsGeneralView } from "@core/client/views/settings-general";
 import { SettingsInvitationsView } from "@core/client/views/settings-invitations";
 import { SettingsMembersView } from "@core/client/views/settings-members";
 import { SettingsRolesView } from "@core/client/views/settings-roles";
-import { SettingsSlotView } from "@core/client/views/settings-slot";
 import { SettingsUnitsView } from "@core/client/views/settings-units";
+import { SettingsAgentsView } from "@core/client/views/settings-agents";
+import { SettingsSkillsView } from "@core/client/views/settings-skills";
+import { SettingsKnowledgeView } from "@core/client/views/settings-knowledge";
+import { SettingsConnectorsView } from "@core/client/views/settings-connectors";
+import { SettingsWorkflowsView } from "@core/client/views/settings-workflows";
+import { SettingsApprovalsView } from "@core/client/views/settings-approvals";
+import { SettingsUsageView } from "@core/client/views/settings-usage";
+import { SettingsTracesView } from "@core/client/views/settings-traces";
+import { SettingsEvalsView } from "@core/client/views/settings-evals";
+import { SettingsFlagsView } from "@core/client/views/settings-flags";
 
 const isOneOf = <T extends string>(values: readonly T[], value: string): value is T => (values as readonly string[]).includes(value);
 
@@ -32,19 +41,27 @@ function KnownSettingsSection({ section }: { section: SettingsSection }) {
       return <SettingsApiKeysView />;
     case "devices":
       return <SettingsDevicesView />;
-    // SP5 Task 14 fills these; until its pages land they are slots or not found.
-    case "connectors":
+    // The agent runtime sections (SP5 spec §7); the ones with detail pages read the `rest` tail.
     case "agents":
-    case "usage":
-      return <SettingsSlotView />;
+      return <SettingsAgentsView />;
     case "skills":
+      return <SettingsSkillsView />;
     case "knowledge":
+      return <SettingsKnowledgeView />;
+    case "connectors":
+      return <SettingsConnectorsView />;
     case "workflows":
+      return <SettingsWorkflowsView />;
     case "approvals":
+      return <SettingsApprovalsView />;
+    case "usage":
+      return <SettingsUsageView />;
     case "traces":
+      return <SettingsTracesView />;
     case "evals":
+      return <SettingsEvalsView />;
     case "flags":
-      return <NotFoundView />;
+      return <SettingsFlagsView />;
   }
 }
 

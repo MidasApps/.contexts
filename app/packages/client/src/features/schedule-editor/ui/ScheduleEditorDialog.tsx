@@ -1,0 +1,212 @@
+"use client";
+
+import { createScheduleEndpoint, ScheduleSlugSchema, updateScheduleEndpoint, type Schedule, type WorkflowCatalogEntry } from "@core/contracts";
+import { useQueryClient } from "@tanstack/react-query";
+import { CircleAlertIcon } from "lucide-react";
+import { useState, type FormEvent } from "react";
+import { useTranslations } from "use-intl";
+import { tenantScheduleKeys } from "#/entities/schedule/index.ts";
+import { useCallEndpoint } from "#/shared/api/api-context.tsx";
+import { ApiError } from "#/shared/api/api-error.ts";
+import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
+import { Input } from "#/shared/ui/atoms/Input/Input.tsx";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "#/shared/ui/atoms/Select/Select.tsx";
+import { Textarea } from "#/shared/ui/atoms/Textarea/Textarea.tsx";
+import { Alert, AlertDescription } from "#/shared/ui/molecules/Alert/Alert.tsx";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "#/shared/ui/molecules/Dialog/Dialog.tsx";
+import { ApiErrorAlert } from "#/shared/ui/molecules/ErrorState/ApiErrorAlert.tsx";
+import { Field, FieldControl, FieldDescription, FieldError, FieldGroup, FieldLabel } from "#/shared/ui/molecules/Field/Field.tsx";
+import { TimeZoneSelect } from "#/shared/ui/molecules/TimeZoneSelect/TimeZoneSelect.tsx";
+import { notify } from "#/shared/ui/molecules/Toaster/notify.ts";
+import { cronOfDraft, DEFAULT_CRON_DRAFT, draftOfCron, parseJsonObject, type CronDraft } from "../model/cron-presets.ts";
+import { CronFields } from "./CronFields.tsx";
+
+export type ScheduleEditorDialogProps = {
+  organizationId: string;
+  /** `null` creates a schedule; a schedule edits its cron, time zone and input. */
+  schedule: Schedule | null;
+  /** The organization's workflow catalog; only the schedulable ones are offered. */
+  workflows: readonly WorkflowCatalogEntry[];
+  /** Zone a new schedule starts in: the organization's resolved time zone. */
+  defaultTimeZone: string;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+};
+
+type Draft = { workflowId: string | undefined; slug: string; cron: CronDraft; timezone: string; input: string };
+type Problem = "workflow" | "slug" | "cron" | "timezone" | "input";
+
+// Refusals the editor can explain better than the generic copy of the code.
+const REFUSALS: Record<string, "slugTaken" | "tooFrequent" | "notSchedulable"> = {
+  CONFLICT: "slugTaken",
+  SCHEDULE_INTERVAL_TOO_SHORT: "tooFrequent",
+  WORKFLOW_NOT_SCHEDULABLE: "notSchedulable",
+};
+
+const draftOf = (schedule: Schedule | null, defaultTimeZone: string): Draft =>
+  schedule === null
+    ? { workflowId: undefined, slug: "", cron: DEFAULT_CRON_DRAFT, timezone: defaultTimeZone, input: "" }
+    : {
+        workflowId: schedule.workflowId,
+        slug: "",
+        cron: draftOfCron(schedule.cron),
+        timezone: schedule.timezone,
+        input: Object.keys(schedule.inputData).length === 0 ? "" : JSON.stringify(schedule.inputData, null, 2),
+      };
+
+const problemsOf = (draft: Draft, creating: boolean): Set<Problem> => {
+  const problems = new Set<Problem>();
+  if (creating && draft.workflowId === undefined) problems.add("workflow");
+  if (creating && !ScheduleSlugSchema.safeParse(draft.slug).success) problems.add("slug");
+  if (cronOfDraft(draft.cron) === null) problems.add("cron");
+  if (draft.timezone === "") problems.add("timezone");
+  if (parseJsonObject(draft.input) === null) problems.add("input");
+  return problems;
+};
+
+function Refusal({ error }: { error: unknown }) {
+  const t = useTranslations("settings.workflows.editor.errors");
+  const known = error instanceof ApiError ? REFUSALS[error.code] : undefined;
+  if (known === undefined) return <ApiErrorAlert error={error} />;
+  return (
+    <Alert variant="destructive">
+      <CircleAlertIcon aria-hidden="true" />
+      <AlertDescription className="text-inherit">{t(known)}</AlertDescription>
+    </Alert>
+  );
+}
+
+function IdentityFields({ draft, setDraft, problems, schedulable }: { draft: Draft; setDraft: (draft: Draft) => void; problems: Set<Problem>; schedulable: readonly WorkflowCatalogEntry[] }) {
+  const t = useTranslations("settings.workflows.editor");
+  const selected = schedulable.find((workflow) => workflow.id === draft.workflowId);
+  return (
+    <>
+      <Field>
+        <FieldLabel>{t("workflow")}</FieldLabel>
+        <Select value={draft.workflowId ?? ""} onValueChange={(workflowId) => setDraft({ ...draft, workflowId })}>
+          <FieldControl>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder={t("workflowPlaceholder")} />
+            </SelectTrigger>
+          </FieldControl>
+          <SelectContent>
+            {schedulable.map((workflow) => (
+              <SelectItem key={workflow.id} value={workflow.id}>
+                {workflow.id}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        {selected === undefined || selected.description === "" ? null : <FieldDescription>{selected.description}</FieldDescription>}
+        <FieldError errors={[problems.has("workflow") ? t("errors.workflow") : undefined]} />
+      </Field>
+      <Field>
+        <FieldLabel>{t("slug")}</FieldLabel>
+        <FieldControl>
+          <Input required maxLength={60} autoCapitalize="none" spellCheck={false} value={draft.slug} onChange={(event) => setDraft({ ...draft, slug: event.target.value.trim().toLowerCase() })} />
+        </FieldControl>
+        <FieldDescription>{t("slugHint")}</FieldDescription>
+        <FieldError errors={[problems.has("slug") ? t("errors.slug") : undefined]} />
+      </Field>
+    </>
+  );
+}
+
+function ScheduleEditorForm({ organizationId, schedule, workflows, defaultTimeZone, onOpenChange }: ScheduleEditorDialogProps) {
+  const t = useTranslations("settings.workflows.editor");
+  const callEndpoint = useCallEndpoint();
+  const queryClient = useQueryClient();
+  const creating = schedule === null;
+  const [draft, setDraft] = useState<Draft>(() => draftOf(schedule, defaultTimeZone));
+  const [problems, setProblems] = useState<Set<Problem>>(new Set());
+  const [failure, setFailure] = useState<unknown>(null);
+  const [pending, setPending] = useState(false);
+
+  const save = async (cron: string, inputData: Record<string, unknown>): Promise<string> => {
+    const shared = { cron, timezone: draft.timezone, inputData };
+    if (schedule !== null) return (await callEndpoint(updateScheduleEndpoint, { params: { scheduleId: schedule.id }, query: { organizationId }, body: shared })).data.workflowId;
+    const body = { workflowId: draft.workflowId ?? "", slug: draft.slug, ...shared };
+    return (await callEndpoint(createScheduleEndpoint, { query: { organizationId }, body })).data.workflowId;
+  };
+
+  const submit = async (event: FormEvent<HTMLFormElement>): Promise<void> => {
+    event.preventDefault();
+    if (pending) return;
+    const found = problemsOf(draft, creating);
+    setProblems(found);
+    setFailure(null);
+    const cron = cronOfDraft(draft.cron);
+    const inputData = parseJsonObject(draft.input);
+    if (found.size > 0 || cron === null || inputData === null) return;
+    setPending(true);
+    try {
+      const workflow = await save(cron, inputData);
+      await queryClient.invalidateQueries({ queryKey: tenantScheduleKeys.all(organizationId) });
+      notify.success(t(creating ? "created" : "updated", { workflow }));
+      onOpenChange(false);
+    } catch (error: unknown) {
+      setFailure(error);
+    } finally {
+      setPending(false);
+    }
+  };
+
+  return (
+    <form noValidate onSubmit={(event) => void submit(event)} className="flex max-h-[70vh] flex-col gap-5 overflow-y-auto pr-1">
+      {failure === null ? null : <Refusal error={failure} />}
+      <FieldGroup>
+        {creating ? <IdentityFields draft={draft} setDraft={setDraft} problems={problems} schedulable={workflows.filter((workflow) => workflow.schedulable)} /> : null}
+        <CronFields draft={draft.cron} onChange={(cron) => setDraft({ ...draft, cron })} invalid={problems.has("cron")} />
+        <Field>
+          <FieldLabel>{t("timezone")}</FieldLabel>
+          <FieldControl>
+            <TimeZoneSelect className="w-full" value={draft.timezone === "" ? undefined : draft.timezone} onValueChange={(timezone) => setDraft({ ...draft, timezone })} />
+          </FieldControl>
+          <FieldDescription>{t("timezoneHint")}</FieldDescription>
+          <FieldError errors={[problems.has("timezone") ? t("errors.timezone") : undefined]} />
+        </Field>
+        <Field>
+          <FieldLabel>{t("input")}</FieldLabel>
+          <FieldControl>
+            <Textarea className="font-mono text-[13px]" rows={4} spellCheck={false} value={draft.input} onChange={(event) => setDraft({ ...draft, input: event.target.value })} />
+          </FieldControl>
+          <FieldDescription>{t("inputHint")}</FieldDescription>
+          <FieldError errors={[problems.has("input") ? t("errors.input") : undefined]} />
+        </Field>
+      </FieldGroup>
+      <p className="text-xs text-muted-foreground">{t("nextFireAfterSave")}</p>
+      <DialogFooter className="sticky bottom-0 bg-background pt-2">
+        <Button type="button" variant="secondary" disabled={pending} onClick={() => onOpenChange(false)}>
+          {t("cancel")}
+        </Button>
+        <Button type="submit" pending={pending}>
+          {t(creating ? "createSubmit" : "editSubmit")}
+        </Button>
+      </DialogFooter>
+    </form>
+  );
+}
+
+/**
+ * Creates or edits a tenant schedule (`POST /v1/schedules`, `PATCH /v1/schedules/{id}`,
+ * core.schedule.write): a schedulable workflow, a slug (both fixed after creation: they are the
+ * schedule's id), the cron from a preset or a 5-field expression, the IANA zone the cron is read
+ * in, and the JSON input of every fire. The server owns the semantics: it refuses an interval
+ * under its minimum, a workflow that is not schedulable and a slug in use, each with its own copy
+ * here. The next fire is the server's; this dialog computes none.
+ */
+export function ScheduleEditorDialog(props: ScheduleEditorDialogProps) {
+  const t = useTranslations("settings.workflows.editor");
+  const { schedule } = props;
+  return (
+    <Dialog open={props.open} onOpenChange={props.onOpenChange}>
+      <DialogContent className="sm:max-w-xl">
+        <DialogHeader>
+          <DialogTitle>{schedule === null ? t("createTitle") : t("editTitle", { workflow: schedule.workflowId })}</DialogTitle>
+          <DialogDescription>{t("description")}</DialogDescription>
+        </DialogHeader>
+        <ScheduleEditorForm key={schedule?.id ?? "new"} {...props} />
+      </DialogContent>
+    </Dialog>
+  );
+}

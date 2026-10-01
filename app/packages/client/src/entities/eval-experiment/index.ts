@@ -9,3 +9,11 @@ export {
   type ExperimentPage,
 } from "./api/eval-queries.ts";
 export { compareExperiments, type ScoreComparison, type ScoreOutcome } from "./lib/compare-experiments.ts";
+// SP5 Task 14: an organization's own datasets and experiments (`/v1/evals/*`).
+export {
+  tenantDatasetsQuery,
+  tenantEvalKeys,
+  tenantExperimentsQuery,
+  useTenantDatasets,
+  useTenantExperiments,
+} from "./api/tenant-eval-queries.ts";

@@ -38,10 +38,12 @@ export type ScheduleTableProps<Row extends ScheduleRow> = {
   onResume: (schedule: Row) => void;
   /** Opens the caller's confirmation; the run starts there. */
   onRunNow: (schedule: Row) => void;
+  /** More actions of a row (edit, delete), after run-now; shown only when `canManage`. */
+  renderRowActions?: ((schedule: Row) => ReactNode) | undefined;
   empty: ReactNode;
 };
 
-type TableState = Pick<ScheduleTableProps<ScheduleRow>, "ownerLabel" | "canManage" | "disabled" | "pendingId" | "onPause" | "onResume" | "onRunNow">;
+type TableState = Pick<ScheduleTableProps<ScheduleRow>, "ownerLabel" | "canManage" | "disabled" | "pendingId" | "onPause" | "onResume" | "onRunNow" | "renderRowActions">;
 
 // Cells read the changing state from context so the column definitions never change identity
 // (TanStack remounts cells when they do, which drops clicks made while data loads).
@@ -101,7 +103,7 @@ function Status({ status }: { status: ScheduleRow["status"] }) {
 
 function Actions({ schedule }: { schedule: ScheduleRow }) {
   const t = useTranslations("common.scheduleTable");
-  const { canManage, disabled = false, pendingId, onPause, onResume, onRunNow } = useTableState();
+  const { canManage, disabled = false, pendingId, onPause, onResume, onRunNow, renderRowActions } = useTableState();
   if (!canManage) return null;
   const pending = pendingId === schedule.id;
   const blocked = disabled || pendingId !== null;
@@ -120,6 +122,7 @@ function Actions({ schedule }: { schedule: ScheduleRow }) {
       <Button variant="outline" size="sm" disabled={blocked} onClick={() => onRunNow(schedule)} aria-label={t("runNowNamed", { name, id: schedule.id })}>
         {t("runNow")}
       </Button>
+      {renderRowActions?.(schedule)}
     </span>
   );
 }

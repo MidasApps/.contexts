@@ -11,3 +11,12 @@ export {
 } from "./api/trace-queries.ts";
 export { buildSpanTree, hasSpanPayload, type SpanNode } from "./lib/span-tree.ts";
 export { TraceCost, TraceDuration, TraceStatusPill, useFormatDuration } from "./ui/trace-metrics.tsx";
+// SP5 Task 14: the same traces as an organization reads its own (`/v1/traces`).
+export {
+  tenantTraceKeys,
+  tenantTraceQuery,
+  tenantTracesQuery,
+  useTenantTrace,
+  useTenantTraces,
+  type TenantTraceFilters,
+} from "./api/tenant-trace-queries.ts";

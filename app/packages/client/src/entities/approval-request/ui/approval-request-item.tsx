@@ -1,26 +1,57 @@
-import type { ApprovalRequest } from "@core/contracts";
+"use client";
+
+import type { ApprovalRequest, ApprovalStatus } from "@core/contracts";
 import type { ReactNode } from "react";
-import { useFormatter, useTranslations } from "use-intl";
+import { useTranslations } from "use-intl";
+import { useFormatDateTime } from "#/shared/lib/format/use-format-date-time.ts";
+import type { Route } from "#/shared/lib/router/route-paths.ts";
+import { RouteLink } from "#/shared/lib/router/router-context.tsx";
+import { StatusPill, type StatusTone } from "#/shared/ui/molecules/StatusPill/StatusPill.tsx";
 import { approvalPreviewOf } from "../lib/approval-preview.ts";
 
 export type ApprovalRequestItemProps = {
   readonly request: ApprovalRequest;
-  /** Display name of the requester, resolved by the caller (members list); falls back to the id. */
-  readonly requesterName?: string;
-  /** Approve/reject controls (the `decide-approval` feature of Task 14); none in read-only lists. */
+  /** Display name of the requester, resolved by the caller (members list, "you"); falls back to the id. */
+  readonly requesterName?: string | undefined;
+  /** Where the request applies, rendered by the caller (the node name widget). */
+  readonly node?: ReactNode;
+  /** Makes the summary a link (the inbox links each item to its detail page). */
+  readonly titleRoute?: Route | undefined;
+  /** Heading level of the summary in the page outline. */
+  readonly headingLevel?: 2 | 3 | undefined;
+  /** Decision controls (the `approval-decision` feature); none in read-only lists. */
   readonly actions?: ReactNode;
-  /** Renders the run link (the router's `Link`); a plain anchor by default. */
-  readonly renderLink?: ((props: { readonly href: string; readonly children: ReactNode }) => ReactNode) | undefined;
 };
+
+const TONES: Record<ApprovalStatus, StatusTone> = {
+  pending: "amber",
+  approved: "blue",
+  executed: "emerald",
+  rejected: "danger",
+  failed: "danger",
+  cancelled: "neutral",
+  expired: "neutral",
+};
+
+/** The request's lifecycle state in words (the color is never the only signal). */
+export function ApprovalStatusPill({ status }: { status: ApprovalStatus }) {
+  const t = useTranslations("common.approvals.status");
+  return <StatusPill tone={TONES[status]}>{t(status)}</StatusPill>;
+}
 
 const json = (value: unknown): string => JSON.stringify(value, null, 2);
 
-const Preview = ({ request, renderLink }: Pick<ApprovalRequestItemProps, "request" | "renderLink">) => {
+function Preview({ request }: Pick<ApprovalRequestItemProps, "request">) {
   const t = useTranslations("common.approvals.preview");
   const preview = approvalPreviewOf(request);
   if (preview.kind === "workflow-resume") {
-    const children = t("viewRun");
-    return renderLink === undefined ? <a href={preview.runHref}>{children}</a> : renderLink({ href: preview.runHref, children });
+    return (
+      <p className="text-sm">
+        <RouteLink to={preview.runRoute} className="font-medium text-primary underline underline-offset-4">
+          {t("viewRun")}
+        </RouteLink>
+      </p>
+    );
   }
   if (preview.kind === "agent-command" && preview.hasDiff) {
     return (
@@ -28,42 +59,68 @@ const Preview = ({ request, renderLink }: Pick<ApprovalRequestItemProps, "reques
         <div>
           <dt className="text-sm font-medium">{t("before")}</dt>
           <dd>
-            <pre className="overflow-x-auto rounded-md bg-muted p-2 text-xs">{json(preview.before)}</pre>
+            {/* Wrapped, not scrolled: a scroll region would need keyboard focus (WCAG 2.1.1). */}
+            <pre className="rounded-md bg-muted p-2 text-xs break-words whitespace-pre-wrap">
+              {json(preview.before)}
+            </pre>
           </dd>
         </div>
         <div>
           <dt className="text-sm font-medium">{t("after")}</dt>
           <dd>
-            <pre className="overflow-x-auto rounded-md bg-muted p-2 text-xs">{json(preview.after)}</pre>
+            <pre className="rounded-md bg-muted p-2 text-xs break-words whitespace-pre-wrap">
+              {json(preview.after)}
+            </pre>
           </dd>
         </div>
       </dl>
     );
   }
   return <p className="text-sm text-muted-foreground">{t("none")}</p>;
-};
+}
 
 /**
- * One approval request of the inbox (SP5 spec §3.4): summary, status, requester, expiry and the
- * preview of its action kind. Decisions are passed in as `actions`, so the entity stays read-only.
+ * One approval request (SP5 spec §3.4): summary, status, requester, node, expiry and the preview of
+ * its action kind. Decisions are passed in as `actions`, so the entity stays read-only.
  */
-export const ApprovalRequestItem = ({ request, requesterName, actions, renderLink }: ApprovalRequestItemProps) => {
+export function ApprovalRequestItem({ request, requesterName, node, titleRoute, headingLevel = 3, actions }: ApprovalRequestItemProps) {
   const t = useTranslations("common.approvals");
-  const format = useFormatter();
+  const formatDateTime = useFormatDateTime();
+  const Heading = headingLevel === 2 ? "h2" : "h3";
+  const settled = request.status !== "pending";
   return (
-    <article className="flex flex-col gap-3 rounded-lg border border-border p-4" aria-labelledby={`approval-${request.id}`}>
-      <header className="flex flex-wrap items-baseline justify-between gap-2">
-        <h3 id={`approval-${request.id}`} className="font-medium">
-          {request.action.summary}
-        </h3>
-        <span className="rounded-full bg-muted px-2 py-0.5 text-xs">{t(`status.${request.status}`)}</span>
+    <article className="flex flex-col gap-3 rounded-lg border border-border bg-card p-4" aria-labelledby={`approval-${request.id}`}>
+      <header className="flex flex-wrap items-start justify-between gap-2">
+        <Heading id={`approval-${request.id}`} className="min-w-0 text-[15px] font-medium break-words">
+          {titleRoute === undefined ? (
+            request.action.summary
+          ) : (
+            <RouteLink to={titleRoute} className="underline-offset-4 hover:underline">
+              {request.action.summary}
+            </RouteLink>
+          )}
+        </Heading>
+        <ApprovalStatusPill status={request.status} />
       </header>
-      <p className="text-sm text-muted-foreground">
-        {t("item.requestedBy", { requester: requesterName ?? request.requestedBy.id })} ·{" "}
-        {t("item.expires", { when: format.dateTime(new Date(request.expiresAt), { dateStyle: "medium", timeStyle: "short" }) })}
-      </p>
-      <Preview request={request} renderLink={renderLink} />
-      {actions === undefined ? null : <footer className="flex gap-2">{actions}</footer>}
+      <dl className="flex flex-wrap gap-x-6 gap-y-1 text-sm text-muted-foreground">
+        <div className="flex gap-1.5">
+          <dt className="sr-only">{t("item.requester")}</dt>
+          <dd>{t("item.requestedBy", { requester: requesterName ?? request.requestedBy.id })}</dd>
+        </div>
+        {node === undefined ? null : (
+          <div className="flex gap-1.5">
+            <dt>{t("item.node")}</dt>
+            <dd className="text-foreground">{node}</dd>
+          </div>
+        )}
+        <div className="flex gap-1.5">
+          <dt className="sr-only">{t("item.when")}</dt>
+          <dd>{settled ? t("item.updated", { when: formatDateTime(request.updatedAt) }) : t("item.expires", { when: formatDateTime(request.expiresAt) })}</dd>
+        </div>
+      </dl>
+      {request.reason === null ? null : <p className="text-sm">{t("item.reason", { reason: request.reason })}</p>}
+      <Preview request={request} />
+      {actions === undefined || actions === null ? null : <footer className="flex flex-col gap-2">{actions}</footer>}
     </article>
   );
-};
+}

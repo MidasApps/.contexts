@@ -27,8 +27,11 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "#/shared/ui/molecules/DropdownMenu/DropdownMenu.tsx";
+import { Badge } from "#/shared/ui/atoms/Badge/Badge.tsx";
 import { useSidebar } from "#/shared/ui/organisms/Sidebar/sidebar-context.tsx";
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "#/shared/ui/organisms/Sidebar/sidebar-menu.tsx";
+
+import { useWaitingApprovals } from "../model/use-waiting-approvals.ts";
 
 const THEME_ICONS: Record<ThemePreference, IconName> = { system: "monitor", light: "sun", dark: "moon" };
 
@@ -57,10 +60,29 @@ function ThemeSubmenu() {
   );
 }
 
+/** Entry to the approvals inbox with the number of requests waiting for the viewer's decision. */
+function ApprovalsMenuItem({ organizationId, count }: { organizationId: string; count: number }) {
+  const t = useTranslations("common.approvals.menu");
+  return (
+    <DropdownMenuItem asChild>
+      <RouteLink to={{ id: "settings", organizationId, section: "approvals" }} aria-label={count > 0 ? t("labelWithWaiting", { count }) : t("label")}>
+        <Icon name="inbox" />
+        {t("label")}
+        {count > 0 ? (
+          <Badge className="ml-auto" aria-hidden="true">
+            {count}
+          </Badge>
+        ) : null}
+      </RouteLink>
+    </DropdownMenuItem>
+  );
+}
+
 /**
  * User menu at the sidebar footer (sidebar-07 nav-user): who is signed in, the profile sections
- * from the `user-menu` navigation slot, theme (system/light/dark), language (profile preferences)
- * and sign out.
+ * from the `user-menu` navigation slot, the approvals inbox with its waiting count (holders of
+ * `core.approval.read` in the organization), theme (system/light/dark), language (profile
+ * preferences) and sign out.
  */
 export function UserMenu() {
   const t = useTranslations();
@@ -70,14 +92,19 @@ export function UserMenu() {
   const { can } = usePermissions();
   const items = useNavigationRegistry().visibleItems("user-menu", can);
   const { signOut } = useSignOut();
+  const approvals = useWaitingApprovals();
+  const waiting = approvals?.count ?? 0;
   const name = me.data === undefined ? "" : me.data.displayName.trim() === "" ? me.data.email : me.data.displayName;
   return (
     <SidebarMenu>
       <SidebarMenuItem>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <SidebarMenuButton size="lg" tooltip={name} aria-label={t("shell.userMenu.trigger", { name })} className="data-[state=open]:bg-sidebar-accent">
-              {me.data === undefined ? <Skeleton className="size-8 rounded-full" /> : <Avatar name={name} size="sm" decorative className="size-8" />}
+            <SidebarMenuButton size="lg" tooltip={name} aria-label={waiting > 0 ? t("common.approvals.menu.triggerWithWaiting", { name, count: waiting }) : t("shell.userMenu.trigger", { name })} className="data-[state=open]:bg-sidebar-accent">
+              <span className="relative">
+                {me.data === undefined ? <Skeleton className="size-8 rounded-full" /> : <Avatar name={name} size="sm" decorative className="size-8" />}
+                {waiting > 0 ? <span aria-hidden="true" data-slot="approvals-dot" className="absolute -top-0.5 -right-0.5 size-2.5 rounded-full border-2 border-sidebar bg-amber" /> : null}
+              </span>
               <span className="grid min-w-0 flex-1 text-left leading-tight">
                 {me.data === undefined ? (
                   <Skeleton className="h-4 w-28" />
@@ -110,6 +137,7 @@ export function UserMenu() {
                   </DropdownMenuItem>
                 );
               })}
+              {approvals === null ? null : <ApprovalsMenuItem organizationId={approvals.organizationId} count={approvals.count} />}
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <ThemeSubmenu />

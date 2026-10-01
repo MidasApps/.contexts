@@ -3,3 +3,4 @@
 export { useCan, usePermissions, type PermissionsState } from "./model/use-can.ts";
 export { platformRoleCan, usePlatformPermissions } from "./model/use-platform-permissions.ts";
 export { Can, type CanProps } from "./ui/Can.tsx";
+export { grantCoversNode, myGrantsQuery, useMyGrants } from "./model/use-my-grants.ts";

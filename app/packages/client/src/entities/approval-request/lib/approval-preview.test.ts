@@ -1,10 +1,22 @@
 import { describe, expect, it } from "vitest";
+import { routeHref } from "#/shared/lib/router/route-paths.ts";
 import { buildApprovalRequest } from "../approval-request.fixture.ts";
-import { approvalPreviewOf } from "./approval-preview.ts";
+import { approvalPreviewOf, approvalRequestRoute } from "./approval-preview.ts";
 
 describe("approvalPreviewOf", () => {
-  it("links a workflow-resume request to its run progress", () => {
-    expect(approvalPreviewOf(buildApprovalRequest())).toEqual({ kind: "workflow-resume", workflowId: "approval-demo", runId: "run-1", runHref: "/settings/workflows/runs/run-1" });
+  it("links a workflow-resume request to its run progress under the request's organization", () => {
+    const preview = approvalPreviewOf(buildApprovalRequest());
+    expect(preview).toEqual({
+      kind: "workflow-resume",
+      workflowId: "approval-demo",
+      runId: "run-1",
+      runRoute: { id: "settings", organizationId: "OrgAaaaaaaaaaaaaaaaaa", section: "workflows", rest: "runs/run-1" },
+    });
+    expect(preview.kind === "workflow-resume" ? routeHref(preview.runRoute) : "").toBe("/o/OrgAaaaaaaaaaaaaaaaaa/settings/workflows/runs/run-1");
+  });
+
+  it("addresses one request under its organization's settings", () => {
+    expect(routeHref(approvalRequestRoute("org 1", "Ap1"))).toBe("/o/org%201/settings/approvals/Ap1");
   });
 
   it("shows the before/after of an agent-command request", () => {

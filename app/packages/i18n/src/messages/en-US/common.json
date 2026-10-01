@@ -134,13 +134,23 @@
     },
     "item": {
       "expires": "Expires {when}",
-      "requestedBy": "Requested by {requester}"
+      "requestedBy": "Requested by {requester}",
+      "requester": "Requester",
+      "node": "Where:",
+      "when": "Deadline",
+      "updated": "Updated on {when}",
+      "reason": "Reason given: {reason}"
     },
     "preview": {
       "before": "Before",
       "after": "After",
       "none": "No preview available.",
       "viewRun": "View workflow progress"
+    },
+    "menu": {
+      "label": "Approvals",
+      "labelWithWaiting": "Approvals, {count, plural, one {# waiting for your decision} other {# waiting for your decision}}",
+      "triggerWithWaiting": "{name}, account menu, {count, plural, one {# approval waiting for your decision} other {# approvals waiting for your decision}}"
     }
   },
   "traceViewer": {

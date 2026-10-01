@@ -29,8 +29,17 @@ import { SettingsGeneralView } from "@core/client/views/settings-general";
 import { SettingsInvitationsView } from "@core/client/views/settings-invitations";
 import { SettingsMembersView } from "@core/client/views/settings-members";
 import { SettingsRolesView } from "@core/client/views/settings-roles";
-import { SettingsSlotView } from "@core/client/views/settings-slot";
 import { SettingsUnitsView } from "@core/client/views/settings-units";
+import { SettingsAgentsView } from "@core/client/views/settings-agents";
+import { SettingsSkillsView } from "@core/client/views/settings-skills";
+import { SettingsKnowledgeView } from "@core/client/views/settings-knowledge";
+import { SettingsConnectorsView } from "@core/client/views/settings-connectors";
+import { SettingsWorkflowsView } from "@core/client/views/settings-workflows";
+import { SettingsApprovalsView } from "@core/client/views/settings-approvals";
+import { SettingsUsageView } from "@core/client/views/settings-usage";
+import { SettingsTracesView } from "@core/client/views/settings-traces";
+import { SettingsEvalsView } from "@core/client/views/settings-evals";
+import { SettingsFlagsView } from "@core/client/views/settings-flags";
 import { createElement, type ComponentType } from "react";
 
 /** The shared view of each `/o/:organizationId/settings/:section` (SP2 spec §8). */
@@ -42,17 +51,17 @@ export const SETTINGS_SECTION_VIEWS: Readonly<Record<SettingsSection, ComponentT
   units: SettingsUnitsView,
   "api-keys": SettingsApiKeysView,
   devices: SettingsDevicesView,
-  // SP5 Task 14 fills these; until its pages land they are slots or not found.
-  agents: SettingsSlotView,
-  skills: NotFoundView,
-  knowledge: NotFoundView,
-  connectors: SettingsSlotView,
-  workflows: NotFoundView,
-  approvals: NotFoundView,
-  usage: SettingsSlotView,
-  traces: NotFoundView,
-  evals: NotFoundView,
-  flags: NotFoundView,
+  // The agent runtime sections (SP5 spec §7); the ones with detail pages read the `rest` tail.
+  agents: SettingsAgentsView,
+  skills: SettingsSkillsView,
+  knowledge: SettingsKnowledgeView,
+  connectors: SettingsConnectorsView,
+  workflows: SettingsWorkflowsView,
+  approvals: SettingsApprovalsView,
+  usage: SettingsUsageView,
+  traces: SettingsTracesView,
+  evals: SettingsEvalsView,
+  flags: SettingsFlagsView,
 };
 
 /** The shared view of each `/profile/:section` (SP2 spec §8). */

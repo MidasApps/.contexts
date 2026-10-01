@@ -1,0 +1,232 @@
+import type { AgentSettings, Permission, PromptVersion } from "@core/contracts";
+import { configure, screen, waitFor, within } from "@testing-library/react";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { renderApp } from "#/app-shell/testing/render-app.tsx";
+import { shellRoutes } from "#/app-shell/testing/shell-routes.ts";
+import { buildCatalogAgent } from "#/entities/agent-catalog/agent-catalog.fixture.ts";
+import { expectNoAxeViolations } from "#/shared/testing/axe.ts";
+import { apiError, ok, type FakeRequest, type FakeRoutes } from "#/shared/testing/fake-api.ts";
+import { IDS } from "#/shared/testing/fixtures.ts";
+import { SettingsAgentsView } from "./SettingsAgentsView.tsx";
+
+const READ: Permission[] = ["core.organization.read", "core.agent-settings.read"];
+const ADMIN: Permission[] = [...READ, "core.agent-settings.update", "core.prompt.read", "core.prompt.write"];
+const VERSION_ID = "01927f3c-8b4a-7d2e-9f10-3a4b5c6d7e8f";
+const NEW_VERSION_ID = "01927f3c-8b4a-7d2e-9f10-3a4b5c6d7e90";
+
+const settings = (overrides: Partial<AgentSettings> = {}): AgentSettings =>
+  ({
+    tenantId: IDS.organization,
+    enabledAgents: ["knowledge"],
+    webTools: { firecrawl: false, browser: false },
+    guardrails: { pii: "warn" },
+    budget: { monthlyMicroUsd: 50_000_000, monthlyTokens: 20_000_000 },
+    updatedBy: null,
+    createdAt: "2026-09-29T14:30:00.000Z",
+    updatedAt: "2026-09-29T14:30:00.000Z",
+    ...overrides,
+  }) as AgentSettings;
+
+const version = (overrides: Record<string, unknown> = {}): PromptVersion =>
+  ({
+    id: VERSION_ID,
+    agentId: "knowledge",
+    scope: "tenant",
+    tenantId: IDS.organization,
+    version: 1,
+    body: "Answer formally.",
+    bodySha256: "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    note: "First draft",
+    evalExperimentId: null,
+    evalVerdict: null,
+    createdBy: IDS.user,
+    createdAt: "2026-09-29T14:30:00.000Z",
+    ...overrides,
+  }) as PromptVersion;
+
+const CATALOG = [
+  buildCatalogAgent(),
+  buildCatalogAgent({
+    key: "action",
+    name: "Action",
+    description: "Runs commands after confirmation.",
+    enabled: false,
+    tools: [
+      { id: "command.tenancy.CreateProjectInput", kind: "mutation", source: "core" },
+      { id: "issues-api.listIssues", kind: "read", source: "connector" },
+    ],
+    skills: [],
+  }),
+  buildCatalogAgent({ key: "example-notes", name: "Notes", description: "Takes notes.", source: "module", moduleId: "example", enabled: false, tools: [], skills: [] }),
+];
+
+const renderView = (permissions: readonly Permission[] = ADMIN, routes: FakeRoutes = {}) =>
+  renderApp(
+    <main>
+      <SettingsAgentsView />
+    </main>,
+    {
+      path: `/o/${IDS.organization}/settings/agents`,
+      routes: shellRoutes(permissions, {
+        "GET /v1/agents": ok(CATALOG),
+        "GET /v1/agent-settings": ok(settings()),
+        "GET /v1/agents/:agentId/prompt-addendum/versions": ok([]),
+        "GET /v1/agents/:agentId/prompt-addendum/activations": ok([]),
+        ...routes,
+      }),
+    },
+  );
+
+const card = async (name: string) => (await screen.findByRole("heading", { level: 3, name })).closest("article") as HTMLElement;
+
+// The whole app shell renders per test; under a loaded machine the defaults (1 s, 5 s) are too short.
+beforeAll(() => {
+  configure({ asyncUtilTimeout: 10_000 });
+});
+afterAll(() => {
+  configure({ asyncUtilTimeout: 1000 });
+});
+
+describe("SettingsAgentsView", { timeout: 30_000 }, () => {
+  it("lists the agents with their tools and skills and says agents cannot be created here", async () => {
+    const { container, api } = renderView();
+    const knowledge = await card("Knowledge");
+    expect(within(knowledge).getByText("knowledge.search")).toBeDefined();
+    expect(within(knowledge).getByText("knowledge-citations")).toBeDefined();
+    const action = await card("Action");
+    expect(within(action).getByText("command.tenancy.CreateProjectInput").closest("li")?.textContent).toContain("altera dados");
+    expect(within(action).getByText("De conectores")).toBeDefined();
+    expect(within(await card("Notes")).getByText("Módulo example")).toBeDefined();
+    expect(screen.getByText(/Não é possível criar um novo agente aqui\./u)).toBeDefined();
+    expect(api.calls.find((call) => call.path === "/v1/agents")?.query).toContain(`organizationId=${IDS.organization}`);
+    await expectNoAxeViolations(container);
+  });
+
+  it("turns an agent on for the organization", async () => {
+    const requests: FakeRequest[] = [];
+    const { user } = renderView(ADMIN, {
+      "PATCH /v1/agent-settings": (request) => {
+        requests.push(request);
+        return ok(settings({ enabledAgents: ["knowledge", "action"] }));
+      },
+    });
+    const toggle = await screen.findByRole("switch", { name: "Ativar Action" });
+    expect(toggle.getAttribute("aria-checked")).toBe("false");
+    await user.click(toggle);
+    await waitFor(() => expect(requests).toHaveLength(1));
+    expect(requests[0]?.body).toEqual({ enabledAgents: ["knowledge", "action"] });
+    expect(requests[0]?.query.get("organizationId")).toBe(IDS.organization);
+    await waitFor(() => expect(screen.getByRole("switch", { name: "Ativar Action" }).getAttribute("aria-checked")).toBe("true"));
+  });
+
+  it("shows why a change was refused and puts the switch back", async () => {
+    const { user } = renderView(ADMIN, { "PATCH /v1/agent-settings": apiError(403, "FORBIDDEN") });
+    await user.click(await screen.findByRole("switch", { name: "Ativar Action" }));
+    expect((await screen.findByRole("alert")).textContent).toContain("Não foi possível salvar");
+    expect(screen.getByRole("switch", { name: "Ativar Action" }).getAttribute("aria-checked")).toBe("false");
+  });
+
+  it("changes the PII mode of the organization", async () => {
+    const requests: FakeRequest[] = [];
+    const { user } = renderView(ADMIN, {
+      "PATCH /v1/agent-settings": (request) => {
+        requests.push(request);
+        return ok(settings({ guardrails: { pii: "redact" } }));
+      },
+    });
+    await user.click(await screen.findByRole("radio", { name: "Ocultar" }));
+    await waitFor(() => expect(requests[0]?.body).toEqual({ guardrails: { pii: "redact" } }));
+  });
+
+  it("shows states without switches or instructions to a viewer who can only read", async () => {
+    renderView(READ);
+    const action = await card("Action");
+    expect(within(action).getByText("Desativado")).toBeDefined();
+    expect(screen.queryByRole("switch", { name: /^Ativar /u })).toBeNull();
+    expect(screen.queryByText("Instruções da organização")).toBeNull();
+    expect(screen.getByRole<HTMLButtonElement>("radio", { name: "Ocultar" }).disabled).toBe(true);
+  });
+
+  it(
+    "writes, evaluates and activates the organization's instructions of an agent",
+    { timeout: 60_000 },
+    async () => {
+      let versions: PromptVersion[] = [];
+      let activations: unknown[] = [];
+      const posts: FakeRequest[] = [];
+      const forAgent = (request: FakeRequest, rows: unknown[]) => ok(request.params["agentId"] === "knowledge" ? rows : []);
+      const { user } = renderView(ADMIN, {
+        "GET /v1/agents/:agentId/prompt-addendum/versions": (request) => forAgent(request, versions),
+        "GET /v1/agents/:agentId/prompt-addendum/activations": (request) => forAgent(request, activations),
+        "POST /v1/agents/:agentId/prompt-addendum/versions": (request) => {
+          posts.push(request);
+          versions = [version({ id: NEW_VERSION_ID, body: "Answer formally.", note: null })];
+          return ok(versions[0], 201);
+        },
+        "POST /v1/agents/:agentId/prompt-addendum/versions/:versionId/eval": (request) => {
+          posts.push(request);
+          versions = [version({ id: NEW_VERSION_ID, note: null, evalVerdict: "passed", evalExperimentId: "exp_1" })];
+          return ok({ versionId: NEW_VERSION_ID, experimentId: "exp_1", verdict: "passed", scorers: [] });
+        },
+        "POST /v1/agents/:agentId/prompt-addendum/activations": (request) => {
+          posts.push(request);
+          const activation = { id: "01927f3d-1a2b-7c3d-8e4f-5a6b7c8d9e0f", agentId: "knowledge", scope: "tenant", tenantId: IDS.organization, versionId: NEW_VERSION_ID, forced: false, reason: null, activatedBy: IDS.user, activatedAt: "2026-09-29T15:00:00.000Z" };
+          activations = [activation];
+          return ok(activation, 201);
+        },
+      });
+      const knowledge = await card("Knowledge");
+      expect(await within(knowledge).findByText(/Nenhuma instrução da organização está ativa/u)).toBeDefined();
+      await user.click(within(knowledge).getByRole("button", { name: "Escrever instruções para Knowledge" }));
+      const dialog = await screen.findByRole("dialog", { name: "Instruções para Knowledge" });
+      await user.type(within(dialog).getByRole("textbox", { name: /Instruções/u }), "Answer formally.");
+      await user.click(within(dialog).getByRole("button", { name: "Salvar versão" }));
+      await waitFor(() => expect(posts).toHaveLength(1));
+      expect(posts[0]?.body).toEqual({ body: "Answer formally." });
+      expect(posts[0]?.query.get("organizationId")).toBe(IDS.organization);
+
+      const activate = await within(knowledge).findByRole("button", { name: "Ativar a versão 1 de Knowledge" });
+      expect(activate).toHaveProperty("disabled", true);
+      await user.click(within(knowledge).getByRole("button", { name: "Avaliar a versão 1 de Knowledge" }));
+      await waitFor(() => expect(posts).toHaveLength(2));
+      expect(posts[1]?.params["versionId"]).toBe(NEW_VERSION_ID);
+      await within(knowledge).findByText("Aprovada");
+
+      await waitFor(() => expect(within(knowledge).getByRole<HTMLButtonElement>("button", { name: "Ativar a versão 1 de Knowledge" }).disabled).toBe(false));
+      await user.click(within(knowledge).getByRole("button", { name: "Ativar a versão 1 de Knowledge" }));
+      await waitFor(() => expect(posts).toHaveLength(3));
+      expect(posts[2]?.body).toEqual({ versionId: NEW_VERSION_ID });
+      expect(posts[2]?.query.get("organizationId")).toBe(IDS.organization);
+      expect(await within(knowledge).findByText("Versão 1 ativa")).toBeDefined();
+    },
+  );
+
+  it("explains a refused activation (the evaluation is required)", async () => {
+    const { user } = renderView(ADMIN, {
+      "GET /v1/agents/:agentId/prompt-addendum/versions": (request) => ok(request.params["agentId"] === "knowledge" ? [version({ evalVerdict: "passed", evalExperimentId: "exp_1" })] : []),
+      "POST /v1/agents/:agentId/prompt-addendum/activations": apiError(409, "EVAL_REQUIRED"),
+    });
+    const knowledge = await card("Knowledge");
+    await user.click(await within(knowledge).findByRole("button", { name: "Ativar a versão 1 de Knowledge" }));
+    expect((await within(knowledge).findByRole("alert")).textContent).toContain("Execute uma avaliação aprovada antes de ativar esta versão.");
+  });
+
+  it("lets a prompt reader see the instructions without the write actions", async () => {
+    renderView([...READ, "core.prompt.read"], {
+      "GET /v1/agents/:agentId/prompt-addendum/versions": (request) => ok(request.params["agentId"] === "knowledge" ? [version()] : []),
+    });
+    const knowledge = await card("Knowledge");
+    expect(await within(knowledge).findByText("First draft")).toBeDefined();
+    expect(within(knowledge).queryByRole("button", { name: /Escrever instruções/u })).toBeNull();
+    expect(within(knowledge).queryByRole("button", { name: /Avaliar/u })).toBeNull();
+    expect(within(await card("Notes")).getByText("Este agente ainda não aceita instruções da organização.")).toBeDefined();
+  });
+
+  it("shows the error with a retry when the catalog fails, and no access without the read permission", async () => {
+    const failed = renderView(ADMIN, { "GET /v1/agents": apiError(409, "CONFLICT") });
+    expect(await screen.findByRole("button", { name: "Tentar novamente" })).toBeDefined();
+    failed.unmount();
+    renderView(["core.organization.read"]);
+    expect(await screen.findByRole("heading", { name: "Você não tem acesso a esta página" })).toBeDefined();
+  });
+});

@@ -1,20 +1,20 @@
-// Public API of the approval-request entity (SP5 Task 3): data access, inbox state and preview.
-export {
-  type ApiTransport,
-  type ApprovalApiError,
-  type ApprovalApiResult,
-  approvalErrorOf,
-  type ApprovalPage,
-  type ApprovalRequestsApi,
-  createApprovalRequestsApi,
-} from "./api/approval-requests-api.ts";
+// Public API of the approval-request entity (SP5 Tasks 3 and 14): data access, inbox state and preview.
+export { approvalRequestKeys, approvalRequestQuery, approvalRequestsQuery, APPROVALS_MAX_PAGES } from "./api/approval-request-queries.ts";
 export {
   type ApprovalChangeSource,
-  approvalRequestsQueryKey,
   APPROVALS_POLL_MS,
+  useApprovalRequest,
   useApprovalRequests,
   type UseApprovalRequestsArgs,
   type UseApprovalRequestsResult,
+  waitingForDecision,
 } from "./model/use-approval-requests.ts";
-export { AGENT_COMMAND_KIND, type ApprovalPreview, approvalPreviewOf, WORKFLOW_RESUME_KIND, workflowRunHref } from "./lib/approval-preview.ts";
-export { ApprovalRequestItem, type ApprovalRequestItemProps } from "./ui/approval-request-item.tsx";
+export {
+  AGENT_COMMAND_KIND,
+  type ApprovalPreview,
+  approvalPreviewOf,
+  approvalRequestRoute,
+  WORKFLOW_RESUME_KIND,
+  workflowRunRoute,
+} from "./lib/approval-preview.ts";
+export { ApprovalRequestItem, type ApprovalRequestItemProps, ApprovalStatusPill } from "./ui/approval-request-item.tsx";

@@ -134,13 +134,23 @@
     },
     "item": {
       "expires": "Vence {when}",
-      "requestedBy": "Pedida por {requester}"
+      "requestedBy": "Pedida por {requester}",
+      "requester": "Solicitante",
+      "node": "Dónde:",
+      "when": "Plazo",
+      "updated": "Actualizada el {when}",
+      "reason": "Motivo informado: {reason}"
     },
     "preview": {
       "before": "Antes",
       "after": "Después",
       "none": "No hay vista previa disponible.",
       "viewRun": "Ver el progreso del flujo"
+    },
+    "menu": {
+      "label": "Aprobaciones",
+      "labelWithWaiting": "Aprobaciones, {count, plural, one {# esperando tu decisión} other {# esperando tu decisión}}",
+      "triggerWithWaiting": "{name}, menú de la cuenta, {count, plural, one {# aprobación esperando tu decisión} other {# aprobaciones esperando tu decisión}}"
     }
   },
   "traceViewer": {
