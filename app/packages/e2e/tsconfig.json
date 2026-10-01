@@ -1,0 +1,25 @@
+{
+  "extends": "@core/config/tsconfig/nodenext.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "declaration": false,
+    "declarationMap": false,
+    "allowImportingTsExtensions": true,
+    "allowJs": true,
+    "checkJs": true,
+    "incremental": true,
+    "tsBuildInfoFile": ".tscache/tsbuildinfo",
+    "lib": [
+      "ES2025",
+      "ESNext.Disposable",
+      "DOM"
+    ]
+  },
+  "include": [
+    "src/**/*.ts",
+    "*.js"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}
