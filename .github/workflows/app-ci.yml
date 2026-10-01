@@ -193,6 +193,65 @@ jobs:
       - name: Postgres tests
         run: pnpm test:postgres
 
+  # Follow-up #6 (decision 0017 §5): Rust compile check of apps/desktop/src-tauri on Linux.
+  # The native smoke test (`pnpm -F @core/desktop test:native`) stays local: it needs a display.
+  desktop-check:
+    name: desktop check (vite build + cargo check)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      CARGO_TERM_COLOR: always
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      # WebKitGTK and friends: the system libraries tauri/wry link against on Linux (Tauri 2 prerequisites).
+      - name: Install Tauri system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends libwebkit2gtk-4.1-dev libayatana-appindicator3-dev librsvg2-dev libxdo-dev libssl-dev
+      # rustup is preinstalled on the runner; `rustup toolchain install` without a name installs
+      # the toolchain pinned by src-tauri/rust-toolchain.toml (no third-party toolchain action).
+      - name: Install the pinned Rust toolchain
+        working-directory: app/apps/desktop/src-tauri
+        run: |
+          rustup toolchain install
+          rustc --version
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            app/apps/desktop/src-tauri/target/
+          key: desktop-cargo-${{ runner.os }}-${{ hashFiles('app/apps/desktop/src-tauri/rust-toolchain.toml', 'app/apps/desktop/src-tauri/Cargo.lock') }}
+          restore-keys: |
+            desktop-cargo-${{ runner.os }}-
+      - name: Install pnpm
+        run: npm install -g pnpm@${{ env.PNPM_VERSION }}
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      # tauri-build embeds `frontendDist` (../dist), so the bundle must exist before cargo runs.
+      # Public placeholders only (the env schema fails closed at build time): a remote https API
+      # and no emulator, as a release build would have.
+      - name: Build the desktop frontend
+        run: pnpm -F @core/desktop build
+        env:
+          VITE_API_URL: https://api.example.invalid
+          VITE_APP_ENV: staging
+          VITE_FIREBASE_API_KEY: ci-placeholder-api-key
+          VITE_FIREBASE_AUTH_DOMAIN: ci-placeholder.firebaseapp.com
+          VITE_FIREBASE_PROJECT_ID: ci-placeholder
+          VITE_MFA_FACTORS: totp
+      # Run from src-tauri: rustup picks the toolchain from the current directory's
+      # rust-toolchain.toml, not from --manifest-path.
+      - name: cargo check
+        working-directory: app/apps/desktop/src-tauri
+        run: cargo check --locked
+
   evals:
     name: agent evals (fake models)
     runs-on: ubuntu-24.04
@@ -223,6 +282,48 @@ jobs:
           name: eval-reports
           path: app/.evals/
           retention-days: 30
+
+  e2e:
+    name: e2e (Playwright)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      # The Firestore emulator is a Java program.
+      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        with:
+          distribution: temurin
+          java-version: "21"
+      - name: Install pnpm
+        run: npm install -g pnpm@${{ env.PNPM_VERSION }}
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Install Playwright browsers
+        run: pnpm -F @core/web exec playwright install --with-deps chromium firefox webkit
+      # Placeholders only; scripts/e2e.ts overrides every target (emulators of
+      # firebase.e2e.json, web on 3100, desktop preview on 1420, AI_MODE=fake).
+      - name: Local env file
+        run: |
+          cp .env.example .env.local
+          sed -i 's/^WEB_PORT=.*/WEB_PORT=3100/; s#^NEXT_PUBLIC_APP_URL=.*#NEXT_PUBLIC_APP_URL=http://localhost:3100#' .env.local
+      # Emulators (auth, firestore) + turbo build with the e2e public config +
+      # Playwright for web (chromium, firefox, webkit, mobile-chrome) and desktop-web.
+      - name: e2e
+        run: pnpm test:e2e
+      - name: Upload Playwright reports
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: playwright-reports
+          path: |
+            app/apps/web/playwright-report/
+            app/apps/desktop/playwright-report/
+          retention-days: 14
 
   # Follow-up #2 (decision 0023 D3-20): the Mastra server build. `mastra build` installs the
   # output's dependencies on its own; the build script then copies the workspace overrides

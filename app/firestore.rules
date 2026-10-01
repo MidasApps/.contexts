@@ -121,5 +121,10 @@ service cloud.firestore {
       allow read: if isMember(resource.data.tenantId) && resource.data.ownerId == request.auth.uid && notDeleted();
       allow write: if false;
     }
+
+    // Module settings (decision 0015 §6): read and written only through `/v1` (Admin SDK).
+    match /module-settings/{settingsId} {
+      allow read, write: if false;
+    }
   }
 }

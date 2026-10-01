@@ -3,8 +3,11 @@
   // Agent guidance lives in ../.contexts; stop turbo from maintaining a root AGENTS.md.
   "agentGuidance": false,
   "tasks": {
+    // Public client config is inlined into the web and desktop bundles, so it keys the cache
+    // (a dev build and an e2e build are different outputs).
     "build": {
       "dependsOn": ["^build"],
+      "env": ["NEXT_PUBLIC_*", "VITE_*"],
       "outputs": ["dist/**", ".next/**", "!.next/cache/**", "lib/**", ".mastra/output/**"]
     },
     "lint": {
@@ -54,8 +57,16 @@
         "GITHUB_SHA"
       ]
     },
+    // Playwright on the e2e stack (root `pnpm test:e2e` = scripts/e2e.ts: emulators of
+    // firebase.e2e.json + the e2e env, run with --env-mode=loose --concurrency=1 because
+    // the web and desktop runs share the e2e web port).
     "test:e2e": {
       "dependsOn": ["build"],
+      "cache": false
+    },
+    // The desktop-web project calls the e2e web server (`next start`), so the web build too.
+    "@core/desktop#test:e2e": {
+      "dependsOn": ["build", "@core/web#build"],
       "cache": false
     },
     // Catalog tasks write and read app/docs, outside any package, so they are never cached.

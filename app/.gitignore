@@ -22,6 +22,8 @@ playwright-report/
 test-results/
 # Eval reports of `pnpm evals` / `pnpm evals:real` (decision 0028).
 .evals/
+# Playwright storage states and the seeded world of the e2e run (session cookies).
+**/e2e/.auth/
 
 # Tool logs
 *-debug.log

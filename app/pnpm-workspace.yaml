@@ -13,6 +13,7 @@ catalog:
   "@ai-sdk/google-vertex": 5.0.98 # Gemini via Vertex ADC (GOOGLE_AI_BACKEND=vertex)
   "@ai-sdk/openai": 4.0.81
   "@ai-sdk/provider": 4.0.19 # LanguageModelV4 types for the fake models
+  "@axe-core/playwright": 4.13.0 # axe in the e2e journeys (web, desktop-web)
   "@eslint/js": 9.39.5
   "@firebase/rules-unit-testing": 5.0.2
   "@formatjs/icu-messageformat-parser": 3.5.20 # i18n:check parses ICU messages
@@ -33,9 +34,13 @@ catalog:
   "@mastra/otel-exporter": 1.4.2 # OTLP span export (Cloud Trace); 1.4.3 needs @mastra/observability 1.18.2 (train bump, follow-up #17)
   "@mastra/pg": 1.27.1
   "@opentelemetry/exporter-trace-otlp-proto": 0.218.0 # http/protobuf OTLP; @mastra/otel-exporter 1.4.2 peers ^0.218.0 (0.222.0 is outside it)
+  "@playwright/test": 1.63.0 # e2e runner (web + desktop-web projects); no component testing (E5)
   "@next/eslint-plugin-next": 16.3.7
   "@tailwindcss/node": 4.3.3 # compiles globals.css in the client token test
+  "@tailwindcss/postcss": 4.3.3 # web (Next) Tailwind plugin, postcss.config.mjs
+  "@tailwindcss/vite": 4.3.3 # desktop (Vite) Tailwind plugin
   "@tanstack/react-query": 5.104.0
+  "@tanstack/react-table": 9.2.4 # DataTable organism (v9 API; shadcn docs still show v8)
   "@tanstack/react-router": 1.170.40
   "@tanstack/router-plugin": 1.168.41 # file-based routes (Vite plugin)
   "@tauri-apps/api": 2.12.0 # same minor as the tauri crate (CLI checks it)
@@ -50,10 +55,18 @@ catalog:
   "@typescript/typescript6": 6.0.2
   "@vitest/coverage-v8": 5.0.2 # coverage provider; same version as vitest (plan coverage commands)
   "@vitejs/plugin-react": 6.1.1
+  "@wdio/cli": 9.32.0 # native desktop smoke (decision 0017 §4, local only): wdio runner
+  "@wdio/globals": 9.31.3 # latest; the 9.32.0 train publishes no globals
+  "@wdio/local-runner": 9.32.0
+  "@wdio/mocha-framework": 9.32.0
+  "@wdio/spec-reporter": 9.32.0
+  "@wdio/tauri-service": 1.4.0 # Tauri's documented WebDriver path (tauri-driver + Edge WebDriver)
+  webdriverio: 9.32.0
   ai: 7.0.122
   axe-core: 4.13.0
   class-variance-authority: 0.7.1
   clsx: 2.1.1
+  cmdk: 1.1.1 # command palette (shadcn Command)
   drizzle-kit: 0.31.11 # generates SQL migrations into infra/postgres/migrations (decision 0023)
   drizzle-orm: 0.45.3
   eslint: 9.39.5 # E3: eslint-plugin-react only accepts ^9.7
@@ -75,14 +88,19 @@ catalog:
   lucide-react: 1.49.0
   mastra: 1.31.3 # CLI; same release train as @mastra/core
   next: 16.3.7
+  next-intl: 4.14.8 # web locale routing, request config and navigation (decision 0013); wraps use-intl
+  next-themes: 0.4.6 # theme provider for both apps (attribute data-theme, decision 0014)
   postgres: 3.4.9
   radix-ui: 1.6.7 # unified Radix package (shadcn new-york base)
   react: 19.3.0
   react-dom: 19.3.0
+  react-hook-form: 7.89.0 # SchemaForm and client forms (SP2 spec §3)
   server-only: 0.0.1
+  sonner: 2.0.8 # Toaster (shadcn replaced its Toast with Sonner)
   tailwind-merge: 3.7.0
   tailwindcss: 4.3.3
   turbo: 2.11.5
+  tw-animate-css: 1.4.0 # CSS-only enter/exit utilities used by shadcn overlays (decision 0014)
   typescript: 7.0.2
   typescript-eslint: 8.71.0 # E2: runs on the TS 6 API via .pnpmfile.cjs
   ulid: 3.0.2
@@ -91,6 +109,7 @@ catalog:
   vitest: 5.0.2
   yaml: 2.9.1
   zod: 4.6.5
+  zustand: 5.0.15 # shell UI preferences store (command palette recents, decision 0011)
 
 # apps/web runs on App Hosting nodejs24 (spec §14/§16.3): its Node types stay on 24.
 catalogs:
@@ -108,9 +127,19 @@ savePrefix: ""
 # - protobufjs only checks its CLI's dependencies;
 # - re2 is superstatic's optional native regex (Hosting emulator, unused here),
 #   which falls back to RegExp.
+# - @swc/core and @parcel/watcher come with next-intl for its optional message
+#   extractor (unused: catalogs are hand-written JSON, decision 0013); their
+#   scripts only check or build the native binary pnpm installs as an optional
+#   platform package.
+# - edgedriver and geckodriver (webdriverio, native desktop smoke) only pre-download a
+#   driver at install; WebdriverIO and @wdio/tauri-service fetch the matching one on use.
 allowBuilds:
   "@firebase/util": false
+  "@parcel/watcher": false
+  "@swc/core": false
+  edgedriver: false
   esbuild: false
+  geckodriver: false
   protobufjs: false
   re2: false
   unrs-resolver: false
@@ -137,6 +166,10 @@ minimumReleaseAgeExclude:
   - icu-minify@4.14.8 # dependency of use-intl
   - lucide-react@1.49.0
   - use-intl@4.14.8
+  # SP2 web wiring (Task 18): next-intl and its SWC extractor, published 2026-09-29;
+  # remove after 2026-10-06 (7 days after the publish).
+  - next-intl@4.14.8
+  - next-intl-swc-plugin-extractor@4.14.8
   # SP3 model factory (Task 5): latest @ai-sdk/openai, published 2026-09-29, admitted by
   # pnpm at install; remove after 2026-10-06 (7 days after the publish).
   - '@ai-sdk/openai@4.0.81'

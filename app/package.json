@@ -13,7 +13,7 @@
     "lint": "turbo run lint",
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
-    "test:e2e": "turbo run test:e2e",
+    "test:e2e": "node scripts/e2e.ts",
     "test:emulators": "turbo run build --filter=@core/functions && firebase emulators:exec --project demo-core --only auth,firestore,functions,storage \"turbo run test:emulators\"",
     "test:postgres": "turbo run test:postgres",
     "evals": "turbo run evals",
@@ -29,6 +29,7 @@
     "db:migrate": "node scripts/db-migrate.ts"
   },
   "devDependencies": {
+    "@core/module-example": "workspace:*",
     "firebase-tools": "catalog:",
     "turbo": "catalog:",
     "typescript": "catalog:"
