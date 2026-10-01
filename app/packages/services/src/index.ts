@@ -642,3 +642,19 @@ export {
   type UsageReportRepository,
 } from "./services/usage/index.ts";
 export { listLiveOrganizationIds } from "./services/tenancy/adapters/driven/firestore-live-organization-ids.ts";
+// SP4 conversations context (Tasks 4–6): chat conversation metadata, `/v1/chat` and `/v1/conversations`.
+export {
+  ACTIVE_RUN_TTL_MS,
+  buildSearchTokens,
+  CONVERSATIONS_COLLECTION,
+  createConversationsServices,
+  createFirestoreConversationRepository,
+  createFirestoreConversationsServices,
+  createInMemoryConversationRepository,
+  MAX_ACTIVE_STREAMS_PER_TENANT,
+  queryTokens,
+  type ActiveRuns,
+  type ConversationRepository,
+  type ConversationsServices,
+  type InMemoryConversationRepository,
+} from "./services/conversations/index.ts";

@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 import { z } from "zod";
 import { AUDIT_LOG_COLLECTIONS } from "../audit/adapters/driven/firestore-audit-log-writer.ts";
 import { CONNECTORS_COLLECTION } from "../connectors/adapters/driven/firestore-connector-repository.ts";
+import { CONVERSATIONS_COLLECTION } from "../conversations/adapters/driven/conversation-storage.ts";
 import { FILES_COLLECTION } from "../files/adapters/driven/firestore-file-repository.ts";
 import { CORE_COLLECTIONS } from "./firestore/collections.ts";
 import { IDEMPOTENCY_RECORDS_COLLECTION } from "./idempotency/firestore-idempotency-store.ts";
@@ -59,6 +60,10 @@ const REQUIRED = [
   signature("devices", ["tenantId:ASCENDING", "createdAt:DESCENDING"]),
   signature("sessions", ["uid:ASCENDING", "revokedAt:ASCENDING", "createdAt:DESCENDING"]),
   signature("connectors", ["tenantId:ASCENDING", "createdAt:DESCENDING"]),
+  // SP4 conversations: history list (with and without search) and the per-tenant stream cap.
+  signature("conversations", ["tenantId:ASCENDING", "ownerId:ASCENDING", "deletedAt:ASCENDING", "archived:ASCENDING", "pinned:DESCENDING", "lastMessageAt:DESCENDING"]),
+  signature("conversations", ["tenantId:ASCENDING", "ownerId:ASCENDING", "deletedAt:ASCENDING", "archived:ASCENDING", "searchTokens:CONTAINS", "pinned:DESCENDING", "lastMessageAt:DESCENDING"]),
+  signature("conversations", ["tenantId:ASCENDING", "activeStreamStartedAt:ASCENDING"]),
 ];
 
 /**
@@ -79,6 +84,7 @@ const KNOWN_COLLECTIONS = new Set<string>([
   IDEMPOTENCY_RECORDS_COLLECTION,
   FILES_COLLECTION,
   CONNECTORS_COLLECTION,
+  CONVERSATIONS_COLLECTION,
 ]);
 
 describe("firestore.indexes.json", () => {

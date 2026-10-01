@@ -114,5 +114,12 @@ service cloud.firestore {
     match /local-secrets/{secretName} {
       allow read, write: if false;
     }
+
+    // Chat conversation metadata (SP4, decision 0033): the owner reads their own conversations
+    // of the active organization for realtime history lists; every write goes through `/v1`.
+    match /conversations/{conversationId} {
+      allow read: if isMember(resource.data.tenantId) && resource.data.ownerId == request.auth.uid && notDeleted();
+      allow write: if false;
+    }
   }
 }
