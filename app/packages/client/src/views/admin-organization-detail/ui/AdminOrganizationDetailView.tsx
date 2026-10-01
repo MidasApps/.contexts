@@ -1,9 +1,9 @@
 "use client";
 
-import type { OrganizationAdminSummary, Plan } from "@core/contracts";
+import type { OrganizationAdminDetail, OrganizationAdminSummary, Plan } from "@core/contracts";
 import type { ReactNode } from "react";
 import { useFormatter, useTranslations } from "use-intl";
-import { BudgetUsagePill, OrganizationStatusPill, useAllAdminOrganizations } from "#/entities/admin-organization/index.ts";
+import { BudgetUsagePill, OrganizationStatusPill, useAdminOrganization } from "#/entities/admin-organization/index.ts";
 import { usePlatformPermissions } from "#/entities/permission/index.ts";
 import { usePlans } from "#/entities/plan/index.ts";
 import { BudgetOverrideForm, OrganizationPlanForm, OrganizationStatusAction } from "#/features/admin-update-organization/index.ts";
@@ -32,7 +32,7 @@ function Stat({ label, children }: { label: string; children: ReactNode }) {
   );
 }
 
-function Summary({ organization, planName }: { organization: OrganizationAdminSummary; planName: string }) {
+function Summary({ organization, planName }: { organization: OrganizationAdminDetail; planName: string }) {
   const t = useTranslations("admin.organizationDetail.summary");
   const tList = useTranslations("admin.organizations");
   const format = useFormatter();
@@ -57,6 +57,10 @@ function Summary({ organization, planName }: { organization: OrganizationAdminSu
         </Stat>
         <Stat label={tList("columns.usage")}>
           <BudgetUsagePill organization={organization} />
+        </Stat>
+        <Stat label={t("members")}>
+          <span className={mono}>{format.number(organization.memberCount)}</span>
+          <span className="ml-2 text-xs text-muted-foreground">{t("membersHint")}</span>
         </Stat>
       </dl>
     </SectionCard>
@@ -87,7 +91,7 @@ function RelatedLinks({ organization }: { organization: OrganizationAdminSummary
   );
 }
 
-function Detail({ organization, plans, canWrite }: { organization: OrganizationAdminSummary; plans: readonly Plan[] | undefined; canWrite: boolean }) {
+function Detail({ organization, plans, canWrite }: { organization: OrganizationAdminDetail; plans: readonly Plan[] | undefined; canWrite: boolean }) {
   const t = useTranslations("admin.organizationDetail");
   const tList = useTranslations("admin.organizations");
   const planName = organization.planId === null ? tList("defaultPlan") : (plans?.find((plan) => plan.id === organization.planId)?.name ?? organization.planId);
@@ -124,18 +128,18 @@ function Detail({ organization, plans, canWrite }: { organization: OrganizationA
 /**
  * `/admin/organizations/:organizationId` (SP5 spec §6, platform.organization.read): one
  * organization's status, plan, cost and budget; staff with `platform.organization.update` assign
- * the plan, override the budget and suspend or reactivate it. There is no read-by-id endpoint, so
- * the organization comes from the list (an id that is not in it is not found).
+ * the plan, override the budget and suspend or reactivate it. The organization comes from
+ * `GET /v1/admin/organizations/{id}` (decision 0044), with its member count; a 404 is not found.
  */
 export function AdminOrganizationDetailView() {
   const t = useTranslations("admin.organizationDetail");
   const tList = useTranslations("admin.organizations");
   const organizationId = (useRouter().useRouteParams()["rest"] ?? "").split("/")[1] ?? "";
   const permissions = usePlatformPermissions();
-  const organizations = useAllAdminOrganizations({ enabled: permissions.can("platform.organization.read") });
+  const query = useAdminOrganization(organizationId, { enabled: permissions.can("platform.organization.read") });
   const plans = usePlans({ enabled: permissions.can("platform.plan.manage") });
-  const organization = organizations.data?.find((item) => item.id === organizationId);
-  if (organizations.status === "success" && organization === undefined) return <PageNotFound />;
+  const organization = query.data ?? undefined;
+  if (organizationId === "" || (query.status === "success" && query.data === null)) return <PageNotFound />;
   return (
     <AdminPageFrame
       permission="platform.organization.read"
@@ -144,8 +148,8 @@ export function AdminOrganizationDetailView() {
       back={{ rest: "organizations", label: tList("title") }}
       meta={organization === undefined ? undefined : <OrganizationStatusPill status={organization.status} />}
     >
-      <AdminQuerySection query={organizations} loadingLabel={t("loading")}>
-        {() => (organization === undefined ? null : <Detail organization={organization} plans={plans.data} canWrite={permissions.can("platform.organization.update")} />)}
+      <AdminQuerySection query={query} loadingLabel={t("loading")}>
+        {(data) => <Detail organization={data} plans={plans.data} canWrite={permissions.can("platform.organization.update")} />}
       </AdminQuerySection>
     </AdminPageFrame>
   );

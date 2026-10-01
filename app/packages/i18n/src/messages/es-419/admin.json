@@ -82,7 +82,6 @@
     "loading": "Cargando organizaciones…",
     "caption": "Organizaciones de la plataforma",
     "pagination": "Páginas de organizaciones",
-    "resultCount": "{count, plural, =0 {Ninguna organización} one {# organización} other {# organizaciones}}",
     "open": "Abrir",
     "openNamed": "Abrir {name}",
     "defaultPlan": "Predeterminado de la plataforma",
@@ -105,7 +104,7 @@
     "filters": {
       "label": "Filtrar organizaciones",
       "search": "Buscar organización",
-      "searchPlaceholder": "Nombre o id",
+      "searchPlaceholder": "Palabras del nombre o id",
       "status": "Estado",
       "anyStatus": "Todos los estados"
     },
@@ -278,7 +277,9 @@
     "summary": {
       "title": "Resumen",
       "description": "Situación de la organización este mes.",
-      "tokenCap": "Límite de tokens del mes"
+      "tokenCap": "Límite de tokens del mes",
+      "members": "Miembros",
+      "membersHint": "personas con acceso"
     },
     "plan": {
       "title": "Plan",

@@ -31,6 +31,9 @@ export const buildOrganizationSummary = (overrides: Json = {}): Json => ({
   ...overrides,
 });
 
+/** `GET /v1/admin/organizations/{id}`: the list row plus the member count. */
+export const buildOrganizationDetail = (overrides: Json = {}): Json => ({ ...buildOrganizationSummary(), memberCount: 12, ...overrides });
+
 export const buildAdminOverview = (overrides: Json = {}): Json => ({
   organizations: 12,
   activeUsers7d: 87,

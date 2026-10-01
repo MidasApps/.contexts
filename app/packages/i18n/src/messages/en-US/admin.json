@@ -82,7 +82,6 @@
     "loading": "Loading organizations…",
     "caption": "Organizations on the platform",
     "pagination": "Organization pages",
-    "resultCount": "{count, plural, =0 {No organizations} one {# organization} other {# organizations}}",
     "open": "Open",
     "openNamed": "Open {name}",
     "defaultPlan": "Platform default",
@@ -105,7 +104,7 @@
     "filters": {
       "label": "Filter organizations",
       "search": "Search organizations",
-      "searchPlaceholder": "Name or id",
+      "searchPlaceholder": "Words of the name or id",
       "status": "Status",
       "anyStatus": "Any status"
     },
@@ -278,7 +277,9 @@
     "summary": {
       "title": "Summary",
       "description": "Where the organization stands this month.",
-      "tokenCap": "Token cap this month"
+      "tokenCap": "Token cap this month",
+      "members": "Members",
+      "membersHint": "people with access"
     },
     "plan": {
       "title": "Plan",

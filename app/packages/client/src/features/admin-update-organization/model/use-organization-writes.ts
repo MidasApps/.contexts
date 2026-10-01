@@ -1,6 +1,6 @@
 "use client";
 
-import { setOrganizationBudgetEndpoint, updateOrganizationAdminEndpoint, type BudgetCaps, type OrganizationAdminSummary } from "@core/contracts";
+import { setOrganizationBudgetEndpoint, updateOrganizationAdminEndpoint, type BudgetCaps, type OrganizationAdminDetail, type OrganizationAdminSummary } from "@core/contracts";
 import { useQueryClient } from "@tanstack/react-query";
 import { adminOrganizationKeys } from "#/entities/admin-organization/index.ts";
 import { adminOverviewKeys } from "#/entities/admin-overview/index.ts";
@@ -15,14 +15,17 @@ export type OrganizationWrites = {
 
 /**
  * Staff writes on one organization (platform.organization.update, audited with `targetTenantId`).
- * The API answers the organization as the list shows it, so the cached list is updated from the
- * response instead of refetched; the overview numbers are refreshed.
+ * The API answers the organization as the list shows it, so the cached detail and the pickers' list
+ * are updated from the response instead of refetched (a write never changes the member count); the
+ * searched lists and the overview numbers are refreshed.
  */
 export const useOrganizationWrites = (organizationId: string): OrganizationWrites => {
   const callEndpoint = useCallEndpoint();
   const queryClient = useQueryClient();
   const store = (saved: OrganizationAdminSummary): OrganizationAdminSummary => {
     queryClient.setQueryData<OrganizationAdminSummary[]>(adminOrganizationKeys.whole(), (list) => list?.map((item) => (item.id === saved.id ? saved : item)));
+    queryClient.setQueryData<OrganizationAdminDetail | null>(adminOrganizationKeys.detail(saved.id), (detail) => (detail === undefined || detail === null ? detail : { ...detail, ...saved }));
+    void queryClient.invalidateQueries({ queryKey: adminOrganizationKeys.searches() });
     void queryClient.invalidateQueries({ queryKey: adminOverviewKeys.all() });
     return saved;
   };

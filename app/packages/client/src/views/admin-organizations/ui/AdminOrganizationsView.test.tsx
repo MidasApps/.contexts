@@ -42,12 +42,17 @@ describe("AdminOrganizationsView", () => {
     expect(within(contoso).getAllByText("Padrão da plataforma")).toHaveLength(1);
     expect(within(contoso).getByText("Ajuste da equipe")).toBeDefined();
     expect(plain(within(contoso).getByText(/Acima do limite/u).textContent)).toBe("Acima do limite: 120%");
-    expect(screen.getByRole("status").textContent).toBe("2 organizações");
     await expectNoAxeViolations(container);
   });
 
-  it("filters by the search and status in the URL and writes changes back to it", async () => {
-    const { user, router } = render({ path: "/admin/organizations?status=suspended" });
+  it("sends the search and the status of the URL to the server and writes changes back to the URL", async () => {
+    const { user, router, api } = render({
+      path: "/admin/organizations?status=suspended",
+      routes: {
+        ...routes(),
+        "GET /v1/admin/organizations": (request) => page(request.query.get("query") === "north" ? [] : request.query.get("status") === "suspended" ? [CONTOSO] : [NORTHWIND, CONTOSO]),
+      },
+    });
     const table = await screen.findByRole("table", { name: "Organizações da plataforma" });
     expect(within(table).queryByRole("row", { name: /Northwind/u })).toBeNull();
     expect(within(table).getByRole("row", { name: /Contoso/u })).toBeDefined();
@@ -57,36 +62,31 @@ describe("AdminOrganizationsView", () => {
     await user.click(screen.getByRole("button", { name: "Limpar filtros" }));
     expect(router.current()).toBe("/admin/organizations");
     expect(await screen.findByRole("row", { name: /Northwind/u })).toBeDefined();
+    const asked = api.calls.filter((call) => call.path === "/v1/admin/organizations").map((call) => call.query);
+    expect(asked[0]).toBe("?limit=20&status=suspended");
+    // Typing a word asks once, after the pause: never one request per key.
+    expect(asked).toContain("?limit=20&query=north&status=suspended");
+    expect(asked.filter((query) => query.includes("query=")).length).toBe(1);
+    expect(asked.at(-1)).toBe("?limit=20");
   });
 
-  it("finds an organization by id, ignoring accents and case", async () => {
-    render({ path: `/admin/organizations?q=${IDS.otherOrganization.toLowerCase()}` });
-    const table = await screen.findByRole("table", { name: "Organizações da plataforma" });
-    expect(within(table).getAllByRole("row")).toHaveLength(2);
-    expect(within(table).getByRole("row", { name: /Contoso/u })).toBeDefined();
-  });
-
-  it("pages the list and keeps the page in the URL", async () => {
+  it("pages by the API cursor and keeps the loaded pages", async () => {
     const many = Array.from({ length: 25 }, (_, index) => buildOrganizationSummary({ id: `Org${String(index).padStart(17, "0")}`, name: `Org ${String(index + 1).padStart(2, "0")}` }));
-    const { user, router } = render({ routes: routes(many) });
+    const { user, api } = render({
+      routes: {
+        ...routes(),
+        "GET /v1/admin/organizations": (request) => (request.query.get("cursor") === "next" ? page(many.slice(20), { limit: 20 }) : page(many.slice(0, 20), { cursor: "next", limit: 20 })),
+      },
+    });
     const table = await screen.findByRole("table", { name: "Organizações da plataforma" });
     expect(within(table).getAllByRole("row")).toHaveLength(21);
     const pages = screen.getByRole("navigation", { name: "Páginas de organizações" });
     await user.click(within(pages).getByRole("button", { name: "Próxima" }));
-    expect(router.current()).toBe("/admin/organizations?page=2");
     await waitFor(() => expect(within(screen.getByRole("table", { name: "Organizações da plataforma" })).getAllByRole("row")).toHaveLength(6));
     expect(within(pages).getByRole("button", { name: "Próxima" }).hasAttribute("disabled")).toBe(true);
-  });
-
-  it("reads every cursor page of the API", async () => {
-    const { api } = render({
-      routes: {
-        ...routes(),
-        "GET /v1/admin/organizations": (request) => (request.query.get("cursor") === "next" ? page([CONTOSO]) : page([NORTHWIND], { cursor: "next" })),
-      },
-    });
-    expect(await screen.findByRole("row", { name: /Contoso/u })).toBeDefined();
-    expect(api.calls.filter((call) => call.path === "/v1/admin/organizations").map((call) => call.query)).toEqual(["?limit=100", "?limit=100&cursor=next"]);
+    await user.click(within(pages).getByRole("button", { name: "Anterior" }));
+    await waitFor(() => expect(within(screen.getByRole("table", { name: "Organizações da plataforma" })).getAllByRole("row")).toHaveLength(21));
+    expect(api.calls.filter((call) => call.path === "/v1/admin/organizations").map((call) => call.query)).toEqual(["?limit=20", "?limit=20&cursor=next"]);
   });
 
   it("shows the plan id to a role that cannot read the plan catalog", async () => {
