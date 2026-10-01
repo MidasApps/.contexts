@@ -22,8 +22,15 @@ export type ChatInputProps = {
   offline?: boolean | undefined;
   /** Blocks typing and sending (history loading, a failed chat waiting for retry). */
   disabled?: boolean | undefined;
-  /** Tools on the left of the footer: attachments (Task 11), voice (Task 12). */
+  /** Tools on the left of the footer: the attach menu, push-to-talk. */
   tools?: ReactNode;
+  /** The files of the message being written, above the field (the upload feature's chips). */
+  attachments?: ReactNode;
+  /** Why sending must wait (uploads in flight, an attachment with an error); said under the field. */
+  blocked?: string | undefined;
+  /** The draft, when the owner needs to write into it (a transcription); kept here otherwise. */
+  value?: string | undefined;
+  onValueChange?: ((text: string) => void) | undefined;
   /** The field, so the panel can focus it (new conversation, suggestion chosen). */
   inputRef?: Ref<HTMLTextAreaElement> | undefined;
   maxLength?: number | undefined;
@@ -38,17 +45,22 @@ const COUNTER_FROM = 0.9;
  * and the send button becomes stop. Over the limit the text is kept and the reason is said;
  * nothing is truncated silently.
  */
-export function ChatInput({ status, onSend, onStop, offline = false, disabled = false, tools, inputRef, maxLength = MAX_CHAT_TEXT_CHARS }: ChatInputProps) {
+export function ChatInput({ status, onSend, onStop, offline = false, disabled = false, tools, attachments, blocked, value, onValueChange, inputRef, maxLength = MAX_CHAT_TEXT_CHARS }: ChatInputProps) {
   const t = useTranslations("chat.input");
-  const [text, setText] = useState("");
+  const [ownText, setOwnText] = useState("");
+  const text = value ?? ownText;
+  const setText = (next: string) => {
+    setOwnText(next);
+    onValueChange?.(next);
+  };
   const hintId = useId();
   const problemId = useId();
   const busy = status === "submitted" || status === "streaming";
   const trimmed = text.trim();
   const over = trimmed.length - maxLength;
   const tooLong = over > 0;
-  const canSend = !busy && !offline && !disabled && trimmed !== "" && !tooLong;
-  const problem = tooLong ? t("tooLong", { max: maxLength, over }) : offline ? t("offline") : null;
+  const canSend = !busy && !offline && !disabled && trimmed !== "" && !tooLong && blocked === undefined;
+  const problem = tooLong ? t("tooLong", { max: maxLength, over }) : offline ? t("offline") : (blocked ?? null);
 
   const submit = () => {
     if (!canSend) return;
@@ -59,6 +71,7 @@ export function ChatInput({ status, onSend, onStop, offline = false, disabled = 
   return (
     <div data-slot="chat-input" className="flex flex-col gap-1.5">
       <PromptInput onSubmit={submit} aria-label={t("label")}>
+        {attachments}
         <PromptInputTextarea
           ref={inputRef}
           label={t("label")}

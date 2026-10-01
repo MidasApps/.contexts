@@ -4,11 +4,10 @@ import type { ContractDefinition } from "@core/contracts";
 import type { ChatTransport, UIMessage } from "ai";
 import { CheckIcon, CopyIcon, RefreshCwIcon, SparklesIcon } from "lucide-react";
 import { useEffect, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
+import type { UseUploadQueueArgs } from "#/features/chat-upload/index.ts";
 import { useTranslations } from "use-intl";
 import { ChatMessage, formatUiSubmission, textOf, type UiSubmission } from "#/entities/message/index.ts";
-import { ChatInput } from "#/features/chat-send/index.ts";
 import { GenerativeUiProvider, type UiRegistry } from "#/features/generative-ui/index.ts";
-import { useCallEndpoint } from "#/shared/api/api-context.tsx";
 import type { ChatScope } from "#/shared/api/chat-transport.ts";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
 import { Conversation, ConversationEmptyState, ConversationScrollButton } from "#/shared/ui/ai/conversation.tsx";
@@ -16,7 +15,8 @@ import { Message, MessageAction, MessageActions, MessageContent } from "#/shared
 import { Shimmer } from "#/shared/ui/ai/shimmer.tsx";
 import { Suggestion, Suggestions } from "#/shared/ui/ai/suggestion.tsx";
 import { useChatSession } from "../model/use-chat-session.ts";
-import { fetchMessagePage } from "../model/use-conversation-thread.ts";
+import { useOlderMessages } from "../model/use-older-messages.ts";
+import { ChatComposer } from "./chat-composer.tsx";
 import { createCoreToolRenderer } from "./chat-tool-part.tsx";
 import { StatusLine } from "./status-line.tsx";
 
@@ -44,9 +44,11 @@ export type ChatThreadProps = {
   approvalHref?: ((approvalId: string) => string) | undefined;
   can?: ((permission: string) => boolean) | undefined;
   defaultCurrency?: string | undefined;
-  /** Composer tools (attachments, voice). */
+  /** Extra composer tools of the host (the attach menu is the thread's own). */
   tools?: ReactNode;
   transport?: ChatTransport<UIMessage> | undefined;
+  /** Tests pass scripted uploads. */
+  uploadSeams?: UseUploadQueueArgs["seams"];
 };
 
 const COPIED_MS = 2000;
@@ -93,7 +95,6 @@ function AnswerActions({ message, canRegenerate, onRegenerate }: { message: UIMe
  */
 export function ChatThread(props: ChatThreadProps) {
   const t = useTranslations("chat");
-  const callEndpoint = useCallEndpoint();
   const session = useChatSession({
     scope: props.scope,
     conversationId: props.conversationId,
@@ -103,9 +104,13 @@ export function ChatThread(props: ChatThreadProps) {
     transport: props.transport,
   });
   const inputRef = useRef<HTMLTextAreaElement>(null);
-  const [olderCursor, setOlderCursor] = useState(props.olderCursor);
-  const [loadingOlder, setLoadingOlder] = useState(false);
   const { messages, phase, busy } = session;
+  const older = useOlderMessages({
+    conversationId: session.conversationId,
+    initialCursor: props.olderCursor,
+    messages,
+    prepend: (page) => session.setMessages((current) => [...page, ...current]),
+  });
   const renderTool = createCoreToolRenderer(session);
 
   // What the member answers in a form or a picker goes as the next user turn: the tools that
@@ -134,20 +139,6 @@ export function ChatThread(props: ChatThreadProps) {
     stop();
   };
 
-  const loadOlder = async () => {
-    if (olderCursor === undefined || session.conversationId === undefined) return;
-    setLoadingOlder(true);
-    try {
-      const page = await fetchMessagePage(callEndpoint, session.conversationId, olderCursor);
-      session.setMessages((current) => [...page.messages, ...current]);
-      setOlderCursor(page.olderCursor);
-    } catch {
-      // The button stays: the member can ask again; the conversation on screen is unaffected.
-    } finally {
-      setLoadingOlder(false);
-    }
-  };
-
   const lastId = messages.at(-1)?.id;
   const waitingFirstChunk = (phase === "connecting" || phase === "resuming") && messages.at(-1)?.role !== "assistant";
   const retry = phase === "lost" && props.onRecover !== undefined && session.conversationId !== undefined ? props.onRecover : session.retry;
@@ -156,9 +147,9 @@ export function ChatThread(props: ChatThreadProps) {
     <GenerativeUiProvider registry={props.uiRegistry} contracts={props.contracts} submit={submitUi} approvalHref={props.approvalHref} can={props.can} defaultCurrency={props.defaultCurrency}>
       {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions -- Esc is a shortcut of the whole thread; every action it triggers also has a button */}
       <div data-slot="chat-thread" className="flex min-h-0 flex-1 flex-col" onKeyDown={onKeyDown}>
-        <Conversation label={t("panel.logLabel")} overlay={<ConversationScrollButton />}>
-          {olderCursor === undefined ? null : (
-            <Button variant="ghost" size="sm" className="self-center" pending={loadingOlder} onClick={() => void loadOlder()}>
+        <Conversation label={t("panel.logLabel")} overlay={<ConversationScrollButton />} scrollElementRef={older.scrollElementRef}>
+          {!older.hasOlder ? null : (
+            <Button variant="ghost" size="sm" className="self-center" pending={older.loading} onClick={older.load}>
               {t("panel.loadEarlier")}
             </Button>
           )}
@@ -197,7 +188,7 @@ export function ChatThread(props: ChatThreadProps) {
         </Conversation>
         <div className="flex flex-col gap-2 border-t border-border px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
           <StatusLine phase={phase} failure={session.failure} onRetry={retry} />
-          <ChatInput status={session.status} onSend={send} onStop={stop} offline={phase === "offline"} inputRef={inputRef} tools={props.tools} />
+          <ChatComposer session={session} organizationId={props.scope.organizationId} offline={phase === "offline"} inputRef={inputRef} onStop={stop} can={props.can} tools={props.tools} uploadSeams={props.uploadSeams} />
         </div>
       </div>
     </GenerativeUiProvider>

@@ -64,10 +64,23 @@ const lastMessageOf = (messages: readonly UIMessage[]): ChatRequestMessage | und
   return user === undefined ? undefined : toUserMessage(user);
 };
 
-const attachmentsOf = (body: Record<string, unknown> | undefined): string[] | undefined => {
-  const attachments = body?.["attachments"];
+const fileIdsOf = (attachments: unknown): string[] | undefined => {
   if (!Array.isArray(attachments) || attachments.length === 0) return undefined;
-  return attachments.filter((id): id is string => typeof id === "string");
+  const ids = attachments.flatMap((entry: unknown): string[] => {
+    if (typeof entry === "string") return [entry];
+    const fileId = typeof entry === "object" && entry !== null ? (entry as { fileId?: unknown }).fileId : undefined;
+    return typeof fileId === "string" ? [fileId] : [];
+  });
+  return ids.length === 0 ? undefined : ids;
+};
+
+/**
+ * File ids of the turn: from the send options, or from the message's own metadata when the turn
+ * is sent again (retry, regenerate), so its attachments are not lost.
+ */
+const attachmentsOf = (body: Record<string, unknown> | undefined, messages: readonly UIMessage[], messageId: string): string[] | undefined => {
+  const metadata = messages.find((message) => message.id === messageId)?.metadata as { attachments?: unknown } | undefined;
+  return fileIdsOf(body?.["attachments"]) ?? fileIdsOf(metadata?.attachments);
 };
 
 const toApiError = async (response: Response, requestId: string): Promise<ApiError> => {
@@ -155,7 +168,7 @@ export const createChatTransport = (options: ChatTransportOptions): ChatTranspor
           ...(scope.projectId === undefined ? {} : { projectId: scope.projectId }),
           ...(scope.agentId === undefined ? {} : { agentId: scope.agentId }),
         };
-        const attachments = message.role === "user" ? attachmentsOf(body) : undefined;
+        const attachments = message.role === "user" ? attachmentsOf(body, messages, message.id) : undefined;
         return { body: { ...(conversationId === undefined ? start : { conversationId }), message, trigger, ...(attachments === undefined ? {} : { attachments }) } };
       },
       prepareReconnectToStreamRequest: () => ({ api: `${api}/${encodeURIComponent(options.getConversationId() ?? "")}/stream` }),

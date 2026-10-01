@@ -1,7 +1,7 @@
 "use client";
 
 import { ArrowDownIcon } from "lucide-react";
-import { createContext, use, useMemo, type ComponentProps, type ReactNode } from "react";
+import { createContext, use, useMemo, type ComponentProps, type ReactNode, type RefObject } from "react";
 import { useStickToBottom } from "use-stick-to-bottom";
 import { useTranslations } from "use-intl";
 import { cn } from "#/shared/lib/cn.ts";
@@ -16,6 +16,8 @@ export type ConversationProps = Omit<ComponentProps<"div">, "aria-label"> & {
   label: string;
   /** Rendered over the log, outside the scrolling content (the scroll-to-bottom chip). */
   overlay?: ReactNode;
+  /** The scrolling element, for owners that restore the position (earlier messages prepended). */
+  scrollElementRef?: RefObject<HTMLDivElement | null> | undefined;
 };
 
 /**
@@ -24,14 +26,17 @@ export type ConversationProps = Omit<ComponentProps<"div">, "aria-label"> & {
  * focusable `role="log"`; `aria-live` is off because the status line announces transitions —
  * reading every streamed token aloud would be unusable.
  */
-export function Conversation({ label, overlay, className, children, ...props }: ConversationProps) {
+export function Conversation({ label, overlay, scrollElementRef, className, children, ...props }: ConversationProps) {
   const { scrollRef, contentRef, isAtBottom, scrollToBottom } = useStickToBottom({ initial: "instant", resize: "smooth" });
   const context = useMemo(() => ({ isAtBottom, scrollToBottom: () => void scrollToBottom() }), [isAtBottom, scrollToBottom]);
   return (
     <ConversationContext value={context}>
       <div data-slot="conversation" className={cn("relative flex min-h-0 flex-1 flex-col", className)} {...props}>
         <div
-          ref={scrollRef}
+          ref={(node) => {
+            scrollRef(node);
+            if (scrollElementRef !== undefined) scrollElementRef.current = node;
+          }}
           role="log"
           aria-live="off"
           aria-label={label}

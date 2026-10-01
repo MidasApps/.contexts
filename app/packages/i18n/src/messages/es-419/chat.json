@@ -88,7 +88,9 @@
     "hint": "Enter envía · Shift+Enter agrega una línea · Esc detiene",
     "counter": "{count} de {max} caracteres",
     "tooLong": "Límite de {max} caracteres. Quita {over, plural, one {# carácter} other {# caracteres}}.",
-    "offline": "Sin conexión. El envío no está disponible hasta que vuelva la conexión."
+    "offline": "Sin conexión. El envío no está disponible hasta que vuelva la conexión.",
+    "uploading": "Espera a que termine la carga de los adjuntos.",
+    "attachmentProblem": "Quita o reenvía los adjuntos con error antes de enviar."
   },
   "status": {
     "connecting": "Conectando…",
@@ -209,5 +211,105 @@
       "open": "Abrir aprobaciones",
       "reference": "Solicitud {approvalId}"
     }
+  },
+  "upload": {
+    "menu": "Adjuntar",
+    "attachFile": "Adjuntar archivo",
+    "addToKnowledge": "Agregar a la base de conocimiento",
+    "fileInput": "Archivos para adjuntar",
+    "knowledgeInput": "Archivos para la base de conocimiento",
+    "listLabel": "Adjuntos del mensaje",
+    "remove": "Quitar {name}",
+    "cancel": "Cancelar la carga de {name}",
+    "retry": "Intentar de nuevo: {name}",
+    "status": {
+      "pending": "En cola",
+      "uploading": "Cargando {percent}",
+      "validating": "Verificando…",
+      "ready": "Listo",
+      "indexing": "En la base de conocimiento. Indexando…",
+      "failed": "Falló la carga",
+      "timeout": "La verificación tardó demasiado",
+      "rejected": {
+        "TYPE_NOT_ALLOWED": "Tipo de archivo no aceptado",
+        "TOO_LARGE": "Archivo demasiado grande",
+        "CONTENT_MISMATCH": "El contenido no corresponde al tipo del archivo",
+        "TOO_MANY": "Límite de {max} adjuntos por mensaje"
+      }
+    },
+    "announce": {
+      "ready": "{name}: listo.",
+      "indexing": "{name}: agregado a la base de conocimiento.",
+      "problem": "{name}: {reason}."
+    }
+  },
+  "history": {
+    "title": "Conversaciones",
+    "listLabel": "Historial de conversaciones",
+    "new": "Nueva conversación",
+    "untitled": "Conversación sin título",
+    "pinned": "Fijada",
+    "answering": "Respondiendo",
+    "searchLabel": "Buscar conversaciones",
+    "searchPlaceholder": "Buscar por título o resumen",
+    "showArchived": "Archivadas",
+    "loading": "Cargando conversaciones…",
+    "loadMore": "Cargar más conversaciones",
+    "count": "{count, plural, =0 {Ninguna conversación} one {# conversación} other {# conversaciones}}",
+    "empty": {
+      "title": "Aún no hay conversaciones",
+      "description": "Las conversaciones con el asistente aparecen aquí."
+    },
+    "emptySearch": {
+      "title": "Nada encontrado",
+      "description": "Ninguna conversación coincide con “{q}”."
+    },
+    "emptyArchived": {
+      "title": "No hay conversaciones archivadas",
+      "description": "Las conversaciones archivadas salen de la lista principal y quedan aquí."
+    },
+    "noAccess": "No tienes permiso para ver el historial de conversaciones.",
+    "error": "No se pudieron cargar las conversaciones.",
+    "actions": {
+      "menu": "Acciones de {title}",
+      "rename": "Renombrar",
+      "pin": "Fijar",
+      "unpin": "Desfijar",
+      "archive": "Archivar",
+      "restore": "Restaurar",
+      "summarize": "Resumir",
+      "delete": "Eliminar"
+    },
+    "rename": {
+      "label": "Nuevo título de {title}",
+      "save": "Guardar título",
+      "cancel": "Cancelar",
+      "hint": "Enter guarda · Esc cancela",
+      "required": "Ingresa un título.",
+      "done": "Conversación renombrada."
+    },
+    "pinnedDone": "Conversación fijada.",
+    "unpinnedDone": "Conversación desfijada.",
+    "archivedDone": "Conversación archivada.",
+    "restoredDone": "Conversación restaurada.",
+    "summary": {
+      "title": "Resumen de {title}",
+      "description": "Hecho a partir de los últimos mensajes y usado en la búsqueda.",
+      "loading": "Resumiendo la conversación…",
+      "empty": "Todavía no hay mensajes para resumir.",
+      "close": "Cerrar"
+    },
+    "delete": {
+      "title": "¿Eliminar “{title}”?",
+      "description": "La conversación y todos sus mensajes se eliminarán. Esta acción no se puede deshacer.",
+      "confirm": "Eliminar conversación",
+      "done": "Conversación eliminada."
+    }
+  },
+  "view": {
+    "title": "Chat",
+    "loading": "Cargando el chat…",
+    "openHistory": "Conversaciones",
+    "historyPanel": "Historial de conversaciones"
   }
 }

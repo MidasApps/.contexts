@@ -92,7 +92,7 @@ describe("message metadata", () => {
 
   it("flags only low confidence", () => {
     expect(isLowConfidence(message({ confidence: "low" }))).toBe(true);
-    expect(isLowConfidence(message({ confidence: "grounded" }))).toBe(false);
+    expect(isLowConfidence(message({ confidence: "normal" }))).toBe(false);
     expect(isLowConfidence(message(undefined))).toBe(false);
   });
 

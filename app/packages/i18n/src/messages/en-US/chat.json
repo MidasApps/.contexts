@@ -88,7 +88,9 @@
     "hint": "Enter sends · Shift+Enter adds a line · Esc stops",
     "counter": "{count} of {max} characters",
     "tooLong": "Limit of {max} characters. Remove {over, plural, one {# character} other {# characters}}.",
-    "offline": "Offline. Sending is unavailable until the connection is back."
+    "offline": "Offline. Sending is unavailable until the connection is back.",
+    "uploading": "Wait for the attachments to finish uploading.",
+    "attachmentProblem": "Remove or retry the attachments with errors before sending."
   },
   "status": {
     "connecting": "Connecting…",
@@ -209,5 +211,105 @@
       "open": "Open approvals",
       "reference": "Request {approvalId}"
     }
+  },
+  "upload": {
+    "menu": "Attach",
+    "attachFile": "Attach file",
+    "addToKnowledge": "Add to knowledge base",
+    "fileInput": "Files to attach",
+    "knowledgeInput": "Files for the knowledge base",
+    "listLabel": "Message attachments",
+    "remove": "Remove {name}",
+    "cancel": "Cancel upload of {name}",
+    "retry": "Try again: {name}",
+    "status": {
+      "pending": "Queued",
+      "uploading": "Uploading {percent}",
+      "validating": "Checking…",
+      "ready": "Ready",
+      "indexing": "In the knowledge base. Indexing…",
+      "failed": "Upload failed",
+      "timeout": "The check took too long",
+      "rejected": {
+        "TYPE_NOT_ALLOWED": "File type not accepted",
+        "TOO_LARGE": "File too large",
+        "CONTENT_MISMATCH": "The content does not match the file type",
+        "TOO_MANY": "Limit of {max} attachments per message"
+      }
+    },
+    "announce": {
+      "ready": "{name}: ready.",
+      "indexing": "{name}: added to the knowledge base.",
+      "problem": "{name}: {reason}."
+    }
+  },
+  "history": {
+    "title": "Conversations",
+    "listLabel": "Conversation history",
+    "new": "New conversation",
+    "untitled": "Untitled conversation",
+    "pinned": "Pinned",
+    "answering": "Answering",
+    "searchLabel": "Search conversations",
+    "searchPlaceholder": "Search by title or summary",
+    "showArchived": "Archived",
+    "loading": "Loading conversations…",
+    "loadMore": "Load more conversations",
+    "count": "{count, plural, =0 {No conversations} one {# conversation} other {# conversations}}",
+    "empty": {
+      "title": "No conversations yet",
+      "description": "Conversations with the assistant show up here."
+    },
+    "emptySearch": {
+      "title": "Nothing found",
+      "description": "No conversation matches “{q}”."
+    },
+    "emptyArchived": {
+      "title": "No archived conversations",
+      "description": "Archived conversations leave the main list and stay here."
+    },
+    "noAccess": "You do not have permission to see the conversation history.",
+    "error": "The conversations could not be loaded.",
+    "actions": {
+      "menu": "Actions for {title}",
+      "rename": "Rename",
+      "pin": "Pin",
+      "unpin": "Unpin",
+      "archive": "Archive",
+      "restore": "Restore",
+      "summarize": "Summarize",
+      "delete": "Delete"
+    },
+    "rename": {
+      "label": "New title for {title}",
+      "save": "Save title",
+      "cancel": "Cancel",
+      "hint": "Enter saves · Esc cancels",
+      "required": "Enter a title.",
+      "done": "Conversation renamed."
+    },
+    "pinnedDone": "Conversation pinned.",
+    "unpinnedDone": "Conversation unpinned.",
+    "archivedDone": "Conversation archived.",
+    "restoredDone": "Conversation restored.",
+    "summary": {
+      "title": "Summary of {title}",
+      "description": "Made from the latest messages and used by search.",
+      "loading": "Summarizing the conversation…",
+      "empty": "There are no messages to summarize yet.",
+      "close": "Close"
+    },
+    "delete": {
+      "title": "Delete “{title}”?",
+      "description": "The conversation and all its messages will be deleted. This cannot be undone.",
+      "confirm": "Delete conversation",
+      "done": "Conversation deleted."
+    }
+  },
+  "view": {
+    "title": "Chat",
+    "loading": "Loading the chat…",
+    "openHistory": "Conversations",
+    "historyPanel": "Conversation history"
   }
 }

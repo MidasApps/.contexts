@@ -151,8 +151,8 @@ export const pendingApprovalOf = (value: unknown): { readonly approvalId: string
 export const partsOf = (message: UIMessage): readonly LoosePart[] => message.parts;
 
 /**
- * `confidence: "low"` of the citation guard (SP3). Read leniently: the guard writes
- * `low | grounded` while `MessageMetadataSchema` names `low | normal`; only `low` matters here.
+ * `confidence: "low"` (`MessageMetadataSchema`: `low | normal`): the chat stream and the history
+ * grade the answer's knowledge delegation with the citation guard's rule (SP3).
  */
 export const isLowConfidence = (message: UIMessage): boolean => isRecord(message.metadata) && message.metadata["confidence"] === "low";
 

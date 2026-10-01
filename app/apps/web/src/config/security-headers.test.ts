@@ -29,9 +29,16 @@ describe("buildPageContentSecurityPolicy", () => {
 
   it("allows the Firebase Auth endpoints and, only when given, the Auth Emulator origin", () => {
     expect(directive(buildPageContentSecurityPolicy({ isDevelopment: false }), "connect-src")).toBe(
-      "connect-src 'self' https://identitytoolkit.googleapis.com https://securetoken.googleapis.com",
+      "connect-src 'self' https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://storage.googleapis.com",
     );
     expect(directive(buildPageContentSecurityPolicy({ isDevelopment: false, authEmulatorOrigin: "http://127.0.0.1:9099" }), "connect-src")).toContain("http://127.0.0.1:9099");
+  });
+
+  it("lets uploads reach the signed URL origin (and the Storage Emulator in local) and plays only own or blob audio", () => {
+    const policy = buildPageContentSecurityPolicy({ isDevelopment: false, storageEmulatorOrigin: "http://127.0.0.1:9199" });
+    expect(directive(policy, "connect-src")).toBe("connect-src 'self' https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://storage.googleapis.com http://127.0.0.1:9199");
+    expect(directive(policy, "media-src")).toBe("media-src 'self' blob:");
+    expect(directive(policy, "img-src")).toBe("img-src 'self' blob: data:");
   });
 
   it("uses the nonce with strict-dynamic instead of unsafe-inline scripts when one is given", () => {

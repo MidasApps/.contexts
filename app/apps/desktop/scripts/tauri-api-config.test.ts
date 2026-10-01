@@ -5,10 +5,10 @@ import { BASE_CONNECT_SRC, buildTauriApiConfigPatch, FIREBASE_AUTH_ORIGINS } fro
 
 type TauriConf = { app: { security: { csp: Record<string, string>; dangerousDisableAssetCspModification?: unknown } } };
 const TAURI_CONF = path.resolve(import.meta.dirname, "../src-tauri/tauri.conf.json");
-const FIREBASE = "https://identitytoolkit.googleapis.com https://securetoken.googleapis.com";
+const FIREBASE = "https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://storage.googleapis.com";
 
 describe("buildTauriApiConfigPatch", () => {
-  it("allows the webview to connect only to itself, Tauri IPC, the API origin and Firebase Auth", () => {
+  it("allows the webview to connect only to itself, Tauri IPC, the API origin, Firebase Auth and the upload origin", () => {
     expect(buildTauriApiConfigPatch({ apiUrl: "https://api.example.com" }).app.security.csp).toEqual({
       "connect-src": `'self' ipc: http://ipc.localhost https://api.example.com ${FIREBASE}`,
     });

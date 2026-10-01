@@ -8,6 +8,9 @@ const DEV_HMR_SOCKET = "ws://localhost:1420";
  */
 export const FIREBASE_AUTH_ORIGINS = ["https://identitytoolkit.googleapis.com", "https://securetoken.googleapis.com"] as const;
 
+/** Where chat uploads send their bytes: the signed URL of the files API (decision 0035). */
+export const FILE_UPLOAD_ORIGIN = "https://storage.googleapis.com";
+
 type ConnectSrcPatch = { "connect-src": string };
 
 export type TauriApiConfigPatch = {
@@ -24,12 +27,12 @@ export type TauriApiConfigInput = {
 /**
  * Tauri config merge patch (RFC 7396, `tauri dev|build --config <file>`) that
  * sets CSP `connect-src` to exactly what the bundle calls: the API origin, the
- * Firebase Auth origins and, in local, the Auth Emulator — in both `csp` and
+ * Firebase Auth origins, the upload origin and, in local, the Auth Emulator — in both `csp` and
  * `devCsp`. Only `connect-src` is replaced; every other directive stays as in
  * tauri.conf.json.
  */
 export const buildTauriApiConfigPatch = ({ apiUrl, authEmulatorUrl }: TauriApiConfigInput): TauriApiConfigPatch => {
-  const origins = [new URL(apiUrl).origin, ...FIREBASE_AUTH_ORIGINS, ...(authEmulatorUrl === undefined ? [] : [new URL(authEmulatorUrl).origin])].join(" ");
+  const origins = [new URL(apiUrl).origin, ...FIREBASE_AUTH_ORIGINS, FILE_UPLOAD_ORIGIN, ...(authEmulatorUrl === undefined ? [] : [new URL(authEmulatorUrl).origin])].join(" ");
   return {
     app: {
       security: {

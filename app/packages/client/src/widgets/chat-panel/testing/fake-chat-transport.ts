@@ -6,6 +6,8 @@ export type FakeStream = {
   /** What the chat sent to open this stream (`resume` for a reconnect). */
   readonly trigger: "submit-message" | "regenerate-message" | "resume";
   readonly messages: readonly UIMessage[];
+  /** Extra request body of the send (`sendMessage(…, { body })`), e.g. `attachments`. */
+  readonly body: Record<string, unknown> | undefined;
   readonly emit: (...chunks: UIMessageChunk[]) => void;
   /** Ends the stream normally (with or without a `finish` chunk before it). */
   readonly close: () => void;
@@ -24,7 +26,7 @@ export type FakeChatTransport = ChatTransport<UIMessage> & {
   readonly resumeCalls: () => number;
 };
 
-const openStream = (trigger: FakeStream["trigger"], messages: readonly UIMessage[], abortSignal: AbortSignal | undefined): { stream: ReadableStream<UIMessageChunk>; handle: FakeStream } => {
+const openStream = (trigger: FakeStream["trigger"], messages: readonly UIMessage[], abortSignal: AbortSignal | undefined, body?: Record<string, unknown>): { stream: ReadableStream<UIMessageChunk>; handle: FakeStream } => {
   let controller: ReadableStreamDefaultController<UIMessageChunk> | undefined;
   let done = false;
   let aborted = false;
@@ -47,6 +49,7 @@ const openStream = (trigger: FakeStream["trigger"], messages: readonly UIMessage
     handle: {
       trigger,
       messages,
+      body,
       emit: (...chunks) => {
         if (!done) chunks.forEach((chunk) => controller?.enqueue(chunk));
       },
@@ -68,13 +71,13 @@ export const createFakeChatTransport = (): FakeChatTransport => {
     failNextSend: (error) => {
       nextFailure = error;
     },
-    sendMessages: ({ trigger, messages, abortSignal }) => {
+    sendMessages: ({ trigger, messages, abortSignal, body }) => {
       if (nextFailure !== undefined) {
         const failure = nextFailure;
         nextFailure = undefined;
         return Promise.reject(failure);
       }
-      const { stream, handle } = openStream(trigger, messages, abortSignal);
+      const { stream, handle } = openStream(trigger, messages, abortSignal, body as Record<string, unknown> | undefined);
       streams.push(handle);
       return Promise.resolve(stream);
     },

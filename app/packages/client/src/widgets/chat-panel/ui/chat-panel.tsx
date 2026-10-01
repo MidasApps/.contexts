@@ -5,6 +5,7 @@ import type { ChatTransport, UIMessage } from "ai";
 import { SquarePenIcon } from "lucide-react";
 import { useId, useMemo, useState, type ReactNode } from "react";
 import { useTranslations } from "use-intl";
+import type { UseUploadQueueArgs } from "#/features/chat-upload/index.ts";
 import { CORE_UI_COMPONENTS, createUiRegistry, type UiRegistry, type UiRegistryEntry } from "#/features/generative-ui/index.ts";
 import { ApiError } from "#/shared/api/api-error.ts";
 import type { ChatScope } from "#/shared/api/chat-transport.ts";
@@ -36,11 +37,12 @@ export type ChatPanelProps = {
   /** Permission check and currency for forms (`can()` and `regional.currency` of the access context). */
   can?: ((permission: string) => boolean) | undefined;
   defaultCurrency?: string | undefined;
-  /** Composer tools (attachments, voice). */
+  /** Extra composer tools of the host (attachments and voice are the panel's own). */
   tools?: ReactNode;
   className?: string | undefined;
-  /** Tests pass a scripted transport. */
+  /** Tests pass a scripted transport and scripted uploads. */
   transport?: ChatTransport<UIMessage> | undefined;
+  uploadSeams?: UseUploadQueueArgs["seams"];
 };
 
 /**
@@ -98,6 +100,7 @@ function StoredThread(props: { thread: Thread; conversationId: string; panel: Ch
       defaultCurrency={props.panel.defaultCurrency}
       tools={props.panel.tools}
       transport={props.panel.transport}
+      uploadSeams={props.panel.uploadSeams}
     />
   );
 }
@@ -166,6 +169,7 @@ export function ChatPanel(props: ChatPanelProps) {
           defaultCurrency={props.defaultCurrency}
           tools={props.tools}
           transport={props.transport}
+          uploadSeams={props.uploadSeams}
         />
       ) : (
         <StoredThread key={thread.key} thread={thread} conversationId={thread.storedId} panel={props} environment={environment} suggestions={suggestions} onStarted={started} onRecover={recover} />

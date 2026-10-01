@@ -88,14 +88,14 @@ describe("ChatMessage", () => {
     expect(screen.getByText("Uma regra de segurança interrompeu esta resposta.")).toBeTruthy();
   });
 
-  it("badges a low-confidence answer once it is complete", () => {
+  it("badges a low-confidence answer, already while it streams", () => {
     const message = assistant([{ type: "text", text: "Acho que sim." }], { confidence: "low" });
     const { rerender } = renderWithProviders(<ChatMessage message={message} streaming />);
-    expect(screen.queryByText("Sem certeza")).toBeNull();
+    expect(screen.getByText("Sem certeza")).toBeTruthy();
     rerender(<ChatMessage message={message} />);
     expect(screen.getByText("Sem certeza")).toBeTruthy();
     expect(screen.getByText(/Confira antes de usar/)).toBeTruthy();
-    rerender(<ChatMessage message={assistant([{ type: "text", text: "Sim." }], { confidence: "grounded" })} />);
+    rerender(<ChatMessage message={assistant([{ type: "text", text: "Sim." }], { confidence: "normal" })} />);
     expect(screen.queryByText("Sem certeza")).toBeNull();
   });
 

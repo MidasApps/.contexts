@@ -116,6 +116,13 @@ describe("createChatTransport", () => {
     expect((calls[0]?.body as { message: unknown }).message).toEqual({ id: "u-1", role: "user", parts: [{ type: "text", text: "veja" }] });
   });
 
+  it("sends the attachments of the message's own metadata when the turn is sent again without a body", async () => {
+    const { transport, calls } = setup(() => streamResponse(ANSWER));
+    const message = { ...user("u-1", "veja"), metadata: { attachments: [{ fileId: "file-9", name: "a.png", mediaType: "image/png", sizeBytes: 5 }] } };
+    await drain(await send(transport, [message], { trigger: "regenerate-message" }));
+    expect(calls[0]?.body).toMatchObject({ attachments: ["file-9"], trigger: "regenerate-message" });
+  });
+
   it("sends attachments given in the request body by file id and nothing else of that body", async () => {
     const { transport, calls } = setup(() => streamResponse(ANSWER));
     await drain(await send(transport, [user("u-1", "veja")], { body: { attachments: ["file-1", "file-2"], maxSteps: 99 } }));

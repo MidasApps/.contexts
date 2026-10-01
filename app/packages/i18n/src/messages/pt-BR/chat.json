@@ -88,7 +88,9 @@
     "hint": "Enter envia · Shift+Enter quebra linha · Esc interrompe",
     "counter": "{count} de {max} caracteres",
     "tooLong": "Limite de {max} caracteres. Remova {over, plural, one {# caractere} other {# caracteres}}.",
-    "offline": "Sem conexão. Envio indisponível até a conexão voltar."
+    "offline": "Sem conexão. Envio indisponível até a conexão voltar.",
+    "uploading": "Aguarde o envio dos anexos terminar.",
+    "attachmentProblem": "Remova ou reenvie os anexos com erro antes de enviar."
   },
   "status": {
     "connecting": "Conectando…",
@@ -209,5 +211,105 @@
       "open": "Abrir aprovações",
       "reference": "Pedido {approvalId}"
     }
+  },
+  "upload": {
+    "menu": "Anexar",
+    "attachFile": "Anexar arquivo",
+    "addToKnowledge": "Adicionar à base de conhecimento",
+    "fileInput": "Arquivos para anexar",
+    "knowledgeInput": "Arquivos para a base de conhecimento",
+    "listLabel": "Anexos da mensagem",
+    "remove": "Remover {name}",
+    "cancel": "Cancelar envio de {name}",
+    "retry": "Tentar de novo: {name}",
+    "status": {
+      "pending": "Na fila",
+      "uploading": "Enviando {percent}",
+      "validating": "Verificando…",
+      "ready": "Pronto",
+      "indexing": "Na base de conhecimento. Indexando…",
+      "failed": "Falha no envio",
+      "timeout": "A verificação demorou demais",
+      "rejected": {
+        "TYPE_NOT_ALLOWED": "Tipo de arquivo não aceito",
+        "TOO_LARGE": "Arquivo grande demais",
+        "CONTENT_MISMATCH": "O conteúdo não corresponde ao tipo do arquivo",
+        "TOO_MANY": "Limite de {max} anexos por mensagem"
+      }
+    },
+    "announce": {
+      "ready": "{name}: pronto.",
+      "indexing": "{name}: adicionado à base de conhecimento.",
+      "problem": "{name}: {reason}."
+    }
+  },
+  "history": {
+    "title": "Conversas",
+    "listLabel": "Histórico de conversas",
+    "new": "Nova conversa",
+    "untitled": "Conversa sem título",
+    "pinned": "Fixada",
+    "answering": "Respondendo",
+    "searchLabel": "Buscar conversas",
+    "searchPlaceholder": "Buscar por título ou resumo",
+    "showArchived": "Arquivadas",
+    "loading": "Carregando conversas…",
+    "loadMore": "Carregar mais conversas",
+    "count": "{count, plural, =0 {Nenhuma conversa} one {# conversa} other {# conversas}}",
+    "empty": {
+      "title": "Nenhuma conversa ainda",
+      "description": "As conversas com o assistente aparecem aqui."
+    },
+    "emptySearch": {
+      "title": "Nada encontrado",
+      "description": "Nenhuma conversa corresponde a “{q}”."
+    },
+    "emptyArchived": {
+      "title": "Nenhuma conversa arquivada",
+      "description": "Conversas arquivadas saem da lista principal e ficam aqui."
+    },
+    "noAccess": "Você não tem permissão para ver o histórico de conversas.",
+    "error": "Não foi possível carregar as conversas.",
+    "actions": {
+      "menu": "Ações de {title}",
+      "rename": "Renomear",
+      "pin": "Fixar",
+      "unpin": "Desafixar",
+      "archive": "Arquivar",
+      "restore": "Restaurar",
+      "summarize": "Resumir",
+      "delete": "Excluir"
+    },
+    "rename": {
+      "label": "Novo título de {title}",
+      "save": "Salvar título",
+      "cancel": "Cancelar",
+      "hint": "Enter salva · Esc cancela",
+      "required": "Informe um título.",
+      "done": "Conversa renomeada."
+    },
+    "pinnedDone": "Conversa fixada.",
+    "unpinnedDone": "Conversa desafixada.",
+    "archivedDone": "Conversa arquivada.",
+    "restoredDone": "Conversa restaurada.",
+    "summary": {
+      "title": "Resumo de {title}",
+      "description": "Feito a partir das últimas mensagens e usado na busca.",
+      "loading": "Resumindo a conversa…",
+      "empty": "Ainda não há mensagens para resumir.",
+      "close": "Fechar"
+    },
+    "delete": {
+      "title": "Excluir “{title}”?",
+      "description": "A conversa e todas as mensagens serão excluídas. Esta ação não pode ser desfeita.",
+      "confirm": "Excluir conversa",
+      "done": "Conversa excluída."
+    }
+  },
+  "view": {
+    "title": "Chat",
+    "loading": "Carregando o chat…",
+    "openHistory": "Conversas",
+    "historyPanel": "Histórico de conversas"
   }
 }

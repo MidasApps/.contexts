@@ -28,7 +28,8 @@ export type ChatMessageProps = {
 export function ChatMessage({ message, streaming = false, interrupted = false, showReasoning, renderTool, actions }: ChatMessageProps) {
   const t = useTranslations("chat.message");
   const from = message.role === "user" ? "user" : "assistant";
-  const lowConfidence = from === "assistant" && !streaming && isLowConfidence(message);
+  // Shown as soon as the stream says so (the knowledge delegation ends before the answer text).
+  const lowConfidence = from === "assistant" && isLowConfidence(message);
   return (
     <Message from={from} author={from === "user" ? t("you") : t("assistant")} data-message-id={message.id}>
       <MessageContent>

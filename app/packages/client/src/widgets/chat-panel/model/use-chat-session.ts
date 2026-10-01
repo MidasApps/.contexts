@@ -1,7 +1,7 @@
 "use client";
 
 import { useChat } from "@ai-sdk/react";
-import { stopChatRunEndpoint } from "@core/contracts";
+import { MessageMetadataSchema, stopChatRunEndpoint, type MessageAttachment } from "@core/contracts";
 import { lastAssistantMessageIsCompleteWithApprovalResponses, type ChatStatus, type ChatTransport, type UIMessage } from "ai";
 import { useEffect, useState } from "react";
 import { ApiError } from "#/shared/api/api-error.ts";
@@ -64,7 +64,8 @@ export type ChatSession = {
   /** The message a stop or a lost stream cut short. */
   readonly interruptedMessageId: string | undefined;
   readonly busy: boolean;
-  readonly send: (text: string) => void;
+  /** Sends a turn; `attachments` are ready files of the upload queue (sent by id, shown from metadata). */
+  readonly send: (text: string, attachments?: readonly MessageAttachment[]) => void;
   readonly stop: () => void;
   /** Sends the failed turn again (or the pending approval answer). */
   readonly retry: () => void;
@@ -164,6 +165,8 @@ export const useChatSession = (args: UseChatSessionArgs): ChatSession => {
     transport,
     ...(args.initialMessages === undefined ? {} : { messages: args.initialMessages }),
     resume: args.resume === true,
+    // The stream's metadata is checked against the contract (`confidence: low | normal`, follow-up #42).
+    messageMetadataSchema: MessageMetadataSchema,
     sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithApprovalResponses,
     onFinish: ({ message, isAbort, isDisconnect, isError }) => {
       setResuming(false);
@@ -179,9 +182,10 @@ export const useChatSession = (args: UseChatSessionArgs): ChatSession => {
   const busy = status === "submitted" || status === "streaming";
   const failure = failureOf(chat.error);
 
-  const send = (text: string) => {
+  const send = (text: string, attachments: readonly MessageAttachment[] = []) => {
     setOutcome({ kind: "none" });
-    void chat.sendMessage({ text });
+    if (attachments.length === 0) void chat.sendMessage({ text });
+    else void chat.sendMessage({ text, metadata: { attachments } }, { body: { attachments: attachments.map((file) => file.fileId) } });
   };
 
   const stop = () => {
