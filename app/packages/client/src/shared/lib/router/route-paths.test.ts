@@ -20,6 +20,8 @@ const SAMPLES: Record<RouteId, Route[]> = {
   settings: [
     { id: "settings", organizationId: "org", section: "members" },
     { id: "settings", organizationId: "org", section: "api-keys" },
+    { id: "settings", organizationId: "org", section: "approvals", rest: "Ap3rQ9vLr3TnB7pWc1aZ" },
+    { id: "settings", organizationId: "org", section: "workflows", rest: "runs/run 1" },
   ],
   "settings-module": [{ id: "settings-module", organizationId: "org", moduleId: "example" }],
   profile: [{ id: "profile", section: "preferences" }],
@@ -39,6 +41,8 @@ describe("route paths", () => {
     expect(routeHref({ id: "project", organizationId: "a", projectId: "b", unit: "c" })).toBe("/o/a/p/b?unit=c");
     expect(routeHref({ id: "module", organizationId: "a", projectId: "b", moduleId: "example", rest: "items/1" })).toBe("/o/a/p/b/m/example/items/1");
     expect(routeHref({ id: "settings-module", organizationId: "a", moduleId: "example" })).toBe("/o/a/settings/m/example");
+    expect(routeHref({ id: "settings", organizationId: "a", section: "approvals", rest: "ap1" })).toBe("/o/a/settings/approvals/ap1");
+    expect(routeHref({ id: "settings", organizationId: "a", section: "workflows", rest: "runs/r1" })).toBe("/o/a/settings/workflows/runs/r1");
     expect(routeHref({ id: "sign-in", next: "/organizations" })).toBe("/sign-in?next=%2Forganizations");
     expect(routeHref({ id: "invite", token: "t1" })).toBe("/invite#token=t1");
     expect(routeHref({ id: "admin", rest: "" })).toBe("/admin");
@@ -50,6 +54,7 @@ describe("route paths", () => {
     expect(parseRoute("/nope")).toBeNull();
     expect(parseRoute("/o")).toBeNull();
     expect(parseRoute("/o/a/settings/billing")).toBeNull();
+    expect(parseRoute("/o/a/settings/members/extra")).toBeNull();
     expect(parseRoute("/profile/unknown")).toBeNull();
     expect(parseRoute("/o/a/p/b/x")).toBeNull();
   });

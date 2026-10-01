@@ -12,6 +12,8 @@ import { SectionNav, type SectionNavItem } from "#/shared/ui/molecules/SectionNa
 import { SettingsTemplate } from "#/shared/ui/templates/SettingsTemplate/SettingsTemplate.tsx";
 
 const pathOf = (route: Route): string => routeHref(route).split(/[?#]/u)[0] ?? "";
+// A section stays current on its detail pages (`approvals/{id}`, `workflows/runs/{id}`).
+const isCurrent = (sectionPath: string, locationPath: string): boolean => locationPath === sectionPath || locationPath.startsWith(`${sectionPath}/`);
 
 /**
  * Sections of the organization settings (SP2 spec §8): the core sections, SP3/SP5 slots and one
@@ -27,7 +29,7 @@ export function SettingsNav({ organizationId }: { organizationId: string }) {
     .visibleItems("settings", permissions.can)
     .flatMap((item): SectionNavItem[] => {
       const route = navItemRoute(item.target, { organizationId });
-      return route === null ? [] : [{ id: item.id, label: t(item.labelKey), icon: item.icon, to: route, current: pathOf(route) === locationPath }];
+      return route === null ? [] : [{ id: item.id, label: t(item.labelKey), icon: item.icon, to: route, current: isCurrent(pathOf(route), locationPath) }];
     });
   return <SectionNav items={items} loading={permissions.status === "pending"} loadingLabel={t("settings.navLoading")} />;
 }

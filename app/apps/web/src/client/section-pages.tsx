@@ -42,10 +42,17 @@ export const SETTINGS_SECTION_VIEWS: Readonly<Record<SettingsSection, ComponentT
   units: SettingsUnitsView,
   "api-keys": SettingsApiKeysView,
   devices: SettingsDevicesView,
-  // Slots filled by SP3 (connectors, agents) and SP5 (usage).
-  connectors: SettingsSlotView,
+  // SP5 Task 14 fills these; until its pages land they are slots or not found.
   agents: SettingsSlotView,
+  skills: NotFoundView,
+  knowledge: NotFoundView,
+  connectors: SettingsSlotView,
+  workflows: NotFoundView,
+  approvals: NotFoundView,
   usage: SettingsSlotView,
+  traces: NotFoundView,
+  evals: NotFoundView,
+  flags: NotFoundView,
 };
 
 /** The shared view of each `/profile/:section` (SP2 spec §8). */
@@ -59,7 +66,7 @@ export const PROFILE_SECTION_VIEWS: Readonly<Record<ProfileSection, ComponentTyp
 
 const isOneOf = <T extends string>(values: readonly T[], value: string | undefined): value is T => value !== undefined && (values as readonly string[]).includes(value);
 
-/** `[section]` of the settings route: the section's view, not-found for an unknown one. */
+/** `[section]/[[...rest]]` of the settings route: the section's view (it reads the `rest` tail), not-found for an unknown one. */
 export function SettingsSectionPage() {
   const section = useRouter().useRouteParams()["section"];
   const View = isOneOf(SETTINGS_SECTIONS, section) ? SETTINGS_SECTION_VIEWS[section] : NotFoundView;

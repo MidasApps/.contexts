@@ -32,11 +32,19 @@ function KnownSettingsSection({ section }: { section: SettingsSection }) {
       return <SettingsApiKeysView />;
     case "devices":
       return <SettingsDevicesView />;
-    // Slots filled by SP3 (connectors, agents) and SP5 (usage).
+    // SP5 Task 14 fills these; until its pages land they are slots or not found.
     case "connectors":
     case "agents":
     case "usage":
       return <SettingsSlotView />;
+    case "skills":
+    case "knowledge":
+    case "workflows":
+    case "approvals":
+    case "traces":
+    case "evals":
+    case "flags":
+      return <NotFoundView />;
   }
 }
 

@@ -1,4 +1,4 @@
-import { PROFILE_SECTIONS, SETTINGS_SECTIONS, type ProfileSection, type Route, type SettingsSection } from "./route-paths.ts";
+import { PROFILE_SECTIONS, SETTINGS_DETAIL_SECTIONS, SETTINGS_SECTIONS, type ProfileSection, type Route, type SettingsSection } from "./route-paths.ts";
 
 const isOneOf = <T extends string>(values: readonly T[], value: string | undefined): value is T =>
   value !== undefined && (values as readonly string[]).includes(value);
@@ -20,8 +20,10 @@ const parseOrganizationRoute = ([organizationId, ...rest]: string[], search: URL
   if (kind === "settings" && second === "m" && third !== undefined && fourth === undefined) {
     return { id: "settings-module", organizationId, moduleId: third };
   }
-  if (kind === "settings" && isOneOf<SettingsSection>(SETTINGS_SECTIONS, second) && third === undefined) {
-    return { id: "settings", organizationId, section: second };
+  if (kind === "settings" && isOneOf<SettingsSection>(SETTINGS_SECTIONS, second)) {
+    if (third === undefined) return { id: "settings", organizationId, section: second };
+    // Detail pages (an approval, a trace, a workflow run) live under their section.
+    return isOneOf(SETTINGS_DETAIL_SECTIONS, second) ? { id: "settings", organizationId, section: second, rest: rest.slice(2).join("/") } : null;
   }
   if (kind !== "p" || second === undefined) return null;
   const unit = optional(search.get("unit"));

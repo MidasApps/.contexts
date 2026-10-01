@@ -55,9 +55,16 @@
       "units": "Units",
       "api-keys": "API keys",
       "devices": "Devices",
-      "connectors": "Connectors",
       "agents": "Agents",
-      "usage": "Usage"
+      "skills": "Skills",
+      "knowledge": "Knowledge base",
+      "connectors": "Connectors",
+      "workflows": "Workflows and schedules",
+      "approvals": "Approvals",
+      "usage": "Usage and budget",
+      "traces": "Traces",
+      "evals": "Evaluations",
+      "flags": "Features"
     },
     "profile": {
       "account": "Account",

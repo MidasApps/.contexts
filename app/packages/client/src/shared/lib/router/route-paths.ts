@@ -1,4 +1,4 @@
-/** Sections of `/o/:organizationId/settings/:section` (SP2 spec §8; slots for SP3/SP5 included). */
+/** Sections of `/o/:organizationId/settings/:section` (SP2 spec §8; SP5 spec §7 for the agent runtime ones). */
 export const SETTINGS_SECTIONS = [
   "general",
   "members",
@@ -7,11 +7,24 @@ export const SETTINGS_SECTIONS = [
   "units",
   "api-keys",
   "devices",
-  "connectors",
   "agents",
+  "skills",
+  "knowledge",
+  "connectors",
+  "workflows",
+  "approvals",
   "usage",
+  "traces",
+  "evals",
+  "flags",
 ] as const;
 export type SettingsSection = (typeof SETTINGS_SECTIONS)[number];
+
+/**
+ * Sections with pages below them, addressed by the `rest` tail of the settings route:
+ * `approvals/{approvalRequestId}`, `traces/{traceId}`, `workflows/runs/{runId}`.
+ */
+export const SETTINGS_DETAIL_SECTIONS = ["approvals", "traces", "workflows"] as const satisfies readonly SettingsSection[];
 
 /** Sections of `/profile/:section` (SP2 spec §8). */
 export const PROFILE_SECTIONS = ["account", "preferences", "security", "sessions", "notifications"] as const;
@@ -19,7 +32,8 @@ export type ProfileSection = (typeof PROFILE_SECTIONS)[number];
 
 /**
  * A place in the app (SP2 spec §4, decision 0012), without the web's `/{locale}` prefix, which
- * the web adapter adds. `rest` is the catch-all tail of module and admin routes ("" for the root).
+ * the web adapter adds. `rest` is the catch-all tail of module and admin routes ("" for the root),
+ * and the detail tail of a settings section (absent for the section itself).
  * Admin pages keep their filters and page in `search` (SP5: filters are shareable links); views
  * read them with `useSearchParam`.
  */
@@ -31,7 +45,7 @@ export type Route =
   | { id: "organization"; organizationId: string }
   | { id: "project"; organizationId: string; projectId: string; unit?: string | undefined }
   | { id: "module"; organizationId: string; projectId: string; moduleId: string; rest: string; unit?: string | undefined }
-  | { id: "settings"; organizationId: string; section: SettingsSection }
+  | { id: "settings"; organizationId: string; section: SettingsSection; rest?: string | undefined }
   | { id: "settings-module"; organizationId: string; moduleId: string }
   | { id: "profile"; section: ProfileSection }
   | { id: "admin"; rest: string; search?: Readonly<Record<string, string>> | undefined };
@@ -92,7 +106,7 @@ export const routeHref = (route: Route): string => {
       return withSearch(base, { unit: route.unit });
     }
     case "settings":
-      return `${organizationPath(route.organizationId)}/settings/${route.section}`;
+      return `${organizationPath(route.organizationId)}/settings/${route.section}${tail(route.rest ?? "")}`;
     case "settings-module":
       return `${organizationPath(route.organizationId)}/settings/m/${seg(route.moduleId)}`;
     case "profile":

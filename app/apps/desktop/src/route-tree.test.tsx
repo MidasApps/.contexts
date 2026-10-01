@@ -16,7 +16,11 @@ const SAMPLES: Record<RouteId, readonly Route[]> = {
     { id: "module", organizationId: "org-1", projectId: "p-1", moduleId: "example", rest: "" },
     { id: "module", organizationId: "org-1", projectId: "p-1", moduleId: "example", rest: "items/42" },
   ],
-  settings: [{ id: "settings", organizationId: "org-1", section: "members" }],
+  settings: [
+    { id: "settings", organizationId: "org-1", section: "members" },
+    { id: "settings", organizationId: "org-1", section: "approvals", rest: "ap-1" },
+    { id: "settings", organizationId: "org-1", section: "workflows", rest: "runs/run-1" },
+  ],
   "settings-module": [{ id: "settings-module", organizationId: "org-1", moduleId: "example" }],
   profile: [{ id: "profile", section: "security" }],
   admin: [{ id: "admin", rest: "" }],
@@ -31,7 +35,7 @@ const DESKTOP_ROUTE: Record<Exclude<RouteId, "admin">, string> = {
   organization: "/o/$organizationId/",
   project: "/o/$organizationId/p/$projectId/",
   module: "/o/$organizationId/p/$projectId/m/$moduleId/$",
-  settings: "/o/$organizationId/settings/$section",
+  settings: "/o/$organizationId/settings/$section/$",
   "settings-module": "/o/$organizationId/settings/m/$moduleId",
   profile: "/profile/$section",
 };

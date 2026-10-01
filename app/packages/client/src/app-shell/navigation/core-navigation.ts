@@ -3,7 +3,7 @@ import { PROFILE_SECTIONS, SETTINGS_SECTIONS, type ProfileSection, type Settings
 import type { IconName } from "#/shared/ui/atoms/Icon/icon-registry.ts";
 import type { ShellNavItem } from "./navigation-registry.ts";
 
-// Read permission of each settings section (SP1 spec §7.3); SP3/SP5 slots use their SP3 permissions.
+// Read permission of each settings section (SP1 spec §7.3; SP3 spec §2.2 and SP5 spec §2.1 for the runtime ones).
 const SETTINGS: Record<SettingsSection, { icon: IconName; permission: Permission }> = {
   general: { icon: "settings", permission: "core.organization.read" },
   members: { icon: "users", permission: "core.member.read" },
@@ -12,9 +12,16 @@ const SETTINGS: Record<SettingsSection, { icon: IconName; permission: Permission
   units: { icon: "network", permission: "core.unit.read" },
   "api-keys": { icon: "key", permission: "core.api-key.read" },
   devices: { icon: "smartphone", permission: "core.device.read" },
-  connectors: { icon: "plug", permission: "core.connector.read" },
   agents: { icon: "bot", permission: "core.agent-settings.read" },
+  skills: { icon: "sparkles", permission: "core.agent-settings.read" },
+  knowledge: { icon: "file-text", permission: "core.knowledge.read" },
+  connectors: { icon: "plug", permission: "core.connector.read" },
+  workflows: { icon: "workflow", permission: "core.workflow-run.read" },
+  approvals: { icon: "inbox", permission: "core.approval.read" },
   usage: { icon: "chart", permission: "core.usage.read" },
+  traces: { icon: "scroll-text", permission: "core.trace.read" },
+  evals: { icon: "activity", permission: "core.eval.read" },
+  flags: { icon: "flag", permission: "core.flag.read" },
 };
 
 const PROFILE_ICONS: Record<ProfileSection, IconName> = {
@@ -51,7 +58,7 @@ const HOMES: ShellNavItem[] = [
 
 /**
  * The core's own navigation (SP2 spec §7–§9): organization and project homes, every settings
- * section (slots for SP3/SP5 included), every profile section in the user menu and the `/admin`
+ * section (the agent runtime ones of SP5 spec §7 included), every profile section in the user menu and the `/admin`
  * slots. Orders are spaced by 10 so contributions can sit in between.
  */
 export const CORE_NAVIGATION: readonly ShellNavItem[] = [

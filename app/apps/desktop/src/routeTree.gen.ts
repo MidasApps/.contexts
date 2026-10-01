@@ -15,8 +15,8 @@ import { Route as OrganizationsRouteImport } from './routes/organizations'
 import { Route as SignInRouteImport } from './routes/sign-in'
 import { Route as ProfileSectionRouteImport } from './routes/profile/$section'
 import { Route as OOrganizationIdIndexRouteImport } from './routes/o/$organizationId/index'
-import { Route as OOrganizationIdSettingsSectionRouteImport } from './routes/o/$organizationId/settings/$section'
 import { Route as OOrganizationIdPProjectIdIndexRouteImport } from './routes/o/$organizationId/p/$projectId/index'
+import { Route as OOrganizationIdSettingsSectionSplatRouteImport } from './routes/o/$organizationId/settings/$section/$'
 import { Route as OOrganizationIdSettingsMModuleIdRouteImport } from './routes/o/$organizationId/settings/m/$moduleId'
 import { Route as OOrganizationIdPProjectIdMModuleIdSplatRouteImport } from './routes/o/$organizationId/p/$projectId/m/$moduleId/$'
 
@@ -50,16 +50,16 @@ const OOrganizationIdIndexRoute = OOrganizationIdIndexRouteImport.update({
   path: '/o/$organizationId/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const OOrganizationIdSettingsSectionRoute =
-  OOrganizationIdSettingsSectionRouteImport.update({
-    id: '/o/$organizationId/settings/$section',
-    path: '/o/$organizationId/settings/$section',
-    getParentRoute: () => rootRouteImport,
-  } as any)
 const OOrganizationIdPProjectIdIndexRoute =
   OOrganizationIdPProjectIdIndexRouteImport.update({
     id: '/o/$organizationId/p/$projectId/',
     path: '/o/$organizationId/p/$projectId/',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const OOrganizationIdSettingsSectionSplatRoute =
+  OOrganizationIdSettingsSectionSplatRouteImport.update({
+    id: '/o/$organizationId/settings/$section/$',
+    path: '/o/$organizationId/settings/$section/$',
     getParentRoute: () => rootRouteImport,
   } as any)
 const OOrganizationIdSettingsMModuleIdRoute =
@@ -82,7 +82,7 @@ export interface FileRoutesByFullPath {
   '/sign-in': typeof SignInRoute
   '/profile/$section': typeof ProfileSectionRoute
   '/o/$organizationId/': typeof OOrganizationIdIndexRoute
-  '/o/$organizationId/settings/$section': typeof OOrganizationIdSettingsSectionRoute
+  '/o/$organizationId/settings/$section/$': typeof OOrganizationIdSettingsSectionSplatRoute
   '/o/$organizationId/settings/m/$moduleId': typeof OOrganizationIdSettingsMModuleIdRoute
   '/o/$organizationId/p/$projectId/': typeof OOrganizationIdPProjectIdIndexRoute
   '/o/$organizationId/p/$projectId/m/$moduleId/$': typeof OOrganizationIdPProjectIdMModuleIdSplatRoute
@@ -94,7 +94,7 @@ export interface FileRoutesByTo {
   '/sign-in': typeof SignInRoute
   '/profile/$section': typeof ProfileSectionRoute
   '/o/$organizationId': typeof OOrganizationIdIndexRoute
-  '/o/$organizationId/settings/$section': typeof OOrganizationIdSettingsSectionRoute
+  '/o/$organizationId/settings/$section/$': typeof OOrganizationIdSettingsSectionSplatRoute
   '/o/$organizationId/settings/m/$moduleId': typeof OOrganizationIdSettingsMModuleIdRoute
   '/o/$organizationId/p/$projectId': typeof OOrganizationIdPProjectIdIndexRoute
   '/o/$organizationId/p/$projectId/m/$moduleId/$': typeof OOrganizationIdPProjectIdMModuleIdSplatRoute
@@ -107,7 +107,7 @@ export interface FileRoutesById {
   '/sign-in': typeof SignInRoute
   '/profile/$section': typeof ProfileSectionRoute
   '/o/$organizationId/': typeof OOrganizationIdIndexRoute
-  '/o/$organizationId/settings/$section': typeof OOrganizationIdSettingsSectionRoute
+  '/o/$organizationId/settings/$section/$': typeof OOrganizationIdSettingsSectionSplatRoute
   '/o/$organizationId/settings/m/$moduleId': typeof OOrganizationIdSettingsMModuleIdRoute
   '/o/$organizationId/p/$projectId/': typeof OOrganizationIdPProjectIdIndexRoute
   '/o/$organizationId/p/$projectId/m/$moduleId/$': typeof OOrganizationIdPProjectIdMModuleIdSplatRoute
@@ -121,7 +121,7 @@ export interface FileRouteTypes {
     | '/sign-in'
     | '/profile/$section'
     | '/o/$organizationId/'
-    | '/o/$organizationId/settings/$section'
+    | '/o/$organizationId/settings/$section/$'
     | '/o/$organizationId/settings/m/$moduleId'
     | '/o/$organizationId/p/$projectId/'
     | '/o/$organizationId/p/$projectId/m/$moduleId/$'
@@ -133,7 +133,7 @@ export interface FileRouteTypes {
     | '/sign-in'
     | '/profile/$section'
     | '/o/$organizationId'
-    | '/o/$organizationId/settings/$section'
+    | '/o/$organizationId/settings/$section/$'
     | '/o/$organizationId/settings/m/$moduleId'
     | '/o/$organizationId/p/$projectId'
     | '/o/$organizationId/p/$projectId/m/$moduleId/$'
@@ -145,7 +145,7 @@ export interface FileRouteTypes {
     | '/sign-in'
     | '/profile/$section'
     | '/o/$organizationId/'
-    | '/o/$organizationId/settings/$section'
+    | '/o/$organizationId/settings/$section/$'
     | '/o/$organizationId/settings/m/$moduleId'
     | '/o/$organizationId/p/$projectId/'
     | '/o/$organizationId/p/$projectId/m/$moduleId/$'
@@ -158,7 +158,7 @@ export interface RootRouteChildren {
   SignInRoute: typeof SignInRoute
   ProfileSectionRoute: typeof ProfileSectionRoute
   OOrganizationIdIndexRoute: typeof OOrganizationIdIndexRoute
-  OOrganizationIdSettingsSectionRoute: typeof OOrganizationIdSettingsSectionRoute
+  OOrganizationIdSettingsSectionSplatRoute: typeof OOrganizationIdSettingsSectionSplatRoute
   OOrganizationIdSettingsMModuleIdRoute: typeof OOrganizationIdSettingsMModuleIdRoute
   OOrganizationIdPProjectIdIndexRoute: typeof OOrganizationIdPProjectIdIndexRoute
   OOrganizationIdPProjectIdMModuleIdSplatRoute: typeof OOrganizationIdPProjectIdMModuleIdSplatRoute
@@ -208,18 +208,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OOrganizationIdIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/o/$organizationId/settings/$section': {
-      id: '/o/$organizationId/settings/$section'
-      path: '/o/$organizationId/settings/$section'
-      fullPath: '/o/$organizationId/settings/$section'
-      preLoaderRoute: typeof OOrganizationIdSettingsSectionRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/o/$organizationId/p/$projectId/': {
       id: '/o/$organizationId/p/$projectId/'
       path: '/o/$organizationId/p/$projectId'
       fullPath: '/o/$organizationId/p/$projectId/'
       preLoaderRoute: typeof OOrganizationIdPProjectIdIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/o/$organizationId/settings/$section/$': {
+      id: '/o/$organizationId/settings/$section/$'
+      path: '/o/$organizationId/settings/$section/$'
+      fullPath: '/o/$organizationId/settings/$section/$'
+      preLoaderRoute: typeof OOrganizationIdSettingsSectionSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/o/$organizationId/settings/m/$moduleId': {
@@ -246,7 +246,8 @@ const rootRouteChildren: RootRouteChildren = {
   SignInRoute: SignInRoute,
   ProfileSectionRoute: ProfileSectionRoute,
   OOrganizationIdIndexRoute: OOrganizationIdIndexRoute,
-  OOrganizationIdSettingsSectionRoute: OOrganizationIdSettingsSectionRoute,
+  OOrganizationIdSettingsSectionSplatRoute:
+    OOrganizationIdSettingsSectionSplatRoute,
   OOrganizationIdSettingsMModuleIdRoute: OOrganizationIdSettingsMModuleIdRoute,
   OOrganizationIdPProjectIdIndexRoute: OOrganizationIdPProjectIdIndexRoute,
   OOrganizationIdPProjectIdMModuleIdSplatRoute:
