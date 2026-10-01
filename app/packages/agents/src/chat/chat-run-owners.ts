@@ -8,10 +8,15 @@
 
 export type ChatRunState = "running" | "suspended" | "finished";
 
+/** The text of the member's message that started a run (attachments are not kept in memory). */
+export type PendingUserMessage = { readonly id: string; readonly text: string };
+
 export type ChatRunOwner = {
   readonly resourceId: string;
   readonly threadId: string;
   readonly agentId: string;
+  /** The message the run answers; memory stores it only when the run ends. */
+  readonly userMessage?: PendingUserMessage | undefined;
 };
 
 export type ChatRunEntry = ChatRunOwner & { readonly state: ChatRunState; readonly recordedAt: number };
@@ -21,6 +26,11 @@ export type ChatRunOwners = {
   readonly ownerOf: (runId: string) => ChatRunEntry | undefined;
   readonly markState: (runId: string, state: ChatRunState) => void;
   readonly isOwnedBy: (runId: string, caller: { readonly resourceId: string; readonly threadId: string }) => boolean;
+  /**
+   * The message of the thread's newest run while that run has not finished, so a history read in
+   * the middle of an answer (a reload that resumes it) shows the question too.
+   */
+  readonly pendingMessageOf: (caller: { readonly resourceId: string; readonly threadId: string }) => PendingUserMessage | undefined;
 };
 
 /** Mastra `server.timeout` (15 min): no chat stream outlives it. */
@@ -58,6 +68,17 @@ export const createChatRunOwners = (options: { readonly ttlMs?: number; readonly
     isOwnedBy: (runId, caller) => {
       const entry = live(runId);
       return entry !== undefined && entry.resourceId === caller.resourceId && entry.threadId === caller.threadId;
+    },
+    pendingMessageOf: (caller) => {
+      // Insertion order: the last match is the thread's newest run. Older runs are ignored even
+      // when they never reported their end, because their message is in memory by then.
+      let newest: ChatRunEntry | undefined;
+      for (const runId of [...runs.keys()]) {
+        const entry = live(runId);
+        if (entry !== undefined && entry.threadId === caller.threadId) newest = entry;
+      }
+      if (newest === undefined || newest.resourceId !== caller.resourceId || newest.state === "finished") return undefined;
+      return newest.userMessage;
     },
   };
 };

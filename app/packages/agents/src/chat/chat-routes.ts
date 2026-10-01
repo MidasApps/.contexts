@@ -7,7 +7,7 @@ import { createUIMessageStreamResponse, type UIMessage } from "ai";
 import { handleAbort } from "./abort-route.ts";
 import { callerOf, chatError, type ChatRouteDeps, durableIdOf, readCappedJson } from "./chat-http.ts";
 import { type ChatRouteBody, ChatRouteBodySchema } from "./chat-request.schema.ts";
-import { approvalRunIdsOf } from "./chat-run-owners.ts";
+import { approvalRunIdsOf, type PendingUserMessage } from "./chat-run-owners.ts";
 import { handleMessages, handleSummary, MESSAGES_ROUTE_PATH, SUMMARY_ROUTE_PATH } from "./history-routes.ts";
 import { handleObserve } from "./observe-route.ts";
 import { createChatStreamTap } from "./tool-preview.ts";
@@ -52,6 +52,13 @@ const runIdOf = (body: ChatRouteBody, caller: Caller, deps: ChatRouteDeps): RunI
   const [runId] = runIds;
   if (runId === undefined || runIds.length > 1) return { refusal: "invalid" };
   return deps.owners.isOwnedBy(runId, caller) ? { runId } : { refusal: "forbidden" };
+};
+
+/** The text of the member's message, kept while its run answers (the attachments stay out of memory). */
+const pendingMessageOf = (message: ChatRouteBody["messages"][number]): PendingUserMessage | undefined => {
+  const parts = message.parts as readonly { readonly type?: unknown; readonly text?: unknown }[];
+  const text = parts.flatMap((part) => (part.type === "text" && typeof part.text === "string" ? [part.text] : [])).join("\n");
+  return typeof message.id === "string" && text !== "" ? { id: message.id, text } : undefined;
 };
 
 const streamRun = async (input: ChatPostInput, deps: ChatRouteDeps, args: { durableId: string; body: ChatRouteBody; caller: Caller; runId: string }) => {
@@ -102,7 +109,8 @@ export const handleChatPost = async (input: ChatPostInput, deps: ChatRouteDeps):
       : chatError("VALIDATION_FAILED", requestContext, [{ field: "messages.0.parts", issue: "APPROVAL_REQUIRED" }]);
   }
   const { runId } = resolved;
-  if (parsed.data.messages[0]?.role === "user") deps.owners.record(runId, { ...caller, agentId: input.agentId });
+  const first = parsed.data.messages[0];
+  if (first?.role === "user") deps.owners.record(runId, { ...caller, agentId: input.agentId, userMessage: pendingMessageOf(first) });
   try {
     const stream = await streamRun(input, deps, { durableId, body: parsed.data, caller, runId });
     const response = createUIMessageStreamResponse({ stream, headers: { "x-run-id": runId } });

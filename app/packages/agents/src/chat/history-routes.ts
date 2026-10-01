@@ -43,19 +43,34 @@ const toUiMessages = async (stored: Parameters<typeof toAISdkMessages>[0]): Prom
   return validated.success ? withAnswerConfidence(validated.data) : [];
 };
 
+type PendingMessages = Pick<ChatRouteDeps["owners"], "pendingMessageOf">;
+
+/**
+ * Memory stores the turn when its run ends. While the newest run of the thread is still answering
+ * (or waits for an approval), its question is added to the newest page from the run registry.
+ */
+const withPendingMessage = (messages: UIMessage[], input: HistoryInput, owners: PendingMessages): UIMessage[] => {
+  const { resourceId, threadId } = callerOf(input.requestContext);
+  if (resourceId === undefined || threadId === undefined) return messages;
+  const pending = owners.pendingMessageOf({ resourceId, threadId });
+  if (pending === undefined || messages.some((message) => message.id === pending.id)) return messages;
+  return [...messages, { id: pending.id, role: "user", parts: [{ type: "text", text: pending.text }] }];
+};
+
 /**
  * Stored messages of the caller's conversation as AI SDK v7 UI messages (spec §4.1): page 0 is
  * the newest page. Messages that fail `validateUIMessages` make the page empty rather than reach
  * the client malformed.
  */
-export const handleMessages = async (input: HistoryInput, deps: Pick<ChatRouteDeps, "chatAgents" | "resolveCustomAgent" | "logger">): Promise<Response> => {
+export const handleMessages = async (input: HistoryInput, deps: Pick<ChatRouteDeps, "chatAgents" | "resolveCustomAgent" | "logger"> & { readonly owners: PendingMessages }): Promise<Response> => {
   if ((await durableIdOf(deps, input.agentId, input.requestContext)) === undefined) return chatError("NOT_FOUND", input.requestContext);
   const page = pageParam(input.url, "page", 0, 100_000);
   const perPage = pageParam(input.url, "perPage", 50, MAX_MESSAGES_PER_PAGE);
   if (page === null || perPage === null || perPage === 0) return chatError("VALIDATION_FAILED", input.requestContext, [{ field: "page", issue: "INVALID" }]);
   const window = await readWindow(input, page, perPage);
   if (window === null) return chatError("FORBIDDEN", input.requestContext);
-  return Response.json({ data: await toUiMessages(window.messages), meta: { hasMore: window.hasMore } });
+  const messages = await toUiMessages(window.messages);
+  return Response.json({ data: page === 0 ? withPendingMessage(messages, input, deps.owners) : messages, meta: { hasMore: window.hasMore } });
 };
 
 const transcriptOf = (messages: readonly UIMessage[]): string =>

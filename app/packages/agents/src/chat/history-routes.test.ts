@@ -7,7 +7,8 @@ import { handleMessages, handleSummary } from "./history-routes.ts";
 const THREAD = "HistThread0000000001";
 const RESOURCE = "tenant-1:user-1";
 const silentLogger = { debug: () => undefined, info: () => undefined, warn: () => undefined, error: () => undefined };
-const deps = { chatAgents: { assistant: "assistant-chat" }, logger: silentLogger };
+const noPending = { pendingMessageOf: () => undefined };
+const deps = { chatAgents: { assistant: "assistant-chat" }, logger: silentLogger, owners: noPending };
 
 const stored = (id: string, role: "user" | "assistant", text: string, minute: number) => ({
   id,
@@ -55,6 +56,22 @@ describe("history routes", () => {
     expect(body.data[0]?.parts).toContainEqual(expect.objectContaining({ type: "text", text: "Hello" }));
     expect(body.meta).toEqual({ hasMore: false });
     expect(seen[0]).toMatchObject({ threadId: THREAD, resourceId: RESOURCE, page: 0, perPage: 20, orderBy: { field: "createdAt", direction: "DESC" } });
+  });
+
+  it("adds the message of a run that is still answering, which memory stores only when the run ends", async () => {
+    const owners = { pendingMessageOf: () => ({ id: "m3", text: "And then?" }) };
+    const mastra = mastraWith([stored("m1", "user", "Hello", 1), stored("m2", "assistant", "Hi there", 2)]);
+    const response = await handleMessages({ agentId: "assistant", requestContext: contextFor(), mastra, url: url() }, { ...deps, owners });
+    const body = (await response.json()) as { data: { id: string; role: string; parts: unknown[] }[] };
+    expect(body.data.map((message) => message.id)).toEqual(["m1", "m2", "m3"]);
+    expect(body.data[2]).toMatchObject({ role: "user", parts: [{ type: "text", text: "And then?" }] });
+
+    // Already stored (the run ended without telling the registry), or an older page: nothing is added.
+    const storedToo = mastraWith([stored("m3", "user", "And then?", 3)]);
+    const again = (await (await handleMessages({ agentId: "assistant", requestContext: contextFor(), mastra: storedToo, url: url() }, { ...deps, owners })).json()) as { data: { id: string }[] };
+    expect(again.data.map((message) => message.id)).toEqual(["m3"]);
+    const older = (await (await handleMessages({ agentId: "assistant", requestContext: contextFor(), mastra, url: url("?page=1") }, { ...deps, owners })).json()) as { data: { id: string }[] };
+    expect(older.data.map((message) => message.id)).toEqual(["m1", "m2"]);
   });
 
   it("refuses an unknown agent, a bad page and a request without a thread", async () => {

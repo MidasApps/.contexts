@@ -20,6 +20,21 @@ describe("createChatRunOwners", () => {
     expect(owners.ownerOf("unknown")).toBeUndefined();
   });
 
+  it("keeps the member's message of the thread's newest run until that run finishes", () => {
+    const owners = createChatRunOwners();
+    const caller = { resourceId: OWNER.resourceId, threadId: OWNER.threadId };
+    expect(owners.pendingMessageOf(caller)).toBeUndefined();
+    owners.record("run-1", { ...OWNER, userMessage: { id: "m1", text: "First" } });
+    owners.record("run-2", { ...OWNER, userMessage: { id: "m2", text: "Second" } });
+    expect(owners.pendingMessageOf(caller)).toEqual({ id: "m2", text: "Second" });
+    expect(owners.pendingMessageOf({ ...caller, resourceId: "other:uid" })).toBeUndefined();
+    owners.markState("run-2", "suspended");
+    expect(owners.pendingMessageOf(caller)).toEqual({ id: "m2", text: "Second" });
+    owners.markState("run-2", "finished");
+    // The older run never reported its end (its client left): its message is stored by now.
+    expect(owners.pendingMessageOf(caller)).toBeUndefined();
+  });
+
   it("forgets a run after its time to live", () => {
     let now = 0;
     const owners = createChatRunOwners({ ttlMs: 1_000, now: () => now });
