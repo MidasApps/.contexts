@@ -8,6 +8,7 @@ import {
   agentCommandExecutors,
   createCoreAgentCommandExecutors,
   createFirebaseConnectorsServices,
+  createFirebaseCustomAgentsServices,
   createFirebaseConsoleServices,
   createPostgresPromptRepository,
   createFirebaseFlagsServices,
@@ -37,6 +38,7 @@ import type { AppModule } from "../modules.ts";
 import { bindAccessPort } from "./access-port-binding.ts";
 import { bindApprovalsPort } from "./approvals-port-binding.ts";
 import { bindAuditPort } from "./audit-port-binding.ts";
+import { bindCustomAgentsPort } from "./custom-agents-port-binding.ts";
 import { bindKnowledgePort } from "./knowledge-port-binding.ts";
 import { bindUsagePort } from "./usage-port-binding.ts";
 import { createLogNotificationPort } from "./notifications-port-binding.ts";
@@ -119,6 +121,8 @@ export type RuntimePortsAdapters = {
  * - flags: the SP5 flags services (Remote Config outside local, Firestore `feature-flags` in local,
  *   tenant overrides in Firestore; the env voice/memory switches only seed defaults, decision 0039).
  * - settings: SP5 agent settings (Firestore `agent-settings`, defaults when none are stored).
+ * - custom agents: tenant-defined agents and skills (Firestore `custom-agents`, `custom-skills`;
+ *   decision 0046), read server side for the run's tenant only.
  * @param args.modules installed modules: their manifests join SP1's registries (permissions, unit
  *   types, settings) and their commands join the command registry.
  */
@@ -161,6 +165,7 @@ export const createRuntimePorts = (args: {
   // Decided in /v1; registered here so SP1 accepts requests of the kind (decision 0036).
   registerWorkflowApprovals({ approvals: core.approvals, settler: RUNTIME_SIDE_SETTLER });
   // Remote Config outside local, Firestore in local; the agents cache the values 30 s (decision 0039).
+  const customAgents = createFirebaseCustomAgentsServices({ firebase: args.firebase, audit: core.audit, clock: systemClock });
   const settings = createFirebaseConsoleServices({ firebase: args.firebase, sql, audit: core.audit, clock: systemClock });
   const flags = createFirebaseFlagsServices({ firebase: args.firebase, appEnv: args.env.APP_ENV, audit: core.audit, clock: systemClock, environmentDefaults: flagEnvironmentDefaults(args.env) });
   return {
@@ -188,5 +193,7 @@ export const createRuntimePorts = (args: {
     approvalSweeps: bindApprovalSweepPort(core.approvals),
     conversationPurge: bindConversationPurgePort(args.firebase.firestore),
     evalExport: bindEvalExportPort({ env: sinkEnv, logger: args.logger }),
+    // Decision 0046: tenant-defined agents and skills (Firestore), read server side per run.
+    customAgents: bindCustomAgentsPort(customAgents.runtime),
   };
 };
