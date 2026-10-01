@@ -1190,7 +1190,12 @@
       "label": "Indexações em andamento",
       "running": "Indexando {name}. O documento aparece na lista quando o conteúdo for lido.",
       "dismiss": "Dispensar",
-      "dismissNamed": "Dispensar o aviso de {name}"
+      "dismissNamed": "Dispensar o aviso de {name}",
+      "failedTitle": "Não foi possível indexar {name}",
+      "failedDescription": "A leitura do conteúdo falhou antes de o documento entrar na lista. Tente de novo ou confira o endereço ou o arquivo.",
+      "reference": "Referência: {runId}",
+      "retry": "Tentar de novo",
+      "retryNamed": "Tentar indexar {name} de novo"
     },
     "add": {
       "title": "Adicionar documento",

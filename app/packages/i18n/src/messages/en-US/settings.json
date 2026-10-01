@@ -1190,7 +1190,12 @@
       "label": "Indexing in progress",
       "running": "Indexing {name}. The document appears in the list once its content is read.",
       "dismiss": "Dismiss",
-      "dismissNamed": "Dismiss the notice for {name}"
+      "dismissNamed": "Dismiss the notice for {name}",
+      "failedTitle": "Could not index {name}",
+      "failedDescription": "Reading the content failed before the document reached the list. Try again or check the address or the file.",
+      "reference": "Reference: {runId}",
+      "retry": "Try again",
+      "retryNamed": "Try indexing {name} again"
     },
     "add": {
       "title": "Add document",

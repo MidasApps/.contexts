@@ -1,7 +1,7 @@
 "use client";
 
 import type { AccessContext, KnowledgeDocument } from "@core/contracts";
-import { useId, useMemo, useState } from "react";
+import { useCallback, useId, useMemo, useState } from "react";
 import { useTranslations } from "use-intl";
 import { collectionOfNamespace, namespaceOfTarget, ORGANIZATION_NAMESPACE, useKnowledgeDocuments } from "#/entities/knowledge/index.ts";
 import { useProjects } from "#/entities/project/index.ts";
@@ -19,6 +19,7 @@ import { OfflineNotice } from "#/shared/ui/molecules/OfflineNotice/OfflineNotice
 import { PageHeader } from "#/widgets/page-header/index.ts";
 import { QueryPage } from "#/widgets/page-state/index.ts";
 import { SettingsPageFrame } from "#/widgets/settings-nav/index.ts";
+import { IngestionNotices } from "./IngestionNotices.tsx";
 import { documentName, KnowledgeDocumentsTable, useCollectionName } from "./KnowledgeDocumentsTable.tsx";
 
 /** The picker value that lists every namespace the organization can read. */
@@ -27,27 +28,6 @@ const ALL = "all";
 /** Runs started here whose document is not in the list yet (the workflow registers it once it fetched the content). */
 const stillIndexing = (started: readonly StartedKnowledgeIngestion[], documents: readonly KnowledgeDocument[]): StartedKnowledgeIngestion[] =>
   started.filter((run) => !documents.some((document) => document.sourceRef === run.sourceRef || document.sourceUrl === run.sourceRef));
-
-function IndexingNotices({ runs, onDismiss }: { runs: readonly StartedKnowledgeIngestion[]; onDismiss: (runId: string) => void }) {
-  const t = useTranslations("settings.knowledge.indexing");
-  if (runs.length === 0) return null;
-  return (
-    <ul aria-label={t("label")} className="flex flex-col gap-2">
-      {runs.map((run) => (
-        <li key={run.runId}>
-          <Alert variant="info" role="status">
-            <AlertDescription className="flex w-full flex-wrap items-center justify-between gap-2 text-inherit">
-              <span>{t("running", { name: run.label })}</span>
-              <Button variant="outline" size="sm" onClick={() => onDismiss(run.runId)} aria-label={t("dismissNamed", { name: run.label })}>
-                {t("dismiss")}
-              </Button>
-            </AlertDescription>
-          </Alert>
-        </li>
-      ))}
-    </ul>
-  );
-}
 
 function CollectionPicker({ value, onChange, projects }: { value: string; onChange: (value: string) => void; projects: readonly { id: string; name: string }[] }) {
   const t = useTranslations("settings.knowledge");
@@ -87,6 +67,11 @@ function SettingsKnowledge({ context }: { context: AccessContext }) {
   const allowed = permissions.includes("core.knowledge.read");
   const documents = useKnowledgeDocuments(organization.id, selected === ALL ? undefined : selected, { poll: started.length > 0, enabled: allowed });
   const indexing = stillIndexing(started, documents.data ?? []);
+  const dismissRun = useCallback((runId: string) => setStarted((runs) => runs.filter((run) => run.runId !== runId)), []);
+  const restartRun = useCallback(
+    (previousRunId: string, next: StartedKnowledgeIngestion) => setStarted((runs) => runs.map((run) => (run.runId === previousRunId ? next : run))),
+    [],
+  );
   // An upload goes to the collection being looked at; "all" has no single target, so it goes to the organization.
   const collection = collectionOfNamespace(selected === ALL ? ORGANIZATION_NAMESPACE : selected);
   const targetProjectId = collection.kind === "project" ? collection.projectId : undefined;
@@ -119,7 +104,13 @@ function SettingsKnowledge({ context }: { context: AccessContext }) {
         <AlertDescription>{t("collectionsNote.description")}</AlertDescription>
       </Alert>
       <CollectionPicker value={selected} onChange={setSelected} projects={(projects.data ?? []).map((project) => ({ id: String(project.id), name: project.name }))} />
-      <IndexingNotices runs={indexing} onDismiss={(runId) => setStarted((runs) => runs.filter((run) => run.runId !== runId))} />
+      <IngestionNotices
+        organizationId={organization.id}
+        runs={indexing}
+        followRuns={permissions.includes("core.workflow-run.read")}
+        onDismiss={dismissRun}
+        onRestarted={restartRun}
+      />
       <KnowledgeDocumentsTable
         caption={t("caption", { organization: organization.name })}
         documents={documents}

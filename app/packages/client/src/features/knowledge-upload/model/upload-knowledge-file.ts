@@ -1,4 +1,4 @@
-import { addKnowledgeSourceEndpoint, getFileEndpoint, requestFileUploadEndpoint, type StoredFile, type UploadInstructions } from "@core/contracts";
+import { addKnowledgeSourceEndpoint, getFileEndpoint, type KnowledgeSource, requestFileUploadEndpoint, type StoredFile, type UploadInstructions } from "@core/contracts";
 import type { CallEndpoint } from "#/shared/api/call-endpoint.ts";
 import { contentTypeOfFile } from "./knowledge-file-policy.ts";
 
@@ -68,7 +68,7 @@ const untilValidated = async (args: UploadKnowledgeFileArgs, fileId: string): Pr
  * @throws {KnowledgeUploadError} when the storage or the validation refuses the file.
  * @throws {ApiError} for a failed `/v1` call.
  */
-export const uploadKnowledgeFile = async (args: UploadKnowledgeFileArgs): Promise<{ runId: string; fileId: string }> => {
+export const uploadKnowledgeFile = async (args: UploadKnowledgeFileArgs): Promise<{ runId: string; fileId: string; source: KnowledgeSource }> => {
   const { callEndpoint, organizationId, projectId, file, onStep, signal } = args;
   const withSignal = signal === undefined ? {} : { signal };
   onStep("requesting");
@@ -85,11 +85,12 @@ export const uploadKnowledgeFile = async (args: UploadKnowledgeFileArgs): Promis
   onStep("validating");
   await untilValidated(args, ticket.data.fileId);
   onStep("starting");
+  const source: KnowledgeSource = { kind: "file", fileId: ticket.data.fileId };
   const started = await callEndpoint(addKnowledgeSourceEndpoint, {
     params: { organizationId },
     query: projectId === undefined ? {} : { projectId },
-    body: { kind: "file", fileId: ticket.data.fileId },
+    body: source,
     ...withSignal,
   });
-  return { runId: started.data.runId, fileId: ticket.data.fileId };
+  return { runId: started.data.runId, fileId: ticket.data.fileId, source };
 };

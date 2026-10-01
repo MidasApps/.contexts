@@ -1,6 +1,6 @@
 "use client";
 
-import { addKnowledgeSourceEndpoint } from "@core/contracts";
+import { addKnowledgeSourceEndpoint, type KnowledgeSource } from "@core/contracts";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState, type FormEvent } from "react";
 import { useFormatter, useTranslations } from "use-intl";
@@ -27,6 +27,8 @@ export type StartedKnowledgeIngestion = {
   /** What the indexed document will carry as `sourceRef`: the file id or the URL. */
   readonly sourceRef: string;
   readonly projectId: string | undefined;
+  /** What was sent to `POST …/knowledge/sources`, so a failed run can be started again. */
+  readonly source: KnowledgeSource;
 };
 
 export type AddKnowledgeDocumentDialogProps = {
@@ -90,12 +92,13 @@ function AddKnowledgeDocumentBody({ organizationId, target, onOpenChange, onAdde
   const start = async (): Promise<StartedKnowledgeIngestion> => {
     const projectId = target.projectId;
     if (kind === "file" && file !== null) {
-      const { runId, fileId } = await uploadKnowledgeFile({ callEndpoint, organizationId, projectId, file, onStep: setStep, sendBytes, wait });
-      return { runId, label: file.name, sourceRef: fileId, projectId };
+      const { runId, fileId, source } = await uploadKnowledgeFile({ callEndpoint, organizationId, projectId, file, onStep: setStep, sendBytes, wait });
+      return { runId, label: file.name, sourceRef: fileId, projectId, source };
     }
-    const source = url.trim();
-    const started = await callEndpoint(addKnowledgeSourceEndpoint, { params: { organizationId }, query: projectId === undefined ? {} : { projectId }, body: { kind: "url", url: source } });
-    return { runId: started.data.runId, label: source, sourceRef: source, projectId };
+    const address = url.trim();
+    const source: KnowledgeSource = { kind: "url", url: address };
+    const started = await callEndpoint(addKnowledgeSourceEndpoint, { params: { organizationId }, query: projectId === undefined ? {} : { projectId }, body: source });
+    return { runId: started.data.runId, label: address, sourceRef: address, projectId, source };
   };
 
   const submit = async (event: FormEvent<HTMLFormElement>): Promise<void> => {

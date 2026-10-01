@@ -62,12 +62,12 @@ export const tenantWorkflowRunQuery = (callEndpoint: CallEndpoint, organizationI
   });
 
 /** One run; re-read every 2 s while it can still change (progress without a reload). */
-export const useTenantWorkflowRun = (organizationId: string, runId: string) => {
+export const useTenantWorkflowRun = (organizationId: string, runId: string, options: { enabled?: boolean } = {}) => {
   const callEndpoint = useCallEndpoint();
   const signedIn = useIsSignedIn();
   return useQuery({
     ...tenantWorkflowRunQuery(callEndpoint, organizationId, runId),
-    enabled: signedIn && organizationId !== "" && runId !== "",
+    enabled: signedIn && organizationId !== "" && runId !== "" && options.enabled !== false,
     refetchInterval: (query) => (query.state.data !== undefined && isRunCancelable(query.state.data.status) ? RUN_POLL_MS : false),
   });
 };

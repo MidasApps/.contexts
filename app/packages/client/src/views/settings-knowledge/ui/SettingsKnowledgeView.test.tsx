@@ -4,6 +4,7 @@ import { describe, expect, it, vi } from "vitest";
 import { renderApp } from "#/app-shell/testing/render-app.tsx";
 import { shellRoutes } from "#/app-shell/testing/shell-routes.ts";
 import { buildKnowledgeDocument, KNOWLEDGE_IDS } from "#/entities/knowledge/knowledge.fixture.ts";
+import { buildWorkflowRun } from "#/entities/workflow-run/workflow-run.fixture.ts";
 import { expectNoAxeViolations } from "#/shared/testing/axe.ts";
 import { apiError, noContent, ok, page, type FakeRequest, type FakeRoutes } from "#/shared/testing/fake-api.ts";
 import { IDS } from "#/shared/testing/fixtures.ts";
@@ -16,6 +17,11 @@ vi.setConfig({ testTimeout: 60_000 });
 const READER: Permission[] = ["core.organization.read", "core.project.read", "core.knowledge.read"];
 const ADMIN: Permission[] = [...READER, "core.knowledge.write", "core.knowledge.delete", "core.file.upload"];
 const DOCUMENTS = "GET /v1/organizations/:organizationId/knowledge/documents";
+const SOURCES = "POST /v1/organizations/:organizationId/knowledge/sources";
+const RUN = "GET /v1/workflows/runs/:runId";
+/** An admin who can also follow workflow runs (core.workflow-run.read, every member has it). */
+const RUN_READER: Permission[] = [...ADMIN, "core.workflow-run.read"];
+const PAGE_URL = "https://docs.example.com/new";
 
 const LIST = [
   buildKnowledgeDocument(),
@@ -107,6 +113,85 @@ describe("SettingsKnowledgeView", () => {
     expect(sources[0]?.body).toEqual({ kind: "url", url: "https://docs.example.com/new" });
     await user.click(within(notices).getByRole("button", { name: "Dispensar o aviso de https://docs.example.com/new" }));
     expect(screen.queryByRole("list", { name: "Indexações em andamento" })).toBeNull();
+  });
+
+  it("shows an ingestion that failed before any document existed, with its reference, and retries it", async () => {
+    const sources: FakeRequest[] = [];
+    const runs: string[] = [];
+    const { user } = renderView(
+      {
+        [DOCUMENTS]: page([]),
+        [SOURCES]: (request: FakeRequest) => {
+          sources.push(request);
+          return ok({ runId: `run-${String(sources.length)}` }, 202);
+        },
+        [RUN]: (request: FakeRequest) => {
+          const runId = request.params["runId"] ?? "";
+          runs.push(runId);
+          expect(request.query.get("organizationId")).toBe(IDS.organization);
+          return ok(buildWorkflowRun({ runId, workflowId: "knowledge-ingest", status: runId === "run-1" ? "failed" : "running" }));
+        },
+      },
+      RUN_READER,
+    );
+    expect(await screen.findByRole("heading", { name: "Nenhum documento nesta coleção" })).toBeDefined();
+    await user.click(screen.getAllByRole("button", { name: "Adicionar documento" })[0] as HTMLElement);
+    const dialog = await screen.findByRole("dialog", { name: "Adicionar documento" });
+    await user.click(within(dialog).getByRole("tab", { name: "Página da web" }));
+    await user.type(within(dialog).getByRole("textbox", { name: "Endereço da página" }), PAGE_URL);
+    await user.click(within(dialog).getByRole("button", { name: "Adicionar" }));
+    const failed = await screen.findByRole("alert", { name: `Não foi possível indexar ${PAGE_URL}` });
+    expect(failed.textContent).toContain("Referência: run-1");
+    expect(screen.queryByText(/Indexando https/u)).toBeNull();
+    await user.click(within(failed).getByRole("button", { name: `Tentar indexar ${PAGE_URL} de novo` }));
+    const notices = await screen.findByRole("list", { name: "Indexações em andamento" });
+    expect(await within(notices).findByText(/Indexando https:\/\/docs\.example\.com\/new/u)).toBeDefined();
+    expect(screen.queryByRole("alert", { name: `Não foi possível indexar ${PAGE_URL}` })).toBeNull();
+    expect(sources.map((request) => request.body)).toEqual([
+      { kind: "url", url: PAGE_URL },
+      { kind: "url", url: PAGE_URL },
+    ]);
+    await waitFor(() => expect(runs).toContain("run-2"));
+  });
+
+  it("dismisses a failed ingestion", async () => {
+    const { user } = renderView(
+      { [DOCUMENTS]: page([]), [SOURCES]: ok({ runId: "run-1" }, 202), [RUN]: ok(buildWorkflowRun({ runId: "run-1", workflowId: "knowledge-ingest", status: "failed" })) },
+      RUN_READER,
+    );
+    await user.click((await screen.findAllByRole("button", { name: "Adicionar documento" }))[0] as HTMLElement);
+    const dialog = await screen.findByRole("dialog", { name: "Adicionar documento" });
+    await user.click(within(dialog).getByRole("tab", { name: "Página da web" }));
+    await user.type(within(dialog).getByRole("textbox", { name: "Endereço da página" }), PAGE_URL);
+    await user.click(within(dialog).getByRole("button", { name: "Adicionar" }));
+    const failed = await screen.findByRole("alert", { name: `Não foi possível indexar ${PAGE_URL}` });
+    await user.click(within(failed).getByRole("button", { name: `Dispensar o aviso de ${PAGE_URL}` }));
+    expect(screen.queryByRole("alert", { name: `Não foi possível indexar ${PAGE_URL}` })).toBeNull();
+  });
+
+  it("drops the notice of an ingestion that finished and stops reading its run", async () => {
+    const runs: string[] = [];
+    const { user } = renderView(
+      {
+        [DOCUMENTS]: page([]),
+        [SOURCES]: ok({ runId: "run-1" }, 202),
+        [RUN]: (request: FakeRequest) => {
+          runs.push(request.params["runId"] ?? "");
+          return ok(buildWorkflowRun({ runId: "run-1", workflowId: "knowledge-ingest", status: "success" }));
+        },
+      },
+      RUN_READER,
+    );
+    await user.click((await screen.findAllByRole("button", { name: "Adicionar documento" }))[0] as HTMLElement);
+    const dialog = await screen.findByRole("dialog", { name: "Adicionar documento" });
+    await user.click(within(dialog).getByRole("tab", { name: "Página da web" }));
+    await user.type(within(dialog).getByRole("textbox", { name: "Endereço da página" }), PAGE_URL);
+    await user.click(within(dialog).getByRole("button", { name: "Adicionar" }));
+    await waitFor(() => expect(runs.length).toBeGreaterThan(0));
+    await waitFor(() => expect(screen.queryByRole("list", { name: "Indexações em andamento" })).toBeNull());
+    const reads = runs.length;
+    await new Promise((resolve) => setTimeout(resolve, 2500));
+    expect(runs.length).toBe(reads);
   });
 
   it("offers no add or delete action to a viewer who can only read", async () => {
