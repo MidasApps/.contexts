@@ -41,7 +41,8 @@ export function ConversationItem({ conversation, to, active = false, editing, ac
             {title}
           </RouteLink>
         )}
-        <p className="flex items-center gap-1.5 truncate text-[11.5px] text-muted-foreground">
+        {/* On the active row's accent background the muted tone falls below 4.5:1 (axe, 4.34). */}
+        <p className={cn("flex items-center gap-1.5 truncate text-[11.5px]", active ? "text-foreground" : "text-muted-foreground")}>
           {conversation.pinned ? (
             <span className="inline-flex items-center gap-1">
               <PinIcon aria-hidden="true" className="size-3" />
