@@ -82,7 +82,7 @@ workflows suspend and resume; on Postgres a resume atomically claims the run
   `core.workflow-run.approve-demo` (SP5 Task 1).
 - `approval-demo`'s `apply` step runs the module command `example.CreateNoteCommand` as the
   requester through a `WorkflowCommandPort` (SP3's command executors and at-most-once records,
-  idempotency key = `runId`). SP3 Task 19 (module commands) is deferred, so today no executor
+  idempotency key `workflow:<runId>`). SP3 Task 19 (module commands) is deferred, so today no executor
   exists for that command and the real runtime ends the run with `UNKNOWN_COMMAND` after the
   approval; the tests bind a fake port. The command id is a parameter of the workflow factory.
 
