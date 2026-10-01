@@ -1,0 +1,14 @@
+{
+  "extends": "@core/config/tsconfig/bundler.json",
+  "//": "Relative imports carry .ts/.tsx extensions: the manifest and contracts are also loaded by Node (catalog scripts, native type stripping); pages go through the apps' bundlers.",
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "types": ["node"],
+    "allowJs": true,
+    "checkJs": true,
+    "incremental": true,
+    "tsBuildInfoFile": ".tscache/tsbuildinfo"
+  },
+  "include": ["src/**/*.ts", "src/**/*.tsx", "*.ts", "*.js"],
+  "exclude": ["node_modules"]
+}

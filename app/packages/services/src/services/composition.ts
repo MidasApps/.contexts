@@ -1,7 +1,7 @@
 // Composition root of the core server: builds every adapter once per process and binds the
 // `/v1` pipeline, the access core, the access write side and the audit writer. Apps call it lazily.
 import { randomBytes } from "node:crypto";
-import type { PermissionDefinition, UnitTypeDefinition } from "@core/contracts";
+import type { ModuleSettingsManifest, PermissionDefinition, UnitTypeDefinition } from "@core/contracts";
 import { createFirestoreAccessAdapters, type FirestoreAccessAdapters } from "./access/adapters/driven/firestore-access-adapters.ts";
 import { createNoopInvitationNotifier } from "./access/adapters/driven/noop-invitation-notifier.ts";
 import type { AccessWriteDeps } from "./access/application/access-write-deps.ts";
@@ -44,6 +44,9 @@ import type { Logger } from "./shared/observability/logger.ts";
 import { createFirestoreRateLimiter } from "./shared/rate-limit/firestore-rate-limiter.ts";
 import { createFirestoreTenancyAdapters, type FirestoreTenancyAdapters } from "./tenancy/adapters/driven/firestore-tenancy-adapters.ts";
 import { createTenancyServices, type TenancyServices } from "./tenancy/composition.ts";
+import { buildModuleSettingsRoutes } from "./modules/adapters/driving/module-settings-routes.ts";
+import { createFirestoreModuleSettingsServices, type ModuleSettingsServices } from "./modules/composition.ts";
+import { moduleSettingsDefinitionsOf } from "./modules/domain/module-settings-registry.ts";
 
 export { createRouteResolver, UnknownEndpointError, type CoreRoutes } from "./core-routes.ts";
 
@@ -53,6 +56,8 @@ export type CoreServerModule = {
   readonly permissions?: readonly PermissionDefinition[];
   /** Unit types for tenancy (`createTenancyServices({ unitTypes })`, SP1 Task 10 wires them). */
   readonly unitTypes?: readonly UnitTypeDefinition[] | undefined;
+  /** Settings served by `GET|PUT /v1/organizations/{organizationId}/module-settings/{moduleId}`. */
+  readonly settings?: ModuleSettingsManifest | undefined;
 };
 
 /** Adapters a caller may replace (tests, and later tasks until their Firestore adapters land). */
@@ -108,6 +113,10 @@ export type CoreServer = {
    * node, or null (fail-closed). Also exported as `resolveAccessContext` of `identity`.
    */
   readonly resolveAccessContext: ResolveAccessContext;
+  /** Module settings store (SP2 Task 9, decision 0015 §6). */
+  readonly moduleSettings: ModuleSettingsServices;
+  /** Unit types declared by the installed modules, in module order (for tenancy). */
+  readonly moduleUnitTypes: readonly UnitTypeDefinition[];
   readonly audit: AuditWriter;
   /** The dependencies every `withApiRoute` of this server shares. */
   readonly pipeline: ApiRouteDeps;
@@ -192,9 +201,11 @@ const buildTenancy = (args: CoreServerArgs, clock: Clock, audit: AuditWriter, ac
  * Builds the core server once per process. Adapters keep references only, so building
  * touches neither Firestore nor Auth.
  * @param env `API_KEY_PREFIX` of the validated services env.
- * @param modules installed modules (their permissions join the registry).
+ * @param modules installed modules: their permissions join the registry, their settings are
+ *   served under `/v1/.../module-settings/{moduleId}` and their unit types are exposed for tenancy.
  * @throws {PermissionRegistryError} when module permissions conflict (startup bug).
  * @throws {UnitTypeRegistryError} when module unit types conflict (startup bug).
+ * @throws {ModuleSettingsRegistryError} when two modules declare settings under one id.
  */
 export const createCoreServer = (args: CoreServerArgs): CoreServer => {
   const clock = args.clock ?? systemClock;
@@ -281,7 +292,13 @@ export const createCoreServer = (args: CoreServerArgs): CoreServer => {
     randomBytes: args.adapters?.randomBytes ?? randomBytes,
     logger: args.logger,
   });
-  const routes = buildCoreRoutes({ pipeline, access: access.services, members: access.members, tenancy, identity, sessions, apiKeys, devices, platform, approvals, auditLogs });
+  const modules = args.modules ?? [];
+  const moduleSettings = createFirestoreModuleSettingsServices({ firestore, definitions: moduleSettingsDefinitionsOf(modules), audit, clock });
+  const routes = {
+    ...buildCoreRoutes({ pipeline, access: access.services, members: access.members, tenancy, identity, sessions, apiKeys, devices, platform, approvals, auditLogs }),
+    ...buildModuleSettingsRoutes({ pipeline, moduleSettings }),
+  };
+  const moduleUnitTypes = modules.flatMap((module) => module.unitTypes ?? []);
   return {
     routes,
     verifyBearer,
@@ -291,6 +308,8 @@ export const createCoreServer = (args: CoreServerArgs): CoreServer => {
     tenancy,
     identity,
     resolveAccessContext: identity.resolveAccessContext,
+    moduleSettings,
+    moduleUnitTypes,
     sessions,
     apiKeys,
     devices,

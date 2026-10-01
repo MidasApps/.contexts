@@ -1,0 +1,40 @@
+{
+  "module": { "name": "Example" },
+  "nav": { "home": "Example" },
+  "permissions": {
+    "item": { "read": "View the example module's items", "write": "Create and change the example module's items" }
+  },
+  "unitTypes": { "area": "Area" },
+  "settings": {
+    "greeting": "Greeting",
+    "greetingHint": "Shown at the top of the module, to every member.",
+    "defaultBudget": "Default budget",
+    "defaultBudgetHint": "Suggested amount for new items."
+  },
+  "home": {
+    "title": "Example module",
+    "description": "Reference for the module contract: context, amounts, time zone and permissions.",
+    "loading": "Loading the example module…",
+    "contextTitle": "Current context",
+    "contextDescription": "Resolved by the server for the node in the URL.",
+    "organization": "Organization",
+    "project": "Project",
+    "unit": "Unit",
+    "noUnit": "No unit selected",
+    "locale": "Language",
+    "timeZone": "Display time zone",
+    "currency": "Default currency",
+    "now": "Now",
+    "settingsTitle": "Module settings",
+    "settingsLoading": "Loading the module settings…",
+    "greeting": "Greeting",
+    "defaultBudget": "Default budget",
+    "emptyTitle": "Module not set up yet",
+    "emptyDescription": "Set the greeting and the default budget in the module settings.",
+    "emptyDescriptionReadOnly": "Ask an organization admin to set up this module.",
+    "configure": "Set up",
+    "recordItem": "Record item",
+    "recorded": "Item recorded.",
+    "recordedDescription": "Demonstrates the write permission: nothing was saved."
+  }
+}

@@ -8071,6 +8071,172 @@ paths:
       tags:
         - access
       x-auth: user
+  /v1/organizations/{organizationId}/module-settings/{moduleId}:
+    get:
+      operationId: modules.getModuleSettings
+      parameters:
+        - description: Organization id.
+          in: path
+          name: organizationId
+          required: true
+          schema:
+            minLength: 1
+            type: string
+            x-pii: none
+        - description: Installed module id.
+          in: path
+          name: moduleId
+          required: true
+          schema:
+            pattern: ^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$
+            type: string
+            x-pii: none
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: "#/components/schemas/modules.ModuleSettings"
+                required:
+                  - data
+                type: object
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: VALIDATION_FAILED
+          x-error-codes:
+            - VALIDATION_FAILED
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UNAUTHORIZED
+          x-error-codes:
+            - UNAUTHORIZED
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: FORBIDDEN
+          x-error-codes:
+            - FORBIDDEN
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: NOT_FOUND
+          x-error-codes:
+            - NOT_FOUND
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: INTERNAL_ERROR
+          x-error-codes:
+            - INTERNAL_ERROR
+      security:
+        - bearerAuth: []
+      summary: Reads a module's settings in an organization (the module's read permission).
+      tags:
+        - modules
+      x-auth: principal
+    put:
+      operationId: modules.updateModuleSettings
+      parameters:
+        - description: Organization id.
+          in: path
+          name: organizationId
+          required: true
+          schema:
+            minLength: 1
+            type: string
+            x-pii: none
+        - description: Installed module id.
+          in: path
+          name: moduleId
+          required: true
+          schema:
+            pattern: ^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$
+            type: string
+            x-pii: none
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties: {}
+              propertyNames:
+                type: string
+              type: object
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: "#/components/schemas/modules.ModuleSettings"
+                required:
+                  - data
+                type: object
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: VALIDATION_FAILED
+          x-error-codes:
+            - VALIDATION_FAILED
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UNAUTHORIZED
+          x-error-codes:
+            - UNAUTHORIZED
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: FORBIDDEN
+          x-error-codes:
+            - FORBIDDEN
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: NOT_FOUND
+          x-error-codes:
+            - NOT_FOUND
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: INTERNAL_ERROR
+          x-error-codes:
+            - INTERNAL_ERROR
+      security:
+        - bearerAuth: []
+      summary: Replaces a module's settings, validated by its settings contract (the module's update permission).
+      tags:
+        - modules
+      x-auth: principal
   /v1/organizations/{organizationId}/projects:
     get:
       operationId: tenancy.listProjects
@@ -14651,6 +14817,7 @@ components:
             - UNIT_UPDATED
             - UNIT_MOVED
             - UNIT_DELETED
+            - MODULE_SETTINGS_UPDATED
             - ROLE_CREATED
             - ROLE_UPDATED
             - ROLE_DELETED
@@ -14968,6 +15135,7 @@ components:
             - UNIT_UPDATED
             - UNIT_MOVED
             - UNIT_DELETED
+            - MODULE_SETTINGS_UPDATED
             - ROLE_CREATED
             - ROLE_UPDATED
             - ROLE_DELETED
@@ -15098,6 +15266,7 @@ components:
             - UNIT_UPDATED
             - UNIT_MOVED
             - UNIT_DELETED
+            - MODULE_SETTINGS_UPDATED
             - ROLE_CREATED
             - ROLE_UPDATED
             - ROLE_DELETED
@@ -17337,6 +17506,63 @@ components:
       x-pii: personal
       x-relations: []
       x-tenancyScope: user
+    example.ExampleSettings:
+      additionalProperties: false
+      description: Organization-wide settings of the example module (reference module of the module contract).
+      examples:
+        - defaultBudget:
+            amountMinor: 150000
+            currency: BRL
+          greeting: Welcome to the example module
+      properties:
+        defaultBudget:
+          additionalProperties: false
+          description: Amount suggested for new items; currency defaults to the organization's regional currency in forms.
+          examples:
+            - amountMinor: 150000
+              currency: BRL
+          properties:
+            amountMinor:
+              description: Amount in the currency's minor unit.
+              maximum: 9007199254740991
+              minimum: 0
+              type: integer
+              x-pii: none
+            currency:
+              description: ISO 4217 currency code.
+              pattern: ^[A-Z]{3}$
+              type: string
+              x-pii: none
+          required:
+            - amountMinor
+            - currency
+          type: object
+          x-pii: none
+          x-ui:
+            labelKey: example.settings.defaultBudget
+            order: 2
+            widget: money
+        greeting:
+          description: Short greeting shown at the top of the module to every member of the organization.
+          examples:
+            - Welcome to the example module
+          maxLength: 80
+          minLength: 1
+          type: string
+          x-pii: none
+          x-ui:
+            labelKey: example.settings.greeting
+            order: 1
+            widget: text
+      required:
+        - greeting
+        - defaultBudget
+      type: object
+      x-kind: settings
+      x-permission: example.item.read
+      x-pii: none
+      x-relations: []
+      x-tenancyScope: organization
     example.Note:
       additionalProperties: false
       description: A free-text note inside an organization. Sample contract; remove it in derived apps.
@@ -19764,6 +19990,73 @@ components:
       x-permission: core.knowledge.write
       x-pii: none
       x-relations: []
+      x-tenancyScope: organization
+    modules.ModuleSettings:
+      additionalProperties: false
+      description: Settings of one installed module in an organization; values follow the module's own settings contract.
+      examples:
+        - moduleId: example
+          tenantId: Jd8sK2lPq0WnR5tYu3bV
+          updatedAt: "2026-09-29T15:00:00.000Z"
+          updatedBy: uA1b2C3d4E5f6G7h8I9j
+          values:
+            defaultBudget:
+              amountMinor: 150000
+              currency: BRL
+            greeting: Olá
+        - moduleId: example
+          tenantId: Jd8sK2lPq0WnR5tYu3bV
+          updatedAt: null
+          updatedBy: null
+          values: null
+      properties:
+        moduleId:
+          description: Module the settings belong to.
+          pattern: ^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$
+          type: string
+          x-pii: none
+        tenantId:
+          description: Organization the settings belong to.
+          minLength: 1
+          type: string
+          x-pii: none
+        updatedAt:
+          anyOf:
+            - format: date-time
+              pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z))$
+              type: string
+            - type: "null"
+          description: When the values last changed (UTC); null until first saved.
+          x-pii: none
+        updatedBy:
+          anyOf:
+            - minLength: 1
+              type: string
+            - type: "null"
+          description: Actor id of the last editor (uid, device id or API key id); null until first saved.
+          x-pii: personal
+        values:
+          anyOf:
+            - additionalProperties: {}
+              propertyNames:
+                type: string
+              type: object
+            - type: "null"
+          description: Values validated by the module's settings contract; null until first saved.
+          x-pii: personal
+      required:
+        - tenantId
+        - moduleId
+        - values
+        - updatedAt
+        - updatedBy
+      type: object
+      x-kind: view
+      x-pii: personal
+      x-relations:
+        - field: tenantId
+          target: tenancy.Organization
+          type: belongs-to
       x-tenancyScope: organization
     observability.EvalDataset:
       additionalProperties: false

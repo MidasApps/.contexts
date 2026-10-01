@@ -458,6 +458,21 @@ export { none, personal, sensitive, type FieldDocs } from "./contracts/field-doc
 export { HAS_ANY_FIELD_ERROR, hasAnyField, hasUniqueItems } from "./contracts/primitives/refinements.ts";
 // Removable sample contract (keeps the catalog non-empty).
 export { NoteContract, NoteIdSchema, NoteSchema, type Note, type NoteId } from "./contracts/example/note.schema.ts";
+// SP2 module contract and module settings (decision 0015).
+export { CapabilityRefSchema, type CapabilityRef } from "./contracts/modules/capability-ref.schema.ts";
+export { defineModule } from "./contracts/modules/define-module.ts";
+export { ModuleDefinitionError, type ModuleDefinitionErrorCode } from "./contracts/modules/module-definition-error.ts";
+export {
+  CAPABILITY_KINDS, ModuleIdSchema, ModuleManifestSchema, ModuleSettingsDefinitionSchema, RESERVED_MODULE_IDS,
+  type CapabilityKind, type ModuleId, type ModuleManifest, type ModuleSettingsManifest,
+} from "./contracts/modules/module-manifest.schema.ts";
+export {
+  ModuleSettingsContract, ModuleSettingsSchema, ModuleSettingsValuesSchema, type ModuleSettings, type ModuleSettingsValues,
+} from "./contracts/modules/module-settings.schema.ts";
+export {
+  getModuleSettingsEndpoint, MODULES_ENDPOINTS, ModuleSettingsParamsSchema, updateModuleSettingsEndpoint,
+} from "./contracts/modules/endpoints.ts";
+export { NAV_SLOTS, NavItemSchema, NavSlotSchema, type NavItem, type NavSlot } from "./contracts/modules/nav-item.schema.ts";
 // SP5 workflows, prompts, platform console and observability.
 export { SP5_CONTRACTS } from "./contracts/sp5-contracts.ts";
 export { SP5_PERMISSIONS } from "./contracts/access/core-permissions.ts";

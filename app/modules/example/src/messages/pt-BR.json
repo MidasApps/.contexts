@@ -1,0 +1,40 @@
+{
+  "module": { "name": "Exemplo" },
+  "nav": { "home": "Exemplo" },
+  "permissions": {
+    "item": { "read": "Ver os itens do módulo de exemplo", "write": "Criar e alterar itens do módulo de exemplo" }
+  },
+  "unitTypes": { "area": "Área" },
+  "settings": {
+    "greeting": "Saudação",
+    "greetingHint": "Mostrada no início do módulo, para todos os membros.",
+    "defaultBudget": "Orçamento padrão",
+    "defaultBudgetHint": "Valor sugerido para novos itens."
+  },
+  "home": {
+    "title": "Módulo de exemplo",
+    "description": "Referência do contrato de módulos: contexto, valores, fuso horário e permissões.",
+    "loading": "Carregando o módulo de exemplo…",
+    "contextTitle": "Contexto atual",
+    "contextDescription": "Resolvido pelo servidor para o nó da URL.",
+    "organization": "Organização",
+    "project": "Projeto",
+    "unit": "Unidade",
+    "noUnit": "Nenhuma unidade selecionada",
+    "locale": "Idioma",
+    "timeZone": "Fuso horário de exibição",
+    "currency": "Moeda padrão",
+    "now": "Agora",
+    "settingsTitle": "Configurações do módulo",
+    "settingsLoading": "Carregando as configurações do módulo…",
+    "greeting": "Saudação",
+    "defaultBudget": "Orçamento padrão",
+    "emptyTitle": "Módulo ainda não configurado",
+    "emptyDescription": "Defina a saudação e o orçamento padrão nas configurações do módulo.",
+    "emptyDescriptionReadOnly": "Peça a um administrador da organização para configurar este módulo.",
+    "configure": "Configurar",
+    "recordItem": "Registrar item",
+    "recorded": "Item registrado.",
+    "recordedDescription": "Demonstração da permissão de escrita: nada foi salvo."
+  }
+}

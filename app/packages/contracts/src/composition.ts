@@ -42,6 +42,8 @@ import { createEndpointRegistry, type EndpointRegistry } from "./contracts/http/
 import { ErrorEnvelopeContract } from "./contracts/http/envelopes.schema.ts";
 import { IDENTITY_CONTRACTS } from "./contracts/identity/contracts.ts";
 import { IDENTITY_ENDPOINTS } from "./contracts/identity/endpoints.ts";
+import { MODULES_ENDPOINTS } from "./contracts/modules/endpoints.ts";
+import { ModuleSettingsContract } from "./contracts/modules/module-settings.schema.ts";
 import { createContractRegistry, type ContractRegistry } from "./contracts/registry.ts";
 import { TENANCY_CONTRACTS } from "./contracts/tenancy/contracts.ts";
 import { TENANCY_ENDPOINTS } from "./contracts/tenancy/endpoints.ts";
@@ -60,6 +62,8 @@ export const CORE_CONTRACTS: readonly ContractDefinition[] = [
   ...IDENTITY_CONTRACTS,
   ...ACCESS_CONTRACTS,
   ...AUDIT_CONTRACTS,
+  // SP2 module settings (decision 0015).
+  ModuleSettingsContract,
   // SP3 agent runtime.
   AgentRequestContextContract,
   AgentSettingsContract,
@@ -108,6 +112,8 @@ export const CORE_ENDPOINTS: readonly EndpointDefinition[] = [
   // SP4 chat, conversation history and voice.
   ...CONVERSATIONS_ENDPOINTS,
   ...VOICE_ENDPOINTS,
+  // SP2 module settings (decision 0015).
+  ...MODULES_ENDPOINTS,
   // SP5 workflow runs and tenant schedules.
   ...WORKFLOW_RUN_ENDPOINTS,
   ...SCHEDULE_ENDPOINTS,

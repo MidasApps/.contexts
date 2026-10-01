@@ -30,4 +30,28 @@ describe("boundaries", () => {
 
     expect(result.messages).toEqual([]);
   });
+
+  it("reports client importing a module (the core never imports a module, spec D6)", async () => {
+    const result = await lintFixture("packages/client/src/imports-module.ts");
+
+    expect(result.messages.map((message) => message.ruleId)).toContain("boundaries/dependencies");
+  });
+
+  it("allows a module importing client", async () => {
+    const result = await lintFixture("modules/example/src/imports-client.ts");
+
+    expect(result.messages).toEqual([]);
+  });
+
+  it("reports the e2e harness importing app-side code (it drives the apps from outside)", async () => {
+    const result = await lintFixture("packages/e2e/src/imports-client.ts");
+
+    expect(result.messages.map((message) => message.ruleId)).toContain("boundaries/dependencies");
+  });
+
+  it("allows the e2e harness importing itself", async () => {
+    const result = await lintFixture("packages/e2e/src/imports-self.ts");
+
+    expect(result.messages).toEqual([]);
+  });
 });

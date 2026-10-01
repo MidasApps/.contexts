@@ -362,6 +362,31 @@ export {
   type SqlRejection,
   type SqlRejectionReason,
 } from "./services/catalog/index.ts";
+// SP2 module settings store (Task 9, decision 0015 §6).
+export {
+  buildModuleSettingsRoutes,
+  createFirestoreModuleSettingsRepository,
+  createFirestoreModuleSettingsServices,
+  createInMemoryModuleSettingsRepository,
+  createModuleSettingsRegistry,
+  InvalidModuleSettingsError,
+  MODULE_SETTINGS_COLLECTION,
+  moduleSettingsDefinitionsOf,
+  moduleSettingsDocId,
+  ModuleSettingsRegistryError,
+  UnknownModuleError,
+  createModuleSettingsServices,
+  type GetModuleSettings,
+  type InMemoryModuleSettingsRepository,
+  type ModuleSettingsDefinition,
+  type ModuleSettingsKey,
+  type ModuleSettingsRegistry,
+  type ModuleSettingsRepository,
+  type ModuleSettingsServices,
+  type StoredModuleSettings,
+  type UpdateModuleSettings,
+  type UpdateModuleSettingsCommand,
+} from "./services/modules/index.ts";
 // SP3 agents context: the /v1 → Mastra gateway (Task 8).
 export {
   createMastraGateway,

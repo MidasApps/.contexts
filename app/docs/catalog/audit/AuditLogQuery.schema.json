@@ -22,6 +22,7 @@
         "UNIT_UPDATED",
         "UNIT_MOVED",
         "UNIT_DELETED",
+        "MODULE_SETTINGS_UPDATED",
         "ROLE_CREATED",
         "ROLE_UPDATED",
         "ROLE_DELETED",

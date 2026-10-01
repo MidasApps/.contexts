@@ -1,0 +1,76 @@
+{
+  "additionalProperties": false,
+  "description": "Organization-wide settings of the example module (reference module of the module contract).",
+  "examples": [
+    {
+      "defaultBudget": {
+        "amountMinor": 150000,
+        "currency": "BRL"
+      },
+      "greeting": "Welcome to the example module"
+    }
+  ],
+  "properties": {
+    "defaultBudget": {
+      "additionalProperties": false,
+      "description": "Amount suggested for new items; currency defaults to the organization's regional currency in forms.",
+      "examples": [
+        {
+          "amountMinor": 150000,
+          "currency": "BRL"
+        }
+      ],
+      "properties": {
+        "amountMinor": {
+          "description": "Amount in the currency's minor unit.",
+          "maximum": 9007199254740991,
+          "minimum": 0,
+          "type": "integer",
+          "x-pii": "none"
+        },
+        "currency": {
+          "description": "ISO 4217 currency code.",
+          "pattern": "^[A-Z]{3}$",
+          "type": "string",
+          "x-pii": "none"
+        }
+      },
+      "required": [
+        "amountMinor",
+        "currency"
+      ],
+      "type": "object",
+      "x-pii": "none",
+      "x-ui": {
+        "labelKey": "example.settings.defaultBudget",
+        "order": 2,
+        "widget": "money"
+      }
+    },
+    "greeting": {
+      "description": "Short greeting shown at the top of the module to every member of the organization.",
+      "examples": [
+        "Welcome to the example module"
+      ],
+      "maxLength": 80,
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none",
+      "x-ui": {
+        "labelKey": "example.settings.greeting",
+        "order": 1,
+        "widget": "text"
+      }
+    }
+  },
+  "required": [
+    "greeting",
+    "defaultBudget"
+  ],
+  "type": "object",
+  "x-kind": "settings",
+  "x-permission": "example.item.read",
+  "x-pii": "none",
+  "x-relations": [],
+  "x-tenancyScope": "organization"
+}

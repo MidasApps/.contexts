@@ -20,6 +20,8 @@ export const ELEMENTS = [
   { type: "services", pattern: "packages/services", partialMatch: false },
   { type: "agents", pattern: "packages/agents", partialMatch: false },
   { type: "i18n", pattern: "packages/i18n", partialMatch: false },
+  // Shared Playwright harness (SP2 Tasks 22-23): used by the apps' e2e folders only.
+  { type: "e2e", pattern: "packages/e2e", partialMatch: false },
   { type: "module", pattern: "modules/*", capture: ["name"], partialMatch: false },
 ];
 
@@ -51,7 +53,7 @@ export const DEPENDENCY_POLICIES = [
     from: { element: { type: "app" } },
     allow: [
       sameCaptured("app"),
-      ...["client", "contracts", "services", "agents", "i18n", "module"].map(to),
+      ...["client", "contracts", "services", "agents", "i18n", "module", "e2e"].map(to),
     ],
   },
   { from: { element: { type: "client" } }, allow: [to("client"), to("contracts"), to("i18n")] },
@@ -64,6 +66,8 @@ export const DEPENDENCY_POLICIES = [
   },
   allowSelf("contracts"),
   allowSelf("i18n"),
+  // The harness drives the apps through the browser and HTTP only; it imports no app code.
+  allowSelf("e2e"),
   // The core never imports a module (spec D6); a module builds on the core.
   {
     from: { element: { type: "module" } },

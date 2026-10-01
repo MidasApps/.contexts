@@ -5972,6 +5972,7 @@
               "UNIT_UPDATED",
               "UNIT_MOVED",
               "UNIT_DELETED",
+              "MODULE_SETTINGS_UPDATED",
               "ROLE_CREATED",
               "ROLE_UPDATED",
               "ROLE_DELETED",
@@ -6418,6 +6419,7 @@
               "UNIT_UPDATED",
               "UNIT_MOVED",
               "UNIT_DELETED",
+              "MODULE_SETTINGS_UPDATED",
               "ROLE_CREATED",
               "ROLE_UPDATED",
               "ROLE_DELETED",
@@ -6660,6 +6662,7 @@
               "UNIT_UPDATED",
               "UNIT_MOVED",
               "UNIT_DELETED",
+              "MODULE_SETTINGS_UPDATED",
               "ROLE_CREATED",
               "ROLE_UPDATED",
               "ROLE_DELETED",
@@ -10203,6 +10206,135 @@
       "pii": "personal",
       "relations": [],
       "tenancyScope": "user"
+    },
+    {
+      "context": "example",
+      "description": "Organization-wide settings of the example module (reference module of the module contract).",
+      "examples": [
+        {
+          "defaultBudget": {
+            "amountMinor": 150000,
+            "currency": "BRL"
+          },
+          "greeting": "Welcome to the example module"
+        }
+      ],
+      "fields": [
+        {
+          "description": "Amount suggested for new items; currency defaults to the organization's regional currency in forms.",
+          "examples": [
+            {
+              "amountMinor": 150000,
+              "currency": "BRL"
+            }
+          ],
+          "name": "defaultBudget",
+          "pii": "none",
+          "required": true,
+          "ui": {
+            "labelKey": "example.settings.defaultBudget",
+            "order": 2,
+            "widget": "money"
+          }
+        },
+        {
+          "description": "Short greeting shown at the top of the module to every member of the organization.",
+          "examples": [
+            "Welcome to the example module"
+          ],
+          "name": "greeting",
+          "pii": "none",
+          "required": true,
+          "ui": {
+            "labelKey": "example.settings.greeting",
+            "order": 1,
+            "widget": "text"
+          }
+        }
+      ],
+      "id": "example.ExampleSettings",
+      "jsonSchema": {
+        "additionalProperties": false,
+        "description": "Organization-wide settings of the example module (reference module of the module contract).",
+        "examples": [
+          {
+            "defaultBudget": {
+              "amountMinor": 150000,
+              "currency": "BRL"
+            },
+            "greeting": "Welcome to the example module"
+          }
+        ],
+        "properties": {
+          "defaultBudget": {
+            "additionalProperties": false,
+            "description": "Amount suggested for new items; currency defaults to the organization's regional currency in forms.",
+            "examples": [
+              {
+                "amountMinor": 150000,
+                "currency": "BRL"
+              }
+            ],
+            "properties": {
+              "amountMinor": {
+                "description": "Amount in the currency's minor unit.",
+                "maximum": 9007199254740991,
+                "minimum": 0,
+                "type": "integer",
+                "x-pii": "none"
+              },
+              "currency": {
+                "description": "ISO 4217 currency code.",
+                "pattern": "^[A-Z]{3}$",
+                "type": "string",
+                "x-pii": "none"
+              }
+            },
+            "required": [
+              "amountMinor",
+              "currency"
+            ],
+            "type": "object",
+            "x-pii": "none",
+            "x-ui": {
+              "labelKey": "example.settings.defaultBudget",
+              "order": 2,
+              "widget": "money"
+            }
+          },
+          "greeting": {
+            "description": "Short greeting shown at the top of the module to every member of the organization.",
+            "examples": [
+              "Welcome to the example module"
+            ],
+            "maxLength": 80,
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none",
+            "x-ui": {
+              "labelKey": "example.settings.greeting",
+              "order": 1,
+              "widget": "text"
+            }
+          }
+        },
+        "required": [
+          "greeting",
+          "defaultBudget"
+        ],
+        "type": "object",
+        "x-kind": "settings",
+        "x-permission": "example.item.read",
+        "x-pii": "none",
+        "x-relations": [],
+        "x-tenancyScope": "organization"
+      },
+      "kind": "settings",
+      "name": "ExampleSettings",
+      "permission": "example.item.read",
+      "pii": "none",
+      "relations": [],
+      "tenancyScope": "organization"
     },
     {
       "context": "example",
@@ -14703,6 +14835,165 @@
       "permission": "core.knowledge.write",
       "pii": "none",
       "relations": [],
+      "tenancyScope": "organization"
+    },
+    {
+      "context": "modules",
+      "description": "Settings of one installed module in an organization; values follow the module's own settings contract.",
+      "examples": [
+        {
+          "moduleId": "example",
+          "tenantId": "Jd8sK2lPq0WnR5tYu3bV",
+          "updatedAt": "2026-09-29T15:00:00.000Z",
+          "updatedBy": "[redacted]",
+          "values": "[redacted]"
+        },
+        {
+          "moduleId": "example",
+          "tenantId": "Jd8sK2lPq0WnR5tYu3bV",
+          "updatedAt": null,
+          "updatedBy": "[redacted]",
+          "values": "[redacted]"
+        }
+      ],
+      "fields": [
+        {
+          "description": "Module the settings belong to.",
+          "name": "moduleId",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Organization the settings belong to.",
+          "name": "tenantId",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "When the values last changed (UTC); null until first saved.",
+          "name": "updatedAt",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Actor id of the last editor (uid, device id or API key id); null until first saved.",
+          "name": "updatedBy",
+          "pii": "personal",
+          "required": true
+        },
+        {
+          "description": "Values validated by the module's settings contract; null until first saved.",
+          "name": "values",
+          "pii": "personal",
+          "required": true
+        }
+      ],
+      "id": "modules.ModuleSettings",
+      "jsonSchema": {
+        "additionalProperties": false,
+        "description": "Settings of one installed module in an organization; values follow the module's own settings contract.",
+        "examples": [
+          {
+            "moduleId": "example",
+            "tenantId": "Jd8sK2lPq0WnR5tYu3bV",
+            "updatedAt": "2026-09-29T15:00:00.000Z",
+            "updatedBy": "[redacted]",
+            "values": "[redacted]"
+          },
+          {
+            "moduleId": "example",
+            "tenantId": "Jd8sK2lPq0WnR5tYu3bV",
+            "updatedAt": null,
+            "updatedBy": "[redacted]",
+            "values": "[redacted]"
+          }
+        ],
+        "properties": {
+          "moduleId": {
+            "description": "Module the settings belong to.",
+            "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+            "type": "string",
+            "x-pii": "none"
+          },
+          "tenantId": {
+            "description": "Organization the settings belong to.",
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "updatedAt": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "When the values last changed (UTC); null until first saved.",
+            "x-pii": "none"
+          },
+          "updatedBy": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Actor id of the last editor (uid, device id or API key id); null until first saved.",
+            "x-pii": "personal"
+          },
+          "values": {
+            "anyOf": [
+              {
+                "additionalProperties": {},
+                "propertyNames": {
+                  "type": "string"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Values validated by the module's settings contract; null until first saved.",
+            "x-pii": "personal"
+          }
+        },
+        "required": [
+          "tenantId",
+          "moduleId",
+          "values",
+          "updatedAt",
+          "updatedBy"
+        ],
+        "type": "object",
+        "x-kind": "view",
+        "x-pii": "personal",
+        "x-relations": [
+          {
+            "field": "tenantId",
+            "target": "tenancy.Organization",
+            "type": "belongs-to"
+          }
+        ],
+        "x-tenancyScope": "organization"
+      },
+      "kind": "view",
+      "name": "ModuleSettings",
+      "pii": "personal",
+      "relations": [
+        {
+          "field": "tenantId",
+          "target": "tenancy.Organization",
+          "type": "belongs-to"
+        }
+      ],
       "tenancyScope": "organization"
     },
     {
