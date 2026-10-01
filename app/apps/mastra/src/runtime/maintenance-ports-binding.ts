@@ -29,8 +29,8 @@ export const bindConversationPurgePort = (firestore: FirebaseAdmin["firestore"])
 
 /**
  * Eval export (decision 0040). The sink follows `USAGE_SINK` (BigQuery `eval_runs` outside local).
- * The summary source is not wired yet: experiment summaries with per-scorer means arrive with the
- * evals API (SP5 Task 11); until then each run logs and exports nothing.
+ * This binding has no summary source (it logs and exports nothing); `create-agent-runtime.ts` replaces
+ * it with the Mastra experiments store once the storage exists (`eval-export-source.ts`, SP5 Task 11).
  */
 export const bindEvalExportPort = (deps: {
   readonly env: { readonly USAGE_SINK: "none" | "bigquery"; readonly BIGQUERY_DATASET_AI_OBSERVABILITY: string; readonly FIREBASE_PROJECT_ID: string };

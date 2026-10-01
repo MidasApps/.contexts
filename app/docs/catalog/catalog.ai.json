@@ -14707,6 +14707,150 @@
     },
     {
       "context": "observability",
+      "description": "An eval dataset: platform eval sets per agent, or an organization's own (feedback, manual items).",
+      "examples": [
+        {
+          "createdAt": "2026-09-30T12:00:00.000Z",
+          "id": "ds_01J8Z3K4M5",
+          "name": "feedback",
+          "targetIds": [
+            "assistant"
+          ],
+          "tenantId": "Jd8sK2lPq0WnR5tYu3bV",
+          "version": 3
+        }
+      ],
+      "fields": [
+        {
+          "description": "When the dataset was created (UTC).",
+          "name": "createdAt",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Dataset id.",
+          "name": "id",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Dataset name (`assistant.v1`, `feedback`).",
+          "name": "name",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Agents the dataset evaluates.",
+          "name": "targetIds",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Organization of a tenant dataset; null for platform datasets.",
+          "name": "tenantId",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Current dataset version (items are versioned).",
+          "name": "version",
+          "pii": "none",
+          "required": true
+        }
+      ],
+      "id": "observability.EvalDataset",
+      "jsonSchema": {
+        "additionalProperties": false,
+        "description": "An eval dataset: platform eval sets per agent, or an organization's own (feedback, manual items).",
+        "examples": [
+          {
+            "createdAt": "2026-09-30T12:00:00.000Z",
+            "id": "ds_01J8Z3K4M5",
+            "name": "feedback",
+            "targetIds": [
+              "assistant"
+            ],
+            "tenantId": "Jd8sK2lPq0WnR5tYu3bV",
+            "version": 3
+          }
+        ],
+        "properties": {
+          "createdAt": {
+            "description": "When the dataset was created (UTC).",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "type": "string",
+            "x-pii": "none"
+          },
+          "id": {
+            "description": "Dataset id.",
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "name": {
+            "description": "Dataset name (`assistant.v1`, `feedback`).",
+            "maxLength": 200,
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "targetIds": {
+            "description": "Agents the dataset evaluates.",
+            "items": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 50,
+            "type": "array",
+            "x-pii": "none"
+          },
+          "tenantId": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Organization of a tenant dataset; null for platform datasets.",
+            "x-pii": "none"
+          },
+          "version": {
+            "description": "Current dataset version (items are versioned).",
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer",
+            "x-pii": "none"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "tenantId",
+          "version",
+          "targetIds",
+          "createdAt"
+        ],
+        "type": "object",
+        "x-kind": "view",
+        "x-permission": "core.eval.read",
+        "x-pii": "none",
+        "x-relations": [],
+        "x-tenancyScope": "organization"
+      },
+      "kind": "view",
+      "name": "EvalDataset",
+      "permission": "core.eval.read",
+      "pii": "none",
+      "relations": [],
+      "tenancyScope": "organization"
+    },
+    {
+      "context": "observability",
       "description": "An eval experiment of an agent on a dataset, with scores per scorer and the gate verdict.",
       "examples": [
         {
@@ -14962,6 +15106,72 @@
       "kind": "view",
       "name": "EvalExperimentSummary",
       "permission": "core.eval.read",
+      "pii": "none",
+      "relations": [],
+      "tenancyScope": "organization"
+    },
+    {
+      "context": "observability",
+      "description": "Starts an experiment of an enabled agent on one of the organization's datasets.",
+      "examples": [
+        {
+          "agentId": "assistant",
+          "datasetId": "ds_01J8Z3K4M5"
+        }
+      ],
+      "fields": [
+        {
+          "description": "Agent to evaluate; must be enabled for the organization.",
+          "name": "agentId",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "The organization's dataset.",
+          "name": "datasetId",
+          "pii": "none",
+          "required": true
+        }
+      ],
+      "id": "observability.StartEvalExperimentInput",
+      "jsonSchema": {
+        "additionalProperties": false,
+        "description": "Starts an experiment of an enabled agent on one of the organization's datasets.",
+        "examples": [
+          {
+            "agentId": "assistant",
+            "datasetId": "ds_01J8Z3K4M5"
+          }
+        ],
+        "properties": {
+          "agentId": {
+            "description": "Agent to evaluate; must be enabled for the organization.",
+            "pattern": "^[a-z][a-z0-9-]*$",
+            "type": "string",
+            "x-pii": "none"
+          },
+          "datasetId": {
+            "description": "The organization's dataset.",
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          }
+        },
+        "required": [
+          "datasetId",
+          "agentId"
+        ],
+        "type": "object",
+        "x-kind": "command",
+        "x-permission": "core.eval.write",
+        "x-pii": "none",
+        "x-relations": [],
+        "x-tenancyScope": "organization"
+      },
+      "kind": "command",
+      "name": "StartEvalExperimentInput",
+      "permission": "core.eval.write",
       "pii": "none",
       "relations": [],
       "tenancyScope": "organization"

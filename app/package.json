@@ -19,6 +19,7 @@
     "evals": "turbo run evals",
     "evals:real": "turbo run evals:real",
     "evals:seed": "pnpm -F @core/mastra evals:seed",
+    "evals:publish": "node scripts/evals-publish.ts",
     "contracts:catalog": "turbo run contracts:catalog",
     "contracts:check": "turbo run contracts:check",
     "i18n:check": "turbo run i18n:check",

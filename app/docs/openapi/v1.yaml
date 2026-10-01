@@ -431,6 +431,146 @@ paths:
       tags:
         - prompts
       x-auth: user
+  /v1/admin/datasets:
+    get:
+      operationId: evals.adminListDatasets
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    items:
+                      $ref: "#/components/schemas/observability.EvalDataset"
+                    type: array
+                required:
+                  - data
+                type: object
+          description: OK
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UNAUTHORIZED
+          x-error-codes:
+            - UNAUTHORIZED
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: FORBIDDEN, MFA_REQUIRED
+          x-error-codes:
+            - FORBIDDEN
+            - MFA_REQUIRED
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: INTERNAL_ERROR
+          x-error-codes:
+            - INTERNAL_ERROR
+      security:
+        - bearerAuth: []
+      summary: Lists every dataset, platform and tenant ones (staff, platform.eval.manage).
+      tags:
+        - evals
+      x-auth: user
+  /v1/admin/experiments:
+    get:
+      operationId: evals.adminListExperiments
+      parameters:
+        - description: Page number, from 0.
+          in: query
+          name: page
+          required: false
+          schema:
+            default: 0
+            maximum: 1000
+            minimum: 0
+            type: integer
+            x-pii: none
+        - description: Page size, 1-100 (default 20).
+          in: query
+          name: perPage
+          required: false
+          schema:
+            default: 20
+            maximum: 100
+            minimum: 1
+            type: integer
+            x-pii: none
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    items:
+                      $ref: "#/components/schemas/observability.EvalExperimentSummary"
+                    type: array
+                  meta:
+                    additionalProperties: false
+                    description: Paging state.
+                    properties:
+                      hasMore:
+                        description: Whether a next page exists.
+                        type: boolean
+                        x-pii: none
+                    required:
+                      - hasMore
+                    type: object
+                    x-pii: none
+                required:
+                  - data
+                  - meta
+                type: object
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: VALIDATION_FAILED
+          x-error-codes:
+            - VALIDATION_FAILED
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UNAUTHORIZED
+          x-error-codes:
+            - UNAUTHORIZED
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: FORBIDDEN, MFA_REQUIRED
+          x-error-codes:
+            - FORBIDDEN
+            - MFA_REQUIRED
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: INTERNAL_ERROR
+          x-error-codes:
+            - INTERNAL_ERROR
+      security:
+        - bearerAuth: []
+      summary: "Lists every experiment: CI eval runs, prompt evals and tenant experiments (staff, platform.eval.manage)."
+      tags:
+        - evals
+      x-auth: user
   /v1/admin/flags:
     get:
       operationId: flags.adminList
@@ -1233,6 +1373,195 @@ paths:
       summary: Replaces a plan; the budgets of organizations on it follow (staff, platform.plan.manage).
       tags:
         - admin
+      x-auth: user
+  /v1/admin/traces:
+    get:
+      operationId: traces.adminList
+      parameters:
+        - description: Page number, from 0.
+          in: query
+          name: page
+          required: false
+          schema:
+            default: 0
+            maximum: 1000
+            minimum: 0
+            type: integer
+            x-pii: none
+        - description: Page size, 1-100 (default 20).
+          in: query
+          name: perPage
+          required: false
+          schema:
+            default: 20
+            maximum: 100
+            minimum: 1
+            type: integer
+            x-pii: none
+        - description: Only traces of this agent.
+          in: query
+          name: agentId
+          required: false
+          schema:
+            pattern: ^[a-z][a-z0-9-]*$
+            type: string
+            x-pii: none
+        - description: Only traces in this status.
+          in: query
+          name: status
+          required: false
+          schema:
+            enum:
+              - ok
+              - error
+            type: string
+            x-pii: none
+        - description: Only this organization's traces.
+          in: query
+          name: organizationId
+          required: false
+          schema:
+            minLength: 1
+            type: string
+            x-pii: none
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    items:
+                      $ref: "#/components/schemas/observability.TraceSummary"
+                    type: array
+                  meta:
+                    additionalProperties: false
+                    description: Paging state.
+                    properties:
+                      hasMore:
+                        description: Whether a next page exists.
+                        type: boolean
+                        x-pii: none
+                    required:
+                      - hasMore
+                    type: object
+                    x-pii: none
+                required:
+                  - data
+                  - meta
+                type: object
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: VALIDATION_FAILED
+          x-error-codes:
+            - VALIDATION_FAILED
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UNAUTHORIZED
+          x-error-codes:
+            - UNAUTHORIZED
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: FORBIDDEN, MFA_REQUIRED
+          x-error-codes:
+            - FORBIDDEN
+            - MFA_REQUIRED
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: INTERNAL_ERROR
+          x-error-codes:
+            - INTERNAL_ERROR
+      security:
+        - bearerAuth: []
+      summary: Lists traces of every tenant, optionally one (staff, platform.trace.read).
+      tags:
+        - traces
+      x-auth: user
+  /v1/admin/traces/{traceId}:
+    get:
+      operationId: traces.adminGet
+      parameters:
+        - description: Trace id.
+          in: path
+          name: traceId
+          required: true
+          schema:
+            pattern: ^[0-9a-f]{32}$
+            type: string
+            x-pii: none
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: "#/components/schemas/observability.TraceDetail"
+                required:
+                  - data
+                type: object
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: VALIDATION_FAILED
+          x-error-codes:
+            - VALIDATION_FAILED
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UNAUTHORIZED
+          x-error-codes:
+            - UNAUTHORIZED
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: FORBIDDEN, MFA_REQUIRED
+          x-error-codes:
+            - FORBIDDEN
+            - MFA_REQUIRED
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: NOT_FOUND
+          x-error-codes:
+            - NOT_FOUND
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: INTERNAL_ERROR
+          x-error-codes:
+            - INTERNAL_ERROR
+      security:
+        - bearerAuth: []
+      summary: Reads any trace with its spans (staff, platform.trace.read).
+      tags:
+        - traces
       x-auth: user
   /v1/agent-settings:
     get:
@@ -2617,6 +2946,83 @@ paths:
       tags:
         - conversations
       x-auth: user
+  /v1/conversations/{conversationId}/feedback:
+    post:
+      operationId: conversations.recordFeedback
+      parameters:
+        - description: Conversation id.
+          in: path
+          name: conversationId
+          required: true
+          schema:
+            pattern: ^[A-Za-z0-9_-]{1,128}$
+            type: string
+            x-pii: none
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/conversations.MessageFeedbackInput"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: "#/components/schemas/conversations.MessageFeedback"
+                required:
+                  - data
+                type: object
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: VALIDATION_FAILED
+          x-error-codes:
+            - VALIDATION_FAILED
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UNAUTHORIZED
+          x-error-codes:
+            - UNAUTHORIZED
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: FORBIDDEN
+          x-error-codes:
+            - FORBIDDEN
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: NOT_FOUND
+          x-error-codes:
+            - NOT_FOUND
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: INTERNAL_ERROR
+          x-error-codes:
+            - INTERNAL_ERROR
+      security:
+        - bearerAuth: []
+      summary: Rates an assistant message (thumbs up/down, optional comment); one rating per message and user, a second one replaces it.
+      tags:
+        - conversations
+      x-auth: user
   /v1/conversations/{conversationId}/messages:
     get:
       operationId: conversations.listMessages
@@ -3069,6 +3475,262 @@ paths:
       summary: "Revokes a device: grants removed, tokens revoked, Auth user disabled (core.device.revoke)."
       tags:
         - identity
+      x-auth: user
+  /v1/evals/datasets:
+    get:
+      operationId: evals.listDatasets
+      parameters:
+        - description: Organization to act in; required for users, and when given it must be an API key's own organization.
+          in: query
+          name: organizationId
+          required: false
+          schema:
+            minLength: 1
+            type: string
+            x-pii: none
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    items:
+                      $ref: "#/components/schemas/observability.EvalDataset"
+                    type: array
+                required:
+                  - data
+                type: object
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: VALIDATION_FAILED
+          x-error-codes:
+            - VALIDATION_FAILED
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UNAUTHORIZED
+          x-error-codes:
+            - UNAUTHORIZED
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: FORBIDDEN
+          x-error-codes:
+            - FORBIDDEN
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: INTERNAL_ERROR
+          x-error-codes:
+            - INTERNAL_ERROR
+      security:
+        - bearerAuth: []
+      summary: Lists the organization's own datasets (core.eval.read).
+      tags:
+        - evals
+      x-auth: principal
+  /v1/evals/experiments:
+    get:
+      operationId: evals.listExperiments
+      parameters:
+        - description: Organization to act in; required for users, and when given it must be an API key's own organization.
+          in: query
+          name: organizationId
+          required: false
+          schema:
+            minLength: 1
+            type: string
+            x-pii: none
+        - description: Page number, from 0.
+          in: query
+          name: page
+          required: false
+          schema:
+            default: 0
+            maximum: 1000
+            minimum: 0
+            type: integer
+            x-pii: none
+        - description: Page size, 1-100 (default 20).
+          in: query
+          name: perPage
+          required: false
+          schema:
+            default: 20
+            maximum: 100
+            minimum: 1
+            type: integer
+            x-pii: none
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    items:
+                      $ref: "#/components/schemas/observability.EvalExperimentSummary"
+                    type: array
+                  meta:
+                    additionalProperties: false
+                    description: Paging state.
+                    properties:
+                      hasMore:
+                        description: Whether a next page exists.
+                        type: boolean
+                        x-pii: none
+                    required:
+                      - hasMore
+                    type: object
+                    x-pii: none
+                required:
+                  - data
+                  - meta
+                type: object
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: VALIDATION_FAILED
+          x-error-codes:
+            - VALIDATION_FAILED
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UNAUTHORIZED
+          x-error-codes:
+            - UNAUTHORIZED
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: FORBIDDEN
+          x-error-codes:
+            - FORBIDDEN
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: INTERNAL_ERROR
+          x-error-codes:
+            - INTERNAL_ERROR
+      security:
+        - bearerAuth: []
+      summary: Lists the organization's experiments with scores and verdicts (core.eval.read).
+      tags:
+        - evals
+      x-auth: principal
+    post:
+      operationId: evals.startExperiment
+      parameters:
+        - description: Organization to act in; required for users, and when given it must be an API key's own organization.
+          in: query
+          name: organizationId
+          required: false
+          schema:
+            minLength: 1
+            type: string
+            x-pii: none
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/observability.StartEvalExperimentInput"
+        required: true
+      responses:
+        "202":
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    additionalProperties: false
+                    properties:
+                      experimentId:
+                        description: Started experiment.
+                        minLength: 1
+                        type: string
+                        x-pii: none
+                    required:
+                      - experimentId
+                    type: object
+                required:
+                  - data
+                type: object
+          description: Accepted
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: VALIDATION_FAILED
+          x-error-codes:
+            - VALIDATION_FAILED
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UNAUTHORIZED
+          x-error-codes:
+            - UNAUTHORIZED
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: FORBIDDEN
+          x-error-codes:
+            - FORBIDDEN
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: NOT_FOUND
+          x-error-codes:
+            - NOT_FOUND
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: INTERNAL_ERROR
+          x-error-codes:
+            - INTERNAL_ERROR
+        "503":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UPSTREAM_UNAVAILABLE
+          x-error-codes:
+            - UPSTREAM_UNAVAILABLE
+      security:
+        - bearerAuth: []
+      summary: Runs an agent the organization enabled on one of its datasets, as the caller (core.eval.write).
+      tags:
+        - evals
       x-auth: user
   /v1/files/{fileId}:
     get:
@@ -9410,6 +10072,201 @@ paths:
       summary: Starts a run of the schedule now, with the creator re-authorized (core.schedule.write).
       tags:
         - schedules
+      x-auth: principal
+  /v1/traces:
+    get:
+      operationId: traces.list
+      parameters:
+        - description: Organization to act in; required for users, and when given it must be an API key's own organization.
+          in: query
+          name: organizationId
+          required: false
+          schema:
+            minLength: 1
+            type: string
+            x-pii: none
+        - description: Page number, from 0.
+          in: query
+          name: page
+          required: false
+          schema:
+            default: 0
+            maximum: 1000
+            minimum: 0
+            type: integer
+            x-pii: none
+        - description: Page size, 1-100 (default 20).
+          in: query
+          name: perPage
+          required: false
+          schema:
+            default: 20
+            maximum: 100
+            minimum: 1
+            type: integer
+            x-pii: none
+        - description: Only traces of this agent.
+          in: query
+          name: agentId
+          required: false
+          schema:
+            pattern: ^[a-z][a-z0-9-]*$
+            type: string
+            x-pii: none
+        - description: Only traces in this status.
+          in: query
+          name: status
+          required: false
+          schema:
+            enum:
+              - ok
+              - error
+            type: string
+            x-pii: none
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    items:
+                      $ref: "#/components/schemas/observability.TraceSummary"
+                    type: array
+                  meta:
+                    additionalProperties: false
+                    description: Paging state.
+                    properties:
+                      hasMore:
+                        description: Whether a next page exists.
+                        type: boolean
+                        x-pii: none
+                    required:
+                      - hasMore
+                    type: object
+                    x-pii: none
+                required:
+                  - data
+                  - meta
+                type: object
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: VALIDATION_FAILED
+          x-error-codes:
+            - VALIDATION_FAILED
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UNAUTHORIZED
+          x-error-codes:
+            - UNAUTHORIZED
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: FORBIDDEN
+          x-error-codes:
+            - FORBIDDEN
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: INTERNAL_ERROR
+          x-error-codes:
+            - INTERNAL_ERROR
+      security:
+        - bearerAuth: []
+      summary: Lists the organization's traces, newest first; filtered by tenant on the server (core.trace.read).
+      tags:
+        - traces
+      x-auth: principal
+  /v1/traces/{traceId}:
+    get:
+      operationId: traces.get
+      parameters:
+        - description: Trace id.
+          in: path
+          name: traceId
+          required: true
+          schema:
+            pattern: ^[0-9a-f]{32}$
+            type: string
+            x-pii: none
+        - description: Organization to act in; required for users, and when given it must be an API key's own organization.
+          in: query
+          name: organizationId
+          required: false
+          schema:
+            minLength: 1
+            type: string
+            x-pii: none
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: "#/components/schemas/observability.TraceDetail"
+                required:
+                  - data
+                type: object
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: VALIDATION_FAILED
+          x-error-codes:
+            - VALIDATION_FAILED
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UNAUTHORIZED
+          x-error-codes:
+            - UNAUTHORIZED
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: FORBIDDEN
+          x-error-codes:
+            - FORBIDDEN
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: NOT_FOUND
+          x-error-codes:
+            - NOT_FOUND
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: INTERNAL_ERROR
+          x-error-codes:
+            - INTERNAL_ERROR
+      security:
+        - bearerAuth: []
+      summary: Reads one trace of the organization with its spans; another tenant's trace answers 404 (core.trace.read).
+      tags:
+        - traces
       x-auth: principal
   /v1/unit-types:
     get:
@@ -18908,6 +19765,70 @@ components:
       x-pii: none
       x-relations: []
       x-tenancyScope: organization
+    observability.EvalDataset:
+      additionalProperties: false
+      description: "An eval dataset: platform eval sets per agent, or an organization's own (feedback, manual items)."
+      examples:
+        - createdAt: "2026-09-30T12:00:00.000Z"
+          id: ds_01J8Z3K4M5
+          name: feedback
+          targetIds:
+            - assistant
+          tenantId: Jd8sK2lPq0WnR5tYu3bV
+          version: 3
+      properties:
+        createdAt:
+          description: When the dataset was created (UTC).
+          format: date-time
+          pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z))$
+          type: string
+          x-pii: none
+        id:
+          description: Dataset id.
+          maxLength: 128
+          minLength: 1
+          type: string
+          x-pii: none
+        name:
+          description: Dataset name (`assistant.v1`, `feedback`).
+          maxLength: 200
+          minLength: 1
+          type: string
+          x-pii: none
+        targetIds:
+          description: Agents the dataset evaluates.
+          items:
+            minLength: 1
+            type: string
+          maxItems: 50
+          type: array
+          x-pii: none
+        tenantId:
+          anyOf:
+            - minLength: 1
+              type: string
+            - type: "null"
+          description: Organization of a tenant dataset; null for platform datasets.
+          x-pii: none
+        version:
+          description: Current dataset version (items are versioned).
+          maximum: 9007199254740991
+          minimum: 0
+          type: integer
+          x-pii: none
+      required:
+        - id
+        - name
+        - tenantId
+        - version
+        - targetIds
+        - createdAt
+      type: object
+      x-kind: view
+      x-permission: core.eval.read
+      x-pii: none
+      x-relations: []
+      x-tenancyScope: organization
     observability.EvalExperimentSummary:
       additionalProperties: false
       description: An eval experiment of an agent on a dataset, with scores per scorer and the gate verdict.
@@ -19031,6 +19952,33 @@ components:
       type: object
       x-kind: view
       x-permission: core.eval.read
+      x-pii: none
+      x-relations: []
+      x-tenancyScope: organization
+    observability.StartEvalExperimentInput:
+      additionalProperties: false
+      description: Starts an experiment of an enabled agent on one of the organization's datasets.
+      examples:
+        - agentId: assistant
+          datasetId: ds_01J8Z3K4M5
+      properties:
+        agentId:
+          description: Agent to evaluate; must be enabled for the organization.
+          pattern: ^[a-z][a-z0-9-]*$
+          type: string
+          x-pii: none
+        datasetId:
+          description: The organization's dataset.
+          maxLength: 128
+          minLength: 1
+          type: string
+          x-pii: none
+      required:
+        - datasetId
+        - agentId
+      type: object
+      x-kind: command
+      x-permission: core.eval.write
       x-pii: none
       x-relations: []
       x-tenancyScope: organization

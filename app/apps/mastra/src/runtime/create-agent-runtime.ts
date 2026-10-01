@@ -6,6 +6,7 @@ import { PgVector, PostgresStore } from "@mastra/pg";
 import { buildMemoryVectorConfig, buildStorageConfig, MASTRA_SERVICE_NAME } from "../mastra/mastra-options.ts";
 import type { MastraEnv } from "../mastra-env.schema.ts";
 import { createRuntimePorts, type RuntimePortsAdapters } from "./create-runtime-ports.ts";
+import { withExperimentSource } from "./eval-export-source.ts";
 
 export type AgentRuntimeOverrides = {
   readonly firebase?: FirebaseAdmin;
@@ -29,12 +30,15 @@ export const createAgentRuntime = (args: {
 }): RuntimeParts => {
   const { env, overrides = {} } = args;
   const firebase = overrides.firebase ?? createFirebaseAdmin({ env, processEnv: args.processEnv });
-  const ports = createRuntimePorts({ env, firebase, logger: processLogger, ...(overrides.adapters === undefined ? {} : { adapters: overrides.adapters }) });
+  const base = createRuntimePorts({ env, firebase, logger: processLogger, ...(overrides.adapters === undefined ? {} : { adapters: overrides.adapters }) });
+  const storage = overrides.storage ?? new PostgresStore(buildStorageConfig(env));
+  // The eval export reads finished experiments from the same Mastra storage (decision 0040).
+  const ports = { ...base, evalExport: withExperimentSource(base.evalExport, storage) };
   return composeAgentRuntime({
     env,
     ports,
     modules: args.modules,
-    storage: overrides.storage ?? new PostgresStore(buildStorageConfig(env)),
+    storage,
     vector: overrides.vector ?? new PgVector(buildMemoryVectorConfig(env)),
     serviceName: MASTRA_SERVICE_NAME,
     // Decision 0038: candidate prompts run on the isolated eval harness (real mode reads the provider keys).

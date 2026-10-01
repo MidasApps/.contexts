@@ -29,5 +29,13 @@ export const createHarnessPromptEvalRunner =
       experimentId: report.runId,
       verdict: report.gate.passed ? "passed" : "failed",
       scorers: report.gate.scorers.map((scorer) => ({ scorerId: scorer.scorerId, mean: scorer.mean, passed: scorer.passed })),
+      run: {
+        datasetName: report.dataset.name,
+        datasetVersion: report.dataset.version,
+        itemCount: report.dataset.itemCount,
+        startedAt: report.startedAt,
+        finishedAt: report.finishedAt,
+        scores: report.gate.scorers.flatMap((scorer) => (scorer.mean === null ? [] : [{ scorer: scorer.scorerId, mean: scorer.mean, baseline: Math.max(0, scorer.floor) }])),
+      },
     };
   };

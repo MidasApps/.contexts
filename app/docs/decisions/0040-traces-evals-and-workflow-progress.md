@@ -64,3 +64,35 @@ runtime already allows. No tenant may see another tenant's data.
     resumes after one. A stream window lasts 5 minutes, and step outputs are never sent.
   - The run view surfaces `approvalRequestId` from the suspended step's payload, and
     `startedBy` and `scheduleId` from the run's request context.
+- **2026-10-01 — traces, evals and feedback as built (SP5 Task 11).**
+  - **Console routes.** The runtime serves `/console/traces[/:traceId]`, `/console/experiments`
+    (GET, POST), `/console/eval-runs`, `/console/datasets` and `/console/feedback-items`: custom
+    routes outside the API prefix, no user Bearer, Cloud Run IAM outside local (like the settle
+    route of decision 0036). `/v1` authorizes first (`requireTenant` / `requireStaff`) and passes
+    the tenant of a tenant endpoint itself; no tenant means staff. The raw `/api/observability` and
+    `/api/datasets` routes are not used by `/v1`.
+  - **Tenant isolation.** Trace lists filter on the root span's `metadata.tenantId` in storage and
+    check every trace again in the reader, so a storage filter that is ignored still leaks nothing
+    (proven against the in-memory store); a trace of another tenant reads as 404. Experiments and
+    datasets filter on Mastra's `organizationId` and are checked again the same way.
+  - **Redaction.** Span input and output drop every key named like a credential (the
+    `SensitiveDataFilter` field list, whole-key match) at any depth, on top of the filter that ran
+    at write time. Cost per trace is `null` (the ledger has it per call; join is a follow-up).
+  - **Experiments.** CI reports (`pnpm evals:publish`, a no-op without `EVALS_TARGET_URL`) and
+    prompt evals (decision 0038 amendment) are stored as completed Mastra experiments whose
+    metadata keeps the per-scorer means, baseline floors and verdict; `/v1/admin/experiments`,
+    `/v1/evals/experiments` and the `eval-export` workflow read that one store (its source is now
+    bound in `create-agent-runtime.ts`). Comparing two experiments and editing dataset items in
+    the console are not built yet.
+  - **Tenant experiments.** `POST /v1/evals/experiments` needs `core.eval.write` and an agent the
+    organization enabled (the supervisor always is; else 400 `AGENT_NOT_ENABLED`). The runtime
+    reads the dataset under the organization and starts the experiment asynchronously with the
+    caller's current grants (context resolved from the uid `/v1` passes). Only agents registered
+    in Mastra (the supervisor, module entry agents) can be targets; one context serves every item,
+    so items share a memory thread.
+  - **Feedback.** `POST /v1/conversations/{id}/feedback`: the owner of the conversation
+    (`core.conversation.send`; another member's conversation is 404) rates a message. One
+    Firestore document `message-feedback/{sha256(tenant, conversation, message, user)}` per
+    message and user (a second rating replaces the first). With `addToDataset` the turn goes to the
+    organization's `feedback` dataset (created on first use, item `externalId` = the same key);
+    a dataset failure is logged and the rating stays. Mastra trace feedback is not written yet.

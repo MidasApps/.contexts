@@ -451,3 +451,8 @@ export { composeInstructions, createInstructionsResolver, PROMPT_CACHE_TTL_MS, t
 export { createPromptEvalRoutes, handlePromptEval, PROMPT_EVAL_ROUTE_PATH, type PromptEvalRunner } from "./agents/prompt-eval-route.ts";
 export { createHarnessPromptEvalRunner } from "./evals/prompt-eval-runner.ts";
 export { PROMPT_AGENT_IDS } from "@core/contracts";
+// SP5 console (Task 11, decision 0040): traces, experiments and datasets over Mastra storage.
+export { CONSOLE_ROUTES_PREFIX, createConsoleRoutes, type ConsoleRouteDeps } from "./console/console-routes.ts";
+export { addFeedbackItem, FEEDBACK_DATASET_NAME, listDatasets } from "./console/dataset-console.ts";
+export { EvalRunRecordSchema, type EvalRunRecord, type ExperimentStore, listExperimentSummaries, listFinishedSince, recordEvalRun, summarizeExperiment } from "./console/eval-console.ts";
+export { createTraceReader, dropSensitive, summarizeTrace, type StoredSpan, type TraceReader, type TraceStore } from "./console/trace-reader.ts";

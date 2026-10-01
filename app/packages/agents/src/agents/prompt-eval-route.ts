@@ -3,6 +3,7 @@ import type { Logger } from "@core/services";
 import { type ApiRoute, registerApiRoute } from "@mastra/core/server";
 import { z } from "zod";
 import type { PromptBody, PromptStorePort } from "../runtime/runtime-ports.ts";
+import { type EvalRunRecord, type ExperimentStore, recordEvalRun } from "../console/eval-console.ts";
 
 /** Custom route outside the API prefix (decision 0038); `/v1` reaches it through the prompt eval gateway. */
 export const PROMPT_EVAL_ROUTE_PATH = "/prompt-evals/:versionId";
@@ -16,19 +17,33 @@ export type PromptEvalRunner = (input: {
   readonly agentId: string;
   readonly platform: PromptBody | null;
   readonly addendum: PromptBody | null;
-}) => Promise<Omit<PromptEvalResult, "versionId"> | "NO_DATASET">;
+}) => Promise<PromptEvalOutcome | "NO_DATASET">;
+
+/** A runner's verdict plus what the experiment record keeps (dataset, timing, scores with baseline floors). */
+export type PromptEvalOutcome = Omit<PromptEvalResult, "versionId"> & {
+  readonly run?: Pick<EvalRunRecord, "datasetName" | "datasetVersion" | "itemCount" | "scores" | "startedAt" | "finishedAt">;
+};
 
 export type PromptEvalRouteDeps = {
   readonly prompts: PromptStorePort;
   /** Absent when the runtime cannot run evals (the route answers 503). */
   readonly runner: PromptEvalRunner | undefined;
   readonly logger: Pick<Logger, "info" | "error">;
+  /** Records the run as a Mastra experiment (its id becomes the version's `evalExperimentId`). */
+  readonly experiments?: ExperimentStore;
 };
 
 const BodySchema = z.strictObject({ tenantId: z.string().min(1).max(128).nullable() });
 const VERSION_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 
 const json = (status: number, body: unknown): Response => Response.json(body, { status });
+
+// The experiment record of the run when the storage has one, else the runner's own run id.
+const experimentIdOf = async (deps: PromptEvalRouteDeps, version: { versionId: string; agentId: string; tenantId: string | null }, outcome: PromptEvalOutcome): Promise<string> => {
+  if (deps.experiments === undefined || outcome.run === undefined) return outcome.experimentId;
+  const run: EvalRunRecord = { ...outcome.run, agentId: version.agentId, verdict: outcome.verdict, source: "prompt-eval", promptVersionId: version.versionId, gitSha: null };
+  return recordEvalRun(deps.experiments, run, version.tenantId);
+};
 const errorOf = (status: number, code: string, requestId: string | null): Response => json(status, { error: { code, message: code, ...(requestId === null ? {} : { requestId }) } });
 
 // A tenant addendum runs on top of the active platform prompt; a platform version runs alone.
@@ -55,9 +70,10 @@ export const handlePromptEval = async (input: { readonly versionId: string; read
     if (version === null || version.tenantId !== body.data.tenantId) return errorOf(404, "NOT_FOUND", requestId);
     const outcome = await deps.runner({ agentId: version.agentId, ...(await candidatesOf(deps.prompts, version)) });
     if (outcome === "NO_DATASET") return errorOf(422, "EVAL_DATASET_MISSING", requestId);
-    await deps.prompts.recordEval({ versionId: version.versionId, tenantId: version.tenantId, experimentId: outcome.experimentId, verdict: outcome.verdict });
+    const experimentId = await experimentIdOf(deps, version, outcome);
+    await deps.prompts.recordEval({ versionId: version.versionId, tenantId: version.tenantId, experimentId, verdict: outcome.verdict });
     deps.logger.info("prompt_eval_finished", { ...correlation, versionId: version.versionId, agentId: version.agentId, verdict: outcome.verdict });
-    return json(200, { data: { versionId: version.versionId, ...outcome } });
+    return json(200, { data: { versionId: version.versionId, experimentId, verdict: outcome.verdict, scorers: outcome.scorers } });
   } catch (error: unknown) {
     deps.logger.error("prompt_eval_failed", { ...correlation, versionId: input.versionId, err: error });
     return errorOf(502, "UPSTREAM_UNAVAILABLE", requestId);
@@ -68,12 +84,14 @@ export const createPromptEvalRoutes = (deps: PromptEvalRouteDeps): ApiRoute[] =>
   registerApiRoute(PROMPT_EVAL_ROUTE_PATH, {
     method: "POST",
     requiresAuth: false,
-    handler: async (context) =>
-      handlePromptEval({
+    handler: async (context) => {
+      const experiments = (await context.get("mastra").getStorage()?.getStore("experiments")) as ExperimentStore | undefined;
+      return handlePromptEval({
         versionId: context.req.param("versionId"),
         body: await context.req.json().catch(() => null),
         requestId: context.req.header("x-request-id") ?? null,
-        deps,
-      }),
+        deps: experiments === undefined ? deps : { ...deps, experiments },
+      });
+    },
   }),
 ];

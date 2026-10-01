@@ -548,3 +548,12 @@ export {
   adminListPromptActivationsEndpoint, adminListPromptVersionsEndpoint, createAddendumVersionEndpoint, evaluateAddendumVersionEndpoint,
   listAddendumActivationsEndpoint, listAddendumVersionsEndpoint, PROMPT_ENDPOINTS,
 } from "./contracts/agents/prompt-endpoints.ts";
+export {
+  EvalDatasetContract, EvalDatasetSchema, StartEvalExperimentInputContract, StartEvalExperimentInputSchema, type EvalDataset,
+  type StartEvalExperimentInput,
+} from "./contracts/observability/eval-dataset.schema.ts";
+export {
+  adminGetTraceEndpoint, adminListDatasetsEndpoint, adminListExperimentsEndpoint, adminListTracesEndpoint, getTraceEndpoint,
+  listEvalDatasetsEndpoint, listEvalExperimentsEndpoint, listTracesEndpoint, OBSERVABILITY_ENDPOINTS, recordMessageFeedbackEndpoint,
+  startEvalExperimentEndpoint,
+} from "./contracts/observability/endpoints.ts";

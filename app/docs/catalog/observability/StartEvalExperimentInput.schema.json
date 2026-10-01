@@ -1,0 +1,35 @@
+{
+  "additionalProperties": false,
+  "description": "Starts an experiment of an enabled agent on one of the organization's datasets.",
+  "examples": [
+    {
+      "agentId": "assistant",
+      "datasetId": "ds_01J8Z3K4M5"
+    }
+  ],
+  "properties": {
+    "agentId": {
+      "description": "Agent to evaluate; must be enabled for the organization.",
+      "pattern": "^[a-z][a-z0-9-]*$",
+      "type": "string",
+      "x-pii": "none"
+    },
+    "datasetId": {
+      "description": "The organization's dataset.",
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    }
+  },
+  "required": [
+    "datasetId",
+    "agentId"
+  ],
+  "type": "object",
+  "x-kind": "command",
+  "x-permission": "core.eval.write",
+  "x-pii": "none",
+  "x-relations": [],
+  "x-tenancyScope": "organization"
+}

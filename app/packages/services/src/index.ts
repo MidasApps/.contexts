@@ -741,3 +741,15 @@ export { createPostgresPromptRepository, PLATFORM_PROMPT_SCOPE, PROMPTS_RUNTIME_
 export type { PromptEvalError, PromptEvalGateway } from "./services/agents/application/ports/prompt-eval-gateway.ts";
 export type { ActivePrompts, PromptKey, PromptRepository } from "./services/agents/application/ports/prompt-repository.ts";
 export { createPostgresPromptServices, createPromptServices, type PromptServices } from "./services/agents/prompt-composition.ts";
+// SP5 traces, evals and feedback (Task 11, decision 0040): the runtime's console routes behind /v1.
+export { buildObservabilityRoutes, OBSERVABILITY_PERMISSIONS } from "./services/observability/adapters/driving/traces-route-handler.ts";
+export { createMastraConsoleGateway } from "./services/observability/adapters/driven/mastra-traces-reader.ts";
+export type { ConsoleError, ConsoleGateway, ConsoleResult } from "./services/observability/application/ports/console-gateway.ts";
+export { createObservabilityServices, type ObservabilityServices } from "./services/observability/composition.ts";
+export { buildFeedbackRoutes } from "./services/conversations/adapters/driving/feedback-route-handler.ts";
+export {
+  createFirestoreMessageFeedbackStore,
+  createInMemoryMessageFeedbackStore,
+  MESSAGE_FEEDBACK_COLLECTION,
+} from "./services/conversations/adapters/driven/firestore-message-feedback-store.ts";
+export { feedbackKeyOf } from "./services/conversations/application/use-cases/record-message-feedback.ts";

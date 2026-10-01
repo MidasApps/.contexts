@@ -3,6 +3,8 @@ import {
   buildAdminFlagsRoutes,
   buildAdminPlatformRoutes,
   buildAgentSettingsRoutes,
+  buildFeedbackRoutes,
+  buildObservabilityRoutes,
   buildPromptRoutes,
   buildChatRoutes,
   buildFlagsRoutes,
@@ -22,6 +24,9 @@ import {
   createFirebaseFilesServices,
   createFirebaseConsoleServices,
   createFirebaseFlagsServices,
+  createFirestoreMessageFeedbackStore,
+  createMastraConsoleGateway,
+  createObservabilityServices,
   createPostgresPromptServices,
   flagEnvironmentDefaults,
   createFirestoreConversationsServices,
@@ -92,6 +97,17 @@ export const buildRuntimeRoutes = async (core: CoreServer): Promise<CoreRoutes> 
     flags: createFirebaseFlagsServices({ firebase, appEnv: env.APP_ENV, audit: core.audit, clock: core.pipeline.clock, environmentDefaults: flagEnvironmentDefaults(env) }),
   };
   const consoleDeps = { pipeline: core.pipeline, console: createFirebaseConsoleServices({ firebase, sql, audit: core.audit, clock: core.pipeline.clock }) };
+  const observabilityDeps = {
+    pipeline: core.pipeline,
+    observability: createObservabilityServices({
+      console: createMastraConsoleGateway(gatewayOptions),
+      getAgentSettings: consoleDeps.console.getAgentSettings,
+      getConversation: createFirestoreConversationsServices({ firestore: firebase.firestore, clock: core.pipeline.clock }).getConversation,
+      feedback: createFirestoreMessageFeedbackStore({ firestore: firebase.firestore }),
+      clock: core.pipeline.clock,
+      logger: processLogger,
+    }),
+  };
   const chatDeps = {
     pipeline: core.pipeline,
     chat: createMastraChatGateway(gatewayOptions),
@@ -121,5 +137,8 @@ export const buildRuntimeRoutes = async (core: CoreServer): Promise<CoreRoutes> 
     ...buildAgentSettingsRoutes(consoleDeps),
     // SP5 prompt store (decision 0038): append-only versions, eval-gated activation through the Mastra eval route.
     ...buildPromptRoutes({ pipeline: core.pipeline, prompts: createPostgresPromptServices({ sql, audit: core.audit, mastraUrl: env.MASTRA_URL, serverlessToken }) }),
+    // SP5 traces, evals and feedback (decision 0040): the runtime's console routes, tenant-filtered there.
+    ...buildObservabilityRoutes(observabilityDeps),
+    ...buildFeedbackRoutes(observabilityDeps),
   };
 };
