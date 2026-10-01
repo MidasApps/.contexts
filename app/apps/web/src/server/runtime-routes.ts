@@ -1,6 +1,8 @@
 import "server-only";
 import {
   buildAdminFlagsRoutes,
+  buildAdminLogsRoutes,
+  buildAdminOperationsRoutes,
   buildAdminPlatformRoutes,
   buildAgentSettingsRoutes,
   buildFeedbackRoutes,
@@ -26,6 +28,8 @@ import {
   createFirebaseFlagsServices,
   createFirestoreMessageFeedbackStore,
   createMastraConsoleGateway,
+  createFirestoreConnectorRepository,
+  createMastraOperationsGateway,
   createObservabilityServices,
   createPostgresPromptServices,
   flagEnvironmentDefaults,
@@ -40,6 +44,7 @@ import {
   createPostgresKnowledgeRepository,
   createServerlessIdTokenSource,
   processLogger,
+  readProcessLogBuffer,
   registerAgentCommandApprovals,
   registerWorkflowApprovals,
 } from "@core/services";
@@ -142,5 +147,13 @@ export const buildRuntimeRoutes = async (core: CoreServer): Promise<CoreRoutes> 
     // SP5 traces, evals and feedback (decision 0040): the runtime's console routes, tenant-filtered there.
     ...buildObservabilityRoutes(observabilityDeps),
     ...buildFeedbackRoutes(observabilityDeps),
+    // SP5 staff operations (decision 0043): runs and schedules through the runtime console routes,
+    // connectors from Firestore, and the local log ring of this process.
+    ...buildAdminOperationsRoutes({
+      pipeline: core.pipeline,
+      operations: createMastraOperationsGateway(gatewayOptions),
+      listConnectors: createFirestoreConnectorRepository({ firestore: firebase.firestore }).list,
+    }),
+    ...buildAdminLogsRoutes({ pipeline: core.pipeline, appEnv: env.APP_ENV, readLogs: readProcessLogBuffer }),
   };
 };

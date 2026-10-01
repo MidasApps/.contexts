@@ -5,6 +5,7 @@ import { MessageFeedbackContract, MessageFeedbackInputContract } from "./convers
 import { EvalExperimentSummaryContract } from "./observability/eval-experiment-summary.schema.ts";
 import { TraceDetailContract } from "./observability/trace-detail.schema.ts";
 import { TraceSummaryContract } from "./observability/trace-summary.schema.ts";
+import { AdminScheduleContract, AdminWorkflowRunContract, LogLineContract } from "./platform/admin-operations.schema.ts";
 import { AdminOverviewContract } from "./platform/admin-overview.schema.ts";
 import { FeatureFlagContract, FeatureFlagDefinitionContract, SetFeatureFlagValueInputContract, TenantFlagValueInputContract } from "./platform/feature-flag.schema.ts";
 import { PlanContract, UpsertPlanInputContract } from "./platform/plan.schema.ts";
@@ -56,4 +57,7 @@ export const SP5_CONTRACTS: readonly ContractDefinition[] = [
   StartEvalExperimentInputContract,
   MessageFeedbackContract,
   MessageFeedbackInputContract,
+  AdminWorkflowRunContract,
+  AdminScheduleContract,
+  LogLineContract,
 ];

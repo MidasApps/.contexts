@@ -6350,7 +6350,11 @@
               "PROMPT_VERSION_CREATED",
               "PROMPT_EVALUATED",
               "PROMPT_ACTIVATED",
-              "PROMPT_ACTIVATION_FORCED"
+              "PROMPT_ACTIVATION_FORCED",
+              "WORKFLOW_RUN_CANCELED",
+              "SCHEDULE_PAUSED",
+              "SCHEDULE_RESUMED",
+              "SCHEDULE_RUN_REQUESTED"
             ],
             "type": "string",
             "x-pii": "none"
@@ -6797,7 +6801,11 @@
               "PROMPT_VERSION_CREATED",
               "PROMPT_EVALUATED",
               "PROMPT_ACTIVATED",
-              "PROMPT_ACTIVATION_FORCED"
+              "PROMPT_ACTIVATION_FORCED",
+              "WORKFLOW_RUN_CANCELED",
+              "SCHEDULE_PAUSED",
+              "SCHEDULE_RESUMED",
+              "SCHEDULE_RUN_REQUESTED"
             ],
             "type": "string",
             "x-pii": "none"
@@ -7058,7 +7066,11 @@
               "PROMPT_VERSION_CREATED",
               "PROMPT_EVALUATED",
               "PROMPT_ACTIVATED",
-              "PROMPT_ACTIVATION_FORCED"
+              "PROMPT_ACTIVATION_FORCED",
+              "WORKFLOW_RUN_CANCELED",
+              "SCHEDULE_PAUSED",
+              "SCHEDULE_RESUMED",
+              "SCHEDULE_RUN_REQUESTED"
             ],
             "type": "string",
             "x-pii": "none"
@@ -17384,6 +17396,497 @@
     },
     {
       "context": "platform",
+      "description": "A platform or tenant schedule as staff see it, with its state and next fire.",
+      "examples": [
+        {
+          "createdAt": "2026-09-29T14:30:00.000Z",
+          "createdBy": null,
+          "cron": "15 * * * *",
+          "id": "schedule_platform-usage-report",
+          "lastFireAt": null,
+          "nextFireAt": "2026-09-30T12:15:00.000Z",
+          "scope": "platform",
+          "status": "active",
+          "tenantId": null,
+          "timezone": "UTC",
+          "updatedAt": "2026-09-29T14:30:00.000Z",
+          "workflowId": "usage-report"
+        },
+        {
+          "createdAt": "2026-09-29T14:30:00.000Z",
+          "createdBy": "uA1b2C3d4E5f6G7h8I9j",
+          "cron": "0 9 * * *",
+          "id": "schedule_3fa9c0e1b2d4a6f8-daily-usage",
+          "lastFireAt": "2026-09-29T12:00:00.000Z",
+          "nextFireAt": null,
+          "scope": "tenant",
+          "status": "paused",
+          "tenantId": "Jd8sK2lPq0WnR5tYu3bV",
+          "timezone": "America/Sao_Paulo",
+          "updatedAt": "2026-09-29T15:00:00.000Z",
+          "workflowId": "usage-report"
+        }
+      ],
+      "fields": [
+        {
+          "description": "When the schedule was created (UTC).",
+          "name": "createdAt",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Creator of a tenant schedule; null for platform ones.",
+          "name": "createdBy",
+          "pii": "personal",
+          "required": true
+        },
+        {
+          "description": "5-field cron expression, evaluated in `timezone`.",
+          "name": "cron",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Schedule id.",
+          "name": "id",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Last fire (UTC); null before the first.",
+          "name": "lastFireAt",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Next fire (UTC); null while paused.",
+          "name": "nextFireAt",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "`platform` for the core crons, `tenant` for a schedule of an organization.",
+          "name": "scope",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "`paused` schedules do not fire.",
+          "name": "status",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Organization that owns a tenant schedule; null for platform ones.",
+          "name": "tenantId",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "IANA time zone of the cron expression.",
+          "name": "timezone",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "When the schedule last changed (UTC).",
+          "name": "updatedAt",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Scheduled workflow.",
+          "name": "workflowId",
+          "pii": "none",
+          "required": true
+        }
+      ],
+      "id": "platform.AdminSchedule",
+      "jsonSchema": {
+        "additionalProperties": false,
+        "description": "A platform or tenant schedule as staff see it, with its state and next fire.",
+        "examples": [
+          {
+            "createdAt": "2026-09-29T14:30:00.000Z",
+            "createdBy": null,
+            "cron": "15 * * * *",
+            "id": "schedule_platform-usage-report",
+            "lastFireAt": null,
+            "nextFireAt": "2026-09-30T12:15:00.000Z",
+            "scope": "platform",
+            "status": "active",
+            "tenantId": null,
+            "timezone": "UTC",
+            "updatedAt": "2026-09-29T14:30:00.000Z",
+            "workflowId": "usage-report"
+          },
+          {
+            "createdAt": "2026-09-29T14:30:00.000Z",
+            "createdBy": "uA1b2C3d4E5f6G7h8I9j",
+            "cron": "0 9 * * *",
+            "id": "schedule_3fa9c0e1b2d4a6f8-daily-usage",
+            "lastFireAt": "2026-09-29T12:00:00.000Z",
+            "nextFireAt": null,
+            "scope": "tenant",
+            "status": "paused",
+            "tenantId": "Jd8sK2lPq0WnR5tYu3bV",
+            "timezone": "America/Sao_Paulo",
+            "updatedAt": "2026-09-29T15:00:00.000Z",
+            "workflowId": "usage-report"
+          }
+        ],
+        "properties": {
+          "createdAt": {
+            "description": "When the schedule was created (UTC).",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "type": "string",
+            "x-pii": "none"
+          },
+          "createdBy": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Creator of a tenant schedule; null for platform ones.",
+            "x-pii": "personal"
+          },
+          "cron": {
+            "description": "5-field cron expression, evaluated in `timezone`.",
+            "maxLength": 120,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "id": {
+            "description": "Schedule id.",
+            "pattern": "^schedule_[a-z0-9-]{1,120}$",
+            "type": "string",
+            "x-pii": "none"
+          },
+          "lastFireAt": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Last fire (UTC); null before the first.",
+            "x-pii": "none"
+          },
+          "nextFireAt": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Next fire (UTC); null while paused.",
+            "x-pii": "none"
+          },
+          "scope": {
+            "description": "`platform` for the core crons, `tenant` for a schedule of an organization.",
+            "enum": [
+              "platform",
+              "tenant"
+            ],
+            "type": "string",
+            "x-pii": "none"
+          },
+          "status": {
+            "description": "`paused` schedules do not fire.",
+            "enum": [
+              "active",
+              "paused"
+            ],
+            "type": "string",
+            "x-pii": "none"
+          },
+          "tenantId": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Organization that owns a tenant schedule; null for platform ones.",
+            "x-pii": "none"
+          },
+          "timezone": {
+            "description": "IANA time zone of the cron expression.",
+            "type": "string",
+            "x-pii": "none"
+          },
+          "updatedAt": {
+            "description": "When the schedule last changed (UTC).",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "type": "string",
+            "x-pii": "none"
+          },
+          "workflowId": {
+            "description": "Scheduled workflow.",
+            "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+            "type": "string",
+            "x-pii": "none"
+          }
+        },
+        "required": [
+          "id",
+          "scope",
+          "tenantId",
+          "workflowId",
+          "cron",
+          "timezone",
+          "status",
+          "nextFireAt",
+          "lastFireAt",
+          "createdBy",
+          "createdAt",
+          "updatedAt"
+        ],
+        "type": "object",
+        "x-kind": "view",
+        "x-permission": "platform.workflow.manage",
+        "x-pii": "personal",
+        "x-relations": [],
+        "x-tenancyScope": "platform"
+      },
+      "kind": "view",
+      "name": "AdminSchedule",
+      "permission": "platform.workflow.manage",
+      "pii": "personal",
+      "relations": [],
+      "tenancyScope": "platform"
+    },
+    {
+      "context": "platform",
+      "description": "A workflow run of any organization, or of the platform, as staff see it.",
+      "examples": [
+        {
+          "approvalRequestId": null,
+          "createdAt": "2026-09-29T14:30:00.000Z",
+          "runId": "01J8Z3K4M5N6P7Q8R9S0T1V2W3",
+          "scheduleId": null,
+          "startedBy": null,
+          "status": "success",
+          "tenantId": null,
+          "updatedAt": "2026-09-29T15:00:00.000Z",
+          "workflowId": "usage-report"
+        }
+      ],
+      "fields": [
+        {
+          "description": "Approval request a suspended run waits for, if any.",
+          "name": "approvalRequestId",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "When the run started (UTC).",
+          "name": "createdAt",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Run id.",
+          "name": "runId",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Schedule that started the run, if any.",
+          "name": "scheduleId",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "User who started the run; null for platform schedules.",
+          "name": "startedBy",
+          "pii": "personal",
+          "required": true
+        },
+        {
+          "description": "Run status.",
+          "name": "status",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Organization the run belongs to; null for platform runs.",
+          "name": "tenantId",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "When the run last changed (UTC).",
+          "name": "updatedAt",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Workflow of the run.",
+          "name": "workflowId",
+          "pii": "none",
+          "required": true
+        }
+      ],
+      "id": "platform.AdminWorkflowRun",
+      "jsonSchema": {
+        "additionalProperties": false,
+        "description": "A workflow run of any organization, or of the platform, as staff see it.",
+        "examples": [
+          {
+            "approvalRequestId": null,
+            "createdAt": "2026-09-29T14:30:00.000Z",
+            "runId": "01J8Z3K4M5N6P7Q8R9S0T1V2W3",
+            "scheduleId": null,
+            "startedBy": null,
+            "status": "success",
+            "tenantId": null,
+            "updatedAt": "2026-09-29T15:00:00.000Z",
+            "workflowId": "usage-report"
+          }
+        ],
+        "properties": {
+          "approvalRequestId": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Approval request a suspended run waits for, if any.",
+            "x-pii": "none"
+          },
+          "createdAt": {
+            "description": "When the run started (UTC).",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "type": "string",
+            "x-pii": "none"
+          },
+          "runId": {
+            "description": "Run id.",
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "scheduleId": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Schedule that started the run, if any.",
+            "x-pii": "none"
+          },
+          "startedBy": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "User who started the run; null for platform schedules.",
+            "x-pii": "personal"
+          },
+          "status": {
+            "description": "Run status.",
+            "enum": [
+              "pending",
+              "running",
+              "waiting",
+              "suspended",
+              "paused",
+              "success",
+              "failed",
+              "canceled",
+              "tripwire"
+            ],
+            "type": "string",
+            "x-pii": "none"
+          },
+          "tenantId": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Organization the run belongs to; null for platform runs.",
+            "x-pii": "none"
+          },
+          "updatedAt": {
+            "description": "When the run last changed (UTC).",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "type": "string",
+            "x-pii": "none"
+          },
+          "workflowId": {
+            "description": "Workflow of the run.",
+            "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+            "type": "string",
+            "x-pii": "none"
+          }
+        },
+        "required": [
+          "runId",
+          "workflowId",
+          "tenantId",
+          "status",
+          "startedBy",
+          "scheduleId",
+          "approvalRequestId",
+          "createdAt",
+          "updatedAt"
+        ],
+        "type": "object",
+        "x-kind": "view",
+        "x-permission": "platform.workflow.manage",
+        "x-pii": "personal",
+        "x-relations": [],
+        "x-tenancyScope": "platform"
+      },
+      "kind": "view",
+      "name": "AdminWorkflowRun",
+      "permission": "platform.workflow.manage",
+      "pii": "personal",
+      "relations": [],
+      "tenancyScope": "platform"
+    },
+    {
+      "context": "platform",
       "description": "A feature flag with its effective value and expiry status.",
       "examples": [
         {
@@ -17720,6 +18223,175 @@
       "name": "FeatureFlagDefinition",
       "permission": "platform.flag.manage",
       "pii": "none",
+      "relations": [],
+      "tenancyScope": "platform"
+    },
+    {
+      "context": "platform",
+      "description": "A structured log line kept in the ring buffer of the local environment for the staff console.",
+      "examples": [
+        {
+          "env": "local",
+          "fields": {
+            "durationMs": 42
+          },
+          "level": "info",
+          "message": "order_placed",
+          "requestId": "01J8Z3K4M5N6P7Q8R9S0T1V2W3",
+          "service": "web",
+          "timestamp": "2026-09-30T12:00:00.000Z",
+          "traceId": null
+        }
+      ],
+      "fields": [
+        {
+          "description": "Logical environment.",
+          "name": "env",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "The other structured fields of the line.",
+          "name": "fields",
+          "pii": "personal",
+          "required": true
+        },
+        {
+          "description": "`debug`, `info`, `warn` or `error`.",
+          "name": "level",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Stable event name of the line.",
+          "name": "message",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Request the line belongs to, if any.",
+          "name": "requestId",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Service that wrote the line.",
+          "name": "service",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "When the line was written (UTC).",
+          "name": "timestamp",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Trace the line belongs to, if any.",
+          "name": "traceId",
+          "pii": "none",
+          "required": true
+        }
+      ],
+      "id": "platform.LogLine",
+      "jsonSchema": {
+        "additionalProperties": false,
+        "description": "A structured log line kept in the ring buffer of the local environment for the staff console.",
+        "examples": [
+          {
+            "env": "local",
+            "fields": {
+              "durationMs": 42
+            },
+            "level": "info",
+            "message": "order_placed",
+            "requestId": "01J8Z3K4M5N6P7Q8R9S0T1V2W3",
+            "service": "web",
+            "timestamp": "2026-09-30T12:00:00.000Z",
+            "traceId": null
+          }
+        ],
+        "properties": {
+          "env": {
+            "description": "Logical environment.",
+            "type": "string",
+            "x-pii": "none"
+          },
+          "fields": {
+            "additionalProperties": {},
+            "description": "The other structured fields of the line.",
+            "propertyNames": {
+              "type": "string"
+            },
+            "type": "object",
+            "x-pii": "personal"
+          },
+          "level": {
+            "description": "`debug`, `info`, `warn` or `error`.",
+            "enum": [
+              "debug",
+              "info",
+              "warn",
+              "error"
+            ],
+            "type": "string",
+            "x-pii": "none"
+          },
+          "message": {
+            "description": "Stable event name of the line.",
+            "type": "string",
+            "x-pii": "none"
+          },
+          "requestId": {
+            "description": "Request the line belongs to, if any.",
+            "type": [
+              "string",
+              "null"
+            ],
+            "x-pii": "none"
+          },
+          "service": {
+            "description": "Service that wrote the line.",
+            "type": "string",
+            "x-pii": "none"
+          },
+          "timestamp": {
+            "description": "When the line was written (UTC).",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+            "type": "string",
+            "x-pii": "none"
+          },
+          "traceId": {
+            "description": "Trace the line belongs to, if any.",
+            "type": [
+              "string",
+              "null"
+            ],
+            "x-pii": "none"
+          }
+        },
+        "required": [
+          "timestamp",
+          "level",
+          "message",
+          "service",
+          "env",
+          "requestId",
+          "traceId",
+          "fields"
+        ],
+        "type": "object",
+        "x-kind": "view",
+        "x-permission": "platform.trace.read",
+        "x-pii": "personal",
+        "x-relations": [],
+        "x-tenancyScope": "platform"
+      },
+      "kind": "view",
+      "name": "LogLine",
+      "permission": "platform.trace.read",
+      "pii": "personal",
       "relations": [],
       "tenancyScope": "platform"
     },

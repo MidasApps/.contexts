@@ -431,6 +431,128 @@ paths:
       tags:
         - prompts
       x-auth: user
+  /v1/admin/connectors:
+    get:
+      operationId: admin.listConnectors
+      parameters:
+        - description: Cursor returned by the previous page.
+          in: query
+          name: cursor
+          required: false
+          schema:
+            minLength: 1
+            type: string
+            x-pii: none
+        - description: Page size, 1-100 (default 20).
+          in: query
+          name: limit
+          required: false
+          schema:
+            default: 20
+            maximum: 100
+            minimum: 1
+            type: integer
+            x-pii: none
+        - description: Organization whose connectors to list; required (400 without it).
+          in: query
+          name: organizationId
+          required: false
+          schema:
+            minLength: 1
+            type: string
+            x-pii: none
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    description: The items of this page.
+                    items:
+                      $ref: "#/components/schemas/connectors.Connector"
+                    type: array
+                    x-pii: personal
+                  meta:
+                    additionalProperties: false
+                    description: Response metadata.
+                    properties:
+                      page:
+                        additionalProperties: false
+                        description: Pagination state.
+                        properties:
+                          cursor:
+                            anyOf:
+                              - minLength: 1
+                                type: string
+                              - type: "null"
+                            description: Opaque cursor of the next page; null at the end.
+                            x-pii: none
+                          hasMore:
+                            description: Whether another page exists.
+                            type: boolean
+                            x-pii: none
+                          limit:
+                            description: Page size used for this response.
+                            maximum: 100
+                            minimum: 1
+                            type: integer
+                            x-pii: none
+                        required:
+                          - cursor
+                          - hasMore
+                          - limit
+                        type: object
+                        x-pii: none
+                    required:
+                      - page
+                    type: object
+                    x-pii: none
+                required:
+                  - data
+                  - meta
+                type: object
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: VALIDATION_FAILED
+          x-error-codes:
+            - VALIDATION_FAILED
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UNAUTHORIZED
+          x-error-codes:
+            - UNAUTHORIZED
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: FORBIDDEN, MFA_REQUIRED
+          x-error-codes:
+            - FORBIDDEN
+            - MFA_REQUIRED
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: INTERNAL_ERROR
+          x-error-codes:
+            - INTERNAL_ERROR
+      security:
+        - bearerAuth: []
+      summary: Lists the connectors of one organization, never their secrets (staff, platform.connector.read).
+      tags:
+        - admin
+      x-auth: user
   /v1/admin/datasets:
     get:
       operationId: evals.adminListDatasets
@@ -715,6 +837,121 @@ paths:
       summary: Sets a flag for the environment or overrides it for one organization (staff, audited with targetTenantId).
       tags:
         - flags
+      x-auth: user
+  /v1/admin/logs:
+    get:
+      operationId: admin.listLogs
+      parameters:
+        - description: Minimum level.
+          in: query
+          name: level
+          required: false
+          schema:
+            enum:
+              - debug
+              - info
+              - warn
+              - error
+            type: string
+            x-pii: none
+        - description: Text the message contains.
+          in: query
+          name: q
+          required: false
+          schema:
+            maxLength: 200
+            minLength: 1
+            type: string
+            x-pii: none
+        - description: Only lines of this trace.
+          in: query
+          name: traceId
+          required: false
+          schema:
+            maxLength: 128
+            minLength: 1
+            type: string
+            x-pii: none
+        - description: Only lines of this request.
+          in: query
+          name: requestId
+          required: false
+          schema:
+            maxLength: 128
+            minLength: 1
+            type: string
+            x-pii: none
+        - description: Most lines to return, 1-500 (default 200).
+          in: query
+          name: limit
+          required: false
+          schema:
+            default: 200
+            maximum: 500
+            minimum: 1
+            type: integer
+            x-pii: none
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    items:
+                      $ref: "#/components/schemas/platform.LogLine"
+                    type: array
+                required:
+                  - data
+                type: object
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: VALIDATION_FAILED
+          x-error-codes:
+            - VALIDATION_FAILED
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UNAUTHORIZED
+          x-error-codes:
+            - UNAUTHORIZED
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: FORBIDDEN, MFA_REQUIRED
+          x-error-codes:
+            - FORBIDDEN
+            - MFA_REQUIRED
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: NOT_FOUND
+          x-error-codes:
+            - NOT_FOUND
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: INTERNAL_ERROR
+          x-error-codes:
+            - INTERNAL_ERROR
+      security:
+        - bearerAuth: []
+      summary: Latest structured log lines of the web process, newest first; local environment only, 404 elsewhere (staff, platform.trace.read).
+      tags:
+        - admin
       x-auth: user
   /v1/admin/organizations:
     get:
@@ -1374,6 +1611,329 @@ paths:
       tags:
         - admin
       x-auth: user
+  /v1/admin/schedules:
+    get:
+      operationId: admin.listSchedules
+      parameters:
+        - description: Only the schedules of this organization; without it, platform schedules are listed too.
+          in: query
+          name: organizationId
+          required: false
+          schema:
+            minLength: 1
+            type: string
+            x-pii: none
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    items:
+                      $ref: "#/components/schemas/platform.AdminSchedule"
+                    type: array
+                required:
+                  - data
+                type: object
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: VALIDATION_FAILED
+          x-error-codes:
+            - VALIDATION_FAILED
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UNAUTHORIZED
+          x-error-codes:
+            - UNAUTHORIZED
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: FORBIDDEN, MFA_REQUIRED
+          x-error-codes:
+            - FORBIDDEN
+            - MFA_REQUIRED
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: INTERNAL_ERROR
+          x-error-codes:
+            - INTERNAL_ERROR
+        "502":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UPSTREAM_UNAVAILABLE
+          x-error-codes:
+            - UPSTREAM_UNAVAILABLE
+      security:
+        - bearerAuth: []
+      summary: Lists platform and tenant schedules with their state and next fire (staff, platform.workflow.manage).
+      tags:
+        - admin
+      x-auth: user
+  /v1/admin/schedules/{scheduleId}/pause:
+    post:
+      operationId: admin.pauseSchedule
+      parameters:
+        - description: Schedule id.
+          in: path
+          name: scheduleId
+          required: true
+          schema:
+            pattern: ^schedule_[a-z0-9-]{1,120}$
+            type: string
+            x-pii: none
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: "#/components/schemas/platform.AdminSchedule"
+                required:
+                  - data
+                type: object
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: VALIDATION_FAILED
+          x-error-codes:
+            - VALIDATION_FAILED
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UNAUTHORIZED
+          x-error-codes:
+            - UNAUTHORIZED
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: FORBIDDEN, MFA_REQUIRED
+          x-error-codes:
+            - FORBIDDEN
+            - MFA_REQUIRED
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: NOT_FOUND
+          x-error-codes:
+            - NOT_FOUND
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: INTERNAL_ERROR
+          x-error-codes:
+            - INTERNAL_ERROR
+        "502":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UPSTREAM_UNAVAILABLE
+          x-error-codes:
+            - UPSTREAM_UNAVAILABLE
+      security:
+        - bearerAuth: []
+      summary: Pauses any schedule (staff, platform.workflow.manage; audited).
+      tags:
+        - admin
+      x-auth: user
+  /v1/admin/schedules/{scheduleId}/resume:
+    post:
+      operationId: admin.resumeSchedule
+      parameters:
+        - description: Schedule id.
+          in: path
+          name: scheduleId
+          required: true
+          schema:
+            pattern: ^schedule_[a-z0-9-]{1,120}$
+            type: string
+            x-pii: none
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: "#/components/schemas/platform.AdminSchedule"
+                required:
+                  - data
+                type: object
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: VALIDATION_FAILED
+          x-error-codes:
+            - VALIDATION_FAILED
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UNAUTHORIZED
+          x-error-codes:
+            - UNAUTHORIZED
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: FORBIDDEN, MFA_REQUIRED
+          x-error-codes:
+            - FORBIDDEN
+            - MFA_REQUIRED
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: NOT_FOUND
+          x-error-codes:
+            - NOT_FOUND
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: INTERNAL_ERROR
+          x-error-codes:
+            - INTERNAL_ERROR
+        "502":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UPSTREAM_UNAVAILABLE
+          x-error-codes:
+            - UPSTREAM_UNAVAILABLE
+      security:
+        - bearerAuth: []
+      summary: Resumes any schedule from now on (staff, platform.workflow.manage; audited).
+      tags:
+        - admin
+      x-auth: user
+  /v1/admin/schedules/{scheduleId}/run:
+    post:
+      operationId: admin.runScheduleNow
+      parameters:
+        - description: Schedule id.
+          in: path
+          name: scheduleId
+          required: true
+          schema:
+            pattern: ^schedule_[a-z0-9-]{1,120}$
+            type: string
+            x-pii: none
+      responses:
+        "202":
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    additionalProperties: false
+                    properties:
+                      scheduleId:
+                        description: Schedule that will start a run now.
+                        minLength: 1
+                        type: string
+                        x-pii: none
+                    required:
+                      - scheduleId
+                    type: object
+                required:
+                  - data
+                type: object
+          description: Accepted
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: VALIDATION_FAILED
+          x-error-codes:
+            - VALIDATION_FAILED
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UNAUTHORIZED
+          x-error-codes:
+            - UNAUTHORIZED
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: FORBIDDEN, MFA_REQUIRED
+          x-error-codes:
+            - FORBIDDEN
+            - MFA_REQUIRED
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: NOT_FOUND
+          x-error-codes:
+            - NOT_FOUND
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: INTERNAL_ERROR
+          x-error-codes:
+            - INTERNAL_ERROR
+        "502":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UPSTREAM_UNAVAILABLE
+          x-error-codes:
+            - UPSTREAM_UNAVAILABLE
+      security:
+        - bearerAuth: []
+      summary: Starts a run of any schedule now; a tenant schedule still re-authorizes its creator (staff, platform.workflow.manage; audited).
+      tags:
+        - admin
+      x-auth: user
   /v1/admin/traces:
     get:
       operationId: traces.adminList
@@ -1562,6 +2122,231 @@ paths:
       summary: Reads any trace with its spans (staff, platform.trace.read).
       tags:
         - traces
+      x-auth: user
+  /v1/admin/workflow-runs:
+    get:
+      operationId: admin.listWorkflowRuns
+      parameters:
+        - description: Cursor returned by the previous page.
+          in: query
+          name: cursor
+          required: false
+          schema:
+            minLength: 1
+            type: string
+            x-pii: none
+        - description: Page size, 1-100 (default 20).
+          in: query
+          name: limit
+          required: false
+          schema:
+            default: 20
+            maximum: 100
+            minimum: 1
+            type: integer
+            x-pii: none
+        - description: Only the runs of this organization.
+          in: query
+          name: organizationId
+          required: false
+          schema:
+            minLength: 1
+            type: string
+            x-pii: none
+        - description: Only runs of this workflow.
+          in: query
+          name: workflowId
+          required: false
+          schema:
+            pattern: ^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$
+            type: string
+            x-pii: none
+        - description: Only runs in this status.
+          in: query
+          name: status
+          required: false
+          schema:
+            enum:
+              - pending
+              - running
+              - waiting
+              - suspended
+              - paused
+              - success
+              - failed
+              - canceled
+              - tripwire
+            type: string
+            x-pii: none
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    description: The items of this page.
+                    items:
+                      $ref: "#/components/schemas/platform.AdminWorkflowRun"
+                    type: array
+                    x-pii: personal
+                  meta:
+                    additionalProperties: false
+                    description: Response metadata.
+                    properties:
+                      page:
+                        additionalProperties: false
+                        description: Pagination state.
+                        properties:
+                          cursor:
+                            anyOf:
+                              - minLength: 1
+                                type: string
+                              - type: "null"
+                            description: Opaque cursor of the next page; null at the end.
+                            x-pii: none
+                          hasMore:
+                            description: Whether another page exists.
+                            type: boolean
+                            x-pii: none
+                          limit:
+                            description: Page size used for this response.
+                            maximum: 100
+                            minimum: 1
+                            type: integer
+                            x-pii: none
+                        required:
+                          - cursor
+                          - hasMore
+                          - limit
+                        type: object
+                        x-pii: none
+                    required:
+                      - page
+                    type: object
+                    x-pii: none
+                required:
+                  - data
+                  - meta
+                type: object
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: VALIDATION_FAILED
+          x-error-codes:
+            - VALIDATION_FAILED
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UNAUTHORIZED
+          x-error-codes:
+            - UNAUTHORIZED
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: FORBIDDEN, MFA_REQUIRED
+          x-error-codes:
+            - FORBIDDEN
+            - MFA_REQUIRED
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: INTERNAL_ERROR
+          x-error-codes:
+            - INTERNAL_ERROR
+        "502":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UPSTREAM_UNAVAILABLE
+          x-error-codes:
+            - UPSTREAM_UNAVAILABLE
+      security:
+        - bearerAuth: []
+      summary: Lists workflow runs of every organization and of the platform, newest first (staff, platform.workflow.manage).
+      tags:
+        - admin
+      x-auth: user
+  /v1/admin/workflow-runs/{runId}/cancel:
+    post:
+      operationId: admin.cancelWorkflowRun
+      parameters:
+        - description: Workflow run id.
+          in: path
+          name: runId
+          required: true
+          schema:
+            pattern: ^[A-Za-z0-9_-]{1,128}$
+            type: string
+            x-pii: none
+      responses:
+        "204":
+          description: No Content
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: VALIDATION_FAILED
+          x-error-codes:
+            - VALIDATION_FAILED
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UNAUTHORIZED
+          x-error-codes:
+            - UNAUTHORIZED
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: FORBIDDEN, MFA_REQUIRED
+          x-error-codes:
+            - FORBIDDEN
+            - MFA_REQUIRED
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: NOT_FOUND
+          x-error-codes:
+            - NOT_FOUND
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: INTERNAL_ERROR
+          x-error-codes:
+            - INTERNAL_ERROR
+        "502":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UPSTREAM_UNAVAILABLE
+          x-error-codes:
+            - UPSTREAM_UNAVAILABLE
+      security:
+        - bearerAuth: []
+      summary: Cancels any workflow run (staff, platform.workflow.manage; audited with targetTenantId).
+      tags:
+        - admin
       x-auth: user
   /v1/agent-settings:
     get:
@@ -14875,6 +15660,10 @@ components:
             - PROMPT_EVALUATED
             - PROMPT_ACTIVATED
             - PROMPT_ACTIVATION_FORCED
+            - WORKFLOW_RUN_CANCELED
+            - SCHEDULE_PAUSED
+            - SCHEDULE_RESUMED
+            - SCHEDULE_RUN_REQUESTED
           type: string
           x-pii: none
         actor:
@@ -15193,6 +15982,10 @@ components:
             - PROMPT_EVALUATED
             - PROMPT_ACTIVATED
             - PROMPT_ACTIVATION_FORCED
+            - WORKFLOW_RUN_CANCELED
+            - SCHEDULE_PAUSED
+            - SCHEDULE_RESUMED
+            - SCHEDULE_RUN_REQUESTED
           type: string
           x-pii: none
         actorId:
@@ -15324,6 +16117,10 @@ components:
             - PROMPT_EVALUATED
             - PROMPT_ACTIVATED
             - PROMPT_ACTIVATION_FORCED
+            - WORKFLOW_RUN_CANCELED
+            - SCHEDULE_PAUSED
+            - SCHEDULE_RESUMED
+            - SCHEDULE_RUN_REQUESTED
           type: string
           x-pii: none
         actor:
@@ -20706,6 +21503,224 @@ components:
       x-pii: none
       x-relations: []
       x-tenancyScope: platform
+    platform.AdminSchedule:
+      additionalProperties: false
+      description: A platform or tenant schedule as staff see it, with its state and next fire.
+      examples:
+        - createdAt: "2026-09-29T14:30:00.000Z"
+          createdBy: null
+          cron: 15 * * * *
+          id: schedule_platform-usage-report
+          lastFireAt: null
+          nextFireAt: "2026-09-30T12:15:00.000Z"
+          scope: platform
+          status: active
+          tenantId: null
+          timezone: UTC
+          updatedAt: "2026-09-29T14:30:00.000Z"
+          workflowId: usage-report
+        - createdAt: "2026-09-29T14:30:00.000Z"
+          createdBy: uA1b2C3d4E5f6G7h8I9j
+          cron: 0 9 * * *
+          id: schedule_3fa9c0e1b2d4a6f8-daily-usage
+          lastFireAt: "2026-09-29T12:00:00.000Z"
+          nextFireAt: null
+          scope: tenant
+          status: paused
+          tenantId: Jd8sK2lPq0WnR5tYu3bV
+          timezone: America/Sao_Paulo
+          updatedAt: "2026-09-29T15:00:00.000Z"
+          workflowId: usage-report
+      properties:
+        createdAt:
+          description: When the schedule was created (UTC).
+          format: date-time
+          pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z))$
+          type: string
+          x-pii: none
+        createdBy:
+          anyOf:
+            - minLength: 1
+              type: string
+            - type: "null"
+          description: Creator of a tenant schedule; null for platform ones.
+          x-pii: personal
+        cron:
+          description: 5-field cron expression, evaluated in `timezone`.
+          maxLength: 120
+          type: string
+          x-pii: none
+        id:
+          description: Schedule id.
+          pattern: ^schedule_[a-z0-9-]{1,120}$
+          type: string
+          x-pii: none
+        lastFireAt:
+          anyOf:
+            - format: date-time
+              pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z))$
+              type: string
+            - type: "null"
+          description: Last fire (UTC); null before the first.
+          x-pii: none
+        nextFireAt:
+          anyOf:
+            - format: date-time
+              pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z))$
+              type: string
+            - type: "null"
+          description: Next fire (UTC); null while paused.
+          x-pii: none
+        scope:
+          description: "`platform` for the core crons, `tenant` for a schedule of an organization."
+          enum:
+            - platform
+            - tenant
+          type: string
+          x-pii: none
+        status:
+          description: "`paused` schedules do not fire."
+          enum:
+            - active
+            - paused
+          type: string
+          x-pii: none
+        tenantId:
+          anyOf:
+            - minLength: 1
+              type: string
+            - type: "null"
+          description: Organization that owns a tenant schedule; null for platform ones.
+          x-pii: none
+        timezone:
+          description: IANA time zone of the cron expression.
+          type: string
+          x-pii: none
+        updatedAt:
+          description: When the schedule last changed (UTC).
+          format: date-time
+          pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z))$
+          type: string
+          x-pii: none
+        workflowId:
+          description: Scheduled workflow.
+          pattern: ^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$
+          type: string
+          x-pii: none
+      required:
+        - id
+        - scope
+        - tenantId
+        - workflowId
+        - cron
+        - timezone
+        - status
+        - nextFireAt
+        - lastFireAt
+        - createdBy
+        - createdAt
+        - updatedAt
+      type: object
+      x-kind: view
+      x-permission: platform.workflow.manage
+      x-pii: personal
+      x-relations: []
+      x-tenancyScope: platform
+    platform.AdminWorkflowRun:
+      additionalProperties: false
+      description: A workflow run of any organization, or of the platform, as staff see it.
+      examples:
+        - approvalRequestId: null
+          createdAt: "2026-09-29T14:30:00.000Z"
+          runId: 01J8Z3K4M5N6P7Q8R9S0T1V2W3
+          scheduleId: null
+          startedBy: null
+          status: success
+          tenantId: null
+          updatedAt: "2026-09-29T15:00:00.000Z"
+          workflowId: usage-report
+      properties:
+        approvalRequestId:
+          anyOf:
+            - minLength: 1
+              type: string
+            - type: "null"
+          description: Approval request a suspended run waits for, if any.
+          x-pii: none
+        createdAt:
+          description: When the run started (UTC).
+          format: date-time
+          pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z))$
+          type: string
+          x-pii: none
+        runId:
+          description: Run id.
+          maxLength: 128
+          minLength: 1
+          type: string
+          x-pii: none
+        scheduleId:
+          anyOf:
+            - minLength: 1
+              type: string
+            - type: "null"
+          description: Schedule that started the run, if any.
+          x-pii: none
+        startedBy:
+          anyOf:
+            - minLength: 1
+              type: string
+            - type: "null"
+          description: User who started the run; null for platform schedules.
+          x-pii: personal
+        status:
+          description: Run status.
+          enum:
+            - pending
+            - running
+            - waiting
+            - suspended
+            - paused
+            - success
+            - failed
+            - canceled
+            - tripwire
+          type: string
+          x-pii: none
+        tenantId:
+          anyOf:
+            - minLength: 1
+              type: string
+            - type: "null"
+          description: Organization the run belongs to; null for platform runs.
+          x-pii: none
+        updatedAt:
+          description: When the run last changed (UTC).
+          format: date-time
+          pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z))$
+          type: string
+          x-pii: none
+        workflowId:
+          description: Workflow of the run.
+          pattern: ^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$
+          type: string
+          x-pii: none
+      required:
+        - runId
+        - workflowId
+        - tenantId
+        - status
+        - startedBy
+        - scheduleId
+        - approvalRequestId
+        - createdAt
+        - updatedAt
+      type: object
+      x-kind: view
+      x-permission: platform.workflow.manage
+      x-pii: personal
+      x-relations: []
+      x-tenancyScope: platform
     platform.FeatureFlag:
       additionalProperties: false
       description: A feature flag with its effective value and expiry status.
@@ -20860,6 +21875,81 @@ components:
       x-kind: entity
       x-permission: platform.flag.manage
       x-pii: none
+      x-relations: []
+      x-tenancyScope: platform
+    platform.LogLine:
+      additionalProperties: false
+      description: A structured log line kept in the ring buffer of the local environment for the staff console.
+      examples:
+        - env: local
+          fields:
+            durationMs: 42
+          level: info
+          message: order_placed
+          requestId: 01J8Z3K4M5N6P7Q8R9S0T1V2W3
+          service: web
+          timestamp: "2026-09-30T12:00:00.000Z"
+          traceId: null
+      properties:
+        env:
+          description: Logical environment.
+          type: string
+          x-pii: none
+        fields:
+          additionalProperties: {}
+          description: The other structured fields of the line.
+          propertyNames:
+            type: string
+          type: object
+          x-pii: personal
+        level:
+          description: "`debug`, `info`, `warn` or `error`."
+          enum:
+            - debug
+            - info
+            - warn
+            - error
+          type: string
+          x-pii: none
+        message:
+          description: Stable event name of the line.
+          type: string
+          x-pii: none
+        requestId:
+          description: Request the line belongs to, if any.
+          type:
+            - string
+            - "null"
+          x-pii: none
+        service:
+          description: Service that wrote the line.
+          type: string
+          x-pii: none
+        timestamp:
+          description: When the line was written (UTC).
+          format: date-time
+          pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z))$
+          type: string
+          x-pii: none
+        traceId:
+          description: Trace the line belongs to, if any.
+          type:
+            - string
+            - "null"
+          x-pii: none
+      required:
+        - timestamp
+        - level
+        - message
+        - service
+        - env
+        - requestId
+        - traceId
+        - fields
+      type: object
+      x-kind: view
+      x-permission: platform.trace.read
+      x-pii: personal
       x-relations: []
       x-tenancyScope: platform
     platform.OrganizationAdminSummary:

@@ -1,0 +1,94 @@
+{
+  "additionalProperties": false,
+  "description": "A structured log line kept in the ring buffer of the local environment for the staff console.",
+  "examples": [
+    {
+      "env": "local",
+      "fields": {
+        "durationMs": 42
+      },
+      "level": "info",
+      "message": "order_placed",
+      "requestId": "01J8Z3K4M5N6P7Q8R9S0T1V2W3",
+      "service": "web",
+      "timestamp": "2026-09-30T12:00:00.000Z",
+      "traceId": null
+    }
+  ],
+  "properties": {
+    "env": {
+      "description": "Logical environment.",
+      "type": "string",
+      "x-pii": "none"
+    },
+    "fields": {
+      "additionalProperties": {},
+      "description": "The other structured fields of the line.",
+      "propertyNames": {
+        "type": "string"
+      },
+      "type": "object",
+      "x-pii": "personal"
+    },
+    "level": {
+      "description": "`debug`, `info`, `warn` or `error`.",
+      "enum": [
+        "debug",
+        "info",
+        "warn",
+        "error"
+      ],
+      "type": "string",
+      "x-pii": "none"
+    },
+    "message": {
+      "description": "Stable event name of the line.",
+      "type": "string",
+      "x-pii": "none"
+    },
+    "requestId": {
+      "description": "Request the line belongs to, if any.",
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-pii": "none"
+    },
+    "service": {
+      "description": "Service that wrote the line.",
+      "type": "string",
+      "x-pii": "none"
+    },
+    "timestamp": {
+      "description": "When the line was written (UTC).",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+      "type": "string",
+      "x-pii": "none"
+    },
+    "traceId": {
+      "description": "Trace the line belongs to, if any.",
+      "type": [
+        "string",
+        "null"
+      ],
+      "x-pii": "none"
+    }
+  },
+  "required": [
+    "timestamp",
+    "level",
+    "message",
+    "service",
+    "env",
+    "requestId",
+    "traceId",
+    "fields"
+  ],
+  "type": "object",
+  "x-kind": "view",
+  "x-permission": "platform.trace.read",
+  "x-pii": "personal",
+  "x-relations": [],
+  "x-tenancyScope": "platform"
+}

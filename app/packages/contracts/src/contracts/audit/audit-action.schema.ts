@@ -83,6 +83,11 @@ export const AUDIT_ACTIONS = [
   "PROMPT_EVALUATED",
   "PROMPT_ACTIVATED",
   "PROMPT_ACTIVATION_FORCED",
+  // SP5 staff console (decision 0043): staff cancelled a run or paused, resumed or fired a schedule.
+  "WORKFLOW_RUN_CANCELED",
+  "SCHEDULE_PAUSED",
+  "SCHEDULE_RESUMED",
+  "SCHEDULE_RUN_REQUESTED",
 ] as const;
 
 export const AuditActionSchema = z.enum(AUDIT_ACTIONS);

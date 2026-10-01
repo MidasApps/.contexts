@@ -1,4 +1,12 @@
-import { type WorkflowEvent, type WorkflowRun as WorkflowRunView, WorkflowRunSchema, type WorkflowRunStatus, WorkflowRunStatusSchema } from "@core/contracts";
+import {
+  type AdminWorkflowRun,
+  AdminWorkflowRunSchema,
+  type WorkflowEvent,
+  type WorkflowRun as WorkflowRunView,
+  WorkflowRunSchema,
+  type WorkflowRunStatus,
+  WorkflowRunStatusSchema,
+} from "@core/contracts";
 
 /**
  * Read model of Mastra workflow runs for `/v1` (SP5 spec §3.6, decision 0040): the tenant of a
@@ -66,12 +74,9 @@ const approvalRequestIdOf = (steps: Snapshot["steps"]): string | null => {
   return isRecord(payload) ? stringOrNull(payload["approvalRequestId"]) : null;
 };
 
-/** `/v1` view of a run; `null` when the run has no tenant resource (platform runs) or does not fit the contract. */
-export const toWorkflowRunView = (run: StoredRun): WorkflowRunView | null => {
-  const tenantId = tenantOf(run.resourceId);
-  if (tenantId === null) return null;
+const viewFieldsOf = (run: StoredRun, tenantId: string | null) => {
   const snapshot = parseSnapshot(run.snapshot);
-  const view = WorkflowRunSchema.safeParse({
+  return {
     runId: run.runId,
     workflowId: run.workflowName,
     tenantId,
@@ -81,7 +86,20 @@ export const toWorkflowRunView = (run: StoredRun): WorkflowRunView | null => {
     approvalRequestId: snapshot.status === "suspended" ? approvalRequestIdOf(snapshot.steps) : null,
     createdAt: run.createdAt.toISOString(),
     updatedAt: run.updatedAt.toISOString(),
-  });
+  };
+};
+
+/** `/v1` view of a run; `null` when the run has no tenant resource (platform runs) or does not fit the contract. */
+export const toWorkflowRunView = (run: StoredRun): WorkflowRunView | null => {
+  const tenantId = tenantOf(run.resourceId);
+  if (tenantId === null) return null;
+  const view = WorkflowRunSchema.safeParse(viewFieldsOf(run, tenantId));
+  return view.success ? view.data : null;
+};
+
+/** Staff view of any run: a platform run (no tenant resource) has `tenantId: null`; `null` when it does not fit the contract. */
+export const toAdminWorkflowRunView = (run: StoredRun): AdminWorkflowRun | null => {
+  const view = AdminWorkflowRunSchema.safeParse(viewFieldsOf(run, tenantOf(run.resourceId)));
   return view.success ? view.data : null;
 };
 

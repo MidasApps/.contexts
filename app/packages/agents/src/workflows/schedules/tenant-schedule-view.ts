@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { type AgentRequestContext, type Schedule, ScheduleSchema } from "@core/contracts";
+import { type AdminSchedule, AdminScheduleSchema, type AgentRequestContext, type Schedule, ScheduleSchema } from "@core/contracts";
 import { MASTRA_RESOURCE_ID_KEY } from "@mastra/core/request-context";
 import { resourceIdOf } from "../../auth/agent-principal.ts";
 import { AGENT_PRINCIPAL_KEY } from "../../context/agent-request-context.ts";
@@ -50,6 +50,29 @@ export const toScheduleView = (schedule: StoredSchedule): Schedule | null => {
     nextFireAt: schedule.status === "paused" ? null : iso(schedule.nextFireAt),
     lastFireAt: iso(schedule.lastFireAt),
     createdBy: schedule.metadata?.["createdBy"],
+    createdAt: iso(schedule.createdAt),
+    updatedAt: iso(schedule.updatedAt),
+  });
+  return view.success ? view.data : null;
+};
+
+/**
+ * Staff view of any schedule row: `tenant` when the tenant routes wrote its `metadata.tenantId`,
+ * else `platform` (the boot-time rows of the core crons). `null` for a row that fits neither.
+ */
+export const toAdminScheduleView = (schedule: StoredSchedule): AdminSchedule | null => {
+  const tenantId = typeof schedule.metadata?.["tenantId"] === "string" ? schedule.metadata["tenantId"] : null;
+  const view = AdminScheduleSchema.safeParse({
+    id: schedule.id,
+    scope: tenantId === null ? "platform" : "tenant",
+    tenantId,
+    workflowId: schedule.workflowId,
+    cron: schedule.cron,
+    timezone: schedule.timezone,
+    status: schedule.status,
+    nextFireAt: schedule.status === "paused" ? null : iso(schedule.nextFireAt),
+    lastFireAt: iso(schedule.lastFireAt),
+    createdBy: tenantId === null ? null : (schedule.metadata?.["createdBy"] ?? null),
     createdAt: iso(schedule.createdAt),
     updatedAt: iso(schedule.updatedAt),
   });

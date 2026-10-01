@@ -8,6 +8,7 @@ import { buildAgentRequestContext, writeAgentContext } from "../context/write-ag
 import type { AccessPort } from "../runtime/runtime-ports.ts";
 import { addFeedbackItem, listDatasets } from "./dataset-console.ts";
 import { EvalRunRecordSchema, type ExperimentStore, listExperimentSummaries, recordEvalRun } from "./eval-console.ts";
+import { actOnAdminSchedule, AdminRunsQuerySchema, cancelAdminRun, listAdminRuns, listAdminSchedules, SCHEDULE_ACTIONS } from "./operations-console.ts";
 import { createTraceReader, type TraceStore } from "./trace-reader.ts";
 
 /**
@@ -30,11 +31,12 @@ type Ctx = {
   readonly param: (key: string) => string;
   readonly json: () => Promise<unknown>;
   readonly header: (key: string) => string | undefined;
+  readonly queries: () => Record<string, string>;
   readonly mastra: Mastra;
 };
 
 type HonoLike = {
-  readonly req: { query: (key: string) => string | undefined; param: () => Record<string, string>; json: () => Promise<unknown>; header: (key: string) => string | undefined };
+  readonly req: { url: string; query: (key: string) => string | undefined; param: () => Record<string, string>; json: () => Promise<unknown>; header: (key: string) => string | undefined };
   readonly get: (key: "mastra") => Mastra;
 };
 
@@ -43,6 +45,7 @@ const ctxOf = (c: HonoLike): Ctx => ({
   param: (key) => c.req.param()[key] ?? "",
   json: () => c.req.json(),
   header: (key) => c.req.header(key),
+  queries: () => Object.fromEntries(new URL(c.req.url).searchParams),
   mastra: c.get("mastra"),
 });
 
@@ -173,4 +176,50 @@ const datasetRoutes = (deps: ConsoleRouteDeps): ApiRoute[] => [
   }),
 ];
 
-export const createConsoleRoutes = (deps: ConsoleRouteDeps): ApiRoute[] => [...traceRoutes(deps), ...evalRoutes(deps), ...datasetRoutes(deps)];
+const requestIdOf = (ctx: Ctx): { requestId?: string } => {
+  const requestId = ctx.header("x-request-id");
+  return requestId === undefined ? {} : { requestId };
+};
+
+// Staff operations (decision 0043): `/v1/admin` requires staff with MFA and audits; these act on any tenant.
+const operationRoutes = (deps: ConsoleRouteDeps): ApiRoute[] => [
+  registerApiRoute(`${CONSOLE_ROUTES_PREFIX}/workflow-runs`, {
+    method: "GET",
+    requiresAuth: false,
+    handler: guarded(deps, "console_workflow_runs_failed", async (ctx) => {
+      const query = AdminRunsQuerySchema.safeParse(ctx.queries());
+      if (!query.success) return fail(400, "VALIDATION_FAILED");
+      const listed = await listAdminRuns(ctx.mastra, query.data);
+      return json(200, { data: listed.runs, meta: { page: listed.page } });
+    }),
+  }),
+  registerApiRoute(`${CONSOLE_ROUTES_PREFIX}/workflow-runs/:runId/cancel`, {
+    method: "POST",
+    requiresAuth: false,
+    handler: guarded(deps, "console_workflow_run_cancel_failed", async (ctx) => {
+      const run = await cancelAdminRun(ctx.mastra, ctx.param("runId"));
+      if (run === null) return fail(404, "NOT_FOUND");
+      deps.logger.info("console_workflow_run_canceled", { ...requestIdOf(ctx), runId: run.runId, workflowId: run.workflowId, tenantId: run.tenantId });
+      return json(200, { data: run });
+    }),
+  }),
+  registerApiRoute(`${CONSOLE_ROUTES_PREFIX}/schedules`, {
+    method: "GET",
+    requiresAuth: false,
+    handler: guarded(deps, "console_schedules_failed", async (ctx) => json(200, { data: await listAdminSchedules(ctx.mastra, tenantOf(ctx)) })),
+  }),
+  ...SCHEDULE_ACTIONS.map((action) =>
+    registerApiRoute(`${CONSOLE_ROUTES_PREFIX}/schedules/:scheduleId/${action}`, {
+      method: "POST",
+      requiresAuth: false,
+      handler: guarded(deps, `console_schedule_${action}_failed`, async (ctx) => {
+        const schedule = await actOnAdminSchedule(ctx.mastra, ctx.param("scheduleId"), action);
+        if (schedule === null) return fail(404, "NOT_FOUND");
+        deps.logger.info(`console_schedule_${action}`, { ...requestIdOf(ctx), scheduleId: schedule.id, tenantId: schedule.tenantId });
+        return json(200, { data: schedule });
+      }),
+    }),
+  ),
+];
+
+export const createConsoleRoutes = (deps: ConsoleRouteDeps): ApiRoute[] => [...traceRoutes(deps), ...evalRoutes(deps), ...datasetRoutes(deps), ...operationRoutes(deps)];

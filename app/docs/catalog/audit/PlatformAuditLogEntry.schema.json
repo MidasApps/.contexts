@@ -95,7 +95,11 @@
         "PROMPT_VERSION_CREATED",
         "PROMPT_EVALUATED",
         "PROMPT_ACTIVATED",
-        "PROMPT_ACTIVATION_FORCED"
+        "PROMPT_ACTIVATION_FORCED",
+        "WORKFLOW_RUN_CANCELED",
+        "SCHEDULE_PAUSED",
+        "SCHEDULE_RESUMED",
+        "SCHEDULE_RUN_REQUESTED"
       ],
       "type": "string",
       "x-pii": "none"

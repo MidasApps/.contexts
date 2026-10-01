@@ -572,3 +572,12 @@ export {
   listEvalDatasetsEndpoint, listEvalExperimentsEndpoint, listTracesEndpoint, OBSERVABILITY_ENDPOINTS, recordMessageFeedbackEndpoint,
   startEvalExperimentEndpoint,
 } from "./contracts/observability/endpoints.ts";
+// SP5 staff console operations (decision 0043): runs, schedules, connectors and local logs for `/admin`.
+export {
+  ADMIN_OPERATIONS_ENDPOINTS, adminCancelWorkflowRunEndpoint, adminListConnectorsEndpoint, adminListLogsEndpoint, adminListSchedulesEndpoint,
+  adminListWorkflowRunsEndpoint, adminPauseScheduleEndpoint, adminResumeScheduleEndpoint, adminRunScheduleNowEndpoint,
+} from "./contracts/platform/admin-operations-endpoints.ts";
+export {
+  AdminScheduleContract, AdminScheduleSchema, AdminWorkflowRunContract, AdminWorkflowRunSchema, LogLevelSchema, LogLineContract, LogLineSchema,
+  type AdminSchedule, type AdminWorkflowRun, type LogLine, type LogLineLevel,
+} from "./contracts/platform/admin-operations.schema.ts";

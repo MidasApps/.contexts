@@ -1,3 +1,4 @@
+import { captureProcessLogRecord, enableProcessLogBuffer } from "./log-buffer.ts";
 import { createLogger, jsonLineSink, type LogContext, type Logger, type LogSink } from "./logger.ts";
 
 const UNCONFIGURED: LogContext = Object.freeze({ service: "unknown", env: "unknown" });
@@ -15,9 +16,14 @@ type ContextHolder = { [CONTEXT_KEY]?: Readonly<LogContext> };
 
 const holder = globalThis as ContextHolder;
 
-/** Called once at boot with values from the app's validated `src/env.ts`. */
+/**
+ * Called once at boot with values from the app's validated `src/env.ts`. In `local` it also starts
+ * the ring buffer the staff console reads (`GET /v1/admin/logs`, decision 0043); no other
+ * environment keeps log lines in memory.
+ */
 export const configureProcessLogger = (context: LogContext): void => {
   holder[CONTEXT_KEY] = Object.freeze({ ...context });
+  if (context.env === "local") enableProcessLogBuffer();
 };
 
 export const readProcessLogContext = (): Readonly<LogContext> => holder[CONTEXT_KEY] ?? UNCONFIGURED;
@@ -38,6 +44,9 @@ export const createProcessLogger = (args: { sink?: LogSink } = {}): Logger => {
       sink({ timestamp, level: "warn", message: "process_logger_unconfigured", service, env });
     }
     sink(record);
+    // The sink is fixed when the logger is built, so the ring is reached through globalThis on
+    // every record: a no-op until `configureProcessLogger` enabled it.
+    captureProcessLogRecord(record);
   };
   return createLogger({ context: readProcessLogContext, sink: warnOnceWhenUnconfigured });
 };

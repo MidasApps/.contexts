@@ -30,6 +30,7 @@ export {
 export { type ErrorDetail, type ErrorEnvelope, errorResponse } from "./services/shared/http/error-envelope.ts";
 export { type RouteContext, type RouteHandler, withRouteBoundary } from "./services/shared/http/route-boundary.ts";
 export { configureProcessLogger, processLogger, readProcessLogContext } from "./services/shared/observability/process-logger.ts";
+export { LOG_BUFFER_CAPACITY, readProcessLogBuffer } from "./services/shared/observability/log-buffer.ts";
 export {
   REQUEST_ID_HEADER,
   resolveRequestId,
@@ -778,3 +779,20 @@ export {
   MESSAGE_FEEDBACK_COLLECTION,
 } from "./services/conversations/adapters/driven/firestore-message-feedback-store.ts";
 export { feedbackKeyOf } from "./services/conversations/application/use-cases/record-message-feedback.ts";
+// SP5 staff console operations (decision 0043): runs, schedules, connectors and local logs for `/admin`.
+export {
+  buildAdminLogsRoutes,
+  buildAdminOperationsRoutes,
+  createMastraOperationsGateway,
+  listLogLines,
+  LOGS_PERMISSION,
+  OPERATIONS_PERMISSIONS,
+  type AdminLogsRouteDeps,
+  type AdminOperationsRouteDeps,
+  type AdminRunsQuery,
+  type LogLinesQuery,
+  type OperationsError,
+  type OperationsGateway,
+  type OperationsResult,
+  type ScheduleAction,
+} from "./services/platform/index.ts";
