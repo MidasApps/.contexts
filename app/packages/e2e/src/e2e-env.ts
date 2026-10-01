@@ -16,6 +16,8 @@ const E2eEnvSchema = z.object({
   E2E_DESKTOP_PORT: z.coerce.number().int(),
   E2E_WEB_ORIGIN: LoopbackOriginSchema,
   E2E_DESKTOP_ORIGIN: LoopbackOriginSchema,
+  E2E_MASTRA_PORT: z.coerce.number().int(),
+  E2E_MASTRA_ORIGIN: LoopbackOriginSchema,
   E2E_AUTH_EMULATOR_ORIGIN: LoopbackOriginSchema,
   E2E_PROJECT_ID: z.string().startsWith("demo-"),
   FIRESTORE_EMULATOR_HOST: z.string().min(1),

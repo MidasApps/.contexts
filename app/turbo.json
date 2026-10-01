@@ -64,9 +64,14 @@
       "dependsOn": ["build"],
       "cache": false
     },
+    // The chat journeys reach the agent runtime (`node .mastra/output/index.mjs`) through `/v1`.
+    "@core/web#test:e2e": {
+      "dependsOn": ["build", "@core/mastra#build"],
+      "cache": false
+    },
     // The desktop-web project calls the e2e web server (`next start`), so the web build too.
     "@core/desktop#test:e2e": {
-      "dependsOn": ["build", "@core/web#build"],
+      "dependsOn": ["build", "@core/web#build", "@core/mastra#build"],
       "cache": false
     },
     // Catalog tasks write and read app/docs, outside any package, so they are never cached.

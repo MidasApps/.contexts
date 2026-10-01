@@ -6,13 +6,23 @@ import { z } from "zod";
  */
 export const E2E_PROJECT_ID = "demo-core-e2e";
 export const E2E_FIREBASE_CONFIG = "firebase.e2e.json";
-export const E2E_EMULATORS = ["auth", "firestore"] as const;
+// Chat (SP4) needs uploads: Storage and the Functions trigger that validates them.
+export const E2E_EMULATORS = ["auth", "firestore", "storage", "functions"] as const;
+/** The e2e run's own database in the compose Postgres, so journeys never write into `pnpm dev`'s. */
+export const E2E_DATABASE_NAME = "app_e2e";
+/**
+ * Loading `apps/functions/lib` takes longer than the emulator's 10 s default on a busy machine
+ * ("Cannot determine backend specification"); uploads would then never leave `pending`.
+ */
+export const FUNCTIONS_DISCOVERY_TIMEOUT_SECONDS = "180";
 
 const DEFAULT_WEB_PORT = 3100;
 const DEFAULT_DESKTOP_PORT = 1420;
-// Never started by the e2e run: services that would use them fail loudly instead of reaching
-// the dev emulators of `pnpm dev` (processes/environments.md: no cross-environment traffic).
-const UNUSED_STORAGE_EMULATOR = "127.0.0.1:9691";
+// Apart from `mastra dev` (4111), so both stacks can run at the same time.
+const DEFAULT_MASTRA_PORT = 4191;
+// Never started by the e2e run (nothing in the journeys publishes; its java process also outlives
+// `emulators:exec` on Windows): a service that would use it fails loudly instead of reaching the
+// dev emulator of `pnpm dev` (processes/environments.md: no cross-environment traffic).
 const UNUSED_PUBSUB_EMULATOR = "127.0.0.1:8691";
 /** Origins of the native Tauri webview, allowed by the e2e web so the native smoke can call `/v1`. */
 const TAURI_WEBVIEW_ORIGINS = ["http://tauri.localhost", "tauri://localhost"] as const;
@@ -30,12 +40,18 @@ const EmulatorEntrySchema = z.object({ host: z.string().min(1), port: z.number()
 
 /** The emulator hosts of `firebase.e2e.json` (the single source of the e2e emulator ports). */
 export const FirebaseE2eConfigSchema = z.object({
-  emulators: z.object({ auth: EmulatorEntrySchema, firestore: EmulatorEntrySchema }),
+  emulators: z.object({
+    auth: EmulatorEntrySchema,
+    firestore: EmulatorEntrySchema,
+    storage: EmulatorEntrySchema,
+    functions: EmulatorEntrySchema,
+  }),
 });
 
 const OverridesSchema = z.object({
   E2E_WEB_PORT: PortSchema.default(DEFAULT_WEB_PORT),
   E2E_DESKTOP_PORT: PortSchema.default(DEFAULT_DESKTOP_PORT),
+  E2E_MASTRA_PORT: PortSchema.default(DEFAULT_MASTRA_PORT),
 });
 
 /** Thrown when a port override is invalid; names the variable, never other env values. */
@@ -64,7 +80,8 @@ export const buildE2eEnv = (args: {
   const config = FirebaseE2eConfigSchema.parse(args.firebaseConfig);
   const parsed = OverridesSchema.safeParse(args.overrides);
   if (!parsed.success) throw new InvalidE2eEnvError([...new Set(parsed.error.issues.map((issue) => String(issue.path[0])))]);
-  const { E2E_WEB_PORT: webPort, E2E_DESKTOP_PORT: desktopPort } = parsed.data;
+  const { E2E_WEB_PORT: webPort, E2E_DESKTOP_PORT: desktopPort, E2E_MASTRA_PORT: mastraPort } = parsed.data;
+  const mastraOrigin = `http://localhost:${String(mastraPort)}`;
   const webOrigin = `http://localhost:${String(webPort)}`;
   const desktopOrigin = `http://localhost:${String(desktopPort)}`;
   const authHost = hostPort(config.emulators.auth);
@@ -72,6 +89,8 @@ export const buildE2eEnv = (args: {
   return {
     E2E_WEB_PORT: String(webPort),
     E2E_DESKTOP_PORT: String(desktopPort),
+    E2E_MASTRA_PORT: String(mastraPort),
+    E2E_MASTRA_ORIGIN: mastraOrigin,
     E2E_WEB_ORIGIN: webOrigin,
     E2E_DESKTOP_ORIGIN: desktopOrigin,
     E2E_PROJECT_ID,
@@ -79,15 +98,21 @@ export const buildE2eEnv = (args: {
     // Server (services + web env).
     APP_ENV: "local",
     AI_MODE: "fake",
-    // The compose Postgres of .env.example (local-only credentials). SP2 journeys never query it
-    // (the pool connects lazily), but the services env requires a local URL.
-    DATABASE_URL: "postgresql://app:app@127.0.0.1:5432/app",
+    // The compose Postgres of .env.example (local-only credentials), in the e2e run's own
+    // database (scripts/src/e2e/e2e-database.ts creates and migrates it).
+    DATABASE_URL: `postgresql://app:app@127.0.0.1:5432/${E2E_DATABASE_NAME}`,
+    // The agent runtime of the chat journeys (apps/mastra with fake models), started by Playwright.
+    MASTRA_URL: mastraOrigin,
+    MASTRA_HOST: "localhost",
+    MASTRA_CORS_ORIGINS: webOrigin,
+    MASTRA_TELEMETRY_DISABLED: "1",
     FIREBASE_PROJECT_ID: E2E_PROJECT_ID,
     GCLOUD_PROJECT: E2E_PROJECT_ID,
     FIREBASE_AUTH_EMULATOR_HOST: authHost,
     FIRESTORE_EMULATOR_HOST: hostPort(config.emulators.firestore),
-    FIREBASE_STORAGE_EMULATOR_HOST: UNUSED_STORAGE_EMULATOR,
+    FIREBASE_STORAGE_EMULATOR_HOST: hostPort(config.emulators.storage),
     PUBSUB_EMULATOR_HOST: UNUSED_PUBSUB_EMULATOR,
+    FUNCTIONS_DISCOVERY_TIMEOUT: FUNCTIONS_DISCOVERY_TIMEOUT_SECONDS,
     FILES_BUCKET: `${E2E_PROJECT_ID}.appspot.com`,
     MFA_FACTORS: "phone",
     ORGANIZATION_SELF_SERVE: "true",

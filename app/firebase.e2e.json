@@ -1,7 +1,18 @@
 {
+  "functions": [
+    {
+      "source": "apps/functions/lib",
+      "configDir": "apps/functions",
+      "codebase": "default",
+      "runtime": "nodejs24"
+    }
+  ],
   "firestore": {
     "rules": "firestore.rules",
     "indexes": "firestore.indexes.json"
+  },
+  "storage": {
+    "rules": "storage.rules"
   },
   "emulators": {
     "singleProjectMode": true,
@@ -13,6 +24,18 @@
       "host": "127.0.0.1",
       "port": 8391,
       "websocketPort": 9392
+    },
+    "storage": {
+      "host": "127.0.0.1",
+      "port": 9393
+    },
+    "functions": {
+      "host": "127.0.0.1",
+      "port": 5391
+    },
+    "eventarc": {
+      "host": "127.0.0.1",
+      "port": 9394
     },
     "hub": {
       "host": "127.0.0.1",

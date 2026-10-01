@@ -33,7 +33,16 @@ export const createV1Client = (args: { origin: string; idToken: string }) => {
     if (!response.ok) throw new V1RequestError(method, path, response.status, payload.error?.code ?? "UNKNOWN");
     return payload.data as T;
   };
+  /** The raw answer of a call that is not a JSON envelope (the chat stream); the caller reads it. */
+  const raw = (method: string, path: string, body?: unknown): Promise<Response> =>
+    fetch(`${args.origin}${path}`, {
+      method,
+      headers: { authorization: `Bearer ${args.idToken}`, ...(body === undefined ? {} : { "content-type": "application/json" }) },
+      ...(body === undefined ? {} : { body: JSON.stringify(body) }),
+      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+    });
   return {
+    raw,
     get: <T>(path: string): Promise<T> => request<T>("GET", path),
     post: <T>(path: string, body: unknown): Promise<T> => request<T>("POST", path, body),
     put: <T>(path: string, body: unknown): Promise<T> => request<T>("PUT", path, body),

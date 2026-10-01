@@ -42,3 +42,5 @@ ui-debug.log
 # .env.demo-core only holds non-secret emulator config for the demo project.
 apps/functions/lib/
 !apps/functions/.env.demo-core
+# Same for the e2e project of firebase.e2e.json.
+!apps/functions/.env.demo-core-e2e

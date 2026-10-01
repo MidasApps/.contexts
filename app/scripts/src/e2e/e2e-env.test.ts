@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import { buildE2eEnv, buildEmulatorExecArgs, DEFAULT_E2E_COMMAND, E2E_PROJECT_ID, InvalidE2eEnvError, joinCommandArgs } from "./e2e-env.ts";
+import { buildE2eEnv, buildEmulatorExecArgs, DEFAULT_E2E_COMMAND, E2E_DATABASE_NAME, E2E_PROJECT_ID, InvalidE2eEnvError, joinCommandArgs } from "./e2e-env.ts";
 
 const firebaseConfig: unknown = JSON.parse(readFileSync(path.resolve(import.meta.dirname, "../../../firebase.e2e.json"), "utf8"));
 const devConfig: unknown = JSON.parse(readFileSync(path.resolve(import.meta.dirname, "../../../firebase.json"), "utf8"));
@@ -48,9 +48,9 @@ describe("buildE2eEnv", () => {
 });
 
 describe("buildEmulatorExecArgs", () => {
-  it("runs the command inside the e2e project's auth and firestore emulators", () => {
+  it("runs the command inside the e2e project's auth, firestore, storage and functions emulators", () => {
     expect(buildEmulatorExecArgs("pnpm x")).toEqual([
-      "--config", "firebase.e2e.json", "emulators:exec", "--project", E2E_PROJECT_ID, "--only", "auth,firestore", "pnpm x",
+      "--config", "firebase.e2e.json", "emulators:exec", "--project", E2E_PROJECT_ID, "--only", "auth,firestore,storage,functions", "pnpm x",
     ]);
   });
 });
@@ -61,9 +61,24 @@ describe("the e2e command", () => {
     expect(DEFAULT_E2E_COMMAND).toContain("--env-mode=loose --concurrency=1");
   });
 
-  it("points the services at the local compose Postgres, never a remote database", () => {
+  it("points the services at their own database in the local compose Postgres, never a remote one", () => {
     const env = buildE2eEnv({ firebaseConfig, overrides: {} });
-    expect(new URL(env["DATABASE_URL"] ?? "").hostname).toBe("127.0.0.1");
+    const url = new URL(env["DATABASE_URL"] ?? "");
+    expect(url.hostname).toBe("127.0.0.1");
+    expect(url.pathname).toBe(`/${E2E_DATABASE_NAME}`);
+  });
+
+  it("starts the chat stack: storage and functions emulators, the agent runtime in fake mode and a long functions discovery", () => {
+    const env = buildE2eEnv({ firebaseConfig, overrides: { E2E_MASTRA_PORT: "4192" } });
+    expect(env).toMatchObject({
+      FIREBASE_STORAGE_EMULATOR_HOST: "127.0.0.1:9393",
+      MASTRA_URL: "http://localhost:4192",
+      E2E_MASTRA_ORIGIN: "http://localhost:4192",
+      MASTRA_CORS_ORIGINS: "http://localhost:3100",
+      FUNCTIONS_DISCOVERY_TIMEOUT: "180",
+      AI_MODE: "fake",
+    });
+    expect(() => buildE2eEnv({ firebaseConfig, overrides: { E2E_MASTRA_PORT: "3000" } })).toThrow(/E2E_MASTRA_PORT/);
   });
 
   it("quotes passthrough arguments that hold spaces or shell operators", () => {

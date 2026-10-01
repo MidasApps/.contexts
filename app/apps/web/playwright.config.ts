@@ -1,5 +1,7 @@
 import { defineConfig, devices } from "@playwright/test";
 import { readE2eEnv } from "@core/e2e/e2e-env";
+import path from "node:path";
+import { e2eMastraServer } from "@core/e2e/mastra-server";
 import { e2eWebServer } from "@core/e2e/web-server";
 import { authFile } from "./e2e/web-test.ts";
 
@@ -8,6 +10,7 @@ import { authFile } from "./e2e/web-test.ts";
 const env = readE2eEnv();
 const isCi = process.env["CI"] !== undefined;
 const owner = authFile("owner");
+const CHAT_SPECS = /chat-[a-z-]+.spec.ts/;
 
 // Playwright's config loader requires a default export.
 export default defineConfig({
@@ -31,10 +34,17 @@ export default defineConfig({
   },
   projects: [
     { name: "setup", testMatch: /global\.setup\.ts/ },
-    { name: "chromium", use: { ...devices["Desktop Chrome"], storageState: owner }, dependencies: ["setup"] },
-    { name: "firefox", use: { ...devices["Desktop Firefox"], storageState: owner }, dependencies: ["setup"] },
-    { name: "webkit", use: { ...devices["Desktop Safari"], storageState: owner }, dependencies: ["setup"] },
-    { name: "mobile-chrome", use: { ...devices["Pixel 7"], storageState: owner }, dependencies: ["setup"] },
+    { name: "chromium", testIgnore: CHAT_SPECS, use: { ...devices["Desktop Chrome"], storageState: owner }, dependencies: ["setup"] },
+    { name: "firefox", testIgnore: CHAT_SPECS, use: { ...devices["Desktop Firefox"], storageState: owner }, dependencies: ["setup"] },
+    { name: "webkit", testIgnore: CHAT_SPECS, use: { ...devices["Desktop Safari"], storageState: owner }, dependencies: ["setup"] },
+    { name: "mobile-chrome", testIgnore: CHAT_SPECS, use: { ...devices["Pixel 7"], storageState: owner }, dependencies: ["setup"] },
+    // The chat journeys (SP4) run once, on chromium: each one streams through the agent runtime,
+    // and the browser matrix above already covers the shell they are mounted in.
+    { name: "chat", testMatch: CHAT_SPECS, use: { ...devices["Desktop Chrome"], storageState: owner }, dependencies: ["setup"] },
   ],
-  webServer: e2eWebServer(env, { webAppDir: import.meta.dirname }),
+  webServer: [
+    e2eWebServer(env, { webAppDir: import.meta.dirname }),
+    // Started by path (a command in its folder), never imported: apps stay apart.
+    e2eMastraServer(env, { mastraAppDir: path.resolve(import.meta.dirname, "../mastra") }),
+  ],
 });
