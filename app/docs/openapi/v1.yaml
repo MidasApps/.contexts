@@ -6773,6 +6773,672 @@ paths:
       tags:
         - access
       x-auth: user
+  /v1/schedules:
+    get:
+      operationId: schedules.list
+      parameters:
+        - description: Organization to act in; required for users, and when given it must be an API key's own organization.
+          in: query
+          name: organizationId
+          required: false
+          schema:
+            minLength: 1
+            type: string
+            x-pii: none
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    items:
+                      $ref: "#/components/schemas/workflows.Schedule"
+                    type: array
+                required:
+                  - data
+                type: object
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: VALIDATION_FAILED
+          x-error-codes:
+            - VALIDATION_FAILED
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UNAUTHORIZED
+          x-error-codes:
+            - UNAUTHORIZED
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: FORBIDDEN
+          x-error-codes:
+            - FORBIDDEN
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: INTERNAL_ERROR
+          x-error-codes:
+            - INTERNAL_ERROR
+      security:
+        - bearerAuth: []
+      summary: Lists the organization's schedules with their next fire (core.schedule.read).
+      tags:
+        - schedules
+      x-auth: principal
+    post:
+      operationId: schedules.create
+      parameters:
+        - description: Organization to act in; required for users, and when given it must be an API key's own organization.
+          in: query
+          name: organizationId
+          required: false
+          schema:
+            minLength: 1
+            type: string
+            x-pii: none
+        - description: ULID; a retry with the same key and body replays the first response (24 h).
+          in: header
+          name: Idempotency-Key
+          required: false
+          schema:
+            format: ulid
+            pattern: ^[0-7][0-9A-HJKMNP-TV-Za-hjkmnp-tv-z]{25}$
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/workflows.CreateScheduleInput"
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: "#/components/schemas/workflows.Schedule"
+                required:
+                  - data
+                type: object
+          description: Created
+          headers:
+            Location:
+              description: URL of the created resource.
+              schema:
+                type: string
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: VALIDATION_FAILED
+          x-error-codes:
+            - VALIDATION_FAILED
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UNAUTHORIZED
+          x-error-codes:
+            - UNAUTHORIZED
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: FORBIDDEN
+          x-error-codes:
+            - FORBIDDEN
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: NOT_FOUND
+          x-error-codes:
+            - NOT_FOUND
+        "409":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: CONFLICT, IDEMPOTENCY_KEY_REUSED
+          x-error-codes:
+            - CONFLICT
+            - IDEMPOTENCY_KEY_REUSED
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: SCHEDULE_INTERVAL_TOO_SHORT, WORKFLOW_NOT_SCHEDULABLE
+          x-error-codes:
+            - SCHEDULE_INTERVAL_TOO_SHORT
+            - WORKFLOW_NOT_SCHEDULABLE
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: INTERNAL_ERROR
+          x-error-codes:
+            - INTERNAL_ERROR
+      security:
+        - bearerAuth: []
+      summary: Schedules a schedulable workflow on a 5-field cron in an IANA time zone; runs re-authorize the creator (core.schedule.write).
+      tags:
+        - schedules
+      x-auth: principal
+  /v1/schedules/{scheduleId}:
+    delete:
+      operationId: schedules.delete
+      parameters:
+        - description: Schedule id.
+          in: path
+          name: scheduleId
+          required: true
+          schema:
+            pattern: ^schedule_[a-z0-9-]{1,120}$
+            type: string
+            x-pii: none
+        - description: Organization to act in; required for users, and when given it must be an API key's own organization.
+          in: query
+          name: organizationId
+          required: false
+          schema:
+            minLength: 1
+            type: string
+            x-pii: none
+      responses:
+        "204":
+          description: No Content
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: VALIDATION_FAILED
+          x-error-codes:
+            - VALIDATION_FAILED
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UNAUTHORIZED
+          x-error-codes:
+            - UNAUTHORIZED
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: FORBIDDEN
+          x-error-codes:
+            - FORBIDDEN
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: NOT_FOUND
+          x-error-codes:
+            - NOT_FOUND
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: INTERNAL_ERROR
+          x-error-codes:
+            - INTERNAL_ERROR
+      security:
+        - bearerAuth: []
+      summary: Deletes a schedule (core.schedule.write).
+      tags:
+        - schedules
+      x-auth: principal
+    get:
+      operationId: schedules.get
+      parameters:
+        - description: Schedule id.
+          in: path
+          name: scheduleId
+          required: true
+          schema:
+            pattern: ^schedule_[a-z0-9-]{1,120}$
+            type: string
+            x-pii: none
+        - description: Organization to act in; required for users, and when given it must be an API key's own organization.
+          in: query
+          name: organizationId
+          required: false
+          schema:
+            minLength: 1
+            type: string
+            x-pii: none
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: "#/components/schemas/workflows.Schedule"
+                required:
+                  - data
+                type: object
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: VALIDATION_FAILED
+          x-error-codes:
+            - VALIDATION_FAILED
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UNAUTHORIZED
+          x-error-codes:
+            - UNAUTHORIZED
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: FORBIDDEN
+          x-error-codes:
+            - FORBIDDEN
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: NOT_FOUND
+          x-error-codes:
+            - NOT_FOUND
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: INTERNAL_ERROR
+          x-error-codes:
+            - INTERNAL_ERROR
+      security:
+        - bearerAuth: []
+      summary: Reads one schedule of the organization (core.schedule.read).
+      tags:
+        - schedules
+      x-auth: principal
+    patch:
+      operationId: schedules.update
+      parameters:
+        - description: Schedule id.
+          in: path
+          name: scheduleId
+          required: true
+          schema:
+            pattern: ^schedule_[a-z0-9-]{1,120}$
+            type: string
+            x-pii: none
+        - description: Organization to act in; required for users, and when given it must be an API key's own organization.
+          in: query
+          name: organizationId
+          required: false
+          schema:
+            minLength: 1
+            type: string
+            x-pii: none
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/workflows.UpdateScheduleInput"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: "#/components/schemas/workflows.Schedule"
+                required:
+                  - data
+                type: object
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: VALIDATION_FAILED
+          x-error-codes:
+            - VALIDATION_FAILED
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UNAUTHORIZED
+          x-error-codes:
+            - UNAUTHORIZED
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: FORBIDDEN
+          x-error-codes:
+            - FORBIDDEN
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: NOT_FOUND
+          x-error-codes:
+            - NOT_FOUND
+        "409":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: CONFLICT
+          x-error-codes:
+            - CONFLICT
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: SCHEDULE_INTERVAL_TOO_SHORT, WORKFLOW_NOT_SCHEDULABLE
+          x-error-codes:
+            - SCHEDULE_INTERVAL_TOO_SHORT
+            - WORKFLOW_NOT_SCHEDULABLE
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: INTERNAL_ERROR
+          x-error-codes:
+            - INTERNAL_ERROR
+      security:
+        - bearerAuth: []
+      summary: Changes a schedule's cron, time zone or input (core.schedule.write).
+      tags:
+        - schedules
+      x-auth: principal
+  /v1/schedules/{scheduleId}/pause:
+    post:
+      operationId: schedules.pause
+      parameters:
+        - description: Schedule id.
+          in: path
+          name: scheduleId
+          required: true
+          schema:
+            pattern: ^schedule_[a-z0-9-]{1,120}$
+            type: string
+            x-pii: none
+        - description: Organization to act in; required for users, and when given it must be an API key's own organization.
+          in: query
+          name: organizationId
+          required: false
+          schema:
+            minLength: 1
+            type: string
+            x-pii: none
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: "#/components/schemas/workflows.Schedule"
+                required:
+                  - data
+                type: object
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: VALIDATION_FAILED
+          x-error-codes:
+            - VALIDATION_FAILED
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UNAUTHORIZED
+          x-error-codes:
+            - UNAUTHORIZED
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: FORBIDDEN
+          x-error-codes:
+            - FORBIDDEN
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: NOT_FOUND
+          x-error-codes:
+            - NOT_FOUND
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: INTERNAL_ERROR
+          x-error-codes:
+            - INTERNAL_ERROR
+      security:
+        - bearerAuth: []
+      summary: Pauses a schedule; it does not fire until resumed (core.schedule.write).
+      tags:
+        - schedules
+      x-auth: principal
+  /v1/schedules/{scheduleId}/resume:
+    post:
+      operationId: schedules.resume
+      parameters:
+        - description: Schedule id.
+          in: path
+          name: scheduleId
+          required: true
+          schema:
+            pattern: ^schedule_[a-z0-9-]{1,120}$
+            type: string
+            x-pii: none
+        - description: Organization to act in; required for users, and when given it must be an API key's own organization.
+          in: query
+          name: organizationId
+          required: false
+          schema:
+            minLength: 1
+            type: string
+            x-pii: none
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: "#/components/schemas/workflows.Schedule"
+                required:
+                  - data
+                type: object
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: VALIDATION_FAILED
+          x-error-codes:
+            - VALIDATION_FAILED
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UNAUTHORIZED
+          x-error-codes:
+            - UNAUTHORIZED
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: FORBIDDEN
+          x-error-codes:
+            - FORBIDDEN
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: NOT_FOUND
+          x-error-codes:
+            - NOT_FOUND
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: INTERNAL_ERROR
+          x-error-codes:
+            - INTERNAL_ERROR
+      security:
+        - bearerAuth: []
+      summary: Resumes a schedule from now on; missed fires are not replayed (core.schedule.write).
+      tags:
+        - schedules
+      x-auth: principal
+  /v1/schedules/{scheduleId}/run:
+    post:
+      operationId: schedules.runNow
+      parameters:
+        - description: Schedule id.
+          in: path
+          name: scheduleId
+          required: true
+          schema:
+            pattern: ^schedule_[a-z0-9-]{1,120}$
+            type: string
+            x-pii: none
+        - description: Organization to act in; required for users, and when given it must be an API key's own organization.
+          in: query
+          name: organizationId
+          required: false
+          schema:
+            minLength: 1
+            type: string
+            x-pii: none
+      responses:
+        "202":
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    additionalProperties: false
+                    properties:
+                      scheduleId:
+                        description: Schedule that will start a run now.
+                        minLength: 1
+                        type: string
+                        x-pii: none
+                    required:
+                      - scheduleId
+                    type: object
+                required:
+                  - data
+                type: object
+          description: Accepted
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: VALIDATION_FAILED
+          x-error-codes:
+            - VALIDATION_FAILED
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UNAUTHORIZED
+          x-error-codes:
+            - UNAUTHORIZED
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: FORBIDDEN
+          x-error-codes:
+            - FORBIDDEN
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: NOT_FOUND
+          x-error-codes:
+            - NOT_FOUND
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: INTERNAL_ERROR
+          x-error-codes:
+            - INTERNAL_ERROR
+      security:
+        - bearerAuth: []
+      summary: Starts a run of the schedule now, with the creator re-authorized (core.schedule.write).
+      tags:
+        - schedules
+      x-auth: principal
   /v1/unit-types:
     get:
       operationId: tenancy.listUnitTypes
@@ -18389,7 +19055,7 @@ components:
         - createdAt: "2026-09-29T14:30:00.000Z"
           createdBy: uA1b2C3d4E5f6G7h8I9j
           cron: 0 9 * * *
-          id: schedule_Jd8sK2lPq0WnR5tYu3bV_daily-usage
+          id: schedule_3fa9c0e1b2d4a6f8-daily-usage
           inputData: {}
           lastFireAt: null
           nextFireAt: "2026-09-30T12:00:00.000Z"
@@ -18416,8 +19082,8 @@ components:
           type: string
           x-pii: none
         id:
-          description: "`schedule_<tenantId>_<slug>`."
-          pattern: ^schedule_[A-Za-z0-9]+_[a-z0-9-]+$
+          description: "`schedule_<tenant key>-<slug>`; the tenant key is the first 16 hex digits of SHA-256(tenantId), because Mastra slugifies ids."
+          pattern: ^schedule_[a-f0-9]{16}-[a-z0-9]+(?:-[a-z0-9]+)*$
           type: string
           x-pii: none
         inputData:

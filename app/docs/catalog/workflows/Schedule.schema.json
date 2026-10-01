@@ -6,7 +6,7 @@
       "createdAt": "2026-09-29T14:30:00.000Z",
       "createdBy": "uA1b2C3d4E5f6G7h8I9j",
       "cron": "0 9 * * *",
-      "id": "schedule_Jd8sK2lPq0WnR5tYu3bV_daily-usage",
+      "id": "schedule_3fa9c0e1b2d4a6f8-daily-usage",
       "inputData": {},
       "lastFireAt": null,
       "nextFireAt": "2026-09-30T12:00:00.000Z",
@@ -38,8 +38,8 @@
       "x-pii": "none"
     },
     "id": {
-      "description": "`schedule_<tenantId>_<slug>`.",
-      "pattern": "^schedule_[A-Za-z0-9]+_[a-z0-9-]+$",
+      "description": "`schedule_<tenant key>-<slug>`; the tenant key is the first 16 hex digits of SHA-256(tenantId), because Mastra slugifies ids.",
+      "pattern": "^schedule_[a-f0-9]{16}-[a-z0-9]+(?:-[a-z0-9]+)*$",
       "type": "string",
       "x-pii": "none"
     },

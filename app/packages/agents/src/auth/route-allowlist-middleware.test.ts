@@ -38,12 +38,16 @@ describe("createRouteAllowlistMiddleware", () => {
       ["GET", "/api/stored/agents"],
       ["POST", "/api/memory/save-messages"],
       ["POST", "/api/mcp/core/tools/catalog.listEntities/execute"],
+      // A raw schedule carries any request context: tenant schedules use /tenant-schedules (SP5).
+      ["GET", "/api/schedules"],
+      ["POST", "/api/schedules"],
+      ["POST", "/api/schedules/schedule_x/run"],
     ] as const) {
       expect(await run(method, path), `${method} ${path}`).toEqual({ nextCalled: false, status: 404 });
     }
   });
 
-  it("passes the agent, memory read, workflow, schedule, MCP, observability and dataset routes", async () => {
+  it("passes the agent, memory read, workflow, MCP, observability and dataset routes", async () => {
     for (const [method, path] of [
       ["POST", "/api/agents/x/stream"],
       ["POST", "/api/agents/x/generate"],
@@ -52,7 +56,6 @@ describe("createRouteAllowlistMiddleware", () => {
       ["GET", "/api/memory/threads/t1/messages"],
       ["DELETE", "/api/memory/threads/t1"],
       ["POST", "/api/workflows/knowledge-ingest/start-async"],
-      ["GET", "/api/schedules"],
       ["POST", "/api/mcp/core/mcp"],
       ["GET", "/api/observability/traces"],
       ["GET", "/api/datasets"],

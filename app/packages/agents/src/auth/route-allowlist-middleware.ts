@@ -14,7 +14,8 @@ const AGENT_ACTIONS = "generate|stream|approve-tool-call|decline-tool-call|appro
  * Everything else under the prefix answers 404, so a route added by a Mastra
  * upgrade stays closed until it is listed here. Closed on purpose: `/vectors`,
  * `/vector`, `/tools` (direct execution), `/v1/responses`, `/v1/conversations`,
- * `/stored/*`, memory writes and the REST tool execution of MCP servers.
+ * `/stored/*`, memory writes, the REST tool execution of MCP servers and `/schedules` (a raw
+ * schedule carries any request context; tenant schedules go through `/tenant-schedules`, SP5).
  */
 const ALLOWED_ROUTES: readonly RouteRule[] = [
   { methods: READ, pattern: /^\/agents$/ },
@@ -24,7 +25,6 @@ const ALLOWED_ROUTES: readonly RouteRule[] = [
   // The gateway deletes a conversation's thread (`deleteThread`).
   { methods: DELETE, pattern: /^\/memory\/threads\/[^/]+$/ },
   { methods: "any", pattern: /^\/workflows(?:\/[^/]+)*$/ },
-  { methods: "any", pattern: /^\/schedules(?:\/[^/]+)*$/ },
   { methods: "any", pattern: /^\/mcp\/[^/]+\/(?:mcp|sse|messages)$/ },
   { methods: READ, pattern: /^\/mcp\/[^/]+\/(?:tools|resources)$/ },
   { methods: "any", pattern: /^\/observability(?:\/[^/]+)*$/ },

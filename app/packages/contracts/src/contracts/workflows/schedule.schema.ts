@@ -21,7 +21,7 @@ export const CronExpressionSchema = z
     return fields.length === 5 && fields.every((field) => CRON_FIELD.test(field));
   }, { error: "Expected a 5-field cron expression." });
 
-/** Slug of a tenant schedule: its id is `schedule_<tenantId>_<slug>`. */
+/** Slug of a tenant schedule: its id is `schedule_<tenant key>-<slug>` (decision 0037 amendment). */
 export const ScheduleSlugSchema = z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, { error: "Expected a kebab-case slug." }).max(60);
 
 export const ScheduleStatusSchema = z.enum(["active", "paused"]);
@@ -32,7 +32,10 @@ const inputDataField = () => z.record(z.string(), z.unknown()).meta(personal("Wo
 
 /** A tenant schedule of a schedulable workflow (Mastra Schedules, decision 0037). */
 export const ScheduleSchema = z.strictObject({
-  id: z.string().regex(/^schedule_[A-Za-z0-9]+_[a-z0-9-]+$/).meta(none("`schedule_<tenantId>_<slug>`.")),
+  id: z
+    .string()
+    .regex(/^schedule_[a-f0-9]{16}-[a-z0-9]+(?:-[a-z0-9]+)*$/)
+    .meta(none("`schedule_<tenant key>-<slug>`; the tenant key is the first 16 hex digits of SHA-256(tenantId), because Mastra slugifies ids.")),
   tenantId: TenantIdSchema.meta(none("Organization that owns the schedule.")),
   workflowId: WorkflowIdSchema.meta(none("Scheduled workflow.")),
   cron: CronExpressionSchema.meta(none("5-field cron expression, evaluated in `timezone`.")),
@@ -53,7 +56,7 @@ export const ScheduleContract = defineContract(ScheduleSchema, {
   description: "A tenant schedule that starts a schedulable workflow on a cron expression in an IANA time zone.",
   examples: [
     {
-      id: `schedule_${EXAMPLE_IDS.organization}_daily-usage`,
+      id: "schedule_3fa9c0e1b2d4a6f8-daily-usage",
       tenantId: EXAMPLE_IDS.organization,
       workflowId: "usage-report",
       cron: "0 9 * * *",

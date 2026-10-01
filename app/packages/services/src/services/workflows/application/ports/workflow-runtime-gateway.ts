@@ -29,11 +29,11 @@ export type ListRunsQuery = {
 };
 
 export type ScheduleWriteInput = {
-  readonly workflowId?: string;
-  readonly slug?: string;
-  readonly cron?: string;
-  readonly timezone?: string;
-  readonly inputData?: Readonly<Record<string, unknown>>;
+  readonly workflowId?: string | undefined;
+  readonly slug?: string | undefined;
+  readonly cron?: string | undefined;
+  readonly timezone?: string | undefined;
+  readonly inputData?: Readonly<Record<string, unknown>> | undefined;
 };
 
 export type ScheduleAction = "pause" | "resume" | "run";

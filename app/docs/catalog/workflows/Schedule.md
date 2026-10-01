@@ -19,7 +19,7 @@ A tenant schedule that starts a schedulable workflow on a cron expression in an 
 | `createdAt` | yes | `none` | When the schedule was created (UTC). |  |
 | `createdBy` | yes | `personal` | Creator; every run re-authorizes this user. |  |
 | `cron` | yes | `none` | 5-field cron expression, evaluated in `timezone`. |  |
-| `id` | yes | `none` | `schedule_<tenantId>_<slug>`. |  |
+| `id` | yes | `none` | `schedule_<tenant key>-<slug>`; the tenant key is the first 16 hex digits of SHA-256(tenantId), because Mastra slugifies ids. |  |
 | `inputData` | yes | `personal` | Workflow input; validated by the workflow's own schema on the server. |  |
 | `lastFireAt` | yes | `none` | Last fire (UTC); null before the first. |  |
 | `nextFireAt` | yes | `none` | Next fire (UTC); null while paused. |  |
@@ -38,7 +38,7 @@ A tenant schedule that starts a schedulable workflow on a cron expression in an 
 ```json
 [
   {
-    "id": "schedule_Jd8sK2lPq0WnR5tYu3bV_daily-usage",
+    "id": "schedule_3fa9c0e1b2d4a6f8-daily-usage",
     "tenantId": "Jd8sK2lPq0WnR5tYu3bV",
     "workflowId": "usage-report",
     "cron": "0 9 * * *",

@@ -155,7 +155,8 @@ describe("workflow HITL with four eyes (Auth + Firestore emulators, real Mastra 
     expect(notes).toEqual([]);
     const approved = await decide("approveRequest", admin.uid, approvalRequestId);
     expect(approved).toMatchObject({ ok: true, data: { status: "executed", decidedBy: admin.uid } });
-    expect(notes).toEqual([expect.objectContaining({ title: "Supplier follow-up", principal: expect.objectContaining({ type: "user", uid: member.uid }) })]);
+    expect(notes).toHaveLength(1);
+    expect(notes[0]).toMatchObject({ title: "Supplier follow-up", principal: { type: "user", uid: member.uid } });
     expect(await runResult(runId)).toMatchObject({ outcome: "applied", approvalRequestId, decidedBy: admin.uid });
     // A second approval is refused by SP1 and a replayed settle finds nothing to resume.
     expect(await decide("approveRequest", admin.uid, approvalRequestId)).toMatchObject({ ok: false, error: { code: "CONFLICT" } });

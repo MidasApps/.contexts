@@ -282,6 +282,23 @@ export type WorkflowCommandPort = {
   }) => Promise<{ readonly ok: true; readonly output: unknown; readonly replayed: boolean } | { readonly ok: false; readonly code: string }>;
 };
 
+/** Kinds of the notices SP5 workflows send (decision 0037: paused schedule; decision 0039: budget alerts). */
+export type WorkflowNotificationKind = "SCHEDULE_PAUSED" | "BUDGET_ALERT";
+
+/**
+ * A notice to the people of a tenant: the recipient (a uid, or `null` for the tenant's owners and
+ * admins) and ids, numbers and codes only, never personal content. The delivery channel (e-mail,
+ * in-app inbox) is the binding's concern.
+ */
+export type WorkflowNotification = {
+  readonly tenantId: string;
+  readonly recipientUid: string | null;
+  readonly kind: WorkflowNotificationKind;
+  readonly data: Readonly<Record<string, string | number | boolean | null>>;
+};
+
+export type NotificationPort = { readonly notify: (notification: WorkflowNotification) => Promise<void> };
+
 export type AgentRuntimePorts = {
   readonly access: AccessPort;
   readonly audit: AuditPort;
@@ -300,4 +317,6 @@ export type AgentRuntimePorts = {
   /** SP5 workflow HITL (decision 0036). */
   readonly workflowApprovals: WorkflowApprovalPort;
   readonly workflowCommands: WorkflowCommandPort;
+  /** SP5 notices of scheduled and platform workflows (decisions 0037, 0039). */
+  readonly notifications: NotificationPort;
 };

@@ -30,6 +30,7 @@ export type {
   KnowledgeEventsPort,
   KnowledgePort,
   NodeRef,
+  NotificationPort,
   RegionalSettings,
   SecretStore,
   SemanticQueryPort,
@@ -41,6 +42,8 @@ export type {
   WorkflowApprovalPort,
   WorkflowApprovalRecord,
   WorkflowCommandPort,
+  WorkflowNotification,
+  WorkflowNotificationKind,
 } from "./runtime/runtime-ports.ts";
 export {
   type AgentModels,
@@ -404,3 +407,17 @@ export {
 } from "./workflows/steps/request-human-approval.step.ts";
 export { settleWorkflowApproval, type SettleSkipReason, type SettleWorkflowApprovalResult } from "./workflows/settle-workflow-approval.ts";
 export { createWorkflowApprovalRoutes, handleSettleWorkflowApproval, WORKFLOW_APPROVAL_SETTLE_PATH, type WorkflowApprovalRouteDeps } from "./workflows/workflow-approval-routes.ts";
+// SP5 workflow runs, catalog and tenant schedules (decisions 0037, 0040).
+export { createWorkflowCatalog, type ModuleWorkflow, policyOf, type WorkflowCatalog, type WorkflowPolicy } from "./workflows/workflow-catalog.ts";
+export { eventsOfRun, isTenantRun, SCHEDULE_ID_CONTEXT_KEY, type StoredRun, toWorkflowRunView } from "./workflows/runs/workflow-run-view.ts";
+export { createWorkflowRunRoutes, WORKFLOW_RUN_PERMISSIONS, WORKFLOW_RUN_ROUTES_PATTERN } from "./workflows/runs/workflow-run-routes.ts";
+export { checkSchedule, DEFAULT_MIN_INTERVAL_MINUTES, minIntervalMinutesOf, nextFires } from "./workflows/schedules/schedule-policy.ts";
+export { createTenantScheduleRoutes, TENANT_SCHEDULE_ROUTES_PATTERN } from "./workflows/schedules/tenant-schedule-routes.ts";
+export { scheduleIdOf, tenantKeyOf } from "./workflows/schedules/tenant-schedule-view.ts";
+export { ensurePlatformSchedules, PLATFORM_SCHEDULE_TIMEZONE, type PlatformSchedule, platformScheduleIdOf } from "./workflows/schedules/platform-schedules.ts";
+export {
+  createReauthorizeScheduleCreatorStep,
+  REAUTHORIZE_SCHEDULE_CREATOR_STEP_ID,
+  SCHEDULE_WRITE_PERMISSION,
+  ScheduleCreatorForbiddenError,
+} from "./workflows/steps/reauthorize-schedule-creator.step.ts";

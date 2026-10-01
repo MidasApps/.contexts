@@ -47,7 +47,7 @@ import { TENANCY_CONTRACTS } from "./contracts/tenancy/contracts.ts";
 import { TENANCY_ENDPOINTS } from "./contracts/tenancy/endpoints.ts";
 import { SP5_CONTRACTS } from "./contracts/sp5-contracts.ts";
 import { VOICE_ENDPOINTS } from "./contracts/voice/endpoints.ts";
-import { WORKFLOW_RUN_ENDPOINTS } from "./contracts/workflows/endpoints.ts";
+import { SCHEDULE_ENDPOINTS, WORKFLOW_RUN_ENDPOINTS } from "./contracts/workflows/endpoints.ts";
 import { RealtimeSessionContract, SpeechRequestContract, TranscriptionContract } from "./contracts/voice/voice.schema.ts";
 
 /** Every contract of the core; add new contracts here. `example.Note` is removable. */
@@ -107,8 +107,9 @@ export const CORE_ENDPOINTS: readonly EndpointDefinition[] = [
   // SP4 chat, conversation history and voice.
   ...CONVERSATIONS_ENDPOINTS,
   ...VOICE_ENDPOINTS,
-  // SP5 workflow runs.
+  // SP5 workflow runs and tenant schedules.
   ...WORKFLOW_RUN_ENDPOINTS,
+  ...SCHEDULE_ENDPOINTS,
 ];
 
 /** Builds a fresh registry with the core contracts (catalog scripts, apps at startup). */

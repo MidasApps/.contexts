@@ -516,3 +516,7 @@ export {
   cancelWorkflowRunEndpoint, getWorkflowRunEndpoint, listWorkflowRunsEndpoint, OrganizationQuerySchema, StartedWorkflowRunSchema,
   startWorkflowRunEndpoint, streamWorkflowRunEndpoint, WORKFLOW_RUN_ENDPOINTS, WorkflowRunStreamSchema,
 } from "./contracts/workflows/endpoints.ts";
+export {
+  createScheduleEndpoint, deleteScheduleEndpoint, getScheduleEndpoint, listSchedulesEndpoint, pauseScheduleEndpoint, resumeScheduleEndpoint,
+  runScheduleNowEndpoint, SCHEDULE_ENDPOINTS, ScheduleRunQueuedSchema, updateScheduleEndpoint,
+} from "./contracts/workflows/endpoints.ts";

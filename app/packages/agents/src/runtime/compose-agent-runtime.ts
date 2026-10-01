@@ -31,6 +31,9 @@ import { createApprovalDemoWorkflow } from "../workflows/approval-demo.workflow.
 import { createWorkflowApprovalRoutes } from "../workflows/workflow-approval-routes.ts";
 import { createWorkflowRunRoutes, WORKFLOW_RUN_ROUTES_PATTERN } from "../workflows/runs/workflow-run-routes.ts";
 import { createWorkflowChatRoutes } from "../chat/workflow-chat-route.ts";
+import { minIntervalMinutesOf } from "../workflows/schedules/schedule-policy.ts";
+import type { PlatformSchedule } from "../workflows/schedules/platform-schedules.ts";
+import { createTenantScheduleRoutes, TENANT_SCHEDULE_ROUTES_PATTERN } from "../workflows/schedules/tenant-schedule-routes.ts";
 import { createWorkflowCatalog, policyOf, type WorkflowCatalog, workflowIdOf, type WorkflowPolicy } from "../workflows/workflow-catalog.ts";
 import { coreFakeRules } from "../models/fake/fake-scenarios.ts";
 import { type AgentModels, createModelProvider, embeddingModelIdOf, type ModelFactoryEnv } from "../models/model-factory.ts";
@@ -67,7 +70,11 @@ export const MEMORY_VECTOR_KEY = "memory";
 export type ComposeAgentRuntimeArgs = {
   readonly env: ModelFactoryEnv &
     Pick<ObservabilityEnv, "OTEL_EXPORTER_OTLP_ENDPOINT"> &
-    Pick<WebClientEnv, "FIRECRAWL_API_KEY" | "FIRECRAWL_API_URL"> & { readonly AI_MEMORY_OBSERVATIONAL?: boolean; readonly MCP_REQUEST_STATE_KEY?: string };
+    Pick<WebClientEnv, "FIRECRAWL_API_KEY" | "FIRECRAWL_API_URL"> & {
+      readonly AI_MEMORY_OBSERVATIONAL?: boolean;
+      readonly MCP_REQUEST_STATE_KEY?: string;
+      readonly SCHEDULE_MIN_INTERVAL_MINUTES?: number | undefined;
+    };
   readonly ports: AgentRuntimePorts;
   /** `APP_MODULES` of `apps/mastra`, built with `defineAgentModule`. */
   readonly modules: readonly AgentModule[];
@@ -105,6 +112,8 @@ export type RuntimeParts = {
   readonly workflows: Record<string, AnyWorkflow>;
   /** Which workflows `/v1` may start and tenants may schedule (SP5). */
   readonly workflowCatalog: WorkflowCatalog;
+  /** Platform crons of core workflows; `apps/mastra` writes them with `ensurePlatformSchedules` at boot. */
+  readonly platformSchedules: readonly PlatformSchedule[];
   /** Core scorers (Task 27); the LLM judge only in real mode. */
   readonly scorers: Record<string, CoreScorer>;
   /** The core MCP server (`core`, Task 24); `/v1/mcp` reaches it through the gateway. */
@@ -183,13 +192,20 @@ const coreWorkflowMap = (args: ComposeAgentRuntimeArgs, models: AgentModels): Re
   return { [ingest.id]: ingest, [reindex.id]: reindex, [approvalDemo.id]: approvalDemo };
 };
 
-/** Core workflow policies (SP5 spec §3.2): only the HITL demo starts from `/v1`. */
-const CORE_WORKFLOW_FLAGS: Readonly<Record<string, { startable?: boolean; schedulable?: boolean }>> = {
+/**
+ * Core workflow policies (SP5 spec §3.2): only the HITL demo starts from `/v1`; platform crons (UTC)
+ * are written as Mastra Schedules rows at boot (`ensurePlatformSchedules`, decision 0037 amendment).
+ */
+const CORE_WORKFLOW_FLAGS: Readonly<Record<string, { startable?: boolean; schedulable?: boolean; platformCron?: string }>> = {
   "approval-demo": { startable: true },
+  "catalog-reindex": { platformCron: "0 3 * * *" },
 };
 
 /** Core and module workflows with the catalog of their policies (decisions 0037, 0040). */
-const collectWorkflows = (args: ComposeAgentRuntimeArgs, models: AgentModels): { workflows: Record<string, AnyWorkflow>; catalog: WorkflowCatalog } => {
+const collectWorkflows = (
+  args: ComposeAgentRuntimeArgs,
+  models: AgentModels,
+): { workflows: Record<string, AnyWorkflow>; catalog: WorkflowCatalog; platformSchedules: PlatformSchedule[] } => {
   const workflows = coreWorkflowMap(args, models);
   const policies: WorkflowPolicy[] = Object.keys(workflows).map((id) => policyOf(id, CORE_WORKFLOW_FLAGS[id]));
   for (const entry of args.modules.flatMap((module) => module.workflows ?? [])) {
@@ -198,7 +214,11 @@ const collectWorkflows = (args: ComposeAgentRuntimeArgs, models: AgentModels): {
     workflows[id] = entry.workflow;
     policies.push(policyOf(id, entry));
   }
-  return { workflows, catalog: createWorkflowCatalog(policies) };
+  const platformSchedules = Object.keys(workflows).flatMap((workflowId) => {
+    const cron = CORE_WORKFLOW_FLAGS[workflowId]?.platformCron;
+    return cron === undefined ? [] : [{ workflowId, cron }];
+  });
+  return { workflows, catalog: createWorkflowCatalog(policies), platformSchedules };
 };
 
 /** The supervisor calls no core tool itself; its subagents' calls are capped by their own ceilings. */
@@ -298,7 +318,7 @@ export const composeAgentRuntime = (args: ComposeAgentRuntimeArgs): RuntimeParts
   const prefix = apiPrefix === undefined ? {} : { apiPrefix };
   const voice = createVoice({ models });
   const chat = buildChat(agents, tools, toolDeps);
-  const { workflows, catalog: workflowCatalog } = collectWorkflows(args, models);
+  const { workflows, catalog: workflowCatalog, platformSchedules } = collectWorkflows(args, models);
   const contextMiddleware = (path?: string) =>
     createContextMiddleware({ auth, aiMode: args.env.AI_MODE, threadOwnerOf: threadOwnerFromStorage(args.storage), ...prefix, ...(path === undefined ? {} : { path }) });
   return {
@@ -306,6 +326,7 @@ export const composeAgentRuntime = (args: ComposeAgentRuntimeArgs): RuntimeParts
     subagents,
     workflows,
     workflowCatalog,
+    platformSchedules,
     scorers: createCoreScorers(models.mode === "real" ? { judgeModel: models.language("judge") } : {}),
     mcpServers: buildMcpServers(args, tools, toolDeps, agents[SUPERVISOR_AGENT_ID]),
     mcpOptions: { setRequestAuth: setMcpRequestAuth },
@@ -324,6 +345,7 @@ export const composeAgentRuntime = (args: ComposeAgentRuntimeArgs): RuntimeParts
       contextMiddleware(),
       contextMiddleware(CHAT_ROUTES_PATTERN),
       contextMiddleware(WORKFLOW_RUN_ROUTES_PATTERN),
+      contextMiddleware(TENANT_SCHEDULE_ROUTES_PATTERN),
     ],
     apiRoutes: [
       ...createVoiceRoutes({ voice, logger: processLogger }),
@@ -331,6 +353,7 @@ export const composeAgentRuntime = (args: ComposeAgentRuntimeArgs): RuntimeParts
       ...createWorkflowApprovalRoutes({ approvals: args.ports.workflowApprovals, logger: processLogger }),
       ...createWorkflowRunRoutes({ access: args.ports.access, catalog: workflowCatalog, logger: processLogger }),
       ...createWorkflowChatRoutes({ access: args.ports.access, catalog: workflowCatalog, logger: processLogger }),
+      ...createTenantScheduleRoutes({ access: args.ports.access, catalog: workflowCatalog, minIntervalMinutes: minIntervalMinutesOf(args.env), logger: processLogger }),
     ],
     tools,
     voice,

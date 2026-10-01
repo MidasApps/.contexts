@@ -41,3 +41,25 @@ through `mastra.schedules.*`. They use Croner, and the time zone defaults to the
 
 - **Cloud Scheduler + Functions.** A second scheduler, and workflow state split across hosts.
 - **Agent schedules (`agentId` + prompt).** Unattended agent loops; scheduled work is a workflow.
+
+## Amendments
+
+- **A1 — 2026-09-30 (SP5 Task 5): schedule ids, platform schedules and where the policy runs.**
+  - **Ids.** Mastra slugifies schedule ids (lowercase; `_` and case changes become `-`), so a raw
+    tenant id does not survive. A tenant schedule id is `schedule_<tenant key>-<slug>`, the tenant key
+    being the first 16 hex digits of SHA-256(tenantId). Ownership never comes from the id: it is
+    `metadata.tenantId`, written only by the runtime from the verified context.
+  - **Platform schedules are rows written at boot, not `createWorkflow({ schedule })`.** A declarative
+    schedule moves the workflow to Mastra's evented engine, which the core workflows do not use (they
+    run in process and in tests on the default engine). `ensurePlatformSchedules` creates or realigns
+    `schedule_platform-<workflowId>` rows in UTC, with no principal and no tenant metadata, and keeps
+    a row an operator paused paused. Measured on Postgres: a `* * * * *` tenant schedule fires on its
+    own on the default engine (scheduler tick 500 ms in the test, 10 s by default).
+  - **The policy runs in the runtime.** Tenant schedules are written through custom Mastra routes
+    (`/tenant-schedules/*`, behind the context middleware), which check `core.schedule.write`, the
+    `schedulable` flag, the workflow's input schema and the interval with Mastra's own Croner helpers
+    (`computeNextFireAt`, `validateCron`); no separate `croner` dependency. `/v1/schedules` authorizes
+    first and forwards the caller's Bearer. The raw `/api/schedules` routes are closed: a raw schedule
+    can carry any request context.
+  - **Notices.** The `NotificationPort` is bound to a structured log line (`workflow_notification`)
+    until a delivery channel exists.

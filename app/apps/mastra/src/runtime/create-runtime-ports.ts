@@ -35,6 +35,7 @@ import { bindKnowledgePort } from "./knowledge-port-binding.ts";
 import { bindProjectsPort } from "./projects-port-binding.ts";
 import { bindUsagePort } from "./usage-port-binding.ts";
 import { UNWIRED_PORTS } from "./unwired-ports.ts";
+import { createLogNotificationPort } from "./notifications-port-binding.ts";
 import { bindWorkflowApprovalsPort, bindWorkflowCommandsPort, RUNTIME_SIDE_SETTLER } from "./workflow-ports-binding.ts";
 
 export type RuntimePortsEnv = Pick<ServicesEnv, "API_KEY_PREFIX" | "DATABASE_URL" | "APP_ENV" | "AI_MODE" | "FIREBASE_STORAGE_EMULATOR_HOST" | "FIREBASE_PROJECT_ID"> & {
@@ -140,5 +141,6 @@ export const createRuntimePorts = (args: {
     projects: bindProjectsPort({ tenancy: core.tenancy, access: core.access }),
     workflowApprovals: bindWorkflowApprovalsPort(core.approvals),
     workflowCommands: bindWorkflowCommandsPort({ executors: agentCommandExecutors(executors), access: core.access, commands }),
+    notifications: createLogNotificationPort(args.logger),
   };
 };

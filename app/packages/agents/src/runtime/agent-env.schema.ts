@@ -56,6 +56,8 @@ export const AgentEnvSchema = z.object({
   MASTRA_PUBSUB: optionalValue(z.enum(["memory", "gcp"])),
   // Unset: `auto` in local, `skip` elsewhere (decision 0023).
   MASTRA_STORAGE_INIT: optionalValue(z.enum(["auto", "skip"])),
+  // Minimum minutes between two fires of a tenant schedule (decision 0037); below 15 only in local.
+  SCHEDULE_MIN_INTERVAL_MINUTES: optionalValue(z.coerce.number().int().min(1).max(1440)),
   USAGE_SINK: z.enum(["none", "bigquery"]).default("none"),
   BIGQUERY_DATASET_AI_OBSERVABILITY: z
     .string()

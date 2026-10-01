@@ -21,6 +21,8 @@ import type {
   UsagePort,
   WebContentPort,
   WebPage,
+  NotificationPort,
+  WorkflowNotification,
 } from "../runtime/runtime-ports.ts";
 import type { StoredFile } from "@core/contracts";
 
@@ -267,8 +269,23 @@ export const createFakeRuntimePorts = (overrides: Partial<AgentRuntimePorts> = {
   projects: createFakeProjectsPort(),
   workflowApprovals: createFakeWorkflowApprovalPort(),
   workflowCommands: createFakeWorkflowCommandPort(),
+  notifications: createRecordingNotificationPort(),
   ...overrides,
 });
+
+export type RecordingNotificationPort = NotificationPort & { readonly sent: WorkflowNotification[] };
+
+/** Records every notice (SP5 paused schedules and budget alerts). */
+export const createRecordingNotificationPort = (): RecordingNotificationPort => {
+  const sent: WorkflowNotification[] = [];
+  return {
+    sent,
+    notify: (notification) => {
+      sent.push(notification);
+      return Promise.resolve();
+    },
+  };
+};
 
 type WorkflowApprovalRequestInput = Parameters<WorkflowApprovalPort["requestWorkflowApproval"]>[0];
 

@@ -29,3 +29,5 @@ export { createMastraWorkflowGateway, DEFAULT_WORKFLOW_GATEWAY_TIMEOUT_MS, type 
 export { encodeDone, encodeError, encodeWorkflowEvent, resumeIndexOf, SSE_HEADERS } from "./adapters/driven/workflow-event-sse.ts";
 export { buildWorkflowRunsRoutes, WORKFLOW_RUN_PERMISSIONS, type WorkflowRunsRouteDeps } from "./adapters/driving/workflow-runs-route-handler.ts";
 export { buildWorkflowRunStreamRoutes, STREAM_TIMING, type WorkflowRunStreamDeps } from "./adapters/driving/workflow-run-stream-route-handler.ts";
+// Tenant schedules (SP5 Task 5, decision 0037).
+export { buildSchedulesRoutes, SCHEDULE_PERMISSIONS, type SchedulesRouteDeps } from "./adapters/driving/schedules-route-handler.ts";

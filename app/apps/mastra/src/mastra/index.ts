@@ -1,4 +1,5 @@
-import { createPubSub } from "@core/agents";
+import { createPubSub, ensurePlatformSchedules } from "@core/agents";
+import { processLogger } from "@core/services";
 import { Mastra } from "@mastra/core";
 import { PinoLogger } from "@mastra/loggers";
 import { env, processEnvForFirebaseGuard } from "../env.ts";
@@ -28,4 +29,10 @@ export const mastra = new Mastra({
   // `memory` in local, Google Cloud Pub/Sub elsewhere (Task 25); the GCP adapter loads lazily.
   pubsub: await createPubSub(env),
   server: { ...buildServerConfig(env), auth: runtime.auth, middleware: runtime.middleware, apiRoutes: runtime.apiRoutes, mcpOptions: runtime.mcpOptions },
+});
+
+// Platform crons of the core workflows (UTC, decision 0037 amendment). A failure is logged and the
+// server still starts: the next boot writes the rows again.
+await ensurePlatformSchedules({ schedules: mastra.schedules, specs: runtime.platformSchedules, logger: processLogger }).catch((error: unknown) => {
+  processLogger.error("platform_schedules_failed", { err: error });
 });
