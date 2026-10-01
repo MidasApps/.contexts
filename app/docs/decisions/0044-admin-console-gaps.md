@@ -2,7 +2,7 @@
 
 - **Status:** accepted
 - **Date:** 2026-10-01
-- **Scope:** `app/packages/contracts/src/contracts/platform/admin-user*.ts`, `app/packages/services/src/services/platform` (admin user directory, handler), `app/packages/services/src/services/shared/{text,firestore}` (search text, `users.searchName`, backfill), the three writers of `users/{uid}`, `app/scripts/backfill-user-search-names.ts`, `app/apps/web/src/app/v1/admin/users`, `app/packages/client/src/{entities/admin-user,views/admin-users}` (local decision; the framework is unchanged)
+- **Scope:** `app/packages/contracts/src/contracts/platform/{admin-user*,organization-admin.schema,admin-endpoints}.ts`, the organization list and detail use cases and store (`countMembers`), `app/packages/client/src/{entities/admin-organization,views/admin-organizations,views/admin-organization-detail}`, `app/packages/services/src/services/platform` (admin user directory, handler), `app/packages/services/src/services/shared/{text,firestore}` (search text, `users.searchName`, backfill), the three writers of `users/{uid}`, `app/scripts/backfill-user-search-names.ts`, `app/apps/web/src/app/v1/admin/users`, `app/packages/client/src/{entities/admin-user,views/admin-users}` (local decision; the framework is unchanged)
 - **Records:** SP5 plan Task 13b (the API gaps listed in `docs/plans/2026-09-29-sp5-workflows-admin/reports/task-12-13.md`)
 - **Relates to:** decisions 0006 (tenancy and access), 0041 (admin composition), 0042 (admin UI), 0043 (staff operations endpoints)
 
@@ -75,6 +75,65 @@ emails, and a display name keeps its case and accents.
   proves too narrow.
 - **Firebase Auth `getUserByEmail`.** Exact email only, and it would answer accounts that have no
   profile in the app.
+
+## 2. One organization and server-side organization search
+
+### Context
+
+`/admin/organizations/:id` found its organization in the list (no read by id, no member count),
+and the list page read up to 2 000 organizations and filtered them in the browser. Firestore has no
+substring search. Memberships are grants: one person may hold several (organization, project,
+unit), and a person invited to one project has no grant at the organization node.
+
+### Decision
+
+1. **`GET /v1/admin/organizations/{organizationId}`** (`admin.getOrganization`, `requireStaff`
+   with `platform.organization.read` and `targetTenantId`): the list row plus `memberCount`
+   (`platform.OrganizationAdminDetail`); 404 when the organization does not exist or is deleted.
+2. **Member count = distinct users holding a live grant at any node of the organization**, the
+   same people the organization's members list shows. Devices are not counted. Firestore `count()`
+   cannot count distinct values, so the store reads the live user grants of the tenant with a
+   field mask (`principalId` only) and deduplicates them, up to 10 000 grants
+   (`MEMBER_COUNT_GRANT_LIMIT`). The query has equality filters only (`tenantId`, `principalType`,
+   `deletedAt`), served by the automatic single-field indexes: no new composite index.
+3. **`GET /v1/admin/organizations` takes `query` and `status`.** The server reads live
+   organizations in id order (batches of 200) and keeps those whose name or id contains every word
+   of the text, case and accents ignored (`normalizeSearchText`), and whose status matches. Plan,
+   budget and cost are computed for the rows of the page only.
+   - It looks for one match more than the page holds, so `hasMore` is exact.
+   - One call reads at most 2 000 organizations (`ORGANIZATION_SCAN_BUDGET`). When the budget ends
+     first, the page is short (maybe empty) with `hasMore: true`, and its cursor continues the scan.
+   - The cursor is the id of the last row returned (or of the last organization read).
+   - **An exact organization id always hits:** on the first page the organization with that id is
+     read directly and comes first; the scan skips it, so it never appears twice.
+   - Without `query` and `status` the list is unchanged.
+4. **Client.** The detail page reads the new endpoint. The list page keeps `q` and `status` in the
+   URL (an organization name is not personal data), waits 300 ms after typing before it asks, and
+   pages by cursor (previous and next; loaded pages stay cached). Organization writes update the
+   cached detail from the response and invalidate the searched lists.
+
+### Consequences
+
+- Staff find an organization by any word of its name, not only by its start, with no stored
+  search field, no backfill and no change to the tenancy writers.
+- A search costs one document read per live organization until the page fills. That is fine for
+  thousands of organizations; beyond tens of thousands a search for a rare word takes several
+  "next" clicks through short pages. Follow-up at that size: a stored normalized name with a
+  prefix range, as `users.searchName`.
+- The page number left the URL (cursors are opaque), and the list no longer shows a total count.
+- An organization with more than 10 000 live user grants shows a member count that stops growing.
+- `AdminOrganizationFilter` (the picker of traces, flags, workflows, connectors and support
+  access) and the costs page still read the whole list, bounded at 2 000 organizations.
+
+### Alternatives rejected
+
+- **A stored `searchName` with a prefix range, as for users.** Prefix only ("sul" would not find
+  "Grupo Sul"), plus a backfill and a change to every writer of `organizations`; organizations are
+  few enough to scan.
+- **`count()` of the grants at the organization node.** It would miss people who only hold a
+  project or unit grant and count nobody twice only by accident.
+- **A member counter on the organization document.** Every grant and revoke would have to
+  maintain it transactionally; a follow-up if the count read becomes costly.
 
 ## 8. Names for user ids in admin lists (`GET /v1/admin/users?ids=`)
 
