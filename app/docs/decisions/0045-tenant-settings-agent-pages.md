@@ -4,7 +4,7 @@
 - **Date:** 2026-10-01
 - **Scope:** `app/packages/client/src/{views/settings-*,features,entities}` (agents, skills, knowledge, connectors, workflows, approvals, usage, traces, evals, flags), `app/packages/client/src/shared/lib/router`, `app/packages/contracts/src/contracts/{sp5-settings-endpoints.ts,agents/agent-catalog.schema.ts,workflows/workflow-catalog.schema.ts,access/endpoints.ts,knowledge/endpoints.ts}`, `app/packages/services/src/services/{usage,workflows,access,knowledge}` (handlers), `app/packages/agents/src/runtime/tenant-catalog-routes.ts`, `app/apps/web/src/app/v1/{agents,workflows,usage,me/grants,approval-requests/[approvalRequestId]}` (local decision; the framework is unchanged)
 - **Records:** SP5 spec §7, §3.4; plan Task 14
-- **Relates to:** decisions 0012 (route map), 0022 (knowledge namespaces), 0027 (connectors), 0029 (skills), 0030 A7 (grants), 0037, 0038, 0039, 0040, 0042
+- **Relates to:** decisions 0012 (route map), 0022 (knowledge namespaces), 0027 (connectors), 0029 (skills), 0030 A7 (grants), 0037, 0038, 0039, 0040, 0042, 0044 (staff agent catalog)
 
 ## Context
 
@@ -39,7 +39,12 @@ knowledge base?", so the pages must be exact about what an organization can and 
    their input (`z.toJSONSchema`). `/v1` exposes them as `GET /v1/agents`
    (`core.agent-settings.read`) and `GET /v1/workflows` (`core.workflow-run.read`) through the
    workflow gateway. One agent that fails to resolve is listed without tools; the list never fails
-   for it.
+   for it. This is not the staff catalog of decision 0044 (`GET /v1/admin/agents`): that one has
+   no user Bearer and no tenant, and lists what each definition declares
+   (`AgentDefinition.catalog`). The tenant catalog is a user call and resolves the tools of that
+   organization, connector tools included, plus its enabled state. Both read the same built
+   agents; the tenant route should take source and module from the definitions instead of the id
+   prefix (follow-up).
 4. **Usage.** `GET /v1/usage?organizationId=&month=` (`core.usage.read`) answers the existing
    `usage.UsageSummary` use case. The tenant is the authorized organization.
 5. **Approvals.** `GET /v1/approval-requests/{approvalRequestId}` reads one request with
