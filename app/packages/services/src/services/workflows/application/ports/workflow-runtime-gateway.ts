@@ -1,9 +1,9 @@
-import type { Schedule, WorkflowEvent, WorkflowRun, WorkflowRunStatus } from "@core/contracts";
+import type { AgentCatalogEntry, Schedule, WorkflowCatalogEntry, WorkflowEvent, WorkflowRun, WorkflowRunStatus } from "@core/contracts";
 import type { AgentCallScope } from "../../../agents/application/ports/agent-runtime-gateway.ts";
 
 /**
  * Driven port of `/v1` to the SP5 custom Mastra routes of workflow runs and tenant schedules
- * (`/workflow-runs/*`, `/tenant-schedules/*`; decisions 0037 and 0040). The runtime reads the
+ * and of the tenant catalogs (`/workflow-runs/*`, `/tenant-schedules/*`, `/tenant-catalog/*`; decisions 0037 and 0040). The runtime reads the
  * tenant and the caller from the verified Bearer and authorizes again; these routes are ours, so
  * their envelope codes (an allowlist) pass through, unlike Mastra's built-in error bodies.
  */
@@ -50,4 +50,8 @@ export type WorkflowRuntimeGateway = {
   readonly updateSchedule: (scope: AgentCallScope, scheduleId: string, input: ScheduleWriteInput) => Promise<WorkflowGatewayResult<Schedule>>;
   readonly actOnSchedule: (scope: AgentCallScope, scheduleId: string, action: ScheduleAction) => Promise<WorkflowGatewayResult<Schedule | { readonly scheduleId: string }>>;
   readonly deleteSchedule: (scope: AgentCallScope, scheduleId: string) => Promise<WorkflowGatewayResult<null>>;
+  /** The subagents of the caller's tenant with their tools and skills (`/tenant-catalog/agents`, SP5 Task 14). */
+  readonly listAgentCatalog: (scope: AgentCallScope) => Promise<WorkflowGatewayResult<AgentCatalogEntry[]>>;
+  /** The workflows the tenant may start or schedule (`/tenant-catalog/workflows`, SP5 Task 14). */
+  readonly listWorkflowCatalog: (scope: AgentCallScope) => Promise<WorkflowGatewayResult<WorkflowCatalogEntry[]>>;
 };

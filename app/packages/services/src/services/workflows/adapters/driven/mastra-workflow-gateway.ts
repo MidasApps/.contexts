@@ -1,4 +1,4 @@
-import { ScheduleSchema, WorkflowEventSchema, WorkflowRunSchema } from "@core/contracts";
+import { AgentCatalogEntrySchema, ScheduleSchema, WorkflowCatalogEntrySchema, WorkflowEventSchema, WorkflowRunSchema } from "@core/contracts";
 import { z } from "zod";
 import type { AgentCallScope } from "../../../agents/application/ports/agent-runtime-gateway.ts";
 import { mapMastraStatus, UPSTREAM_TIMEOUT, UPSTREAM_UNAVAILABLE } from "../../../agents/adapters/driven/mastra-error-mapper.ts";
@@ -25,6 +25,8 @@ const EventsSchema = z.object({ data: z.object({ run: WorkflowRunSchema, events:
 const StartedSchema = z.object({ data: z.object({ runId: z.string().min(1) }) });
 const ScheduleListSchema = z.object({ data: z.array(ScheduleSchema) });
 const ScheduleOneSchema = z.object({ data: ScheduleSchema });
+const AgentCatalogSchema = z.object({ data: z.array(AgentCatalogEntrySchema) });
+const WorkflowCatalogSchema = z.object({ data: z.array(WorkflowCatalogEntrySchema) });
 const ScheduleActedSchema = z.object({ data: z.union([ScheduleSchema, z.object({ scheduleId: z.string().min(1) })]) });
 
 export type MastraWorkflowGatewayOptions = {
@@ -102,5 +104,7 @@ export const createMastraWorkflowGateway = (options: MastraWorkflowGatewayOption
     updateSchedule: (scope, id, input) => map(send(scope, { method: "PATCH", path: `/tenant-schedules/${segment(id)}`, body: input }, ScheduleOneSchema), (body) => body.data),
     actOnSchedule: (scope, id, action) => map(send(scope, { method: "POST", path: `/tenant-schedules/${segment(id)}/${action}` }, ScheduleActedSchema), (body) => body.data),
     deleteSchedule: (scope, id) => send(scope, { method: "DELETE", path: `/tenant-schedules/${segment(id)}` }, null),
+    listAgentCatalog: (scope) => map(send(scope, { method: "GET", path: "/tenant-catalog/agents" }, AgentCatalogSchema), (body) => body.data),
+    listWorkflowCatalog: (scope) => map(send(scope, { method: "GET", path: "/tenant-catalog/workflows" }, WorkflowCatalogSchema), (body) => body.data),
   };
 };

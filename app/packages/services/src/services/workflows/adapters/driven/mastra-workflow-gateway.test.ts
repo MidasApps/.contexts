@@ -42,6 +42,18 @@ describe("createMastraWorkflowGateway", () => {
     expect(await gatewayAnswering(500, { error: { code: "WORKFLOW_NOT_STARTABLE" } }).gateway.getRun(scope, "run-1")).toEqual({ ok: false, error: { code: "UPSTREAM_UNAVAILABLE", status: 502 } });
   });
 
+  it("reads the tenant catalogs and refuses an entry that breaks the contract", async () => {
+    const agent = { key: "knowledge", name: "Knowledge", description: "x", source: "core", moduleId: null, enabled: true, tools: [{ id: "knowledge.searchKnowledge", kind: "read", source: "core" }], skills: [] };
+    const { gateway, seen } = gatewayAnswering(200, { data: [agent] });
+    expect(await gateway.listAgentCatalog(scope)).toEqual({ ok: true, data: [agent] });
+    expect(seen[0]?.url).toBe("http://mastra:4111/tenant-catalog/agents");
+    const workflows = gatewayAnswering(200, { data: [{ id: "usage-report", description: "x", startable: false, schedulable: true, inputSchema: null }] });
+    expect(await workflows.gateway.listWorkflowCatalog(scope)).toMatchObject({ ok: true, data: [{ id: "usage-report", schedulable: true }] });
+    expect(workflows.seen[0]?.url).toBe("http://mastra:4111/tenant-catalog/workflows");
+    const leaky = gatewayAnswering(200, { data: [{ ...agent, instructions: "system prompt" }] });
+    expect(await leaky.gateway.listAgentCatalog(scope)).toEqual({ ok: false, error: { code: "UPSTREAM_UNAVAILABLE", status: 502 } });
+  });
+
   it("refuses a success body that breaks the contract", async () => {
     expect(await gatewayAnswering(200, { data: { runId: 1 } }).gateway.getRun(scope, "run-1")).toEqual({ ok: false, error: { code: "UPSTREAM_UNAVAILABLE", status: 502 } });
   });

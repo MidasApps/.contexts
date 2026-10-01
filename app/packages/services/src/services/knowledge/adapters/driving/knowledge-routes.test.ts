@@ -12,6 +12,8 @@ import { buildKnowledgeSourcesRoutes } from "./knowledge-sources-route-handler.t
 
 const ORG_A = "OrgAaaaaaaaaaaaaaaaaa";
 const ORG_B = "OrgBbbbbbbbbbbbbbbbbb";
+const PROJECT_A = "ProjAaaaaaaaaaaaaaaaa";
+const PROJECT_B = "ProjBbbbbbbbbbbbbbbbb";
 const DOC_ID = "01928f6e-7b2a-7c3d-9e4f-5a6b7c8d9e0f";
 const REGIONAL: RegionalSettings = { locale: "pt-BR", displayTimeZone: "America/Sao_Paulo", nodeTimeZone: "America/Sao_Paulo", currency: "BRL" };
 
@@ -55,7 +57,7 @@ const fakeRepository = (): KnowledgeRepository & { deleted: string[] } => {
 const readyFile = { id: "file-1", tenantId: ORG_A, purpose: "knowledge", status: "ready" } as StoredFile;
 
 const setup = () => {
-  const { pipeline } = makeInMemoryPipeline({
+  const { pipeline, store } = makeInMemoryPipeline({
     now: "2026-09-29T12:00:00.000Z",
     members: [
       { uid: "alice", tenantId: ORG_A, role: "admin" },
@@ -63,6 +65,8 @@ const setup = () => {
       { uid: "bob", tenantId: ORG_B, role: "admin" },
     ],
   });
+  store.putProject({ id: PROJECT_A, tenantId: ORG_A });
+  store.putProject({ id: PROJECT_B, tenantId: ORG_B });
   const repository = fakeRepository();
   const launched: WorkflowStartInput[] = [];
   const gateway = {
@@ -74,7 +78,13 @@ const setup = () => {
   const getReadyFile: GetReadyFile = ({ fileId }) =>
     Promise.resolve(fileId === "file-1" ? { ok: true, data: readyFile } : fileId === "pending" ? { ok: false, error: { code: "FILE_NOT_READY" } } : { ok: false, error: { code: "FILE_NOT_FOUND" } });
   const resolveAccessContext: ResolveAccessContext = ({ principal, node }) =>
-    Promise.resolve(node.level === "organization" ? { tenantId: node.tenantId, principal, permissions: [], regional: REGIONAL } : null);
+    Promise.resolve(
+      node.level === "organization"
+        ? { tenantId: node.tenantId, principal, permissions: [], regional: REGIONAL }
+        : node.level === "project"
+          ? { tenantId: node.tenantId, projectId: node.projectId, principal, permissions: [], regional: REGIONAL }
+          : null,
+    );
   const routes = {
     ...buildKnowledgeDocumentsRoutes({ pipeline, knowledge: createKnowledgeServices({ repository, embeddingModel: "fake/fake-embedding" }) }),
     ...buildKnowledgeSourcesRoutes({ pipeline, gateway, getReadyFile, resolveAccessContext }),
@@ -121,6 +131,22 @@ describe("POST /v1/organizations/{organizationId}/knowledge/sources", () => {
     expect(await response.json()).toEqual({ data: { runId: "run-42" } });
     expect(launched).toHaveLength(1);
     expect(launched[0]).toMatchObject({ workflowId: "knowledge-ingest", inputData: { source: { kind: "file", fileId: "file-1" } }, scope: { bearer: "alice-token", tenantId: ORG_A, regional: REGIONAL } });
+  });
+
+  it("indexes for one project when asked: authorized at the project, which goes into the run scope", async () => {
+    const { routes, launched } = setup();
+    const response = await callRoute(routes, "knowledge.addSource", `${sources(ORG_A)}?projectId=${PROJECT_A}`, { method: "POST", as: "alice", body: { kind: "url", url: "https://docs.example.com" } });
+    expect(response.status).toBe(202);
+    expect(launched[0]).toMatchObject({ scope: { tenantId: ORG_A, projectId: PROJECT_A } });
+  });
+
+  it("refuses a project of another organization and an unknown project without starting a run", async () => {
+    const { routes, launched } = setup();
+    for (const projectId of [PROJECT_B, "ProjNoneeeeeeeeeeeee0"]) {
+      const response = await callRoute(routes, "knowledge.addSource", `${sources(ORG_A)}?projectId=${projectId}`, { method: "POST", as: "alice", body: { kind: "url", url: "https://docs.example.com" } });
+      expect([403, 404]).toContain(response.status);
+    }
+    expect(launched).toEqual([]);
   });
 
   it("needs core.knowledge.write and a ready knowledge file of the organization", async () => {

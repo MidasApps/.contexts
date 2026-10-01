@@ -31,3 +31,5 @@ export { buildWorkflowRunsRoutes, WORKFLOW_RUN_PERMISSIONS, type WorkflowRunsRou
 export { buildWorkflowRunStreamRoutes, STREAM_TIMING, type WorkflowRunStreamDeps } from "./adapters/driving/workflow-run-stream-route-handler.ts";
 // Tenant schedules (SP5 Task 5, decision 0037).
 export { buildSchedulesRoutes, SCHEDULE_PERMISSIONS, type SchedulesRouteDeps } from "./adapters/driving/schedules-route-handler.ts";
+// Tenant catalogs of the settings pages (SP5 Task 14): agents with tools and skills, startable and schedulable workflows.
+export { buildTenantCatalogRoutes, TENANT_CATALOG_PERMISSIONS, type TenantCatalogRouteDeps } from "./adapters/driving/tenant-catalog-route-handler.ts";

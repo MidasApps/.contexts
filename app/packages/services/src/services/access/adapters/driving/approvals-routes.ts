@@ -1,6 +1,7 @@
 import {
   approveApprovalRequestEndpoint,
   createApprovalRequestEndpoint,
+  getApprovalRequestEndpoint,
   listApprovalRequestsEndpoint,
   rejectApprovalRequestEndpoint,
 } from "@core/contracts";
@@ -30,7 +31,7 @@ const approvalErrorResponse = (error: Error & { readonly code: string }, request
 
 /**
  * `/v1` approval handlers (SP1 spec §6.5, §7.3): list and create under an organization,
- * approve and reject by id. Approving answers 200 with the request after its single
+ * read, approve and reject by id. Approving answers 200 with the request after its single
  * execution (`executed` or `failed`).
  */
 export const buildApprovalsRoutes = (deps: { pipeline: ApiRouteDeps; approvals: ApprovalServices }): Record<string, RouteHandler> => {
@@ -46,6 +47,10 @@ export const buildApprovalsRoutes = (deps: { pipeline: ApiRouteDeps; approvals: 
       const result = await approvals.requestApproval({ principal, access: scope, tenantId: input.params.organizationId, input: input.body, requestId });
       if (!result.ok) return approvalErrorResponse(result.error, requestId);
       return dataResponse({ data: result.data }, { status: 201, location: `/v1/approval-requests/${result.data.id}` });
+    }),
+    [getApprovalRequestEndpoint.id]: withApiRoute(getApprovalRequestEndpoint, pipeline, async ({ principal, input, scope, requestId }) => {
+      const result = await approvals.readApprovalRequest({ actor: principal, access: scope, approvalRequestId: input.params.approvalRequestId });
+      return result.ok ? dataResponse({ data: result.data }) : approvalErrorResponse(result.error, requestId);
     }),
     [approveApprovalRequestEndpoint.id]: withApiRoute(approveApprovalRequestEndpoint, pipeline, async ({ principal, input, scope, requestId }) => {
       const result = await approvals.approveRequest({ actor: principal, access: scope, approvalRequestId: input.params.approvalRequestId, reason: input.body.reason, requestId });

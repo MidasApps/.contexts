@@ -19,6 +19,8 @@ import {
   buildKnowledgeSourcesRoutes,
   buildMcpRoutes,
   buildSchedulesRoutes,
+  buildTenantCatalogRoutes,
+  buildUsageRoutes,
   buildVoiceRoutes,
   buildWorkflowRunsRoutes,
   buildWorkflowRunStreamRoutes,
@@ -36,6 +38,8 @@ import {
   createObservabilityServices,
   createPostgresPromptServices,
   createPostgresTraceCosts,
+  createPostgresUsageRepository,
+  createUsageServices,
   flagEnvironmentDefaults,
   createFirestoreConversationsServices,
   createKnowledgeServices,
@@ -142,6 +146,9 @@ export const buildRuntimeRoutes = async (core: CoreServer): Promise<CoreRoutes> 
     ...buildWorkflowRunsRoutes(workflowDeps),
     ...buildWorkflowRunStreamRoutes(workflowDeps),
     ...buildSchedulesRoutes(workflowDeps),
+    // SP5 tenant settings (Task 14): the runtime's agent and workflow catalogs, and the usage summary of the ledger.
+    ...buildTenantCatalogRoutes(workflowDeps),
+    ...buildUsageRoutes({ pipeline: core.pipeline, getUsageSummary: createUsageServices({ repository: createPostgresUsageRepository(sql), clock: core.pipeline.clock }).getUsageSummary }),
     // SP4 chat (decisions 0031-0033): conversation metadata in Firestore, the stream from Mastra.
     ...buildChatRoutes(chatDeps),
     ...buildConversationsRoutes(chatDeps),

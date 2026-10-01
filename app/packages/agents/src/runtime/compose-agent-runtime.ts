@@ -44,6 +44,7 @@ import { minIntervalMinutesOf } from "../workflows/schedules/schedule-policy.ts"
 import type { PlatformSchedule } from "../workflows/schedules/platform-schedules.ts";
 import { gateScheduleFires } from "../workflows/schedules/schedule-fire-gate.ts";
 import { createTenantScheduleRoutes, TENANT_SCHEDULE_ROUTES_PATTERN } from "../workflows/schedules/tenant-schedule-routes.ts";
+import { createTenantCatalogRoutes, TENANT_CATALOG_ROUTES_PATTERN } from "./tenant-catalog-routes.ts";
 import { createWorkflowCatalog, policyOf, type WorkflowCatalog, workflowIdOf, type WorkflowPolicy } from "../workflows/workflow-catalog.ts";
 import { coreFakeRules } from "../models/fake/fake-scenarios.ts";
 import { type AgentModels, createModelProvider, embeddingModelIdOf, type ModelFactoryEnv } from "../models/model-factory.ts";
@@ -405,6 +406,7 @@ export const composeAgentRuntime = (args: ComposeAgentRuntimeArgs): RuntimeParts
       contextMiddleware(CHAT_ROUTES_PATTERN, MAX_CHAT_BODY_BYTES),
       contextMiddleware(WORKFLOW_RUN_ROUTES_PATTERN),
       contextMiddleware(TENANT_SCHEDULE_ROUTES_PATTERN),
+      contextMiddleware(TENANT_CATALOG_ROUTES_PATTERN),
       // Voice routes (SP4 Task 7): the caller's context for the budget, ledger and audit; body capped first.
       contextMiddleware(VOICE_ROUTES_PATTERN, MAX_AUDIO_BYTES),
     ],
@@ -425,6 +427,16 @@ export const composeAgentRuntime = (args: ComposeAgentRuntimeArgs): RuntimeParts
       ...createWorkflowRunRoutes({ access: args.ports.access, catalog: workflowCatalog, logger: processLogger }),
       ...createWorkflowChatRoutes({ access: args.ports.access, catalog: workflowCatalog, logger: processLogger }),
       ...createTenantScheduleRoutes({ access: args.ports.access, catalog: workflowCatalog, minIntervalMinutes: minIntervalMinutesOf(args.env), logger: processLogger }),
+      // SP5 tenant settings (Task 14): the subagents, tools, skills and workflows an organization has, read only.
+      ...createTenantCatalogRoutes({
+        access: args.ports.access,
+        subagents,
+        moduleIds: args.modules.map((module) => module.id),
+        isRegisteredTool: tools.has,
+        settings: args.ports.settings,
+        catalog: workflowCatalog,
+        logger: processLogger,
+      }),
     ],
     tools,
     voice,

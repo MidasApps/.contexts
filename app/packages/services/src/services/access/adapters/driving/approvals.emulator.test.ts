@@ -74,6 +74,11 @@ describe("approval requests (emulator)", () => {
     expect(created.headers.get("location")).toBe(`/v1/approval-requests/${request.id}`);
     expect(request).toMatchObject({ status: "pending", requestedBy: { type: "user", id: "apr-member" } });
 
+    // The Location is readable by a member of the organization; an unknown id is 404 (SP5 Task 14).
+    const read = await harness.call("access.getApprovalRequest", { method: "GET", path: `/v1/approval-requests/${request.id}`, as: "apr-admin" });
+    expect((await body(read)).data).toMatchObject({ id: request.id, status: "pending" });
+    expect((await harness.call("access.getApprovalRequest", { method: "GET", path: "/v1/approval-requests/NoSuchRequest0000000", as: "apr-admin" })).status).toBe(404);
+
     const self = await decide("approve", request.id, "apr-member");
     expect(self.status).toBe(403);
     expect((await body(self)).error?.code).toBe("SELF_APPROVAL_FORBIDDEN");

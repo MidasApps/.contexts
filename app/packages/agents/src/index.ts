@@ -421,6 +421,14 @@ export { eventsOfRun, isTenantRun, SCHEDULE_ID_CONTEXT_KEY, type StoredRun, toWo
 export { createWorkflowRunRoutes, WORKFLOW_RUN_PERMISSIONS, WORKFLOW_RUN_ROUTES_PATTERN } from "./workflows/runs/workflow-run-routes.ts";
 export { checkSchedule, DEFAULT_MIN_INTERVAL_MINUTES, minIntervalMinutesOf, nextFires } from "./workflows/schedules/schedule-policy.ts";
 export { createTenantScheduleRoutes, TENANT_SCHEDULE_ROUTES_PATTERN } from "./workflows/schedules/tenant-schedule-routes.ts";
+export {
+  createTenantCatalogRoutes,
+  TENANT_CATALOG_AGENTS_PATH,
+  TENANT_CATALOG_PERMISSIONS,
+  TENANT_CATALOG_ROUTES_PATTERN,
+  TENANT_CATALOG_WORKFLOWS_PATH,
+  type TenantCatalogRouteDeps,
+} from "./runtime/tenant-catalog-routes.ts";
 export { scheduleIdOf, tenantKeyOf } from "./workflows/schedules/tenant-schedule-view.ts";
 export { ensurePlatformSchedules, PLATFORM_SCHEDULE_TIMEZONE, type PlatformSchedule, platformScheduleIdOf } from "./workflows/schedules/platform-schedules.ts";
 export {

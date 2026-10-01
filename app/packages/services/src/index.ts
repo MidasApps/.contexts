@@ -661,6 +661,7 @@ export { createFirestoreApprovalRequestRepository } from "./services/access/inde
 // SP5 workflow runs, progress stream and tenant schedules (decisions 0037, 0040).
 export {
   buildSchedulesRoutes,
+  buildTenantCatalogRoutes,
   buildWorkflowRunsRoutes,
   buildWorkflowRunStreamRoutes,
   createMastraWorkflowGateway,
@@ -769,6 +770,8 @@ export {
   type ConsoleServices,
 } from "./services/platform/index.ts";
 export { AGENT_SETTINGS_PERMISSIONS, buildAgentSettingsRoutes } from "./services/agents/adapters/driving/agent-settings-route-handler.ts";
+// SP5 tenant settings (Task 14): the month usage summary of an organization.
+export { buildUsageRoutes, USAGE_READ_PERMISSION } from "./services/usage/adapters/driving/usage-route-handler.ts";
 export { resolveTenantCaps, selfCapWithin, type TenantCaps } from "./services/usage/domain/budget-policy.ts";
 // SP5 prompt store (Task 9, decision 0038): append-only Postgres versions and activations, eval gate.
 export { buildPromptRoutes, PROMPT_PERMISSIONS } from "./services/agents/adapters/driving/prompts-route-handler.ts";

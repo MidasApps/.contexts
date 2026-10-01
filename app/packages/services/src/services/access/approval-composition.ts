@@ -7,6 +7,7 @@ import { createApprovalHandlerRegistry, type ApprovalHandlerRegistry } from "./a
 import type { ApprovalActionHandler } from "./application/ports/driven/approval-action-handler.ts";
 import { makeApproveRequest, type ApproveRequest } from "./application/use-cases/approve-request.ts";
 import { makeListApprovalRequests, type ListApprovalRequests } from "./application/use-cases/list-approval-requests.ts";
+import { makeReadApprovalRequest, type ReadApprovalRequest } from "./application/use-cases/read-approval-request.ts";
 import { makeRejectRequest, type RejectRequest } from "./application/use-cases/reject-request.ts";
 import { makeRequestApproval, type RequestApproval } from "./application/use-cases/request-approval.ts";
 import {
@@ -22,6 +23,8 @@ export type ApprovalServices = {
   /** Route and in-process entry (SP3 tool approvals, SP5 workflow HITL). */
   readonly requestApproval: RequestApproval;
   readonly listApprovalRequests: ListApprovalRequests;
+  /** One request for a caller who may read the organization's approvals (the inbox detail page). */
+  readonly readApprovalRequest: ReadApprovalRequest;
   readonly approveRequest: ApproveRequest;
   readonly rejectRequest: RejectRequest;
   /** System read with the effective status (SP5 workflow HITL, decision 0036). */
@@ -37,6 +40,7 @@ export type ApprovalServices = {
 export const createApprovalServices = (deps: ApprovalDeps): ApprovalServices => ({
   requestApproval: makeRequestApproval(deps),
   listApprovalRequests: makeListApprovalRequests(deps),
+  readApprovalRequest: makeReadApprovalRequest(deps),
   approveRequest: makeApproveRequest(deps),
   rejectRequest: makeRejectRequest(deps),
   getApprovalRequest: makeGetApprovalRequest(deps),
