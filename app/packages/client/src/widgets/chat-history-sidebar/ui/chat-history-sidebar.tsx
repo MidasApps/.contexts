@@ -5,6 +5,7 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { SquarePenIcon } from "lucide-react";
 import { useEffect, useId, useRef, useState } from "react";
 import { useTranslations } from "use-intl";
+import { agentNameOf, ASSISTANT_AGENT_ID, useChatAgents } from "#/entities/chat-agent/index.ts";
 import { ConversationItem, conversationsQuery } from "#/entities/conversation/index.ts";
 import { ConversationActionsMenu, HistorySearch, RenameConversationForm } from "#/features/chat-history/index.ts";
 import { useCallEndpoint } from "#/shared/api/api-context.tsx";
@@ -91,6 +92,10 @@ export function ChatHistorySidebar({ organizationId, projectId, activeConversati
   }, [renamingId]);
 
   const conversations: readonly Conversation[] = query.data ?? [];
+  const tAgents = useTranslations("chat.agents");
+  const agents = useChatAgents(organizationId);
+  const agentNameFor = (agentId: string): string | undefined =>
+    agentId === ASSISTANT_AGENT_ID ? undefined : (agentNameOf({ agentId, agents: agents.data, assistant: tAgents("assistant") }) ?? tAgents("unknown"));
   const state = <ListState query={query} q={q} archived={archived} online={online} />;
 
   return (
@@ -128,6 +133,7 @@ export function ChatHistorySidebar({ organizationId, projectId, activeConversati
                 conversation={conversation}
                 to={{ id: "chat", organizationId, projectId: conversation.projectId ?? projectId, conversationId: conversation.id }}
                 active={conversation.id === activeConversationId}
+                agentName={agentNameFor(conversation.agentId)}
                 onNavigate={onNavigate}
                 editing={renamingId === conversation.id ? <RenameConversationForm organizationId={organizationId} conversation={conversation} onDone={() => setRenamingId(undefined)} /> : undefined}
                 actions={<ConversationActionsMenu organizationId={organizationId} conversation={conversation} onRename={() => setRenamingId(conversation.id)} onDeleted={onDeleted} />}

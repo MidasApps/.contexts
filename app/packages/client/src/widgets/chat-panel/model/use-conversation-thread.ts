@@ -16,6 +16,8 @@ export type ConversationThread = {
   readonly olderCursor: string | undefined;
   /** A run is streaming on the server: the thread re-attaches to it (decision 0031). */
   readonly resume: boolean;
+  /** The agent that answers this conversation (fixed when it started, decision 0046). */
+  readonly agentId: string;
 };
 
 const PAGE = 50;
@@ -65,7 +67,7 @@ export const useConversationThread = (args: { organizationId: string; conversati
           fetchMessagePage(callEndpoint, conversationId, undefined, signal),
         ]);
         const resume = conversation.data.activeRunId !== null;
-        return { ...page, messages: resume ? withoutAnswerInFlight(page.messages) : page.messages, resume };
+        return { ...page, messages: resume ? withoutAnswerInFlight(page.messages) : page.messages, resume, agentId: conversation.data.agentId };
       }),
   });
 };

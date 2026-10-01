@@ -312,6 +312,16 @@
     "openHistory": "Conversas",
     "historyPanel": "Histórico de conversas"
   },
+  "agents": {
+    "label": "Agente",
+    "assistant": "Assistente",
+    "loading": "Carregando agentes…",
+    "error": "Não foi possível carregar os agentes.",
+    "retry": "Tentar de novo",
+    "onlyAssistant": "Nenhum agente da organização disponível.",
+    "unknown": "Agente da organização",
+    "current": "Agente: {name}"
+  },
   "voice": {
     "talk": "Falar: segure para gravar",
     "stopRecording": "Parar a gravação e transcrever",

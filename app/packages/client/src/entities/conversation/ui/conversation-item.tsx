@@ -20,6 +20,8 @@ export type ConversationItemProps = {
   /** Trailing control (the actions menu of the history feature). */
   actions?: ReactNode;
   onNavigate?: (() => void) | undefined;
+  /** The organization's agent that answers it (decision 0046); nothing for the assistant. */
+  agentName?: string | undefined;
 };
 
 /**
@@ -27,7 +29,7 @@ export type ConversationItemProps = {
  * used (relative, with the exact time as the tooltip and for screen readers), and what qualifies
  * it in words — pinned, answering now — never an icon or colour alone.
  */
-export function ConversationItem({ conversation, to, active = false, editing, actions, onNavigate }: ConversationItemProps) {
+export function ConversationItem({ conversation, to, active = false, editing, actions, onNavigate, agentName }: ConversationItemProps) {
   const t = useTranslations("chat.history");
   const format = useFormatter();
   const now = useNow();
@@ -49,6 +51,7 @@ export function ConversationItem({ conversation, to, active = false, editing, ac
               {t("pinned")}
             </span>
           ) : null}
+          {agentName === undefined ? null : <span data-slot="conversation-agent" className="truncate">{agentName}</span>}
           {conversation.activeRunId === null ? null : <span>{t("answering")}</span>}
           <time dateTime={conversation.lastMessageAt} title={formatDateTime(conversation.lastMessageAt)}>
             {format.relativeTime(new Date(conversation.lastMessageAt), now)}

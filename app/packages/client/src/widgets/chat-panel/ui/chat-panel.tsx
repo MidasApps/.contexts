@@ -3,8 +3,10 @@
 import { CORE_CONTRACTS, type ContractDefinition } from "@core/contracts";
 import type { ChatTransport, UIMessage } from "ai";
 import { SquarePenIcon } from "lucide-react";
-import { useId, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useId, useMemo, useState, type ReactNode } from "react";
 import { useTranslations } from "use-intl";
+import { agentNameOf, ASSISTANT_AGENT_ID, useChatAgents } from "#/entities/chat-agent/index.ts";
+import { AgentPicker } from "#/features/chat-agent-picker/index.ts";
 import type { UseUploadQueueArgs } from "#/features/chat-upload/index.ts";
 import type { ComposerVoiceProps, ReadAloudActionProps } from "#/features/chat-voice/index.ts";
 import { CORE_UI_COMPONENTS, createUiRegistry, type UiRegistry, type UiRegistryEntry } from "#/features/generative-ui/index.ts";
@@ -71,9 +73,27 @@ const CORE_SUGGESTIONS = ["capabilities", "knowledge", "data", "create"] as cons
 
 type ThreadEnvironment = { readonly uiRegistry: UiRegistry; readonly contracts: readonly ContractDefinition[] };
 
-function StoredThread(props: { thread: Thread; conversationId: string; panel: ChatPanelProps; environment: ThreadEnvironment; suggestions: readonly ChatSuggestion[]; onStarted: (id: string) => void; onRecover: () => void }) {
+type StoredThreadProps = {
+  thread: Thread;
+  conversationId: string;
+  panel: ChatPanelProps;
+  environment: ThreadEnvironment;
+  suggestions: readonly ChatSuggestion[];
+  assistantName: string | undefined;
+  onStarted: (id: string) => void;
+  onRecover: () => void;
+  /** The stored conversation names its agent once it has loaded. */
+  onAgent: (agentId: string) => void;
+};
+
+function StoredThread(props: StoredThreadProps) {
   const t = useTranslations("chat");
   const history = useConversationThread({ organizationId: props.panel.scope.organizationId, conversationId: props.conversationId, attempt: props.thread.attempt });
+  const loadedAgent = history.data?.agentId;
+  const { onAgent } = props;
+  useEffect(() => {
+    if (loadedAgent !== undefined) onAgent(loadedAgent);
+  }, [loadedAgent, onAgent]);
   if (history.isPending) return <LoadingState label={t("panel.loadingHistory")} rows={5} className="p-4" />;
   if (history.isError) {
     return (
@@ -95,6 +115,7 @@ function StoredThread(props: { thread: Thread; conversationId: string; panel: Ch
       olderCursor={history.data.olderCursor}
       resume={history.data.resume}
       showReasoning={props.panel.showReasoning}
+      assistantName={props.assistantName}
       suggestions={props.suggestions}
       onConversationStarted={props.onStarted}
       onTurnSettled={props.panel.onTurnSettled}
@@ -114,6 +135,35 @@ function StoredThread(props: { thread: Thread; conversationId: string; panel: Ch
 }
 
 /**
+ * The header of the panel: the title, which agent answers — a picker while the conversation is
+ * new, its name once it exists (the server keeps the agent of a stored conversation) — and
+ * "new conversation".
+ */
+function ChatPanelHeader(props: { titleId: string; organizationId: string; agentId: string; fixed: boolean; agentName: string; onPick: (agentId: string) => void; onNew: () => void }) {
+  const t = useTranslations("chat");
+  return (
+    <header className="flex min-h-12 shrink-0 flex-wrap items-center justify-between gap-x-3 gap-y-1 border-b border-border px-4 py-1.5">
+      <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1">
+        <h2 id={props.titleId} className="truncate text-sm font-semibold text-foreground">
+          {t("panel.title")}
+        </h2>
+        {props.fixed ? (
+          <p data-slot="conversation-agent" className="truncate text-[12.5px] text-muted-foreground">
+            {t("agents.current", { name: props.agentName })}
+          </p>
+        ) : (
+          <AgentPicker organizationId={props.organizationId} value={props.agentId} onChange={props.onPick} />
+        )}
+      </div>
+      <Button variant="ghost" size="sm" onClick={props.onNew}>
+        <SquarePenIcon aria-hidden="true" />
+        {t("panel.newConversation")}
+      </Button>
+    </header>
+  );
+}
+
+/**
  * The chat widget shared by web and desktop (SP4 spec §5): header, message log, status line and
  * composer, for a new conversation or a stored one (loaded, then resumed when a run is still
  * streaming). It fills its container — the chat view or the shell's right panel — and lays
@@ -129,11 +179,22 @@ export function ChatPanel(props: ChatPanelProps) {
     [uiComponents, contracts],
   );
   const [thread, setThread] = useState<Thread>(() => threadFor(0, conversationId));
+  // The agent picked for a new conversation, or the one a stored conversation names.
+  const [agentId, setAgentId] = useState<string>(ASSISTANT_AGENT_ID);
+  const agents = useChatAgents(props.scope.organizationId);
+  const knownName = agentNameOf({ agentId, agents: agents.data, assistant: t("agents.assistant") });
+  const agentName = knownName ?? t("agents.unknown");
+  // Messages carry the agent's own name; the assistant's keep their usual label.
+  const assistantName = agentId === ASSISTANT_AGENT_ID ? undefined : agentName;
+  const newScope = useMemo(() => (agentId === ASSISTANT_AGENT_ID ? props.scope : { ...props.scope, agentId }), [agentId, props.scope]);
 
   // The owner of the URL moved to another conversation: start that thread. When it only caught
   // up with the id this thread got from the server, nothing remounts (the answer is streaming).
   if (conversationId !== thread.prop) {
-    setThread(conversationId === thread.conversationId ? { ...thread, prop: conversationId } : threadFor(thread.key + 1, conversationId));
+    const caughtUp = conversationId === thread.conversationId;
+    setThread(caughtUp ? { ...thread, prop: conversationId } : threadFor(thread.key + 1, conversationId));
+    // Another conversation: a stored one names its agent once loaded, a new one starts with the assistant.
+    if (!caughtUp) setAgentId(ASSISTANT_AGENT_ID);
   }
 
   const started = (id: string) => {
@@ -143,6 +204,7 @@ export function ChatPanel(props: ChatPanelProps) {
 
   const startNew = () => {
     setThread((current) => ({ ...threadFor(current.key + 1, undefined), prop: current.prop, fresh: true }));
+    setAgentId(ASSISTANT_AGENT_ID);
     onConversationChange?.(undefined);
   };
 
@@ -152,19 +214,20 @@ export function ChatPanel(props: ChatPanelProps) {
 
   return (
     <section data-slot="chat-panel" aria-labelledby={titleId} className={cn("@container/chat flex h-full min-h-0 flex-col bg-background", props.className)}>
-      <header className="flex h-12 shrink-0 items-center justify-between gap-2 border-b border-border px-4">
-        <h2 id={titleId} className="truncate text-sm font-semibold text-foreground">
-          {t("panel.title")}
-        </h2>
-        <Button variant="ghost" size="sm" onClick={startNew}>
-          <SquarePenIcon aria-hidden="true" />
-          {t("panel.newConversation")}
-        </Button>
-      </header>
+      <ChatPanelHeader
+        titleId={titleId}
+        organizationId={props.scope.organizationId}
+        agentId={agentId}
+        fixed={thread.conversationId !== undefined}
+        agentName={agentName}
+        onPick={setAgentId}
+        onNew={startNew}
+      />
       {thread.storedId === undefined ? (
         <ChatThread
           key={thread.key}
-          scope={props.scope}
+          scope={newScope}
+          assistantName={assistantName}
           focusOnMount={thread.fresh}
           showReasoning={props.showReasoning}
           suggestions={suggestions}
@@ -183,7 +246,18 @@ export function ChatPanel(props: ChatPanelProps) {
           speechSeams={props.speechSeams}
         />
       ) : (
-        <StoredThread key={thread.key} thread={thread} conversationId={thread.storedId} panel={props} environment={environment} suggestions={suggestions} onStarted={started} onRecover={recover} />
+        <StoredThread
+          key={thread.key}
+          thread={thread}
+          conversationId={thread.storedId}
+          panel={props}
+          environment={environment}
+          suggestions={suggestions}
+          assistantName={assistantName}
+          onStarted={started}
+          onRecover={recover}
+          onAgent={setAgentId}
+        />
       )}
     </section>
   );

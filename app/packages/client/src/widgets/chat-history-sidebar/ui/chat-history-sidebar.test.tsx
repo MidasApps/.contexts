@@ -1,7 +1,7 @@
 import { act, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { expectNoAxeViolations } from "#/shared/testing/axe.ts";
-import { apiError, createFakeApi, type FakeApi } from "#/shared/testing/fake-api.ts";
+import { apiError, createFakeApi, ok, type FakeApi } from "#/shared/testing/fake-api.ts";
 import { IDS } from "#/shared/testing/fixtures.ts";
 import { renderWithClient } from "#/shared/testing/render-client.tsx";
 import { TooltipProvider } from "#/shared/ui/atoms/Tooltip/Tooltip.tsx";
@@ -49,6 +49,24 @@ const setOnline = (online: boolean): void => {
 afterEach(() => setOnline(true));
 
 describe("ChatHistorySidebar", () => {
+  it("names the organization's agent of a conversation, and nothing for the assistant", async () => {
+    const store = seed();
+    store.items[0] = buildConversation(A, { title: "Plano de integração", agentId: "Ag4sK2lPq0WnR5tYu3bV" });
+    store.items[1] = buildConversation(B, { title: "Dúvidas de faturamento", agentId: "AgGone00000000000001" });
+    const api = createFakeApi({ "GET /v1/chat-agents": ok([{ id: "Ag4sK2lPq0WnR5tYu3bV", name: "Onboarding guide", description: "", source: "custom" }]) });
+    setup({}, store, api);
+    const first = (await screen.findByRole("link", { name: "Plano de integração" }, LOADED)).closest("li");
+    await waitFor(() => expect(first?.querySelector("[data-slot=conversation-agent]")?.textContent).toBe("Onboarding guide"));
+    const second = screen.getByRole("link", { name: "Dúvidas de faturamento" }).closest("li");
+    expect(second?.querySelector("[data-slot=conversation-agent]")?.textContent).toBe("Agente da organização");
+  });
+
+  it("shows no agent for conversations with the assistant", async () => {
+    setup();
+    const first = (await screen.findByRole("link", { name: "Plano de integração" }, LOADED)).closest("li");
+    expect(first?.querySelector("[data-slot=conversation-agent]")).toBeNull();
+  });
+
   it("lists the active conversations, most recent first, linking each to its chat route", async () => {
     const { container, titles } = setup({ activeConversationId: A });
     const first = await screen.findByRole("link", { name: "Plano de integração" }, LOADED);

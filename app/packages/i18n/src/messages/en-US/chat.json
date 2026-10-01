@@ -312,6 +312,16 @@
     "openHistory": "Conversations",
     "historyPanel": "Conversation history"
   },
+  "agents": {
+    "label": "Agent",
+    "assistant": "Assistant",
+    "loading": "Loading agents…",
+    "error": "Could not load the agents.",
+    "retry": "Try again",
+    "onlyAssistant": "No organization agent available.",
+    "unknown": "Organization agent",
+    "current": "Agent: {name}"
+  },
   "voice": {
     "talk": "Talk: hold to record",
     "stopRecording": "Stop recording and transcribe",

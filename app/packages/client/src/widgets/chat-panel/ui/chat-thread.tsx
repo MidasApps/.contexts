@@ -37,6 +37,8 @@ export type ChatThreadProps = {
   /** Focus the composer when the thread mounts (the member asked for a new conversation). */
   focusOnMount?: boolean | undefined;
   showReasoning?: boolean | undefined;
+  /** Name of the agent that answers, on its messages; the assistant by default. */
+  assistantName?: string | undefined;
   suggestions: readonly ChatSuggestion[];
   onConversationStarted?: ((conversationId: string) => void) | undefined;
   /** The turn on screen stopped being busy (answered, stopped, failed or lost). */
@@ -201,6 +203,7 @@ export function ChatThread(props: ChatThreadProps) {
                   streaming={busy && last && message.role === "assistant"}
                   interrupted={message.id === session.interruptedMessageId}
                   showReasoning={props.showReasoning}
+                  assistantName={props.assistantName}
                   renderTool={renderTool}
                   actions={
                     message.role === "assistant" && settled ? (
@@ -212,7 +215,7 @@ export function ChatThread(props: ChatThreadProps) {
             })
           )}
           {waitingFirstChunk ? (
-            <Message from="assistant" author={t("message.assistant")} aria-hidden="true" data-slot="pending-answer">
+            <Message from="assistant" author={props.assistantName ?? t("message.assistant")} aria-hidden="true" data-slot="pending-answer">
               <MessageContent>
                 <Shimmer>{t("status.responding")}</Shimmer>
               </MessageContent>
