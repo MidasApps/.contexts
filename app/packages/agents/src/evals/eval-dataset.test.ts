@@ -1,5 +1,8 @@
+import { mkdirSync, mkdtempSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import path from "node:path";
 import { describe, expect, it } from "vitest";
-import { datasetFileOf, EVAL_AGENT_IDS, loadEvalDataset, parseEvalDataset } from "./eval-dataset.ts";
+import { datasetFileOf, EVAL_AGENT_IDS, loadEvalDataset, parseEvalDataset, resolveEvalsDir } from "./eval-dataset.ts";
 
 describe("eval datasets", () => {
   it.each(EVAL_AGENT_IDS)("%s.v1.jsonl has 10-30 valid cases with unique ids", (agentId) => {
@@ -24,5 +27,19 @@ describe("eval datasets", () => {
     expect(dataset.cases).toEqual([
       { id: "a", input: "Which entities exist?", tags: [], groundTruth: { expectedTools: ["catalog.listEntities"], forbiddenTools: [], expectCitations: false, foreignMarkers: [] } },
     ]);
+  });
+
+  it("finds the bundled copy first and falls back to the package folder", () => {
+    const root = mkdtempSync(path.join(tmpdir(), "evals-dir-"));
+    try {
+      const bundled = path.join(root, "output", "evals");
+      const source = path.join(root, "package", "evals");
+      mkdirSync(path.join(source, "datasets"), { recursive: true });
+      expect(resolveEvalsDir([bundled, source])).toBe(source);
+      mkdirSync(path.join(bundled, "datasets"), { recursive: true });
+      expect(resolveEvalsDir([bundled, source])).toBe(bundled);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
   });
 });

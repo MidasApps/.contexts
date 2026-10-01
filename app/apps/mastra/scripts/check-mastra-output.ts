@@ -4,11 +4,14 @@
 //    installed again when that changed;
 // 1. the nested `pnpm install` of `.mastra/output` must resolve every package it shares with
 //    the workspace to a version of the workspace lockfile (no silent drift);
-// 2. `pnpm audit --prod --audit-level high` must pass on the output's own lockfile.
-// `--no-audit` skips step 2 (offline builds); CI and the image build run both steps.
+// 2. every agent asset file (instructions, skills, eval datasets and baselines) must be in the
+//    output next to the bundle (`AGENT_ASSETS`; prompt evals answered 502 without the eval sets);
+// 3. `pnpm audit --prod --audit-level high` must pass on the output's own lockfile.
+// `--no-audit` skips step 3 (offline builds); CI and the image build run every step.
 import { spawnSync } from "node:child_process";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
+import { AGENT_ASSETS, missingBundledAssets } from "../src/build/agent-assets.ts";
 import { findPinDrift } from "../src/build/mastra-output-pins.ts";
 import { mergeWorkspaceOverrides } from "../src/build/output-overrides.ts";
 
@@ -41,6 +44,11 @@ if (drift.length > 0) {
   fail(`the build output resolves ${drift.length} shared package(s) off the workspace lockfile:\n${lines.join("\n")}`);
 }
 process.stdout.write("[check-mastra-output] output pins match the workspace lockfile\n");
+
+const assets = AGENT_ASSETS.map((asset) => ({ ...asset, source: path.resolve(APP_DIR, asset.source) }));
+const missing = missingBundledAssets({ assets, outputDir: OUTPUT_DIR });
+if (missing.length > 0) fail(`the build output lacks ${missing.length} agent asset file(s):\n${missing.map((file) => `  ${file}`).join("\n")}`);
+process.stdout.write(`[check-mastra-output] agent assets present: ${AGENT_ASSETS.map((asset) => asset.bundled).join(", ")}\n`);
 
 if (!process.argv.includes("--no-audit")) {
   const audit = pnpmIn("audit --prod --audit-level high");

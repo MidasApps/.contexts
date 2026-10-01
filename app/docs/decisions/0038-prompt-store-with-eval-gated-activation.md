@@ -80,3 +80,10 @@ write, the author, a timestamp, rollback, and an evaluation before a production 
   - **Seeds.** `pnpm seed:local` imports each code seed as platform version 1 and activates it,
     marked forced with the reason that the CI eval gate covers it; a rerun skips agents that
     already have a version.
+- **2026-10-01 — eval sets in the Mastra bundle (backend fixes).** The built service answered 502 to
+  every prompt eval: `EVALS_DIR` resolved to `apps/mastra/evals` from the bundle. `copy-agent-assets`
+  now copies `packages/agents/evals` (datasets and baselines) into `public/evals`, served next to the
+  bundle like the instructions and skills; `EVALS_DIR` takes the bundled copy first, then the package
+  folder. `check-mastra-output` fails the build when any instructions, skills or eval file of the
+  sources is missing from the output. Measured: `mastra build`, then `node index.mjs` with
+  `AI_MODE=fake` answers 200 `passed` for a platform `data` version, and 502 with the copy removed.

@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { z } from "zod";
 import { type EvalGroundTruth, EvalGroundTruthSchema } from "../scorers/eval-ground-truth.schema.ts";
@@ -15,8 +15,21 @@ export type EvalAgentId = (typeof EVAL_AGENT_IDS)[number];
 /** Dataset version the gate runs; a new file version is a new Mastra dataset. */
 export const CURRENT_DATASET_VERSION = 1;
 
-/** `packages/agents/evals` (datasets and baselines). */
-export const EVALS_DIR = path.resolve(import.meta.dirname, "../../evals");
+/**
+ * The first candidate holding a `datasets` folder, else the last one (the package source), so a
+ * missing copy fails loudly on the file read with the source path.
+ */
+export const resolveEvalsDir = (candidates: readonly string[]): string => {
+  const found = candidates.find((dir) => existsSync(path.join(dir, "datasets")));
+  return found ?? candidates.at(-1) ?? "evals";
+};
+
+/**
+ * Datasets and baselines: the bundled copy first (`apps/mastra` copies `packages/agents/evals` into
+ * `public/evals`, served next to the bundle, like the instructions and skills), then the package
+ * folder `packages/agents/evals` (tests, `mastra dev`, CI).
+ */
+export const EVALS_DIR = resolveEvalsDir([path.join(import.meta.dirname, "evals"), path.resolve(import.meta.dirname, "../../evals")]);
 
 export const EvalCaseSchema = EvalGroundTruthSchema.extend({
   id: z.string().regex(/^[a-z0-9][a-z0-9-]{0,63}$/),
