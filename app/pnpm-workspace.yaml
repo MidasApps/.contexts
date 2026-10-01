@@ -95,6 +95,8 @@ catalog:
   react: 19.3.0
   react-dom: 19.3.0
   react-hook-form: 7.89.0 # SchemaForm and client forms (SP2 spec §3)
+  react-is: 19.3.0 # peer of recharts (same line as react)
+  recharts: 3.10.1 # admin charts (shadcn chart pattern; decision 0042)
   server-only: 0.0.1
   sonner: 2.0.8 # Toaster (shadcn replaced its Toast with Sonner)
   tailwind-merge: 3.7.0
