@@ -289,6 +289,15 @@ describe("ChatPanel", () => {
     expect(await screen.findByText("O prazo é de 30 dias.")).toBeTruthy();
   });
 
+  it("shows a message once when the history hands it over twice", async () => {
+    const api = historyApi();
+    const [question, answer] = stored;
+    api.route(`GET /v1/conversations/${CONVERSATION_ID}/messages`, page([question, answer, answer]));
+    setup({ conversationId: CONVERSATION_ID }, api);
+    expect(await screen.findByText("O prazo é de 30 dias.")).toBeTruthy();
+    expect(screen.getAllByRole("article")).toHaveLength(2);
+  });
+
   it("loads earlier messages on demand", async () => {
     const api = historyApi();
     const older: UIMessage[] = [{ id: "u-old", role: "user", parts: [{ type: "text", text: "Mensagem antiga" }] }];

@@ -33,9 +33,16 @@ export type ChatHistorySidebarProps = {
 
 type ListQuery = ReturnType<typeof useConversationList>;
 
+/** How often the list is read again while a conversation in it is still answering. */
+const ANSWERING_POLL_MS = 4000;
+
 const useConversationList = (organizationId: string, filter: { archived: boolean; q: string }) => {
   const callEndpoint = useCallEndpoint();
-  return useInfiniteQuery(conversationsQuery(callEndpoint, organizationId, filter));
+  return useInfiniteQuery({
+    ...conversationsQuery(callEndpoint, organizationId, filter),
+    // "Respondendo" and the generated title change on the server without any action here.
+    refetchInterval: (query) => (query.state.data?.pages.some((page) => page.data.some((conversation) => conversation.activeRunId !== null)) === true ? ANSWERING_POLL_MS : false),
+  });
 };
 
 function EmptyList({ q, archived }: { q: string; archived: boolean }) {

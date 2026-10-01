@@ -103,6 +103,17 @@ const createThreadLink = (initial: { scope: ChatScope; conversationId: string | 
   };
 };
 
+/**
+ * One entry per message id, the latest copy in the position of the first. A resumed or replayed
+ * stream can hand `useChat` a message it already holds; rendering both would repeat the answer
+ * (and React keys must be unique).
+ */
+export const uniqueMessages = (messages: UIMessage[]): UIMessage[] => {
+  const latest = new Map<string, UIMessage>();
+  for (const message of messages) latest.set(message.id, message);
+  return latest.size === messages.length ? messages : [...latest.values()];
+};
+
 const failureOf = (error: Error | undefined): ChatFailure | undefined => {
   if (error === undefined) return undefined;
   if (error instanceof ApiError) return { code: error.code, requestId: error.requestId, network: error.status === 0 };
@@ -178,7 +189,8 @@ export const useChatSession = (args: UseChatSessionArgs): ChatSession => {
     onError: () => setResuming(false),
   });
 
-  const { status, messages } = chat;
+  const { status } = chat;
+  const messages = uniqueMessages(chat.messages);
   const busy = status === "submitted" || status === "streaming";
   const failure = failureOf(chat.error);
 
