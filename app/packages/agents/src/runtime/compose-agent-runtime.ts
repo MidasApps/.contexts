@@ -41,6 +41,7 @@ import { createWorkflowRunRoutes, WORKFLOW_RUN_ROUTES_PATTERN } from "../workflo
 import { createWorkflowChatRoutes } from "../chat/workflow-chat-route.ts";
 import { minIntervalMinutesOf } from "../workflows/schedules/schedule-policy.ts";
 import type { PlatformSchedule } from "../workflows/schedules/platform-schedules.ts";
+import { gateScheduleFires } from "../workflows/schedules/schedule-fire-gate.ts";
 import { createTenantScheduleRoutes, TENANT_SCHEDULE_ROUTES_PATTERN } from "../workflows/schedules/tenant-schedule-routes.ts";
 import { createWorkflowCatalog, policyOf, type WorkflowCatalog, workflowIdOf, type WorkflowPolicy } from "../workflows/workflow-catalog.ts";
 import { coreFakeRules } from "../models/fake/fake-scenarios.ts";
@@ -383,7 +384,8 @@ export const composeAgentRuntime = (args: ComposeAgentRuntimeArgs): RuntimeParts
     scorers: createCoreScorers(models.mode === "real" ? { judgeModel: models.language("judge") } : {}),
     mcpServers: buildMcpServers(args, tools, toolDeps, agents[SUPERVISOR_AGENT_ID]),
     mcpOptions: { setRequestAuth: setMcpRequestAuth },
-    storage: args.storage,
+    // Decision 0037 A2: `workflows.schedules` off holds every schedule fire (tenant and platform).
+    storage: gateScheduleFires({ storage: args.storage, isEnabled: () => flags.isEnabled({ key: CORE_FLAG_KEYS.schedules, tenantId: null, fallback: true }), logger: processLogger }),
     vectors: args.vector === undefined ? {} : { [MEMORY_VECTOR_KEY]: args.vector },
     memory,
     observability: createObservability({

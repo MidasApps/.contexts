@@ -56,7 +56,7 @@ export const CORE_FLAGS: readonly RegisteredFlag[] = [
   {
     key: "ai.memory.observational",
     owner: OWNER,
-    reason: "Observational memory, off until the real-model comparison (follow-up #37) is done.",
+    reason: "Observational memory, off until the real-model comparison (follow-up #37). Boot-time: AI_MEMORY_OBSERVATIONAL decides when the runtime starts; a stored value does not change a running process.",
     kind: "rollout",
     default: false,
     createdAt: CREATED,
@@ -66,7 +66,7 @@ export const CORE_FLAGS: readonly RegisteredFlag[] = [
   {
     key: "workflows.schedules",
     owner: OWNER,
-    reason: "Tenant schedules of workflows; off stops creating new schedules.",
+    reason: "Schedule fires of workflows, tenant and platform; off holds every fire (rows and paused states kept, a missed fire runs once when back on).",
     kind: "ops",
     default: true,
     createdAt: CREATED,

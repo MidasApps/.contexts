@@ -100,3 +100,11 @@ plan values), but nothing defines plans.
   - **Overview.** `/v1/admin/overview` computes active organizations and the cost month to date
     (one ledger read per organization). Active users, tripwire and approval rates answer 0 and the
     eval status `unknown` until span aggregates and an eval run history exist.
+- **2026-10-01 — runtime meaning of two flags (backend fixes).**
+  - `workflows.schedules` off holds every schedule fire, tenant and platform (decision 0037 A2). It no
+    longer means "stop creating schedules": creation keeps working and the new rows wait.
+  - `ai.memory.observational` is a **boot-time** flag. Memory is built once per process from
+    `AI_MEMORY_OBSERVATIONAL`, which also seeds the flag's environment default; a value stored from
+    `/admin` is shown but does not change a running runtime, and a restart still reads the env var.
+    Reading it per request would mean building both memories and choosing one per call, which
+    Mastra's agent memory does not offer cheaply. Follow-up: read the stored value once at boot.

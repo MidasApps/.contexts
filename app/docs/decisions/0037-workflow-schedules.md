@@ -63,3 +63,17 @@ through `mastra.schedules.*`. They use Croner, and the time zone defaults to the
     can carry any request context.
   - **Notices.** The `NotificationPort` is bound to a structured log line (`workflow_notification`)
     until a delivery channel exists.
+- **A2 — 2026-10-01 (backend fixes): the `workflows.schedules` flag holds every fire.**
+  - The runtime wraps the `schedules` storage domain it hands to Mastra (`gateScheduleFires`): while
+    the flag is off for the environment, `listDueSchedules` returns nothing, so the scheduler fires
+    no tenant **and no platform** schedule (`approval-expiry-sweep`, `conversation-purge`,
+    `usage-report`, `eval-export`, `catalog-reindex`) on any instance. Unlike `ai.kill-switch`, which
+    leaves workflows alone, this is the switch for workflows.
+  - Rows, their `paused` state and `nextFireAt` are untouched, and creating, editing, pausing and
+    run-now keep working. When the flag is on again, each missed schedule fires **once** on the next
+    tick and Mastra computes the next fire from then: there is no backfill.
+  - The flag is read through the 30 s flag cache with fallback `true` (a store failure keeps firing:
+    the platform crons expire approvals and purge data). Each pause and resume is logged
+    (`schedule_fires_paused`, `schedule_fires_resumed`).
+  - Rejected: stopping `mastra.scheduler` from a watcher (Mastra restarts it lazily when a schedule
+    is created) and a guard step in each workflow (it would still claim fires and record runs).
