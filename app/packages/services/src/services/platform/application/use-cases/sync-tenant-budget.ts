@@ -51,3 +51,47 @@ export const syncTenantBudget = async (
   if (stored !== null) await deps.agentSettings.save({ settings: { ...stored.settings, budget: { ...resolved.caps } }, selfCap });
   return resolved;
 };
+
+/** The three inputs of a tenant's caps (`resolveTenantCaps`): plan limits, staff override, own lower cap. */
+export type CapsInputs = { readonly plan: BudgetCaps | null; readonly override: BudgetCaps | null; readonly selfCap: BudgetCaps | null };
+
+type BudgetDeps = Pick<ConsoleDeps, "organizations" | "plans" | "agentSettings" | "usage" | "clock">;
+
+const capsInputsOf = async (deps: BudgetDeps, tenantId: string): Promise<CapsInputs> => {
+  const base = await baseCapsOf(deps, tenantId);
+  const stored = await deps.agentSettings.get(tenantId);
+  return { plan: base.plan, override: base.override, selfCap: stored?.selfCap ?? null };
+};
+
+const tighterOf = (a: BudgetCaps, b: BudgetCaps): BudgetCaps => ({
+  monthlyMicroUsd: Math.min(a.monthlyMicroUsd, b.monthlyMicroUsd),
+  monthlyTokens: Math.min(a.monthlyTokens, b.monthlyTokens),
+});
+
+/**
+ * Step 1 of a budget change: writes to `usage.tenant_budgets` the lower of the caps in force now and
+ * the caps the pending change resolves to, so the guard is never looser than either while the
+ * inputs (Firestore) and the final caps (Postgres) are written one after the other.
+ */
+export const tightenTenantBudget = async (deps: BudgetDeps, tenantId: string, next: (current: CapsInputs) => CapsInputs): Promise<void> => {
+  const current = await capsInputsOf(deps, tenantId);
+  const before = resolveTenantCaps(current).caps;
+  const after = resolveTenantCaps(next(current)).caps;
+  await deps.usage.setTenantBudget({ tenantId, budget: tighterOf(before, after) });
+};
+
+/**
+ * One budget input change (decision 0039 amendment, backend fixes): 1. Postgres gets the tighter of
+ * the old and new caps (`tightenTenantBudget`); 2. `write` stores the input in Firestore; 3. the caps
+ * are materialized again from the stored inputs (`syncTenantBudget`). Firestore and Postgres share no
+ * transaction: a failure at 2 or 3 throws and leaves caps tighter than, never looser than, both the
+ * old and the new intent until the next write of that tenant.
+ */
+export const changeTenantBudget = async (
+  deps: BudgetDeps,
+  args: { readonly tenantId: string; readonly next: (current: CapsInputs) => CapsInputs; readonly write: () => Promise<void> },
+): Promise<TenantCaps> => {
+  await tightenTenantBudget(deps, args.tenantId, args.next);
+  await args.write();
+  return syncTenantBudget(deps, args.tenantId);
+};

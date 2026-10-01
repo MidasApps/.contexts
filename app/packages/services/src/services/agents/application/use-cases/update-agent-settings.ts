@@ -1,7 +1,7 @@
 import type { AgentSettings, TenantId, UpdateAgentSettingsInput, UserPrincipal } from "@core/contracts";
 import { auditActorOf } from "../../../audit/domain/audit-actor.ts";
 import type { ConsoleDeps } from "../../../platform/application/console-deps.ts";
-import { baseCapsOf, storedSettingsOf, syncTenantBudget } from "../../../platform/application/use-cases/sync-tenant-budget.ts";
+import { baseCapsOf, changeTenantBudget, storedSettingsOf } from "../../../platform/application/use-cases/sync-tenant-budget.ts";
 import { err, ok, type Result } from "../../../shared/result/result.ts";
 import { resolveTenantCaps, selfCapWithin } from "../../../usage/domain/budget-policy.ts";
 
@@ -36,7 +36,8 @@ const audit = (deps: Pick<ConsoleDeps, "audit">, command: UpdateAgentSettingsCom
 /**
  * Partial update of an organization's agent settings (decision 0039): enabled agents, web opt-ins,
  * PII mode, and the organization's own lower cap, which may never exceed the plan or staff override
- * (400). The caps in force are then re-materialized for the budget guard.
+ * (400). The caps in force are then re-materialized for the budget guard, tightened first so a
+ * failed write never leaves them looser than intended (`changeTenantBudget`).
  */
 export const makeUpdateAgentSettings =
   (deps: ConsoleDeps): UpdateAgentSettings =>
@@ -55,8 +56,7 @@ export const makeUpdateAgentSettings =
       updatedBy: command.actor.uid,
       updatedAt: deps.clock.now().toISOString(),
     };
-    await deps.agentSettings.save({ settings, selfCap });
-    const resolved = await syncTenantBudget(deps, tenantId, selfCap);
+    const resolved = await changeTenantBudget(deps, { tenantId, next: (inputs) => ({ ...inputs, selfCap }), write: () => deps.agentSettings.save({ settings, selfCap }) });
     await audit(deps, command, Object.keys(input).filter((key) => input[key as keyof UpdateAgentSettingsInput] !== undefined));
     return ok({ ...settings, budget: { ...resolved.caps } });
   };

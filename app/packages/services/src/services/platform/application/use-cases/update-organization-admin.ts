@@ -3,7 +3,7 @@ import { auditActorOf } from "../../../audit/domain/audit-actor.ts";
 import { err, ok, type Result } from "../../../shared/result/result.ts";
 import type { ConsoleDeps } from "../console-deps.ts";
 import { summarizeOrganization } from "./list-organizations-admin.ts";
-import { syncTenantBudget } from "./sync-tenant-budget.ts";
+import { changeTenantBudget } from "./sync-tenant-budget.ts";
 
 export type OrganizationAdminError = { readonly code: "NOT_FOUND" } | { readonly code: "PLAN_NOT_FOUND" };
 
@@ -34,12 +34,17 @@ export const makeUpdateOrganizationAdmin =
     const org = await deps.organizations.getLive(command.tenantId);
     if (org === null) return err({ code: "NOT_FOUND" });
     const { planId, status } = command.input;
-    if (planId !== undefined && planId !== null && (await deps.plans.get(planId)) === null) return err({ code: "PLAN_NOT_FOUND" });
+    const plan = planId === undefined || planId === null ? null : await deps.plans.get(planId);
+    if (planId !== undefined && planId !== null && plan === null) return err({ code: "PLAN_NOT_FOUND" });
     const at = deps.clock.now().toISOString();
     if (planId !== undefined) {
+      const limits = plan === null ? null : { monthlyMicroUsd: plan.limits.monthlyMicroUsd, monthlyTokens: plan.limits.monthlyTokens };
       const current = await deps.organizations.getPlan(command.tenantId);
-      await deps.organizations.setPlan({ ...current, planId, at, actorId: command.actor.uid });
-      await syncTenantBudget(deps, command.tenantId);
+      await changeTenantBudget(deps, {
+        tenantId: command.tenantId,
+        next: (inputs) => ({ ...inputs, plan: limits }),
+        write: () => deps.organizations.setPlan({ ...current, planId, at, actorId: command.actor.uid }),
+      });
     }
     if (status !== undefined && !(await deps.organizations.setStatus({ tenantId: command.tenantId, status, at, actorId: command.actor.uid }))) return err({ code: "NOT_FOUND" });
     await record(deps, command, "ORGANIZATION_UPDATED", [...(planId === undefined ? [] : ["planId"]), ...(status === undefined ? [] : ["status"])]);
@@ -53,8 +58,12 @@ export const makeSetOrganizationBudget =
     const org = await deps.organizations.getLive(command.tenantId);
     if (org === null) return err({ code: "NOT_FOUND" });
     const current = await deps.organizations.getPlan(command.tenantId);
-    await deps.organizations.setPlan({ ...current, budgetOverride: command.input.override, at: deps.clock.now().toISOString(), actorId: command.actor.uid });
-    await syncTenantBudget(deps, command.tenantId);
+    const { override } = command.input;
+    await changeTenantBudget(deps, {
+      tenantId: command.tenantId,
+      next: (inputs) => ({ ...inputs, override }),
+      write: () => deps.organizations.setPlan({ ...current, budgetOverride: override, at: deps.clock.now().toISOString(), actorId: command.actor.uid }),
+    });
     await record(deps, command, "TENANT_BUDGET_UPDATED", ["budgetOverride"]);
     return ok(await summarizeOrganization(deps, org));
   };

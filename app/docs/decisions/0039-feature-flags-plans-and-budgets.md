@@ -108,3 +108,13 @@ plan values), but nothing defines plans.
     `/admin` is shown but does not change a running runtime, and a restart still reads the env var.
     Reading it per request would mean building both memories and choosing one per call, which
     Mastra's agent memory does not offer cheaply. Follow-up: read the stored value once at boot.
+- **2026-10-01 — budget writes never loosen the caps (backend fixes).** The inputs (plan, staff
+  override, self-cap) live in Firestore and the enforced caps in `usage.tenant_budgets`; the two
+  share no transaction. Every change now runs three steps (`changeTenantBudget`): Postgres first gets
+  the element-wise lower of the caps before and after the change, then the input is written to
+  Firestore, then the caps are materialized again from the stored inputs. A plan update tightens
+  every organization on the plan before replacing it. A failure at the second or third step answers
+  500 and leaves caps tighter than both the old and the new intent until that tenant's next write;
+  never looser. Rejected: Postgres first with the new caps (a failed raise would enforce caps the
+  inputs never recorded) and a reconcile on read (`checkTenantBudget` is the runtime hot path and
+  reads Postgres only).
