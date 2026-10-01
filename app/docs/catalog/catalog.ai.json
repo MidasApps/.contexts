@@ -5369,7 +5369,7 @@
           "required": false
         },
         {
-          "description": "Names of the platform skills the agent loads.",
+          "description": "Names of the platform skills the agent loads, from `GET /v1/agent-options`; an unknown name is refused on write.",
           "name": "coreSkills",
           "pii": "none",
           "required": false
@@ -5417,7 +5417,7 @@
           "required": true
         },
         {
-          "description": "Ids of the tools the agent may call, from the tools the organization already has; unknown ids are ignored at run time.",
+          "description": "Ids of the tools the agent may call, from `GET /v1/agent-options`; an id the runtime does not offer is refused on write (one that disappears later is ignored at run time).",
           "name": "tools",
           "pii": "none",
           "required": false
@@ -5451,7 +5451,7 @@
             "x-pii": "none"
           },
           "coreSkills": {
-            "description": "Names of the platform skills the agent loads.",
+            "description": "Names of the platform skills the agent loads, from `GET /v1/agent-options`; an unknown name is refused on write.",
             "items": {
               "maxLength": 100,
               "minLength": 1,
@@ -5518,7 +5518,7 @@
             "x-pii": "none"
           },
           "tools": {
-            "description": "Ids of the tools the agent may call, from the tools the organization already has; unknown ids are ignored at run time.",
+            "description": "Ids of the tools the agent may call, from `GET /v1/agent-options`; an id the runtime does not offer is refused on write (one that disappears later is ignored at run time).",
             "items": {
               "maxLength": 200,
               "minLength": 1,
@@ -5742,7 +5742,7 @@
           "required": true
         },
         {
-          "description": "Names of the platform skills the agent loads.",
+          "description": "Names of the platform skills the agent loads, from `GET /v1/agent-options`; an unknown name is refused on write.",
           "name": "coreSkills",
           "pii": "none",
           "required": true
@@ -5814,7 +5814,7 @@
           "required": true
         },
         {
-          "description": "Ids of the tools the agent may call, from the tools the organization already has; unknown ids are ignored at run time.",
+          "description": "Ids of the tools the agent may call, from `GET /v1/agent-options`; an id the runtime does not offer is refused on write (one that disappears later is ignored at run time).",
           "name": "tools",
           "pii": "none",
           "required": true
@@ -5860,7 +5860,7 @@
             "x-pii": "none"
           },
           "coreSkills": {
-            "description": "Names of the platform skills the agent loads.",
+            "description": "Names of the platform skills the agent loads, from `GET /v1/agent-options`; an unknown name is refused on write.",
             "items": {
               "maxLength": 100,
               "minLength": 1,
@@ -5952,7 +5952,7 @@
             "x-pii": "none"
           },
           "tools": {
-            "description": "Ids of the tools the agent may call, from the tools the organization already has; unknown ids are ignored at run time.",
+            "description": "Ids of the tools the agent may call, from `GET /v1/agent-options`; an id the runtime does not offer is refused on write (one that disappears later is ignored at run time).",
             "items": {
               "maxLength": 200,
               "minLength": 1,
@@ -7290,7 +7290,7 @@
           "required": false
         },
         {
-          "description": "Names of the platform skills the agent loads.",
+          "description": "Names of the platform skills the agent loads, from `GET /v1/agent-options`; an unknown name is refused on write.",
           "name": "coreSkills",
           "pii": "none",
           "required": false
@@ -7338,7 +7338,7 @@
           "required": false
         },
         {
-          "description": "Ids of the tools the agent may call, from the tools the organization already has; unknown ids are ignored at run time.",
+          "description": "Ids of the tools the agent may call, from `GET /v1/agent-options`; an id the runtime does not offer is refused on write (one that disappears later is ignored at run time).",
           "name": "tools",
           "pii": "none",
           "required": false
@@ -7366,7 +7366,7 @@
             "x-pii": "none"
           },
           "coreSkills": {
-            "description": "Names of the platform skills the agent loads.",
+            "description": "Names of the platform skills the agent loads, from `GET /v1/agent-options`; an unknown name is refused on write.",
             "items": {
               "maxLength": 100,
               "minLength": 1,
@@ -7433,7 +7433,7 @@
             "x-pii": "none"
           },
           "tools": {
-            "description": "Ids of the tools the agent may call, from the tools the organization already has; unknown ids are ignored at run time.",
+            "description": "Ids of the tools the agent may call, from `GET /v1/agent-options`; an id the runtime does not offer is refused on write (one that disappears later is ignored at run time).",
             "items": {
               "maxLength": 200,
               "minLength": 1,
@@ -7702,6 +7702,7 @@
               "DESKTOP_SESSION_REUSE_DETECTED",
               "IMPERSONATION_STARTED",
               "IMPERSONATION_ENDED",
+              "IMPERSONATION_EXPIRED",
               "IMPERSONATED_REQUEST_SERVED",
               "IMPERSONATED_WRITE_DENIED",
               "APPROVAL_REQUESTED",
@@ -8161,6 +8162,7 @@
               "DESKTOP_SESSION_REUSE_DETECTED",
               "IMPERSONATION_STARTED",
               "IMPERSONATION_ENDED",
+              "IMPERSONATION_EXPIRED",
               "IMPERSONATED_REQUEST_SERVED",
               "IMPERSONATED_WRITE_DENIED",
               "APPROVAL_REQUESTED",
@@ -8416,6 +8418,7 @@
               "DESKTOP_SESSION_REUSE_DETECTED",
               "IMPERSONATION_STARTED",
               "IMPERSONATION_ENDED",
+              "IMPERSONATION_EXPIRED",
               "IMPERSONATED_REQUEST_SERVED",
               "IMPERSONATED_WRITE_DENIED",
               "APPROVAL_REQUESTED",
