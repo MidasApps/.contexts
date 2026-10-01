@@ -36,6 +36,21 @@ export const buildEmulatorStartArgs = (args: { projectId: string; dataDir: strin
   ];
 };
 
+/**
+ * Seconds the Functions emulator may take to load `lib/` and answer its discovery request
+ * (firebase-tools `FUNCTIONS_DISCOVERY_TIMEOUT`). The CLI's default is 10 s; on a loaded machine
+ * the load takes longer, the emulator gives up ("Cannot determine backend specification.
+ * Timeout after 10000") and no function is served for the session (uploads stay `pending`).
+ */
+export const FUNCTIONS_DISCOVERY_TIMEOUT_SECONDS = 180;
+
+/** Env of the emulator process: the shell's, plus the discovery timeout unless the shell set one. */
+export const buildEmulatorEnv = (env: Readonly<Record<string, string | undefined>>): Record<string, string | undefined> => {
+  const fromShell = env["FUNCTIONS_DISCOVERY_TIMEOUT"];
+  const timeout = fromShell === undefined || fromShell === "" ? String(FUNCTIONS_DISCOVERY_TIMEOUT_SECONDS) : fromShell;
+  return { ...env, FUNCTIONS_DISCOVERY_TIMEOUT: timeout };
+};
+
 /** Explicit export, used when the emulators are stopped by something other than Ctrl+C. */
 export const buildEmulatorExportArgs = (args: { projectId: string; dataDir: string }): string[] => [
   "emulators:export",

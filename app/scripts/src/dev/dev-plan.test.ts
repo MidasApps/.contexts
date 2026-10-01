@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   buildComposeUpArgs,
+  buildEmulatorEnv,
   buildEmulatorStartArgs,
   buildEmulatorExportArgs,
   buildFunctionsProbeUrl,
@@ -18,6 +19,17 @@ describe("buildComposeUpArgs", () => {
 
   it("falls back to compose defaults without an env file", () => {
     expect(buildComposeUpArgs({})).toEqual(["compose", "up", "-d", "--wait"]);
+  });
+});
+
+describe("buildEmulatorEnv", () => {
+  it("gives the Functions emulator 180 s to load the functions and keeps the rest of the env", () => {
+    expect(buildEmulatorEnv({ PATH: "/bin" })).toEqual({ PATH: "/bin", FUNCTIONS_DISCOVERY_TIMEOUT: "180" });
+    expect(buildEmulatorEnv({ FUNCTIONS_DISCOVERY_TIMEOUT: "" })).toEqual({ FUNCTIONS_DISCOVERY_TIMEOUT: "180" });
+  });
+
+  it("keeps a timeout the shell already set", () => {
+    expect(buildEmulatorEnv({ FUNCTIONS_DISCOVERY_TIMEOUT: "30" })).toEqual({ FUNCTIONS_DISCOVERY_TIMEOUT: "30" });
   });
 });
 

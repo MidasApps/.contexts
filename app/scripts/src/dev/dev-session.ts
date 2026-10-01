@@ -3,6 +3,7 @@ import { existsSync } from "node:fs";
 import path from "node:path";
 import {
   buildComposeUpArgs,
+  buildEmulatorEnv,
   buildEmulatorExportArgs,
   buildEmulatorStartArgs,
   buildFunctionsProbeUrl,
@@ -110,7 +111,7 @@ const startLongRunning = async ({ supervisor, stopper, config, bins, tracker }: 
   const hasSavedData = existsSync(path.join(config.appRoot, config.dataDir));
   const aborted = (): boolean => stopper.signal.aborted;
   supervisor.start({ name: "functions-watch", command: process.execPath, args: [path.join("apps", "functions", "build.ts"), "--watch"], cwd: config.appRoot });
-  const emulators = supervisor.start({ name: "emulators", command: process.execPath, args: [bins.firebase, ...buildEmulatorStartArgs({ ...config, hasSavedData })], cwd: config.appRoot });
+  const emulators = supervisor.start({ name: "emulators", command: process.execPath, args: [bins.firebase, ...buildEmulatorStartArgs({ ...config, hasSavedData })], cwd: config.appRoot, env: buildEmulatorEnv(process.env) });
   tracker.rootPid = emulators.pid;
   if (!(await waitUntilReady("emulator ui", config.emulatorUiUrl, stopper.signal))) {
     if (!aborted()) await stopper.stop("emulators did not start", 1);

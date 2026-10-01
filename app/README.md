@@ -40,7 +40,10 @@ pnpm seed:local              # in another terminal, while `pnpm dev` runs
 1. `docker compose --env-file .env.local up -d --wait` (Postgres healthy);
 2. one Functions build, then an esbuild watch that rebuilds `apps/functions/lib`;
 3. `firebase emulators:start --project demo-core --import .firebase-data --export-on-exit .firebase-data`
-   (`--import` only once `.firebase-data/` exists);
+   (`--import` only once `.firebase-data/` exists), with `FUNCTIONS_DISCOVERY_TIMEOUT=180`
+   unless the shell sets another value: the CLI's 10 s default is too short for the Functions
+   emulator to load `lib/` on a busy machine, and a timed-out load serves no function (uploads
+   then stay "pending");
 4. `turbo run dev` for web and Mastra, once the emulators have loaded the functions.
 
 Ctrl+C stops everything: the emulators export their data to `.firebase-data/`, and
