@@ -311,5 +311,37 @@
     "loading": "Cargando el chat…",
     "openHistory": "Conversaciones",
     "historyPanel": "Historial de conversaciones"
+  },
+  "voice": {
+    "talk": "Hablar: mantén presionado para grabar",
+    "stopRecording": "Detener la grabación y transcribir",
+    "requesting": "Esperando el micrófono…",
+    "recording": "Grabando… suelta para transcribir",
+    "transcribing": "Transcribiendo…",
+    "inserted": "Transcripción agregada al mensaje.",
+    "problem": {
+      "denied": "Micrófono bloqueado. Permite el acceso al micrófono en la configuración del navegador.",
+      "unsupported": "Este dispositivo no tiene un micrófono disponible para grabar.",
+      "too-large": "La grabación fue demasiado larga. Graba hasta 60 segundos.",
+      "empty": "No se pudo entender la grabación. Intenta de nuevo.",
+      "unavailable": "La voz está desactivada para esta organización.",
+      "failed": "La transcripción falló. Intenta de nuevo."
+    },
+    "options": "Opciones de voz",
+    "autoSend": "Enviar después de transcribir",
+    "autoRead": "Leer las respuestas en voz alta",
+    "realtime": {
+      "start": "Iniciar conversación por voz (experimental)",
+      "stop": "Terminar la conversación por voz",
+      "connecting": "Conectando la conversación por voz…",
+      "live": "Conversación por voz activa.",
+      "error": "La conversación por voz falló."
+    },
+    "readAloud": "Escuchar la respuesta",
+    "stopReading": "Detener la lectura",
+    "loadingAudio": "Preparando el audio…",
+    "player": "Respuesta en audio",
+    "readFailed": "No se pudo leer la respuesta en voz alta.",
+    "readUnavailable": "La lectura en voz alta está desactivada para esta organización."
   }
 }

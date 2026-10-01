@@ -4,6 +4,7 @@ import { apiError, dataResponse } from "../../../shared/http/api-errors.ts";
 import { withApiRoute } from "../../../shared/http/api-route.ts";
 import type { RouteHandler } from "../../../shared/http/route-boundary.ts";
 import { gatewayErrorResponse } from "../driven/mastra-error-mapper.ts";
+import { buildVoiceAvailabilityRoute } from "./voice-availability-route-handler.ts";
 import { buildVoiceSpeechRoute } from "./voice-speech-route-handler.ts";
 import { buildVoiceTranscriptionsRoute } from "./voice-transcriptions-route-handler.ts";
 import { type VoiceRoutesDeps, voiceScopeOf } from "./voice-http.ts";
@@ -34,4 +35,5 @@ export const buildVoiceRoutes = (deps: VoiceRoutesDeps): Record<string, RouteHan
   ...buildVoiceTranscriptionsRoute(deps),
   ...buildVoiceSpeechRoute(deps),
   ...buildRealtimeSessionRoute(deps),
+  ...buildVoiceAvailabilityRoute(deps),
 });

@@ -52,7 +52,7 @@ import { SP5_SETTINGS_CONTRACTS, SP5_SETTINGS_ENDPOINTS } from "./contracts/sp5-
 import { SP5_CONTRACTS } from "./contracts/sp5-contracts.ts";
 import { VOICE_ENDPOINTS } from "./contracts/voice/endpoints.ts";
 import { SCHEDULE_ENDPOINTS, WORKFLOW_RUN_ENDPOINTS } from "./contracts/workflows/endpoints.ts";
-import { RealtimeSessionContract, SpeechRequestContract, TranscriptionContract } from "./contracts/voice/voice.schema.ts";
+import { RealtimeSessionContract, SpeechRequestContract, TranscriptionContract, VoiceAvailabilityContract } from "./contracts/voice/voice.schema.ts";
 
 /** Every contract of the core; add new contracts here. `example.Note` is removable. */
 export const CORE_CONTRACTS: readonly ContractDefinition[] = [
@@ -97,6 +97,7 @@ export const CORE_CONTRACTS: readonly ContractDefinition[] = [
   TranscriptionContract,
   SpeechRequestContract,
   RealtimeSessionContract,
+  VoiceAvailabilityContract,
 ];
 
 /** Every `/v1` endpoint of the core (SP1 spec §7.3); add descriptors here. */

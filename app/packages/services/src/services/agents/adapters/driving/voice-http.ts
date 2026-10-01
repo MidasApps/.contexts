@@ -14,6 +14,11 @@ export type VoiceRoutesDeps = {
   readonly pipeline: ApiRouteDeps;
   readonly voice: VoiceRuntimeGateway;
   readonly resolveAccessContext: ResolveAccessContext;
+  /**
+   * Effective flag values of an organization (the flags context), for the availability route.
+   * Absent, or failing, the route answers "off" (fail closed, decision 0034).
+   */
+  readonly readFlags?: ((tenantId: TenantId) => Promise<Readonly<Record<string, boolean>>>) | undefined;
 };
 
 const BEARER = /^Bearer\s+(\S+)$/i;

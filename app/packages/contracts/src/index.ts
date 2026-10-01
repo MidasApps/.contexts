@@ -240,11 +240,21 @@ export {
   SpeechRequestSchema,
   TranscriptionContract,
   TranscriptionSchema,
+  VoiceAvailabilityContract,
+  VoiceAvailabilitySchema,
   type RealtimeSession,
   type SpeechRequest,
   type Transcription,
+  type VoiceAvailability,
 } from "./contracts/voice/voice.schema.ts";
-export { createRealtimeSessionEndpoint, SpeechAudioSchema, synthesizeSpeechEndpoint, transcribeVoiceEndpoint, VOICE_ENDPOINTS } from "./contracts/voice/endpoints.ts";
+export {
+  createRealtimeSessionEndpoint,
+  getVoiceAvailabilityEndpoint,
+  SpeechAudioSchema,
+  synthesizeSpeechEndpoint,
+  transcribeVoiceEndpoint,
+  VOICE_ENDPOINTS,
+} from "./contracts/voice/endpoints.ts";
 export { UsageSummaryContract, UsageSummarySchema, type UsageSummary } from "./contracts/usage/usage-summary.schema.ts";
 export {
   FileNameSchema,

@@ -153,7 +153,13 @@ export const buildRuntimeRoutes = async (core: CoreServer): Promise<CoreRoutes> 
     ...buildChatRoutes(chatDeps),
     ...buildConversationsRoutes(chatDeps),
     // SP4 voice (decision 0034): Mastra gates the feature, the budget, the ledger and the audit.
-    ...buildVoiceRoutes({ pipeline: core.pipeline, voice: createMastraVoiceGateway(gatewayOptions), resolveAccessContext: core.resolveAccessContext }),
+    ...buildVoiceRoutes({
+      pipeline: core.pipeline,
+      voice: createMastraVoiceGateway(gatewayOptions),
+      resolveAccessContext: core.resolveAccessContext,
+      // The chat asks whether to show voice at all (`GET /v1/voice/availability`, decision 0034).
+      readFlags: (tenantId) => flagsDeps.flags.getFlagValues({ tenantId }),
+    }),
     // SP5 feature flags (decision 0039): tenant overrides and the staff console.
     ...buildFlagsRoutes(flagsDeps),
     ...buildAdminFlagsRoutes(flagsDeps),

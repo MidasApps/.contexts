@@ -5,6 +5,7 @@ import type { ChatTransport, UIMessage } from "ai";
 import { CheckIcon, CopyIcon, RefreshCwIcon, SparklesIcon } from "lucide-react";
 import { useEffect, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
 import type { UseUploadQueueArgs } from "#/features/chat-upload/index.ts";
+import { ReadAloudAction, type ComposerVoiceProps, type ReadAloudActionProps } from "#/features/chat-voice/index.ts";
 import { useTranslations } from "use-intl";
 import { ChatMessage, formatUiSubmission, textOf, type UiSubmission } from "#/entities/message/index.ts";
 import { GenerativeUiProvider, type UiRegistry } from "#/features/generative-ui/index.ts";
@@ -15,6 +16,7 @@ import { Message, MessageAction, MessageActions, MessageContent } from "#/shared
 import { Shimmer } from "#/shared/ui/ai/shimmer.tsx";
 import { Suggestion, Suggestions } from "#/shared/ui/ai/suggestion.tsx";
 import { useChatSession } from "../model/use-chat-session.ts";
+import { useChatVoice } from "../model/use-chat-voice.ts";
 import { useOlderMessages } from "../model/use-older-messages.ts";
 import { ChatComposer } from "./chat-composer.tsx";
 import { createCoreToolRenderer } from "./chat-tool-part.tsx";
@@ -47,13 +49,18 @@ export type ChatThreadProps = {
   /** Extra composer tools of the host (the attach menu is the thread's own). */
   tools?: ReactNode;
   transport?: ChatTransport<UIMessage> | undefined;
-  /** Tests pass scripted uploads. */
+  /** Tests pass scripted uploads, a fake microphone and fake audio URLs. */
   uploadSeams?: UseUploadQueueArgs["seams"];
+  voiceSeams?: ComposerVoiceProps["seams"];
+  speechSeams?: ReadAloudActionProps["seams"];
 };
 
 const COPIED_MS = 2000;
 
-function AnswerActions({ message, canRegenerate, onRegenerate }: { message: UIMessage; canRegenerate: boolean; onRegenerate: () => void }) {
+/** Read aloud for one answer; `undefined` while voice is off. */
+type AnswerSpeech = { readonly organizationId: string; readonly autoPlay: boolean; readonly seams: ReadAloudActionProps["seams"] };
+
+function AnswerActions({ message, canRegenerate, onRegenerate, speech }: { message: UIMessage; canRegenerate: boolean; onRegenerate: () => void; speech?: AnswerSpeech | undefined }) {
   const t = useTranslations("chat.message");
   const [copied, setCopied] = useState(false);
   useEffect(() => {
@@ -70,7 +77,7 @@ function AnswerActions({ message, canRegenerate, onRegenerate }: { message: UIMe
     );
   };
   return (
-    <MessageActions>
+    <MessageActions className="flex-wrap">
       {text === "" ? null : (
         <MessageAction label={copied ? t("copied") : t("copy")} onClick={copy}>
           {copied ? <CheckIcon aria-hidden="true" /> : <CopyIcon aria-hidden="true" />}
@@ -81,6 +88,7 @@ function AnswerActions({ message, canRegenerate, onRegenerate }: { message: UIMe
           <RefreshCwIcon aria-hidden="true" />
         </MessageAction>
       ) : null}
+      {speech === undefined || text === "" ? null : <ReadAloudAction organizationId={speech.organizationId} text={text} autoPlay={speech.autoPlay} seams={speech.seams} />}
       <span role="status" className="sr-only">
         {copied ? t("copied") : ""}
       </span>
@@ -105,6 +113,11 @@ export function ChatThread(props: ChatThreadProps) {
   });
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const { messages, phase, busy } = session;
+  const voice = useChatVoice({ organizationId: props.scope.organizationId, can: props.can });
+  const finishedAnswerId = phase === "finished" ? messages.findLast((message) => message.role === "assistant")?.id : undefined;
+  // "Read answers aloud": the answer that just finished in this thread starts reading by itself.
+  const speechFor = (messageId: string): AnswerSpeech | undefined =>
+    voice === undefined ? undefined : { organizationId: props.scope.organizationId, autoPlay: voice.autoRead && messageId === finishedAnswerId, seams: props.speechSeams };
   const older = useOlderMessages({
     conversationId: session.conversationId,
     initialCursor: props.olderCursor,
@@ -173,7 +186,11 @@ export function ChatThread(props: ChatThreadProps) {
                   interrupted={message.id === session.interruptedMessageId}
                   showReasoning={props.showReasoning}
                   renderTool={renderTool}
-                  actions={message.role === "assistant" && settled ? <AnswerActions message={message} canRegenerate={last && phase !== "awaiting-approval"} onRegenerate={session.regenerate} /> : undefined}
+                  actions={
+                    message.role === "assistant" && settled ? (
+                      <AnswerActions message={message} canRegenerate={last && phase !== "awaiting-approval"} onRegenerate={session.regenerate} speech={speechFor(message.id)} />
+                    ) : undefined
+                  }
                 />
               );
             })
@@ -188,7 +205,7 @@ export function ChatThread(props: ChatThreadProps) {
         </Conversation>
         <div className="flex flex-col gap-2 border-t border-border px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
           <StatusLine phase={phase} failure={session.failure} onRetry={retry} />
-          <ChatComposer session={session} organizationId={props.scope.organizationId} offline={phase === "offline"} inputRef={inputRef} onStop={stop} can={props.can} tools={props.tools} uploadSeams={props.uploadSeams} />
+          <ChatComposer session={session} organizationId={props.scope.organizationId} offline={phase === "offline"} inputRef={inputRef} onStop={stop} can={props.can} voice={voice} tools={props.tools} uploadSeams={props.uploadSeams} voiceSeams={props.voiceSeams} />
         </div>
       </div>
     </GenerativeUiProvider>

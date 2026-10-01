@@ -311,5 +311,37 @@
     "loading": "Loading the chat…",
     "openHistory": "Conversations",
     "historyPanel": "Conversation history"
+  },
+  "voice": {
+    "talk": "Talk: hold to record",
+    "stopRecording": "Stop recording and transcribe",
+    "requesting": "Waiting for the microphone…",
+    "recording": "Recording… release to transcribe",
+    "transcribing": "Transcribing…",
+    "inserted": "Transcript added to the message.",
+    "problem": {
+      "denied": "Microphone blocked. Allow microphone access in the browser settings.",
+      "unsupported": "This device has no microphone available to record.",
+      "too-large": "The recording was too long. Record up to 60 seconds.",
+      "empty": "The recording could not be understood. Try again.",
+      "unavailable": "Voice is turned off for this organization.",
+      "failed": "The transcription failed. Try again."
+    },
+    "options": "Voice options",
+    "autoSend": "Send after transcribing",
+    "autoRead": "Read answers aloud",
+    "realtime": {
+      "start": "Start voice conversation (experimental)",
+      "stop": "End voice conversation",
+      "connecting": "Connecting the voice conversation…",
+      "live": "Voice conversation on.",
+      "error": "The voice conversation failed."
+    },
+    "readAloud": "Listen to the answer",
+    "stopReading": "Stop reading",
+    "loadingAudio": "Preparing the audio…",
+    "player": "Answer as audio",
+    "readFailed": "The answer could not be read aloud.",
+    "readUnavailable": "Read aloud is turned off for this organization."
   }
 }

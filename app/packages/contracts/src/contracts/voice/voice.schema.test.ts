@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { MAX_SPEECH_TEXT_CHARS, RealtimeSessionContract, SpeechRequestContract, SpeechRequestSchema, TranscriptionContract } from "./voice.schema.ts";
+import { MAX_SPEECH_TEXT_CHARS, RealtimeSessionContract, SpeechRequestContract, SpeechRequestSchema, TranscriptionContract, VoiceAvailabilityContract } from "./voice.schema.ts";
 
-const contracts = [TranscriptionContract, SpeechRequestContract, RealtimeSessionContract];
+const contracts = [TranscriptionContract, SpeechRequestContract, RealtimeSessionContract, VoiceAvailabilityContract];
 
 describe("voice contracts", () => {
   it.each(contracts.map((contract) => [contract.id, contract] as const))("%s: examples parse and unknown keys are rejected", (_id, contract) => {

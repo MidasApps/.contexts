@@ -6,6 +6,7 @@ import { SquarePenIcon } from "lucide-react";
 import { useId, useMemo, useState, type ReactNode } from "react";
 import { useTranslations } from "use-intl";
 import type { UseUploadQueueArgs } from "#/features/chat-upload/index.ts";
+import type { ComposerVoiceProps, ReadAloudActionProps } from "#/features/chat-voice/index.ts";
 import { CORE_UI_COMPONENTS, createUiRegistry, type UiRegistry, type UiRegistryEntry } from "#/features/generative-ui/index.ts";
 import { ApiError } from "#/shared/api/api-error.ts";
 import type { ChatScope } from "#/shared/api/chat-transport.ts";
@@ -40,9 +41,11 @@ export type ChatPanelProps = {
   /** Extra composer tools of the host (attachments and voice are the panel's own). */
   tools?: ReactNode;
   className?: string | undefined;
-  /** Tests pass a scripted transport and scripted uploads. */
+  /** Tests pass a scripted transport, scripted uploads, a fake microphone and fake audio URLs. */
   transport?: ChatTransport<UIMessage> | undefined;
   uploadSeams?: UseUploadQueueArgs["seams"];
+  voiceSeams?: ComposerVoiceProps["seams"];
+  speechSeams?: ReadAloudActionProps["seams"];
 };
 
 /**
@@ -101,6 +104,8 @@ function StoredThread(props: { thread: Thread; conversationId: string; panel: Ch
       tools={props.panel.tools}
       transport={props.panel.transport}
       uploadSeams={props.panel.uploadSeams}
+      voiceSeams={props.panel.voiceSeams}
+      speechSeams={props.panel.speechSeams}
     />
   );
 }
@@ -170,6 +175,8 @@ export function ChatPanel(props: ChatPanelProps) {
           tools={props.tools}
           transport={props.transport}
           uploadSeams={props.uploadSeams}
+          voiceSeams={props.voiceSeams}
+          speechSeams={props.speechSeams}
         />
       ) : (
         <StoredThread key={thread.key} thread={thread} conversationId={thread.storedId} panel={props} environment={environment} suggestions={suggestions} onStarted={started} onRecover={recover} />

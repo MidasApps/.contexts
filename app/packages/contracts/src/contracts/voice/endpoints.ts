@@ -6,7 +6,7 @@ import { none, personal } from "../field-docs.ts";
 import { defineEndpoint, type EndpointDefinition } from "../http/endpoint.ts";
 import { dataEnvelope } from "../http/envelopes.schema.ts";
 import { OrganizationIdSchema } from "../tenancy/ids.schema.ts";
-import { RealtimeSessionSchema, SpeechRequestSchema, TranscriptionSchema } from "./voice.schema.ts";
+import { RealtimeSessionSchema, SpeechRequestSchema, TranscriptionSchema, VoiceAvailabilitySchema } from "./voice.schema.ts";
 
 const organizationQuery = z.object({ organizationId: OrganizationIdSchema.meta(none("Organization the call is billed to.")) });
 
@@ -55,4 +55,16 @@ export const createRealtimeSessionEndpoint = defineEndpoint({
   summary: "Mints an ephemeral realtime voice secret without tools; 503 while the experimental flag is off (core.voice.use).",
 });
 
-export const VOICE_ENDPOINTS: readonly EndpointDefinition[] = [transcribeVoiceEndpoint, synthesizeSpeechEndpoint, createRealtimeSessionEndpoint];
+/** The chat reads this before it shows any voice control: voice stays hidden unless the flag is on. */
+export const getVoiceAvailabilityEndpoint = defineEndpoint({
+  id: "voice.getAvailability",
+  method: "GET",
+  path: "/v1/voice/availability",
+  auth: "user",
+  query: organizationQuery,
+  responses: { 200: dataEnvelope(VoiceAvailabilitySchema) },
+  errors: { 403: ["FORBIDDEN"] },
+  summary: "Tells whether voice and realtime voice are on for the organization; never answers 503 (core.voice.use).",
+});
+
+export const VOICE_ENDPOINTS: readonly EndpointDefinition[] = [transcribeVoiceEndpoint, synthesizeSpeechEndpoint, createRealtimeSessionEndpoint, getVoiceAvailabilityEndpoint];

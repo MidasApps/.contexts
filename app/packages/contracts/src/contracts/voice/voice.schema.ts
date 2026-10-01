@@ -46,6 +46,31 @@ export const SpeechRequestContract = defineContract(SpeechRequestSchema, {
   permission: "core.voice.use",
 });
 
+/**
+ * `200` of `GET /v1/voice/availability`: what the chat may offer the caller (decision 0034). The
+ * flags are tenant flags only admins may list, so the chat asks here instead; every voice call is
+ * still gated again when it is made.
+ */
+export const VoiceAvailabilitySchema = z.strictObject({
+  voice: z.boolean().meta(none("Push-to-talk and read aloud are on for the organization (flag chat.voice).")),
+  realtime: z.boolean().meta(none("Realtime sessions are on too (flag chat.voice.realtime); the session route still needs real mode and a provider key.")),
+});
+export type VoiceAvailability = z.infer<typeof VoiceAvailabilitySchema>;
+
+export const VoiceAvailabilityContract = defineContract(VoiceAvailabilitySchema, {
+  id: "voice.VoiceAvailability",
+  kind: "view",
+  description: "Whether voice and realtime voice are switched on for the caller's organization.",
+  examples: [
+    { voice: true, realtime: false },
+    { voice: false, realtime: false },
+  ],
+  pii: "none",
+  tenancyScope: "organization",
+  relations: [],
+  permission: "core.voice.use",
+});
+
 /** `201` of `POST /v1/voice/realtime-sessions`: an ephemeral WebRTC client secret (≤ 60 s). */
 export const RealtimeSessionSchema = z.strictObject({
   clientSecret: z.string().min(1).max(4096).meta(sensitive("Ephemeral client secret for the provider's WebRTC endpoint.")),
