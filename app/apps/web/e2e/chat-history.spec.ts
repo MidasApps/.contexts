@@ -69,6 +69,13 @@ test("renames, pins, searches, archives, restores and deletes conversations", as
   await expect(history(page).getByRole("listitem")).toHaveCount(2);
 
   await openActions(page, "Hiring plan for the team");
+  await page.getByRole("menuitem", { name: "Resumir" }).click();
+  const summary = page.getByRole("dialog", { name: "Resumo de Hiring plan for the team" });
+  await expect(summary.getByText(/^Fake answer [0-9a-f]{8}:/)).toBeVisible({ timeout: 30_000 });
+  await summary.getByRole("button", { name: "Fechar" }).first().click();
+  await expect(summary).toBeHidden();
+
+  await openActions(page, "Hiring plan for the team");
   await page.getByRole("menuitem", { name: "Arquivar" }).click();
   await expect(history(page).getByRole("listitem")).toHaveCount(1);
   await history(page).getByRole("button", { name: "Arquivadas" }).click();
