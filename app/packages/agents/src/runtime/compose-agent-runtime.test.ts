@@ -93,6 +93,7 @@ describe("composeAgentRuntime", () => {
       "GET /chat/:agentId/messages",
       "POST /chat/:agentId/summary",
       "POST /workflow-approvals/:approvalRequestId/settle",
+      "POST /prompt-evals/:versionId",
       "GET /workflow-runs",
       "POST /workflow-runs/start/:workflowId",
       "GET /workflow-runs/:runId",

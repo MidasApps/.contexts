@@ -1,5 +1,7 @@
 import type { AuthAdmin } from "./auth-admin.ts";
 import type { SeedCore, SeedState } from "./seed-core-port.ts";
+import { createPostgresClient, createPostgresPromptRepository, loadServicesEnv } from "@core/services";
+import { importPromptSeeds } from "./import-prompt-seeds.ts";
 import { createKnowledgeSeedDeps, seedKnowledgeBase } from "./seed-knowledge.ts";
 import { seedMembers } from "./seed-members.ts";
 import { upsertOwnerUser } from "./seed-owner-user.ts";
@@ -57,4 +59,18 @@ const knowledgeStep: SeedStep = {
  * creates anything) and must never create a second copy when it runs again. Later steps
  * read the ids earlier ones put in `SeedContext.state`.
  */
-export const LOCAL_SEED_STEPS: readonly SeedStep[] = [ownerUserStep, tenancyStep, membersStep, staffStep, knowledgeStep];
+// SP5 Task 9: code seeds of the agent prompts as active platform version 1 (decision 0038).
+const promptSeedsStep: SeedStep = {
+  name: "prompt seeds",
+  run: async ({ processEnv }) => {
+    const sql = createPostgresClient({ DATABASE_URL: loadServicesEnv(processEnv).DATABASE_URL }, { max: 1 });
+    try {
+      const { imported, skipped } = await importPromptSeeds({ prompts: createPostgresPromptRepository(sql) });
+      return `imported ${imported.length}, already present ${skipped.length}`;
+    } finally {
+      await sql.end();
+    }
+  },
+};
+
+export const LOCAL_SEED_STEPS: readonly SeedStep[] = [ownerUserStep, tenancyStep, membersStep, staffStep, knowledgeStep, promptSeedsStep];

@@ -71,6 +71,20 @@
       "when": 1790819041477,
       "tag": "0009_usage_rollups_runtime_grants",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1790828285904,
+      "tag": "0010_prompt_store_tables",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1790828292721,
+      "tag": "0011_prompts_runtime_role",
+      "breakpoints": true
     }
   ]
 }

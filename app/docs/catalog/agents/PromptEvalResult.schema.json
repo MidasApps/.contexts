@@ -1,0 +1,96 @@
+{
+  "additionalProperties": false,
+  "description": "Result of running an agent's eval set with a candidate prompt; activation needs `passed`.",
+  "examples": [
+    {
+      "experimentId": "01927f3e-0000-7000-8000-000000000001",
+      "scorers": [
+        {
+          "mean": 1,
+          "passed": true,
+          "scorerId": "tool-routing"
+        }
+      ],
+      "verdict": "passed",
+      "versionId": "01927f3c-8b4a-7d2e-9f10-3a4b5c6d7e8f"
+    }
+  ],
+  "properties": {
+    "experimentId": {
+      "description": "Id of the eval run (recorded on the version).",
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "scorers": {
+      "description": "Per-scorer gate results.",
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "mean": {
+            "anyOf": [
+              {
+                "maximum": 1,
+                "minimum": 0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Mean score; null when nothing was scorable.",
+            "x-pii": "none"
+          },
+          "passed": {
+            "description": "Whether the mean met the baseline floor.",
+            "type": "boolean",
+            "x-pii": "none"
+          },
+          "scorerId": {
+            "description": "Scorer.",
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          }
+        },
+        "required": [
+          "scorerId",
+          "mean",
+          "passed"
+        ],
+        "type": "object"
+      },
+      "type": "array",
+      "x-pii": "none"
+    },
+    "verdict": {
+      "description": "Gate verdict against the agent's baseline.",
+      "enum": [
+        "passed",
+        "failed"
+      ],
+      "type": "string",
+      "x-pii": "none"
+    },
+    "versionId": {
+      "description": "Evaluated version.",
+      "format": "uuid",
+      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+      "type": "string",
+      "x-pii": "none"
+    }
+  },
+  "required": [
+    "versionId",
+    "experimentId",
+    "verdict",
+    "scorers"
+  ],
+  "type": "object",
+  "x-kind": "view",
+  "x-permission": "core.prompt.write",
+  "x-pii": "none",
+  "x-relations": [],
+  "x-tenancyScope": "organization"
+}

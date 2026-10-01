@@ -540,3 +540,11 @@ export {
   listOrganizationsAdminEndpoint, listPlansEndpoint, setOrganizationBudgetEndpoint, updateAgentSettingsEndpoint,
   updateOrganizationAdminEndpoint, updateOrganizationAgentSettingsEndpoint, updatePlanEndpoint,
 } from "./contracts/platform/admin-endpoints.ts";
+export {
+  PROMPT_AGENT_IDS, PromptAgentIdSchema, PromptEvalResultContract, PromptEvalResultSchema, type PromptAgentId, type PromptEvalResult,
+} from "./contracts/agents/prompt-eval.schema.ts";
+export {
+  activateAddendumEndpoint, adminActivatePromptEndpoint, adminCreatePromptVersionEndpoint, adminEvaluatePromptVersionEndpoint,
+  adminListPromptActivationsEndpoint, adminListPromptVersionsEndpoint, createAddendumVersionEndpoint, evaluateAddendumVersionEndpoint,
+  listAddendumActivationsEndpoint, listAddendumVersionsEndpoint, PROMPT_ENDPOINTS,
+} from "./contracts/agents/prompt-endpoints.ts";

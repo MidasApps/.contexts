@@ -58,7 +58,7 @@ export const createSupervisorAgent = (args: {
     id: SUPERVISOR_AGENT_ID,
     name: "Assistant",
     description: "Answers the user, plans the work and delegates to the knowledge, data, action and web specialists the organization enabled.",
-    instructions: loadInstructions(SUPERVISOR_INSTRUCTIONS, args.instructionsDirs),
+    instructions: deps.instructions(SUPERVISOR_AGENT_ID, loadInstructions(SUPERVISOR_INSTRUCTIONS, args.instructionsDirs)),
     model: deps.models.language("chat", { agentId: SUPERVISOR_AGENT_ID }),
     agents: enabledSubagentsOf(args.subagents, deps.tenantSettings),
     // Read-only connector tools answer questions directly; changes go through `agent-action`.

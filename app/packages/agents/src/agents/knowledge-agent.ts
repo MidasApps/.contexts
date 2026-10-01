@@ -25,13 +25,13 @@ export const createKnowledgeAgentDefinition = (options: { readonly instructionsD
   id: KNOWLEDGE_AGENT_ID,
   role: "subagent",
   ceiling: ["core.chat.use", KNOWLEDGE_READ_PERMISSION, CATALOG_READ_PERMISSION],
-  create: ({ models, tools, guardrails, skills }) => {
+  create: ({ models, tools, guardrails, skills, instructions }) => {
     const profile = guardrails("delegated");
     return new Agent({
       id: KNOWLEDGE_AGENT_ID,
       name: "Knowledge",
       description: "Answers questions about the organization's documents and data catalog from the knowledge base, citing every claim.",
-      instructions: loadInstructions(KNOWLEDGE_INSTRUCTIONS, options.instructionsDirs),
+      instructions: instructions(KNOWLEDGE_AGENT_ID, loadInstructions(KNOWLEDGE_INSTRUCTIONS, options.instructionsDirs)),
       model: models.language("chat", { agentId: KNOWLEDGE_AGENT_ID }),
       tools: tools.toMastraTools([SEARCH_KNOWLEDGE_TOOL_ID]),
       skills: skills([CORE_SKILLS.knowledgeCitations]),

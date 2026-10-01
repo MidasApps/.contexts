@@ -74,7 +74,11 @@
         "PLAN_CREATED",
         "PLAN_UPDATED",
         "TENANT_BUDGET_UPDATED",
-        "AGENT_SETTINGS_UPDATED"
+        "AGENT_SETTINGS_UPDATED",
+        "PROMPT_VERSION_CREATED",
+        "PROMPT_EVALUATED",
+        "PROMPT_ACTIVATED",
+        "PROMPT_ACTIVATION_FORCED"
       ],
       "type": "string",
       "x-pii": "none"

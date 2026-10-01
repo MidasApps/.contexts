@@ -1,13 +1,15 @@
-import { type AgentRuntimePorts, createWebContentPort, embeddingModelIdOf, type FilesPort } from "@core/agents";
+import { type AgentRuntimePorts, createWebContentPort, embeddingModelIdOf, type FilesPort, type PromptStorePort } from "@core/agents";
 import { TenantIdSchema } from "@core/contracts";
 import {
   type AccessReaders,
   type AgentCommandExecutor,
   type ApiKeyAuthenticator,
+  type PromptRepository,
   agentCommandExecutors,
   createCoreAgentCommandExecutors,
   createFirebaseConnectorsServices,
   createFirebaseConsoleServices,
+  createPostgresPromptRepository,
   createFirebaseFlagsServices,
   flagEnvironmentDefaults,
   createFirebaseFilesServices,
@@ -56,6 +58,16 @@ export type RuntimePortsEnv = Pick<ServicesEnv, "API_KEY_PREFIX" | "DATABASE_URL
   readonly FIRECRAWL_API_KEY?: string | undefined;
   readonly FIRECRAWL_API_URL?: string | undefined;
 };
+
+// SP5 prompt store (decision 0038): the agents read bodies; the eval route reads a version and records its verdict.
+const bindPromptStorePort = (repository: PromptRepository): PromptStorePort => ({
+  getActive: (input) => repository.getActive(input),
+  getVersion: async (input) => {
+    const version = await repository.getVersion(input);
+    return version === null ? null : { versionId: version.id, agentId: version.agentId, scope: version.scope, tenantId: version.tenantId, body: version.body };
+  },
+  recordEval: (input) => repository.recordEval(input),
+});
 
 // The files use cases answer `{ code }` errors; the agents port carries the bare code.
 const bindFilesPort = (files: Pick<FilesServices, "getReadyFile" | "readFileBytes">): FilesPort => ({
@@ -163,6 +175,7 @@ export const createRuntimePorts = (args: {
     workflowCommands: bindWorkflowCommandsPort({ executors: agentCommandExecutors(executors), access: core.access, commands }),
     notifications: createLogNotificationPort(args.logger),
     flags: { getValues: ({ tenantId }) => flags.getFlagValues({ tenantId }) },
+    prompts: bindPromptStorePort(createPostgresPromptRepository(sql)),
     usageReport: bindUsageReportPort({ env: sinkEnv, sql, firestore: args.firebase.firestore, audit: core.audit, logger: args.logger }),
     approvalSweeps: bindApprovalSweepPort(core.approvals),
     conversationPurge: bindConversationPurgePort(args.firebase.firestore),

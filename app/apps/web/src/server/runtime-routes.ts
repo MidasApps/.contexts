@@ -3,6 +3,7 @@ import {
   buildAdminFlagsRoutes,
   buildAdminPlatformRoutes,
   buildAgentSettingsRoutes,
+  buildPromptRoutes,
   buildChatRoutes,
   buildFlagsRoutes,
   buildConnectorsRoutes,
@@ -21,6 +22,7 @@ import {
   createFirebaseFilesServices,
   createFirebaseConsoleServices,
   createFirebaseFlagsServices,
+  createPostgresPromptServices,
   flagEnvironmentDefaults,
   createFirestoreConversationsServices,
   createKnowledgeServices,
@@ -117,5 +119,7 @@ export const buildRuntimeRoutes = async (core: CoreServer): Promise<CoreRoutes> 
     // SP5 staff console and agent settings (decisions 0039, 0041): budgets materialize into usage.tenant_budgets.
     ...buildAdminPlatformRoutes(consoleDeps),
     ...buildAgentSettingsRoutes(consoleDeps),
+    // SP5 prompt store (decision 0038): append-only versions, eval-gated activation through the Mastra eval route.
+    ...buildPromptRoutes({ pipeline: core.pipeline, prompts: createPostgresPromptServices({ sql, audit: core.audit, mastraUrl: env.MASTRA_URL, serverlessToken }) }),
   };
 };

@@ -13,6 +13,8 @@ import { createKnowledgeAgentDefinition } from "../agents/knowledge-agent.ts";
 import { PING_AGENT } from "../agents/ping-agent.ts";
 import { createSupervisorAgent, SUPERVISOR_AGENT_ID } from "../agents/supervisor-agent.ts";
 import { createTenantAgentSettingsReader } from "../agents/tenant-agent-settings.ts";
+import { createInstructionsResolver } from "../agents/prompt-instructions.ts";
+import { createPromptEvalRoutes, type PromptEvalRunner } from "../agents/prompt-eval-route.ts";
 import { createWebAgentDefinition } from "../agents/web-agent.ts";
 import type { ChatRuntime } from "../chat/chat-http.ts";
 import { CHAT_ROUTES_PATTERN, createChatRoutes, MAX_CHAT_BODY_BYTES } from "../chat/chat-routes.ts";
@@ -107,6 +109,8 @@ export type ComposeAgentRuntimeArgs = {
   readonly connectorLoaders?: ConnectorLoaders;
   /** Test seam: Firecrawl clients and the guard DNS (default: from env and the secret store). */
   readonly webTools?: WebToolsRuntime;
+  /** Runs prompt evals (`createHarnessPromptEvalRunner` in `apps/mastra`); without it the eval route answers 503. */
+  readonly promptEvalRunner?: PromptEvalRunner;
 };
 
 /** What `new Mastra({...})` receives from the runtime (spec §3.3); `pubsub` arrives with Task 25. */
@@ -344,7 +348,9 @@ export const composeAgentRuntime = (args: ComposeAgentRuntimeArgs): RuntimeParts
   const tenantSettings = createTenantAgentSettingsReader(args.ports.settings, flags);
   const skillDirs = [...(args.skillsDirs ?? []), ...CORE_SKILL_DIRS];
   const skills = (names: readonly string[]) => createSkillsResolver({ core: names.map((name) => loadSkill(name, skillDirs)), modules: args.modules, settings: tenantSettings });
-  const deps: AgentFactoryDeps = { models, tools, ports: args.ports, guardrails, memory, tenantSettings, skills, commands, connectorTools, webTools };
+  // Decision 0038: active platform prompt (else the seed) + tenant addendum, cached 60 s.
+  const instructions = createInstructionsResolver(args.ports.prompts);
+  const deps: AgentFactoryDeps = { models, tools, ports: args.ports, guardrails, memory, tenantSettings, skills, commands, connectorTools, webTools, instructions };
   const { agents, subagents } = buildAgents(definitions, deps, args.instructionsDirs);
   const apiPrefix = args.apiPrefix;
   const auth = new FirebaseMastraAuth({ access: args.ports.access, ...(apiPrefix === undefined ? {} : { apiPrefix }) });
@@ -399,6 +405,8 @@ export const composeAgentRuntime = (args: ComposeAgentRuntimeArgs): RuntimeParts
       ...voiceRoutes,
       ...createChatRoutes({ ...chat.runtime, logger: processLogger }),
       ...createWorkflowApprovalRoutes({ approvals: args.ports.workflowApprovals, logger: processLogger }),
+      // SP5 prompt store (decision 0038): candidate prompts on the isolated eval harness, verdict recorded here.
+      ...createPromptEvalRoutes({ prompts: args.ports.prompts, runner: args.promptEvalRunner, logger: processLogger }),
       ...createWorkflowRunRoutes({ access: args.ports.access, catalog: workflowCatalog, logger: processLogger }),
       ...createWorkflowChatRoutes({ access: args.ports.access, catalog: workflowCatalog, logger: processLogger }),
       ...createTenantScheduleRoutes({ access: args.ports.access, catalog: workflowCatalog, minIntervalMinutes: minIntervalMinutesOf(args.env), logger: processLogger }),

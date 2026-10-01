@@ -733,3 +733,11 @@ export {
 } from "./services/platform/index.ts";
 export { AGENT_SETTINGS_PERMISSIONS, buildAgentSettingsRoutes } from "./services/agents/adapters/driving/agent-settings-route-handler.ts";
 export { resolveTenantCaps, selfCapWithin, type TenantCaps } from "./services/usage/domain/budget-policy.ts";
+// SP5 prompt store (Task 9, decision 0038): append-only Postgres versions and activations, eval gate.
+export { buildPromptRoutes, PROMPT_PERMISSIONS } from "./services/agents/adapters/driving/prompts-route-handler.ts";
+export { createInMemoryPromptRepository } from "./services/agents/adapters/driven/in-memory-prompt-repository.ts";
+export { createMastraPromptEvalGateway } from "./services/agents/adapters/driven/mastra-prompt-eval-gateway.ts";
+export { createPostgresPromptRepository, PLATFORM_PROMPT_SCOPE, PROMPTS_RUNTIME_ROLE } from "./services/agents/adapters/driven/postgres-prompt-repository.ts";
+export type { PromptEvalError, PromptEvalGateway } from "./services/agents/application/ports/prompt-eval-gateway.ts";
+export type { ActivePrompts, PromptKey, PromptRepository } from "./services/agents/application/ports/prompt-repository.ts";
+export { createPostgresPromptServices, createPromptServices, type PromptServices } from "./services/agents/prompt-composition.ts";

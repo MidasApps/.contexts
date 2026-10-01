@@ -37,7 +37,7 @@ export const createWebAgentDefinition = (options: { readonly instructionsDirs?: 
       id: WEB_AGENT_ID,
       name: "Web",
       description: "Researches public web pages and summarizes them with their addresses; browser actions ask the user for approval.",
-      instructions: loadInstructions(WEB_INSTRUCTIONS, options.instructionsDirs),
+      instructions: deps.instructions(WEB_AGENT_ID, loadInstructions(WEB_INSTRUCTIONS, options.instructionsDirs)),
       model: deps.models.language("chat", { agentId: WEB_AGENT_ID }),
       tools: ({ requestContext }) => webToolsOf(deps, requestContext),
       defaultOptions: { maxSteps: SUBAGENT_MAX_STEPS },

@@ -38,6 +38,9 @@ export const CORE_ERROR_CODES = [
   "SCHEDULE_INTERVAL_TOO_SHORT",
   // 503: the AI kill-switch `ai.kill-switch` or another feature flag is off (decision 0039).
   "FEATURE_DISABLED",
+  // SP5 prompt store (decision 0038): activation needs a passing eval; an agent without an eval set.
+  "EVAL_REQUIRED",
+  "EVAL_DATASET_MISSING",
 ] as const;
 
 export const CoreErrorCodeSchema = z.enum(CORE_ERROR_CODES);

@@ -242,6 +242,23 @@ export type SettingsPort = { readonly getAgentSettings: (input: { tenantId: stri
  * (`tenantId: null` = the environment values). Rejects when the store fails; readers decide the
  * fail-safe (the kill-switch fails closed).
  */
+/** A prompt body and the version it comes from. */
+export type PromptBody = { readonly versionId: string; readonly body: string };
+
+/** One stored prompt version, as the eval route reads it. */
+export type PromptVersionRecord = PromptBody & { readonly agentId: string; readonly scope: "platform" | "tenant"; readonly tenantId: string | null };
+
+/**
+ * Versioned prompts (decision 0038): the active platform instructions and the tenant's active
+ * addendum of an agent, a version read and the eval verdict write of `run-prompt-eval`. Reads
+ * reject on a store failure; the resolver then serves its cache or the code seed.
+ */
+export type PromptStorePort = {
+  readonly getActive: (input: { readonly agentId: string; readonly tenantId: string | null }) => Promise<{ readonly platform: PromptBody | null; readonly addendum: PromptBody | null }>;
+  readonly getVersion: (input: { readonly versionId: string; readonly tenantId: string | null }) => Promise<PromptVersionRecord | null>;
+  readonly recordEval: (input: { readonly versionId: string; readonly tenantId: string | null; readonly experimentId: string; readonly verdict: "passed" | "failed" }) => Promise<void>;
+};
+
 export type FlagsPort = { readonly getValues: (input: { readonly tenantId: string | null }) => Promise<Readonly<Record<string, boolean>>> };
 
 /** An SP1 approval request as workflows read it: effective status (a pending one past its expiry reads `expired`). */
@@ -371,4 +388,6 @@ export type AgentRuntimePorts = {
   readonly evalExport: EvalExportPort;
   /** SP5 feature flags (Task 8, decision 0039); read through `createFlagReader` (30 s cache). */
   readonly flags: FlagsPort;
+  /** SP5 prompt store (Task 9, decision 0038); read through `createInstructionsResolver` (60 s cache). */
+  readonly prompts: PromptStorePort;
 };

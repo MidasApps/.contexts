@@ -1,4 +1,4 @@
-import { type AgentModule, composeAgentRuntime, type RuntimeParts } from "@core/agents";
+import { type AgentModule, composeAgentRuntime, createHarnessPromptEvalRunner, type RuntimeParts } from "@core/agents";
 import { createFirebaseAdmin, type FirebaseAdmin, processLogger } from "@core/services";
 import type { MastraCompositeStore } from "@mastra/core/storage";
 import type { MastraVector } from "@mastra/core/vector";
@@ -37,6 +37,8 @@ export const createAgentRuntime = (args: {
     storage: overrides.storage ?? new PostgresStore(buildStorageConfig(env)),
     vector: overrides.vector ?? new PgVector(buildMemoryVectorConfig(env)),
     serviceName: MASTRA_SERVICE_NAME,
+    // Decision 0038: candidate prompts run on the isolated eval harness (real mode reads the provider keys).
+    promptEvalRunner: createHarnessPromptEvalRunner({ mode: env.AI_MODE, processEnv: args.processEnv }),
     ...(overrides.observability === undefined ? {} : { exporters: overrides.observability }),
   });
 };

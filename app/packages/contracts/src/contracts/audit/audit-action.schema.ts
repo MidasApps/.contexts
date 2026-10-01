@@ -77,6 +77,11 @@ export const AUDIT_ACTIONS = [
   "PLAN_UPDATED",
   "TENANT_BUDGET_UPDATED",
   "AGENT_SETTINGS_UPDATED",
+  // SP5 prompt store (decision 0038): versions, eval verdicts, activations (forced ones apart).
+  "PROMPT_VERSION_CREATED",
+  "PROMPT_EVALUATED",
+  "PROMPT_ACTIVATED",
+  "PROMPT_ACTIVATION_FORCED",
 ] as const;
 
 export const AuditActionSchema = z.enum(AUDIT_ACTIONS);

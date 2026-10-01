@@ -9,3 +9,5 @@ import { pgSchema } from "drizzle-orm/pg-core";
 export const aiSchema = pgSchema("ai");
 // LLM usage ledger and tenant budgets (`usage.llm_calls`, `usage.tenant_budgets`; decision 0026).
 export const usageSchema = pgSchema("usage");
+// Versioned agent prompts (`agents.prompt_versions`, `agents.prompt_activations`; decision 0038).
+export const agentsSchema = pgSchema("agents");

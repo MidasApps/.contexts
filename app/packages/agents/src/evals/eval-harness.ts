@@ -6,7 +6,7 @@ import { MEMBER_PERMISSIONS, noteModule, SUPERVISOR_TEST_ENV } from "../agents/s
 import { type AgentModels, createModelProvider, type ModelFactoryEnv } from "../models/model-factory.ts";
 import { AgentEnvSchema, resolveAgentEnv } from "../runtime/agent-env.schema.ts";
 import { composeAgentRuntime } from "../runtime/compose-agent-runtime.ts";
-import type { KnowledgePort } from "../runtime/runtime-ports.ts";
+import type { KnowledgePort, PromptStorePort } from "../runtime/runtime-ports.ts";
 import { type CoreScorer, createCoreScorers } from "../scorers/core-scorers.ts";
 import { buildAgentContextEntries } from "../testing/agent-context-fixture.ts";
 import { createFakeAccessPort, createFakeProjectsPort, createFakeRuntimePorts, createFakeSettingsPort } from "../testing/fake-ports.ts";
@@ -60,6 +60,8 @@ export const buildEvalHarness = (args: {
   readonly mode: EvalMode;
   readonly processEnv?: Readonly<Record<string, string | undefined>>;
   readonly knowledge?: (models: AgentModels) => KnowledgePort;
+  /** The prompt store the agents read (a prompt eval injects its candidate here, decision 0038). */
+  readonly prompts?: PromptStorePort;
 }): EvalHarness => {
   const env = evalEnvOf(args.mode, args.processEnv);
   const models = createModelProvider(env);
@@ -69,6 +71,7 @@ export const buildEvalHarness = (args: {
     settings: createFakeSettingsPort(),
     knowledge: args.knowledge?.(models) ?? createCorpusKnowledgePort(embedWith(models)),
     projects: createFakeProjectsPort(),
+    ...(args.prompts === undefined ? {} : { prompts: args.prompts }),
   });
   const runtime = composeAgentRuntime({ env, ports, modules: [noteModule()], storage: new InMemoryStore(), serviceName: "evals", aiCatalog: FIXTURE_AI_CATALOG, models });
   const scorers = createCoreScorers({ foreignMarkers: FOREIGN_MARKERS, ...(args.mode === "real" ? { judgeModel: models.language("judge") } : {}) });

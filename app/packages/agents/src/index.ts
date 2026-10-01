@@ -29,6 +29,9 @@ export type {
   FileReadError,
   FilesPort,
   FlagsPort,
+  PromptBody,
+  PromptStorePort,
+  PromptVersionRecord,
   KnowledgeChunkInput,
   KnowledgeDocumentInput,
   KnowledgeEventsPort,
@@ -443,3 +446,8 @@ export { createEvalExportWorkflow, EVAL_EXPORT_CRON, EVAL_EXPORT_WINDOW_MS, EVAL
 // SP5 feature flags (Task 8, decision 0039): the runtime's cached reader and the kill-switch paths.
 export { createFlagReader, FLAG_CACHE_TTL_MS, type FlagReader } from "./runtime/flag-reader.ts";
 export { CORE_FLAG_KEYS, isAgentRunPath } from "./runtime/core-flag-keys.ts";
+// SP5 prompt store (Task 9, decision 0038): dynamic instructions and the eval route.
+export { composeInstructions, createInstructionsResolver, PROMPT_CACHE_TTL_MS, type InstructionsResolver } from "./agents/prompt-instructions.ts";
+export { createPromptEvalRoutes, handlePromptEval, PROMPT_EVAL_ROUTE_PATH, type PromptEvalRunner } from "./agents/prompt-eval-route.ts";
+export { createHarnessPromptEvalRunner } from "./evals/prompt-eval-runner.ts";
+export { PROMPT_AGENT_IDS } from "@core/contracts";

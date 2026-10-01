@@ -9,6 +9,7 @@ import type { AgentCommand } from "../tools/commands/agent-command.ts";
 import type { CoreToolDefinition } from "../tools/define-core-tool.ts";
 import type { ToolRegistry } from "../tools/tool-registry.ts";
 import type { WebToolsRuntime } from "../tools/web/web-tools-runtime.ts";
+import type { InstructionsResolver } from "../agents/prompt-instructions.ts";
 import { type ModuleWorkflow, workflowIdOf } from "../workflows/workflow-catalog.ts";
 import type { AgentRuntimePorts } from "./runtime-ports.ts";
 
@@ -37,6 +38,8 @@ export type AgentFactoryDeps = {
   readonly connectorTools: ConnectorToolsResolver;
   /** Firecrawl clients per tenant and the SSRF guard DNS (the web agent gates its Firecrawl tools on them). */
   readonly webTools: WebToolsRuntime;
+  /** Dynamic instructions: the active platform prompt (else the code seed) plus the tenant addendum (decision 0038). */
+  readonly instructions: InstructionsResolver;
 };
 
 export type AgentDefinition = {

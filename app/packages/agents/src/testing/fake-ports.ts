@@ -12,6 +12,9 @@ import type {
   BudgetCheck,
   FilesPort,
   FlagsPort,
+  PromptBody,
+  PromptStorePort,
+  PromptVersionRecord,
   KnowledgeEventsPort,
   NodeRef,
   ProjectsPort,
@@ -208,6 +211,38 @@ export const createFakeFlagsPort = (values: Readonly<Record<string, boolean>> | 
   };
 };
 
+export type FakePromptStorePort = PromptStorePort & {
+  readonly evals: { versionId: string; experimentId: string; verdict: "passed" | "failed" }[];
+  readonly reads: { agentId: string; tenantId: string | null }[];
+};
+
+/**
+ * Prompt store fake: `active` maps `agentId` (platform) and `agentId:tenantId` (addendum) to a body;
+ * `versions` are readable by id (platform rows to everyone, tenant rows to their tenant).
+ */
+export const createFakePromptStorePort = (
+  seed: { readonly active?: Readonly<Record<string, PromptBody>>; readonly versions?: readonly PromptVersionRecord[]; readonly fails?: boolean } = {},
+): FakePromptStorePort => {
+  const evals: FakePromptStorePort["evals"] = [];
+  const reads: FakePromptStorePort["reads"] = [];
+  return {
+    evals,
+    reads,
+    getActive: ({ agentId, tenantId }) => {
+      reads.push({ agentId, tenantId });
+      if (seed.fails === true) return Promise.reject(new Error("prompt store down"));
+      const active = seed.active ?? {};
+      return Promise.resolve({ platform: active[agentId] ?? null, addendum: tenantId === null ? null : (active[`${agentId}:${tenantId}`] ?? null) });
+    },
+    getVersion: ({ versionId, tenantId }) =>
+      Promise.resolve(seed.versions?.find((version) => version.versionId === versionId && (version.tenantId === null || version.tenantId === tenantId)) ?? null),
+    recordEval: (input) => {
+      evals.push({ versionId: input.versionId, experimentId: input.experimentId, verdict: input.verdict });
+      return Promise.resolve();
+    },
+  };
+};
+
 export const createFakeSettingsPort = (overrides: Partial<AgentSettings> = {}): SettingsPort => ({
   getAgentSettings: ({ tenantId }) => Promise.resolve({ ...defaultAgentSettings(tenantId), ...overrides }),
 });
@@ -296,6 +331,7 @@ export const createFakeRuntimePorts = (overrides: Partial<AgentRuntimePorts> = {
   conversationPurge: { purgeDeleted: () => Promise.resolve({ purged: 0, failed: 0 }) },
   evalExport: { listFinishedSince: () => Promise.resolve([]), exportSummaries: () => Promise.resolve(0) },
   flags: createFakeFlagsPort(),
+  prompts: createFakePromptStorePort(),
   ...overrides,
 });
 

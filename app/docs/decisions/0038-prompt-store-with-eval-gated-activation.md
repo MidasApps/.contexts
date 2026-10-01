@@ -44,3 +44,39 @@ write, the author, a timestamp, rollback, and an evaluation before a production 
 - **`@mastra/editor` stored agents.** They replace whole agents, and have no tenant addendum and
   no eval gate.
 - **Prompts only in code.** Every wording change needs a deploy, and tenants cannot add context.
+
+## Amendments
+
+- **2026-10-01 — the store as built (SP5 Task 9).**
+  - **Tables.** Migration 0010 creates schema `agents` with `prompt_versions` (unique agent, scope,
+    tenant and version with `NULLS NOT DISTINCT`; scope/tenant, SHA-256 and verdict CHECKs) and
+    `prompt_activations` (FK to the version, `ON DELETE RESTRICT`, indexed; a forced activation needs
+    a reason). Migration 0011 forces row level security and adds role `prompts_runtime`: SELECT and
+    INSERT on both tables and UPDATE of the eval columns only, so bodies and activations can never
+    change or disappear. A policy shows platform rows to everyone and a tenant's rows to that tenant;
+    platform-only reads run under the scope `~platform`, which no organization id can equal.
+  - **Eval run.** `run-prompt-eval` calls the Mastra route `POST /prompt-evals/:versionId` (no user
+    Bearer, behind Cloud Run IAM like the settle route of decision 0036; `/v1` already authorized the
+    caller for the prompt line). The route re-reads the version under the given tenant scope, runs
+    the agent's committed eval set (decision 0028) in the isolated eval harness with the candidate
+    injected as the harness's active prompt (a tenant addendum runs on top of the active platform
+    prompt), gates the means against the agent's baseline and records the verdict and run id on the
+    version. The verdict never comes from the web side.
+  - **No request-context override in production.** Instead of a `promptVersionId` key that the live
+    runtime would honor, the candidate exists only inside the harness, so no caller of the
+    production runtime can make an agent run an unactivated prompt. `experimentId` is the harness
+    run id, not a Mastra dataset experiment; agents without an eval set (`web`) answer 422
+    `EVAL_DATASET_MISSING` and can only be force-activated by staff. In fake mode the models ignore
+    instructions, so a verdict there proves the wiring only.
+  - **Loading.** Every core agent's `instructions` is dynamic: the active platform body (else the
+    code seed) plus the tenant addendum in an `<organization-addendum>` section after a sentence
+    stating it never overrides the rules above (a closing tag inside the addendum is neutralized).
+    Cached 60 s per agent and tenant; a store failure serves the cache, else the seed without an
+    addendum.
+  - **Writes and audit.** Staff (`platform.prompt.manage`) write platform versions; an
+    organization's admins (`core.prompt.write`) write its addendum; tenants can never force.
+    Audited `PROMPT_VERSION_CREATED` (with the body hash as fingerprint, never the body),
+    `PROMPT_EVALUATED`, `PROMPT_ACTIVATED` and `PROMPT_ACTIVATION_FORCED` (with the reason).
+  - **Seeds.** `pnpm seed:local` imports each code seed as platform version 1 and activates it,
+    marked forced with the reason that the CI eval gate covers it; a rerun skips agents that
+    already have a version.
