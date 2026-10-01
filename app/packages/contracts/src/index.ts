@@ -581,3 +581,9 @@ export {
   AdminScheduleContract, AdminScheduleSchema, AdminWorkflowRunContract, AdminWorkflowRunSchema, LogLevelSchema, LogLineContract, LogLineSchema,
   type AdminSchedule, type AdminWorkflowRun, type LogLine, type LogLineLevel,
 } from "./contracts/platform/admin-operations.schema.ts";
+// SP5 admin gaps (decision 0044): staff user search and batched name lookup.
+export { ADMIN_USER_ENDPOINTS, adminListUsersEndpoint } from "./contracts/platform/admin-user-endpoints.ts";
+export {
+  ADMIN_USER_LOOKUP_MAX, AdminUserSearchBySchema, AdminUserSummaryContract, AdminUserSummarySchema,
+  type AdminUserSearchBy, type AdminUserSummary,
+} from "./contracts/platform/admin-user.schema.ts";

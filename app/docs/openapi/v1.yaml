@@ -2123,6 +2123,149 @@ paths:
       tags:
         - traces
       x-auth: user
+  /v1/admin/users:
+    get:
+      operationId: admin.listUsers
+      parameters:
+        - description: Cursor returned by the previous page.
+          in: query
+          name: cursor
+          required: false
+          schema:
+            minLength: 1
+            type: string
+            x-pii: none
+        - description: Page size, 1-100 (default 20).
+          in: query
+          name: limit
+          required: false
+          schema:
+            default: 20
+            maximum: 100
+            minimum: 1
+            type: integer
+            x-pii: none
+        - description: "Text to find: the start of a name or of an email, or a whole user id."
+          in: query
+          name: query
+          required: false
+          schema:
+            maxLength: 200
+            minLength: 1
+            type: string
+            x-pii: personal
+        - description: "How to read `query`; without it: an email when it has `@`, else a user id when one matches, else a name."
+          in: query
+          name: by
+          required: false
+          schema:
+            enum:
+              - name
+              - email
+              - uid
+            type: string
+            x-pii: none
+        - description: Comma-separated user ids to look up at once (at most 100); not with `query`.
+          in: query
+          name: ids
+          required: false
+          schema:
+            maxLength: 13000
+            minLength: 1
+            type: string
+            x-pii: personal
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    description: The items of this page.
+                    items:
+                      $ref: "#/components/schemas/platform.AdminUserSummary"
+                    type: array
+                    x-pii: personal
+                  meta:
+                    additionalProperties: false
+                    description: Response metadata.
+                    properties:
+                      page:
+                        additionalProperties: false
+                        description: Pagination state.
+                        properties:
+                          cursor:
+                            anyOf:
+                              - minLength: 1
+                                type: string
+                              - type: "null"
+                            description: Opaque cursor of the next page; null at the end.
+                            x-pii: none
+                          hasMore:
+                            description: Whether another page exists.
+                            type: boolean
+                            x-pii: none
+                          limit:
+                            description: Page size used for this response.
+                            maximum: 100
+                            minimum: 1
+                            type: integer
+                            x-pii: none
+                        required:
+                          - cursor
+                          - hasMore
+                          - limit
+                        type: object
+                        x-pii: none
+                    required:
+                      - page
+                    type: object
+                    x-pii: none
+                required:
+                  - data
+                  - meta
+                type: object
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: VALIDATION_FAILED
+          x-error-codes:
+            - VALIDATION_FAILED
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UNAUTHORIZED
+          x-error-codes:
+            - UNAUTHORIZED
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: FORBIDDEN, MFA_REQUIRED
+          x-error-codes:
+            - FORBIDDEN
+            - MFA_REQUIRED
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: INTERNAL_ERROR
+          x-error-codes:
+            - INTERNAL_ERROR
+      security:
+        - bearerAuth: []
+      summary: Finds users by name prefix (case and accents ignored), email prefix (emails are stored lowercase) or exact id, or looks up to 100 ids at once; `query` or `ids` is required (staff, platform.user.read).
+      tags:
+        - admin
+      x-auth: user
   /v1/admin/workflow-runs:
     get:
       operationId: admin.listWorkflowRuns
@@ -21703,6 +21846,61 @@ components:
       type: object
       x-kind: view
       x-permission: platform.workflow.manage
+      x-pii: personal
+      x-relations: []
+      x-tenancyScope: platform
+    platform.AdminUserSummary:
+      additionalProperties: false
+      description: "A user for staff: id, email, name and status, as the user search and the batched name lookup return it."
+      examples:
+        - createdAt: "2026-09-29T14:30:00.000Z"
+          displayName: Ana Souza
+          email: ana@example.com
+          id: uA1b2C3d4E5f6G7h8I9j
+          status: active
+      properties:
+        createdAt:
+          anyOf:
+            - format: date-time
+              pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z))$
+              type: string
+            - type: "null"
+          description: When the profile was created (UTC); null when unknown.
+          x-pii: none
+        displayName:
+          description: Name the user shows; may be empty.
+          maxLength: 120
+          type: string
+          x-pii: personal
+        email:
+          anyOf:
+            - format: email
+              pattern: ^(?:[A-Za-z0-9_'+\-]+\.)*[A-Za-z0-9_'+\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\-]*\.)+[A-Za-z]{2,}$
+              type: string
+            - type: "null"
+          description: Email of the account; null when the profile has none yet.
+          x-pii: personal
+        id:
+          description: Firebase Auth uid.
+          minLength: 1
+          type: string
+          x-pii: personal
+        status:
+          description: "`active` or `disabled`."
+          enum:
+            - active
+            - disabled
+          type: string
+          x-pii: none
+      required:
+        - id
+        - email
+        - displayName
+        - status
+        - createdAt
+      type: object
+      x-kind: view
+      x-permission: platform.user.read
       x-pii: personal
       x-relations: []
       x-tenancyScope: platform

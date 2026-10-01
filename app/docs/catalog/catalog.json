@@ -17876,6 +17876,135 @@
     },
     {
       "context": "platform",
+      "description": "A user for staff: id, email, name and status, as the user search and the batched name lookup return it.",
+      "examples": [
+        {
+          "createdAt": "2026-09-29T14:30:00.000Z",
+          "displayName": "Ana Souza",
+          "email": "ana@example.com",
+          "id": "uA1b2C3d4E5f6G7h8I9j",
+          "status": "active"
+        }
+      ],
+      "fields": [
+        {
+          "description": "When the profile was created (UTC); null when unknown.",
+          "name": "createdAt",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "Name the user shows; may be empty.",
+          "name": "displayName",
+          "pii": "personal",
+          "required": true
+        },
+        {
+          "description": "Email of the account; null when the profile has none yet.",
+          "name": "email",
+          "pii": "personal",
+          "required": true
+        },
+        {
+          "description": "Firebase Auth uid.",
+          "name": "id",
+          "pii": "personal",
+          "required": true
+        },
+        {
+          "description": "`active` or `disabled`.",
+          "name": "status",
+          "pii": "none",
+          "required": true
+        }
+      ],
+      "id": "platform.AdminUserSummary",
+      "jsonSchema": {
+        "additionalProperties": false,
+        "description": "A user for staff: id, email, name and status, as the user search and the batched name lookup return it.",
+        "examples": [
+          {
+            "createdAt": "2026-09-29T14:30:00.000Z",
+            "displayName": "Ana Souza",
+            "email": "ana@example.com",
+            "id": "uA1b2C3d4E5f6G7h8I9j",
+            "status": "active"
+          }
+        ],
+        "properties": {
+          "createdAt": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "When the profile was created (UTC); null when unknown.",
+            "x-pii": "none"
+          },
+          "displayName": {
+            "description": "Name the user shows; may be empty.",
+            "maxLength": 120,
+            "type": "string",
+            "x-pii": "personal"
+          },
+          "email": {
+            "anyOf": [
+              {
+                "format": "email",
+                "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Email of the account; null when the profile has none yet.",
+            "x-pii": "personal"
+          },
+          "id": {
+            "description": "Firebase Auth uid.",
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "personal"
+          },
+          "status": {
+            "description": "`active` or `disabled`.",
+            "enum": [
+              "active",
+              "disabled"
+            ],
+            "type": "string",
+            "x-pii": "none"
+          }
+        },
+        "required": [
+          "id",
+          "email",
+          "displayName",
+          "status",
+          "createdAt"
+        ],
+        "type": "object",
+        "x-kind": "view",
+        "x-permission": "platform.user.read",
+        "x-pii": "personal",
+        "x-relations": [],
+        "x-tenancyScope": "platform"
+      },
+      "kind": "view",
+      "name": "AdminUserSummary",
+      "permission": "platform.user.read",
+      "pii": "personal",
+      "relations": [],
+      "tenancyScope": "platform"
+    },
+    {
+      "context": "platform",
       "description": "A workflow run of any organization, or of the platform, as staff see it.",
       "examples": [
         {

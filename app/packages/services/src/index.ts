@@ -805,7 +805,15 @@ export {
   type OperationsResult,
   type ScheduleAction,
 } from "./services/platform/index.ts";
-// SP5 admin gaps (decision 0044): the searchable name of `users/{uid}` and its backfill.
+// SP5 admin gaps (decision 0044): staff user search and batched lookup over `users/{uid}`.
+export {
+  buildAdminUsersRoutes,
+  createFirestoreAdminUserDirectory,
+  createInMemoryAdminUserDirectory,
+  USERS_PERMISSION,
+  type AdminUserDirectory,
+  type AdminUsersRouteDeps,
+} from "./services/platform/index.ts";
 export { backfillUserSearchNames, type BackfillUserSearchNamesResult } from "./services/shared/firestore/backfill-user-search-names.ts";
 export { USER_SEARCH_NAME_FIELD, userSearchFields } from "./services/shared/firestore/user-search-fields.ts";
 export { normalizeSearchText } from "./services/shared/text/search-text.ts";

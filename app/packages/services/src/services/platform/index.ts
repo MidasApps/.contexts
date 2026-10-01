@@ -2,6 +2,10 @@
 export { buildAdminPlatformRoutes, CONSOLE_PERMISSIONS } from "./adapters/driving/admin-platform-route-handler.ts";
 export { buildAdminLogsRoutes, LOGS_PERMISSION, type AdminLogsRouteDeps } from "./adapters/driving/admin-logs-route-handler.ts";
 export { buildAdminOperationsRoutes, OPERATIONS_PERMISSIONS, type AdminOperationsRouteDeps } from "./adapters/driving/admin-operations-route-handler.ts";
+export { buildAdminUsersRoutes, USERS_PERMISSION, type AdminUsersRouteDeps } from "./adapters/driving/admin-users-route-handler.ts";
+export { createFirestoreAdminUserDirectory } from "./adapters/driven/firestore-admin-user-directory.ts";
+export { createInMemoryAdminUserDirectory, type AdminUserSeed, type InMemoryAdminUserDirectory } from "./adapters/driven/in-memory-admin-user-directory.ts";
+export type { AdminUserDirectory } from "./application/ports/admin-user-directory.ts";
 export { requireStaff, requireTenant } from "./adapters/driving/console-guards.ts";
 export { createMastraOperationsGateway } from "./adapters/driven/mastra-operations-gateway.ts";
 export type { AdminRunsQuery, OperationsError, OperationsGateway, OperationsResult, ScheduleAction } from "./application/ports/operations-gateway.ts";

@@ -4,6 +4,7 @@ import {
   buildAdminLogsRoutes,
   buildAdminOperationsRoutes,
   buildAdminPlatformRoutes,
+  buildAdminUsersRoutes,
   buildAgentSettingsRoutes,
   buildFeedbackRoutes,
   buildObservabilityRoutes,
@@ -22,6 +23,7 @@ import {
   buildWorkflowRunStreamRoutes,
   createCoreAgentCommandExecutors,
   createFirebaseAdmin,
+  createFirestoreAdminUserDirectory,
   createFirebaseConnectorsServices,
   createFirebaseFilesServices,
   createFirebaseConsoleServices,
@@ -160,5 +162,7 @@ export const buildRuntimeRoutes = async (core: CoreServer): Promise<CoreRoutes> 
       listConnectors: createFirestoreConnectorRepository({ firestore: firebase.firestore }).list,
     }),
     ...buildAdminLogsRoutes({ pipeline: core.pipeline, appEnv: env.APP_ENV, readLogs: readProcessLogBuffer }),
+    // SP5 admin gaps (decision 0044): staff user search and the batched name lookup over `users/{uid}`.
+    ...buildAdminUsersRoutes({ pipeline: core.pipeline, users: createFirestoreAdminUserDirectory({ firestore: firebase.firestore }) }),
   };
 };
