@@ -1,14 +1,14 @@
 "use client";
 
 import { useTranslations } from "use-intl";
-import { useMe } from "#/entities/session/index.ts";
+import { useAdminOverview } from "#/entities/admin-overview/index.ts";
 import { RouteLink } from "#/shared/lib/router/router-context.tsx";
 import { Icon } from "#/shared/ui/atoms/Icon/Icon.tsx";
 import { EmptyState } from "#/shared/ui/molecules/EmptyState/EmptyState.tsx";
 import { StatusPill } from "#/shared/ui/molecules/StatusPill/StatusPill.tsx";
+import { AdminKpiCards } from "#/widgets/admin-kpi-cards/index.ts";
+import { AdminPageFrame, AdminQuerySection } from "#/widgets/admin-nav/index.ts";
 import { useAdminItems, type AdminItem } from "#/widgets/admin-sidebar/index.ts";
-import { PageHeader } from "#/widgets/page-header/index.ts";
-import { QueryPage } from "#/widgets/page-state/index.ts";
 
 function AreaCard({ area }: { area: AdminItem }) {
   const t = useTranslations();
@@ -33,7 +33,7 @@ function AreaCard({ area }: { area: AdminItem }) {
 }
 
 function AdminAreas() {
-  const t = useTranslations("admin.home");
+  const t = useTranslations("admin.overview");
   const { items } = useAdminItems();
   if (items.length === 0) return <EmptyState headingLevel={2} icon="shield" title={t("emptyTitle")} description={t("emptyDescription")} />;
   return (
@@ -51,29 +51,30 @@ function AdminAreas() {
 }
 
 /**
- * `/admin` (SP2 spec §7, web only): the platform surface's home — every `admin` slot area the
- * staff role may open, each an empty state until SP5 registers its page. The server already
- * guarded staff + MFA; this only reads the role for what to list.
+ * `/admin` (SP5 spec §6): the platform numbers (`GET /v1/admin/overview`) and every admin area the
+ * staff role may open. A failed overview keeps the areas reachable: its error sits in its own
+ * section with the request reference and a retry.
  */
-export function AdminHomeView() {
+export function AdminOverviewView() {
   const t = useTranslations("admin");
-  const me = useMe();
+  const overview = useAdminOverview();
   return (
-    <QueryPage query={me} loadingLabel={t("home.loading")}>
-      {() => (
-        <>
-          <PageHeader
-            title={t("home.title")}
-            description={t("home.description")}
-            meta={
-              <StatusPill tone="violet" icon="shield">
-                {t("topbar.badge")}
-              </StatusPill>
-            }
-          />
-          <AdminAreas />
-        </>
-      )}
-    </QueryPage>
+    <AdminPageFrame
+      permission="platform.usage.read"
+      title={t("overview.title")}
+      description={t("overview.description")}
+      meta={
+        <StatusPill tone="violet" icon="shield">
+          {t("topbar.badge")}
+        </StatusPill>
+      }
+    >
+      <div className="flex flex-col gap-8">
+        <AdminQuerySection query={overview} loadingLabel={t("overview.loading")} rows={3}>
+          {(data) => <AdminKpiCards overview={data} />}
+        </AdminQuerySection>
+        <AdminAreas />
+      </div>
+    </AdminPageFrame>
   );
 }

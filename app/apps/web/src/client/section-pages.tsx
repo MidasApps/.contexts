@@ -1,7 +1,9 @@
 "use client";
 
 import { useRouter, PROFILE_SECTIONS, SETTINGS_SECTIONS, type ProfileSection, type SettingsSection } from "@core/client/shared/lib/router";
-import { AdminHomeView } from "@core/client/views/admin-home";
+import { AdminOrganizationsView } from "@core/client/views/admin-organizations";
+import { AdminOverviewView } from "@core/client/views/admin-overview";
+import { AdminPlansView } from "@core/client/views/admin-plans";
 import { AdminSlotView } from "@core/client/views/admin-slot";
 import { NotFoundView } from "@core/client/views/not-found";
 import { ProfileAccountView } from "@core/client/views/profile-account";
@@ -59,8 +61,20 @@ export function ProfileSectionPage() {
   return <View />;
 }
 
-/** `/admin/[[...section]]`: the admin home at the root, an admin area below it. */
+/**
+ * The shared view of an `/admin/<area>/…` path (SP5 spec §6): `segments` are the path parts after
+ * the area. `null` falls through to `AdminSlotView` (module areas, or not-found).
+ */
+const ADMIN_AREA_VIEWS: Readonly<Record<string, (segments: readonly string[]) => ComponentType | null>> = {
+  organizations: (segments) => (segments.length === 0 ? AdminOrganizationsView : null),
+  plans: (segments) => (segments.length === 0 ? AdminPlansView : null),
+};
+
+/** `/admin/[[...section]]`: the overview at the root, the area's view below it. */
 export function AdminPage() {
   const rest = useRouter().useRouteParams()["rest"] ?? "";
-  return rest === "" ? <AdminHomeView /> : <AdminSlotView />;
+  if (rest === "") return <AdminOverviewView />;
+  const [area = "", ...segments] = rest.split("/");
+  const View = (Object.hasOwn(ADMIN_AREA_VIEWS, area) ? ADMIN_AREA_VIEWS[area]?.(segments) : null) ?? AdminSlotView;
+  return <View />;
 }

@@ -57,17 +57,19 @@ describe("core navigation", () => {
     expect(profile.map((entry) => entry.target)).toEqual(PROFILE_SECTIONS.map((section) => ({ kind: "profile", section })));
   });
 
-  it("reserves the admin slots of SP2 spec §7 and the organization and project homes", () => {
-    expect(registry.visibleItems("admin", all).map((entry) => entry.id)).toEqual([
-      "core.admin.organizations",
-      "core.admin.users",
-      "core.admin.agents",
-      "core.admin.prompts",
-      "core.admin.connectors",
-      "core.admin.datasets",
-      "core.admin.traces",
-      "core.admin.costs",
-      "core.admin.flags",
+  it("lists the admin areas of SP5 spec §6, each gated by its platform permission, and the organization and project homes", () => {
+    expect(registry.visibleItems("admin", all).map((entry) => [entry.id, entry.permission])).toEqual([
+      ["core.admin.organizations", "platform.organization.read"],
+      ["core.admin.plans", "platform.plan.manage"],
+      ["core.admin.users", "platform.user.read"],
+      ["core.admin.agents", "platform.agent.manage"],
+      ["core.admin.connectors", "platform.connector.read"],
+      ["core.admin.evals", "platform.eval.manage"],
+      ["core.admin.traces", "platform.trace.read"],
+      ["core.admin.logs", "platform.trace.read"],
+      ["core.admin.costs", "platform.usage.read"],
+      ["core.admin.workflows", "platform.workflow.manage"],
+      ["core.admin.flags", "platform.flag.manage"],
     ]);
     expect(registry.visibleItems("organization", all).map((entry) => entry.id)).toEqual(["core.organization.home", "core.organization.settings"]);
     expect(registry.visibleItems("project", all).map((entry) => entry.id)).toEqual(["core.project.home"]);

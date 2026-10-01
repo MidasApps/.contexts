@@ -25,18 +25,21 @@ const PROFILE_ICONS: Record<ProfileSection, IconName> = {
   notifications: "bell",
 };
 
-// `/admin` slots of SP2 spec §7: empty states until SP5 registers each page. The server guards
-// `/admin` (staff + MFA), so only the platform permissions SP1 already defines gate items here.
-const ADMIN: { name: string; icon: IconName; permission?: Permission }[] = [
+// `/admin` areas (SP5 spec §6), each gated by the platform permission its API authorizes. The
+// server guards `/admin` (staff + MFA); `platform-support` holds the read permissions only, so it
+// sees organizations, users, connectors, traces, logs and costs.
+const ADMIN: { name: string; icon: IconName; permission: Permission }[] = [
   { name: "organizations", icon: "building", permission: "platform.organization.read" },
+  { name: "plans", icon: "credit-card", permission: "platform.plan.manage" },
   { name: "users", icon: "users", permission: "platform.user.read" },
-  { name: "agents", icon: "bot" },
-  { name: "prompts", icon: "file-text" },
-  { name: "connectors", icon: "plug" },
-  { name: "datasets", icon: "database" },
-  { name: "traces", icon: "scroll-text" },
-  { name: "costs", icon: "wallet" },
-  { name: "flags", icon: "flag" },
+  { name: "agents", icon: "bot", permission: "platform.agent.manage" },
+  { name: "connectors", icon: "plug", permission: "platform.connector.read" },
+  { name: "evals", icon: "activity", permission: "platform.eval.manage" },
+  { name: "traces", icon: "scroll-text", permission: "platform.trace.read" },
+  { name: "logs", icon: "list", permission: "platform.trace.read" },
+  { name: "costs", icon: "wallet", permission: "platform.usage.read" },
+  { name: "workflows", icon: "workflow", permission: "platform.workflow.manage" },
+  { name: "flags", icon: "flag", permission: "platform.flag.manage" },
 ];
 
 const HOMES: ShellNavItem[] = [

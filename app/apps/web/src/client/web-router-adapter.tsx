@@ -76,6 +76,7 @@ export const createWebRouterAdapter = ({ locale, assign, hooks = NEXT_HOOKS }: W
     Link,
     useRouteParams: () => paramsOf(parseRoute(useCurrentHref())),
     useSearchParam: (name) => new URLSearchParams(hooks.useSearch()).get(name),
+    useSearch: () => hooks.useSearch(),
     useLocationPath: () => hooks.usePathname(),
     // Reads the current location at call time (an event handler, not a render).
     switchLocale: (target) => {

@@ -36,13 +36,10 @@ describe("AdminSidebar", () => {
     expect(within(areas).getAllByRole("link").map((link) => link.textContent)).toEqual([
       "Organizações",
       "Usuários",
-      "Agentes",
-      "Prompts",
       "Conectores",
-      "Datasets e avaliações",
-      "Traces e logs",
+      "Traces",
+      "Logs",
       "Custos",
-      "Flags",
     ]);
     expect(within(areas).getByRole("link", { name: "Usuários" }).getAttribute("aria-current")).toBe("page");
     expect(within(nav).getByRole("link", { name: "Voltar ao app" }).getAttribute("href")).toBe("/");

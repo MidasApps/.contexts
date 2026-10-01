@@ -69,13 +69,15 @@
     "admin": {
       "organizations": "Organizations",
       "users": "Users",
-      "agents": "Agents",
-      "prompts": "Prompts",
+      "agents": "Agents and prompts",
       "connectors": "Connectors",
-      "datasets": "Datasets and evals",
-      "traces": "Traces and logs",
+      "traces": "Traces",
       "costs": "Costs",
-      "flags": "Flags"
+      "flags": "Flags",
+      "plans": "Plans",
+      "evals": "Evals",
+      "logs": "Logs",
+      "workflows": "Workflows"
     }
   },
   "routeAnnouncer": {

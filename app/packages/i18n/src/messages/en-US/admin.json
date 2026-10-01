@@ -11,14 +11,6 @@
   "topbar": {
     "badge": "Platform team"
   },
-  "home": {
-    "title": "Platform administration",
-    "description": "Tools for the team that runs the platform. The areas below get their content in upcoming releases.",
-    "sectionsTitle": "Areas",
-    "emptyTitle": "No areas available",
-    "emptyDescription": "Your team role does not give access to any administration area.",
-    "loading": "Loading the administration…"
-  },
   "slot": {
     "eyebrow": "Administration",
     "emptyTitle": "Not available yet",
@@ -27,14 +19,151 @@
     "loading": "Loading the area…"
   },
   "descriptions": {
-    "organizations": "Organizations on the platform and who runs them.",
-    "users": "User accounts, staff and support access.",
-    "agents": "Available agents and their versions.",
-    "prompts": "Prompts and their published versions.",
-    "connectors": "Configured connectors and integrations.",
-    "datasets": "Datasets and agent evaluations.",
-    "traces": "Execution traces and logs.",
+    "organizations": "Status, plan, cost and budget of each organization.",
+    "users": "Support access as a user, read-only and audited.",
+    "agents": "Agents per organization and the platform prompts.",
+    "connectors": "Connectors configured in each organization.",
+    "traces": "Agent and workflow runs, with tokens and cost.",
     "costs": "Usage and costs per organization.",
-    "flags": "Feature flags per environment."
+    "flags": "Feature flags per environment.",
+    "plans": "Limits each plan grants.",
+    "evals": "Datasets, experiments and the eval verdict.",
+    "logs": "Recent log lines of the local environment.",
+    "workflows": "Runs, pending approvals and schedules."
+  },
+  "states": {
+    "eyebrow": "Administration",
+    "loading": "Loading the area…",
+    "noAccessDescription": "Your role on the platform team does not give access to this area. Ask a platform administrator.",
+    "mfaTitle": "Confirm two-step verification",
+    "mfaDescription": "The administration only answers sessions confirmed with the second factor. Sign out and sign in again with the code.",
+    "mfaAction": "Open account security"
+  },
+  "organizationFilter": {
+    "label": "Organization",
+    "all": "All organizations",
+    "placeholder": "Choose an organization",
+    "loading": "Loading organizations…",
+    "search": "Search organizations",
+    "empty": "No organization found."
+  },
+  "overview": {
+    "title": "Platform administration",
+    "description": "Platform numbers and the areas your team role may open.",
+    "loading": "Loading the platform numbers…",
+    "sectionsTitle": "Areas",
+    "emptyTitle": "No areas available",
+    "emptyDescription": "Your team role does not give access to any administration area.",
+    "kpi": {
+      "title": "Platform numbers",
+      "generatedAt": "Updated {when}",
+      "organizations": "Active organizations",
+      "organizationsHint": "With active status",
+      "activeUsers": "Active users",
+      "last7Days": "Last 7 days",
+      "costMtd": "Cost this month",
+      "costMtdHint": "Models, all organizations",
+      "tripwireRate": "Guardrail stops",
+      "tripwireHint": "Runs stopped, last 7 days",
+      "approvalRate": "Approvals",
+      "approvalHint": "Requests approved, last 7 days",
+      "evalStatus": "Agent evaluation",
+      "evalHint": "Verdict of the latest experiment",
+      "eval": {
+        "passed": "Passed",
+        "failed": "Failed",
+        "unknown": "No result"
+      }
+    }
+  },
+  "organizations": {
+    "title": "Organizations",
+    "description": "Status, plan, cost this month and budget of each organization.",
+    "loading": "Loading organizations…",
+    "caption": "Organizations on the platform",
+    "pagination": "Organization pages",
+    "resultCount": "{count, plural, =0 {No organizations} one {# organization} other {# organizations}}",
+    "open": "Open",
+    "openNamed": "Open {name}",
+    "defaultPlan": "Platform default",
+    "cardCost": "{cost} of {cap} this month",
+    "noMatchTitle": "No organization matches these filters",
+    "noMatchDescription": "Check the search or clear the filters to see all of them.",
+    "clearFilters": "Clear filters",
+    "emptyTitle": "No organizations yet",
+    "emptyDescription": "Organizations appear here once someone creates one in the app.",
+    "emptyAction": "See my organizations",
+    "columns": {
+      "organization": "Organization",
+      "status": "Status",
+      "plan": "Plan",
+      "costMtd": "Cost this month",
+      "cap": "Monthly cap",
+      "usage": "Cap used",
+      "actions": "Actions"
+    },
+    "filters": {
+      "label": "Filter organizations",
+      "search": "Search organizations",
+      "searchPlaceholder": "Name or id",
+      "status": "Status",
+      "anyStatus": "Any status"
+    },
+    "status": {
+      "active": "Active",
+      "suspended": "Suspended"
+    },
+    "budgetSource": {
+      "override": "Staff override",
+      "plan": "From the plan",
+      "default": "Platform default"
+    },
+    "usage": {
+      "noCap": "No cap",
+      "alert": "Attention: {percent}",
+      "over": "Over the cap: {percent}"
+    }
+  },
+  "plans": {
+    "title": "Plans",
+    "description": "Spend, token and connector limits each plan grants to organizations.",
+    "loading": "Loading plans…",
+    "caption": "Plan catalog",
+    "create": "New plan",
+    "edit": "Edit",
+    "editNamed": "Edit the plan {name}",
+    "noFeatures": "None",
+    "featuresOf": "Features of the plan {name}",
+    "cardLimits": "{budget} per month · {tokens} tokens · {connectors, plural, =0 {no connectors} one {# connector} other {# connectors}}",
+    "emptyTitle": "No plans yet",
+    "emptyDescription": "Without a plan, organizations use the platform default limits.",
+    "columns": {
+      "name": "Plan",
+      "monthlyBudget": "Monthly spend",
+      "monthlyTokens": "Tokens per month",
+      "maxConnectors": "Connectors",
+      "features": "Features",
+      "updatedAt": "Updated",
+      "actions": "Actions"
+    },
+    "form": {
+      "createTitle": "New plan",
+      "createDescription": "Set the limits the plan grants. You assign the plan on each organization's page.",
+      "editTitle": "Edit the plan {name}",
+      "editDescription": "Saving replaces the plan's limits and updates the budget of every organization on it.",
+      "createSubmit": "Create plan",
+      "editSubmit": "Save plan",
+      "savedStatus": "Plan saved.",
+      "created": "Plan {name} created.",
+      "updated": "Plan {name} updated.",
+      "name": "Name",
+      "monthlyBudget": "Monthly model spend",
+      "monthlyBudgetHint": "In US dollars (USD). Runs stop when the amount is reached.",
+      "monthlyTokens": "Tokens per month",
+      "monthlyTokensHint": "Applies when the model has no registered price.",
+      "maxConnectors": "Maximum connectors",
+      "features": "Features",
+      "featuresHint": "Keys separated by commas, for example: web-tools, chat.voice"
+    }
   }
 }

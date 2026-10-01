@@ -21,6 +21,8 @@ export type RouterPort = {
   /** Params of the current route (`organizationId`, `projectId`, `section`, …). */
   useRouteParams: () => Readonly<Record<string, string | undefined>>;
   useSearchParam: (name: string) => string | null;
+  /** The whole query string without `?` ("" when empty): pages that keep several filters in the URL. */
+  useSearch: () => string;
   /** Current path without the locale prefix, e.g. `/o/a/p/b`. */
   useLocationPath: () => string;
   /**

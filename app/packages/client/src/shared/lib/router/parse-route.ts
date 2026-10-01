@@ -39,7 +39,10 @@ export const parseRoute = (href: string): Route | null => {
   const [first, second, ...rest] = segments;
   if (first === undefined) return { id: "home" };
   if (first === "o") return second === undefined ? null : parseOrganizationRoute([second, ...rest], search);
-  if (first === "admin") return { id: "admin", rest: segments.slice(1).join("/") };
+  if (first === "admin") {
+    const rest = segments.slice(1).join("/");
+    return search.size === 0 ? { id: "admin", rest } : { id: "admin", rest, search: Object.fromEntries(search) };
+  }
   if (second !== undefined && first === "profile" && rest.length === 0) {
     return isOneOf<ProfileSection>(PROFILE_SECTIONS, second) ? { id: "profile", section: second } : null;
   }

@@ -20,6 +20,8 @@ export type ProfileSection = (typeof PROFILE_SECTIONS)[number];
 /**
  * A place in the app (SP2 spec §4, decision 0012), without the web's `/{locale}` prefix, which
  * the web adapter adds. `rest` is the catch-all tail of module and admin routes ("" for the root).
+ * Admin pages keep their filters and page in `search` (SP5: filters are shareable links); views
+ * read them with `useSearchParam`.
  */
 export type Route =
   | { id: "sign-in"; next?: string | undefined }
@@ -32,7 +34,7 @@ export type Route =
   | { id: "settings"; organizationId: string; section: SettingsSection }
   | { id: "settings-module"; organizationId: string; moduleId: string }
   | { id: "profile"; section: ProfileSection }
-  | { id: "admin"; rest: string };
+  | { id: "admin"; rest: string; search?: Readonly<Record<string, string>> | undefined };
 
 export type RouteId = Route["id"];
 
@@ -96,6 +98,6 @@ export const routeHref = (route: Route): string => {
     case "profile":
       return `/profile/${route.section}`;
     case "admin":
-      return `/admin${tail(route.rest)}`;
+      return withSearch(`/admin${tail(route.rest)}`, route.search ?? {});
   }
 };

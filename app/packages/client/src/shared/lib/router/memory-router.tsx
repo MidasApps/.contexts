@@ -63,6 +63,7 @@ export const createMemoryRouter = (initialHref = "/"): MemoryRouter => {
     Link,
     useRouteParams: () => paramsOf(parseRoute(useHref())),
     useSearchParam: (name) => new URL(useHref(), "http://memory.invalid").searchParams.get(name),
+    useSearch: () => new URL(useHref(), "http://memory.invalid").searchParams.toString(),
     useLocationPath: () => new URL(useHref(), "http://memory.invalid").pathname,
     switchLocale: (locale) => void locales.push(locale),
     current,

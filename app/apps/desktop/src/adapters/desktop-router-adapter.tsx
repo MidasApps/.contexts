@@ -56,6 +56,7 @@ export const createDesktopRouterAdapter = ({ navigate: navigateByHref, switchLoc
     Link,
     useRouteParams: () => paramsOf(parseRoute(useHref())),
     useSearchParam: (name) => new URLSearchParams(useRouterState({ select: (state) => state.location.searchStr })).get(name),
+    useSearch: () => new URLSearchParams(useRouterState({ select: (state) => state.location.searchStr })).toString(),
     useLocationPath: () => useRouterState({ select: (state) => state.location.pathname }),
     switchLocale,
   };

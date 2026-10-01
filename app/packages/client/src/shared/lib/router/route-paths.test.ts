@@ -23,7 +23,11 @@ const SAMPLES: Record<RouteId, Route[]> = {
   ],
   "settings-module": [{ id: "settings-module", organizationId: "org", moduleId: "example" }],
   profile: [{ id: "profile", section: "preferences" }],
-  admin: [{ id: "admin", rest: "" }, { id: "admin", rest: "organizations/org-1" }],
+  admin: [
+    { id: "admin", rest: "" },
+    { id: "admin", rest: "organizations/org-1" },
+    { id: "admin", rest: "traces", search: { status: "error", organizationId: "org 1", page: "2" } },
+  ],
 };
 
 describe("route paths", () => {
@@ -38,6 +42,8 @@ describe("route paths", () => {
     expect(routeHref({ id: "sign-in", next: "/organizations" })).toBe("/sign-in?next=%2Forganizations");
     expect(routeHref({ id: "invite", token: "t1" })).toBe("/invite#token=t1");
     expect(routeHref({ id: "admin", rest: "" })).toBe("/admin");
+    expect(routeHref({ id: "admin", rest: "traces", search: { status: "error" } })).toBe("/admin/traces?status=error");
+    expect(routeHref({ id: "admin", rest: "traces", search: {} })).toBe("/admin/traces");
   });
 
   it("returns null for paths outside the map and unknown sections", () => {

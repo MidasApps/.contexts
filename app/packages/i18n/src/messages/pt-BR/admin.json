@@ -11,14 +11,6 @@
   "topbar": {
     "badge": "Equipe da plataforma"
   },
-  "home": {
-    "title": "Administração da plataforma",
-    "description": "Ferramentas da equipe que opera a plataforma. As áreas abaixo ganham conteúdo nas próximas versões.",
-    "sectionsTitle": "Áreas",
-    "emptyTitle": "Nenhuma área disponível",
-    "emptyDescription": "Seu papel na equipe não dá acesso a nenhuma área da administração.",
-    "loading": "Carregando a administração…"
-  },
   "slot": {
     "eyebrow": "Administração",
     "emptyTitle": "Ainda não disponível",
@@ -27,14 +19,151 @@
     "loading": "Carregando a área…"
   },
   "descriptions": {
-    "organizations": "Organizações da plataforma e seus responsáveis.",
-    "users": "Contas de usuário, equipe e acesso de suporte.",
-    "agents": "Agentes disponíveis e suas versões.",
-    "prompts": "Prompts e suas versões publicadas.",
-    "connectors": "Conectores e integrações configurados.",
-    "datasets": "Conjuntos de dados e avaliações dos agentes.",
-    "traces": "Rastros de execução e registros.",
+    "organizations": "Status, plano, custo e orçamento de cada organização.",
+    "users": "Acesso de suporte como um usuário, somente leitura e auditado.",
+    "agents": "Agentes por organização e os prompts da plataforma.",
+    "connectors": "Conectores configurados em cada organização.",
+    "traces": "Execuções de agentes e workflows, com tokens e custo.",
     "costs": "Uso e custos por organização.",
-    "flags": "Flags de funcionalidades por ambiente."
+    "flags": "Flags de funcionalidades por ambiente.",
+    "plans": "Limites que cada plano concede.",
+    "evals": "Datasets, experimentos e o veredito das avaliações.",
+    "logs": "Linhas de log recentes do ambiente local.",
+    "workflows": "Execuções, aprovações pendentes e agendamentos."
+  },
+  "states": {
+    "eyebrow": "Administração",
+    "loading": "Carregando a área…",
+    "noAccessDescription": "Seu papel na equipe da plataforma não dá acesso a esta área. Peça a um administrador da plataforma.",
+    "mfaTitle": "Confirme a verificação em duas etapas",
+    "mfaDescription": "A administração só responde a sessões confirmadas com o segundo fator. Saia e entre de novo informando o código.",
+    "mfaAction": "Abrir segurança da conta"
+  },
+  "organizationFilter": {
+    "label": "Organização",
+    "all": "Todas as organizações",
+    "placeholder": "Escolha uma organização",
+    "loading": "Carregando organizações…",
+    "search": "Buscar organização",
+    "empty": "Nenhuma organização encontrada."
+  },
+  "overview": {
+    "title": "Administração da plataforma",
+    "description": "Números da plataforma e as áreas que seu papel na equipe pode abrir.",
+    "loading": "Carregando os números da plataforma…",
+    "sectionsTitle": "Áreas",
+    "emptyTitle": "Nenhuma área disponível",
+    "emptyDescription": "Seu papel na equipe não dá acesso a nenhuma área da administração.",
+    "kpi": {
+      "title": "Números da plataforma",
+      "generatedAt": "Atualizado em {when}",
+      "organizations": "Organizações ativas",
+      "organizationsHint": "Com status ativo",
+      "activeUsers": "Usuários ativos",
+      "last7Days": "Últimos 7 dias",
+      "costMtd": "Custo no mês",
+      "costMtdHint": "Modelos, todas as organizações",
+      "tripwireRate": "Paradas por guardrail",
+      "tripwireHint": "Execuções interrompidas, últimos 7 dias",
+      "approvalRate": "Aprovações",
+      "approvalHint": "Solicitações aprovadas, últimos 7 dias",
+      "evalStatus": "Avaliação dos agentes",
+      "evalHint": "Veredito do experimento mais recente",
+      "eval": {
+        "passed": "Aprovada",
+        "failed": "Reprovada",
+        "unknown": "Sem resultado"
+      }
+    }
+  },
+  "organizations": {
+    "title": "Organizações",
+    "description": "Status, plano, custo no mês e orçamento de cada organização.",
+    "loading": "Carregando organizações…",
+    "caption": "Organizações da plataforma",
+    "pagination": "Páginas de organizações",
+    "resultCount": "{count, plural, =0 {Nenhuma organização} one {# organização} other {# organizações}}",
+    "open": "Abrir",
+    "openNamed": "Abrir {name}",
+    "defaultPlan": "Padrão da plataforma",
+    "cardCost": "{cost} de {cap} no mês",
+    "noMatchTitle": "Nenhuma organização com esses filtros",
+    "noMatchDescription": "Confira a busca ou limpe os filtros para ver todas.",
+    "clearFilters": "Limpar filtros",
+    "emptyTitle": "Nenhuma organização ainda",
+    "emptyDescription": "As organizações aparecem aqui quando alguém cria uma no app.",
+    "emptyAction": "Ver minhas organizações",
+    "columns": {
+      "organization": "Organização",
+      "status": "Status",
+      "plan": "Plano",
+      "costMtd": "Custo no mês",
+      "cap": "Limite mensal",
+      "usage": "Uso do limite",
+      "actions": "Ações"
+    },
+    "filters": {
+      "label": "Filtrar organizações",
+      "search": "Buscar organização",
+      "searchPlaceholder": "Nome ou id",
+      "status": "Status",
+      "anyStatus": "Todos os status"
+    },
+    "status": {
+      "active": "Ativa",
+      "suspended": "Suspensa"
+    },
+    "budgetSource": {
+      "override": "Ajuste da equipe",
+      "plan": "Do plano",
+      "default": "Padrão da plataforma"
+    },
+    "usage": {
+      "noCap": "Sem limite",
+      "alert": "Atenção: {percent}",
+      "over": "Acima do limite: {percent}"
+    }
+  },
+  "plans": {
+    "title": "Planos",
+    "description": "Limites de gasto, tokens e conectores que cada plano concede às organizações.",
+    "loading": "Carregando planos…",
+    "caption": "Catálogo de planos",
+    "create": "Novo plano",
+    "edit": "Editar",
+    "editNamed": "Editar o plano {name}",
+    "noFeatures": "Nenhuma",
+    "featuresOf": "Funcionalidades do plano {name}",
+    "cardLimits": "{budget} por mês · {tokens} tokens · {connectors, plural, =0 {nenhum conector} one {# conector} other {# conectores}}",
+    "emptyTitle": "Nenhum plano cadastrado",
+    "emptyDescription": "Sem plano, as organizações usam os limites padrão da plataforma.",
+    "columns": {
+      "name": "Plano",
+      "monthlyBudget": "Gasto mensal",
+      "monthlyTokens": "Tokens por mês",
+      "maxConnectors": "Conectores",
+      "features": "Funcionalidades",
+      "updatedAt": "Atualizado em",
+      "actions": "Ações"
+    },
+    "form": {
+      "createTitle": "Novo plano",
+      "createDescription": "Defina os limites que o plano concede. Você atribui o plano na página de cada organização.",
+      "editTitle": "Editar o plano {name}",
+      "editDescription": "Salvar substitui os limites do plano e atualiza o orçamento de todas as organizações que o usam.",
+      "createSubmit": "Criar plano",
+      "editSubmit": "Salvar plano",
+      "savedStatus": "Plano salvo.",
+      "created": "Plano {name} criado.",
+      "updated": "Plano {name} atualizado.",
+      "name": "Nome",
+      "monthlyBudget": "Gasto mensal com modelos",
+      "monthlyBudgetHint": "Em dólares (USD). As execuções param ao atingir o valor.",
+      "monthlyTokens": "Tokens por mês",
+      "monthlyTokensHint": "Vale quando o modelo não tem preço cadastrado.",
+      "maxConnectors": "Máximo de conectores",
+      "features": "Funcionalidades",
+      "featuresHint": "Chaves separadas por vírgula, por exemplo: web-tools, chat.voice"
+    }
   }
 }
