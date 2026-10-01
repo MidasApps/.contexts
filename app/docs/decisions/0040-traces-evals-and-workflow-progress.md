@@ -50,3 +50,17 @@ runtime already allows. No tenant may see another tenant's data.
 - **Clients calling Mastra observability routes directly.** Mastra is private, and `/v1` must
   apply the tenant filter.
 - **WebSocket progress.** `api.md` §14 standardizes on SSE.
+
+## Amendments
+
+- **A1 — 2026-10-01 (SP5 Task 4): runs and progress go through custom runtime routes.**
+  - `/v1/workflows/runs*` reaches custom Mastra routes `/workflow-runs/*` behind the context
+    middleware, not Mastra's built-in workflow routes. The tenant and the caller come from the
+    verified Bearer, the routes authorize again through SP1, and a run belongs to a tenant by its
+    `resourceId` prefix `tenantId:`. The built-in list filters by the exact resource only, and
+    `/v1` addresses runs by run id alone.
+  - Progress events are derived from the stored run snapshot instead of `observeStream`. `/v1`
+    polls it every second, so indexes stay stable across reconnections and `Last-Event-Id`
+    resumes after one. A stream window lasts 5 minutes, and step outputs are never sent.
+  - The run view surfaces `approvalRequestId` from the suspended step's payload, and
+    `startedBy` and `scheduleId` from the run's request context.

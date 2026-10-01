@@ -228,6 +228,10 @@ git diff --quiet main -- .contexts .claude && echo framework-ok → framework-ok
   - the lint and type regressions.
 - Most other tests were written alongside their code and passed on the first run.
 
+Decision 0040 got amendment A1 (custom run routes, progress derived from the stored run) in the
+report commit. Audit `requestId` is a free string (`min(1)`), so scheduler run ids (`sched_…`) are
+accepted as the correlation id of `BUDGET_THRESHOLD_REACHED` and `APPROVAL_EXPIRED`.
+
 ## Deviations and concerns
 
 1. **Platform schedules are rows written at boot, not declarative.** See Task 5 and decision
@@ -267,7 +271,15 @@ git diff --quiet main -- .contexts .claude && echo framework-ok → framework-ok
       block regex). It predates this work.
 14. **A failed `workflow-resume` request leaves its run suspended** (decision 0036). This is now
     exercised by the sweep emulator test; staff cancel lands with `/admin/workflows` (Task 13).
-15. **Deploy steps.**
+15. **`startable` is enforced by the custom routes only.** `/api/workflows/**` is still open to
+    any authenticated runtime caller, so a user with their own Bearer can start a workflow through
+    the raw route. `/v1` never forwards there. For example, a user could run `usage-report`'s
+    digest for their own tenant without `core.usage.read`, because the re-authorize step checks
+    only runs that carry `coreScheduleId`. Narrowing the allowlist to the routes the gateway uses
+    is a follow-up, like Task 2's remark on raw resumes.
+16. **The boot path is untested.** `ensurePlatformSchedules` runs as a top-level await in the
+    Mastra entry. `mastra build` passes, but `mastra dev` and `start` were not run here.
+17. **Deploy steps.**
     - Apply `infra/bigquery/ai_observability.sql`.
     - Run `pnpm db:migrate` (0008, 0009) and `pnpm -F @core/mastra db:init`. The schedule tables
       must exist where `MASTRA_STORAGE_INIT=skip`.
