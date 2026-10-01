@@ -1,6 +1,6 @@
-import { adminListFlagsEndpoint, adminSetFlagEndpoint } from "@core/contracts";
+import { adminClearFlagOverrideEndpoint, adminListFlagsEndpoint, adminSetFlagEndpoint } from "@core/contracts";
 import { requireStaff } from "../../../platform/adapters/driving/console-guards.ts";
-import { dataResponse } from "../../../shared/http/api-errors.ts";
+import { apiError, dataResponse } from "../../../shared/http/api-errors.ts";
 import { withApiRoute, type ApiRouteDeps } from "../../../shared/http/api-route.ts";
 import type { RouteHandler } from "../../../shared/http/route-boundary.ts";
 import type { FlagsServices } from "../../composition.ts";
@@ -31,5 +31,12 @@ export const buildAdminFlagsRoutes = (deps: { readonly pipeline: ApiRouteDeps; r
       requestId: ctx.requestId,
     });
     return result.ok ? dataResponse({ data: result.data }) : flagErrorResponse(result.error, ctx.requestId);
+  }),
+  [adminClearFlagOverrideEndpoint.id]: withApiRoute(adminClearFlagOverrideEndpoint, deps.pipeline, async (ctx) => {
+    const { flagKey, organizationId } = ctx.input.params;
+    const denied = await requireStaff(ctx, { permission: FLAG_PERMISSIONS.manage, targetTenantId: organizationId });
+    if (denied !== null) return denied;
+    const result = await deps.flags.clearFlagOverride({ actor: ctx.principal, key: flagKey, tenantId: organizationId, requestId: ctx.requestId });
+    return result.ok ? dataResponse({ data: result.data }) : apiError(404, "NOT_FOUND", ctx.requestId);
   }),
 });

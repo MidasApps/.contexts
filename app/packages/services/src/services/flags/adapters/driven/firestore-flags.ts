@@ -1,4 +1,4 @@
-import { type Firestore, Timestamp } from "firebase-admin/firestore";
+import { FieldPath, FieldValue, type Firestore, Timestamp } from "firebase-admin/firestore";
 import { CORE_SCHEMA_VERSION } from "../../../shared/firestore/collections.ts";
 import type { EnvironmentFlagValues, TenantFlagOverrides } from "../../application/ports/flag-store.ts";
 
@@ -36,4 +36,13 @@ export const createFirestoreTenantFlagOverrides = (deps: { readonly firestore: F
       .doc(tenantId)
       .set({ tenantId, values: { [key]: value }, updatedAt, updatedBy, schemaVersion: CORE_SCHEMA_VERSION }, { merge: true });
   },
+  clear: ({ key, tenantId, updatedBy }) =>
+    deps.firestore.runTransaction(async (tx) => {
+      const ref = deps.firestore.collection(FEATURE_FLAG_OVERRIDES_COLLECTION).doc(tenantId);
+      const snapshot = await tx.get(ref);
+      if (!(key in booleansOf(snapshot.get("values")))) return false;
+      // A `FieldPath`, not a dotted string: flag keys contain dots, which `update` would read as nesting.
+      tx.update(ref, new FieldPath("values", key), FieldValue.delete(), "updatedAt", Timestamp.fromDate((deps.now ?? (() => new Date()))()), "updatedBy", updatedBy);
+      return true;
+    }),
 });

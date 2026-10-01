@@ -13,6 +13,8 @@ export type EnvironmentFlagValues = {
 export type TenantFlagOverrides = {
   readonly read: (tenantId: string) => Promise<Readonly<Record<string, boolean>>>;
   readonly write: (input: { readonly key: string; readonly tenantId: string; readonly value: boolean; readonly updatedBy: string }) => Promise<void>;
+  /** Removes one override; @returns false when the organization had none for the flag. */
+  readonly clear: (input: { readonly key: string; readonly tenantId: string; readonly updatedBy: string }) => Promise<boolean>;
 };
 
 export type FlagStores = {

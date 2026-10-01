@@ -95,6 +95,40 @@ describe("AdminFlagsView", () => {
     expect(api.calls.find((call) => call.method === "PUT")?.body).toEqual({ value: true, tenantId: IDS.organization });
   });
 
+  it("removes an organization's override after a confirmation, and offers it only where one exists", async () => {
+    const { user, api } = render({
+      path: `/admin/flags?organizationId=${IDS.organization}`,
+      routes: routes({ "DELETE /v1/admin/flags/:flagKey/overrides/:organizationId": ok(buildExpiredFlag({ value: true, tenantOverride: null })) }),
+    });
+    const voice = await screen.findByRole("row", { name: /chat\.voice/u });
+    const kill = screen.getByRole("row", { name: /ai\.kill-switch/u });
+    await within(voice).findByText("Ajuste: desligada");
+    expect(within(kill).queryByRole("button", { name: /^Remover o ajuste/u })).toBeNull();
+    await user.click(within(voice).getByRole("button", { name: "Remover o ajuste de chat.voice para Northwind" }));
+    const dialog = await screen.findByRole("alertdialog", { name: "Remover o ajuste de chat.voice?" });
+    expect(dialog.textContent).toContain("Northwind volta a seguir o valor do ambiente");
+    expect(api.calls.some((call) => call.method === "DELETE")).toBe(false);
+    api.route("GET /v1/admin/flags", (request) => ok(request.query.get("organizationId") === null ? [KILL, VOICE] : [KILL, VOICE]));
+    await user.click(within(dialog).getByRole("button", { name: "Remover ajuste" }));
+    await waitFor(() => expect(screen.queryByRole("alertdialog")).toBeNull());
+    expect(api.calls.find((call) => call.method === "DELETE")?.path).toBe(`/v1/admin/flags/chat.voice/overrides/${IDS.organization}`);
+    expect(await screen.findByText("Ajuste de chat.voice removido.")).toBeDefined();
+    await waitFor(() => expect(within(screen.getByRole("row", { name: /chat\.voice/u })).getByText("Sem ajuste")).toBeDefined());
+  });
+
+  it("keeps the override and shows the error with its reference when the removal fails", async () => {
+    const { user } = render({
+      path: `/admin/flags?organizationId=${IDS.organization}`,
+      routes: routes({ "DELETE /v1/admin/flags/:flagKey/overrides/:organizationId": apiError(502, "UPSTREAM_UNAVAILABLE") }),
+    });
+    const voice = await screen.findByRole("row", { name: /chat\.voice/u });
+    await user.click(await within(voice).findByRole("button", { name: "Remover o ajuste de chat.voice para Northwind" }));
+    const dialog = await screen.findByRole("alertdialog");
+    await user.click(within(dialog).getByRole("button", { name: "Remover ajuste" }));
+    expect((await within(dialog).findByRole("alert")).textContent).toContain(FAKE_REQUEST_ID);
+    expect(within(voice).getByText("Ajuste: desligada")).toBeDefined();
+  });
+
   it("puts the chosen organization in the URL", async () => {
     const { user, router } = render();
     await user.click(await screen.findByRole("combobox", { name: "Ajuste por organização" }));

@@ -8,19 +8,20 @@ import type { FlagsDeps } from "./application/flags-deps.ts";
 import type { FlagStores } from "./application/ports/flag-store.ts";
 import { type GetFlagValues, makeGetFlagValues } from "./application/use-cases/get-flags.ts";
 import { type ListFlags, makeListFlags } from "./application/use-cases/list-flags.ts";
-import { makeSetFlagValue, type SetFlagValue } from "./application/use-cases/set-flag-value.ts";
+import { type ClearFlagOverride, makeClearFlagOverride, makeSetFlagValue, type SetFlagValue } from "./application/use-cases/set-flag-value.ts";
 import { assertFlagRegistry, CORE_FLAGS } from "./flag-registry.ts";
 
 export type FlagsServices = {
   readonly getFlagValues: GetFlagValues;
   readonly listFlags: ListFlags;
   readonly setFlagValue: SetFlagValue;
+  readonly clearFlagOverride: ClearFlagOverride;
 };
 
 /** Binds the flags use cases (in-memory stores in unit tests). */
 export const createFlagsServices = (deps: Omit<FlagsDeps, "registry"> & { readonly registry?: FlagsDeps["registry"] }): FlagsServices => {
   const full: FlagsDeps = { ...deps, registry: assertFlagRegistry(deps.registry ?? CORE_FLAGS) };
-  return { getFlagValues: makeGetFlagValues(full), listFlags: makeListFlags(full), setFlagValue: makeSetFlagValue(full) };
+  return { getFlagValues: makeGetFlagValues(full), listFlags: makeListFlags(full), setFlagValue: makeSetFlagValue(full), clearFlagOverride: makeClearFlagOverride(full) };
 };
 
 /**

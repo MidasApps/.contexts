@@ -838,6 +838,87 @@ paths:
       tags:
         - flags
       x-auth: user
+  /v1/admin/flags/{flagKey}/overrides/{organizationId}:
+    delete:
+      operationId: flags.adminClearOverride
+      parameters:
+        - description: Flag key (`chat.voice`).
+          in: path
+          name: flagKey
+          required: true
+          schema:
+            maxLength: 80
+            pattern: ^[a-z][a-z0-9-]*(?:\.[a-z0-9-]+)+$
+            type: string
+            x-pii: none
+        - description: Organization whose override is removed.
+          in: path
+          name: organizationId
+          required: true
+          schema:
+            minLength: 1
+            type: string
+            x-pii: none
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: "#/components/schemas/platform.FeatureFlag"
+                required:
+                  - data
+                type: object
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: VALIDATION_FAILED
+          x-error-codes:
+            - VALIDATION_FAILED
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UNAUTHORIZED
+          x-error-codes:
+            - UNAUTHORIZED
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: FORBIDDEN, MFA_REQUIRED
+          x-error-codes:
+            - FORBIDDEN
+            - MFA_REQUIRED
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: NOT_FOUND
+          x-error-codes:
+            - NOT_FOUND
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: INTERNAL_ERROR
+          x-error-codes:
+            - INTERNAL_ERROR
+      security:
+        - bearerAuth: []
+      summary: Removes an organization's override of a flag, so the environment value applies again; idempotent (staff, platform.flag.manage; audited with targetTenantId).
+      tags:
+        - flags
+      x-auth: user
   /v1/admin/logs:
     get:
       operationId: admin.listLogs

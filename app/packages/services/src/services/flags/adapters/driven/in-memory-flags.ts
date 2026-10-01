@@ -18,6 +18,12 @@ export const createInMemoryFlagStores = (seed: { environment?: Record<string, bo
         tenants[tenantId] = { ...tenants[tenantId], [key]: value };
         return Promise.resolve();
       },
+      clear: ({ key, tenantId }) => {
+        const current = tenants[tenantId] ?? {};
+        if (!(key in current)) return Promise.resolve(false);
+        tenants[tenantId] = Object.fromEntries(Object.entries(current).filter(([name]) => name !== key));
+        return Promise.resolve(true);
+      },
     },
   };
   return { stores, environment, tenants };

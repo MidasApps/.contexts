@@ -6,7 +6,7 @@ import { useTranslations } from "use-intl";
 import { useAllAdminOrganizations } from "#/entities/admin-organization/index.ts";
 import { useAdminFlags } from "#/entities/feature-flag/index.ts";
 import { usePlatformPermissions } from "#/entities/permission/index.ts";
-import { SetFlagDialog, type FlagChange } from "#/features/admin-set-flag/index.ts";
+import { ClearFlagOverrideDialog, SetFlagDialog, type FlagChange, type FlagOverrideTarget } from "#/features/admin-set-flag/index.ts";
 import { useFormatDateTime } from "#/shared/lib/format/use-format-date-time.ts";
 import { useOnlineStatus } from "#/shared/lib/network/use-online-status.ts";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
@@ -31,6 +31,7 @@ type RowContext = {
   /** The chosen organization's view of each flag, by key; `undefined` while it loads or fails. */
   readonly overrides: ReadonlyMap<string, FeatureFlag> | undefined;
   readonly onChange: (change: FlagChange) => void;
+  readonly onClear: (target: FlagOverrideTarget) => void;
 };
 
 // Row controls read this from context, not from the column definitions: columns stay the same
@@ -111,6 +112,17 @@ function OrganizationOverride({ flag }: { flag: FeatureFlag }) {
       <span className="flex flex-wrap gap-1.5">
         {override === true ? null : offer(true)}
         {override === false ? null : offer(false)}
+        {override === null ? null : (
+          <Button
+            variant="ghost"
+            size="sm"
+            disabled={!context.writable}
+            aria-label={t("override.clearNamed", { key: flag.key, name: organization.name })}
+            onClick={() => context.onClear({ flag, organization })}
+          >
+            {t("override.clear")}
+          </Button>
+        )}
       </span>
     </span>
   );
@@ -192,6 +204,7 @@ function FlagsContent({ flags, onReload }: { flags: readonly FeatureFlag[]; onRe
   const organizations = useAllAdminOrganizations();
   const overrides = useAdminFlags(organizationId, { enabled: organizationId !== undefined });
   const [change, setChange] = useState<FlagChange | null>(null);
+  const [clearing, setClearing] = useState<FlagOverrideTarget | null>(null);
   const context = useMemo((): RowContext => {
     const name = organizations.data?.find((candidate) => candidate.id === organizationId)?.name ?? organizationId ?? "";
     return {
@@ -199,6 +212,7 @@ function FlagsContent({ flags, onReload }: { flags: readonly FeatureFlag[]; onRe
       organization: organizationId === undefined ? undefined : { id: organizationId, name },
       overrides: organizationId === undefined || overrides.data === undefined ? undefined : new Map(overrides.data.map((flag) => [flag.key, flag])),
       onChange: setChange,
+      onClear: setClearing,
     };
   }, [online, organizationId, organizations.data, overrides.data]);
   return (
@@ -223,6 +237,7 @@ function FlagsContent({ flags, onReload }: { flags: readonly FeatureFlag[]; onRe
         <FlagsTable flags={flags} withOverride={organizationId !== undefined} onReload={onReload} />
       </RowContextValue>
       <SetFlagDialog change={change} onOpenChange={(open) => !open && setChange(null)} />
+      <ClearFlagOverrideDialog target={clearing} onOpenChange={(open) => !open && setClearing(null)} />
     </div>
   );
 }
@@ -230,7 +245,8 @@ function FlagsContent({ flags, onReload }: { flags: readonly FeatureFlag[]; onRe
 /**
  * `/admin/flags` (SP5 spec §5–§6, platform.flag.manage): every flag of the code registry with its
  * owner, reason, kind and expiry, a warning for expired flags, the environment value behind a
- * confirmation and, for the organization in the URL, its override. Writes wait for the connection.
+ * confirmation and, for the organization in the URL, its override (set, or removed so the
+ * environment value applies again). Writes wait for the connection.
  */
 export function AdminFlagsView() {
   const t = useTranslations("admin.flags");

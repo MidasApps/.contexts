@@ -21,5 +21,11 @@ describe("Firestore flag stores (emulator)", () => {
     await tenants.write({ key: "chat.voice.realtime", tenantId: tenantA, value: true, updatedBy: "admin" });
     expect(await tenants.read(tenantA)).toEqual({ "chat.voice": false, "chat.voice.realtime": true });
     expect(await tenants.read(`TenantB${RUN}`)).toEqual({});
+
+    // Clearing removes exactly the dotted key, and tells when there was nothing to remove.
+    expect(await tenants.clear({ key: "chat.voice", tenantId: tenantA, updatedBy: "staff" })).toBe(true);
+    expect(await tenants.read(tenantA)).toEqual({ "chat.voice.realtime": true });
+    expect(await tenants.clear({ key: "chat.voice", tenantId: tenantA, updatedBy: "staff" })).toBe(false);
+    expect(await tenants.clear({ key: "chat.voice", tenantId: `TenantB${RUN}`, updatedBy: "staff" })).toBe(false);
   });
 });

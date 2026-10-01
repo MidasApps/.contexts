@@ -56,4 +56,18 @@ export const adminSetFlagEndpoint = defineEndpoint({
   summary: "Sets a flag for the environment or overrides it for one organization (staff, audited with targetTenantId).",
 });
 
-export const FLAG_ENDPOINTS: readonly EndpointDefinition[] = [listFlagsEndpoint, setTenantFlagEndpoint, adminListFlagsEndpoint, adminSetFlagEndpoint];
+export const adminClearFlagOverrideEndpoint = defineEndpoint({
+  id: "flags.adminClearOverride",
+  method: "DELETE",
+  path: "/v1/admin/flags/{flagKey}/overrides/{organizationId}",
+  auth: "user",
+  params: z.object({
+    flagKey: FeatureFlagKeySchema.meta(none("Flag key (`chat.voice`).")),
+    organizationId: OrganizationIdSchema.meta(none("Organization whose override is removed.")),
+  }),
+  responses: { 200: dataEnvelope(FeatureFlagSchema) },
+  errors: { 403: ["FORBIDDEN", "MFA_REQUIRED"], 404: ["NOT_FOUND"] },
+  summary: "Removes an organization's override of a flag, so the environment value applies again; idempotent (staff, platform.flag.manage; audited with targetTenantId).",
+});
+
+export const FLAG_ENDPOINTS: readonly EndpointDefinition[] = [listFlagsEndpoint, setTenantFlagEndpoint, adminListFlagsEndpoint, adminSetFlagEndpoint, adminClearFlagOverrideEndpoint];

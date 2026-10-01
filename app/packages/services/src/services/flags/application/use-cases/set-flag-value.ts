@@ -72,3 +72,34 @@ export const makeSetFlagValue =
       }),
     );
   };
+
+export type ClearFlagOverrideCommand = { readonly actor: UserPrincipal; readonly key: string; readonly tenantId: TenantId; readonly requestId: string };
+
+export type ClearFlagOverride = (command: ClearFlagOverrideCommand) => Promise<Result<FeatureFlag, { readonly code: "FLAG_NOT_FOUND" }>>;
+
+/**
+ * Staff remove an organization's override (decision 0044): the environment value applies again.
+ * Idempotent: clearing an absent override answers the flag without a second audit entry. A removal
+ * is audited like a write (`FEATURE_FLAG_UPDATED`, platform log, `targetTenantId`).
+ */
+export const makeClearFlagOverride =
+  (deps: FlagsDeps): ClearFlagOverride =>
+  async (command) => {
+    const flag = findFlag(deps.registry, command.key);
+    if (flag === undefined) return err({ code: "FLAG_NOT_FOUND" });
+    const removed = await deps.stores.tenants.clear({ key: flag.key, tenantId: command.tenantId, updatedBy: command.actor.uid });
+    if (removed) {
+      await deps.audit.record({
+        log: "platform",
+        action: "FEATURE_FLAG_UPDATED",
+        actor: auditActorOf(command.actor),
+        target: { type: "feature-flag", id: flag.key },
+        targetTenantId: command.tenantId,
+        outcome: "success",
+        requestId: command.requestId,
+        changes: ["tenantOverride"],
+      });
+    }
+    const [stored, overrides] = await Promise.all([deps.stores.environment.read(), deps.stores.tenants.read(command.tenantId)]);
+    return ok(toFeatureFlag(flag, { stored: stored[flag.key], environmentDefault: deps.environmentDefaults[flag.key], tenantOverride: overrides[flag.key] ?? null, now: deps.clock.now() }));
+  };

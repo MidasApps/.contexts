@@ -54,6 +54,36 @@ describe("/v1/admin/flags", () => {
   });
 });
 
+describe("DELETE /v1/admin/flags/{flagKey}/overrides/{organizationId}", () => {
+  const path = (key: string, org: string) => `/v1/admin/flags/${key}/overrides/${org}`;
+
+  it("refuses non-staff, staff without MFA and support staff with 403 and keeps the override", async () => {
+    const { routes, memory } = setup();
+    memory.tenants[ORG_B] = { "ai.kill-switch": true };
+    for (const as of ["alice", "nomfa", "sue"]) {
+      expect((await callRoute(routes, "flags.adminClearOverride", path("ai.kill-switch", ORG_B), { method: "DELETE", as })).status).toBe(403);
+    }
+    expect(memory.tenants[ORG_B]).toEqual({ "ai.kill-switch": true });
+  });
+
+  it("removes only that override, answers the flag without it and audits with targetTenantId", async () => {
+    const { routes, memory, auditLog } = setup();
+    memory.tenants[ORG_B] = { "ai.kill-switch": true, "chat.voice": false };
+    const cleared = await callRoute(routes, "flags.adminClearOverride", path("ai.kill-switch", ORG_B), { method: "DELETE", as: "sam" });
+    expect(cleared.status).toBe(200);
+    expect(await cleared.json()).toMatchObject({ data: { key: "ai.kill-switch", value: false, tenantOverride: null } });
+    expect(memory.tenants[ORG_B]).toEqual({ "chat.voice": false });
+    expect(auditLog.entries("platform")).toEqual([expect.objectContaining({ action: "FEATURE_FLAG_UPDATED", targetTenantId: ORG_B, changes: ["tenantOverride"], actor: { type: "user", id: "sam" } })]);
+  });
+
+  it("is idempotent (no second audit entry) and answers 404 for an unknown flag", async () => {
+    const { routes, auditLog } = setup();
+    expect((await callRoute(routes, "flags.adminClearOverride", path("ai.kill-switch", ORG_A), { method: "DELETE", as: "sam" })).status).toBe(200);
+    expect(auditLog.entries("platform")).toEqual([]);
+    expect((await callRoute(routes, "flags.adminClearOverride", path("no.such", ORG_A), { method: "DELETE", as: "sam" })).status).toBe(404);
+  });
+});
+
 describe("/v1/flags", () => {
   it("shows tenant-overridable flags to members with core.flag.read and lets admins switch them off", async () => {
     const { routes, memory } = setup();
