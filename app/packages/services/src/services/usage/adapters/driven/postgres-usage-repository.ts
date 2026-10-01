@@ -116,6 +116,20 @@ const setTenantBudget = (sql: Sql) => (input: { tenantId: string; budget: Stored
  * Usage ledger over `usage.llm_calls` / `usage.tenant_budgets` (decision 0026): every
  * transaction is tenant-scoped (`withTenantTransaction`) and runs as `usage_runtime`.
  */
+/**
+ * Distinct users of a tenant's ledger rows since an instant (the staff overview's active users),
+ * under the tenant's row level security like every other read here; rows without a user (service
+ * calls) are skipped.
+ */
+export const listActiveUserIds = (sql: Sql) => (input: { readonly tenantId: string; readonly since: Date }): Promise<readonly string[]> =>
+  withTenantTransaction(sql, { tenantId: input.tenantId, readOnly: true }, async (tx) => {
+    await asRuntime(tx);
+    const rows = await tx<{ user_id: string }[]>`
+      SELECT DISTINCT user_id FROM usage.llm_calls
+      WHERE tenant_id = ${input.tenantId} AND occurred_at >= ${input.since} AND user_id IS NOT NULL`;
+    return rows.map((row) => row.user_id);
+  });
+
 export const createPostgresUsageRepository = (sql: Sql): UsageRepository => ({
   insertCalls: insertCalls(sql),
   getMonthSpend: getMonthSpend(sql),

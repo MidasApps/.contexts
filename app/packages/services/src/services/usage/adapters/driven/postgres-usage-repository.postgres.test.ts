@@ -6,7 +6,7 @@ import { createPostgresClient } from "../../../shared/postgres/postgres-client.t
 import { makeCheckTenantBudget } from "../../application/use-cases/check-tenant-budget.ts";
 import { makeGetUsageSummary } from "../../application/use-cases/get-usage-summary.ts";
 import { makeRecordLlmCalls } from "../../application/use-cases/record-llm-calls.ts";
-import { createPostgresUsageRepository, USAGE_RUNTIME_ROLE } from "./postgres-usage-repository.ts";
+import { createPostgresUsageRepository, listActiveUserIds, USAGE_RUNTIME_ROLE } from "./postgres-usage-repository.ts";
 
 // Needs the compose container and `pnpm db:migrate` (migrations 0006/0007).
 const LOCAL_DATABASE_URL = "postgresql://app:app@127.0.0.1:5432/app";
@@ -78,6 +78,18 @@ describe("postgres usage repository", () => {
       { tenant_id: TENANT_A, calls: "1", input_tokens: "100", cost_micro_usd: "600", unpriced_calls: "0" },
       { tenant_id: TENANT_A, calls: "2", input_tokens: "200", cost_micro_usd: "600", unpriced_calls: "1" },
     ]);
+  });
+
+  it("lists the distinct users of a tenant since an instant, skipping calls without a user and other tenants", async () => {
+    await repository.insertCalls([
+      call({ userId: "uid-1", occurredAt: "2026-09-25T10:00:00.000Z" }),
+      call({ userId: "uid-1", occurredAt: "2026-09-26T10:00:00.000Z" }),
+      call({ userId: "uid-2", occurredAt: "2026-09-20T10:00:00.000Z" }),
+      call({ userId: null, occurredAt: "2026-09-27T10:00:00.000Z" }),
+      call({ tenantId: TENANT_B, userId: "uid-3", occurredAt: "2026-09-27T10:00:00.000Z" }),
+    ]);
+    expect(await listActiveUserIds(sql)({ tenantId: TENANT_A, since: new Date("2026-09-23T12:00:00.000Z") })).toEqual(["uid-1"]);
+    expect(await listActiveUserIds(sql)({ tenantId: TENANT_B, since: new Date("2026-09-23T12:00:00.000Z") })).toEqual(["uid-3"]);
   });
 
   it("never shows another tenant's rows, even through the view", async () => {

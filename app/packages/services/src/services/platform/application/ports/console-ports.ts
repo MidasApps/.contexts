@@ -41,4 +41,14 @@ export type AgentSettingsRepository = {
 export type ConsoleUsage = {
   readonly setTenantBudget: (input: { readonly tenantId: string; readonly budget: BudgetCaps }) => Promise<void>;
   readonly monthCostMicroUsd: (input: { readonly tenantId: string; readonly monthStart: Date }) => Promise<number>;
+  /** Distinct users of the tenant's ledger rows since an instant (the overview's active users). */
+  readonly activeUserIds: (input: { readonly tenantId: string; readonly since: Date }) => Promise<readonly string[]>;
+};
+
+/** Settled approval requests since an instant, across tenants (the overview's approval rate). */
+export type ApprovalDecisionCounts = { readonly approved: number; readonly rejected: number };
+
+export type ApprovalStats = {
+  /** `approved` counts requests approved since then, executed or failed afterwards included. */
+  readonly countDecidedSince: (since: Date) => Promise<ApprovalDecisionCounts>;
 };

@@ -11,6 +11,7 @@ export const createInMemoryConsoleStores = (seed: { organizations?: readonly { i
   const settings = new Map<string, StoredAgentSettings>();
   const budgets = new Map<string, BudgetCaps>();
   const costs = new Map<string, number>();
+  const activity: { tenantId: string; userId: string; at: Date }[] = [];
   let sequence = 0;
   const planRepository: PlanRepository = {
     list: () => Promise.resolve([...plans.values()].sort((a, b) => a.name.localeCompare(b.name))),
@@ -61,6 +62,7 @@ export const createInMemoryConsoleStores = (seed: { organizations?: readonly { i
       return Promise.resolve();
     },
     monthCostMicroUsd: ({ tenantId }) => Promise.resolve(costs.get(tenantId) ?? 0),
+    activeUserIds: ({ tenantId, since }) => Promise.resolve([...new Set(activity.filter((row) => row.tenantId === tenantId && row.at >= since).map((row) => row.userId))]),
   };
-  return { stores: { plans: planRepository, organizations: organizationStore, agentSettings: settingsRepository, usage }, plans, organizations, assignments, settings, budgets, costs };
+  return { stores: { plans: planRepository, organizations: organizationStore, agentSettings: settingsRepository, usage }, plans, organizations, assignments, settings, budgets, costs, activity };
 };

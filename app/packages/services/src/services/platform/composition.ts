@@ -5,7 +5,9 @@ import { makeUpdateAgentSettings, type UpdateAgentSettings } from "../agents/app
 import type { AuditWriter } from "../audit/application/use-cases/record-audit.ts";
 import type { Clock } from "../shared/clock/clock.ts";
 import type { FirebaseAdmin } from "../shared/firebase/firebase-admin.ts";
-import { createPostgresUsageRepository } from "../usage/adapters/driven/postgres-usage-repository.ts";
+import type { ConsoleGateway } from "../observability/application/ports/console-gateway.ts";
+import { createPostgresUsageRepository, listActiveUserIds } from "../usage/adapters/driven/postgres-usage-repository.ts";
+import { createFirestoreApprovalStats } from "./adapters/driven/firestore-approval-stats.ts";
 import { createFirestoreAgentSettingsRepository, createFirestoreOrganizationAdminStore, createFirestorePlanRepository } from "./adapters/driven/firestore-console-stores.ts";
 import type { ConsoleDeps } from "./application/console-deps.ts";
 import type { ConsoleUsage } from "./application/ports/console-ports.ts";
@@ -51,11 +53,21 @@ export const createPostgresConsoleUsage = (sql: Sql): ConsoleUsage => {
   return {
     setTenantBudget: repository.setTenantBudget,
     monthCostMicroUsd: async (input) => (await repository.getMonthSpend(input)).costMicroUsd,
+    activeUserIds: listActiveUserIds(sql),
   };
 };
 
-/** Firestore + Postgres console services (web `/v1` routes; the Mastra `SettingsPort` reads `getAgentSettings`). */
-export const createFirebaseConsoleServices = (args: { readonly firebase: FirebaseAdmin; readonly sql: Sql; readonly audit: AuditWriter; readonly clock: Clock }): ConsoleServices =>
+/**
+ * Firestore + Postgres console services (web `/v1` routes; the Mastra `SettingsPort` reads `getAgentSettings`).
+ * @param evals the runtime's experiments, for the overview's eval status (the web passes its console gateway).
+ */
+export const createFirebaseConsoleServices = (args: {
+  readonly firebase: FirebaseAdmin;
+  readonly sql: Sql;
+  readonly audit: AuditWriter;
+  readonly clock: Clock;
+  readonly evals?: Pick<ConsoleGateway, "listExperiments">;
+}): ConsoleServices =>
   createConsoleServices({
     plans: createFirestorePlanRepository({ firestore: args.firebase.firestore }),
     organizations: createFirestoreOrganizationAdminStore({ firestore: args.firebase.firestore }),
@@ -63,4 +75,6 @@ export const createFirebaseConsoleServices = (args: { readonly firebase: Firebas
     usage: createPostgresConsoleUsage(args.sql),
     audit: args.audit,
     clock: args.clock,
+    approvals: createFirestoreApprovalStats({ firestore: args.firebase.firestore }),
+    ...(args.evals === undefined ? {} : { evals: args.evals }),
   });

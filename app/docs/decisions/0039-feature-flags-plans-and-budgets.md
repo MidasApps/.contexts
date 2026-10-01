@@ -118,3 +118,16 @@ plan values), but nothing defines plans.
   never looser. Rejected: Postgres first with the new caps (a failed raise would enforce caps the
   inputs never recorded) and a reconcile on read (`checkTenantBudget` is the runtime hot path and
   reads Postgres only).
+- **2026-10-01 — overview metrics (backend fixes).** `/v1/admin/overview` now also computes, over
+  active organizations and the last 7 days:
+  - **active users**: distinct `user_id` of `usage.llm_calls` (one read per organization under its row
+    level security; a user of two organizations counts once);
+  - **approval rate**: approved over approved plus rejected `approval-requests` by `updatedAt`
+    (`executed` and `failed` count as approved; two count aggregations on the `status + updatedAt`
+    index; 0 without decisions). `updatedAt` also moves on execution, so a request approved just
+    before the window and executed inside it counts;
+  - **eval status**: the verdict of the latest finished experiment of any source in the runtime's
+    console (CI gate, prompt eval, tenant run); `unknown` without one or when the runtime is
+    unreachable.
+  The **tripwire rate stays 0**: a guardrail stop aborts the run, but nothing records it (no audit
+  action, no ledger column). Follow-up: persist tripwires, then compute the rate.

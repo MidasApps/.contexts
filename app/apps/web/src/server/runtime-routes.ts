@@ -96,11 +96,13 @@ export const buildRuntimeRoutes = async (core: CoreServer): Promise<CoreRoutes> 
     pipeline: core.pipeline,
     flags: createFirebaseFlagsServices({ firebase, appEnv: env.APP_ENV, audit: core.audit, clock: core.pipeline.clock, environmentDefaults: flagEnvironmentDefaults(env) }),
   };
-  const consoleDeps = { pipeline: core.pipeline, console: createFirebaseConsoleServices({ firebase, sql, audit: core.audit, clock: core.pipeline.clock }) };
+  // SP5 console (decision 0040): the runtime's traces and experiments; the overview reads its eval status there.
+  const runtimeConsole = createMastraConsoleGateway(gatewayOptions);
+  const consoleDeps = { pipeline: core.pipeline, console: createFirebaseConsoleServices({ firebase, sql, audit: core.audit, clock: core.pipeline.clock, evals: runtimeConsole }) };
   const observabilityDeps = {
     pipeline: core.pipeline,
     observability: createObservabilityServices({
-      console: createMastraConsoleGateway(gatewayOptions),
+      console: runtimeConsole,
       getAgentSettings: consoleDeps.console.getAgentSettings,
       getConversation: createFirestoreConversationsServices({ firestore: firebase.firestore, clock: core.pipeline.clock }).getConversation,
       feedback: createFirestoreMessageFeedbackStore({ firestore: firebase.firestore }),
