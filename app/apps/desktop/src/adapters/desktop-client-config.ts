@@ -13,4 +13,5 @@ export const toClientConfig = (env: DesktopEnv): ClientConfig =>
     firebase: { apiKey: env.VITE_FIREBASE_API_KEY, authDomain: env.VITE_FIREBASE_AUTH_DOMAIN, projectId: env.VITE_FIREBASE_PROJECT_ID },
     ...(env.VITE_AUTH_EMULATOR_URL === undefined ? {} : { authEmulatorUrl: env.VITE_AUTH_EMULATOR_URL }),
     mfaFactors: env.VITE_MFA_FACTORS,
+    ...(env.VITE_SELF_SERVE_SIGN_UP === undefined ? {} : { selfServeSignUp: env.VITE_SELF_SERVE_SIGN_UP }),
   });

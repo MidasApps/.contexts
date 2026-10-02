@@ -8,6 +8,8 @@ export type WebPublicEnv = {
   readonly NEXT_PUBLIC_FIREBASE_PROJECT_ID?: string | undefined;
   readonly NEXT_PUBLIC_FIREBASE_AUTH_EMULATOR_URL?: string | undefined;
   readonly NEXT_PUBLIC_MFA_FACTORS?: string | undefined;
+  /** `true` offers open sign-up (`/sign-up`, decision 0049); unset or `false`: invitations only. */
+  readonly NEXT_PUBLIC_SELF_SERVE_SIGN_UP?: string | undefined;
 };
 
 // Same default as the server's MFA_FACTORS: remote environments offer TOTP.
@@ -32,6 +34,7 @@ export const toWebClientConfig = (source: WebPublicEnv): ClientConfig =>
     },
     ...(source.NEXT_PUBLIC_FIREBASE_AUTH_EMULATOR_URL === undefined ? {} : { authEmulatorUrl: source.NEXT_PUBLIC_FIREBASE_AUTH_EMULATOR_URL }),
     mfaFactors: factorList(source.NEXT_PUBLIC_MFA_FACTORS),
+    ...(source.NEXT_PUBLIC_SELF_SERVE_SIGN_UP === undefined ? {} : { selfServeSignUp: source.NEXT_PUBLIC_SELF_SERVE_SIGN_UP === "true" }),
   });
 
 /**
@@ -45,4 +48,5 @@ export const WEB_PUBLIC_ENV: WebPublicEnv = {
   NEXT_PUBLIC_FIREBASE_PROJECT_ID: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
   NEXT_PUBLIC_FIREBASE_AUTH_EMULATOR_URL: process.env.NEXT_PUBLIC_FIREBASE_AUTH_EMULATOR_URL,
   NEXT_PUBLIC_MFA_FACTORS: process.env.NEXT_PUBLIC_MFA_FACTORS,
+  NEXT_PUBLIC_SELF_SERVE_SIGN_UP: process.env.NEXT_PUBLIC_SELF_SERVE_SIGN_UP,
 };

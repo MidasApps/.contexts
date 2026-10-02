@@ -1,5 +1,5 @@
 import { AppLayout } from "@core/client/app-shell";
-import { parseRoute, useRouter } from "@core/client/shared/lib/router";
+import { ENTRY_ROUTE_IDS, parseRoute, useRouter } from "@core/client/shared/lib/router";
 import { useSession, type SessionState } from "@core/client/shared/lib/session";
 import { LoadingState } from "@core/client/shared/ui/molecules/LoadingState/LoadingState";
 import { useRouterState } from "@tanstack/react-router";
@@ -23,8 +23,6 @@ export const userAreaAccess = (status: SessionState["status"]): UserAreaAccess =
   }
 };
 
-const ENTRY_ROUTE_IDS = new Set(["sign-in", "invite"]);
-
 function UserAreaGate({ href, children }: { href: string; children: ReactNode }) {
   const t = useTranslations("auth.signIn");
   const { state } = useSession();
@@ -43,7 +41,7 @@ function UserAreaGate({ href, children }: { href: string; children: ReactNode })
 }
 
 /**
- * Chooses the frame of the current page: entry pages (sign-in, invite) render alone and handle
+ * Chooses the frame of the current page: entry pages (sign-in, invite, sign-up, password reset) render alone and handle
  * their own session states; every other path — the user area and not-found — needs a signed-in
  * session and renders inside the shared `AppLayout` (same widgets as web, no `/admin`).
  */

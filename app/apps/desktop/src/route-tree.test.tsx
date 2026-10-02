@@ -8,6 +8,8 @@ import type { DesktopApp } from "@/router-context.ts";
 const SAMPLES: Record<RouteId, readonly Route[]> = {
   "sign-in": [{ id: "sign-in", next: "/o/org-1" }],
   invite: [{ id: "invite", token: "t" }],
+  "sign-up": [{ id: "sign-up", next: "/organizations" }],
+  "reset-password": [{ id: "reset-password" }],
   home: [{ id: "home" }],
   organizations: [{ id: "organizations" }],
   organization: [{ id: "organization", organizationId: "org-1" }],
@@ -34,6 +36,8 @@ const SAMPLES: Record<RouteId, readonly Route[]> = {
 const DESKTOP_ROUTE: Record<Exclude<RouteId, "admin">, string> = {
   "sign-in": "/sign-in",
   invite: "/invite",
+  "sign-up": "/sign-up",
+  "reset-password": "/reset-password",
   home: "/",
   organizations: "/organizations",
   organization: "/o/$organizationId/",

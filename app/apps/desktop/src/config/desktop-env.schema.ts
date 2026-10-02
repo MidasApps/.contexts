@@ -52,6 +52,8 @@ export const DesktopEnvSchema = z
     // local). Only the Tauri CSP reads it; optional, because a local build may not upload.
     VITE_STORAGE_EMULATOR_URL: EmulatorOriginSchema,
     VITE_MFA_FACTORS: MfaFactorListSchema,
+    // Open sign-up page (decision 0049); unset = invitations only.
+    VITE_SELF_SERVE_SIGN_UP: z.enum(["true", "false"]).transform((value) => value === "true").optional(),
   })
   .refine((env) => (env.VITE_APP_ENV === "local") === (env.VITE_AUTH_EMULATOR_URL !== undefined), {
     error: "VITE_AUTH_EMULATOR_URL is required in local and forbidden elsewhere",

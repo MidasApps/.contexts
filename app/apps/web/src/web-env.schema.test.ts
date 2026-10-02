@@ -90,6 +90,11 @@ describe("loadWebEnv public client variables", () => {
     expect(() => loadWebEnv({ ...LOCAL_ENV, NEXT_PUBLIC_APP_ENV: "prod" })).toThrow(/NEXT_PUBLIC_APP_ENV \(MISMATCH\)/);
   });
 
+  it("accepts NEXT_PUBLIC_SELF_SERVE_SIGN_UP as true or false only", () => {
+    expect(loadWebEnv({ ...LOCAL_ENV, NEXT_PUBLIC_SELF_SERVE_SIGN_UP: "true" }).NEXT_PUBLIC_SELF_SERVE_SIGN_UP).toBe("true");
+    expect(() => loadWebEnv({ ...LOCAL_ENV, NEXT_PUBLIC_SELF_SERVE_SIGN_UP: "yes" })).toThrow(/NEXT_PUBLIC_SELF_SERVE_SIGN_UP/);
+  });
+
   it("parses NEXT_PUBLIC_MFA_FACTORS as a list of known factors", () => {
     expect(loadWebEnv({ ...LOCAL_ENV, NEXT_PUBLIC_MFA_FACTORS: "phone, totp" }).NEXT_PUBLIC_MFA_FACTORS).toEqual(["phone", "totp"]);
     expect(() => loadWebEnv({ ...LOCAL_ENV, NEXT_PUBLIC_MFA_FACTORS: "email" })).toThrow(/NEXT_PUBLIC_MFA_FACTORS/);

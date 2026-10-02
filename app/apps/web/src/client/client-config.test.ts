@@ -26,6 +26,12 @@ describe("toWebClientConfig", () => {
     expect(toWebClientConfig({ ...LOCAL, NEXT_PUBLIC_MFA_FACTORS: undefined }).mfaFactors).toEqual(["totp"]);
   });
 
+  it("offers open sign-up only when NEXT_PUBLIC_SELF_SERVE_SIGN_UP is true", () => {
+    expect(toWebClientConfig(LOCAL).selfServeSignUp).toBeUndefined();
+    expect(toWebClientConfig({ ...LOCAL, NEXT_PUBLIC_SELF_SERVE_SIGN_UP: "true" }).selfServeSignUp).toBe(true);
+    expect(toWebClientConfig({ ...LOCAL, NEXT_PUBLIC_SELF_SERVE_SIGN_UP: "false" }).selfServeSignUp).toBe(false);
+  });
+
   it("splits and de-duplicates the factor list", () => {
     expect(toWebClientConfig({ ...LOCAL, NEXT_PUBLIC_MFA_FACTORS: "totp, phone,totp" }).mfaFactors).toEqual(["totp", "phone"]);
   });

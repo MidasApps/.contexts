@@ -12,7 +12,9 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as InviteRouteImport } from './routes/invite'
 import { Route as OrganizationsRouteImport } from './routes/organizations'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as SignInRouteImport } from './routes/sign-in'
+import { Route as SignUpRouteImport } from './routes/sign-up'
 import { Route as ProfileSectionRouteImport } from './routes/profile/$section'
 import { Route as OOrganizationIdIndexRouteImport } from './routes/o/$organizationId/index'
 import { Route as OOrganizationIdPProjectIdIndexRouteImport } from './routes/o/$organizationId/p/$projectId/index'
@@ -36,9 +38,19 @@ const OrganizationsRoute = OrganizationsRouteImport.update({
   path: '/organizations',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SignInRoute = SignInRouteImport.update({
   id: '/sign-in',
   path: '/sign-in',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SignUpRoute = SignUpRouteImport.update({
+  id: '/sign-up',
+  path: '/sign-up',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProfileSectionRoute = ProfileSectionRouteImport.update({
@@ -86,7 +98,9 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/invite': typeof InviteRoute
   '/organizations': typeof OrganizationsRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/sign-in': typeof SignInRoute
+  '/sign-up': typeof SignUpRoute
   '/profile/$section': typeof ProfileSectionRoute
   '/o/$organizationId/': typeof OOrganizationIdIndexRoute
   '/o/$organizationId/settings/$section/$': typeof OOrganizationIdSettingsSectionSplatRoute
@@ -99,7 +113,9 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/invite': typeof InviteRoute
   '/organizations': typeof OrganizationsRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/sign-in': typeof SignInRoute
+  '/sign-up': typeof SignUpRoute
   '/profile/$section': typeof ProfileSectionRoute
   '/o/$organizationId': typeof OOrganizationIdIndexRoute
   '/o/$organizationId/settings/$section/$': typeof OOrganizationIdSettingsSectionSplatRoute
@@ -113,7 +129,9 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/invite': typeof InviteRoute
   '/organizations': typeof OrganizationsRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/sign-in': typeof SignInRoute
+  '/sign-up': typeof SignUpRoute
   '/profile/$section': typeof ProfileSectionRoute
   '/o/$organizationId/': typeof OOrganizationIdIndexRoute
   '/o/$organizationId/settings/$section/$': typeof OOrganizationIdSettingsSectionSplatRoute
@@ -128,7 +146,9 @@ export interface FileRouteTypes {
     | '/'
     | '/invite'
     | '/organizations'
+    | '/reset-password'
     | '/sign-in'
+    | '/sign-up'
     | '/profile/$section'
     | '/o/$organizationId/'
     | '/o/$organizationId/settings/$section/$'
@@ -141,7 +161,9 @@ export interface FileRouteTypes {
     | '/'
     | '/invite'
     | '/organizations'
+    | '/reset-password'
     | '/sign-in'
+    | '/sign-up'
     | '/profile/$section'
     | '/o/$organizationId'
     | '/o/$organizationId/settings/$section/$'
@@ -154,7 +176,9 @@ export interface FileRouteTypes {
     | '/'
     | '/invite'
     | '/organizations'
+    | '/reset-password'
     | '/sign-in'
+    | '/sign-up'
     | '/profile/$section'
     | '/o/$organizationId/'
     | '/o/$organizationId/settings/$section/$'
@@ -168,7 +192,9 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   InviteRoute: typeof InviteRoute
   OrganizationsRoute: typeof OrganizationsRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
   SignInRoute: typeof SignInRoute
+  SignUpRoute: typeof SignUpRoute
   ProfileSectionRoute: typeof ProfileSectionRoute
   OOrganizationIdIndexRoute: typeof OOrganizationIdIndexRoute
   OOrganizationIdSettingsSectionSplatRoute: typeof OOrganizationIdSettingsSectionSplatRoute
@@ -201,11 +227,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OrganizationsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/sign-in': {
       id: '/sign-in'
       path: '/sign-in'
       fullPath: '/sign-in'
       preLoaderRoute: typeof SignInRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sign-up': {
+      id: '/sign-up'
+      path: '/sign-up'
+      fullPath: '/sign-up'
+      preLoaderRoute: typeof SignUpRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/profile/$section': {
@@ -264,7 +304,9 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   InviteRoute: InviteRoute,
   OrganizationsRoute: OrganizationsRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
   SignInRoute: SignInRoute,
+  SignUpRoute: SignUpRoute,
   ProfileSectionRoute: ProfileSectionRoute,
   OOrganizationIdIndexRoute: OOrganizationIdIndexRoute,
   OOrganizationIdSettingsSectionSplatRoute:

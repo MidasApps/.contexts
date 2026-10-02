@@ -38,6 +38,8 @@ describe("loadDesktopEnv", () => {
     const env = loadDesktopEnv({ ...REMOTE, VITE_MFA_FACTORS: "totp, phone" });
     expect(env.VITE_AUTH_EMULATOR_URL).toBeUndefined();
     expect(env.VITE_MFA_FACTORS).toEqual(["totp", "phone"]);
+    expect(loadDesktopEnv({ ...REMOTE, VITE_SELF_SERVE_SIGN_UP: "true" }).VITE_SELF_SERVE_SIGN_UP).toBe(true);
+    expect(() => loadDesktopEnv({ ...REMOTE, VITE_SELF_SERVE_SIGN_UP: "yes" })).toThrow(/VITE_SELF_SERVE_SIGN_UP/);
   });
 
   it("drops a trailing slash so paths can be appended", () => {
