@@ -1,6 +1,6 @@
-import { screen } from "@testing-library/react";
+import { act, screen } from "@testing-library/react";
 import { useState } from "react";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { expectNoAxeViolations } from "#/shared/testing/axe.ts";
 import { renderWithProviders } from "#/shared/testing/render.tsx";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
@@ -27,7 +27,30 @@ const RemoveMember = ({ onConfirm, error }: { onConfirm: () => Promise<boolean |
   );
 };
 
+const setOnline = (online: boolean): void => {
+  Object.defineProperty(window.navigator, "onLine", { configurable: true, get: () => online });
+  act(() => {
+    window.dispatchEvent(new Event(online ? "online" : "offline"));
+  });
+};
+
+afterEach(() => setOnline(true));
+
 describe("ConfirmDialog", () => {
+  it("holds the confirm while offline and says why, even when it was opened online", async () => {
+    const onConfirm = vi.fn(() => Promise.resolve());
+    const { user } = renderWithProviders(<RemoveMember onConfirm={onConfirm} />);
+    await user.click(screen.getByRole("button", { name: "Remover" }));
+    const confirm = await screen.findByRole("button", { name: "Remover membro" });
+    setOnline(false);
+    expect(confirm.hasAttribute("disabled")).toBe(true);
+    expect(screen.getByRole("alertdialog").textContent).toContain("Você está sem conexão.");
+    setOnline(true);
+    expect(confirm.hasAttribute("disabled")).toBe(false);
+    await user.click(confirm);
+    expect(onConfirm).toHaveBeenCalledTimes(1);
+  });
+
   it("starts on Cancel, runs the async action with a pending state and closes on success", async () => {
     let resolve: () => void = () => undefined;
     const onConfirm = vi.fn(() => new Promise<void>((done) => (resolve = done)));

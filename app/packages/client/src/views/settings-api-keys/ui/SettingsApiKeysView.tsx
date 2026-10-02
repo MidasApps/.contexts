@@ -73,6 +73,7 @@ const useColumns = (now: number, onRevoke: ((key: ApiKey) => void) | null) => {
 function ApiKeysTable({ context, onCreate }: { context: AccessContext; onCreate: (() => void) | null }) {
   const t = useTranslations("settings.apiKeys");
   const formatDateTime = useFormatDateTime();
+  const online = useOnlineStatus();
   const { organization } = context;
   const keys = useApiKeys(organization.id);
   const [revoking, setRevoking] = useState<ApiKey | null>(null);
@@ -115,7 +116,13 @@ function ApiKeysTable({ context, onCreate }: { context: AccessContext; onCreate:
             icon="key"
             title={t("emptyTitle")}
             description={onCreate === null ? t("emptyDescriptionNoPermission") : t("emptyDescription")}
-            action={onCreate === null ? undefined : <Button onClick={onCreate}>{t("create")}</Button>}
+            action={
+              onCreate === null ? undefined : (
+                <Button onClick={onCreate} disabled={!online}>
+                  {t("create")}
+                </Button>
+              )
+            }
           />
         }
       />
@@ -150,7 +157,8 @@ function SettingsApiKeys({ context }: { context: AccessContext }) {
         />
       }
     >
-      <ApiKeysTable context={context} onCreate={canCreate && online ? () => setCreating(true) : null} />
+  // The empty-state copy follows the permission; offline only holds the action (the shell says why).
+      <ApiKeysTable context={context} onCreate={canCreate ? () => setCreating(true) : null} />
       {canCreate ? <CreateApiKeyDialog organization={organization} open={creating} onOpenChange={setCreating} /> : null}
     </SettingsPageFrame>
   );

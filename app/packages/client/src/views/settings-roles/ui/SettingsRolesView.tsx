@@ -77,6 +77,7 @@ function SystemRoles() {
 
 function CustomRoles({ context, onCreate }: { context: AccessContext; onCreate: (() => void) | null }) {
   const t = useTranslations("settings.roles");
+  const online = useOnlineStatus();
   const { organization } = context;
   const roles = useRoles(organization.id);
   const catalog = usePermissionsCatalog();
@@ -114,7 +115,7 @@ function CustomRoles({ context, onCreate }: { context: AccessContext; onCreate: 
             description={onCreate === null ? t("emptyDescriptionNoPermission") : t("emptyDescription")}
             action={
               onCreate === null ? undefined : (
-                <Button onClick={onCreate} disabled={waiting} pending={waiting}>
+                <Button onClick={onCreate} disabled={waiting || !online} pending={waiting}>
                   {t("create")}
                 </Button>
               )
@@ -142,7 +143,8 @@ function SettingsRoles({ context }: { context: AccessContext }) {
   const canCreate = context.permissions.includes("core.role.create");
   const catalog = usePermissionsCatalog();
   const grantable = (permission: Permission): boolean => context.permissions.includes(permission);
-  const create = canCreate && online ? () => setCreating(true) : null;
+  // The empty-state copy follows the permission; offline only holds the action (the shell says why).
+  const create = canCreate ? () => setCreating(true) : null;
   return (
     <SettingsPageFrame width="wide"
       organizationId={organization.id}

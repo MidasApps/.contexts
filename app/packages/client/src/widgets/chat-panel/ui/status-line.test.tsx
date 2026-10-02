@@ -21,7 +21,7 @@ describe("StatusLine", () => {
     ["awaiting-approval", "Aguardando sua aprovação."],
     ["stopped", "Resposta interrompida."],
     ["lost", "Conexão perdida. A resposta parou antes do fim."],
-    ["offline", "Sem conexão."],
+    ["offline", ""],
   ])("says the %s phase in one polite live region", async (phase, text) => {
     const { container } = renderWithProviders(<StatusLine phase={phase} failure={undefined} onRetry={vi.fn()} />);
     expect(live().textContent).toBe(text);
@@ -35,6 +35,13 @@ describe("StatusLine", () => {
     rerender(<StatusLine phase="finished" failure={undefined} onRetry={vi.fn()} />);
     expect(live()).toBe(region);
     expect(region.textContent).toBe("Resposta concluída.");
+  });
+
+  it("leaves plain offline to the shell banner and the composer, and says it only when a failed send can be retried", () => {
+    const { rerender } = renderWithProviders(<StatusLine phase="offline" failure={undefined} onRetry={vi.fn()} />);
+    expect(live().textContent).toBe("");
+    rerender(<StatusLine phase="offline" failure={{ code: "NETWORK_ERROR", requestId: "r", network: true }} onRetry={vi.fn()} />);
+    expect(live().textContent).toBe("Sem conexão.");
   });
 
   it("offers a retry for a lost stream and for a failed send while offline, not for plain offline", async () => {

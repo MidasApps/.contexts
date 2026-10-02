@@ -114,6 +114,7 @@ const useColumns = (actions: RowActions | null) => {
 
 function ConnectorsTable({ context, actions, onCreate }: { context: AccessContext; actions: RowActions | null; onCreate: (() => void) | null }) {
   const t = useTranslations("settings.connectors");
+  const online = useOnlineStatus();
   const { organization } = context;
   const connectors = useTenantConnectors(organization.id);
   const paged = useCursorPages(connectors, TENANT_CONNECTORS_PAGE_LIMIT, t("pagination"));
@@ -147,7 +148,13 @@ function ConnectorsTable({ context, actions, onCreate }: { context: AccessContex
           icon="plug"
           title={t("emptyTitle")}
           description={onCreate === null ? t("emptyDescriptionNoPermission") : t("emptyDescription")}
-          action={onCreate === null ? undefined : <Button onClick={onCreate}>{t("create")}</Button>}
+          action={
+            onCreate === null ? undefined : (
+              <Button onClick={onCreate} disabled={!online}>
+                {t("create")}
+              </Button>
+            )
+          }
         />
       }
     />
@@ -197,7 +204,7 @@ function SettingsConnectors({ context }: { context: AccessContext }) {
         <Alert>
           <AlertDescription>{t("limitNotice")}</AlertDescription>
         </Alert>
-        <ConnectorsTable context={context} actions={writable ? dialogs.actions : null} onCreate={writable ? create : null} />
+        <ConnectorsTable context={context} actions={writable ? dialogs.actions : null} onCreate={canWrite ? create : null} />
       </div>
       {canWrite ? (
         <>

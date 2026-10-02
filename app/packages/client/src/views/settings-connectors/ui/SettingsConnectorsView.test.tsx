@@ -234,6 +234,20 @@ describe("SettingsConnectorsView", { timeout: 30_000 }, () => {
     expect(await screen.findByRole("button", { name: "Tentar novamente" })).toBeDefined();
   });
 
+  it("keeps the empty state's copy and holds its action while offline, instead of claiming no permission", async () => {
+    renderView({ [LIST]: page([]) });
+    expect(await screen.findByRole("heading", { name: "Nenhum conector" })).toBeDefined();
+    setOnline(false);
+    try {
+      await waitFor(() => expect(screen.getAllByRole("button", { name: "Novo conector" }).every((button) => button.hasAttribute("disabled"))).toBe(true));
+      expect(screen.getAllByRole("button", { name: "Novo conector" })).toHaveLength(2);
+      expect(screen.getByText(/Crie um conector para que os agentes/u)).toBeDefined();
+      expect(screen.queryByText(/Você não tem permissão para criar conectores/u)).toBeNull();
+    } finally {
+      setOnline(true);
+    }
+  });
+
   it("disables writes while offline", async () => {
     renderView();
     await screen.findByRole("table", { name: "Conectores de Northwind" });

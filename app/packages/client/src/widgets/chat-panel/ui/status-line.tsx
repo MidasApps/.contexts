@@ -50,7 +50,9 @@ export function StatusLine({ phase, failure, onRetry, className }: StatusLinePro
       case "lost":
         return { text: t("status.lost"), icon: <AlertTriangleIcon aria-hidden="true" className="size-3.5" />, tone: "warning", visible: true, retry: true };
       case "offline":
-        return { text: t("status.offline"), icon: <WifiOffIcon aria-hidden="true" className="size-3.5" />, tone: "warning", visible: true, retry: failure !== undefined };
+        // Plain offline is already said by the shell banner and under the field; the line speaks
+        // only when a send failed and can be retried.
+        return failure === undefined ? null : { text: t("status.offline"), icon: <WifiOffIcon aria-hidden="true" className="size-3.5" />, tone: "warning", visible: true, retry: true };
       case "error":
       case "idle":
         return null;

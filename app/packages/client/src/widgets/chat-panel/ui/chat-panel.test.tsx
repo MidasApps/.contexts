@@ -235,7 +235,9 @@ describe("ChatPanel", () => {
   it("says it is offline, keeps the draft and blocks sending until the connection is back", async () => {
     const { user, transport, field, container } = setup();
     setOnline(false);
-    await waitFor(() => expect(status()).toBe("Sem conexão."));
+    // Said once under the field (and by the shell banner), not again in the status line.
+    expect(await screen.findByText("Sem conexão. Envio indisponível até a conexão voltar.")).toBeTruthy();
+    expect(status()).toBe("");
     await user.type(field(), "rascunho{Enter}");
     expect(transport.streams).toHaveLength(0);
     expect(field().value).toBe("rascunho");

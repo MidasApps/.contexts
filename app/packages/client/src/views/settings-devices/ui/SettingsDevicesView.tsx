@@ -59,6 +59,7 @@ const useColumns = (onRevoke: ((device: Device) => void) | null) => {
 function DevicesTable({ context, onCreate }: { context: AccessContext; onCreate: (() => void) | null }) {
   const t = useTranslations("settings.devices");
   const formatDateTime = useFormatDateTime();
+  const online = useOnlineStatus();
   const { organization } = context;
   const devices = useDevices(organization.id);
   const [revoking, setRevoking] = useState<Device | null>(null);
@@ -100,7 +101,13 @@ function DevicesTable({ context, onCreate }: { context: AccessContext; onCreate:
             icon="smartphone"
             title={t("emptyTitle")}
             description={onCreate === null ? t("emptyDescriptionNoPermission") : t("emptyDescription")}
-            action={onCreate === null ? undefined : <Button onClick={onCreate}>{t("create")}</Button>}
+            action={
+              onCreate === null ? undefined : (
+                <Button onClick={onCreate} disabled={!online}>
+                  {t("create")}
+                </Button>
+              )
+            }
           />
         }
       />
@@ -136,7 +143,8 @@ function SettingsDevices({ context }: { context: AccessContext }) {
         />
       }
     >
-      <DevicesTable context={context} onCreate={canCreate && online ? () => setCreating(true) : null} />
+  // The empty-state copy follows the permission; offline only holds the action (the shell says why).
+      <DevicesTable context={context} onCreate={canCreate ? () => setCreating(true) : null} />
       {canCreate ? <CreateDeviceActivationDialog organization={organization} customRoles={roles.data} open={creating} onOpenChange={setCreating} /> : null}
     </SettingsPageFrame>
   );

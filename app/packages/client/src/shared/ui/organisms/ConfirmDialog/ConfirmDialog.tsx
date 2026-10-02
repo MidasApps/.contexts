@@ -2,6 +2,7 @@
 
 import { useRef, useState, type ReactNode } from "react";
 import { useTranslations } from "use-intl";
+import { useOnlineStatus } from "#/shared/lib/network/use-online-status.ts";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
 import {
   AlertDialog,
@@ -12,6 +13,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "#/shared/ui/molecules/AlertDialog/AlertDialog.tsx";
+import { OfflineNotice } from "#/shared/ui/molecules/OfflineNotice/OfflineNotice.tsx";
 
 export type ConfirmDialogProps = {
   open: boolean;
@@ -34,7 +36,8 @@ export type ConfirmDialogProps = {
 /**
  * Confirmation organism over AlertDialog for destructive or consequential actions (remove member,
  * revoke key, delete unit). Async-aware: pending state, no double submit, focus returns to the
- * trigger on close.
+ * trigger on close. Offline the confirm is held with the reason: a dialog opened before the
+ * connection dropped would otherwise submit and fail with a generic error.
  */
 export function ConfirmDialog({
   open,
@@ -49,6 +52,7 @@ export function ConfirmDialog({
 }: ConfirmDialogProps) {
   const t = useTranslations("common.actions");
   const [pending, setPending] = useState(false);
+  const online = useOnlineStatus();
   // Usually opened from a menu item or row action, not an AlertDialogTrigger, so Radix has no
   // trigger to return focus to: remember what had focus when it opened (rules/accessibility.md).
   const returnFocus = useRef<HTMLElement | null>(null);
@@ -77,6 +81,7 @@ export function ConfirmDialog({
           <AlertDialogTitle>{title}</AlertDialogTitle>
           <AlertDialogDescription>{description}</AlertDialogDescription>
         </AlertDialogHeader>
+        {online ? null : <OfflineNotice />}
         {error === undefined ? null : (
           <p role="alert" className="text-sm font-medium text-destructive-text">
             {error}
@@ -84,7 +89,7 @@ export function ConfirmDialog({
         )}
         <AlertDialogFooter>
           <AlertDialogCancel disabled={pending}>{cancelLabel ?? t("cancel")}</AlertDialogCancel>
-          <Button variant={destructive ? "destructive" : "default"} pending={pending} onClick={() => void confirm()}>
+          <Button variant={destructive ? "destructive" : "default"} pending={pending} disabled={!online} onClick={() => void confirm()}>
             {confirmLabel}
           </Button>
         </AlertDialogFooter>
