@@ -85,6 +85,31 @@ test.describe("credentials", () => {
     await expect(page.getByText(/^core_/)).toHaveCount(0);
   });
 
+  test("on a 360×640 phone the tall key dialog fits and scrolls to its actions, and Esc asks before dropping the secret", async ({ page, world }) => {
+    await page.setViewportSize({ width: 360, height: 640 });
+    const name = unique("Phone key");
+    await page.goto(settings(world.alpha.id, "api-keys"));
+    await page.getByRole("button", { name: "Nova chave" }).first().click();
+    const dialog = page.getByRole("dialog", { name: "Nova chave de API" });
+    await expect(dialog.getByRole("heading", { name: "Nova chave de API" })).toBeInViewport();
+    expect((await dialog.boundingBox())?.height ?? Number.POSITIVE_INFINITY).toBeLessThanOrEqual(640);
+    await dialog.getByRole("textbox", { name: /^Nome/ }).fill(name);
+    await dialog.getByRole("checkbox", { name: /Ver projetos/ }).check();
+    const submit = dialog.getByRole("button", { name: "Criar chave" });
+    await submit.scrollIntoViewIfNeeded();
+    await expect(submit).toBeInViewport();
+    await submit.click();
+    const created = page.getByRole("dialog", { name: `Chave ${name} criada` });
+    await expect(created.getByRole("textbox", { name: "Chave de API" })).toBeVisible();
+    await page.keyboard.press("Escape");
+    const question = page.getByRole("alertdialog", { name: "Fechar sem guardar?" });
+    await question.getByRole("button", { name: "Voltar" }).click();
+    await expect(created.getByRole("textbox", { name: "Chave de API" })).toBeVisible();
+    await created.getByRole("checkbox", { name: "Copiei e guardei a chave em lugar seguro" }).check();
+    await created.getByRole("button", { name: "Concluir" }).click();
+    await expect(created).toBeHidden();
+  });
+
   test("creates a device activation code", async ({ page, world }) => {
     const label = unique("Reception tablet");
     await page.goto(settings(world.alpha.id, "devices"));
