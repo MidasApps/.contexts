@@ -75,10 +75,10 @@ describe("AdminOverviewView", () => {
     expect(within(areas).getAllByRole("link").map((link) => link.getAttribute("href"))).toEqual([
       "/admin/organizations",
       "/admin/users",
-      "/admin/connectors",
       "/admin/traces",
       "/admin/logs",
       "/admin/costs",
+      "/admin/connectors",
     ]);
     expect(within(areas).getByRole("link", { name: /Custos.*Uso e custos por organização/u })).toBeDefined();
   });

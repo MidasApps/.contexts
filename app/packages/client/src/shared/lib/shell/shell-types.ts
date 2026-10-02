@@ -32,7 +32,17 @@ export type ShellNavItem = {
   readonly permission?: Permission | undefined;
   readonly order: number;
   readonly target: NavTarget;
+  /**
+   * Heading the item sits under in the settings nav and the admin sidebar: a key of
+   * `shell.nav.groups` (decision 0054). Items without one (module contributions) go under
+   * "other", after the grouped ones.
+   */
+  readonly group?: NavGroup | undefined;
 };
+
+/** Headings of the settings and admin navigation, in the order they appear (decision 0054). */
+export const NAV_GROUPS = ["organization", "access", "customers", "ai", "operations", "other"] as const;
+export type NavGroup = (typeof NAV_GROUPS)[number];
 
 export type NavigationRegistry = {
   /** Items of a slot the viewer may see, by `order` then `id`. */

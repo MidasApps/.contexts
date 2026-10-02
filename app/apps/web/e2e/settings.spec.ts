@@ -162,12 +162,19 @@ test.describe("empty lists", () => {
 test.describe("a viewer", () => {
   test.use({ storageState: authFile("viewer") });
 
-  test("sees only the sections the viewer role can read, read-only", async ({ page, world }) => {
+  test("sees only the sections the viewer role can read, read-only", async ({ page, world, isMobile }) => {
     await page.goto(settings(world.alpha.id, "general"));
     await expect(page.getByRole("heading", { level: 1, name: "Geral" })).toBeVisible();
     await expect(page.getByText("Somente administradores podem alterar estes dados.")).toBeVisible();
     const nav = page.getByRole("navigation", { name: "Seções das configurações" });
-    await expect(nav.getByRole("link", { name: "Unidades" })).toBeVisible();
+    // Grouped links on wide screens; on phones the same sections are a picker (decision 0054).
+    if (isMobile) {
+      await nav.getByRole("combobox", { name: "Seção" }).click();
+      await expect(page.getByRole("option", { name: "Unidades" })).toBeVisible();
+      await page.keyboard.press("Escape");
+    } else {
+      await expect(nav.getByRole("link", { name: "Unidades" })).toBeVisible();
+    }
     await expect(nav.getByRole("link", { name: "Membros" })).toHaveCount(0);
     await expect(nav.getByRole("link", { name: "Chaves de API" })).toHaveCount(0);
 

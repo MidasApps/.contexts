@@ -63,14 +63,16 @@ describe("core navigation", () => {
       ["core.admin.plans", "platform.plan.manage"],
       ["core.admin.users", "platform.user.read"],
       ["core.admin.agents", "platform.agent.manage"],
-      ["core.admin.connectors", "platform.connector.read"],
       ["core.admin.evals", "platform.eval.manage"],
       ["core.admin.traces", "platform.trace.read"],
       ["core.admin.logs", "platform.trace.read"],
       ["core.admin.costs", "platform.usage.read"],
       ["core.admin.workflows", "platform.workflow.manage"],
       ["core.admin.flags", "platform.flag.manage"],
+      ["core.admin.connectors", "platform.connector.read"],
     ]);
+    // Grouped by what staff come to do (decision 0054).
+    expect(registry.visibleItems("admin", all).map((entry) => entry.group)).toEqual(["customers", "customers", "customers", "ai", "ai", "ai", "ai", "ai", "operations", "operations", "operations"]);
     expect(registry.visibleItems("organization", all).map((entry) => entry.id)).toEqual(["core.organization.home", "core.organization.settings"]);
     expect(registry.visibleItems("project", all).map((entry) => entry.id)).toEqual(["core.project.home", "core.project.chat"]);
     // The chat entry is for members who may chat (SP4 Task 13).

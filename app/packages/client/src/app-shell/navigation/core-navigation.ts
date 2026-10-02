@@ -1,27 +1,29 @@
 import type { Permission } from "@core/contracts";
 import { PROFILE_SECTIONS, SETTINGS_SECTIONS, type ProfileSection, type SettingsSection } from "#/shared/lib/router/route-paths.ts";
 import type { IconName } from "#/shared/ui/atoms/Icon/icon-registry.ts";
+import type { NavGroup } from "#/shared/lib/shell/shell-types.ts";
 import type { ShellNavItem } from "./navigation-registry.ts";
 
-// Read permission of each settings section (SP1 spec §7.3; SP3 spec §2.2 and SP5 spec §2.1 for the runtime ones).
-const SETTINGS: Record<SettingsSection, { icon: IconName; permission: Permission }> = {
-  general: { icon: "settings", permission: "core.organization.read" },
-  members: { icon: "users", permission: "core.member.read" },
-  invitations: { icon: "user-plus", permission: "core.member.invite" },
-  roles: { icon: "shield", permission: "core.role.read" },
-  units: { icon: "network", permission: "core.unit.read" },
-  "api-keys": { icon: "key", permission: "core.api-key.read" },
-  devices: { icon: "smartphone", permission: "core.device.read" },
-  agents: { icon: "bot", permission: "core.agent-settings.read" },
-  skills: { icon: "sparkles", permission: "core.agent-settings.read" },
-  knowledge: { icon: "file-text", permission: "core.knowledge.read" },
-  connectors: { icon: "plug", permission: "core.connector.read" },
-  workflows: { icon: "workflow", permission: "core.workflow-run.read" },
-  approvals: { icon: "inbox", permission: "core.approval.read" },
-  usage: { icon: "chart", permission: "core.usage.read" },
-  traces: { icon: "scroll-text", permission: "core.trace.read" },
-  evals: { icon: "activity", permission: "core.eval.read" },
-  flags: { icon: "flag", permission: "core.flag.read" },
+// Read permission of each settings section (SP1 spec §7.3; SP3 spec §2.2 and SP5 spec §2.1 for the
+// runtime ones) and the heading it sits under (decision 0054).
+const SETTINGS: Record<SettingsSection, { icon: IconName; permission: Permission; group: NavGroup }> = {
+  general: { icon: "settings", permission: "core.organization.read", group: "organization" },
+  members: { icon: "users", permission: "core.member.read", group: "organization" },
+  invitations: { icon: "user-plus", permission: "core.member.invite", group: "organization" },
+  roles: { icon: "shield", permission: "core.role.read", group: "organization" },
+  units: { icon: "network", permission: "core.unit.read", group: "organization" },
+  "api-keys": { icon: "key", permission: "core.api-key.read", group: "access" },
+  devices: { icon: "smartphone", permission: "core.device.read", group: "access" },
+  agents: { icon: "bot", permission: "core.agent-settings.read", group: "ai" },
+  skills: { icon: "sparkles", permission: "core.agent-settings.read", group: "ai" },
+  knowledge: { icon: "file-text", permission: "core.knowledge.read", group: "ai" },
+  connectors: { icon: "plug", permission: "core.connector.read", group: "ai" },
+  workflows: { icon: "workflow", permission: "core.workflow-run.read", group: "operations" },
+  approvals: { icon: "inbox", permission: "core.approval.read", group: "operations" },
+  usage: { icon: "chart", permission: "core.usage.read", group: "operations" },
+  traces: { icon: "scroll-text", permission: "core.trace.read", group: "operations" },
+  evals: { icon: "activity", permission: "core.eval.read", group: "operations" },
+  flags: { icon: "flag", permission: "core.flag.read", group: "operations" },
 };
 
 const PROFILE_ICONS: Record<ProfileSection, IconName> = {
@@ -35,18 +37,19 @@ const PROFILE_ICONS: Record<ProfileSection, IconName> = {
 // `/admin` areas (SP5 spec §6), each gated by the platform permission its API authorizes. The
 // server guards `/admin` (staff + MFA); `platform-support` holds the read permissions only, so it
 // sees organizations, users, connectors, traces, logs and costs.
-const ADMIN: { name: string; icon: IconName; permission: Permission }[] = [
-  { name: "organizations", icon: "building", permission: "platform.organization.read" },
-  { name: "plans", icon: "credit-card", permission: "platform.plan.manage" },
-  { name: "users", icon: "users", permission: "platform.user.read" },
-  { name: "agents", icon: "bot", permission: "platform.agent.manage" },
-  { name: "connectors", icon: "plug", permission: "platform.connector.read" },
-  { name: "evals", icon: "activity", permission: "platform.eval.manage" },
-  { name: "traces", icon: "scroll-text", permission: "platform.trace.read" },
-  { name: "logs", icon: "list", permission: "platform.trace.read" },
-  { name: "costs", icon: "wallet", permission: "platform.usage.read" },
-  { name: "workflows", icon: "workflow", permission: "platform.workflow.manage" },
-  { name: "flags", icon: "flag", permission: "platform.flag.manage" },
+// Grouped by what staff come to do (decision 0054): customers, AI, operations.
+const ADMIN: { name: string; icon: IconName; permission: Permission; group: NavGroup }[] = [
+  { name: "organizations", icon: "building", permission: "platform.organization.read", group: "customers" },
+  { name: "plans", icon: "credit-card", permission: "platform.plan.manage", group: "customers" },
+  { name: "users", icon: "users", permission: "platform.user.read", group: "customers" },
+  { name: "agents", icon: "bot", permission: "platform.agent.manage", group: "ai" },
+  { name: "evals", icon: "activity", permission: "platform.eval.manage", group: "ai" },
+  { name: "traces", icon: "scroll-text", permission: "platform.trace.read", group: "ai" },
+  { name: "logs", icon: "list", permission: "platform.trace.read", group: "ai" },
+  { name: "costs", icon: "wallet", permission: "platform.usage.read", group: "ai" },
+  { name: "workflows", icon: "workflow", permission: "platform.workflow.manage", group: "operations" },
+  { name: "flags", icon: "flag", permission: "platform.flag.manage", group: "operations" },
+  { name: "connectors", icon: "plug", permission: "platform.connector.read", group: "operations" },
 ];
 
 const HOMES: ShellNavItem[] = [
@@ -72,6 +75,7 @@ export const CORE_NAVIGATION: readonly ShellNavItem[] = [
     permission: SETTINGS[section].permission,
     order: index * 10,
     target: { kind: "settings", section },
+    group: SETTINGS[section].group,
   })),
   ...PROFILE_SECTIONS.map((section, index): ShellNavItem => ({
     id: `core.profile.${section}`,
@@ -81,7 +85,7 @@ export const CORE_NAVIGATION: readonly ShellNavItem[] = [
     order: index * 10,
     target: { kind: "profile", section },
   })),
-  ...ADMIN.map(({ name, icon, permission }, index): ShellNavItem => ({
+  ...ADMIN.map(({ name, icon, permission, group }, index): ShellNavItem => ({
     id: `core.admin.${name}`,
     slot: "admin",
     labelKey: `shell.nav.admin.${name}`,
@@ -89,5 +93,6 @@ export const CORE_NAVIGATION: readonly ShellNavItem[] = [
     permission,
     order: index * 10,
     target: { kind: "admin", rest: name },
+    group,
   })),
 ];

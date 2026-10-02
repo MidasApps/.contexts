@@ -86,7 +86,15 @@
       "logs": "Logs",
       "workflows": "Workflows"
     },
-    "chat": "Chat"
+    "chat": "Chat",
+    "groups": {
+      "organization": "Organization",
+      "access": "Access",
+      "customers": "Customers",
+      "ai": "AI",
+      "operations": "Operations",
+      "other": "Other"
+    }
   },
   "routeAnnouncer": {
     "fallback": "New page loaded"

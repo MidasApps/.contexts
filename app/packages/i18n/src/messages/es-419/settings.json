@@ -1,6 +1,7 @@
 {
   "navLabel": "Secciones de la configuración",
   "navLoading": "Cargando las secciones…",
+  "navPicker": "Sección",
   "indexLoading": "Abriendo la configuración…",
   "noAccessDescription": "Pide a un administrador de la organización que te dé acceso a esta sección.",
   "nodes": {

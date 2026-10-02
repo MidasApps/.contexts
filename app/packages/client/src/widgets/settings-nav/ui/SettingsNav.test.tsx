@@ -47,6 +47,35 @@ describe("settings and profile navigation", () => {
     expect(heading.closest("section")?.getAttribute("data-width")).toBe("reading");
   });
 
+  it("groups the settings sections under headings, with a section picker on phones", async () => {
+    const { user, router, container } = renderApp(
+      <main>
+        <SettingsPageFrame organizationId={IDS.organization} header={<h1>Membros</h1>} allowed>
+          <p>Conteúdo</p>
+        </SettingsPageFrame>
+      </main>,
+      {
+        path: `/o/${IDS.organization}/settings/members`,
+        routes: shellRoutes(["core.organization.read", "core.member.read", "core.api-key.read", "core.agent-settings.read", "core.trace.read"]),
+      },
+    );
+    const nav = await screen.findByRole("navigation", { name: "Seções das configurações" });
+    const organization = await within(nav).findByRole("list", { name: "Organização" });
+    expect(within(organization).getAllByRole("link").map((link) => link.textContent)).toEqual(["Geral", "Membros"]);
+    expect(within(within(nav).getByRole("list", { name: "Acesso" })).getAllByRole("link").map((link) => link.textContent)).toEqual(["Chaves de API"]);
+    expect(within(within(nav).getByRole("list", { name: "IA" })).getAllByRole("link").map((link) => link.textContent)).toEqual(["Agentes", "Habilidades"]);
+    expect(within(within(nav).getByRole("list", { name: "Operação" })).getAllByRole("link").map((link) => link.textContent)).toEqual(["Rastros"]);
+    await expectNoAxeViolations(container);
+    // Seventeen pills do not fit a phone: a picker of the same sections, grouped, opens the chosen one.
+    const picker = within(nav).getByRole("combobox", { name: "Seção" });
+    expect(picker.textContent).toContain("Membros");
+    await user.click(picker);
+    const groups = within(screen.getByRole("listbox")).getAllByRole("group");
+    expect(groups.map((group) => document.getElementById(group.getAttribute("aria-labelledby") ?? "")?.textContent)).toEqual(["Organização", "Acesso", "IA", "Operação"]);
+    await user.click(screen.getByRole("option", { name: "Rastros" }));
+    expect(router.current()).toBe(`/o/${IDS.organization}/settings/traces`);
+  });
+
   it("replaces the content with no-access when not allowed", async () => {
     renderApp(
       <main>
@@ -90,7 +119,7 @@ describe("settings and profile navigation", () => {
         ],
       },
     );
-    const nav = screen.getByRole("navigation", { name: "Seções do perfil" });
+    const nav = await screen.findByRole("navigation", { name: "Seções do perfil" });
     expect(within(nav).getAllByRole("link").map((link) => link.getAttribute("href"))).toEqual([
       "/profile/account",
       "/profile/security",
