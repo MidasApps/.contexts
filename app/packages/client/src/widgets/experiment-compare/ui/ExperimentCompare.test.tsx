@@ -1,7 +1,7 @@
 import { EvalExperimentSummarySchema } from "@core/contracts";
 import { screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import type { ExperimentPairState } from "#/entities/eval-experiment/index.ts";
+import type { ExperimentPair, ExperimentPairState } from "#/entities/eval-experiment/index.ts";
 import { ApiError } from "#/shared/api/api-error.ts";
 import { buildExperiment } from "#/shared/testing/admin-observability-fixtures.ts";
 import { expectNoAxeViolations } from "#/shared/testing/axe.ts";
@@ -66,7 +66,7 @@ const COPY: ExperimentComparisonCopy = {
 const panel = (ids: readonly string[], pair: ExperimentPairState, onClear = vi.fn()) =>
   renderWithProviders(<ExperimentComparisonPanel ids={ids} pair={pair} onClear={onClear} copy={COPY} />);
 
-const state = (pair: Record<string, unknown>): ExperimentPairState => ({ retry: vi.fn(), retrying: false, ...pair }) as ExperimentPairState;
+const state = (pair: ExperimentPair): ExperimentPairState => ({ ...pair, retry: vi.fn(), retrying: false });
 
 describe("ExperimentComparisonPanel", () => {
   it("guides the choice until two experiments are picked, with nothing to clear at first", () => {

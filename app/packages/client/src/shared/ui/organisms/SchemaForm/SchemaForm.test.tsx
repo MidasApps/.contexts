@@ -1,5 +1,5 @@
 import { fireEvent, screen, within } from "@testing-library/react";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { expectNoAxeViolations } from "#/shared/testing/axe.ts";
 import { setOnline } from "#/shared/testing/network.ts";
 import { renderWithProviders } from "#/shared/testing/render.tsx";
