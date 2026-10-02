@@ -45,6 +45,39 @@ describe("AdminFlagsView", () => {
     await expectNoAxeViolations(container);
   });
 
+  it("lists at most five expired keys and filters the table to the expired ones through the URL", async () => {
+    const expired = Array.from({ length: 7 }, (_, index) => buildExpiredFlag({ key: `legacy.flag-${String(index + 1)}` }));
+    const { user, router, container } = render({ routes: routes({ "GET /v1/admin/flags": ok([KILL, ...expired]) }) });
+    const alert = (await screen.findByText("7 flags expiradas")).closest("[data-slot='alert']") as HTMLElement;
+    expect(within(alert).getAllByRole("listitem").map((item) => item.textContent)).toEqual(["legacy.flag-1", "legacy.flag-2", "legacy.flag-3", "legacy.flag-4", "legacy.flag-5"]);
+    expect(within(alert).getByText("e mais 2")).toBeDefined();
+    const onlyExpired = within(alert).getByRole("button", { name: "Mostrar só as expiradas" });
+    expect(onlyExpired.getAttribute("aria-pressed")).toBe("false");
+    await user.click(onlyExpired);
+    await waitFor(() => expect(router.current()).toBe("/admin/flags?expired=1"));
+    const table = screen.getByRole("table", { name: "Flags de funcionalidades" });
+    await waitFor(() => expect(within(table).queryByRole("row", { name: /ai\.kill-switch/u })).toBeNull());
+    expect(within(table).getAllByRole("row", { name: /legacy\.flag-/u })).toHaveLength(7);
+    expect(within(alert).getByRole("button", { name: "Mostrar só as expiradas" }).getAttribute("aria-pressed")).toBe("true");
+    await expectNoAxeViolations(container);
+  });
+
+  it("searches the flags by key or name, says when none match and clears the search", async () => {
+    const { user, router } = render({ path: "/admin/flags?q=kill" });
+    const table = await screen.findByRole("table", { name: "Flags de funcionalidades" });
+    expect(within(table).getByRole("row", { name: /ai\.kill-switch/u })).toBeDefined();
+    expect(within(table).queryByRole("row", { name: /chat\.voice/u })).toBeNull();
+    const field = screen.getByRole("searchbox", { name: "Buscar flag" });
+    expect((field as HTMLInputElement).value).toBe("kill");
+    await user.clear(field);
+    await user.type(field, "nada");
+    await waitFor(() => expect(router.current()).toBe("/admin/flags?q=nada"));
+    expect(await screen.findByRole("heading", { level: 2, name: "Nenhuma flag corresponde à busca" })).toBeDefined();
+    await user.click(screen.getByRole("button", { name: "Limpar a busca" }));
+    await waitFor(() => expect(router.current()).toBe("/admin/flags"));
+    expect(await screen.findByRole("row", { name: /chat\.voice/u })).toBeDefined();
+  });
+
   it("turns a kill-switch on only after a destructive confirmation that says what stops", async () => {
     const { user, api, container } = render({ routes: routes({ "PUT /v1/admin/flags/:flagKey": ok(buildFeatureFlag({ value: true })) }) });
     await user.click(await screen.findByRole("switch", { name: "Valor de ai.kill-switch no ambiente" }));
