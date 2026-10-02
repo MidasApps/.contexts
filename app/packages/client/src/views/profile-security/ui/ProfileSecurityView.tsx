@@ -6,7 +6,7 @@ import { MfaChallengeForm } from "#/features/mfa-challenge/index.ts";
 import { MfaFactorsSection } from "#/features/mfa-enrollment/index.ts";
 import { SectionCard } from "#/shared/ui/molecules/SectionCard/SectionCard.tsx";
 import { PageHeader } from "#/widgets/page-header/index.ts";
-import { ProfilePageFrame } from "#/widgets/profile-nav/index.ts";
+import { ProfilePageFrame, ReadOnlyFieldset } from "#/widgets/profile-nav/index.ts";
 
 /** The sign-in MFA form reused to confirm a sensitive change. */
 function ReauthMfaStep({ challenge, onResolved, onCancel }: MfaStepProps) {
@@ -25,10 +25,14 @@ export function ProfileSecurityView() {
     <ProfilePageFrame header={<PageHeader title={t("title")} description={t("description")} />}>
       <div className="flex flex-col gap-6">
         <SectionCard title={t("mfa.title")} description={t("mfa.description")}>
-          <MfaFactorsSection />
+          <ReadOnlyFieldset>
+            <MfaFactorsSection />
+          </ReadOnlyFieldset>
         </SectionCard>
         <SectionCard title={t("password.title")} description={t("password.description")}>
-          <ChangePasswordForm MfaStep={ReauthMfaStep} />
+          <ReadOnlyFieldset>
+            <ChangePasswordForm MfaStep={ReauthMfaStep} />
+          </ReadOnlyFieldset>
         </SectionCard>
       </div>
     </ProfilePageFrame>

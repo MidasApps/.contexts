@@ -60,4 +60,15 @@ describe("ProfileAccountView", () => {
     expect(api.callLines()).not.toContain("PATCH /v1/me");
     await expectNoAxeViolations(container);
   });
+
+  it("keeps the retry of a failed load usable while support staff view the account", async () => {
+    const { auth, api, user } = renderView({ "GET /v1/me": apiError(409, "CONFLICT") });
+    auth.setClaims({ accessVersion: 3, imp: "Im5sK2lPq0WnR5tYu3bV", impBy: "staff-1" });
+    expect(await screen.findByText(/Modo suporte: este perfil é somente leitura/u)).toBeDefined();
+    const retry = await screen.findByRole("button", { name: "Tentar novamente" });
+    expect(retry.matches(":disabled")).toBe(false);
+    api.route("GET /v1/me", ok(buildMe()));
+    await user.click(retry);
+    expect(await screen.findByText("ana@example.com")).toBeDefined();
+  });
 });

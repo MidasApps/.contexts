@@ -31,22 +31,28 @@ export function ProfileNav() {
 }
 
 /**
- * Support staff viewing the app as a user (read-only, SP1 spec §6.6): one notice, and every
- * control of the page disabled at once by a disabled `fieldset`, instead of saves that always fail.
+ * Support staff viewing the app as a user (read-only, SP1 spec §6.6): the controls inside are
+ * disabled at once by a disabled `fieldset`, instead of saves that always fail. Views wrap only
+ * what writes, so retrying a failed load or paging a list keeps working.
  */
-function ReadOnlyWhileImpersonating({ children }: { children: ReactNode }) {
-  const t = useTranslations("profile");
+export function ReadOnlyFieldset({ children }: { children: ReactNode }) {
   if (!useIsImpersonating()) return children;
   return (
-    <div className="flex flex-col gap-4">
-      <Alert variant="warning" role={undefined}>
-        <Icon name="eye" />
-        <AlertDescription className="text-inherit">{t("impersonationReadOnly")}</AlertDescription>
-      </Alert>
-      <fieldset disabled className="min-w-0">
-        {children}
-      </fieldset>
-    </div>
+    <fieldset disabled className="min-w-0">
+      {children}
+    </fieldset>
+  );
+}
+
+/** The one notice of a profile page while staff view it as the user; nothing otherwise. */
+function ImpersonationReadOnlyNotice() {
+  const t = useTranslations("profile");
+  if (!useIsImpersonating()) return null;
+  return (
+    <Alert variant="warning" role={undefined} className="mb-6">
+      <Icon name="eye" />
+      <AlertDescription className="text-inherit">{t("impersonationReadOnly")}</AlertDescription>
+    </Alert>
   );
 }
 
@@ -55,7 +61,8 @@ export function ProfilePageFrame({ header, children }: { header: ReactNode; chil
   const t = useTranslations("profile");
   return (
     <SettingsTemplate header={header} navigation={<ProfileNav />} navigationLabel={t("navLabel")}>
-      <ReadOnlyWhileImpersonating>{children}</ReadOnlyWhileImpersonating>
+      <ImpersonationReadOnlyNotice />
+      {children}
     </SettingsTemplate>
   );
 }

@@ -6,7 +6,7 @@ import { NotificationPreferencesForm } from "#/features/update-preferences/index
 import { SectionCard } from "#/shared/ui/molecules/SectionCard/SectionCard.tsx";
 import { PageHeader } from "#/widgets/page-header/index.ts";
 import { QuerySection } from "#/widgets/page-state/index.ts";
-import { ProfilePageFrame } from "#/widgets/profile-nav/index.ts";
+import { ProfilePageFrame, ReadOnlyFieldset } from "#/widgets/profile-nav/index.ts";
 
 /** `/profile/notifications` (SP2 spec §8): `preferences.notifications.*` toggles. */
 export function ProfileNotificationsView() {
@@ -17,7 +17,9 @@ export function ProfileNotificationsView() {
       <QuerySection query={me} loadingLabel={t("loading")}>
         {(data) => (
           <SectionCard title={t("emailTitle")} description={t("emailDescription")}>
-            <NotificationPreferencesForm me={data} />
+            <ReadOnlyFieldset>
+              <NotificationPreferencesForm me={data} />
+            </ReadOnlyFieldset>
           </SectionCard>
         )}
       </QuerySection>

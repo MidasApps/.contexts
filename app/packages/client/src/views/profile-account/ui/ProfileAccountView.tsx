@@ -9,7 +9,7 @@ import { SectionCard } from "#/shared/ui/molecules/SectionCard/SectionCard.tsx";
 import { StatusPill } from "#/shared/ui/molecules/StatusPill/StatusPill.tsx";
 import { PageHeader } from "#/widgets/page-header/index.ts";
 import { QuerySection } from "#/widgets/page-state/index.ts";
-import { ProfilePageFrame } from "#/widgets/profile-nav/index.ts";
+import { ProfilePageFrame, ReadOnlyFieldset } from "#/widgets/profile-nav/index.ts";
 
 function AccountSections({ me }: { me: Me }) {
   const t = useTranslations("profile.account");
@@ -33,7 +33,9 @@ function AccountSections({ me }: { me: Me }) {
         <p className="text-xs text-muted-foreground">{t("emailHint")}</p>
       </SectionCard>
       <SectionCard title={t("profileTitle")} description={t("profileDescription")}>
-        <UpdateProfileForm me={me} />
+        <ReadOnlyFieldset>
+          <UpdateProfileForm me={me} />
+        </ReadOnlyFieldset>
       </SectionCard>
     </div>
   );

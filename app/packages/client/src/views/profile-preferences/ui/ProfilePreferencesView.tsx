@@ -6,7 +6,7 @@ import { RegionalPreferencesForm, ThemePreferenceField } from "#/features/update
 import { SectionCard } from "#/shared/ui/molecules/SectionCard/SectionCard.tsx";
 import { PageHeader } from "#/widgets/page-header/index.ts";
 import { QuerySection } from "#/widgets/page-state/index.ts";
-import { ProfilePageFrame } from "#/widgets/profile-nav/index.ts";
+import { ProfilePageFrame, ReadOnlyFieldset } from "#/widgets/profile-nav/index.ts";
 
 /**
  * `/profile/preferences` (SP2 spec §8): language, time zone and currency (saved together; a new
@@ -21,10 +21,14 @@ export function ProfilePreferencesView() {
         {(data) => (
           <div className="flex flex-col gap-6">
             <SectionCard title={t("regional.title")} description={t("regional.description")}>
-              <RegionalPreferencesForm me={data} />
+              <ReadOnlyFieldset>
+                <RegionalPreferencesForm me={data} />
+              </ReadOnlyFieldset>
             </SectionCard>
             <SectionCard title={t("theme.title")}>
-              <ThemePreferenceField />
+              <ReadOnlyFieldset>
+                <ThemePreferenceField />
+              </ReadOnlyFieldset>
             </SectionCard>
           </div>
         )}

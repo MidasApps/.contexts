@@ -28,9 +28,11 @@ still applied (none were already fixed). Paths are relative to `app/packages/cli
 - **U-20.**
   - `shared/lib/session/use-impersonation.ts` exposes `useImpersonationSessionId()` and
     `useIsImpersonating()` (the `imp` claim). The banner reuses it.
-  - `ProfilePageFrame` shows one read-only notice and wraps the page in a disabled `fieldset`, so
-    every profile form, switch, radio and button is disabled at once (account, preferences,
-    security, sessions, notifications).
+  - `ProfilePageFrame` shows one read-only notice. Each view wraps only its write surfaces in
+    `ReadOnlyFieldset` (a disabled `fieldset` from `widgets/profile-nav`): the account form, the
+    regional form and the theme, the notification switches, and the MFA and password sections.
+    Retrying a failed load and paging the sessions list keep working. A session revoke still gets
+    the server's 403.
   - `useSaveThemePreference` applies the theme locally and skips the PATCH and the retry toast
     while impersonating. This covers the user menu and the command palette.
   - The banner names the user (from `GET /v1/me`, which is the impersonated user). When this tab
