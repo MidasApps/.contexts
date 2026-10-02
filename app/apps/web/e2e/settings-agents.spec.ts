@@ -49,6 +49,8 @@ test.describe("platform agents", () => {
     await expect(toast(page, /A versão 1 foi (aprovada|reprovada) na avaliação/)).toBeVisible({ timeout: 240_000 });
     await expect(versions.getByRole("row", { name: /Versão 1/ })).toContainText("Aprovada");
     await versions.getByRole("button", { name: "Ativar a versão 1 de Assistente" }).click();
+    // Activation changes every conversation of the organization: it asks first.
+    await page.getByRole("alertdialog", { name: "Ativar a versão 1 de Assistente?" }).getByRole("button", { name: "Ativar" }).click();
     await expect(toast(page, "A versão 1 está ativa.")).toBeVisible();
     await expect(assistant.getByText("Versão 1 ativa")).toBeVisible();
   });

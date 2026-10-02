@@ -115,7 +115,8 @@ test.describe("a member's own chat", () => {
     await composer(page).fill("Written while offline");
     await context.setOffline(true);
     await expect(chatStatus(page)).toHaveAttribute("data-phase", "offline");
-    await expect(chatStatus(page).getByRole("status")).toHaveText("Sem conexão.");
+    // Offline is said once, by the composer (and the shell banner); the status line stays quiet.
+    await expect(chatStatus(page).getByRole("status")).toHaveText("");
     await expect(chatPanel(page).getByText("Sem conexão. Envio indisponível até a conexão voltar.")).toBeVisible();
     await composer(page).press("Enter");
     await expect(composer(page)).toHaveValue("Written while offline");

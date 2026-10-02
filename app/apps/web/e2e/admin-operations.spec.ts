@@ -1,6 +1,9 @@
 import { chooseOrganization } from "./admin-helpers.ts";
 import { expect, test, toast, unique } from "./sp5-test.ts";
 
+const APPROVAL_DEMO = "Demonstração de aprovação";
+const CATALOG_REINDEX = "Reindexação do catálogo";
+
 // SP5 Task 16: `/admin` operations: an organization's flag override (set, then removed), workflow
 // runs (a suspended `approval-demo` run cancelled by staff), platform schedules (pause and resume
 // behind a confirmation that says it stops the job for everyone) and connectors (read only).
@@ -46,19 +49,20 @@ test.describe("workflow runs", () => {
     const run = staffPage.getByRole("row").filter({ hasText: runId });
     await expect(run).toContainText("Suspensa", { timeout: 30_000 });
     await expect(run).toContainText("Usuário Demo Owner");
-    await expect(run).toContainText(/Aguarda a aprovação \w+/);
+    await expect(run).toContainText("Aguarda aprovação");
 
-    await run.getByRole("button", { name: `Detalhes da execução ${runId} de approval-demo` }).click();
-    const details = staffPage.getByRole("dialog", { name: "Execução de approval-demo" });
+    // Workflows are named by their labels (decision 0052).
+    await run.getByRole("button", { name: `Detalhes da execução ${runId} de ${APPROVAL_DEMO}` }).click();
+    const details = staffPage.getByRole("dialog", { name: `Execução de ${APPROVAL_DEMO}` });
     await expect(details).toContainText(sp5Org.name);
     await expect(details.getByRole("list", { name: "Linha do tempo da execução" })).toBeVisible();
     await details.press("Escape");
 
-    await run.getByRole("button", { name: `Cancelar a execução ${runId} de approval-demo` }).click();
-    const confirm = staffPage.getByRole("alertdialog", { name: "Cancelar a execução de approval-demo?" });
+    await run.getByRole("button", { name: `Cancelar a execução ${runId} de ${APPROVAL_DEMO}` }).click();
+    const confirm = staffPage.getByRole("alertdialog", { name: `Cancelar a execução de ${APPROVAL_DEMO}?` });
     await expect(confirm).toContainText("A solicitação de aprovação que ela aguardava continua aberta");
     await confirm.getByRole("button", { name: "Cancelar execução" }).click();
-    await expect(toast(staffPage, "Execução de approval-demo cancelada.")).toBeVisible();
+    await expect(toast(staffPage, `Execução de ${APPROVAL_DEMO} cancelada.`)).toBeVisible();
     await filters.getByRole("button", { name: "Aguardando aprovação" }).click();
     await expect(staffPage.getByRole("row").filter({ hasText: runId })).toContainText("Cancelada", { timeout: 30_000 });
   });
@@ -76,21 +80,22 @@ test.describe("schedules", () => {
   test("pauses a platform job after a warning, then resumes it", async ({ staffPage }) => {
     await staffPage.goto("admin/workflows");
     await staffPage.getByRole("tab", { name: "Agendamentos" }).click();
-    const row = staffPage.getByRole("row").filter({ hasText: "schedule_platform-catalog-reindex" });
+    // A platform schedule has no slug: its workflow's label names it.
+    const row = staffPage.getByRole("tabpanel", { name: "Agendamentos" }).getByRole("row").filter({ hasText: CATALOG_REINDEX });
     await expect(row).toContainText("Ativo");
     await expect(row).toContainText("0 3 * * *");
 
-    await row.getByRole("button", { name: "Pausar o agendamento schedule_platform-catalog-reindex de catalog-reindex" }).click();
-    const pause = staffPage.getByRole("alertdialog", { name: "Pausar o agendamento de catalog-reindex?" });
+    await row.getByRole("button", { name: `Pausar o agendamento de ${CATALOG_REINDEX}` }).click();
+    const pause = staffPage.getByRole("alertdialog", { name: `Pausar o agendamento de ${CATALOG_REINDEX}?` });
     await expect(pause).toContainText("deixa de rodar para todas as organizações");
     await pause.getByRole("button", { name: "Pausar job da plataforma" }).click();
-    await expect(toast(staffPage, "Agendamento de catalog-reindex pausado.")).toBeVisible();
+    await expect(toast(staffPage, `Agendamento de ${CATALOG_REINDEX} pausado.`)).toBeVisible();
     await expect(row).toContainText("Pausado");
 
-    await row.getByRole("button", { name: "Retomar o agendamento schedule_platform-catalog-reindex de catalog-reindex" }).click();
-    const resume = staffPage.getByRole("alertdialog", { name: "Retomar o agendamento de catalog-reindex?" });
+    await row.getByRole("button", { name: `Retomar o agendamento de ${CATALOG_REINDEX}` }).click();
+    const resume = staffPage.getByRole("alertdialog", { name: `Retomar o agendamento de ${CATALOG_REINDEX}?` });
     await resume.getByRole("button", { name: "Retomar agendamento" }).click();
-    await expect(toast(staffPage, "Agendamento de catalog-reindex retomado.")).toBeVisible();
+    await expect(toast(staffPage, `Agendamento de ${CATALOG_REINDEX} retomado.`)).toBeVisible();
     await expect(row).toContainText("Ativo");
   });
 });

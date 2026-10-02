@@ -51,6 +51,7 @@ test.describe("usage and budget", () => {
     await expect(page.getByRole("region", { name: "Orçamento" }).getByText(/de US\$\s?12,50/)).toBeVisible();
 
     await page.getByRole("region", { name: "Limite próprio da organização" }).getByRole("button", { name: "Remover limite próprio" }).click();
+    await page.getByRole("alertdialog", { name: "Remover o limite próprio da organização?" }).getByRole("button", { name: "Remover limite" }).click();
     await expect(toast(page, /Limite próprio removido/)).toBeVisible();
     await page.reload();
     await expect(page.getByRole("region", { name: "Orçamento" }).getByText(/de US\$\s?50,00/)).toBeVisible();
@@ -80,9 +81,14 @@ test.describe("traces", () => {
 
   test("filters by status down to the no-match state", async ({ page, sp5Org }) => {
     await page.goto(settingsPath(sp5Org.id, "traces"));
-    await page.getByRole("textbox", { name: "Agente" }).fill("no-such-agent");
-    await page.getByRole("button", { name: "Filtrar" }).click();
-    await expect(page.getByRole("heading", { name: /Nenhum rastro/ })).toBeVisible();
+    // The owner may read the agent catalog, so the agent is picked by name; filters apply at once.
+    const filters = page.getByRole("search", { name: "Filtrar rastros" });
+    await filters.getByRole("combobox", { name: "Status" }).click();
+    await page.getByRole("option", { name: "Erro" }).click();
+    await expect(filters.getByRole("combobox", { name: "Agente" })).toBeEnabled();
+    await filters.getByRole("combobox", { name: "Agente" }).click();
+    await page.getByRole("option", { name: "Conhecimento" }).click();
+    await expect(page.getByRole("heading", { name: "Nenhum rastro com esses filtros" })).toBeVisible();
   });
 });
 
@@ -104,17 +110,18 @@ test.describe("features", () => {
   test("switches a feature off for the organization and back on", async ({ page, sp5Org }) => {
     await page.goto(settingsPath(sp5Org.id, "flags"));
     await expect(page.getByRole("heading", { level: 1, name: "Recursos" })).toBeVisible();
-    const voice = page.getByRole("row", { name: /^chat\.voice Voice transcription/ });
-    await voice.getByRole("button", { name: "Desligar chat.voice para a organização" }).click();
-    const off = page.getByRole("alertdialog", { name: "Desligar chat.voice para a organização?" }).or(page.getByRole("dialog", { name: "Desligar chat.voice para a organização?" }));
+    // Features are named in the viewer's language; the key stays as secondary text.
+    const voice = page.getByRole("row").filter({ has: page.getByText("chat.voice", { exact: true }) });
+    await voice.getByRole("button", { name: "Desligar Voz no chat para a organização" }).click();
+    const off = page.getByRole("alertdialog", { name: "Desligar Voz no chat para a organização?" });
     await off.getByRole("button", { name: "Desligar", exact: true }).click();
-    await expect(toast(page, "chat.voice desligado para a organização.")).toBeVisible();
+    await expect(toast(page, "Voz no chat desligado para a organização.")).toBeVisible();
     await expect(voice).toContainText("Desligado pela organização");
 
-    await voice.getByRole("button", { name: "Voltar a usar chat.voice" }).click();
-    const on = page.getByRole("alertdialog", { name: "Voltar a usar chat.voice?" }).or(page.getByRole("dialog", { name: "Voltar a usar chat.voice?" }));
+    await voice.getByRole("button", { name: "Voltar a usar Voz no chat" }).click();
+    const on = page.getByRole("alertdialog", { name: "Voltar a usar Voz no chat?" });
     await on.getByRole("button", { name: "Voltar a usar", exact: true }).click();
-    await expect(toast(page, "A organização voltou a usar chat.voice.")).toBeVisible();
+    await expect(toast(page, "A organização voltou a usar Voz no chat.")).toBeVisible();
     await expect(voice).toContainText("Ligado pela organização");
   });
 });

@@ -3,16 +3,20 @@ import { expect, FAILED_REQUEST, settingsPath, test, toast, unique } from "./sp5
 
 // SP5 Task 16, `/settings/workflows` as the organization's owner: start `approval-demo`, follow
 // the run page until it waits for approval, cancel it; then a schedule of `usage-report`: create,
-// edit, pause, resume, run now and delete.
+// edit, pause, resume, run now and delete. Workflows are named by their labels (decision 0052):
+// `approval-demo` is "Demonstração de aprovação", `usage-report` is "Relatório de uso".
+const APPROVAL_DEMO = "Demonstração de aprovação";
+const USAGE_REPORT = "Relatório de uso";
 
 const startApprovalDemo = async (page: Page, title: string): Promise<void> => {
   await page.getByRole("button", { name: "Iniciar fluxo" }).first().click();
   const start = page.getByRole("dialog", { name: "Iniciar fluxo" });
   await start.getByRole("combobox", { name: /^Fluxo/ }).click();
-  await page.getByRole("option", { name: /approval-demo/ }).click();
-  await start.getByRole("textbox", { name: /^Dados de entrada/ }).fill(JSON.stringify({ title }));
+  await page.getByRole("option", { name: APPROVAL_DEMO }).click();
+  // The input is filled from the workflow's schema, field by field.
+  await start.getByRole("textbox", { name: /^Título/ }).fill(title);
   await start.getByRole("button", { name: "Iniciar", exact: true }).click();
-  await expect(toast(page, /Execução de .*approval-demo.* iniciada\./)).toBeVisible();
+  await expect(toast(page, `Execução de ${APPROVAL_DEMO} iniciada.`)).toBeVisible();
 };
 
 test.describe("workflow runs", () => {
@@ -26,7 +30,10 @@ test.describe("workflow runs", () => {
     await page.getByRole("button", { name: "Iniciar fluxo" }).first().click();
     const start = page.getByRole("dialog", { name: "Iniciar fluxo" });
     await start.getByRole("combobox", { name: /^Fluxo/ }).click();
-    await page.getByRole("option", { name: /approval-demo/ }).click();
+    await page.getByRole("option", { name: APPROVAL_DEMO }).click();
+    await start.getByRole("button", { name: "Iniciar", exact: true }).click();
+    await expect(start.getByText("Preencha este campo.")).toBeVisible();
+    await start.getByRole("button", { name: "Editar como JSON" }).click();
     await start.getByRole("textbox", { name: /^Dados de entrada/ }).fill("{not json");
     await start.getByRole("button", { name: "Iniciar", exact: true }).click();
     await expect(start.getByText("Escreva um objeto JSON válido.")).toBeVisible();
@@ -34,7 +41,7 @@ test.describe("workflow runs", () => {
 
     await startApprovalDemo(page, unique("Run to cancel"));
     // Starting opens the run page, which follows the run's events.
-    await expect(page.getByRole("heading", { level: 1, name: "Execução de approval-demo" })).toBeVisible();
+    await expect(page.getByRole("heading", { level: 1, name: `Execução de ${APPROVAL_DEMO}` })).toBeVisible();
     await expect(page.getByText("Esta página se atualiza sozinha enquanto a execução está em andamento.")).toBeVisible();
     const steps = page.getByRole("list", { name: "Eventos das etapas da execução" });
     await expect(steps.getByRole("listitem").filter({ hasText: "Etapa concluída" }).filter({ hasText: "collect-input" })).toBeVisible({ timeout: 90_000 });
@@ -43,16 +50,16 @@ test.describe("workflow runs", () => {
 
     await page.getByRole("link", { name: "Voltar às execuções" }).click();
     const runs = page.getByRole("table", { name: `Execuções de fluxos de ${sp5Org.name}` });
-    const run = runs.getByRole("row").filter({ hasText: "approval-demo" });
+    const run = runs.getByRole("row").filter({ hasText: APPROVAL_DEMO });
     await expect(run).toContainText("Suspensa");
     await expect(run).toContainText("Aguarda aprovação");
-    await run.getByRole("link", { name: /^Abrir a execução .* de approval-demo/ }).click();
-    await expect(page.getByRole("heading", { level: 1, name: "Execução de approval-demo" })).toBeVisible();
+    await run.getByRole("link", { name: new RegExp(`^Abrir a execução .* de ${APPROVAL_DEMO}`) }).click();
+    await expect(page.getByRole("heading", { level: 1, name: `Execução de ${APPROVAL_DEMO}` })).toBeVisible();
 
     await page.getByRole("button", { name: "Cancelar execução" }).click();
-    const cancel = page.getByRole("alertdialog", { name: "Cancelar a execução de approval-demo?" });
+    const cancel = page.getByRole("alertdialog", { name: `Cancelar a execução de ${APPROVAL_DEMO}?` });
     await cancel.getByRole("button", { name: "Cancelar execução" }).click();
-    await expect(toast(page, /Execução de .*approval-demo.* cancelada\./)).toBeVisible();
+    await expect(toast(page, `Execução de ${APPROVAL_DEMO} cancelada.`)).toBeVisible();
     await expect(page.getByText("Cancelada").first()).toBeVisible({ timeout: 60_000 });
     await expect(page.getByText("A execução terminou. O estado não muda mais.")).toBeVisible();
   });
@@ -72,7 +79,7 @@ test.describe("schedules", () => {
     await panel.getByRole("button", { name: "Novo agendamento" }).first().click();
     const editor = page.getByRole("dialog", { name: "Novo agendamento" });
     await editor.getByRole("combobox", { name: /^Fluxo/ }).click();
-    await page.getByRole("option", { name: /usage-report/ }).click();
+    await page.getByRole("option", { name: USAGE_REPORT }).click();
     await editor.getByRole("textbox", { name: /^Nome curto/ }).fill(slug);
     await editor.getByRole("combobox", { name: /^Frequência/ }).click();
     await page.getByRole("option", { name: "Expressão cron" }).click();
@@ -82,8 +89,9 @@ test.describe("schedules", () => {
     await expect(editor.getByText(/O intervalo entre disparos é curto demais/)).toBeVisible();
     await editor.getByRole("textbox", { name: /^Expressão cron/ }).fill("*/15 * * * *");
     await editor.getByRole("button", { name: "Criar agendamento" }).click();
-    await expect(toast(page, /Agendamento de .*usage-report.* criado\./)).toBeVisible();
-    const row = panel.getByRole("row").filter({ hasText: "usage-report" });
+    await expect(toast(page, `Agendamento de ${USAGE_REPORT} criado.`)).toBeVisible();
+    // The row shows the slug the organization chose under the workflow's name.
+    const row = panel.getByRole("row").filter({ hasText: slug });
     await expect(row).toContainText("*/15 * * * *");
     await expect(row).toContainText("America/Sao_Paulo");
     await expect(row).toContainText("Ativo");
@@ -92,33 +100,33 @@ test.describe("schedules", () => {
 
     await row.getByRole("button", { name: /^Mais ações do agendamento/ }).click();
     await page.getByRole("menuitem", { name: /^Editar o agendamento/ }).click();
-    const edit = page.getByRole("dialog", { name: /Editar agendamento de .*usage-report/ });
+    const edit = page.getByRole("dialog", { name: `Editar agendamento de ${USAGE_REPORT}` });
     await edit.getByRole("textbox", { name: /^Expressão cron/ }).fill("*/30 * * * *");
     await edit.getByRole("button", { name: "Salvar agendamento" }).click();
-    await expect(toast(page, /Agendamento de .*usage-report.* atualizado\./)).toBeVisible();
+    await expect(toast(page, `Agendamento de ${USAGE_REPORT} atualizado.`)).toBeVisible();
     await expect(row).toContainText("*/30 * * * *");
 
     await row.getByRole("button", { name: /^Pausar o agendamento/ }).click();
     await page.getByRole("alertdialog", { name: /Pausar o agendamento de/ }).getByRole("button", { name: "Pausar agendamento" }).click();
-    await expect(toast(page, /Agendamento de .*usage-report.* pausado\./)).toBeVisible();
+    await expect(toast(page, `Agendamento de ${USAGE_REPORT} pausado.`)).toBeVisible();
     await expect(row).toContainText("Pausado");
     await row.getByRole("button", { name: /^Retomar o agendamento/ }).click();
     const resume = page.getByRole("alertdialog", { name: /Retomar o agendamento de/ });
     if (await resume.isVisible()) await resume.getByRole("button", { name: /Retomar/ }).click();
-    await expect(toast(page, /Agendamento de .*usage-report.* retomado\./)).toBeVisible();
+    await expect(toast(page, `Agendamento de ${USAGE_REPORT} retomado.`)).toBeVisible();
     await expect(row).toContainText("Ativo");
 
     await row.getByRole("button", { name: /^Executar agora o agendamento/ }).click();
-    await page.getByRole("alertdialog", { name: /Executar .*usage-report.* agora\?/ }).getByRole("button", { name: "Executar agora" }).click();
-    await expect(toast(page, /Execução de .*usage-report.* iniciada\./)).toBeVisible();
+    await page.getByRole("alertdialog", { name: `Executar ${USAGE_REPORT} agora?` }).getByRole("button", { name: "Executar agora" }).click();
+    await expect(toast(page, `Execução de ${USAGE_REPORT} iniciada.`)).toBeVisible();
     await page.getByRole("tab", { name: "Execuções" }).click();
-    await expect(page.getByRole("row").filter({ hasText: "usage-report" }).first()).toBeVisible({ timeout: 60_000 });
+    await expect(page.getByRole("row").filter({ hasText: USAGE_REPORT }).first()).toBeVisible({ timeout: 60_000 });
 
     await page.getByRole("tab", { name: "Agendamentos" }).click();
     await row.getByRole("button", { name: /^Mais ações do agendamento/ }).click();
     await page.getByRole("menuitem", { name: /^Excluir o agendamento/ }).click();
     await page.getByRole("alertdialog", { name: /Excluir o agendamento de/ }).getByRole("button", { name: "Excluir agendamento" }).click();
-    await expect(toast(page, /Agendamento de .*usage-report.* excluído\./)).toBeVisible();
+    await expect(toast(page, `Agendamento de ${USAGE_REPORT} excluído.`)).toBeVisible();
     await expect(panel.getByRole("heading", { name: "Nenhum agendamento" })).toBeVisible();
   });
 });

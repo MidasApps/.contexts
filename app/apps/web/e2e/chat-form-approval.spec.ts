@@ -12,6 +12,8 @@ test.use({ storageState: SIGNED_OUT });
 // file may create one meanwhile.
 test.describe.configure({ mode: "serial" });
 
+const CREATE_NOTE = "Criar notas no módulo de exemplo";
+
 type AuditEntry = { action: string; target?: { type?: string; id?: string }; metadata?: Record<string, unknown> };
 
 const auditOf = (owner: V1Client, organizationId: string): Promise<AuditEntry[]> =>
@@ -21,13 +23,14 @@ const auditOf = (owner: V1Client, organizationId: string): Promise<AuditEntry[]>
 const submitNoteForm = async (page: Page, title: string) => {
   await send(page, "Create a note");
   await expectAnswered(page);
-  const form = messageLog(page).getByRole("form", { name: "Formulário: example.CreateNoteCommand" });
+  // Commands are named by their permission's label (decision 0052), the id stays in the API.
+  const form = messageLog(page).getByRole("form", { name: `Formulário: ${CREATE_NOTE}` });
   await expect(form).toBeVisible();
   await expectNoAxeViolations(page);
   await form.getByRole("textbox", { name: "Título (obrigatório)" }).fill(title);
   await form.getByRole("button", { name: "Enviar" }).click();
   await expect(chatStatus(page)).toHaveAttribute("data-phase", "awaiting-approval", { timeout: 30_000 });
-  await expect(messageLog(page).getByRole("article", { name: "Você" }).last()).toContainText("Formulário enviado: example.CreateNoteCommand");
+  await expect(messageLog(page).getByRole("article", { name: "Você" }).last()).toContainText(`Formulário enviado: ${CREATE_NOTE}`);
   const card = messageLog(page).getByRole("region", { name: `Aprovação: Create the note "${title}"` });
   await expect(card.getByRole("heading", { name: "Aprovação necessária" })).toBeVisible();
   return card;
@@ -37,7 +40,7 @@ test("a submitted form asks for approval with before and after, then the command
   const user = await signInFresh();
   await openChat(page, world);
   const card = await submitNoteForm(page, "Supplier follow-up");
-  await expect(card.getByText("Permissão: example.note.create")).toBeVisible();
+  await expect(card.getByText(`Permissão: ${CREATE_NOTE}`)).toBeVisible();
   const diff = card.getByRole("table", { name: "Alterações propostas" });
   await expect(diff.getByRole("row", { name: /title/ })).toContainText("Supplier follow-up");
   await expectNoAxeViolations(page);

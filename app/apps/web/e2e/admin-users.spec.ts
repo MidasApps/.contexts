@@ -116,7 +116,8 @@ test.describe("support access in the tab", () => {
     await startSession(page, world.alpha.name, reason);
 
     await page.getByRole("region", { name: "Sessão aberta nesta aba" }).getByRole("button", { name: "Abrir o app como este usuário" }).click();
-    const banner = page.getByText(/^Você está vendo o app como outro usuário, em modo somente leitura/);
+    // The banner names the user (and the organization when known) the staff member is viewing as.
+    const banner = page.getByText(new RegExp(`^Você está vendo o app como ${viewer.displayName}\\b.*, em modo somente leitura`));
     await expect(banner).toBeVisible();
     await showSidebar(page);
     await expect(page.getByRole("button", { name: `${viewer.displayName}, menu da conta` })).toBeVisible();

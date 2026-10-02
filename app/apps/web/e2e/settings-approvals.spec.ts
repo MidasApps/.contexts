@@ -12,8 +12,9 @@ const startRunAwaitingApproval = async (page: Page, org: Sp5Org, title: string):
   await page.getByRole("button", { name: "Iniciar fluxo" }).first().click();
   const start = page.getByRole("dialog", { name: "Iniciar fluxo" });
   await start.getByRole("combobox", { name: /^Fluxo/ }).click();
-  await page.getByRole("option", { name: /approval-demo/ }).click();
-  await start.getByRole("textbox", { name: /^Dados de entrada/ }).fill(JSON.stringify({ title }));
+  // Workflows are named by their labels; the input is filled field by field from its schema.
+  await page.getByRole("option", { name: "Demonstração de aprovação" }).click();
+  await start.getByRole("textbox", { name: /^Título/ }).fill(title);
   await start.getByRole("button", { name: "Iniciar", exact: true }).click();
   const approvals = page.getByRole("link", { name: "Abrir aprovações" });
   await expect(approvals).toBeVisible({ timeout: 90_000 });
@@ -81,7 +82,7 @@ test.describe("four-eyes approvals", () => {
     const runs = page.getByRole("table", { name: `Execuções de fluxos de ${sp5Org.name}` });
     await expect(async () => {
       await page.reload();
-      await expect(runs.getByRole("row").filter({ hasText: "approval-demo" }).filter({ hasText: "Concluída" })).toHaveCount(2, { timeout: 5_000 });
+      await expect(runs.getByRole("row").filter({ hasText: "Demonstração de aprovação" }).filter({ hasText: "Concluída" })).toHaveCount(2, { timeout: 5_000 });
     }).toPass({ timeout: 120_000 });
   });
 });
