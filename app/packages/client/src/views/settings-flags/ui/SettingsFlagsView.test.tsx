@@ -42,14 +42,16 @@ describe("SettingsFlagsView", { timeout: 30_000 }, () => {
   it("lists the overridable flags of the organization with platform value, override and value in use", async () => {
     const { container, api } = renderView();
     const table = await screen.findByRole("table", { name: "Recursos que Northwind pode desligar" });
-    const voice = within(table).getByRole("row", { name: /Voice input and output/u });
-    expect(within(voice).getByText("Voice input and output in chat.")).toBeDefined();
+    const voice = within(table).getByRole("row", { name: /Voz no chat/u });
+    // Flags read as their localized name and description; the key stays as secondary text.
+    expect(within(voice).getByText("Transcrição e fala por ambiente e organização.")).toBeDefined();
+    expect(within(voice).getByText("chat.voice")).toBeDefined();
     expect(within(voice).getAllByText("Ligado")).toHaveLength(2);
     expect(within(voice).getByText("Sem alteração")).toBeDefined();
-    const realtime = within(table).getByRole("row", { name: /chat\.voice\.realtime/u });
+    const realtime = within(table).getByRole("row", { name: /Voz em tempo real/u });
     expect(within(realtime).getByText("Desligado pela organização")).toBeDefined();
     expect(within(realtime).getByText("Não informado enquanto a organização altera o recurso")).toBeDefined();
-    expect(within(realtime).getByRole("button", { name: "Voltar a usar chat.voice.realtime" })).toBeDefined();
+    expect(within(realtime).getByRole("button", { name: "Voltar a usar Voz em tempo real" })).toBeDefined();
     const off = within(table).getByRole("row", { name: /chat\.preview/u });
     expect(within(off).getByText("Desligado pela plataforma")).toBeDefined();
     expect(within(off).queryByRole("button")).toBeNull();
@@ -66,9 +68,9 @@ describe("SettingsFlagsView", { timeout: 30_000 }, () => {
         return ok(rollout({ key: "chat.voice", value: false, tenantOverride: false }));
       },
     });
-    await user.click(await screen.findByRole("button", { name: "Desligar chat.voice para a organização" }));
-    const dialog = await screen.findByRole("alertdialog", { name: "Desligar chat.voice para a organização?" });
-    expect(within(dialog).getByText(/Voice input and output in chat\./u)).toBeDefined();
+    await user.click(await screen.findByRole("button", { name: "Desligar Voz no chat para a organização" }));
+    const dialog = await screen.findByRole("alertdialog", { name: "Desligar Voz no chat para a organização?" });
+    expect(within(dialog).getByText(/Transcrição e fala por ambiente e organização\./u)).toBeDefined();
     await user.click(within(dialog).getByRole("button", { name: "Desligar" }));
     await waitFor(() => expect(requests).toHaveLength(1));
     expect(requests[0]?.params["flagKey"]).toBe("chat.voice");
@@ -84,8 +86,8 @@ describe("SettingsFlagsView", { timeout: 30_000 }, () => {
         return apiError(400, "VALIDATION_FAILED", [{ field: "value", issue: "DISABLED_BY_ENVIRONMENT" }]);
       },
     });
-    await user.click(await screen.findByRole("button", { name: "Voltar a usar chat.voice.realtime" }));
-    const dialog = await screen.findByRole("alertdialog", { name: "Voltar a usar chat.voice.realtime?" });
+    await user.click(await screen.findByRole("button", { name: "Voltar a usar Voz em tempo real" }));
+    const dialog = await screen.findByRole("alertdialog", { name: "Voltar a usar Voz em tempo real?" });
     await user.click(within(dialog).getByRole("button", { name: "Voltar a usar" }));
     expect(await within(dialog).findByText(/Referência/u)).toBeDefined();
     expect(requests[0]?.body).toEqual({ value: true });

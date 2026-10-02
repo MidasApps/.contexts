@@ -30,6 +30,7 @@ describe("AdminFlagsView", () => {
     const { container } = render();
     const table = await screen.findByRole("table", { name: "Flags de funcionalidades" });
     const kill = within(table).getByRole("row", { name: /ai\.kill-switch/u });
+    expect(within(kill).getByText("Interruptor de emergência da IA")).toBeDefined();
     expect(within(kill).getByText("Stops every agent and chat run during an incident.")).toBeDefined();
     expect(within(kill).getByText("Responsável: platform-team")).toBeDefined();
     expect(within(kill).getByText("Kill-switch")).toBeDefined();

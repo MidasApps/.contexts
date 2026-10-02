@@ -6,6 +6,7 @@ import { useTranslations } from "use-intl";
 import { useTenantFlags } from "#/entities/feature-flag/index.ts";
 import { useAccessContext, useCurrentNode } from "#/entities/session/index.ts";
 import { TenantSetFlagDialog, type TenantFlagChange } from "#/features/tenant-set-flag/index.ts";
+import { useFlagLabel } from "#/shared/lib/labels/use-catalog-labels.ts";
 import { useOnlineStatus } from "#/shared/lib/network/use-online-status.ts";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
 import { Alert, AlertDescription } from "#/shared/ui/molecules/Alert/Alert.tsx";
@@ -20,11 +21,14 @@ import { SettingsPageFrame } from "#/widgets/settings-nav/index.ts";
 
 const column = dataTableColumnHelper<FeatureFlag>();
 
+/** The flag's localized name and description; the key stays as secondary text, for support. */
 function FlagName({ flag }: { flag: FeatureFlag }) {
+  const label = useFlagLabel();
   return (
     <span className="flex min-w-0 flex-col">
-      <span className="font-mono text-[12.5px] font-medium">{flag.key}</span>
-      <span className="text-[13px] text-muted-foreground">{flag.reason}</span>
+      <span className="font-medium">{label.name(flag.key)}</span>
+      <span className="text-[13px] text-muted-foreground">{label.description(flag.key, flag.reason)}</span>
+      <span className="font-mono text-[11.5px] text-muted-foreground">{flag.key}</span>
     </span>
   );
 }
@@ -57,9 +61,10 @@ const changeOf = (flag: FeatureFlag): TenantFlagChange | null => {
 function FlagAction({ flag, onChange }: { flag: FeatureFlag; onChange: (change: TenantFlagChange) => void }) {
   const t = useTranslations("settings.flags.actions");
   const change = changeOf(flag);
+  const name = useFlagLabel().name(flag.key);
   if (change === null) return <span className="text-[13px] text-muted-foreground">{t("platformOff")}</span>;
   return (
-    <Button variant="outline" size="sm" onClick={() => onChange(change)} aria-label={t(change.value ? "turnOnNamed" : "turnOffNamed", { key: flag.key })}>
+    <Button variant="outline" size="sm" onClick={() => onChange(change)} aria-label={t(change.value ? "turnOnNamed" : "turnOffNamed", { key: name })}>
       {t(change.value ? "turnOn" : "turnOff")}
     </Button>
   );

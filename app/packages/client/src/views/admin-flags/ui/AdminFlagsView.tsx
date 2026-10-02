@@ -8,6 +8,7 @@ import { useAdminFlags } from "#/entities/feature-flag/index.ts";
 import { usePlatformPermissions } from "#/entities/permission/index.ts";
 import { ClearFlagOverrideDialog, SetFlagDialog, type FlagChange, type FlagOverrideTarget } from "#/features/admin-set-flag/index.ts";
 import { useFormatDateTime } from "#/shared/lib/format/use-format-date-time.ts";
+import { useFlagLabel } from "#/shared/lib/labels/use-catalog-labels.ts";
 import { useOnlineStatus } from "#/shared/lib/network/use-online-status.ts";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
 import { Icon } from "#/shared/ui/atoms/Icon/Icon.tsx";
@@ -46,9 +47,12 @@ const useRowContext = (): RowContext => {
 
 function FlagName({ flag }: { flag: FeatureFlag }) {
   const t = useTranslations("admin.flags");
+  const label = useFlagLabel();
+  // Staff manage flags by key, so it stays visible under the localized name.
   return (
     <span className="flex max-w-prose min-w-0 flex-col gap-0.5 whitespace-normal">
-      <span className="font-mono text-[13px] font-medium">{flag.key}</span>
+      <span className="font-medium">{label.name(flag.key)}</span>
+      <span className="font-mono text-[12.5px] text-muted-foreground">{flag.key}</span>
       <span className="text-[12.5px] text-muted-foreground">{flag.reason}</span>
       <span className="text-[11.5px] text-muted-foreground">{t("owner", { owner: flag.owner })}</span>
     </span>

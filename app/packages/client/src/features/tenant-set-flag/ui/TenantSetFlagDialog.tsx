@@ -6,6 +6,7 @@ import { useTranslations } from "use-intl";
 import { tenantFlagKeys } from "#/entities/feature-flag/index.ts";
 import { useCallEndpoint } from "#/shared/api/api-context.tsx";
 import { useConfirmedAction } from "#/shared/lib/errors/use-confirmed-action.ts";
+import { useFlagLabel } from "#/shared/lib/labels/use-catalog-labels.ts";
 import { notify } from "#/shared/ui/molecules/Toaster/notify.ts";
 import { ConfirmDialog } from "#/shared/ui/organisms/ConfirmDialog/ConfirmDialog.tsx";
 
@@ -23,15 +24,16 @@ export function TenantSetFlagDialog({ organizationId, change, onOpenChange }: Te
   const t = useTranslations("settings.flags.confirm");
   const callEndpoint = useCallEndpoint();
   const queryClient = useQueryClient();
+  const label = useFlagLabel();
+  const key = change === null ? "" : label.name(change.flag.key);
   const action = useConfirmedAction(
     async () => {
       if (change === null) return;
       await callEndpoint(setTenantFlagEndpoint, { params: { flagKey: change.flag.key }, query: { organizationId }, body: { value: change.value } });
       await queryClient.invalidateQueries({ queryKey: tenantFlagKeys.list(organizationId) });
     },
-    () => notify.success(t(change?.value === true ? "doneOn" : "doneOff", { key: change?.flag.key ?? "" })),
+    () => notify.success(t(change?.value === true ? "doneOn" : "doneOff", { key })),
   );
-  const key = change?.flag.key ?? "";
   const off = change?.value === false;
   return (
     <ConfirmDialog
@@ -41,7 +43,7 @@ export function TenantSetFlagDialog({ organizationId, change, onOpenChange }: Te
         onOpenChange(open);
       }}
       title={t(off ? "titleOff" : "titleOn", { key })}
-      description={t(off ? "descriptionOff" : "descriptionOn", { reason: change?.flag.reason ?? "" })}
+      description={t(off ? "descriptionOff" : "descriptionOn", { reason: change === null ? "" : label.description(change.flag.key, change.flag.reason) })}
       confirmLabel={t(off ? "confirmOff" : "confirmOn")}
       destructive={off}
       onConfirm={action.confirm}
