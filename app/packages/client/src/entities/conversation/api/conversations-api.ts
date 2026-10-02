@@ -1,7 +1,9 @@
+import { queryOptions } from "@tanstack/react-query";
 import {
   type Conversation,
   type ConversationPatch,
   deleteConversationEndpoint,
+  getConversationEndpoint,
   listConversationsEndpoint,
   summarizeConversationEndpoint,
   updateConversationEndpoint,
@@ -15,9 +17,27 @@ export type ConversationFilter = { readonly archived: boolean; readonly q: strin
 
 export const CONVERSATION_PAGE_SIZE = 30;
 
-/** Every conversation list of an organization (invalidate after any change). */
+/**
+ * Every conversation list of an organization, and each conversation read on its own (invalidate
+ * after any change: a rename, a pin or a turn that generated the title refreshes both).
+ */
 export const conversationListsKey = (organizationId: string): QueryKey =>
   queryKeys.organizationScoped(organizationId, "conversations", "list");
+
+/** One conversation (its title, for the chat header), under the lists key so every change refreshes it. */
+export const conversationKey = (organizationId: string, conversationId: string): QueryKey => [
+  ...conversationListsKey(organizationId),
+  "one",
+  conversationId,
+];
+
+/** `GET /v1/conversations/{id}`: the conversation's own fields (title, agent, pin, archive). */
+export const conversationQuery = (callEndpoint: CallEndpoint, organizationId: string, conversationId: string) =>
+  queryOptions({
+    queryKey: conversationKey(organizationId, conversationId),
+    queryFn: async ({ signal }): Promise<Conversation> =>
+      (await callEndpoint(getConversationEndpoint, { params: { conversationId }, signal })).data,
+  });
 
 export const conversationListKey = (organizationId: string, filter: ConversationFilter): QueryKey => [
   ...conversationListsKey(organizationId),

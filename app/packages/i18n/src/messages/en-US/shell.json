@@ -86,7 +86,7 @@
       "logs": "Logs",
       "workflows": "Workflows"
     },
-    "chat": "Chat",
+    "chat": "Assistant",
     "groups": {
       "organization": "Organization",
       "access": "Access",

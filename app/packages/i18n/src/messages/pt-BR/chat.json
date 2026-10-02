@@ -48,6 +48,7 @@
   },
   "panel": {
     "title": "Assistente",
+    "loadingTitle": "Carregando o título da conversa…",
     "logLabel": "Conversa com o assistente",
     "newConversation": "Nova conversa",
     "close": "Fechar o assistente",
@@ -323,8 +324,8 @@
     "countLoaded": "Mostrando {count, plural, one {# conversa} other {# conversas}}"
   },
   "view": {
-    "title": "Chat",
-    "loading": "Carregando o chat…",
+    "title": "Assistente",
+    "loading": "Carregando o assistente…",
     "openHistory": "Conversas",
     "historyPanel": "Histórico de conversas"
   },

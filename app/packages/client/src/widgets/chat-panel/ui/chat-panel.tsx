@@ -2,7 +2,7 @@
 
 import { CORE_CONTRACTS, type ContractDefinition } from "@core/contracts";
 import type { ChatTransport, UIMessage } from "ai";
-import { type ReactNode, useEffect, useId, useMemo } from "react";
+import { type ReactNode, useCallback, useEffect, useMemo } from "react";
 import { useTranslations } from "use-intl";
 import { ASSISTANT_AGENT_ID, agentNameOf, useChatAgents } from "#/entities/chat-agent/index.ts";
 import type { UseUploadQueueArgs } from "#/features/chat-upload/index.ts";
@@ -22,6 +22,7 @@ import { ErrorState } from "#/shared/ui/molecules/ErrorState/ErrorState.tsx";
 import { LoadingState } from "#/shared/ui/molecules/LoadingState/LoadingState.tsx";
 import { useConversationThread } from "../model/use-conversation-thread.ts";
 import { type PanelThread, usePanelThread } from "../model/use-panel-thread.ts";
+import { useConversationTitle } from "../model/use-conversation-title.ts";
 import { ChatPanelHeader } from "./chat-panel-header.tsx";
 import { type ChatSuggestion, ChatThread } from "./chat-thread.tsx";
 
@@ -73,6 +74,7 @@ type StoredThreadProps = {
   suggestions: readonly ChatSuggestion[];
   assistantName: string | undefined;
   onStarted: (id: string) => void;
+  onTurnSettled: () => void;
   onRecover: () => void;
   /** Starts a new conversation (the way out of a missing one). */
   onNew: () => void;
@@ -126,7 +128,7 @@ function StoredThread(props: StoredThreadProps) {
       assistantName={props.assistantName}
       suggestions={props.suggestions}
       onConversationStarted={props.onStarted}
-      onTurnSettled={props.panel.onTurnSettled}
+      onTurnSettled={props.onTurnSettled}
       onRecover={props.onRecover}
       uiRegistry={props.environment.uiRegistry}
       contracts={props.environment.contracts}
@@ -151,7 +153,6 @@ function StoredThread(props: StoredThreadProps) {
 export function ChatPanel(props: ChatPanelProps) {
   const t = useTranslations("chat");
   const { conversationId, onConversationChange } = props;
-  const titleId = useId();
   const { uiComponents, contracts } = props;
   const environment = useMemo<ThreadEnvironment>(
     () => ({
@@ -169,6 +170,14 @@ export function ChatPanel(props: ChatPanelProps) {
   const agentName = knownName ?? t("agents.unknown");
   // Messages carry the agent's own name; the assistant's keep their usual label.
   const assistantName = agentId === ASSISTANT_AGENT_ID ? undefined : agentName;
+  const conversationTitle = useConversationTitle(props.scope.organizationId, thread.conversationId);
+  const { onTurnSettled } = props;
+  const { refresh: refreshTitle } = conversationTitle;
+  // The server writes the generated title when the run ends: read it again with the turn settled.
+  const turnSettled = useCallback(() => {
+    refreshTitle();
+    onTurnSettled?.();
+  }, [refreshTitle, onTurnSettled]);
   const newScope = useMemo(
     () => (agentId === ASSISTANT_AGENT_ID ? props.scope : { ...props.scope, agentId }),
     [agentId, props.scope],
@@ -186,11 +195,11 @@ export function ChatPanel(props: ChatPanelProps) {
   return (
     <section
       data-slot="chat-panel"
-      aria-labelledby={titleId}
+      aria-label={t("panel.title")}
       className={cn("@container/chat flex h-full min-h-0 flex-col bg-background", props.className)}
     >
       <ChatPanelHeader
-        titleId={titleId}
+        title={conversationTitle.title}
         organizationId={props.scope.organizationId}
         agentId={agentId}
         fixed={thread.conversationId !== undefined}
@@ -209,7 +218,7 @@ export function ChatPanel(props: ChatPanelProps) {
           showReasoning={props.showReasoning}
           suggestions={suggestions}
           onConversationStarted={started}
-          onTurnSettled={props.onTurnSettled}
+          onTurnSettled={turnSettled}
           onRecover={recover}
           uiRegistry={environment.uiRegistry}
           contracts={environment.contracts}
@@ -232,6 +241,7 @@ export function ChatPanel(props: ChatPanelProps) {
           suggestions={suggestions}
           assistantName={assistantName}
           onStarted={started}
+          onTurnSettled={turnSettled}
           onRecover={recover}
           onNew={startNew}
           onAgent={setAgentId}

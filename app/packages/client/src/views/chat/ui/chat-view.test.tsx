@@ -47,10 +47,12 @@ const renderView = (options: { path?: string; permissions?: readonly string[] } 
 describe("ChatView", () => {
   it("composes the history and the chat panel for a new conversation", async () => {
     const { container } = renderView();
-    expect(await screen.findByRole("heading", { level: 1, name: "Chat" }, LOADED)).toBeTruthy();
+    expect(await screen.findByRole("heading", { level: 1, name: "Assistente" }, LOADED)).toBeTruthy();
     const history = screen.getByRole("navigation", { name: "Conversas" });
     expect(await within(history).findByRole("link", { name: "Plano de integração" }, LOADED)).toBeTruthy();
-    expect(screen.getByRole("heading", { level: 2, name: "Assistente" })).toBeTruthy();
+    // The region keeps the feature's name; its heading names the conversation on screen.
+    expect(screen.getByRole("region", { name: "Assistente" })).toBeTruthy();
+    expect(screen.getByRole("heading", { level: 2, name: "Nova conversa" })).toBeTruthy();
     expect(screen.getByRole("heading", { name: "Como posso ajudar?" })).toBeTruthy();
     // The member may upload: the composer offers the attach menu (permissions reach the panel).
     expect(screen.getByRole("button", { name: "Anexar" })).toBeTruthy();
@@ -60,6 +62,7 @@ describe("ChatView", () => {
   it("opens the conversation named in the URL and marks it in the history", async () => {
     renderView({ path: `${PATH}/${A}` });
     expect(await screen.findByText("O prazo é de 30 dias.", {}, LOADED)).toBeTruthy();
+    expect(await screen.findByRole("heading", { level: 2, name: "Plano de integração" }, LOADED)).toBeTruthy();
     const link = await screen.findByRole("link", { name: "Plano de integração" }, LOADED);
     expect(link.getAttribute("aria-current")).toBe("page");
   });
@@ -99,7 +102,7 @@ describe("chat in the shell's right panel", () => {
   it("opens from the topbar inside a project, starts closed and lists the chat in the navigation", async () => {
     const { user } = renderShell(`/o/${IDS.organization}/p/${IDS.project}`);
     const nav = await screen.findByRole("navigation", { name: "Navegação" }, LOADED);
-    expect((await within(nav).findByRole("link", { name: "Chat" }, LOADED)).getAttribute("href")).toBe(PATH);
+    expect((await within(nav).findByRole("link", { name: "Assistente" }, LOADED)).getAttribute("href")).toBe(PATH);
     const toggle = await screen.findByRole("button", { name: "Assistente" }, LOADED);
     expect(toggle.getAttribute("aria-pressed")).toBe("false");
     expect(screen.queryByRole("textbox", { name: "Mensagem" })).toBeNull();
@@ -166,7 +169,7 @@ describe("chat in the shell's right panel", () => {
     const nav = await screen.findByRole("navigation", { name: "Navegação" }, LOADED);
     await within(nav).findByRole("link", { name: "Visão geral" }, LOADED);
     expect(screen.queryByRole("button", { name: "Assistente" })).toBeNull();
-    expect(within(nav).queryByRole("link", { name: "Chat" })).toBeNull();
+    expect(within(nav).queryByRole("link", { name: "Assistente" })).toBeNull();
   });
 });
 

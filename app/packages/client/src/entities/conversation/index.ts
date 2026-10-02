@@ -3,8 +3,10 @@
 export {
   CONVERSATION_PAGE_SIZE,
   type ConversationFilter,
+  conversationKey,
   conversationListKey,
   conversationListsKey,
+  conversationQuery,
   conversationsQuery,
   deleteConversation,
   summarizeConversation,
