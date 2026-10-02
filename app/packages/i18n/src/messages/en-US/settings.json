@@ -1157,7 +1157,9 @@
       "organization": "Whole organization",
       "project": "Project {name}",
       "catalog": "Platform content",
-      "module": "Module {name}"
+      "module": "Module {name}",
+      "projectRemoved": "Removed project",
+      "projectUnknown": "Another project of the organization"
     },
     "collectionsNote": {
       "title": "How collections work",

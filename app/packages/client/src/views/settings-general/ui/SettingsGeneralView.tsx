@@ -1,13 +1,15 @@
 "use client";
 
 import type { AccessContext, Organization } from "@core/contracts";
-import { useTranslations } from "use-intl";
+import { useLocale, useTranslations } from "use-intl";
 import { useAccessContext, useCurrentNode } from "#/entities/session/index.ts";
 import { UpdateOrganizationForm } from "#/features/update-organization/index.ts";
 import { useFormatDateTime } from "#/shared/lib/format/use-format-date-time.ts";
+import { currencyLabel } from "#/shared/ui/molecules/CurrencySelect/CurrencySelect.tsx";
 import { endonym } from "#/shared/ui/molecules/LocaleSelect/LocaleSelect.tsx";
 import { SectionCard } from "#/shared/ui/molecules/SectionCard/SectionCard.tsx";
 import { StatusPill } from "#/shared/ui/molecules/StatusPill/StatusPill.tsx";
+import { timeZoneLabel } from "#/shared/ui/molecules/TimeZoneSelect/TimeZoneSelect.tsx";
 import { PageHeader } from "#/widgets/page-header/index.ts";
 import { QueryPage } from "#/widgets/page-state/index.ts";
 import { SettingsPageFrame } from "#/widgets/settings-nav/index.ts";
@@ -15,11 +17,12 @@ import { SettingsPageFrame } from "#/widgets/settings-nav/index.ts";
 /** Read-only details for members without `core.organization.update`. */
 function OrganizationDetails({ organization }: { organization: Organization }) {
   const t = useTranslations("settings.general");
+  const locale = useLocale();
   const rows: [string, string][] = [
     [t("form.name"), organization.name],
     [t("form.locale"), endonym(organization.defaults.locale)],
-    [t("form.timeZone"), organization.defaults.timeZone],
-    [t("form.currency"), organization.defaults.currency],
+    [t("form.timeZone"), timeZoneLabel(organization.defaults.timeZone, locale, new Date())],
+    [t("form.currency"), currencyLabel(organization.defaults.currency, locale)],
   ];
   return (
     <dl className="grid gap-x-6 gap-y-3 sm:grid-cols-[180px_1fr]">

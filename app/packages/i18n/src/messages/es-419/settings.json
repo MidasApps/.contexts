@@ -1157,7 +1157,9 @@
       "organization": "Toda la organización",
       "project": "Proyecto {name}",
       "catalog": "Contenido de la plataforma",
-      "module": "Módulo {name}"
+      "module": "Módulo {name}",
+      "projectRemoved": "Proyecto eliminado",
+      "projectUnknown": "Otro proyecto de la organización"
     },
     "collectionsNote": {
       "title": "Cómo funcionan las colecciones",

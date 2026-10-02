@@ -47,7 +47,10 @@ describe("SettingsGeneralView", () => {
 
   it("shows the details read-only without core.organization.update", async () => {
     const { container } = renderView(["core.organization.read"]);
-    const list = await screen.findByText("America/Sao_Paulo");
+    // Zone and currency read as the edit widgets name them, not as raw codes.
+    const list = await screen.findByText(/^\(GMT-0[23]:00\) America\/Sao Paulo$/u);
+    expect(within(list.closest("dl") as HTMLElement).getByText("BRL — Real brasileiro")).toBeDefined();
+    expect(within(list.closest("dl") as HTMLElement).queryByText("America/Sao_Paulo")).toBeNull();
     expect(within(list.closest("dl") as HTMLElement).getByText("Português (Brasil)")).toBeDefined();
     expect(screen.queryByRole("button", { name: "Salvar" })).toBeNull();
     await expectNoAxeViolations(container);

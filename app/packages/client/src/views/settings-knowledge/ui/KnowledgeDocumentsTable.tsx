@@ -6,6 +6,7 @@ import { useTranslations } from "use-intl";
 import { collectionOfNamespace, isOwnCollection, KNOWLEDGE_PAGE_LIMIT, KnowledgeStatusPill, type useKnowledgeDocuments } from "#/entities/knowledge/index.ts";
 import { ApiError } from "#/shared/api/api-error.ts";
 import { useFormatDateTime } from "#/shared/lib/format/use-format-date-time.ts";
+import { useModuleLabel } from "#/shared/lib/labels/use-catalog-labels.ts";
 import { useCursorPages } from "#/shared/lib/pagination/use-cursor-pages.ts";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
 import { DataTable, type DataTableStatus } from "#/shared/ui/organisms/DataTable/DataTable.tsx";
@@ -16,13 +17,22 @@ const column = dataTableColumnHelper<KnowledgeDocument>();
 /** What the list calls a document: its title, else where it came from. */
 export const documentName = (document: KnowledgeDocument): string => (document.title === null || document.title === "" ? (document.sourceUrl ?? document.sourceRef) : document.title);
 
-/** Display name of a namespace: the organization, a project by name, platform or module content. */
-export const useCollectionName = (projectNames: ReadonlyMap<string, string>): ((namespace: string) => string) => {
+/**
+ * Display name of a namespace: the organization, a project by name, platform or module content
+ * (the module by its manifest label). A project missing from a complete list was removed; one
+ * missing from a partial list is named generically, never by its id.
+ */
+export const useCollectionName = (projectNames: ReadonlyMap<string, string>, projectsComplete: boolean): ((namespace: string) => string) => {
   const t = useTranslations("settings.knowledge.collections");
+  const moduleLabel = useModuleLabel();
   return (namespace) => {
     const collection = collectionOfNamespace(namespace);
-    if (collection.kind === "project") return t("project", { name: projectNames.get(collection.projectId) ?? collection.projectId });
-    if (collection.kind === "module") return t("module", { name: collection.moduleId });
+    if (collection.kind === "project") {
+      const name = projectNames.get(collection.projectId);
+      if (name !== undefined) return t("project", { name });
+      return t(projectsComplete ? "projectRemoved" : "projectUnknown");
+    }
+    if (collection.kind === "module") return t("module", { name: moduleLabel(collection.moduleId) });
     return t(collection.kind);
   };
 };

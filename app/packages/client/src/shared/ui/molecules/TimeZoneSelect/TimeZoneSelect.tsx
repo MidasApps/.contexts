@@ -11,6 +11,9 @@ const currentOffset = (timeZone: string, locale: string, now: Date): string =>
     .formatToParts(now)
     .find((part) => part.type === "timeZoneName")?.value ?? "";
 
+/** "(GMT-03:00) America/Sao Paulo": how the picker names a zone, also used where a zone is only shown. */
+export const timeZoneLabel = (zone: string, locale: string, now: Date): string => `(${currentOffset(zone, locale, now)}) ${zone.replaceAll("_", " ")}`;
+
 /** IANA zones grouped by region; labels show the current offset and the zone with spaces. */
 export const buildTimeZoneGroups = (locale: string, now: Date): ComboboxGroup[] =>
   listTimeZonesByRegion().map(({ region, zones }) => ({
@@ -18,7 +21,7 @@ export const buildTimeZoneGroups = (locale: string, now: Date): ComboboxGroup[] 
     options: zones.map((zone) => {
       const offset = currentOffset(zone, locale, now);
       const readable = zone.replaceAll("_", " ");
-      return { value: zone, label: `(${offset}) ${readable}`, keywords: [zone, readable, offset] };
+      return { value: zone, label: timeZoneLabel(zone, locale, now), keywords: [zone, readable, offset] };
     }),
   }));
 

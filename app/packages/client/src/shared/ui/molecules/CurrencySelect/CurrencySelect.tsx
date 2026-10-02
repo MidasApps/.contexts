@@ -10,6 +10,9 @@ export type CurrencySelectProps = Omit<
   "groups" | "placeholder" | "searchLabel" | "emptyText" | "searchPlaceholder"
 >;
 
+/** "BRL — Real brasileiro": how the picker names a currency, also used where a currency is only shown. */
+export const currencyLabel = (code: string, locale: string): string => `${code} — ${new Intl.DisplayNames([locale], { type: "currency", fallback: "code" }).of(code) ?? code}`;
+
 /**
  * ISO 4217 currency picker (codes from `Intl.supportedValuesOf`, names in the UI locale). Search
  * matches the code or the localized name. Value is the code (`BRL`).
@@ -20,7 +23,7 @@ export function CurrencySelect(props: CurrencySelectProps) {
   const groups = useMemo(
     () => [
       {
-        options: listCurrencies(locale).map(({ code, name }) => ({ value: code, label: `${code} — ${name}`, keywords: [code, name] })),
+        options: listCurrencies(locale).map(({ code, name }) => ({ value: code, label: currencyLabel(code, locale), keywords: [code, name] })),
       },
     ],
     [locale],

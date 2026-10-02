@@ -63,7 +63,7 @@ function SettingsKnowledge({ context }: { context: AccessContext }) {
   const [started, setStarted] = useState<readonly StartedKnowledgeIngestion[]>([]);
   const projects = useProjects(organization.id);
   const projectNames = useMemo(() => new Map((projects.data ?? []).map((project) => [String(project.id), project.name] as const)), [projects.data]);
-  const collectionName = useCollectionName(projectNames);
+  const collectionName = useCollectionName(projectNames, projects.isSuccess && !projects.hasNextPage);
   const allowed = permissions.includes("core.knowledge.read");
   const documents = useKnowledgeDocuments(organization.id, selected === ALL ? undefined : selected, { poll: started.length > 0, enabled: allowed });
   const indexing = stillIndexing(started, documents.data ?? []);
