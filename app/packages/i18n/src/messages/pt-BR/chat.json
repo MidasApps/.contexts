@@ -51,6 +51,7 @@
     "logLabel": "Conversa com o assistente",
     "newConversation": "Nova conversa",
     "loadEarlier": "Carregar mensagens anteriores",
+    "loadEarlierFailed": "Não foi possível carregar as mensagens anteriores. Tente de novo.",
     "loadingHistory": "Carregando conversa…",
     "notFound": {
       "title": "Conversa não encontrada",

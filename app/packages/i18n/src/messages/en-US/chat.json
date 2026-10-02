@@ -51,6 +51,7 @@
     "logLabel": "Conversation with the assistant",
     "newConversation": "New conversation",
     "loadEarlier": "Load earlier messages",
+    "loadEarlierFailed": "Earlier messages could not be loaded. Try again.",
     "loadingHistory": "Loading conversation…",
     "notFound": {
       "title": "Conversation not found",

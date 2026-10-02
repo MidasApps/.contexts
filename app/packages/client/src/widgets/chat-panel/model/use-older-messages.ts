@@ -9,6 +9,8 @@ export type OlderMessages = {
   /** `true` while more history exists before what is on screen. */
   readonly hasOlder: boolean;
   readonly loading: boolean;
+  /** The last attempt failed: said next to the button, which stays as the retry. */
+  readonly failed: boolean;
   readonly load: () => void;
   /** The scrolling log element (`Conversation` `scrollElementRef`). */
   readonly scrollElementRef: RefObject<HTMLDivElement | null>;
@@ -31,6 +33,7 @@ export const useOlderMessages = (args: {
   const callEndpoint = useCallEndpoint();
   const [cursor, setCursor] = useState(args.initialCursor);
   const [loading, setLoading] = useState(false);
+  const [failed, setFailed] = useState(false);
   const scrollElementRef = useRef<HTMLDivElement | null>(null);
   const anchor = useRef<Anchor | null>(null);
 
@@ -46,6 +49,7 @@ export const useOlderMessages = (args: {
   const load = async (): Promise<void> => {
     if (cursor === undefined || args.conversationId === undefined || loading) return;
     setLoading(true);
+    setFailed(false);
     try {
       const page = await fetchMessagePage(callEndpoint, args.conversationId, cursor);
       const scroller = scrollElementRef.current;
@@ -58,11 +62,13 @@ export const useOlderMessages = (args: {
       args.prepend(page.messages);
       setCursor(page.olderCursor);
     } catch {
-      // The button stays: the member can ask again; the conversation on screen is unaffected.
+      // Shown next to the button, which stays as the retry; the conversation on screen is unaffected.
+      // The thread reports nothing else: the failure is a read the member can repeat at once.
+      setFailed(true);
     } finally {
       setLoading(false);
     }
   };
 
-  return { hasOlder: cursor !== undefined, loading, load: () => void load(), scrollElementRef };
+  return { hasOlder: cursor !== undefined, loading, failed, load: () => void load(), scrollElementRef };
 };

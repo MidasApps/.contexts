@@ -182,9 +182,14 @@ export function ChatThread(props: ChatThreadProps) {
           scrollElementRef={older.scrollElementRef}
         >
           {!older.hasOlder ? null : (
-            <Button variant="ghost" size="sm" className="self-center" pending={older.loading} onClick={older.load}>
-              {t("panel.loadEarlier")}
-            </Button>
+            <div className="flex flex-col items-center gap-1">
+              <Button variant="ghost" size="sm" pending={older.loading} onClick={older.load}>
+                {t("panel.loadEarlier")}
+              </Button>
+              <p role="status" className={older.failed ? "text-[12.5px] text-destructive-text" : "sr-only"}>
+                {older.failed ? t("panel.loadEarlierFailed") : ""}
+              </p>
+            </div>
           )}
           {messages.length === 0 ? (
             <EmptyConversation suggestions={props.suggestions} onSelect={suggest} />
