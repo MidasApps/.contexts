@@ -922,6 +922,8 @@
       "cancelNamed": "Cancel run {id} of {workflow}",
       "detailsTitle": "Run of {workflow}",
       "detailsDescription": "{organization} · {id}",
+      "detailsMissingTitle": "Run not found in this list",
+      "detailsMissingDescription": "The link points to a run that is not among the loaded ones: it may be on another page or outside the filters. Close and look for it in the list.",
       "timelineLabel": "Run timeline",
       "noStepEvents": "Step-by-step events are not available in the administration; the timeline shows what the run records.",
       "noMatchTitle": "No run matches these filters",

@@ -107,6 +107,30 @@ describe("AdminWorkflowsView: runs", () => {
     await expectNoAxeViolations(container.ownerDocument.body);
   });
 
+  it("keeps the open run in the URL, so a reload or a shared link opens it again", async () => {
+    const { user, router } = render();
+    const table = await screen.findByRole("table", { name: "Execuções de workflows" });
+    await user.click(within(table).getByRole("button", { name: /^Detalhes da execução .* de Demonstração de aprovação/u }));
+    await screen.findByRole("dialog", { name: "Execução de Demonstração de aprovação" });
+    expect(router.current()).toBe(`/admin/workflows?run=${OPS_IDS.run}`);
+    await user.keyboard("{Escape}");
+    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+    expect(router.current()).toBe("/admin/workflows");
+  });
+
+  it("opens the run of a shared link, and says so when it is not in the list", async () => {
+    const shared = render({ path: `/admin/workflows?run=${OPS_IDS.otherRun}` });
+    expect(await screen.findByRole("dialog", { name: "Execução de Relatório de uso" })).toBeDefined();
+    shared.unmount();
+
+    const { user, router, container } = render({ path: "/admin/workflows?run=01J8Z3K4M5N6P7Q8R9S0T1V2ZZ" });
+    const dialog = await screen.findByRole("dialog", { name: "Execução não encontrada nesta lista" });
+    expect(within(dialog).getByText(/pode estar em outra página ou fora dos filtros/u)).toBeDefined();
+    await expectNoAxeViolations(container.ownerDocument.body);
+    await user.click(within(dialog).getByRole("button", { name: "Fechar" }));
+    await waitFor(() => expect(router.current()).toBe("/admin/workflows"));
+  });
+
   it("pages by cursor, passing the cursor back as given", async () => {
     const first = Array.from({ length: 20 }, (_, index) => buildAdminRun({ runId: `run-${String(index)}`, status: "success", approvalRequestId: null }));
     const { user, api } = render({

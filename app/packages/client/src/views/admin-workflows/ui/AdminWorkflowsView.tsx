@@ -21,7 +21,7 @@ export function AdminWorkflowsView() {
   const t = useTranslations("admin.workflows");
   const permissions = usePlatformPermissions();
   const allowed = permissions.can("platform.workflow.manage");
-  const search = useAdminSearch(["tab", "organizationId", "workflowId", "status"]);
+  const search = useAdminSearch(["tab", "organizationId", "workflowId", "status", "run"]);
   const tab: Tab = isTab(search.values.tab) ? search.values.tab : "runs";
   const organizations = useAllAdminOrganizations({ enabled: allowed });
   const organizationLabel = (tenantId: string | null): string =>
@@ -40,6 +40,8 @@ export function AdminWorkflowsView() {
               <RunsPanel
                 values={{ organizationId: search.values.organizationId, workflowId: search.values.workflowId, status: search.values.status }}
                 onChange={search.set}
+                openRunId={search.values.run}
+                onOpenRunChange={(run) => search.set({ run })}
                 organizationLabel={organizationLabel}
                 onSeeSchedules={() => setTab("schedules")}
               />

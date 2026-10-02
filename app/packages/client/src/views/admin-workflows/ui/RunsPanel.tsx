@@ -88,35 +88,44 @@ function RunFilters({ values, onChange }: { values: RunFilterValues; onChange: (
   );
 }
 
-function RunDetailsDialog({
-  run,
-  organizationLabel,
-  userLabel,
-  scheduleLabel,
-  onOpenChange,
-}: {
-  run: AdminWorkflowRun | null;
+type RunLabels = {
   organizationLabel: (tenantId: string | null) => string;
   userLabel: (userId: string) => string;
   scheduleLabel: (scheduleId: string) => string | undefined;
-  onOpenChange: (open: boolean) => void;
-}) {
+};
+
+/**
+ * The run of `?run=`: found among the loaded rows, its timeline; while the list
+ * loads, nothing yet; not among them (another page, other filters, or gone), a dialog that says so
+ * instead of an empty one. There is no endpoint for one run by id (follow-up 95).
+ */
+function RunDetailsDialog({ runId, run, loading, labels, onClose }: { runId: string | undefined; run: AdminWorkflowRun | undefined; loading: boolean; labels: RunLabels; onClose: () => void }) {
   const t = useTranslations("admin.workflows.runs");
   const workflowLabel = useWorkflowLabel();
+  const open = runId !== undefined && !loading;
   return (
-    <Dialog open={run !== null} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={(next) => !next && onClose()}>
       <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{t("detailsTitle", { workflow: run === null ? "" : workflowLabel.name(run.workflowId) })}</DialogTitle>
-          <DialogDescription>{run === null ? "" : t("detailsDescription", { organization: organizationLabel(run.tenantId), id: run.runId })}</DialogDescription>
-        </DialogHeader>
-        {run === null ? null : <RunTimeline
-            run={run}
-            label={t("timelineLabel")}
-            starterLabel={run.startedBy === null ? undefined : userLabel(run.startedBy)}
-            scheduleLabel={run.scheduleId === null ? undefined : scheduleLabel(run.scheduleId)}
-          />}
-        <p className="text-xs text-muted-foreground">{t("noStepEvents")}</p>
+        {run === undefined ? (
+          <DialogHeader>
+            <DialogTitle>{t("detailsMissingTitle")}</DialogTitle>
+            <DialogDescription>{t("detailsMissingDescription")}</DialogDescription>
+          </DialogHeader>
+        ) : (
+          <>
+            <DialogHeader>
+              <DialogTitle>{t("detailsTitle", { workflow: workflowLabel.name(run.workflowId) })}</DialogTitle>
+              <DialogDescription>{t("detailsDescription", { organization: labels.organizationLabel(run.tenantId), id: run.runId })}</DialogDescription>
+            </DialogHeader>
+            <RunTimeline
+              run={run}
+              label={t("timelineLabel")}
+              starterLabel={run.startedBy === null ? undefined : labels.userLabel(run.startedBy)}
+              scheduleLabel={run.scheduleId === null ? undefined : labels.scheduleLabel(run.scheduleId)}
+            />
+            <p className="text-xs text-muted-foreground">{t("noStepEvents")}</p>
+          </>
+        )}
       </DialogContent>
     </Dialog>
   );
@@ -134,6 +143,9 @@ function RunsEmpty({ filtering, onClear, onSchedules }: { filtering: boolean; on
 export type RunsPanelProps = {
   values: RunFilterValues;
   onChange: (patch: FilterPatch) => void;
+  /** Run whose details are open (`?run=`), so a reload or a shared link opens it again. */
+  openRunId: string | undefined;
+  onOpenRunChange: (runId: string | undefined) => void;
   organizationLabel: (tenantId: string | null) => string;
   onSeeSchedules: () => void;
 };
@@ -143,7 +155,7 @@ export type RunsPanelProps = {
  * organization, workflow and status in the URL (one press shows the suspended ones, which wait
  * for an approval), paged by cursor, with the run's timeline and a cancel for runs still alive.
  */
-export function RunsPanel({ values, onChange, organizationLabel, onSeeSchedules }: RunsPanelProps) {
+export function RunsPanel({ values, onChange, openRunId, onOpenRunChange, organizationLabel, onSeeSchedules }: RunsPanelProps) {
   const t = useTranslations("admin.workflows.runs");
   const filters = {
     organizationId: values.organizationId,
@@ -157,7 +169,6 @@ export function RunsPanel({ values, onChange, organizationLabel, onSeeSchedules 
   const userLabel = useAdminUserNames(paged.rows.map((run) => run.startedBy), { enabled: canReadUsers });
   // The schedules of the same organization filter (the schedules tab's cached list) name the runs they started.
   const scheduleLabel = useScheduleLabels(useAdminSchedules(filters.organizationId).data);
-  const [details, setDetails] = useState<AdminWorkflowRun | null>(null);
   const [canceling, setCanceling] = useState<AdminWorkflowRun | null>(null);
   const filtering = Object.values(filters).some((value) => value !== undefined);
   return (
@@ -171,13 +182,19 @@ export function RunsPanel({ values, onChange, organizationLabel, onSeeSchedules 
             organizationLabel={organizationLabel}
             userLabel={userLabel}
             scheduleLabel={scheduleLabel}
-            onDetails={setDetails}
+            onDetails={(run) => onOpenRunChange(run.runId)}
             onCancel={setCanceling}
             empty={<RunsEmpty filtering={filtering} onClear={() => onChange({ organizationId: undefined, workflowId: undefined, status: undefined })} onSchedules={onSeeSchedules} />}
           />
         )}
       </AdminQuerySection>
-      <RunDetailsDialog run={details} organizationLabel={organizationLabel} userLabel={userLabel} scheduleLabel={scheduleLabel} onOpenChange={(open) => !open && setDetails(null)} />
+      <RunDetailsDialog
+        runId={openRunId}
+        run={paged.rows.find((run) => run.runId === openRunId)}
+        loading={runs.isPending}
+        labels={{ organizationLabel, userLabel, scheduleLabel }}
+        onClose={() => onOpenRunChange(undefined)}
+      />
       <CancelRunDialog run={canceling} onOpenChange={(open) => !open && setCanceling(null)} />
     </div>
   );

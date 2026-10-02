@@ -922,6 +922,8 @@
       "cancelNamed": "Cancelar la ejecución {id} de {workflow}",
       "detailsTitle": "Ejecución de {workflow}",
       "detailsDescription": "{organization} · {id}",
+      "detailsMissingTitle": "Ejecución no encontrada en esta lista",
+      "detailsMissingDescription": "El enlace apunta a una ejecución que no está entre las cargadas: puede estar en otra página o fuera de los filtros. Cierra y búscala en la lista.",
       "timelineLabel": "Línea de tiempo de la ejecución",
       "noStepEvents": "Los eventos de cada paso no están disponibles en la administración; la línea de tiempo muestra lo que registra la ejecución.",
       "noMatchTitle": "Ninguna ejecución con esos filtros",
