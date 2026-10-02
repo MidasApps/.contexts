@@ -5,6 +5,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "use-intl";
 import { featureFlagKeys } from "#/entities/feature-flag/index.ts";
 import { useCallEndpoint } from "#/shared/api/api-context.tsx";
+import { useFlagLabel } from "#/shared/lib/labels/use-catalog-labels.ts";
 import { useConfirmedAction } from "#/shared/lib/errors/use-confirmed-action.ts";
 import { notify } from "#/shared/ui/molecules/Toaster/notify.ts";
 import { ConfirmDialog } from "#/shared/ui/organisms/ConfirmDialog/ConfirmDialog.tsx";
@@ -27,6 +28,7 @@ export type SetFlagDialogProps = { change: FlagChange | null; onOpenChange: (ope
  */
 export function SetFlagDialog({ change, onOpenChange }: SetFlagDialogProps) {
   const t = useTranslations("admin.flags.confirm");
+  const label = useFlagLabel();
   const callEndpoint = useCallEndpoint();
   const queryClient = useQueryClient();
   const action = useConfirmedAction(
@@ -41,7 +43,8 @@ export function SetFlagDialog({ change, onOpenChange }: SetFlagDialogProps) {
   const key = change?.flag.key ?? "";
   const state = change?.value === true ? "on" : "off";
   const destructive = change?.flag.kind === "kill-switch" && change.value;
-  const reason = change?.flag.reason ?? "";
+  // The flag's description in the page language; the registry's English reason is the fallback (follow-up 85).
+  const reason = change === null ? "" : label.description(change.flag.key, change.flag.reason);
   const organization = change?.organization;
   const description =
     organization === undefined

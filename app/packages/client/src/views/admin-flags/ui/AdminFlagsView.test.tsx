@@ -26,12 +26,12 @@ const setOnline = (online: boolean): void => {
 };
 
 describe("AdminFlagsView", () => {
-  it("lists every flag with owner, reason, kind, expiry and value, and warns on expired flags", async () => {
+  it("lists every flag with owner, description in the page language, kind, expiry and value, and warns on expired flags", async () => {
     const { container } = render();
     const table = await screen.findByRole("table", { name: "Flags de funcionalidades" });
     const kill = within(table).getByRole("row", { name: /ai\.kill-switch/u });
     expect(within(kill).getByText("Interruptor de emergência da IA")).toBeDefined();
-    expect(within(kill).getByText("Stops every agent and chat run during an incident.")).toBeDefined();
+    expect(within(kill).getByText("Para todos os agentes, conversas e voz durante um incidente.")).toBeDefined();
     expect(within(kill).getByText("Responsável: platform-team")).toBeDefined();
     expect(within(kill).getByText("Kill-switch")).toBeDefined();
     expect(within(kill).getByRole("switch", { name: "Valor de ai.kill-switch no ambiente" }).getAttribute("aria-checked")).toBe("false");
@@ -83,7 +83,7 @@ describe("AdminFlagsView", () => {
     await user.click(await screen.findByRole("switch", { name: "Valor de ai.kill-switch no ambiente" }));
     const dialog = await screen.findByRole("alertdialog", { name: "Ligar ai.kill-switch?" });
     expect(dialog.textContent).toContain("interrompe o que ele descreve em todo o ambiente");
-    expect(dialog.textContent).toContain("Stops every agent and chat run during an incident.");
+    expect(dialog.textContent).toContain("Para todos os agentes, conversas e voz durante um incidente.");
     expect(api.calls.some((call) => call.method === "PUT")).toBe(false);
     await expectNoAxeViolations(container.ownerDocument.body);
     api.route("GET /v1/admin/flags", ok([buildFeatureFlag({ value: true }), VOICE]));

@@ -49,12 +49,13 @@ const useRowContext = (): RowContext => {
 function FlagName({ flag }: { flag: FeatureFlag }) {
   const t = useTranslations("admin.flags");
   const label = useFlagLabel();
-  // Staff manage flags by key, so it stays visible under the localized name.
+  // Staff manage flags by key, so it stays visible under the localized name; the description is in
+  // the page language, with the registry's English reason as the fallback (follow-up 85).
   return (
     <span className="flex max-w-prose min-w-0 flex-col gap-0.5 whitespace-normal">
       <span className="font-medium">{label.name(flag.key)}</span>
       <span className="font-mono text-body-sm text-muted-foreground">{flag.key}</span>
-      <span className="text-body-sm text-muted-foreground">{flag.reason}</span>
+      <span className="text-body-sm text-muted-foreground">{label.description(flag.key, flag.reason)}</span>
       <span className="text-caption text-muted-foreground">{t("owner", { owner: flag.owner })}</span>
     </span>
   );
