@@ -75,6 +75,33 @@ describe("SettingsApiKeysView", () => {
     expect(screen.queryByDisplayValue(SECRET)).toBeNull();
   });
 
+  it("keeps the dialog while the key is created, and asks before Escape drops the unseen secret", async () => {
+    let answer: (value: ReturnType<typeof ok>) => void = () => undefined;
+    const { user } = renderView({
+      "POST /v1/organizations/:organizationId/api-keys": () => new Promise((resolve) => (answer = resolve)),
+    });
+    await user.click(await screen.findByRole("button", { name: "Nova chave" }));
+    const dialog = await screen.findByRole("dialog", { name: "Nova chave de API" });
+    await user.type(within(dialog).getByRole("textbox", { name: /Nome/u }), "Sync");
+    await user.click(await within(dialog).findByRole("checkbox", { name: /Ver projetos/u }));
+    await user.click(within(dialog).getByRole("button", { name: "Criar chave" }));
+    await user.keyboard("{Escape}");
+    expect(screen.getByRole("dialog")).toBeDefined();
+    expect(within(dialog).queryByRole("button", { name: "Fechar" })).toBeNull();
+    answer(ok({ apiKey: buildApiKey({ id: "AkNew000000000000000", name: "Sync" }), secret: SECRET }, 201));
+    await within(dialog).findByRole("textbox", { name: "Chave de API" });
+
+    await user.keyboard("{Escape}");
+    const question = await screen.findByRole("alertdialog", { name: "Fechar sem guardar?" });
+    await user.click(within(question).getByRole("button", { name: "Voltar" }));
+    expect(within(dialog).getByRole("textbox", { name: "Chave de API" })).toBeDefined();
+
+    await user.click(within(dialog).getByRole("checkbox", { name: "Copiei e guardei a chave em lugar seguro" }));
+    await user.keyboard("{Escape}");
+    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+    expect(screen.queryByRole("alertdialog")).toBeNull();
+  });
+
   it("requires a name and a scope before calling the API", async () => {
     const { user, api } = renderView();
     await user.click(await screen.findByRole("button", { name: "Nova chave" }));

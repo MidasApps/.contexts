@@ -69,6 +69,21 @@ describe("SettingsInvitationsView", () => {
     expect(screen.queryByDisplayValue(LOCALIZED_ACCEPT_URL)).toBeNull();
   });
 
+  it("asks before Escape or the close button drops the one-time link", async () => {
+    const { user } = renderView({
+      "POST /v1/organizations/:organizationId/invitations": ok({ invitation: buildInvitation({ email: "dora@example.com" }), acceptUrl: ACCEPT_URL }, 201),
+    });
+    await user.click(await screen.findByRole("button", { name: "Convidar" }));
+    const dialog = await screen.findByRole("dialog", { name: "Convidar pessoa" });
+    await user.type(within(dialog).getByRole("textbox", { name: "E-mail" }), "dora@example.com");
+    await user.click(within(dialog).getByRole("button", { name: "Enviar convite" }));
+    await within(dialog).findByRole("textbox", { name: "Link do convite" });
+    await user.click(within(dialog).getByRole("button", { name: "Fechar" }));
+    const question = await screen.findByRole("alertdialog", { name: "Fechar sem guardar?" });
+    await user.click(within(question).getByRole("button", { name: "Fechar mesmo assim" }));
+    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+  });
+
   it("keeps ESCALATION_FORBIDDEN in the dialog with the request reference", async () => {
     const { user } = renderView({ "POST /v1/organizations/:organizationId/invitations": apiError(403, "ESCALATION_FORBIDDEN") });
     await user.click(await screen.findByRole("button", { name: "Convidar" }));

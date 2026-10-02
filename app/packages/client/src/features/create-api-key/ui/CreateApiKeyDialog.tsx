@@ -15,6 +15,7 @@ import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
 import { Input } from "#/shared/ui/atoms/Input/Input.tsx";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "#/shared/ui/atoms/Select/Select.tsx";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "#/shared/ui/molecules/Dialog/Dialog.tsx";
+import { useDialogDismissGuard } from "#/shared/ui/molecules/Dialog/dialog-dismiss-guard.tsx";
 import { ApiErrorAlert } from "#/shared/ui/molecules/ErrorState/ApiErrorAlert.tsx";
 import { Field, FieldControl, FieldDescription, FieldError, FieldGroup, FieldLabel } from "#/shared/ui/molecules/Field/Field.tsx";
 import { LoadingState } from "#/shared/ui/molecules/LoadingState/LoadingState.tsx";
@@ -109,6 +110,8 @@ function CreateApiKeyDialogBody({ organization, onOpenChange, now = systemNow }:
   const [pending, setPending] = useState(false);
   const [secret, setSecret] = useState<{ name: string; value: string } | null>(null);
   const nameInput = useRef<HTMLInputElement>(null);
+  // Closing mid-request would create the key and drop its only copy of the secret.
+  useDialogDismissGuard(pending ? "block" : "allow");
 
   const submit = async (event: FormEvent<HTMLFormElement>): Promise<void> => {
     event.preventDefault();
@@ -141,10 +144,10 @@ function CreateApiKeyDialogBody({ organization, onOpenChange, now = systemNow }:
         {secret !== null ? (
           <OneTimeSecret title={t("secretTitle")} warning={t("secretWarning")} label={t("secretLabel")} secret={secret.value} hint={t("secretHint")} acknowledge={t("stored")} doneLabel={t("done")} onDone={() => onOpenChange(false)} />
         ) : (
-          <form noValidate onSubmit={(event) => void submit(event)} className="flex max-h-[70vh] flex-col gap-5 overflow-y-auto pr-1">
+          <form noValidate onSubmit={(event) => void submit(event)} className="flex flex-col gap-5">
             {failure === null ? null : <ApiErrorAlert error={failure} />}
             <ApiKeyFields organization={organization} draft={draft} setDraft={setDraft} problems={problems} nameInput={nameInput} now={now} />
-            <DialogFooter className="sticky bottom-0 bg-background pt-2">
+            <DialogFooter>
               <Button type="button" variant="secondary" disabled={pending} onClick={() => onOpenChange(false)}>
                 {t("cancel")}
               </Button>

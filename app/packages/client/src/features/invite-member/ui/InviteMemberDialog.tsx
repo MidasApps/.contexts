@@ -17,6 +17,7 @@ import { Input } from "#/shared/ui/atoms/Input/Input.tsx";
 import { Alert, AlertDescription, AlertTitle } from "#/shared/ui/molecules/Alert/Alert.tsx";
 import { CopyField } from "#/shared/ui/molecules/CopyField/CopyField.tsx";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "#/shared/ui/molecules/Dialog/Dialog.tsx";
+import { useDialogDismissGuard } from "#/shared/ui/molecules/Dialog/dialog-dismiss-guard.tsx";
 import { ApiErrorAlert } from "#/shared/ui/molecules/ErrorState/ApiErrorAlert.tsx";
 import { Field, FieldControl, FieldDescription, FieldError, FieldGroup, FieldLabel } from "#/shared/ui/molecules/Field/Field.tsx";
 import { localizeAcceptUrl } from "../model/localize-accept-url.ts";
@@ -50,6 +51,8 @@ const emailIssueOf = (error: unknown): boolean => error instanceof ApiError && e
 function InvitationLink({ email, acceptUrl, onAnother, onDone }: { email: string; acceptUrl: string; onAnother: () => void; onDone: () => void }) {
   const t = useTranslations("settings.invitations.inviteDialog");
   const locale = useLocale();
+  // "Done" and "Invite another" are deliberate; Esc, outside click or X ask before the link is lost.
+  useDialogDismissGuard("confirmOneTime");
   return (
     <div className="flex flex-col gap-5">
       <Alert variant="success">
@@ -84,6 +87,8 @@ function InviteMemberDialogBody({ organization, customRoles, onOpenChange }: Inv
   const [pending, setPending] = useState(false);
   const [created, setCreated] = useState<{ email: string; acceptUrl: string } | null>(null);
   const emailInput = useRef<HTMLInputElement>(null);
+  // Closing mid-request would create the invitation and drop its only copy of the link.
+  useDialogDismissGuard(pending ? "block" : "allow");
 
   const reset = (): void => {
     setDraft(emptyDraft(organization.id));

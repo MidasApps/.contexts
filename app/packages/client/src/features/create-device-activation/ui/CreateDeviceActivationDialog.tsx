@@ -10,6 +10,7 @@ import { useIdempotencyKey } from "#/shared/api/use-idempotency-key.ts";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
 import { Input } from "#/shared/ui/atoms/Input/Input.tsx";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "#/shared/ui/molecules/Dialog/Dialog.tsx";
+import { useDialogDismissGuard } from "#/shared/ui/molecules/Dialog/dialog-dismiss-guard.tsx";
 import { ApiErrorAlert } from "#/shared/ui/molecules/ErrorState/ApiErrorAlert.tsx";
 import { Field, FieldControl, FieldDescription, FieldError, FieldGroup, FieldLabel } from "#/shared/ui/molecules/Field/Field.tsx";
 import { ActivationCode } from "./ActivationCode.tsx";
@@ -45,6 +46,8 @@ function CreateDeviceActivationDialogBody({ organization, customRoles, onOpenCha
   const [pending, setPending] = useState(false);
   const [activation, setActivation] = useState<{ label: string; code: string; expiresAt: string } | null>(null);
   const labelInput = useRef<HTMLInputElement>(null);
+  // Closing mid-request would create the code and drop its only copy.
+  useDialogDismissGuard(pending ? "block" : "allow");
 
   const reset = (): void => {
     setDraft(emptyDraft(organization.id));

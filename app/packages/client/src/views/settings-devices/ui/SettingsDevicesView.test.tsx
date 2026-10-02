@@ -59,6 +59,23 @@ describe("SettingsDevicesView", () => {
     expect(screen.queryByDisplayValue("7KQ2-M9XA")).toBeNull();
   });
 
+  it("asks before Escape drops a live activation code", async () => {
+    const { user } = renderView({
+      "POST /v1/organizations/:organizationId/device-activations": () => ok({ id: "Da4tG6bY8hN0uJ2mI4kO", code: "7KQ2M9XA", expiresAt: inTenMinutes() }, 201),
+    });
+    await user.click(await screen.findByRole("button", { name: "Ativar dispositivo" }));
+    const dialog = await screen.findByRole("dialog", { name: "Ativar dispositivo" });
+    await user.type(within(dialog).getByRole("textbox", { name: /Nome do dispositivo/u }), "Kiosk 2");
+    await user.click(within(dialog).getByRole("button", { name: "Gerar código" }));
+    await within(dialog).findByRole("textbox", { name: "Código de ativação" });
+    await user.keyboard("{Escape}");
+    const question = await screen.findByRole("alertdialog", { name: "Fechar sem guardar?" });
+    await user.keyboard("{Escape}");
+    expect(screen.queryByRole("alertdialog")).toBeNull();
+    expect(question.isConnected).toBe(false);
+    expect(within(dialog).getByRole("textbox", { name: "Código de ativação" })).toBeDefined();
+  });
+
   it("hides an expired code and offers a new one", async () => {
     const { user } = renderView({
       "POST /v1/organizations/:organizationId/device-activations": ok({ id: "Da4tG6bY8hN0uJ2mI4kO", code: "7KQ2M9XA", expiresAt: new Date(Date.now() - 1000).toISOString() }, 201),

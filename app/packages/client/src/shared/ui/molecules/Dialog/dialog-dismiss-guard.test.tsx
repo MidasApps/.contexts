@@ -23,7 +23,12 @@ function Body({ guard }: { guard: DialogDismissGuard }) {
   );
 }
 
-function GuardedDialog({ guard }: { guard: DialogDismissGuard }) {
+function Declares({ guard }: { guard: DialogDismissGuard }) {
+  useDialogDismissGuard(guard);
+  return null;
+}
+
+function GuardedDialog({ guard, also = "allow" }: { guard: DialogDismissGuard; also?: DialogDismissGuard }) {
   const [open, setOpen] = useState(false);
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -32,13 +37,14 @@ function GuardedDialog({ guard }: { guard: DialogDismissGuard }) {
       </DialogTrigger>
       <DialogContent>
         <Body guard={guard} />
+        <Declares guard={also} />
       </DialogContent>
     </Dialog>
   );
 }
 
-const openDialog = async (guard: DialogDismissGuard) => {
-  const rendered = renderWithProviders(<GuardedDialog guard={guard} />);
+const openDialog = async (guard: DialogDismissGuard, also: DialogDismissGuard = "allow") => {
+  const rendered = renderWithProviders(<GuardedDialog guard={guard} also={also} />);
   await rendered.user.click(screen.getByRole("button", { name: "Abrir" }));
   const dialog = await screen.findByRole("dialog", { name: "Editar texto" });
   return { ...rendered, dialog };
@@ -84,6 +90,13 @@ describe("useDialogDismissGuard", () => {
     await user.click(screen.getByRole("button", { name: "Fechar" }));
     await screen.findByRole("alertdialog", { name: "Fechar sem guardar?" });
     await user.click(screen.getByRole("button", { name: "Voltar" }));
+    expect(screen.getByRole("dialog", { name: "Editar texto" })).toBeTruthy();
+  });
+
+  it("applies the strictest of several declarations", async () => {
+    const { user } = await openDialog("confirmOneTime", "block");
+    await user.keyboard("{Escape}");
+    expect(screen.queryByRole("alertdialog")).toBeNull();
     expect(screen.getByRole("dialog", { name: "Editar texto" })).toBeTruthy();
   });
 

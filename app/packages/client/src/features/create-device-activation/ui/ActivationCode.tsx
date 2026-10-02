@@ -5,6 +5,7 @@ import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
 import { Alert, AlertDescription, AlertTitle } from "#/shared/ui/molecules/Alert/Alert.tsx";
 import { CopyField } from "#/shared/ui/molecules/CopyField/CopyField.tsx";
 import { DialogFooter } from "#/shared/ui/molecules/Dialog/Dialog.tsx";
+import { useDialogDismissGuard } from "#/shared/ui/molecules/Dialog/dialog-dismiss-guard.tsx";
 import { groupActivationCode, useCountdown } from "../model/use-countdown.ts";
 
 export type ActivationCodeProps = {
@@ -25,6 +26,8 @@ export function ActivationCode({ label, code, expiresAt, now, onAnother, onDone 
   const t = useTranslations("settings.devices.activation");
   const seconds = useCountdown(expiresAt, now);
   const minutes = Math.ceil(seconds / 60);
+  // A live code is shown once: Esc, outside click or X ask first; an expired one closes freely.
+  useDialogDismissGuard(seconds === 0 ? "allow" : "confirmOneTime");
   const clock = `${String(Math.floor(seconds / 60))}:${String(seconds % 60).padStart(2, "0")}`;
   if (seconds === 0) {
     return (

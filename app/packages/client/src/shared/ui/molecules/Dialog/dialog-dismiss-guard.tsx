@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { useTranslations } from "use-intl";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
 import {
@@ -23,21 +23,27 @@ import {
  */
 export type DialogDismissGuard = "allow" | "block" | "confirmUnsaved" | "confirmOneTime";
 
-type GuardContext = { guard: DialogDismissGuard; setGuard: (guard: DialogDismissGuard) => void };
+type GuardContext = { guard: DialogDismissGuard; declare: (id: string, guard: DialogDismissGuard | null) => void };
 
 const DismissGuardContext = createContext<GuardContext | null>(null);
 
+/** Several parts may declare at once (a body blocks while sending, its child guards a secret): the strictest wins. */
+const STRICTNESS: readonly DialogDismissGuard[] = ["allow", "confirmUnsaved", "confirmOneTime", "block"];
+const strictest = (guards: Iterable<DialogDismissGuard>): DialogDismissGuard =>
+  [...guards].reduce<DialogDismissGuard>((winner, guard) => (STRICTNESS.indexOf(guard) > STRICTNESS.indexOf(winner) ? guard : winner), "allow");
+
 /**
  * Declares, from anywhere inside a `Dialog`, how a dismissal is handled while the caller is
- * mounted (bodies unmount on close, which resets the guard). Outside a `Dialog` it does nothing.
+ * mounted (bodies unmount on close, which drops the declaration). Outside a `Dialog` it does nothing.
  */
 export function useDialogDismissGuard(guard: DialogDismissGuard): void {
-  const setGuard = useContext(DismissGuardContext)?.setGuard;
+  const declare = useContext(DismissGuardContext)?.declare;
+  const id = useId();
   useEffect(() => {
-    if (setGuard === undefined) return undefined;
-    setGuard(guard);
-    return () => setGuard("allow");
-  }, [guard, setGuard]);
+    if (declare === undefined) return undefined;
+    declare(id, guard);
+    return () => declare(id, null);
+  }, [declare, id, guard]);
 }
 
 /** The current guard, for the kit's own parts (the close button hides while blocked). */
@@ -47,14 +53,23 @@ export function useCurrentDismissGuard(): DialogDismissGuard {
 
 /** Owner side, used by `Dialog`: turns a dismissal request into close, nothing, or a question. */
 export function useDismissGuardState(close: () => void) {
-  const [guard, setGuard] = useState<DialogDismissGuard>("allow");
+  const [declared, setDeclared] = useState<ReadonlyMap<string, DialogDismissGuard>>(new Map());
   const [asking, setAsking] = useState<"confirmUnsaved" | "confirmOneTime" | null>(null);
+  const declare = useCallback((id: string, guard: DialogDismissGuard | null) => {
+    setDeclared((current) => {
+      const next = new Map(current);
+      if (guard === null) next.delete(id);
+      else next.set(id, guard);
+      return next;
+    });
+  }, []);
+  const guard = strictest(declared.values());
   const requestDismiss = (): void => {
     if (guard === "allow") return close();
     if (guard === "block") return;
     setAsking(guard);
   };
-  return { context: { guard, setGuard }, asking, setAsking, requestDismiss };
+  return { context: { guard, declare }, asking, setAsking, requestDismiss };
 }
 
 export function DismissGuardProvider({ value, children }: { value: GuardContext; children: ReactNode }) {

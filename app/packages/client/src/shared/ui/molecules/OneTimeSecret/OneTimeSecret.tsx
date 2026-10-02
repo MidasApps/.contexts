@@ -8,6 +8,7 @@ import { Label } from "#/shared/ui/atoms/Label/Label.tsx";
 import { Alert, AlertDescription, AlertTitle } from "#/shared/ui/molecules/Alert/Alert.tsx";
 import { CopyField } from "#/shared/ui/molecules/CopyField/CopyField.tsx";
 import { DialogFooter } from "#/shared/ui/molecules/Dialog/Dialog.tsx";
+import { useDialogDismissGuard } from "#/shared/ui/molecules/Dialog/dialog-dismiss-guard.tsx";
 
 export type OneTimeSecretProps = {
   title: string;
@@ -23,12 +24,14 @@ export type OneTimeSecretProps = {
 
 /**
  * One-time secret reveal (API keys, invitation links): the secret masked with reveal and copy, a warning that it is
- * never shown again, and "Done" enabled once the user confirms they stored it.
+ * never shown again, and "Done" enabled once the user confirms they stored it. Until then, closing the
+ * dialog any other way (Esc, outside click, X) asks first.
  */
 export function OneTimeSecret({ title, warning, label, secret, hint, acknowledge, doneLabel, onDone }: OneTimeSecretProps) {
   const t = useTranslations("common.oneTimeSecret");
   const id = useId();
   const [stored, setStored] = useState(false);
+  useDialogDismissGuard(stored ? "allow" : "confirmOneTime");
   return (
     <div className="flex flex-col gap-5">
       <Alert variant="warning">
