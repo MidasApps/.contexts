@@ -8,6 +8,7 @@ import { Checkbox } from "#/shared/ui/atoms/Checkbox/Checkbox.tsx";
 import { Input } from "#/shared/ui/atoms/Input/Input.tsx";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "#/shared/ui/atoms/Select/Select.tsx";
 import { Switch } from "#/shared/ui/atoms/Switch/Switch.tsx";
+import { useToolLabel } from "#/shared/lib/labels/use-catalog-labels.ts";
 import { Textarea } from "#/shared/ui/atoms/Textarea/Textarea.tsx";
 import { Field, FieldControl, FieldDescription, FieldError, FieldGroup, FieldLabel, FieldLegend, FieldSet } from "#/shared/ui/molecules/Field/Field.tsx";
 import { toggleItem, type AgentDraft, type AgentDraftField, type AgentDraftProblems } from "../model/custom-agent-draft.ts";
@@ -107,7 +108,8 @@ function CheckList({ legend, hint, empty, choices, selected, onChange, errors }:
             <Checkbox checked={selected.includes(choice.value)} onCheckedChange={(checked) => onChange(toggleItem(selected, choice.value, checked === true))} />
           </FieldControl>
           <FieldLabel className="flex flex-wrap items-center gap-2 font-normal">
-            <span className="font-mono text-[12.5px] break-all">{choice.label}</span>
+            {/* A choice no catalog names shows its id, in mono; a named one reads as text. */}
+            <span className={choice.label === choice.value ? "font-mono text-[12.5px] break-all" : "text-sm"}>{choice.label}</span>
             {choice.badge}
             {choice.detail === undefined ? null : <span className="basis-full text-xs text-muted-foreground">{choice.detail}</span>}
           </FieldLabel>
@@ -127,9 +129,10 @@ const withUnknown = (choices: readonly Choice[], selected: readonly string[], de
 function Selections({ draft, setDraft, problems, options, skills }: CustomAgentFieldsProps) {
   const t = useTranslations("settings.agents.custom.editor");
   const problem = useProblem(problems, options.limits.maxInstructionChars);
+  const toolLabel = useToolLabel();
   const tools = options.tools.map((tool): Choice => ({
     value: tool.id,
-    label: tool.id,
+    label: toolLabel(tool.id),
     detail: tool.description,
     // The kind is written out: color alone never tells a mutation from a read.
     badge: <Badge variant={tool.kind === "mutation" ? "default" : "secondary"}>{tool.kind === "mutation" ? t("toolMutation") : t("toolRead")}</Badge>,

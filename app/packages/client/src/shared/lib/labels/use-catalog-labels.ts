@@ -92,6 +92,19 @@ export const useToolLabel = (): ((toolNameOrId: string) => string) => {
   );
 };
 
+/** Name of an installed module, from its manifest `labelKey`; the module id when the module is not installed here. */
+export const useModuleLabel = (): ((moduleId: string) => string) => {
+  const t = useRootTranslator();
+  const modules = useOptionalModuleRegistry();
+  return useCallback(
+    (moduleId) => {
+      const labelKey = modules?.get(moduleId)?.manifest.labelKey;
+      return (labelKey === undefined ? undefined : firstMessage(t, [labelKey])) ?? moduleId;
+    },
+    [t, modules],
+  );
+};
+
 /** Label of a command (`tenancy.CreateProjectInput` → "Criar projetos"), as its agent tool is named; else the command id. */
 export const useCommandLabel = (): ((commandId: string) => string) => {
   const toolLabel = useToolLabel();

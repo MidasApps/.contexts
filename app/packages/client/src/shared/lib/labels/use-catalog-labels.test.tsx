@@ -4,7 +4,8 @@ import { renderHook } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { IntlProvider } from "use-intl";
 import { describe, expect, it } from "vitest";
-import { useAgentLabel, useCommandLabel, useFlagLabel, usePermissionLabel, useToolLabel, useWorkflowLabel } from "./use-catalog-labels.ts";
+import { ShellRegistryProvider } from "../shell/shell-registry-context.tsx";
+import { useAgentLabel, useCommandLabel, useFlagLabel, useModuleLabel, usePermissionLabel, useToolLabel, useWorkflowLabel } from "./use-catalog-labels.ts";
 
 const MODULE_MESSAGES: ExtraNamespaces = {
   example: {
@@ -97,5 +98,28 @@ describe("useCommandLabel", () => {
     const { result } = renderHook(() => useCommandLabel(), { wrapper: wrapperFor() });
     expect(result.current("tenancy.CreateProjectInput")).toBe("Criar projetos");
     expect(result.current("other.UnknownCommand")).toBe("other.UnknownCommand");
+  });
+});
+
+describe("useModuleLabel", () => {
+  const registries = {
+    modules: { get: (id: string) => (id === "example" ? { manifest: { labelKey: "example.module.name" } } : undefined) },
+  } as unknown as Parameters<typeof ShellRegistryProvider>[0]["registries"];
+  const messages = loadMessages("pt-BR", { example: { "pt-BR": { module: { name: "Exemplo" } } } });
+  const wrapper = ({ children }: { children: ReactNode }) => (
+    <IntlProvider locale="pt-BR" messages={messages} timeZone="UTC">
+      <ShellRegistryProvider registries={registries}>{children}</ShellRegistryProvider>
+    </IntlProvider>
+  );
+
+  it("names an installed module by its manifest label, else keeps the id", () => {
+    const { result } = renderHook(() => useModuleLabel(), { wrapper });
+    expect(result.current("example")).toBe("Exemplo");
+    expect(result.current("gone")).toBe("gone");
+  });
+
+  it("keeps the id outside the app shell", () => {
+    const { result } = renderHook(() => useModuleLabel(), { wrapper: wrapperFor() });
+    expect(result.current("example")).toBe("example");
   });
 });

@@ -83,7 +83,10 @@ describe("AdminAgentsView", () => {
     await user.click(screen.getByRole("button", { name: "Escolher organização" }));
     await user.click(await screen.findByRole("option", { name: "Contoso" }));
     expect(router.current()).toBe(`/admin/agents?organizationId=${IDS.otherOrganization}`);
-    expect(await screen.findByRole("switch", { name: "Conhecimento" })).toBeDefined();
+    const knowledge = await screen.findByRole("switch", { name: "Conhecimento" });
+    // The hint is the agent's role in words, not its key.
+    expect(knowledge.getAttribute("aria-describedby")).not.toBeNull();
+    expect(document.getElementById(knowledge.getAttribute("aria-describedby") ?? "")?.textContent).toBe("Responde com a base de conhecimento, citando as fontes.");
     expect(api.calls.some((call) => call.path === `/v1/admin/organizations/${IDS.otherOrganization}/agent-settings`)).toBe(true);
   });
 

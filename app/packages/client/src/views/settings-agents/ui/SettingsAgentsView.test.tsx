@@ -109,6 +109,9 @@ describe("SettingsAgentsView", { timeout: 30_000 }, () => {
     expect(within(knowledge).getByText("knowledge-citations")).toBeDefined();
     const action = await card("Action");
     expect(within(action).getByText("command.tenancy.CreateProjectInput").closest("li")?.textContent).toContain("altera dados");
+    // Tools read as their labels (a command as its permission); connector tools keep their own names.
+    expect(within(action).getByText("Criar projetos")).toBeDefined();
+    expect(within(action).getByText("issues-api.listIssues")).toBeDefined();
     expect(within(action).getByText("De conectores")).toBeDefined();
     expect(within(await card("Notes")).getByText("Módulo example")).toBeDefined();
     expect(screen.queryByText(/Não é possível criar um novo agente aqui\./u)).toBeNull();
@@ -257,8 +260,8 @@ describe("SettingsAgentsView", { timeout: 30_000 }, () => {
     await user.type(within(dialog).getByRole("textbox", { name: "Descrição" }), "Helps new members.");
     await user.type(within(dialog).getByRole("textbox", { name: "Instruções" }), "Be brief.");
     expect(within(dialog).getByText(/9 de 8000 caracteres\./u)).toBeDefined();
-    expect(within(dialog).getByRole("checkbox", { name: /command\.tenancy\.CreateProjectInput/u }).closest("[data-slot=field]")?.textContent).toContain("altera dados");
-    await user.click(within(dialog).getByRole("checkbox", { name: /catalog\.listEntities/u }));
+    expect(within(dialog).getByRole("checkbox", { name: /Criar projetos/u }).closest("[data-slot=field]")?.textContent).toContain("altera dados");
+    await user.click(within(dialog).getByRole("checkbox", { name: /Listar os dados do catálogo/u }));
     await user.click(within(dialog).getByRole("checkbox", { name: /knowledge-citations/u }));
     await user.click(within(dialog).getByRole("checkbox", { name: /weekly-report/u }));
     await user.click(within(dialog).getByRole("switch", { name: "Ferramentas de leitura dos conectores" }));

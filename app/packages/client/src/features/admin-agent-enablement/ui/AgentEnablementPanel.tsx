@@ -122,6 +122,7 @@ function PiiMode({ value, disabled, onChange }: { value: "warn" | "redact"; disa
 export function AgentEnablementPanel({ organizationId, organizationName, settings, registeredAgents }: AgentEnablementPanelProps) {
   const t = useTranslations("admin.agentSettings");
   const names = useTranslations("admin.agents.names");
+  const roles = useTranslations("admin.agents.roles");
   const online = useOnlineStatus();
   const { save, saving, failure } = useSaveAgentSettings(organizationId);
   const disabled = saving || !online;
@@ -153,7 +154,7 @@ export function AgentEnablementPanel({ organizationId, organizationName, setting
       <Group title={t("agents.title")} description={t("agents.description")}>
         <ul className="divide-y divide-border">
           {listedAgentKeys(settings, registeredAgents).map((key) => (
-            <ToggleRow key={key} label={agentName(key)} description={names.has(key) ? key : undefined} checked={settings.enabledAgents.includes(key)} disabled={disabled} onChange={(enabled) => toggleAgent(key, enabled)} />
+            <ToggleRow key={key} label={agentName(key)} description={roles.has(key) ? roles(key) : undefined} checked={settings.enabledAgents.includes(key)} disabled={disabled} onChange={(enabled) => toggleAgent(key, enabled)} />
           ))}
         </ul>
       </Group>

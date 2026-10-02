@@ -5,6 +5,7 @@ import { useId, type ReactNode } from "react";
 import { useTranslations } from "use-intl";
 import { isPromptAgentId } from "#/entities/prompt-version/index.ts";
 import { AgentInstructions } from "#/features/tenant-prompt-addendum/index.ts";
+import { useModuleLabel, useToolLabel } from "#/shared/lib/labels/use-catalog-labels.ts";
 import { Badge } from "#/shared/ui/atoms/Badge/Badge.tsx";
 
 const TOOL_SOURCES = ["core", "module", "connector"] as const;
@@ -20,6 +21,7 @@ export type AgentCardProps = {
 
 function ToolList({ tools }: { tools: readonly AgentCatalogTool[] }) {
   const t = useTranslations("settings.agents.catalog");
+  const toolLabel = useToolLabel();
   if (tools.length === 0) return <p className="text-sm text-muted-foreground">{t("toolsEmpty")}</p>;
   return (
     <div className="flex flex-col gap-3">
@@ -32,7 +34,7 @@ function ToolList({ tools }: { tools: readonly AgentCatalogTool[] }) {
             <ul className="flex flex-col gap-1">
               {group.map((tool) => (
                 <li key={tool.id} className="flex flex-wrap items-center gap-2 text-sm">
-                  <span className="font-mono text-[12.5px] break-all">{tool.id}</span>
+                  <ToolName id={tool.id} label={toolLabel(tool.id)} />
                   {/* The kind is written out: color alone never tells a mutation from a read. */}
                   <Badge variant={tool.kind === "mutation" ? "default" : "secondary"}>{tool.kind === "mutation" ? t("toolMutation") : t("toolRead")}</Badge>
                 </li>
@@ -42,6 +44,17 @@ function ToolList({ tools }: { tools: readonly AgentCatalogTool[] }) {
         );
       })}
     </div>
+  );
+}
+
+/** The tool's label with its id as secondary text; a tool no catalog names (a connector's) shows its id once. */
+function ToolName({ id, label }: { id: string; label: string }) {
+  if (label === id) return <span className="font-mono text-[12.5px] break-all">{id}</span>;
+  return (
+    <span className="flex min-w-0 flex-col">
+      <span>{label}</span>
+      <span className="font-mono text-[11.5px] break-all text-muted-foreground">{id}</span>
+    </span>
   );
 }
 
@@ -64,6 +77,7 @@ function Part({ title, children }: { title: string; children: ReactNode }) {
  */
 export function AgentCard({ organizationId, agent, status, prompt }: AgentCardProps) {
   const t = useTranslations("settings.agents");
+  const moduleLabel = useModuleLabel();
   const headingId = useId();
   return (
     <article aria-labelledby={headingId} data-slot="agent-card" className="flex flex-col gap-4 rounded-lg border border-border p-4">
@@ -77,7 +91,7 @@ export function AgentCard({ organizationId, agent, status, prompt }: AgentCardPr
             {agent.source === "custom"
               ? t("catalog.sourceCustom")
               : agent.source === "module" && agent.moduleId !== null
-                ? t("catalog.sourceModule", { module: agent.moduleId })
+                ? t("catalog.sourceModule", { module: moduleLabel(agent.moduleId) })
                 : t("catalog.sourceCore")}
           </p>
         </div>
