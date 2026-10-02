@@ -305,7 +305,8 @@
       "description": "La conversación y todos sus mensajes se eliminarán. Esta acción no se puede deshacer.",
       "confirm": "Eliminar conversación",
       "done": "Conversación eliminada."
-    }
+    },
+    "countLoaded": "Mostrando {count, plural, one {# conversación} other {# conversaciones}}"
   },
   "view": {
     "title": "Chat",

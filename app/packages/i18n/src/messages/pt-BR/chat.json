@@ -305,7 +305,8 @@
       "description": "A conversa e todas as mensagens serão excluídas. Esta ação não pode ser desfeita.",
       "confirm": "Excluir conversa",
       "done": "Conversa excluída."
-    }
+    },
+    "countLoaded": "Mostrando {count, plural, one {# conversa} other {# conversas}}"
   },
   "view": {
     "title": "Chat",

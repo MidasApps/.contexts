@@ -115,7 +115,8 @@ export function ChatHistorySidebar({ organizationId, projectId, activeConversati
         <HistorySearch onSearch={setQ} />
         <div className="flex items-center justify-between gap-2">
           <p role="status" data-slot="history-count" className="text-[11.5px] text-muted-foreground">
-            {query.isSuccess ? t("count", { count: conversations.length }) : ""}
+            {/* While more pages exist, the loaded rows are not the total. */}
+            {query.isSuccess ? t(query.hasNextPage ? "countLoaded" : "count", { count: conversations.length }) : ""}
           </p>
           <Button variant={archived ? "secondary" : "ghost"} size="sm" aria-pressed={archived} onClick={() => setArchived((current) => !current)}>
             {t("showArchived")}

@@ -1,7 +1,7 @@
 import { act, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { expectNoAxeViolations } from "#/shared/testing/axe.ts";
-import { apiError, createFakeApi, ok, type FakeApi } from "#/shared/testing/fake-api.ts";
+import { apiError, createFakeApi, ok, page, type FakeApi } from "#/shared/testing/fake-api.ts";
 import { IDS } from "#/shared/testing/fixtures.ts";
 import { renderWithClient } from "#/shared/testing/render-client.tsx";
 import { TooltipProvider } from "#/shared/ui/atoms/Tooltip/Tooltip.tsx";
@@ -76,6 +76,19 @@ describe("ChatHistorySidebar", () => {
     expect(screen.getByRole("link", { name: "Nova conversa" }).getAttribute("href")).toBe(`/o/${IDS.organization}/p/${IDS.project}/chat`);
     expect(screen.getByText("2 conversas").getAttribute("role")).toBe("status");
     await expectNoAxeViolations(container);
+  });
+
+  it("does not count only the loaded rows as the total while more conversations exist", async () => {
+    const api = createFakeApi({ "GET /v1/conversations": page([buildConversation(A, { title: "Plano de integração" }), buildConversation(B, { title: "Dúvidas de faturamento" })], { cursor: "next" }) });
+    renderWithClient(
+      <TooltipProvider>
+        <ChatHistorySidebar organizationId={IDS.organization} projectId={IDS.project} />
+      </TooltipProvider>,
+      { api },
+    );
+    await screen.findByRole("link", { name: "Plano de integração" }, LOADED);
+    expect(screen.getByRole("button", { name: "Carregar mais conversas" })).toBeTruthy();
+    expect(document.querySelector("[data-slot=history-count]")?.textContent).toBe("Mostrando 2 conversas");
   });
 
   it("shows a loading state, then an empty state with no conversations", async () => {

@@ -305,7 +305,8 @@
       "description": "The conversation and all its messages will be deleted. This cannot be undone.",
       "confirm": "Delete conversation",
       "done": "Conversation deleted."
-    }
+    },
+    "countLoaded": "Showing {count, plural, one {# conversation} other {# conversations}}"
   },
   "view": {
     "title": "Chat",
