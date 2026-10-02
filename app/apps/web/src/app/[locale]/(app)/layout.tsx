@@ -7,11 +7,23 @@ import { requireWebSession } from "@/server/session-guards";
 import { isSupportedLocale, SOURCE_LOCALE } from "@core/i18n";
 
 /** Checks the web session (request-time: cookies) and renders the user area's shell. */
-async function SignedInShell({ children }: { children: ReactNode }) {
+async function SignedInShell({ sidebarOpen, children }: { sidebarOpen: boolean; children: ReactNode }) {
   const segment = await locale();
   await requireWebSession(isSupportedLocale(segment) ? segment : SOURCE_LOCALE);
-  const sidebarOpen = (await cookies()).get(SIDEBAR_COOKIE_NAME)?.value !== "false";
   return <WebAppLayout sidebarDefaultOpen={sidebarOpen}>{children}</WebAppLayout>;
+}
+
+/**
+ * Reads the sidebar cookie (instant) before the session check (slow), so the skeleton shown while
+ * the session is checked already has the user's sidebar width.
+ */
+async function SignedInShellWithSidebarState({ children }: { children: ReactNode }) {
+  const sidebarOpen = (await cookies()).get(SIDEBAR_COOKIE_NAME)?.value !== "false";
+  return (
+    <Suspense fallback={<ShellSkeleton sidebarOpen={sidebarOpen} />}>
+      <SignedInShell sidebarOpen={sidebarOpen}>{children}</SignedInShell>
+    </Suspense>
+  );
 }
 
 /**
@@ -22,7 +34,7 @@ async function SignedInShell({ children }: { children: ReactNode }) {
 export default function UserAreaLayout({ children }: { children: ReactNode }) {
   return (
     <Suspense fallback={<ShellSkeleton />}>
-      <SignedInShell>{children}</SignedInShell>
+      <SignedInShellWithSidebarState>{children}</SignedInShellWithSidebarState>
     </Suspense>
   );
 }

@@ -7,11 +7,23 @@ import { requirePlatformStaffSession } from "@/server/session-guards";
 import { isSupportedLocale, SOURCE_LOCALE } from "@core/i18n";
 
 /** Checks the staff session (request-time) and renders the admin shell; non-staff get 404. */
-async function StaffShell({ children }: { children: ReactNode }) {
+async function StaffShell({ sidebarOpen, children }: { sidebarOpen: boolean; children: ReactNode }) {
   const segment = await locale();
   await requirePlatformStaffSession(isSupportedLocale(segment) ? segment : SOURCE_LOCALE);
-  const sidebarOpen = (await cookies()).get(SIDEBAR_COOKIE_NAME)?.value !== "false";
   return <WebAdminLayout sidebarDefaultOpen={sidebarOpen}>{children}</WebAdminLayout>;
+}
+
+/**
+ * Reads the sidebar cookie (instant) before the session check (slow), so the skeleton shown while
+ * the session is checked already has the user's sidebar width.
+ */
+async function StaffShellWithSidebarState({ children }: { children: ReactNode }) {
+  const sidebarOpen = (await cookies()).get(SIDEBAR_COOKIE_NAME)?.value !== "false";
+  return (
+    <Suspense fallback={<ShellSkeleton sidebarOpen={sidebarOpen} />}>
+      <StaffShell sidebarOpen={sidebarOpen}>{children}</StaffShell>
+    </Suspense>
+  );
 }
 
 /**
@@ -23,7 +35,7 @@ async function StaffShell({ children }: { children: ReactNode }) {
 export default function AdminAreaLayout({ children }: { children: ReactNode }) {
   return (
     <Suspense fallback={<ShellSkeleton />}>
-      <StaffShell>{children}</StaffShell>
+      <StaffShellWithSidebarState>{children}</StaffShellWithSidebarState>
     </Suspense>
   );
 }

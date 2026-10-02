@@ -1,19 +1,18 @@
 "use client";
 
 import { LoadingState } from "@core/client/shared/ui/molecules/LoadingState/LoadingState";
+import { AppShellSkeleton } from "@core/client/shared/ui/templates/AppShellSkeleton/AppShellSkeleton";
 import { useTranslations } from "use-intl";
 
 /**
  * Fallback while a guarded layout checks the session on the server (Cache Components streams it
- * inside `<Suspense>`): one polite status, no shell chrome yet.
+ * inside `<Suspense>`): the shell's frame without data, so the sidebar, topbar and page header do
+ * not jump in, and one polite status. `sidebarOpen` comes from the sidebar cookie once the request
+ * is known; the static shell assumes the expanded sidebar.
  */
-export function ShellSkeleton() {
+export function ShellSkeleton({ sidebarOpen = true }: { sidebarOpen?: boolean }) {
   const t = useTranslations("shell.home");
-  return (
-    <main id="main" className="mx-auto grid min-h-svh w-full max-w-[1280px] place-items-center px-6">
-      <LoadingState variant="spinner" label={t("loading")} />
-    </main>
-  );
+  return <AppShellSkeleton label={t("loading")} sidebarOpen={sidebarOpen} />;
 }
 
 /** Fallback of the entry pages (sign-in, invitation) while their search params resolve. */
