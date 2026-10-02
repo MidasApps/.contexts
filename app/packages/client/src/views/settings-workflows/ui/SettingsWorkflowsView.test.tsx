@@ -259,7 +259,8 @@ describe("SettingsWorkflowsView: schedules", () => {
         return ok(buildSchedule({ workflowId: "approval-demo" }));
       },
     });
-    await user.click(screen.getByRole("button", { name: "Editar o agendamento daily-usage de Demonstração de aprovação" }));
+    await user.click(screen.getByRole("button", { name: "Mais ações do agendamento daily-usage de Demonstração de aprovação" }));
+    await user.click(await screen.findByRole("menuitem", { name: "Editar o agendamento daily-usage de Demonstração de aprovação" }));
     const dialog = await screen.findByRole("dialog", { name: "Editar agendamento de Demonstração de aprovação" });
     const title = within(dialog).getByRole("textbox", { name: /Título/u });
     expect((title as HTMLInputElement).value).toBe("Daily");
