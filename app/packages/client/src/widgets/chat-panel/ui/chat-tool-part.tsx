@@ -80,7 +80,8 @@ function ChatToolPart({
           ui={item.ui}
           toolCallId={item.toolCallId}
           toolName={item.toolName}
-          interactive={interactive}
+          // A form or a choice answered past a pending approval would strand it (the composer holds too).
+          interactive={interactive && !session.awaitingApproval}
           stale={stale}
           answer={answer}
           fallback={item.toolCallId === tool.toolCallId && delegation === null ? fallback : null}

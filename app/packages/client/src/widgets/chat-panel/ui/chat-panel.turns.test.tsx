@@ -145,6 +145,24 @@ describe("ChatPanel — a turn waiting for the member", () => {
     await waitFor(() => expect(screen.queryByText(WAIT_FOR_APPROVAL)).toBeNull());
   });
 
+  it("does not let a choice in the same answer go past the approval", async () => {
+    const context = setup();
+    await context.user.type(context.field(), "Crie o projeto Launch{Enter}");
+    const stream = await streamAt(context.transport, 0);
+    act(() => {
+      stream.emit(
+        ...APPROVAL_REQUEST,
+        { type: "tool-input-available", toolCallId: "call-p", toolName: "catalog_pick", input: {} },
+        { type: "tool-output-available", toolCallId: "call-p", output: { ui: PICKER_UI } },
+      );
+      stream.close();
+    });
+    await screen.findByRole("region", { name: "Aprovação: Criar projeto Launch" });
+    expect(await screen.findByRole("group", { name: "Escolha uma opção" })).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "Confirmar escolha" })).toBeNull();
+    expect(screen.getByRole("button", { name: "Aprovar" }).hasAttribute("disabled")).toBe(false);
+  });
+
   it("says an approval the conversation moved past is no longer active, instead of bare disabled buttons", async () => {
     setup([
       user("u-1", "Crie o projeto Launch"),
