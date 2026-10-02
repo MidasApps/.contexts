@@ -82,6 +82,8 @@ type StoredThreadProps = {
   assistantName: string | undefined;
   onStarted: (id: string) => void;
   onRecover: () => void;
+  /** Starts a new conversation (the way out of a missing one). */
+  onNew: () => void;
   /** The stored conversation names its agent once it has loaded. */
   onAgent: (agentId: string) => void;
 };
@@ -106,7 +108,17 @@ function StoredThread(props: StoredThreadProps) {
       />
     );
   }
-  if (history.data === null) return <EmptyState className="m-4" icon="message" title={t("panel.notFound.title")} description={t("panel.notFound.description")} />;
+  if (history.data === null) {
+    return (
+      <EmptyState
+        className="m-4"
+        icon="message"
+        title={t("panel.notFound.title")}
+        description={t("panel.notFound.description")}
+        action={<Button onClick={props.onNew}>{t("panel.newConversation")}</Button>}
+      />
+    );
+  }
   return (
     <ChatThread
       scope={props.panel.scope}
@@ -256,6 +268,7 @@ export function ChatPanel(props: ChatPanelProps) {
           assistantName={assistantName}
           onStarted={started}
           onRecover={recover}
+          onNew={startNew}
           onAgent={setAgentId}
         />
       )}

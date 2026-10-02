@@ -183,7 +183,10 @@ describe("ChatPanel", () => {
 
   it("says a missing conversation is not found and offers a retry when the history fails", async () => {
     const missing = setup({ conversationId: CONVERSATION_ID }, createFakeApi());
-    expect(await screen.findByText("Conversa não encontrada")).toBeTruthy();
+    const notFound = (await screen.findByText("Conversa não encontrada")).closest("[data-state=empty]") as HTMLElement;
+    // A way out of the dead end: a new conversation, ready to type.
+    await missing.user.click(within(notFound).getByRole("button", { name: "Nova conversa" }));
+    expect(await screen.findByRole("heading", { name: "Como posso ajudar?" })).toBeTruthy();
     missing.unmount();
 
     const api = createFakeApi({ [`GET /v1/conversations/${CONVERSATION_ID}`]: apiError(500, "INTERNAL_ERROR"), [`GET /v1/conversations/${CONVERSATION_ID}/messages`]: page(stored) });
