@@ -1,4 +1,4 @@
-# 0048. The right panel closes itself and keeps its place while closed
+# 0049. The right panel closes itself and keeps its place while closed
 
 - **Status:** accepted
 - **Date:** 2026-10-01

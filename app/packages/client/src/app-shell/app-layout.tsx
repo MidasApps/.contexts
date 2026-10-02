@@ -35,7 +35,7 @@ const alwaysAvailable = (): boolean => true;
  * impersonation banner (support access as a user, SP1 spec §6.6);
  * the command palette (⌘K / Ctrl+K); the right-panel slot SP4 fills with chat. The panel starts
  * closed and is opened from the topbar; the slot's own hook says where it applies, and its content
- * mounts only while it is open (what it must keep lives in the shell UI store, decision 0048) and
+ * mounts only while it is open (what it must keep lives in the shell UI store, decision 0049) and
  * closes itself through `onClose`.
  */
 export function AppLayout({ children, sidebarDefaultOpen, persistSidebarState }: AppLayoutProps) {

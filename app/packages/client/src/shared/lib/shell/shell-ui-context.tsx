@@ -5,7 +5,7 @@ import { type StoreApi, useStore } from "zustand";
 
 /**
  * UI state without server origin (decision 0011 §5): command palette recents, and what the right
- * panel keeps while it is closed (decision 0048). Server data never goes here
+ * panel keeps while it is closed (decision 0049). Server data never goes here
  * (rules/state-management.md §3).
  */
 export type ShellUiState = {

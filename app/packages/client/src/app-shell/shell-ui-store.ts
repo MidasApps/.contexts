@@ -27,7 +27,7 @@ const rememberedPanel = (
 /**
  * The shell UI store (decision 0011 §5; rules/state-management.md §14–§15): command palette
  * recents, persisted with `partialize` and a version, and the right panel's memory (in memory
- * only, decision 0048), hydrated manually after mount
+ * only, decision 0049), hydrated manually after mount
  * (`skipHydration`, so server renders never read storage), with `reset` for sign-out.
  * @param storage defaults to `localStorage`; tests pass an in-memory one.
  */

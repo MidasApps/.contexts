@@ -89,7 +89,7 @@ export type ModuleRegistry = {
   readonly navItems: () => readonly ShellNavItem[];
 };
 
-/** What the shell gives the right-panel content (decision 0048). */
+/** What the shell gives the right-panel content (decision 0049). */
 export type RightPanelProps = {
   /** Closes the panel: the content puts the close button in its own header (no corner X over it). */
   readonly onClose: () => void;
