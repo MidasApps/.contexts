@@ -1,6 +1,6 @@
 import { LlmCallContract } from "@core/contracts";
 import { describe, expect, it } from "vitest";
-import { estimateCostMicroUsd, MODEL_PRICES, PRICES_VERIFIED_AT } from "./model-prices.ts";
+import { estimateCostMicroUsd, FAKE_MODEL_PRICES, MODEL_PRICES, PRICES_VERIFIED_AT, priceTableFor } from "./model-prices.ts";
 
 describe("estimateCostMicroUsd", () => {
   it("prices input and output tokens per million, rounding up to a whole micro-USD", () => {
@@ -21,6 +21,24 @@ describe("estimateCostMicroUsd", () => {
 
   it("records when prices were checked", () => {
     expect(PRICES_VERIFIED_AT).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+  });
+});
+
+describe("priceTableFor", () => {
+  it("gives the fake models a nominal non-zero price in fake mode only", () => {
+    const fake = priceTableFor("fake");
+    for (const modelId of ["fake/fake-chat", "fake/fake-fast", "fake/fake-reasoning", "fake/fake-judge"]) {
+      expect(estimateCostMicroUsd(modelId, { inputTokens: 1000, outputTokens: 100 }, fake)).toBeGreaterThan(0);
+      expect(estimateCostMicroUsd(modelId, { inputTokens: 1000, outputTokens: 100 }, priceTableFor("real"))).toBeNull();
+    }
+    expect(estimateCostMicroUsd("fake/fake-embedding", { inputTokens: 1000, outputTokens: 0 }, fake)).toBeGreaterThan(0);
+  });
+
+  it("keeps the verified prices in both modes and never adds fake ids to the real table", () => {
+    expect(priceTableFor("real")).toBe(MODEL_PRICES);
+    expect(priceTableFor("fake")["google/gemini-3.5-flash"]).toEqual(MODEL_PRICES["google/gemini-3.5-flash"]);
+    expect(Object.keys(FAKE_MODEL_PRICES).every((modelId) => modelId.startsWith("fake/"))).toBe(true);
+    expect(Object.keys(MODEL_PRICES).some((modelId) => modelId.startsWith("fake/"))).toBe(false);
   });
 });
 

@@ -1,6 +1,7 @@
 import type { LlmCall } from "@core/contracts";
 import { type AnyExportedSpan, SpanType, type TracingEvent, TracingEventType } from "@mastra/core/observability";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { type ModelPrice, priceTableFor } from "../models/model-prices.ts";
 import { createUsageLedgerExporter, LEDGER_FLUSH_MS, LEDGER_FLUSH_ROWS, type LedgerLogger } from "./usage-ledger-exporter.ts";
 
 const TRACE_ID = "4bf92f3577b34da6a3ce929d0e0e4736";
@@ -49,7 +50,7 @@ const recordingLogger = () => {
   return { logger, lines };
 };
 
-const setup = (recordLlmCalls: (calls: readonly LlmCall[]) => Promise<void> = () => Promise.resolve()) => {
+const setup = (recordLlmCalls: (calls: readonly LlmCall[]) => Promise<void> = () => Promise.resolve(), extra: { prices?: Readonly<Record<string, ModelPrice>> } = {}) => {
   const batches: LlmCall[][] = [];
   const { logger, lines } = recordingLogger();
   let sequence = 0;
@@ -62,6 +63,7 @@ const setup = (recordLlmCalls: (calls: readonly LlmCall[]) => Promise<void> = ()
     },
     logger,
     newId: () => `01928f6e-7b2a-7c3d-9e4f-${(sequence++).toString(16).padStart(12, "0")}`,
+    ...extra,
   });
   return { exporter, batches, lines };
 };
@@ -111,6 +113,14 @@ describe("usage ledger exporter", () => {
     await exporter.flush();
     expect(batches[0]?.map((row) => row.costMicroUsd)).toEqual([null, null]);
     expect(lines).toEqual([{ level: "warn", message: "usage_price_missing", fields: { provider: "fake", model: "fake-chat" } }]);
+  });
+
+  it("prices the fake models with the nominal table of fake mode", async () => {
+    const { exporter, batches, lines } = setup(undefined, { prices: priceTableFor("fake") });
+    await exporter.exportTracingEvent(ended(generationSpan({}, { provider: "fake", model: "fake-chat" })));
+    await exporter.flush();
+    expect(batches[0]?.[0]?.costMicroUsd).toBeGreaterThan(0);
+    expect(lines).toEqual([]);
   });
 
   it("ignores other span types and span starts", async () => {

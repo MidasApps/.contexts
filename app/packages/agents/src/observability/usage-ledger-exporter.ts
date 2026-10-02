@@ -1,6 +1,6 @@
 import { type LlmCall, LlmCallSchema } from "@core/contracts";
 import { type AnyExportedSpan, type ObservabilityExporter, SpanType, type TracingEvent, TracingEventType } from "@mastra/core/observability";
-import { estimateCostMicroUsd } from "../models/model-prices.ts";
+import { estimateCostMicroUsd, MODEL_PRICES, type ModelPrice } from "../models/model-prices.ts";
 import type { UsagePort } from "../runtime/runtime-ports.ts";
 import { uuidv7 } from "./uuidv7.ts";
 
@@ -38,6 +38,8 @@ export type UsageLedgerExporterOptions = {
   readonly usage: Pick<UsagePort, "recordLlmCalls">;
   /** Defaults to the logger Mastra hands every exporter (`__setLogger`). */
   readonly logger?: LedgerLogger;
+  /** Price table (`priceTableFor(AI_MODE)`); the verified prices by default. */
+  readonly prices?: Readonly<Record<string, ModelPrice>>;
   /** Row id seam for tests (uuidv7 by default). */
   readonly newId?: () => string;
 };
@@ -61,13 +63,13 @@ type RowParts = { readonly row: LlmCall; readonly priced: boolean } | { readonly
 
 type SpanContext = Readonly<Record<string, unknown>>;
 
-const toRow = (span: AnyExportedSpan, context: SpanContext, tenantId: string, id: string): RowParts => {
+const toRow = (span: AnyExportedSpan, context: SpanContext, tenantId: string, id: string, prices: Readonly<Record<string, ModelPrice>>): RowParts => {
   const attributes = (span.attributes ?? {}) as GenerationAttributes;
   const provider = vendorOf(stringOf(attributes.provider) ?? "unknown");
   const model = stringOf(attributes.model) ?? "unknown";
   const inputTokens = countOf(attributes.usage?.inputTokens);
   const outputTokens = countOf(attributes.usage?.outputTokens);
-  const costMicroUsd = estimateCostMicroUsd(`${provider}/${model}`, { inputTokens, outputTokens });
+  const costMicroUsd = estimateCostMicroUsd(`${provider}/${model}`, { inputTokens, outputTokens }, prices);
   const endTime = span.endTime ?? span.startTime;
   const parsed = LlmCallSchema.safeParse({
     id,
@@ -97,6 +99,7 @@ const SILENT_LOGGER: LedgerLogger = { warn: () => undefined, error: () => undefi
 export const createUsageLedgerExporter = (options: UsageLedgerExporterOptions): ObservabilityExporter => {
   let logger: LedgerLogger = options.logger ?? SILENT_LOGGER;
   const newId = options.newId ?? (() => uuidv7());
+  const prices = options.prices ?? MODEL_PRICES;
   const warnedModels = new Set<string>();
   let buffer: LlmCall[] = [];
   let timer: ReturnType<typeof setTimeout> | undefined;
@@ -152,7 +155,7 @@ export const createUsageLedgerExporter = (options: UsageLedgerExporterOptions): 
       logger.warn("usage_span_without_tenant", { agentId: span.entityId ?? null });
       return;
     }
-    const { row, priced } = toRow(span, context, tenantId, newId());
+    const { row, priced } = toRow(span, context, tenantId, newId(), prices);
     if (row === null) {
       logger.warn("usage_span_invalid", { agentId: span.entityId ?? null });
       return;

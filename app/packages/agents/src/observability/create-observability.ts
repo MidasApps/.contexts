@@ -3,6 +3,7 @@ import { MastraStorageExporter, Observability, SensitiveDataFilter } from "@mast
 import { OtelExporter, type OtelExporterConfig } from "@mastra/otel-exporter";
 import type { UsagePort } from "../runtime/runtime-ports.ts";
 import { sampleTraces, scrubSpanForExport, type SpanExportPolicy } from "./span-export-policy.ts";
+import { priceTableFor } from "../models/model-prices.ts";
 import { createUsageLedgerExporter } from "./usage-ledger-exporter.ts";
 
 /**
@@ -50,6 +51,8 @@ export type ObservabilityEnv = {
 export type CreateObservabilityArgs = {
   readonly serviceName: string;
   readonly env: ObservabilityEnv;
+  /** `AI_MODE`: fake mode prices the fake models with nominal prices (`priceTableFor`); real by default. */
+  readonly aiMode?: "fake" | "real";
   /** The ledger port; without it no ledger exporter is registered. */
   readonly usage?: Pick<UsagePort, "recordLlmCalls">;
   /** Replaces every exporter (tests). */
@@ -84,7 +87,7 @@ export const buildExporters = (args: CreateObservabilityArgs): ObservabilityExpo
             ...(args.otlpSpanExporter === undefined ? {} : { exporter: args.otlpSpanExporter }),
           }),
         ];
-  const ledger = args.usage === undefined ? [] : [createUsageLedgerExporter({ usage: args.usage })];
+  const ledger = args.usage === undefined ? [] : [createUsageLedgerExporter({ usage: args.usage, prices: priceTableFor(args.aiMode ?? "real") })];
   return [...[storage, ...otlp].map((exporter) => sampleTraces(exporter, ratio)), ...ledger];
 };
 

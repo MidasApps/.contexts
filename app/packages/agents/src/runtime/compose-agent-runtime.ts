@@ -423,6 +423,7 @@ export const composeAgentRuntime = (args: ComposeAgentRuntimeArgs): RuntimeParts
     observability: createObservability({
       serviceName: args.serviceName,
       env: args.env,
+      aiMode: args.env.AI_MODE,
       usage: args.ports.usage,
       ...(args.exporters === undefined ? {} : { exporters: args.exporters }),
     }),

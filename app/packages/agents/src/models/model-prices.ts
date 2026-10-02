@@ -23,6 +23,26 @@ export const MODEL_PRICES: Readonly<Record<string, ModelPrice>> = {
   "google/gemini-embedding-2": { inputMicroUsdPerMTok: 200_000, outputMicroUsdPerMTok: 0 },
 };
 
+/**
+ * FAKE PRICES — NOT REAL. Nominal prices for the `AI_MODE=fake` models (follow-up 83), so the
+ * offline ledger, `/admin/costs` and `/settings/usage` show non-zero costs end to end. They are
+ * read only through `priceTableFor("fake")`; the real table never carries a `fake/` id.
+ */
+// Deliberately high (US$ 10–100 per 1M tokens): one fake chat turn of a few thousand tokens must
+// round to at least a cent on the console, or the offline cost screens still read US$ 0,00.
+export const FAKE_MODEL_PRICES: Readonly<Record<string, ModelPrice>> = {
+  "fake/fake-chat": { inputMicroUsdPerMTok: 50_000_000, outputMicroUsdPerMTok: 100_000_000 },
+  "fake/fake-fast": { inputMicroUsdPerMTok: 10_000_000, outputMicroUsdPerMTok: 20_000_000 },
+  "fake/fake-reasoning": { inputMicroUsdPerMTok: 50_000_000, outputMicroUsdPerMTok: 100_000_000 },
+  "fake/fake-judge": { inputMicroUsdPerMTok: 50_000_000, outputMicroUsdPerMTok: 100_000_000 },
+  "fake/fake-embedding": { inputMicroUsdPerMTok: 10_000_000, outputMicroUsdPerMTok: 0 },
+};
+
+const FAKE_MODE_PRICES: Readonly<Record<string, ModelPrice>> = { ...MODEL_PRICES, ...FAKE_MODEL_PRICES };
+
+/** The table the ledger prices with: the verified prices, plus the fake ones in fake mode only. */
+export const priceTableFor = (aiMode: "fake" | "real"): Readonly<Record<string, ModelPrice>> => (aiMode === "fake" ? FAKE_MODE_PRICES : MODEL_PRICES);
+
 export type TokenUsage = { readonly inputTokens: number; readonly outputTokens: number };
 
 const TOKENS_PER_PRICE_UNIT = 1_000_000;
@@ -30,10 +50,11 @@ const TOKENS_PER_PRICE_UNIT = 1_000_000;
 /**
  * Cost of one call in whole micro-USD, rounded up.
  * @param modelId `<provider>/<model>`, as in `AI_MODEL_*`.
- * @returns `null` when the model has no verified price.
+ * @param prices the table to read (`priceTableFor`); the verified prices by default.
+ * @returns `null` when the model has no price in the table.
  */
-export const estimateCostMicroUsd = (modelId: string, usage: TokenUsage): number | null => {
-  const price = MODEL_PRICES[modelId];
+export const estimateCostMicroUsd = (modelId: string, usage: TokenUsage, prices: Readonly<Record<string, ModelPrice>> = MODEL_PRICES): number | null => {
+  const price = prices[modelId];
   if (price === undefined) return null;
   const microUsdTimesMillion = usage.inputTokens * price.inputMicroUsdPerMTok + usage.outputTokens * price.outputMicroUsdPerMTok;
   return Math.ceil(microUsdTimesMillion / TOKENS_PER_PRICE_UNIT);

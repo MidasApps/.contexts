@@ -2,8 +2,8 @@ import { chooseOrganization, failUntilHealed } from "./admin-helpers.ts";
 import { chatTurn, expect, FAILED_REQUEST, test } from "./sp5-test.ts";
 
 // SP5 Task 16: `/admin` traces, costs and logs after a real chat turn of an organization (fake
-// models, `AI_MODE=fake`). Fake models have no price (model-prices.ts lists verified provider
-// prices only), so the ledger rows count tokens with an unknown cost: the pages say so.
+// models, `AI_MODE=fake`). In fake mode the ledger prices the fake models with the nominal
+// `FAKE_MODEL_PRICES` (model-prices.ts, follow-up 83), so the cost is shown above zero.
 
 /** Today's date as the `<input type="date">` value, in the browser's zone (America/Sao_Paulo). */
 const today = (): string => new Intl.DateTimeFormat("en-CA", { timeZone: "America/Sao_Paulo" }).format(new Date());
@@ -72,7 +72,8 @@ test.describe("after a chat turn of the organization", () => {
       await staffPage.reload();
       await expect(status).toHaveText(/em [1-9]\d* chamadas e [\d.]+ tokens\./, { timeout: 5_000 });
     }).toPass({ timeout: 60_000 });
-    await expect(usage.getByText(/chamadas? sem preço conhecido/)).toBeVisible();
+    await expect(status).not.toContainText(/US\$\s?0,00 em/);
+    await expect(usage.getByText(/chamadas? sem preço conhecido/)).toHaveCount(0);
     await expect(usage.getByRole("table", { name: "Custo por dia" }).getByRole("row")).not.toHaveCount(1);
     const byModel = usage.getByRole("table", { name: "Custo por modelo" });
     await expect(byModel.getByRole("row").filter({ hasText: /fake-(chat|fast)/ }).first()).toBeVisible();
