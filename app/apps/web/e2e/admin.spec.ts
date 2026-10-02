@@ -61,6 +61,9 @@ test.describe("platform staff", () => {
       // On phones the sheet closes by itself after the navigation.
       await expect(page.getByRole("dialog", { name: "Navegação" })).toBeHidden();
       await expect(page.getByRole("heading", { level: 1, name: "Usuários" })).toBeVisible();
+      // The area renders its content (SP5), not the empty slot SP2 had here.
+      await expect(page.getByRole("search", { name: "Buscar usuário" })).toBeVisible();
+      await expect(page.getByText("Ainda não disponível")).toHaveCount(0);
       await showSidebar(page);
       await page.getByRole("link", { name: "Voltar ao app" }).click();
       await expect(page).not.toHaveURL(/\/admin/);

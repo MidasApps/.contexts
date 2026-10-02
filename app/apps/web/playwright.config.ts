@@ -11,6 +11,9 @@ const env = readE2eEnv();
 const isCi = process.env["CI"] !== undefined;
 const owner = authFile("owner");
 const CHAT_SPECS = /chat-[a-z-]+.spec.ts/;
+// The SP5 console journeys (/admin and /settings areas) run once, on chromium, like the chat ones.
+const CONSOLE_SPECS = /(admin|settings)-[a-z-]+\.spec\.ts/;
+const SINGLE_BROWSER_SPECS = [CHAT_SPECS, CONSOLE_SPECS];
 
 // Playwright's config loader requires a default export.
 export default defineConfig({
@@ -34,10 +37,11 @@ export default defineConfig({
   },
   projects: [
     { name: "setup", testMatch: /global\.setup\.ts/ },
-    { name: "chromium", testIgnore: CHAT_SPECS, use: { ...devices["Desktop Chrome"], storageState: owner }, dependencies: ["setup"] },
-    { name: "firefox", testIgnore: CHAT_SPECS, use: { ...devices["Desktop Firefox"], storageState: owner }, dependencies: ["setup"] },
-    { name: "webkit", testIgnore: CHAT_SPECS, use: { ...devices["Desktop Safari"], storageState: owner }, dependencies: ["setup"] },
-    { name: "mobile-chrome", testIgnore: CHAT_SPECS, use: { ...devices["Pixel 7"], storageState: owner }, dependencies: ["setup"] },
+    { name: "chromium", testIgnore: SINGLE_BROWSER_SPECS, use: { ...devices["Desktop Chrome"], storageState: owner }, dependencies: ["setup"] },
+    { name: "firefox", testIgnore: SINGLE_BROWSER_SPECS, use: { ...devices["Desktop Firefox"], storageState: owner }, dependencies: ["setup"] },
+    { name: "webkit", testIgnore: SINGLE_BROWSER_SPECS, use: { ...devices["Desktop Safari"], storageState: owner }, dependencies: ["setup"] },
+    { name: "mobile-chrome", testIgnore: SINGLE_BROWSER_SPECS, use: { ...devices["Pixel 7"], storageState: owner }, dependencies: ["setup"] },
+    { name: "console", testMatch: CONSOLE_SPECS, use: { ...devices["Desktop Chrome"], storageState: owner }, dependencies: ["setup"] },
     // The chat journeys (SP4) run once, on chromium: each one streams through the agent runtime,
     // and the browser matrix above already covers the shell they are mounted in.
     { name: "chat", testMatch: CHAT_SPECS, use: { ...devices["Desktop Chrome"], storageState: owner }, dependencies: ["setup"] },
