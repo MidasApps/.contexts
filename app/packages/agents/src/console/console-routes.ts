@@ -7,7 +7,7 @@ import { buildAgentPrincipal } from "../auth/agent-principal.ts";
 import { buildAgentRequestContext, writeAgentContext } from "../context/write-agent-context.ts";
 import type { AccessPort } from "../runtime/runtime-ports.ts";
 import { addFeedbackItem, listDatasets } from "./dataset-console.ts";
-import { EvalRunRecordSchema, type ExperimentStore, listExperimentSummaries, recordEvalRun } from "./eval-console.ts";
+import { EvalRunRecordSchema, type ExperimentStore, getExperimentSummary, listExperimentSummaries, recordEvalRun } from "./eval-console.ts";
 import { actOnAdminSchedule, AdminRunsQuerySchema, cancelAdminRun, listAdminRuns, listAdminSchedules, SCHEDULE_ACTIONS } from "./operations-console.ts";
 import { createTraceReader, type TraceStore } from "./trace-reader.ts";
 
@@ -134,6 +134,15 @@ const evalRoutes = (deps: ConsoleRouteDeps): ApiRoute[] => [
       if (store === null) return json(200, { data: [], meta: { hasMore: false } });
       const listed = await listExperimentSummaries(store, { tenantId: tenantOf(ctx), ...pageOf(ctx) });
       return json(200, { data: listed.experiments, meta: { hasMore: listed.hasMore } });
+    }),
+  }),
+  registerApiRoute(`${CONSOLE_ROUTES_PREFIX}/experiments/:experimentId`, {
+    method: "GET",
+    requiresAuth: false,
+    handler: guarded(deps, "console_experiment_failed", async (ctx) => {
+      const store = await storeOf<ExperimentStore>(ctx, "experiments");
+      const summary = store === null ? null : await getExperimentSummary(store, { experimentId: ctx.param("experimentId"), tenantId: tenantOf(ctx) });
+      return summary === null ? fail(404, "NOT_FOUND") : json(200, { data: summary });
     }),
   }),
   registerApiRoute(`${CONSOLE_ROUTES_PREFIX}/experiments`, {

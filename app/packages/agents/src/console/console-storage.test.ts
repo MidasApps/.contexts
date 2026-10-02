@@ -1,6 +1,6 @@
 import { InMemoryStore } from "@mastra/core/storage";
 import { describe, expect, it } from "vitest";
-import { type EvalRunRecord, type ExperimentStore, listExperimentSummaries, listFinishedSince, recordEvalRun } from "./eval-console.ts";
+import { type EvalRunRecord, type ExperimentStore, getExperimentSummary, listExperimentSummaries, listFinishedSince, recordEvalRun } from "./eval-console.ts";
 import { createTraceReader, dropSensitive, type TraceStore } from "./trace-reader.ts";
 
 const TENANT_A = "TenantAaaaaaaaaaaaaaa";
@@ -105,5 +105,25 @@ describe("eval runs as Mastra experiments (decision 0040)", () => {
     expect((await listExperimentSummaries(store, { tenantId: TENANT_B, page: 0, perPage: 20 })).experiments).toEqual([]);
     expect((await listFinishedSince(store, "2026-10-01T10:04:00.000Z")).map((summary) => summary.scores)).toEqual([[{ scorer: "tool-routing", mean: 1, baseline: 1 }], [{ scorer: "tool-routing", mean: 1, baseline: 1 }]]);
     expect(await listFinishedSince(store, "2026-10-02T00:00:00.000Z")).toEqual([]);
+  });
+
+  it("reads one experiment by id: staff any, a tenant only its own", async () => {
+    const storage = new InMemoryStore();
+    const store = (await storage.getStore("experiments")) as unknown as ExperimentStore;
+    const ci = await recordEvalRun(store, run(), null);
+    const tenantRun = await recordEvalRun(store, run({ verdict: "failed" }), TENANT_A);
+    expect(await getExperimentSummary(store, { experimentId: ci, tenantId: null })).toEqual(expect.objectContaining({ experimentId: ci, verdict: "passed" }));
+    expect(await getExperimentSummary(store, { experimentId: tenantRun, tenantId: TENANT_A })).toEqual(expect.objectContaining({ experimentId: tenantRun, verdict: "failed" }));
+    expect(await getExperimentSummary(store, { experimentId: tenantRun, tenantId: TENANT_B })).toBeNull();
+    expect(await getExperimentSummary(store, { experimentId: ci, tenantId: TENANT_A })).toBeNull();
+    expect(await getExperimentSummary(store, { experimentId: "missing", tenantId: null })).toBeNull();
+  });
+
+  it("never answers another tenant's experiment even when the store ignores the filter", async () => {
+    const storage = new InMemoryStore();
+    const real = (await storage.getStore("experiments")) as unknown as ExperimentStore;
+    const other = await recordEvalRun(real, run(), TENANT_B);
+    const leaky: Pick<ExperimentStore, "getExperimentById"> = { getExperimentById: (args) => real.getExperimentById({ id: args.id }) };
+    expect(await getExperimentSummary(leaky, { experimentId: other, tenantId: TENANT_A })).toBeNull();
   });
 });

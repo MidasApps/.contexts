@@ -22,6 +22,7 @@ export type ExperimentStore = {
     readonly filters?: { readonly organizationId?: string };
     readonly pagination: { readonly page: number; readonly perPage: number };
   }) => Promise<{ readonly experiments: readonly StoredExperiment[]; readonly pagination: { readonly hasMore: boolean } }>;
+  readonly getExperimentById: (args: { readonly id: string; readonly filters?: { readonly organizationId?: string } }) => Promise<StoredExperiment | null>;
   readonly createExperiment: (input: {
     readonly name: string;
     readonly datasetId: null;
@@ -112,6 +113,20 @@ export const listExperimentSummaries = async (
   });
   const own = listed.experiments.filter((experiment) => query.tenantId === null || experiment.organizationId === query.tenantId);
   return { experiments: own.map(summarizeExperiment).filter((summary): summary is EvalExperimentSummary => summary !== null), hasMore: listed.pagination.hasMore };
+};
+
+/**
+ * One experiment by id, for the comparison of two experiments on different list pages: any for
+ * staff (`null`), a tenant's own only. The store filters by tenant and the owner is checked again
+ * here, so another tenant's experiment is `null` (404) whatever the store does with the filter.
+ */
+export const getExperimentSummary = async (
+  store: Pick<ExperimentStore, "getExperimentById">,
+  query: { readonly experimentId: string; readonly tenantId: string | null },
+): Promise<EvalExperimentSummary | null> => {
+  const stored = await store.getExperimentById({ id: query.experimentId, ...(query.tenantId === null ? {} : { filters: { organizationId: query.tenantId } }) });
+  if (stored === null || (query.tenantId !== null && stored.organizationId !== query.tenantId)) return null;
+  return summarizeExperiment(stored);
 };
 
 /** Finished experiments since an instant (the `eval-export` workflow's source, decision 0040). */
