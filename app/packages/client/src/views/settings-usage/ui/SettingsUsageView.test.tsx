@@ -119,6 +119,15 @@ describe("SettingsUsageView", () => {
     expect((await within(card).findByRole("alert")).textContent).toContain("O limite informado é maior que o do plano.");
   });
 
+  it("closes the remove confirmation on a failure and shows why next to the form", async () => {
+    const { user } = renderView({ "PATCH /v1/agent-settings": apiError(403, "FORBIDDEN") });
+    const card = await screen.findByRole("region", { name: "Limite próprio da organização" });
+    await user.click(await within(card).findByRole("button", { name: "Remover limite próprio" }));
+    await user.click(within(await screen.findByRole("alertdialog")).getByRole("button", { name: "Remover limite" }));
+    await waitFor(() => expect(screen.queryByRole("alertdialog")).toBeNull());
+    expect((await within(card).findByRole("alert")).textContent).toContain("Você não tem permissão");
+  });
+
   it("shows no cap form to a viewer who can only read usage", async () => {
     const { api } = renderView({}, READER);
     await screen.findByRole("region", { name: "Totais do mês" });

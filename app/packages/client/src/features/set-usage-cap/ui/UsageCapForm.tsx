@@ -120,7 +120,10 @@ export function UsageCapForm({ organizationId, caps, disabled = false }: UsageCa
         description={t("removeDescription")}
         confirmLabel={t("removeConfirm")}
         destructive
-        onConfirm={() => send(null, "remove")}
+        // Closes either way: a failure is shown above the form, not behind the modal.
+        onConfirm={async () => {
+          await send(null, "remove");
+        }}
       />
     </form>
   );
