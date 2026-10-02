@@ -10,6 +10,7 @@ import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
 import { Input } from "#/shared/ui/atoms/Input/Input.tsx";
 import { Alert, AlertDescription } from "#/shared/ui/molecules/Alert/Alert.tsx";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "#/shared/ui/molecules/Dialog/Dialog.tsx";
+import { useDialogDismissGuard } from "#/shared/ui/molecules/Dialog/dialog-dismiss-guard.tsx";
 import { ApiErrorAlert } from "#/shared/ui/molecules/ErrorState/ApiErrorAlert.tsx";
 import { Field, FieldControl, FieldDescription, FieldError, FieldGroup, FieldLabel } from "#/shared/ui/molecules/Field/Field.tsx";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "#/shared/ui/molecules/Tabs/Tabs.tsx";
@@ -83,6 +84,8 @@ function AddKnowledgeDocumentBody({ organizationId, target, onOpenChange, onAdde
   const [step, setStep] = useState<UploadStep | null>(null);
   const [failure, setFailure] = useState<unknown>(null);
   const [pending, setPending] = useState(false);
+  // Steps 1–3 (ticket, bytes, validation) run while pending: closing then would orphan the upload.
+  useDialogDismissGuard(pending ? "block" : "allow");
 
   const problemOf = (): Problem | null => {
     if (kind === "url") return isHttpsUrl(url.trim()) ? null : "URL_INVALID";

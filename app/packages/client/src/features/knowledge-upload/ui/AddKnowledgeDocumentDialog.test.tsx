@@ -1,5 +1,5 @@
 import type { UploadInstructions } from "@core/contracts";
-import { configure, fireEvent, screen, within } from "@testing-library/react";
+import { configure, fireEvent, screen, waitFor, within } from "@testing-library/react";
 import { useState } from "react";
 import { describe, expect, it, vi } from "vitest";
 import { renderApp } from "#/app-shell/testing/render-app.tsx";
@@ -93,6 +93,27 @@ describe("AddKnowledgeDocumentDialog", () => {
     expect(source?.query.get("projectId")).toBe(IDS.project);
     expect(source?.body).toEqual({ kind: "file", fileId: KNOWLEDGE_IDS.file });
     expect(screen.queryByRole("dialog")).toBeNull();
+  });
+
+  it("cannot be closed while the upload runs", async () => {
+    let release: () => void = () => undefined;
+    const sendBytes: SendBytes = () => new Promise((resolve) => (release = () => resolve(true)));
+    const { user } = renderApp(<Harness sendBytes={sendBytes} projectId={undefined} fileAllowed={true} />, {
+      path: `/o/${IDS.organization}/settings/knowledge`,
+      routes: shellRoutes(["core.organization.read", "core.knowledge.read", "core.knowledge.write", "core.file.upload"], {
+        "POST /v1/organizations/:organizationId/files": ok(buildUploadTicket(), 201),
+        "GET /v1/files/:fileId": ok(buildStoredFile()),
+        "POST /v1/organizations/:organizationId/knowledge/sources": ok({ runId: RUN_ID }, 202),
+      }),
+    });
+    const dialog = await screen.findByRole("dialog", { name: "Adicionar documento" });
+    await user.upload(within(dialog).getByLabelText("Arquivo", { selector: "input" }), markdown());
+    await user.click(within(dialog).getByRole("button", { name: "Adicionar" }));
+    await waitFor(() => expect(within(dialog).queryByRole("button", { name: "Fechar" })).toBeNull());
+    await user.keyboard("{Escape}");
+    expect(screen.getByRole("dialog", { name: "Adicionar documento" })).toBeDefined();
+    release();
+    expect(await screen.findByText(`started ${RUN_ID} ${KNOWLEDGE_IDS.file} organization`)).toBeDefined();
   });
 
   it("shows why the server rejected the uploaded file and starts no indexing", async () => {
