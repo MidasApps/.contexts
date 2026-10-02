@@ -34,6 +34,8 @@ export const usePageLabel = (): string | undefined => {
     case "organizations":
     case "sign-in":
     case "invite":
+    case "sign-up":
+    case "reset-password":
     case "admin":
     case undefined:
       return undefined;

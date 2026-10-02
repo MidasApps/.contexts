@@ -6,6 +6,8 @@ import { ROUTE_IDS, routeHref, type Route, type RouteId } from "./route-paths.ts
 const SAMPLES: Record<RouteId, Route[]> = {
   "sign-in": [{ id: "sign-in", next: undefined }, { id: "sign-in", next: "/o/a b/p/c?unit=d" }],
   invite: [{ id: "invite", token: undefined }, { id: "invite", token: "tok+/=en" }],
+  "sign-up": [{ id: "sign-up", next: undefined }, { id: "sign-up", next: "/organizations" }],
+  "reset-password": [{ id: "reset-password" }],
   home: [{ id: "home" }],
   organizations: [{ id: "organizations" }],
   organization: [{ id: "organization", organizationId: "Xk2mQ9vLr3TnB7pWc1aZ" }],
@@ -51,6 +53,8 @@ describe("route paths", () => {
     expect(routeHref({ id: "chat", organizationId: "a", projectId: "b", conversationId: "c1" })).toBe("/o/a/p/b/chat/c1");
     expect(routeHref({ id: "sign-in", next: "/organizations" })).toBe("/sign-in?next=%2Forganizations");
     expect(routeHref({ id: "invite", token: "t1" })).toBe("/invite#token=t1");
+    expect(routeHref({ id: "sign-up", next: "/organizations" })).toBe("/sign-up?next=%2Forganizations");
+    expect(routeHref({ id: "reset-password" })).toBe("/reset-password");
     expect(routeHref({ id: "admin", rest: "" })).toBe("/admin");
     expect(routeHref({ id: "admin", rest: "traces", search: { status: "error" } })).toBe("/admin/traces?status=error");
     expect(routeHref({ id: "admin", rest: "traces", search: {} })).toBe("/admin/traces");

@@ -1,4 +1,5 @@
 // Public API of shared/lib/router (decision 0012).
+export { ENTRY_ROUTE_IDS, nextRoute } from "./entry-routes.ts";
 export { createMemoryRouter, type MemoryRouter } from "./memory-router.tsx";
 export { parseRoute } from "./parse-route.ts";
 export {

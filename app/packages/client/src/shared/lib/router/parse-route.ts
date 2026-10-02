@@ -52,6 +52,8 @@ export const parseRoute = (href: string): Route | null => {
   if (second !== undefined) return null;
   if (first === "sign-in") return { id: "sign-in", next: optional(search.get("next")) };
   if (first === "invite") return { id: "invite", token: optional(hash.get("token")) };
+  if (first === "sign-up") return { id: "sign-up", next: optional(search.get("next")) };
+  if (first === "reset-password") return { id: "reset-password" };
   if (first === "organizations") return { id: "organizations" };
   return null;
 };

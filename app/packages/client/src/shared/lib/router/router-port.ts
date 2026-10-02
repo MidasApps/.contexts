@@ -37,7 +37,9 @@ export type RouterPort = {
   /**
    * Shows the current page in another UI language (SP2 spec §5): the web writes the `NEXT_LOCALE`
    * cookie and navigates to the same path under `/{locale}`; the desktop re-renders its intl
-   * provider. Callers save the preference first (`PATCH /v1/me`).
+   * provider. Callers save the preference first (`PATCH /v1/me`). `hash` is a fragment the page
+   * read once and keeps in memory (the invitation token): the web reloads with it; the desktop keeps
+   * the page mounted, so it needs none.
    */
-  switchLocale: (locale: SupportedLocale) => void;
+  switchLocale: (locale: SupportedLocale, options?: { readonly hash?: string }) => void;
 };

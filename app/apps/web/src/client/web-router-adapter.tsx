@@ -91,8 +91,10 @@ export const createWebRouterAdapter = ({ locale, assign, hooks = NEXT_HOOKS, rep
     useSearch: () => hooks.useSearch(),
     useLocationPath: () => hooks.usePathname(),
     // Reads the current location at call time (an event handler, not a render).
-    switchLocale: (target) => {
+    switchLocale: (target, options) => {
       const current = withSearch(stripLocalePrefix(globalThis.location.pathname), globalThis.location.search.slice(1));
+      // A fragment (the invitation token) is read once on mount: a full load in the new locale keeps it.
+      if (options?.hash !== undefined) return assign(`${localized(current, target)}#${options.hash}`);
       if (navigator === null) return assign(localized(current, target));
       navigator.replaceInLocale(current, target);
     },

@@ -134,6 +134,19 @@ describe("createWebRouterAdapter", () => {
 
     expect(navigator.calls).toEqual(["locale en-US /o/a/p/b?unit=c"]);
   });
+
+  it("reloads the page in the other locale with a fragment the page keeps in memory (the invitation token)", () => {
+    window.history.replaceState(null, "", "/pt-BR/invite");
+    const assign = vi.fn();
+    const router = createWebRouterAdapter({ locale: "pt-BR", assign, hooks: fakeHooks("/invite") });
+    const navigator = fakeNavigator();
+    router.attach(navigator);
+
+    router.switchLocale("es-419", { hash: "token=abc" });
+
+    expect(assign).toHaveBeenCalledWith("/es-419/invite#token=abc");
+    expect(navigator.calls).toEqual([]);
+  });
 });
 
 describe("stripLocalePrefix", () => {

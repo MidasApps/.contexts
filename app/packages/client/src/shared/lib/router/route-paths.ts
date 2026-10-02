@@ -40,6 +40,10 @@ export type ProfileSection = (typeof PROFILE_SECTIONS)[number];
 export type Route =
   | { id: "sign-in"; next?: string | undefined }
   | { id: "invite"; token?: string | undefined }
+  /** Open sign-up (decision 0049); `next` as on sign-in. */
+  | { id: "sign-up"; next?: string | undefined }
+  /** Password reset request (the email is typed there; never carried in the URL). */
+  | { id: "reset-password" }
   | { id: "home" }
   | { id: "organizations" }
   | { id: "organization"; organizationId: string }
@@ -57,6 +61,8 @@ export type RouteId = Route["id"];
 export const ROUTE_IDS = [
   "sign-in",
   "invite",
+  "sign-up",
+  "reset-password",
   "home",
   "organizations",
   "organization",
@@ -96,6 +102,10 @@ export const routeHref = (route: Route): string => {
       return withSearch("/sign-in", { next: route.next });
     case "invite":
       return route.token === undefined ? "/invite" : `/invite#${new URLSearchParams({ token: route.token }).toString()}`;
+    case "sign-up":
+      return withSearch("/sign-up", { next: route.next });
+    case "reset-password":
+      return "/reset-password";
     case "home":
       return "/";
     case "organizations":

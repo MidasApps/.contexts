@@ -13,6 +13,8 @@ export type MemoryRouter = RouterPort & {
   history: () => readonly string[];
   /** Every `switchLocale` call, oldest first. */
   localeSwitches: () => readonly SupportedLocale[];
+  /** The `hash` option of every `switchLocale` call (`undefined` when none), oldest first. */
+  localeSwitchHashes: () => readonly (string | undefined)[];
 };
 
 const paramsOf = (route: Route | null): Record<string, string | undefined> => {
@@ -32,6 +34,7 @@ export const createMemoryRouter = (initialHref = "/"): MemoryRouter => {
   const entries = [initialHref];
   const listeners = new Set<() => void>();
   const locales: SupportedLocale[] = [];
+  const hashes: (string | undefined)[] = [];
   const current = (): string => entries.at(-1) ?? "/";
   const subscribe = (listener: () => void) => {
     listeners.add(listener);
@@ -65,9 +68,13 @@ export const createMemoryRouter = (initialHref = "/"): MemoryRouter => {
     useSearchParam: (name) => new URL(useHref(), "http://memory.invalid").searchParams.get(name),
     useSearch: () => new URL(useHref(), "http://memory.invalid").searchParams.toString(),
     useLocationPath: () => new URL(useHref(), "http://memory.invalid").pathname,
-    switchLocale: (locale) => void locales.push(locale),
+    switchLocale: (locale, options) => {
+      locales.push(locale);
+      hashes.push(options?.hash);
+    },
     current,
     history: () => [...entries],
     localeSwitches: () => [...locales],
+    localeSwitchHashes: () => [...hashes],
   };
 };
