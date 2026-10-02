@@ -1,5 +1,5 @@
 import { screen, waitFor, within } from "@testing-library/react";
-import type { ReactElement } from "react";
+import { lazy, type ReactElement } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { GenerativeUiView } from "#/entities/message/index.ts";
 import { ErrorReporterProvider } from "#/shared/lib/errors/error-reporter.tsx";
@@ -185,5 +185,26 @@ describe("GenerativePart", () => {
     expect(within(table).getByRole("row", { name: /2026-09/ }).textContent).toContain("17,5");
     expect(within(table).getByRole("row", { name: /2026-10/ }).textContent).toContain("—");
     await expectNoAxeViolations(container);
+  });
+  describe("while a lazy component loads", () => {
+    const Pending = lazy(() => new Promise<never>(() => undefined));
+    const skeletonOf = (container: HTMLElement): HTMLElement | null => container.querySelector('[data-slot="skeleton"]');
+
+    it("reserves the height the entry declares, so the conversation does not jump when it arrives", () => {
+      const registry = createUiRegistry({ slow: uiEntry({ schema: CreateTestNoteContract.schema, Component: Pending, skeletonClassName: "h-80" }) });
+      const { container } = setup({ component: "slow", props: { title: "x" } }, { provider: { registry } });
+      expect(skeletonOf(container)?.className).toContain("h-80");
+      expect(skeletonOf(container)?.className).not.toContain("h-24");
+    });
+
+    it("uses a short placeholder for an entry that declares no height", () => {
+      const registry = createUiRegistry({ slow: uiEntry({ schema: CreateTestNoteContract.schema, Component: Pending }) });
+      const { container } = setup({ component: "slow", props: { title: "x" } }, { provider: { registry } });
+      expect(skeletonOf(container)?.className).toContain("h-24");
+    });
+
+    it("gives the core chart a placeholder as tall as the chart figure", () => {
+      expect(CORE_UI_COMPONENTS["chart"]?.skeletonClassName).toContain("h-80");
+    });
   });
 });

@@ -19,6 +19,11 @@ export type GenerativeComponentProps<Props> = {
 export type UiRegistryEntry<Props = unknown> = {
   readonly schema: z.ZodType<Props>;
   readonly Component: ComponentType<GenerativeComponentProps<Props>>;
+  /**
+   * Height (and any other sizing) of the placeholder while a lazily loaded component arrives, e.g.
+   * `"h-80"`: as tall as the component, so the conversation does not jump. Default: a short block.
+   */
+  readonly skeletonClassName?: string;
 };
 
 /** Component id (`ui.component` of a tool output) → entry. */

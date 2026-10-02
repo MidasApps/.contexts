@@ -18,7 +18,8 @@ const LazyChartPart = lazy(async () => ({ default: (await import("./components/c
 export const CORE_UI_COMPONENTS: Readonly<Record<string, UiRegistryEntry>> = {
   "schema-form": uiEntry({ schema: SchemaFormPropsSchema, Component: SchemaFormPart }),
   "data-table": uiEntry({ schema: DataTablePropsSchema, Component: DataTablePart }),
-  chart: uiEntry({ schema: ChartPropsSchema, Component: LazyChartPart }),
+  // The chart figure: padding, caption, the `h-56` plot and the legend (~320 px).
+  chart: uiEntry({ schema: ChartPropsSchema, Component: LazyChartPart, skeletonClassName: "h-80" }),
   "approval-diff": uiEntry({ schema: ApprovalDiffPropsSchema, Component: ApprovalDiffPart }),
   picker: uiEntry({ schema: PickerPropsSchema, Component: PickerPart }),
   "approval-pending": uiEntry({ schema: ApprovalPendingPropsSchema, Component: ApprovalPendingPart }),

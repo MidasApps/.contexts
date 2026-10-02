@@ -3,6 +3,7 @@
 import { Component, Suspense, useEffect, type ReactNode } from "react";
 import type { GenerativeUiView } from "#/entities/message/index.ts";
 import { useReportError, type ErrorReporter } from "#/shared/lib/errors/error-reporter.tsx";
+import { cn } from "#/shared/lib/cn.ts";
 import { Skeleton } from "#/shared/ui/atoms/Skeleton/Skeleton.tsx";
 import { useGenerativeUi } from "../model/generative-ui-context.tsx";
 import { resolveGenerativeUi } from "../model/ui-registry.ts";
@@ -73,10 +74,10 @@ export function GenerativePart({ ui, toolCallId, toolName, interactive, fallback
   }, [problem, component, toolCallId, reportError]);
 
   if (!resolution.ok) return <>{fallback}</>;
-  const { Component: Part } = resolution.entry;
+  const { Component: Part, skeletonClassName } = resolution.entry;
   return (
     <PartBoundary component={component} fallback={fallback} reportError={reportError}>
-      <Suspense fallback={<Skeleton className="h-24 w-full" />}>
+      <Suspense fallback={<Skeleton className={cn("h-24 w-full rounded-md", skeletonClassName)} />}>
         <div data-slot="generative-ui" data-component={component}>
           <Part props={resolution.props} toolCallId={toolCallId} toolName={toolName} interactive={interactive} fallback={fallback} />
         </div>
