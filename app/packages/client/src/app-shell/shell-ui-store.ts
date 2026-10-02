@@ -20,7 +20,7 @@ const rememberedPanel = (
   key: string,
   value: string | undefined,
 ): Readonly<Record<string, string>> => {
-  const { [key]: _forgotten, ...rest } = current;
+  const rest = Object.fromEntries(Object.entries(current).filter(([remembered]) => remembered !== key));
   return value === undefined ? rest : { ...rest, [key]: value };
 };
 

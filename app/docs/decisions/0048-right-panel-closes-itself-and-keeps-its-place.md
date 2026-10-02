@@ -30,9 +30,9 @@ mounted while closed keeps hiding the rest of the page from assistive tech.
    the value (the conversation id).
 3. **The chat side panel continues its conversation.** It reads the remembered id as its
    `conversationId`, records the id the server gives a new conversation, forgets it on "Nova
-   conversa", and offers "Abrir no chat" (the chat page at that conversation) once it has one. A
-   reopened panel loads the stored conversation and re-attaches to a run that is still streaming
-   (decision 0031), so an answer that was arriving when the panel closed is not lost.
+   conversa", and offers "Abrir na página do assistente" (the chat page at that conversation) once
+   it has one. A reopened panel loads the stored conversation and re-attaches to a run that is still
+   streaming (decision 0031), so an answer that was arriving when the panel closed is not lost.
 
 ## Consequences
 

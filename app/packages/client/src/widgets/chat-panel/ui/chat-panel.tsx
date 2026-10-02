@@ -2,11 +2,9 @@
 
 import { CORE_CONTRACTS, type ContractDefinition } from "@core/contracts";
 import type { ChatTransport, UIMessage } from "ai";
-import { SquarePenIcon } from "lucide-react";
 import { type ReactNode, useEffect, useId, useMemo } from "react";
 import { useTranslations } from "use-intl";
 import { ASSISTANT_AGENT_ID, agentNameOf, useChatAgents } from "#/entities/chat-agent/index.ts";
-import { AgentPicker } from "#/features/chat-agent-picker/index.ts";
 import type { UseUploadQueueArgs } from "#/features/chat-upload/index.ts";
 import type { ComposerVoiceProps, ReadAloudActionProps } from "#/features/chat-voice/index.ts";
 import {
@@ -24,6 +22,7 @@ import { ErrorState } from "#/shared/ui/molecules/ErrorState/ErrorState.tsx";
 import { LoadingState } from "#/shared/ui/molecules/LoadingState/LoadingState.tsx";
 import { useConversationThread } from "../model/use-conversation-thread.ts";
 import { type PanelThread, usePanelThread } from "../model/use-panel-thread.ts";
+import { ChatPanelHeader } from "./chat-panel-header.tsx";
 import { type ChatSuggestion, ChatThread } from "./chat-thread.tsx";
 
 export type ChatPanelProps = {
@@ -50,6 +49,10 @@ export type ChatPanelProps = {
   defaultCurrency?: string | undefined;
   /** Extra composer tools of the host (attachments and voice are the panel's own). */
   tools?: ReactNode;
+  /** Host actions in the header, before "new conversation". */
+  headerActions?: ReactNode;
+  /** Closes the host (the shell's right panel): a close button ends the header. */
+  onClose?: (() => void) | undefined;
   className?: string | undefined;
   /** Tests pass a scripted transport, scripted uploads, a fake microphone and fake audio URLs. */
   transport?: ChatTransport<UIMessage> | undefined;
@@ -140,43 +143,6 @@ function StoredThread(props: StoredThreadProps) {
 }
 
 /**
- * The header of the panel: the title, which agent answers — a picker while the conversation is
- * new, its name once it exists (the server keeps the agent of a stored conversation) — and
- * "new conversation".
- */
-function ChatPanelHeader(props: {
-  titleId: string;
-  organizationId: string;
-  agentId: string;
-  fixed: boolean;
-  agentName: string;
-  onPick: (agentId: string) => void;
-  onNew: () => void;
-}) {
-  const t = useTranslations("chat");
-  return (
-    <header className="flex min-h-12 shrink-0 flex-wrap items-center justify-between gap-x-3 gap-y-1 border-b border-border px-4 py-1.5">
-      <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1">
-        <h2 id={props.titleId} className="truncate text-sm font-semibold text-foreground">
-          {t("panel.title")}
-        </h2>
-        {props.fixed ? (
-          <p data-slot="conversation-agent" className="truncate text-body-sm text-muted-foreground">
-            {t("agents.current", { name: props.agentName })}
-          </p>
-        ) : (
-          <AgentPicker organizationId={props.organizationId} value={props.agentId} onChange={props.onPick} />
-        )}
-      </div>
-      <Button variant="ghost" size="sm" onClick={props.onNew}>
-        <SquarePenIcon aria-hidden="true" />
-        {t("panel.newConversation")}
-      </Button>
-    </header>
-  );
-}
-
-/**
  * The chat widget shared by web and desktop (SP4 spec §5): header, message log, status line and
  * composer, for a new conversation or a stored one (loaded, then resumed when a run is still
  * streaming). It fills its container — the chat view or the shell's right panel — and lays
@@ -231,6 +197,8 @@ export function ChatPanel(props: ChatPanelProps) {
         agentName={agentName}
         onPick={setAgentId}
         onNew={startNew}
+        actions={props.headerActions}
+        onClose={props.onClose}
       />
       {thread.storedId === undefined ? (
         <ChatThread

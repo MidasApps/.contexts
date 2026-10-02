@@ -8,7 +8,7 @@ import { defineClientModule } from "#/app-shell/modules/define-client-module.ts"
 import { renderApp } from "#/app-shell/testing/render-app.tsx";
 import { MEMBER_PERMISSIONS, shellRoutes } from "#/app-shell/testing/shell-routes.ts";
 import { expectNoAxeViolations } from "#/shared/testing/axe.ts";
-import { type FakeRoutes, ok, page } from "#/shared/testing/fake-api.ts";
+import { chatStream, ok, page, type FakeRoutes } from "#/shared/testing/fake-api.ts";
 import { IDS } from "#/shared/testing/fixtures.ts";
 import { buildConversation } from "#/widgets/chat-history-sidebar/testing/conversations-api.fixture.ts";
 import { CHAT_SHELL_SLOTS, useChatEnvironment } from "#/widgets/chat-panel/index.ts";
@@ -73,6 +73,8 @@ describe("ChatView", () => {
     );
     await waitFor(() => expect(screen.getByRole("heading", { name: "Como posso ajudar?" })).toBeTruthy());
     expect(router.current()).toBe(PATH);
+    // Same as the panel's own "Nova conversa": the composer takes the focus.
+    await waitFor(() => expect(document.activeElement).toBe(screen.getByRole("textbox", { name: "Mensagem" })));
   });
 
   it("is forbidden without the chat permission and not found outside a project", async () => {
@@ -105,6 +107,49 @@ describe("chat in the shell's right panel", () => {
     expect(toggle.getAttribute("aria-pressed")).toBe("true");
     const panel = screen.getByRole("complementary", { name: "Painel lateral" });
     expect(within(panel).getByRole("textbox", { name: "Mensagem" })).toBeTruthy();
+  });
+
+  it("keeps the conversation it started when it is closed and reopened, and links to it on the chat page", async () => {
+    const answer = [
+      { type: "start", messageId: "a-1" },
+      { type: "text-start", id: "t-1" },
+      { type: "text-delta", id: "t-1", delta: "Resposta do painel." },
+      { type: "text-end", id: "t-1" },
+      { type: "finish" },
+    ];
+    const { user } = renderApp(
+      <AppLayout>
+        <h1>Página</h1>
+      </AppLayout>,
+      {
+        path: `/o/${IDS.organization}/p/${IDS.project}`,
+        slots: CHAT_SHELL_SLOTS,
+        routes: shellRoutes(CHAT_PERMISSIONS, chatRoutes({ "POST /v1/chat": chatStream(answer, A) })),
+      },
+    );
+    await user.click(await screen.findByRole("button", { name: "Assistente" }, LOADED));
+    const panel = screen.getByRole("complementary", { name: "Painel lateral" });
+    expect(within(panel).queryByRole("link", { name: "Abrir na página do assistente" })).toBeNull();
+    await user.type(within(panel).getByRole("textbox", { name: "Mensagem" }), "Olá{Enter}");
+    expect(await within(panel).findByText("Resposta do painel.", {}, LOADED)).toBeTruthy();
+    expect(within(panel).getByRole("link", { name: "Abrir na página do assistente" }).getAttribute("href")).toBe(
+      `${PATH}/${A}`,
+    );
+
+    await user.click(within(panel).getByRole("button", { name: "Fechar o assistente" }));
+    expect(screen.getByRole("button", { name: "Assistente" }).getAttribute("aria-pressed")).toBe("false");
+    expect(screen.queryByRole("textbox", { name: "Mensagem" })).toBeNull();
+
+    await user.click(screen.getByRole("button", { name: "Assistente" }));
+    const reopened = screen.getByRole("complementary", { name: "Painel lateral" });
+    // The stored conversation comes back (the server's copy of the thread).
+    expect(await within(reopened).findByText("O prazo é de 30 dias.", {}, LOADED)).toBeTruthy();
+
+    await user.click(within(reopened).getByRole("button", { name: "Nova conversa" }));
+    expect(await within(reopened).findByRole("heading", { name: "Como posso ajudar?" })).toBeTruthy();
+    await user.click(within(reopened).getByRole("button", { name: "Fechar o assistente" }));
+    await user.click(screen.getByRole("button", { name: "Assistente" }));
+    expect(await screen.findByRole("heading", { name: "Como posso ajudar?" })).toBeTruthy();
   });
 
   it("is not offered on the chat page, outside a project or without the permission", async () => {

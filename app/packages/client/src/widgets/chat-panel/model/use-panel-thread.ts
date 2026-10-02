@@ -42,9 +42,15 @@ export const usePanelThread = (
 
   // The owner of the URL moved to another conversation: start that thread. When it only caught
   // up with the id this thread got from the server, nothing remounts (the answer is streaming).
+  // A move to a new conversation (the history's "new conversation") focuses the composer, like
+  // the header's button does.
   if (conversationId !== thread.prop) {
     const caughtUp = conversationId === thread.conversationId;
-    setThread(caughtUp ? { ...thread, prop: conversationId } : threadFor(thread.key + 1, conversationId));
+    setThread(
+      caughtUp
+        ? { ...thread, prop: conversationId }
+        : { ...threadFor(thread.key + 1, conversationId), fresh: conversationId === undefined },
+    );
     // Another conversation: a stored one names its agent once loaded, a new one starts with the assistant.
     if (!caughtUp) setAgentId(ASSISTANT_AGENT_ID);
   }

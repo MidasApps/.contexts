@@ -54,6 +54,7 @@ function ChatWorkspace({ place }: { place: ChatPlace }) {
       activeConversationId={conversationId}
       onNavigate={() => setHistoryOpen(false)}
       onDeleted={onDeleted}
+      onClose={compact ? () => setHistoryOpen(false) : undefined}
       className={compact ? undefined : "w-[280px] shrink-0 border-r border-border"}
     />
   );
@@ -85,7 +86,7 @@ function ChatWorkspace({ place }: { place: ChatPlace }) {
       </div>
       {compact ? (
         <Sheet open={historyOpen} onOpenChange={setHistoryOpen}>
-          <SheetContent side="left" className="w-full p-0 sm:max-w-[320px]">
+          <SheetContent side="left" showCloseButton={false} className="w-full p-0 sm:max-w-[320px]">
             <SheetHeader className="sr-only">
               <SheetTitle>{t("historyPanel")}</SheetTitle>
               <SheetDescription>{t("historyPanel")}</SheetDescription>

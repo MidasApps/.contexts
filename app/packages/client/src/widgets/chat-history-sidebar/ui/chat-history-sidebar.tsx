@@ -2,7 +2,7 @@
 
 import type { Conversation } from "@core/contracts";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { SquarePenIcon } from "lucide-react";
+import { SquarePenIcon, XIcon } from "lucide-react";
 import { useId, useState } from "react";
 import { useTranslations } from "use-intl";
 import { ASSISTANT_AGENT_ID, agentNameOf, useChatAgents } from "#/entities/chat-agent/index.ts";
@@ -30,6 +30,8 @@ export type ChatHistorySidebarProps = {
   /** A row or "new conversation" was followed (the compact layout closes its sheet). */
   onNavigate?: (() => void) | undefined;
   onDeleted?: ((conversationId: string) => void) | undefined;
+  /** Closes the host (the compact sheet): a close button ends the header instead of a corner X over it. */
+  onClose?: (() => void) | undefined;
   className?: string | undefined;
 };
 
@@ -220,6 +222,7 @@ export function ChatHistorySidebar({
   activeConversationId,
   onNavigate,
   onDeleted,
+  onClose,
   className,
 }: ChatHistorySidebarProps) {
   const t = useTranslations("chat.history");
@@ -249,12 +252,19 @@ export function ChatHistorySidebar({
         <h2 id={titleId} className="truncate text-sm font-semibold text-foreground">
           {t("title")}
         </h2>
-        <Button variant="ghost" size="sm" asChild>
-          <RouteLink to={{ id: "chat", organizationId, projectId }} onClick={onNavigate}>
-            <SquarePenIcon aria-hidden="true" />
-            {t("new")}
-          </RouteLink>
-        </Button>
+        <div className="flex shrink-0 items-center gap-1">
+          <Button variant="ghost" size="sm" asChild>
+            <RouteLink to={{ id: "chat", organizationId, projectId }} onClick={onNavigate}>
+              <SquarePenIcon aria-hidden="true" />
+              {t("new")}
+            </RouteLink>
+          </Button>
+          {onClose === undefined ? null : (
+            <Button variant="ghost" size="icon-sm" aria-label={t("close")} onClick={onClose}>
+              <XIcon aria-hidden="true" />
+            </Button>
+          )}
+        </div>
       </div>
       <HistoryToolbar
         query={query}

@@ -11,7 +11,13 @@ export type FakeRequest = {
   readonly headers: Headers;
 };
 
-export type FakeResponse = { readonly status: number; readonly body?: unknown };
+export type FakeResponse = {
+  readonly status: number;
+  readonly body?: unknown;
+  /** A raw text body with its own headers instead of JSON (an event stream). */
+  readonly text?: string;
+  readonly headers?: Readonly<Record<string, string>>;
+};
 export type FakeHandler = (request: FakeRequest) => FakeResponse | Promise<FakeResponse>;
 export type FakeRoutes = Record<string, FakeHandler | FakeResponse>;
 
@@ -65,6 +71,25 @@ export const apiError = (
 
 export const noContent = (): FakeResponse => ({ status: 204 });
 
+/** A `/v1/chat` answer: the UI message stream (SSE) of `chunks`, naming the conversation. */
+export const chatStream = (chunks: readonly unknown[], conversationId: string): FakeResponse => ({
+  status: 200,
+  text: `${chunks
+    .map(
+      (chunk) => `data: ${JSON.stringify(chunk)}
+
+`,
+    )
+    .join("")}data: [DONE]
+
+`,
+  headers: {
+    "content-type": "text/event-stream",
+    "x-vercel-ai-ui-message-stream": "v1",
+    "x-conversation-id": conversationId,
+  },
+});
+
 const matchPattern = (pattern: string, path: string): Record<string, string> | null => {
   const want = pattern.split("/");
   const got = path.split("/");
@@ -78,11 +103,13 @@ const matchPattern = (pattern: string, path: string): Record<string, string> | n
   return params;
 };
 
-const toResponse = ({ status, body }: FakeResponse): Response =>
-  new Response(body === undefined || status === 204 ? null : JSON.stringify(body), {
-    status,
-    headers: { "content-type": "application/json", "x-request-id": FAKE_REQUEST_ID },
-  });
+const toResponse = ({ status, body, text, headers }: FakeResponse): Response =>
+  text === undefined
+    ? new Response(body === undefined || status === 204 ? null : JSON.stringify(body), {
+        status,
+        headers: { "content-type": "application/json", "x-request-id": FAKE_REQUEST_ID },
+      })
+    : new Response(text, { status, headers: { "x-request-id": FAKE_REQUEST_ID, ...headers } });
 
 const parseBody = (init: RequestInit): unknown => (typeof init.body === "string" ? JSON.parse(init.body) : undefined);
 

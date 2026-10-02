@@ -123,6 +123,17 @@ describe("ChatHistorySidebar", () => {
     expect(document.querySelector("[data-slot=history-count]")?.textContent).toBe("Mostrando 2 conversas");
   });
 
+  it("offers its own close button only when the host passes one (the compact sheet)", async () => {
+    const onClose = vi.fn();
+    const first = setup();
+    await screen.findByRole("link", { name: "Plano de integração" }, LOADED);
+    expect(screen.queryByRole("button", { name: "Fechar o histórico" })).toBeNull();
+    first.unmount();
+    const { user } = setup({ onClose });
+    await user.click(await screen.findByRole("button", { name: "Fechar o histórico" }));
+    expect(onClose).toHaveBeenCalledOnce();
+  });
+
   it("shows a loading state, then an empty state with no conversations", async () => {
     const { container } = setup({}, { summaryText: "", items: [] });
     expect(screen.getAllByRole("status").some((node) => node.textContent?.includes("Carregando conversas…"))).toBe(
