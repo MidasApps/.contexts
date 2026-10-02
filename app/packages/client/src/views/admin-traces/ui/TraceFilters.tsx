@@ -49,7 +49,7 @@ export function TraceFilters({ values, onChange }: TraceFiltersProps) {
     if (valid) onChange({ agentId: agent });
   };
   return (
-    <form role="search" aria-label={t("label")} noValidate onSubmit={submit} className="flex flex-col gap-3 lg:flex-row lg:items-end">
+    <form role="search" aria-label={t("label")} noValidate onSubmit={submit} className="flex flex-col gap-3 lg:flex-row lg:flex-wrap lg:items-end">
       <AdminOrganizationFilter value={values.organizationId} onValueChange={(organizationId) => onChange({ organizationId })} />
       <div className="flex flex-col gap-1.5">
         <Label htmlFor={statusId}>{t("status")}</Label>
