@@ -2,6 +2,7 @@
 
 import { useFormatter, useTranslations } from "use-intl";
 import { PromptVerdictPill } from "#/entities/prompt-version/index.ts";
+import { RouteLink } from "#/shared/lib/router/router-context.tsx";
 import { StatusPill } from "#/shared/ui/molecules/StatusPill/StatusPill.tsx";
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "#/shared/ui/atoms/Table/Table.tsx";
 import type { PromptEvalOutcome } from "../model/use-run-prompt-eval.ts";
@@ -16,7 +17,9 @@ export function PromptEvalResultTable({ outcome }: { outcome: PromptEvalOutcome 
       <p className="flex flex-wrap items-center gap-2 text-sm">
         {t("verdictOf", { version: outcome.version.version })}
         <PromptVerdictPill verdict={outcome.result.verdict} />
-        <span className="font-mono text-[11.5px] text-muted-foreground">{outcome.result.experimentId}</span>
+        <RouteLink className="text-[13px] font-medium underline underline-offset-4" to={{ id: "admin", rest: "evals", search: { a: outcome.result.experimentId } }}>
+          {t("openExperiment")}
+        </RouteLink>
       </p>
       <Table scrollLabel={caption}>
         <TableCaption className="sr-only">{caption}</TableCaption>

@@ -329,5 +329,8 @@
     "weekly": "Toda semana, {weekday}, às {time}",
     "monthly": "Todo dia {day} do mês às {time}",
     "withZone": "{description} ({zone})"
+  },
+  "evalExperiment": {
+    "label": "{agent} · {dataset} · {when}"
   }
 }

@@ -45,7 +45,8 @@ describe("AdminEvalsView", () => {
     const base = within(table).getByRole("row", { name: /exp_01J8Z3K4M5/u });
     expect(within(base).getByText("Concluído")).toBeDefined();
     expect(within(base).getByText("Aprovado")).toBeDefined();
-    expect(within(base).getByText("Agente assistant")).toBeDefined();
+    // Experiments read as agent · dataset · start; the opaque id stays as secondary text.
+    expect(within(base).getByText(/^Assistente · .+ · /u)).toBeDefined();
     const scores = within(base).getByRole("list", { name: "Notas de exp_01J8Z3K4M5" });
     expect(within(scores).getAllByRole("listitem").map((item) => plain(item.textContent))).toEqual(["tool-routing: 94% (mínimo 90%)", "tenant-leak: 100% (mínimo 100%)"]);
     const candidate = within(table).getByRole("row", { name: /exp_candidate/u });
@@ -57,8 +58,8 @@ describe("AdminEvalsView", () => {
     expect(within(running).getAllByText("Em andamento")).toHaveLength(2);
     expect(screen.getByText("Escolha dois experimentos, de qualquer página, para comparar as notas por avaliador.")).toBeDefined();
     expect(api.calls.find((call) => call.path === "/v1/admin/experiments")?.query).toBe("?page=0&perPage=20");
-    // Only the open tab loads.
-    expect(api.callLines()).not.toContain("GET /v1/admin/datasets");
+    // The experiments tab reads the datasets once, to name each experiment's dataset.
+    expect(api.callLines().filter((line) => line === "GET /v1/admin/datasets")).toHaveLength(1);
     await expectNoAxeViolations(container);
   });
 
@@ -70,7 +71,7 @@ describe("AdminEvalsView", () => {
     await user.click(screen.getByRole("button", { name: "Comparar o experimento exp_candidate" }));
     expect(router.current()).toBe("/admin/evals?a=exp_01J8Z3K4M5&b=exp_candidate");
     const chart = await screen.findByRole("table", { name: "Nota média por avaliador" });
-    expect(within(chart).getAllByRole("columnheader").map((cell) => cell.textContent)).toEqual(["Avaliador", "A · exp_01J8Z3K4M5", "B · exp_candidate", "Mínimo"]);
+    expect(within(chart).getAllByRole("columnheader").map((cell) => cell.textContent)).toEqual(["Avaliador", "A · Assistente · assistant.v1 · 30 de set. de 2026, 09:00", "B · Assistente · assistant.v1 · 30 de set. de 2026, 09:00", "Mínimo"]);
     expect(within(within(chart).getByRole("row", { name: /tool-routing/u })).getAllByRole("cell").map((cell) => plain(cell.textContent))).toEqual(["94%", "85%", "90%"]);
     const verdicts = screen.getByRole("list", { name: "Resultado por avaliador" });
     expect(within(verdicts).getAllByRole("listitem").map((item) => plain(item.textContent))).toEqual(["tool-routing: B pior que A (-9%)", "tenant-leak: sem diferença"]);

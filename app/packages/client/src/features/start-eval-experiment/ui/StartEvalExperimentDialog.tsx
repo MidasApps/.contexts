@@ -16,6 +16,7 @@ import { ApiErrorAlert } from "#/shared/ui/molecules/ErrorState/ApiErrorAlert.ts
 import { ApiErrorState } from "#/shared/ui/molecules/ErrorState/ApiErrorState.tsx";
 import { Field, FieldControl, FieldDescription, FieldError, FieldGroup, FieldLabel } from "#/shared/ui/molecules/Field/Field.tsx";
 import { LoadingState } from "#/shared/ui/molecules/LoadingState/LoadingState.tsx";
+import { useAgentLabel } from "#/shared/lib/labels/use-catalog-labels.ts";
 import { OfflineNotice } from "#/shared/ui/molecules/OfflineNotice/OfflineNotice.tsx";
 import { notify } from "#/shared/ui/molecules/Toaster/notify.ts";
 import { evaluableAgents, refusalProblems, validateExperimentDraft, type ExperimentDraft, type ExperimentDraftProblems } from "../model/experiment-draft.ts";
@@ -29,6 +30,7 @@ export type StartEvalExperimentDialogProps = {
 type FieldsProps = { datasets: readonly EvalDataset[]; agents: readonly string[]; draft: ExperimentDraft; setDraft: (draft: ExperimentDraft) => void; problems: ExperimentDraftProblems };
 
 function ExperimentFields({ datasets, agents, draft, setDraft, problems }: FieldsProps) {
+  const agentLabel = useAgentLabel();
   const t = useTranslations("settings.evals.start");
   return (
     <FieldGroup>
@@ -54,14 +56,14 @@ function ExperimentFields({ datasets, agents, draft, setDraft, problems }: Field
         <FieldLabel>{t("agent")}</FieldLabel>
         <Select value={draft.agentId} onValueChange={(agentId) => setDraft({ ...draft, agentId })}>
           <FieldControl>
-            <SelectTrigger className="w-full font-mono">
+            <SelectTrigger className="w-full">
               <SelectValue />
             </SelectTrigger>
           </FieldControl>
           <SelectContent>
             {agents.map((agent) => (
-              <SelectItem key={agent} value={agent} className="font-mono">
-                {agent}
+              <SelectItem key={agent} value={agent}>
+                {agentLabel(agent)}
               </SelectItem>
             ))}
           </SelectContent>

@@ -1,5 +1,6 @@
 "use client";
 
+import type { EvalExperimentSummary } from "@core/contracts";
 import { useId } from "react";
 import type { ExperimentPairState } from "#/entities/eval-experiment/index.ts";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
@@ -23,9 +24,11 @@ export type ExperimentComparisonPanelProps = {
   readonly pair: ExperimentPairState;
   readonly onClear: () => void;
   readonly copy: ExperimentComparisonCopy;
+  /** How an experiment is named in the chart; defaults to its id. */
+  readonly nameOf?: ((experiment: EvalExperimentSummary) => string) | undefined;
 };
 
-function PanelBody({ pair, copy }: Pick<ExperimentComparisonPanelProps, "pair" | "copy">) {
+function PanelBody({ pair, copy, nameOf }: Pick<ExperimentComparisonPanelProps, "pair" | "copy" | "nameOf">) {
   switch (pair.status) {
     case "idle":
       return <p className="text-sm text-muted-foreground">{copy.hint}</p>;
@@ -46,7 +49,7 @@ function PanelBody({ pair, copy }: Pick<ExperimentComparisonPanelProps, "pair" |
     case "error":
       return <ApiErrorState error={pair.error} headingLevel={3} frame="plain" onRetry={pair.retry} retrying={pair.retrying} />;
     case "ready":
-      return <ExperimentCompare a={pair.a} b={pair.b} />;
+      return <ExperimentCompare a={pair.a} b={pair.b} nameOf={nameOf} />;
   }
 }
 
@@ -55,7 +58,7 @@ function PanelBody({ pair, copy }: Pick<ExperimentComparisonPanelProps, "pair" |
  * next to the "Comparar" toggles (decision 0049). It names the chosen pair, offers to clear it and
  * keeps loading, gone and failed reads of an experiment from another page apart.
  */
-export function ExperimentComparisonPanel({ ids, pair, onClear, copy }: ExperimentComparisonPanelProps) {
+export function ExperimentComparisonPanel({ ids, pair, onClear, copy, nameOf }: ExperimentComparisonPanelProps) {
   const titleId = useId();
   return (
     <section aria-labelledby={titleId} className="flex flex-col gap-3 rounded-xl border border-border bg-card p-4">
@@ -70,7 +73,7 @@ export function ExperimentComparisonPanel({ ids, pair, onClear, copy }: Experime
           </Button>
         )}
       </div>
-      <PanelBody pair={pair} copy={copy} />
+      <PanelBody pair={pair} copy={copy} nameOf={nameOf} />
     </section>
   );
 }

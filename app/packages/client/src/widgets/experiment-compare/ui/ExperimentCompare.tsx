@@ -13,7 +13,11 @@ export type ExperimentCompareProps = {
   a: EvalExperimentSummary;
   /** The experiment compared against it. */
   b: EvalExperimentSummary;
+  /** How an experiment is named in the chart (its agent, dataset and start); defaults to its id. */
+  nameOf?: ((experiment: EvalExperimentSummary) => string) | undefined;
 };
+
+const byId = (experiment: EvalExperimentSummary): string => experiment.experimentId;
 
 const OUTCOME_KEYS = { better: "better", worse: "worse", same: "same", "only-a": "onlyA", "only-b": "onlyB" } as const;
 const OUTCOME_ICONS: Record<ScoreComparison["outcome"], IconName> = { better: "circle-check", worse: "alert-triangle", same: "info", "only-a": "info", "only-b": "info" };
@@ -24,7 +28,7 @@ const OUTCOME_ICONS: Record<ScoreComparison["outcome"], IconName> = { better: "c
  * whether B is better, worse or the same, with the difference in percentage points. The
  * comparison is computed here; the API has no compare endpoint.
  */
-export function ExperimentCompare({ a, b }: ExperimentCompareProps) {
+export function ExperimentCompare({ a, b, nameOf = byId }: ExperimentCompareProps) {
   const t = useTranslations("admin.evals.compare");
   const format = useFormatter();
   const rows = useMemo(() => compareExperiments(a, b), [a, b]);
@@ -35,12 +39,12 @@ export function ExperimentCompare({ a, b }: ExperimentCompareProps) {
     <div data-slot="experiment-compare" className="flex flex-col gap-4">
       <BarChartFigure
         title={t("chartTitle")}
-        description={t("chartDescription", { a: a.experimentId, b: b.experimentId })}
+        description={t("chartDescription", { a: nameOf(a), b: nameOf(b) })}
         rowHeader={t("scorer")}
         formatValue={percent}
         series={[
-          { key: "a", label: t("seriesA", { id: a.experimentId }) },
-          { key: "b", label: t("seriesB", { id: b.experimentId }) },
+          { key: "a", label: t("seriesA", { id: nameOf(a) }) },
+          { key: "b", label: t("seriesB", { id: nameOf(b) }) },
           { key: "baseline", label: t("baseline"), color: "var(--muted-foreground)" },
         ]}
         rows={rows.map((row) => ({ id: row.scorer, label: row.scorer, values: { a: row.a, b: row.b, baseline: row.baseline } }))}

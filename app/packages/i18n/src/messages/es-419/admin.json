@@ -790,6 +790,7 @@
       "failedTitle": "La evaluación de la versión {version} no se ejecutó",
       "caption": "Resultado por evaluador de la versión {version}",
       "verdictOf": "Veredicto de la versión {version}:",
+      "openExperiment": "Ver el experimento en evaluaciones",
       "scorer": "Evaluador",
       "mean": "Promedio",
       "result": "Resultado",

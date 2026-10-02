@@ -790,6 +790,7 @@
       "failedTitle": "The evaluation of version {version} did not run",
       "caption": "Result per scorer of version {version}",
       "verdictOf": "Verdict of version {version}:",
+      "openExperiment": "See the experiment in evals",
       "scorer": "Scorer",
       "mean": "Mean",
       "result": "Result",

@@ -123,8 +123,8 @@ describe("SettingsEvalsView", () => {
     await user.click(await screen.findByRole("button", { name: "Iniciar experimento" }));
     const dialog = await screen.findByRole("dialog", { name: "Iniciar experimento" });
     await user.click(await within(dialog).findByRole("combobox", { name: "Agente" }));
-    expect(screen.queryByRole("option", { name: "action" })).toBeNull();
-    await user.click(await screen.findByRole("option", { name: "knowledge" }));
+    expect(screen.queryByRole("option", { name: "Ações" })).toBeNull();
+    await user.click(await screen.findByRole("option", { name: "Conhecimento" }));
     await expectNoAxeViolations(dialog);
     await user.click(within(dialog).getByRole("button", { name: "Iniciar" }));
     await waitFor(() => expect(sent).toHaveLength(1));

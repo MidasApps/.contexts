@@ -1,9 +1,9 @@
 "use client";
 
 import type { EvalExperimentSummary } from "@core/contracts";
-import { useMemo, useState } from "react";
+import { createContext, use, useMemo, useState } from "react";
 import { useFormatter, useTranslations } from "use-intl";
-import { useTenantExperimentPair, useTenantExperiments, type ExperimentPage } from "#/entities/eval-experiment/index.ts";
+import { useExperimentLabel, useTenantDatasets, useTenantExperimentPair, useTenantExperiments, type ExperimentLabel, type ExperimentPage } from "#/entities/eval-experiment/index.ts";
 import { useFormatDateTime } from "#/shared/lib/format/use-format-date-time.ts";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
 import { EmptyState } from "#/shared/ui/molecules/EmptyState/EmptyState.tsx";
@@ -26,12 +26,26 @@ const useCompare = (): Compare => {
   return { ids, toggle, clear: () => setIds([]) };
 };
 
+// Cells read the labels from context: the column definitions must keep their identity while the
+// datasets load, or TanStack remounts the cells and drops a click made meanwhile.
+const LabelsContext = createContext<ExperimentLabel | null>(null);
+const useLabels = (): ExperimentLabel => {
+  const labels = use(LabelsContext);
+  if (labels === null) throw new Error("experiment cells must render inside the experiments table");
+  return labels;
+};
+
+function DatasetName({ datasetId }: { datasetId: string }) {
+  return useLabels().dataset(datasetId);
+}
+
+/** The experiment by agent, dataset and start; its opaque id stays as secondary text for support. */
 function ExperimentName({ experiment }: { experiment: EvalExperimentSummary }) {
-  const t = useTranslations("settings.evals.experiments");
+  const labels = useLabels();
   return (
     <span className="flex min-w-0 flex-col">
-      <span className="font-mono text-[12.5px] font-medium break-all">{experiment.experimentId}</span>
-      <span className="text-[11.5px] text-muted-foreground">{t("agent", { id: experiment.agentId })}</span>
+      <span className="font-medium">{labels.name(experiment)}</span>
+      <span className="font-mono text-[11.5px] break-all text-muted-foreground">{experiment.experimentId}</span>
     </span>
   );
 }
@@ -59,7 +73,7 @@ const useColumns = (compare: Compare) => {
   return useMemo(
     () => [
       column.display({ id: "experiment", header: () => t("columns.experiment"), cell: ({ row }) => <ExperimentName experiment={row.original} /> }),
-      column.accessor("datasetId", { header: () => t("columns.dataset"), cell: ({ getValue }) => <span className="font-mono text-[12.5px]">{getValue()}</span> }),
+      column.accessor("datasetId", { header: () => t("columns.dataset"), cell: ({ getValue }) => <DatasetName datasetId={getValue()} /> }),
       column.accessor("status", { header: () => t("columns.status"), cell: ({ getValue }) => <ExperimentStatusPill status={getValue()} /> }),
       column.accessor("verdict", { header: () => t("columns.verdict"), cell: ({ getValue }) => <ExperimentVerdictPill verdict={getValue()} /> }),
       column.accessor("itemCount", { header: () => t("columns.items"), meta: { numeric: true }, cell: ({ getValue }) => format.number(getValue()) }),
@@ -73,11 +87,11 @@ const useColumns = (compare: Compare) => {
 };
 
 /** The comparison of the two chosen experiments; one that left the page (paged, refreshed) is read by id. */
-function Comparison({ organizationId, experiments, compare }: { organizationId: string; experiments: readonly EvalExperimentSummary[]; compare: Compare }) {
+function Comparison({ organizationId, experiments, compare, labels }: { organizationId: string; experiments: readonly EvalExperimentSummary[]; compare: Compare; labels: ExperimentLabel }) {
   const t = useTranslations("settings.evals.compare");
   const pair = useTenantExperimentPair(organizationId, compare.ids, experiments);
   const copy = { title: t("title"), hint: t("hint"), hintOne: t("hintOne"), missing: t("missing"), loading: t("loading"), clear: t("clear") };
-  return <ExperimentComparisonPanel ids={compare.ids} pair={pair} onClear={compare.clear} copy={copy} />;
+  return <ExperimentComparisonPanel ids={compare.ids} pair={pair} onClear={compare.clear} copy={copy} nameOf={labels.name} />;
 }
 
 type Paging = { page: number; setPage: (page: number) => void; pending: boolean };
@@ -85,6 +99,7 @@ type Paging = { page: number; setPage: (page: number) => void; pending: boolean 
 type ExperimentsTableProps = { organization: Organization; data: ExperimentPage; paging: Paging; compare: Compare; onStart: (() => void) | null };
 
 function ExperimentsTable({ organization, data, paging, compare, onStart }: ExperimentsTableProps) {
+  const labels = useExperimentLabel(useTenantDatasets(organization.id).data);
   const t = useTranslations("settings.evals.experiments");
   const start = useTranslations("settings.evals.start");
   const formatDateTime = useFormatDateTime();
@@ -96,39 +111,41 @@ function ExperimentsTable({ organization, data, paging, compare, onStart }: Expe
       : { hasPrevious: page > 1, hasNext: data.meta.hasMore, pending: paging.pending, onPrevious: () => setPage(page - 1), onNext: () => setPage(page + 1), label: t("pagination") };
   return (
     <div className="flex flex-col gap-6">
-      {data.data.length === 0 && compare.ids.length === 0 ? null : <Comparison organizationId={organization.id} experiments={data.data} compare={compare} />}
-      <DataTable
-        caption={t("caption", { organization: organization.name })}
-        captionHidden
-        columns={columns}
-        data={data.data}
-        getRowId={(experiment) => experiment.experimentId}
-        pagination={pagination}
-        stateHeadingLevel={2}
-        renderCard={(experiment) => (
-          <div className="flex flex-col gap-2">
-            <span className="flex items-start justify-between gap-2">
-              <ExperimentName experiment={experiment} />
-              <ExperimentVerdictPill verdict={experiment.verdict} />
-            </span>
-            <span className="text-xs text-muted-foreground">{t("cardMeta", { items: experiment.itemCount, when: formatDateTime(experiment.startedAt) })}</span>
-            <ExperimentScores experiment={experiment} />
-            <span className="self-start">
-              <CompareToggle experiment={experiment} compare={compare} />
-            </span>
-          </div>
-        )}
-        empty={
-          <EmptyState
-            frame="plain"
-            headingLevel={2}
-            icon="activity"
-            title={t("emptyTitle")}
-            description={onStart === null ? t("emptyDescriptionReadOnly") : t("emptyDescription")}
-            action={onStart === null ? undefined : <Button onClick={onStart}>{start("action")}</Button>}
-          />
-        }
-      />
+      {data.data.length === 0 && compare.ids.length === 0 ? null : <Comparison organizationId={organization.id} experiments={data.data} compare={compare} labels={labels} />}
+      <LabelsContext value={labels}>
+        <DataTable
+          caption={t("caption", { organization: organization.name })}
+          captionHidden
+          columns={columns}
+          data={data.data}
+          getRowId={(experiment) => experiment.experimentId}
+          pagination={pagination}
+          stateHeadingLevel={2}
+          renderCard={(experiment) => (
+            <div className="flex flex-col gap-2">
+              <span className="flex items-start justify-between gap-2">
+                <ExperimentName experiment={experiment} />
+                <ExperimentVerdictPill verdict={experiment.verdict} />
+              </span>
+              <span className="text-xs text-muted-foreground">{t("cardMeta", { items: experiment.itemCount, when: formatDateTime(experiment.startedAt) })}</span>
+              <ExperimentScores experiment={experiment} />
+              <span className="self-start">
+                <CompareToggle experiment={experiment} compare={compare} />
+              </span>
+            </div>
+          )}
+          empty={
+            <EmptyState
+              frame="plain"
+              headingLevel={2}
+              icon="activity"
+              title={t("emptyTitle")}
+              description={onStart === null ? t("emptyDescriptionReadOnly") : t("emptyDescription")}
+              action={onStart === null ? undefined : <Button onClick={onStart}>{start("action")}</Button>}
+            />
+          }
+        />
+      </LabelsContext>
     </div>
   );
 }

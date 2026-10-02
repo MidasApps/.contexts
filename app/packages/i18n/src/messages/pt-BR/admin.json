@@ -790,6 +790,7 @@
       "failedTitle": "A avaliação da versão {version} não rodou",
       "caption": "Resultado por avaliador da versão {version}",
       "verdictOf": "Veredito da versão {version}:",
+      "openExperiment": "Ver o experimento nas avaliações",
       "scorer": "Avaliador",
       "mean": "Média",
       "result": "Resultado",

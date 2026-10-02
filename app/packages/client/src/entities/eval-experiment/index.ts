@@ -28,3 +28,5 @@ export {
   useAdminExperimentPair,
   useTenantExperimentPair,
 } from "./model/use-experiment-pair.ts";
+// UX review B9: experiments named by agent, dataset and start instead of their ids.
+export { type ExperimentLabel, useExperimentLabel } from "./model/use-experiment-label.ts";
