@@ -37,6 +37,15 @@ export type CatalogLabelPart = "name" | "description";
 export const workflowLabelKeys = (workflowId: string, part: CatalogLabelPart): string[] =>
   isSafe(workflowId) && !workflowId.includes(".") ? [`common.workflows.${workflowId}.${part}`, ...moduleKeys(workflowId, "-", "workflows", part)] : [];
 
+/**
+ * Label keys of one input field of a workflow: `common.workflows.<id>.input.<field>`, then the
+ * module's `<moduleId>.workflows.<rest>.input.<field>`.
+ */
+export const workflowInputLabelKeys = (workflowId: string, field: string): string[] =>
+  /^[A-Za-z0-9][A-Za-z0-9-]*$/u.test(field) && isSafe(workflowId) && !workflowId.includes(".")
+    ? [`common.workflows.${workflowId}.input.${field}`, ...moduleKeys(workflowId, "-", "workflows", `input.${field}`)]
+    : [];
+
 /** `common.agents.<key>`, then `<moduleId>.agents.<rest>` for `<moduleId>-<rest>`. */
 export const agentLabelKeys = (agentKey: string): string[] =>
   isSafe(agentKey) && !agentKey.includes(".") ? [`common.agents.${agentKey}`, ...moduleKeys(agentKey, "-", "agents")] : [];

@@ -4,7 +4,7 @@ import { CORE_CONTRACTS, type ContractDefinition } from "@core/contracts";
 import { useCallback, useMemo } from "react";
 import { useTranslations } from "use-intl";
 import { useOptionalModuleRegistry } from "../shell/shell-registry-context.tsx";
-import { agentLabelKeys, flagLabelKeys, normalizeToolId, permissionLabelKeys, toolLabelKeys, workflowLabelKeys } from "./catalog-label-keys.ts";
+import { agentLabelKeys, flagLabelKeys, normalizeToolId, permissionLabelKeys, toolLabelKeys, workflowInputLabelKeys, workflowLabelKeys } from "./catalog-label-keys.ts";
 
 type RootTranslator = ReturnType<typeof useTranslations>;
 
@@ -31,6 +31,21 @@ export const useWorkflowLabel = (): CatalogLabel => {
       name: (id) => firstMessage(t, workflowLabelKeys(id, "name")) ?? id,
       description: (id, fallback) => firstMessage(t, workflowLabelKeys(id, "description")) ?? fallback,
     }),
+    [t],
+  );
+};
+
+/** What a workflow input field is labelled with, from its JSON Schema (`ui.labelKey` and `title` travel with contract meta). */
+export type WorkflowInputFieldRef = { readonly name: string; readonly labelKey: string | undefined; readonly title: string | undefined };
+
+/**
+ * Label of a workflow input field: the contract's `ui.labelKey`, then the convention key
+ * `common.workflows.<id>.input.<field>` (or the module's), then the schema `title`, else the name.
+ */
+export const useWorkflowInputLabel = (): ((workflowId: string, field: WorkflowInputFieldRef) => string) => {
+  const t = useRootTranslator();
+  return useCallback(
+    (workflowId, field) => firstMessage(t, [...(field.labelKey === undefined ? [] : [field.labelKey]), ...workflowInputLabelKeys(workflowId, field.name)]) ?? field.title ?? field.name,
     [t],
   );
 };

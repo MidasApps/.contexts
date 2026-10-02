@@ -263,7 +263,11 @@
     },
     "approval-demo": {
       "name": "Approval demo",
-      "description": "Asks a second person to approve a note before it is created."
+      "description": "Asks a second person to approve a note before it is created.",
+      "input": {
+        "title": "Title",
+        "body": "Text"
+      }
     },
     "usage-report": {
       "name": "Usage report",
@@ -333,5 +337,13 @@
   },
   "evalExperiment": {
     "label": "{agent} · {dataset} · {when}"
+  },
+  "jsonInput": {
+    "legend": "Input",
+    "label": "Input (JSON)",
+    "editAsJson": "Edit as JSON",
+    "editAsForm": "Edit as form",
+    "invalid": "Write a valid JSON object.",
+    "switchBlocked": "Fix the JSON to go back to the form."
   }
 }

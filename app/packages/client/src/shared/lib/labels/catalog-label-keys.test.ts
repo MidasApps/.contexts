@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { agentLabelKeys, flagLabelKeys, normalizeToolId, permissionLabelKeys, toolLabelKeys, workflowLabelKeys } from "./catalog-label-keys.ts";
+import { agentLabelKeys, flagLabelKeys, normalizeToolId, permissionLabelKeys, toolLabelKeys, workflowInputLabelKeys, workflowLabelKeys } from "./catalog-label-keys.ts";
 
 describe("workflowLabelKeys", () => {
   it("tries the core key first, then each possible module namespace", () => {
@@ -55,5 +55,17 @@ describe("permissionLabelKeys", () => {
   it("reads core permissions from the permissions catalog and module ones from the module namespace", () => {
     expect(permissionLabelKeys("core.project.create")).toEqual(["permissions.core.project.create"]);
     expect(permissionLabelKeys("example.note.archive")).toEqual(["permissions.example.note.archive", "example.permissions.note.archive"]);
+  });
+});
+
+describe("workflowInputLabelKeys", () => {
+  it("names an input field under the workflow's core or module key", () => {
+    expect(workflowInputLabelKeys("approval-demo", "title")).toEqual(["common.workflows.approval-demo.input.title", "approval.workflows.demo.input.title"]);
+  });
+
+  it("refuses fields and workflows that are not safe message paths", () => {
+    expect(workflowInputLabelKeys("approval-demo", "a.b")).toEqual([]);
+    expect(workflowInputLabelKeys("approval-demo", "with space")).toEqual([]);
+    expect(workflowInputLabelKeys("../evil", "title")).toEqual([]);
   });
 });

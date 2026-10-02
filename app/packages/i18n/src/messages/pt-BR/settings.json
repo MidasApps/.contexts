@@ -1378,13 +1378,9 @@
       "workflow": "Fluxo",
       "workflowPlaceholder": "Escolha um fluxo",
       "noneStartable": "Nenhum fluxo desta organização pode ser iniciado manualmente.",
-      "input": "Dados de entrada (JSON)",
       "inputHint": "Um objeto JSON. O servidor valida os dados com o formato do fluxo.",
-      "schemaTitle": "Formato esperado dos dados",
-      "noSchema": "Este fluxo não declara o formato dos dados de entrada.",
       "errors": {
-        "workflow": "Escolha um fluxo.",
-        "input": "Escreva um objeto JSON válido."
+        "workflow": "Escolha um fluxo."
       },
       "cancel": "Cancelar",
       "submit": "Iniciar",
@@ -1478,7 +1474,6 @@
       "cronPreview": "Expressão: {cron}",
       "timezone": "Fuso horário",
       "timezoneHint": "Os horários acima valem neste fuso.",
-      "input": "Dados de entrada (JSON)",
       "inputHint": "Um objeto JSON enviado ao fluxo a cada disparo. Deixe vazio se o fluxo não precisa de dados.",
       "nextFireAfterSave": "O servidor calcula o próximo disparo ao salvar.",
       "errors": {
@@ -1486,7 +1481,6 @@
         "slug": "Use letras minúsculas, números e hífens (até 60 caracteres).",
         "cron": "Revise a frequência: horário, dia ou expressão inválidos.",
         "timezone": "Escolha um fuso horário.",
-        "input": "Escreva um objeto JSON válido.",
         "slugTaken": "Já existe um agendamento com este nome curto. Escolha outro.",
         "tooFrequent": "O intervalo entre disparos é curto demais. Use pelo menos 15 minutos.",
         "notSchedulable": "Este fluxo não pode ser agendado."

@@ -80,7 +80,7 @@ describe("SettingsWorkflowsView: runs", () => {
     });
   });
 
-  it("starts a startable workflow with JSON input and opens the run page", async () => {
+  it("starts a startable workflow from fields of its input schema and opens the run page", async () => {
     const requests: FakeRequest[] = [];
     const { user, router } = renderView({
       "POST /v1/workflows/:workflowId/runs": (request) => {
@@ -97,7 +97,38 @@ describe("SettingsWorkflowsView: runs", () => {
     // Only startable workflows are offered.
     expect(screen.queryByRole("option", { name: /Relatório de uso/u })).toBeNull();
     await user.click(await screen.findByRole("option", { name: /Demonstração de aprovação/u }));
-    const input = within(dialog).getByRole("textbox", { name: /Dados de entrada/u });
+    // A labelled field, not JSON text, and never the schema itself.
+    const title = within(dialog).getByRole("textbox", { name: /Título/u });
+    expect(within(dialog).queryByText(/"type"/u)).toBeNull();
+    await user.click(within(dialog).getByRole("button", { name: "Iniciar" }));
+    expect(within(dialog).getByText("Preencha este campo.")).toBeDefined();
+    expect(requests).toHaveLength(0);
+    await expectNoAxeViolations(dialog);
+    await user.type(title, "Follow-up");
+    await user.click(within(dialog).getByRole("button", { name: "Iniciar" }));
+    await waitFor(() => expect(router.current()).toBe(`${SETTINGS_PATH}/runs/run-new`));
+    expect(requests[0]?.params["workflowId"]).toBe("approval-demo");
+    expect(requests[0]?.query.get("organizationId")).toBe(IDS.organization);
+    expect(requests[0]?.body).toEqual({ inputData: { title: "Follow-up" } });
+  });
+
+  it("edits the input as JSON when asked, and back as fields", async () => {
+    const requests: FakeRequest[] = [];
+    const { user } = renderView({
+      "POST /v1/workflows/:workflowId/runs": (request) => {
+        requests.push(request);
+        return ok({ runId: "run-new" }, 202);
+      },
+      "GET /v1/workflows/runs/:runId": ok(buildWorkflowRun({ runId: "run-new" })),
+    });
+    await user.click(await screen.findByRole("button", { name: "Iniciar fluxo" }));
+    const dialog = await screen.findByRole("dialog", { name: "Iniciar fluxo" });
+    await user.click(within(dialog).getByRole("combobox", { name: /Fluxo/u }));
+    await user.click(await screen.findByRole("option", { name: /Demonstração de aprovação/u }));
+    await user.type(within(dialog).getByRole("textbox", { name: /Título/u }), "Draft");
+    await user.click(within(dialog).getByRole("button", { name: "Editar como JSON" }));
+    const input = within(dialog).getByRole("textbox", { name: /Dados de entrada \(JSON\)/u });
+    expect(JSON.parse((input as HTMLTextAreaElement).value)).toEqual({ title: "Draft" });
     await user.clear(input);
     await user.click(input);
     await user.paste("[1]");
@@ -107,11 +138,23 @@ describe("SettingsWorkflowsView: runs", () => {
     await user.clear(input);
     await user.click(input);
     await user.paste('{"title":"Follow-up"}');
+    await user.click(within(dialog).getByRole("button", { name: "Editar como formulário" }));
+    expect(within(dialog).getByRole<HTMLInputElement>("textbox", { name: /Título/u }).value).toBe("Follow-up");
+  });
+
+  it("puts the server's field refusals next to the field", async () => {
+    const { user } = renderView({
+      "POST /v1/workflows/:workflowId/runs": apiError(400, "VALIDATION_FAILED", [{ field: "inputData.title", issue: "INVALID" }]),
+    });
+    await user.click(await screen.findByRole("button", { name: "Iniciar fluxo" }));
+    const dialog = await screen.findByRole("dialog", { name: "Iniciar fluxo" });
+    await user.click(within(dialog).getByRole("combobox", { name: /Fluxo/u }));
+    await user.click(await screen.findByRole("option", { name: /Demonstração de aprovação/u }));
+    const title = within(dialog).getByRole("textbox", { name: /Título/u });
+    await user.type(title, "x");
     await user.click(within(dialog).getByRole("button", { name: "Iniciar" }));
-    await waitFor(() => expect(router.current()).toBe(`${SETTINGS_PATH}/runs/run-new`));
-    expect(requests[0]?.params["workflowId"]).toBe("approval-demo");
-    expect(requests[0]?.query.get("organizationId")).toBe(IDS.organization);
-    expect(requests[0]?.body).toEqual({ inputData: { title: "Follow-up" } });
+    expect(await within(dialog).findByText("Revise este campo.")).toBeDefined();
+    expect(title.getAttribute("aria-invalid")).toBe("true");
   });
 
   it("shows the server's refusal when the workflow cannot be started", async () => {
@@ -120,6 +163,7 @@ describe("SettingsWorkflowsView: runs", () => {
     const dialog = await screen.findByRole("dialog", { name: "Iniciar fluxo" });
     await user.click(within(dialog).getByRole("combobox", { name: /Fluxo/u }));
     await user.click(await screen.findByRole("option", { name: /Demonstração de aprovação/u }));
+    await user.type(within(dialog).getByRole("textbox", { name: /Título/u }), "Follow-up");
     await user.click(within(dialog).getByRole("button", { name: "Iniciar" }));
     expect((await within(dialog).findByRole("alert")).textContent).toContain("Este fluxo não pode ser iniciado manualmente.");
   });
@@ -201,6 +245,30 @@ describe("SettingsWorkflowsView: schedules", () => {
     expect(await screen.findByText("Agendamento de Relatório de uso criado.")).toBeDefined();
     expect(requests[0]?.query.get("organizationId")).toBe(IDS.organization);
     expect(requests[0]?.body).toEqual({ workflowId: "usage-report", slug: "weekdays", cron: "0 9 * * 1-5", timezone: "America/Sao_Paulo", inputData: {} });
+    // A workflow that declares no input asks for none.
+    expect(within(dialog).queryByRole("group", { name: /Dados de entrada/u })).toBeNull();
+  });
+
+  it("edits a schedule's input in the fields of its workflow, prefilled with what it sends", async () => {
+    const requests: FakeRequest[] = [];
+    const { user } = await openSchedules({
+      "GET /v1/workflows": ok([buildWorkflowCatalogEntry({ schedulable: true })]),
+      "GET /v1/schedules": ok([buildSchedule({ workflowId: "approval-demo", inputData: { title: "Daily" } })]),
+      "PATCH /v1/schedules/:scheduleId": (request) => {
+        requests.push(request);
+        return ok(buildSchedule({ workflowId: "approval-demo" }));
+      },
+    });
+    await user.click(screen.getByRole("button", { name: "Editar o agendamento daily-usage de Demonstração de aprovação" }));
+    const dialog = await screen.findByRole("dialog", { name: "Editar agendamento de Demonstração de aprovação" });
+    const title = within(dialog).getByRole("textbox", { name: /Título/u });
+    expect((title as HTMLInputElement).value).toBe("Daily");
+    await user.clear(title);
+    await user.click(within(dialog).getByRole("button", { name: "Salvar agendamento" }));
+    expect(within(dialog).getByText("Preencha este campo.")).toBeDefined();
+    await user.type(title, "Weekly");
+    await user.click(within(dialog).getByRole("button", { name: "Salvar agendamento" }));
+    await waitFor(() => expect(requests[0]?.body).toEqual({ cron: "0 9 * * *", timezone: "America/Sao_Paulo", inputData: { title: "Weekly" } }));
   });
 
   it("explains the server's refusals: interval too short and slug taken", async () => {

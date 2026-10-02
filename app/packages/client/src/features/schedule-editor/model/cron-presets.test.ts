@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { cronOfDraft, DEFAULT_CRON_DRAFT, draftOfCron, parseJsonObject } from "./cron-presets.ts";
+import { cronOfDraft, DEFAULT_CRON_DRAFT, draftOfCron } from "./cron-presets.ts";
 
 describe("cron presets", () => {
   it("builds the cron of each preset", () => {
@@ -27,12 +27,5 @@ describe("cron presets", () => {
     }
     expect(draftOfCron("*/30 9-17 * * 1-5")).toMatchObject({ kind: "custom", custom: "*/30 9-17 * * 1-5" });
     expect(draftOfCron("0 9 31 * *")).toMatchObject({ kind: "custom" });
-  });
-
-  it("parses workflow input as a JSON object only", () => {
-    expect(parseJsonObject("")).toEqual({});
-    expect(parseJsonObject('{"title":"a"}')).toEqual({ title: "a" });
-    expect(parseJsonObject("[1]")).toBeNull();
-    expect(parseJsonObject("{oops")).toBeNull();
   });
 });

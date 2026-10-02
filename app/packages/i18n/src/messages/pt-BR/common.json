@@ -263,7 +263,11 @@
     },
     "approval-demo": {
       "name": "Demonstração de aprovação",
-      "description": "Pede a outra pessoa que aprove uma nota antes de criá-la."
+      "description": "Pede a outra pessoa que aprove uma nota antes de criá-la.",
+      "input": {
+        "title": "Título",
+        "body": "Texto"
+      }
     },
     "usage-report": {
       "name": "Relatório de uso",
@@ -333,5 +337,13 @@
   },
   "evalExperiment": {
     "label": "{agent} · {dataset} · {when}"
+  },
+  "jsonInput": {
+    "legend": "Dados de entrada",
+    "label": "Dados de entrada (JSON)",
+    "editAsJson": "Editar como JSON",
+    "editAsForm": "Editar como formulário",
+    "invalid": "Escreva um objeto JSON válido.",
+    "switchBlocked": "Corrija o JSON para voltar ao formulário."
   }
 }

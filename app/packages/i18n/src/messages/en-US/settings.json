@@ -1378,13 +1378,9 @@
       "workflow": "Workflow",
       "workflowPlaceholder": "Choose a workflow",
       "noneStartable": "No workflow of this organization can be started manually.",
-      "input": "Input data (JSON)",
       "inputHint": "A JSON object. The server validates it against the workflow's format.",
-      "schemaTitle": "Expected data format",
-      "noSchema": "This workflow does not declare the format of its input data.",
       "errors": {
-        "workflow": "Choose a workflow.",
-        "input": "Enter a valid JSON object."
+        "workflow": "Choose a workflow."
       },
       "cancel": "Cancel",
       "submit": "Start",
@@ -1478,7 +1474,6 @@
       "cronPreview": "Expression: {cron}",
       "timezone": "Time zone",
       "timezoneHint": "The times above are in this time zone.",
-      "input": "Input data (JSON)",
       "inputHint": "A JSON object sent to the workflow on every fire. Leave it empty if the workflow needs no data.",
       "nextFireAfterSave": "The server calculates the next fire when you save.",
       "errors": {
@@ -1486,7 +1481,6 @@
         "slug": "Use lowercase letters, numbers and hyphens (up to 60 characters).",
         "cron": "Check the frequency: the time, day or expression is invalid.",
         "timezone": "Choose a time zone.",
-        "input": "Enter a valid JSON object.",
         "slugTaken": "A schedule with this short name already exists. Choose another one.",
         "tooFrequent": "The interval between fires is too short. Use at least 15 minutes.",
         "notSchedulable": "This workflow cannot be scheduled."

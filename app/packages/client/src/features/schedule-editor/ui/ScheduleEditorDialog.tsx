@@ -8,18 +8,19 @@ import { useTranslations } from "use-intl";
 import { tenantScheduleKeys } from "#/entities/schedule/index.ts";
 import { useCallEndpoint } from "#/shared/api/api-context.tsx";
 import { ApiError } from "#/shared/api/api-error.ts";
-import { useWorkflowLabel } from "#/shared/lib/labels/use-catalog-labels.ts";
+import { useWorkflowInputLabel, useWorkflowLabel } from "#/shared/lib/labels/use-catalog-labels.ts";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
 import { Input } from "#/shared/ui/atoms/Input/Input.tsx";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "#/shared/ui/atoms/Select/Select.tsx";
-import { Textarea } from "#/shared/ui/atoms/Textarea/Textarea.tsx";
 import { Alert, AlertDescription } from "#/shared/ui/molecules/Alert/Alert.tsx";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "#/shared/ui/molecules/Dialog/Dialog.tsx";
 import { ApiErrorAlert } from "#/shared/ui/molecules/ErrorState/ApiErrorAlert.tsx";
 import { Field, FieldControl, FieldDescription, FieldError, FieldGroup, FieldLabel } from "#/shared/ui/molecules/Field/Field.tsx";
 import { TimeZoneSelect } from "#/shared/ui/molecules/TimeZoneSelect/TimeZoneSelect.tsx";
 import { notify } from "#/shared/ui/molecules/Toaster/notify.ts";
-import { cronOfDraft, DEFAULT_CRON_DRAFT, draftOfCron, parseJsonObject, type CronDraft } from "../model/cron-presets.ts";
+import { JsonSchemaFields } from "#/shared/ui/organisms/JsonSchemaFields/JsonSchemaFields.tsx";
+import { useJsonSchemaInput } from "#/shared/ui/organisms/JsonSchemaFields/use-json-schema-input.ts";
+import { cronOfDraft, DEFAULT_CRON_DRAFT, draftOfCron, type CronDraft } from "../model/cron-presets.ts";
 import { CronFields } from "./CronFields.tsx";
 
 export type ScheduleEditorDialogProps = {
@@ -34,8 +35,8 @@ export type ScheduleEditorDialogProps = {
   onOpenChange: (open: boolean) => void;
 };
 
-type Draft = { workflowId: string | undefined; slug: string; cron: CronDraft; timezone: string; input: string };
-type Problem = "workflow" | "slug" | "cron" | "timezone" | "input";
+type Draft = { workflowId: string | undefined; slug: string; cron: CronDraft; timezone: string };
+type Problem = "workflow" | "slug" | "cron" | "timezone";
 
 // Refusals the editor can explain better than the generic copy of the code.
 const REFUSALS: Record<string, "slugTaken" | "tooFrequent" | "notSchedulable"> = {
@@ -46,14 +47,23 @@ const REFUSALS: Record<string, "slugTaken" | "tooFrequent" | "notSchedulable"> =
 
 const draftOf = (schedule: Schedule | null, defaultTimeZone: string): Draft =>
   schedule === null
-    ? { workflowId: undefined, slug: "", cron: DEFAULT_CRON_DRAFT, timezone: defaultTimeZone, input: "" }
-    : {
-        workflowId: schedule.workflowId,
-        slug: "",
-        cron: draftOfCron(schedule.cron),
-        timezone: schedule.timezone,
-        input: Object.keys(schedule.inputData).length === 0 ? "" : JSON.stringify(schedule.inputData, null, 2),
-      };
+    ? { workflowId: undefined, slug: "", cron: DEFAULT_CRON_DRAFT, timezone: defaultTimeZone }
+    : { workflowId: schedule.workflowId, slug: "", cron: draftOfCron(schedule.cron), timezone: schedule.timezone };
+
+const NO_INPUT: Readonly<Record<string, unknown>> = {};
+// Any object, edited as JSON text.
+const FREE_FORM_INPUT: Readonly<Record<string, unknown>> = { type: "object" };
+
+/**
+ * The JSON Schema the input is edited with. Editing a schedule whose workflow left the catalog (or
+ * declares no schema) while it still sends input keeps that input editable as JSON instead of
+ * silently dropping it.
+ */
+const inputSchemaOf = (workflow: WorkflowCatalogEntry | undefined, stored: Readonly<Record<string, unknown>>): Readonly<Record<string, unknown>> | null => {
+  if (workflow !== undefined && workflow.inputSchema !== null) return workflow.inputSchema;
+  return Object.keys(stored).length === 0 ? null : FREE_FORM_INPUT;
+};
+
 
 const problemsOf = (draft: Draft, creating: boolean): Set<Problem> => {
   const problems = new Set<Problem>();
@@ -61,7 +71,6 @@ const problemsOf = (draft: Draft, creating: boolean): Set<Problem> => {
   if (creating && !ScheduleSlugSchema.safeParse(draft.slug).success) problems.add("slug");
   if (cronOfDraft(draft.cron) === null) problems.add("cron");
   if (draft.timezone === "") problems.add("timezone");
-  if (parseJsonObject(draft.input) === null) problems.add("input");
   return problems;
 };
 
@@ -124,6 +133,9 @@ function ScheduleEditorForm({ organizationId, schedule, workflows, defaultTimeZo
   const [problems, setProblems] = useState<Set<Problem>>(new Set());
   const [failure, setFailure] = useState<unknown>(null);
   const [pending, setPending] = useState(false);
+  const stored = schedule?.inputData ?? NO_INPUT;
+  const input = useJsonSchemaInput(inputSchemaOf(workflows.find((workflow) => workflow.id === draft.workflowId), stored), stored);
+  const inputLabel = useWorkflowInputLabel();
 
   const save = async (cron: string, inputData: Record<string, unknown>): Promise<string> => {
     const shared = { cron, timezone: draft.timezone, inputData };
@@ -139,7 +151,7 @@ function ScheduleEditorForm({ organizationId, schedule, workflows, defaultTimeZo
     setProblems(found);
     setFailure(null);
     const cron = cronOfDraft(draft.cron);
-    const inputData = parseJsonObject(draft.input);
+    const inputData = input.read();
     if (found.size > 0 || cron === null || inputData === null) return;
     setPending(true);
     try {
@@ -148,7 +160,8 @@ function ScheduleEditorForm({ organizationId, schedule, workflows, defaultTimeZo
       notify.success(t(creating ? "created" : "updated", { workflow: workflowLabel.name(workflow) }));
       onOpenChange(false);
     } catch (error: unknown) {
-      setFailure(error);
+      // Field refusals go next to their field; anything else is the form's alert.
+      if (!input.applyFailure(error)) setFailure(error);
     } finally {
       setPending(false);
     }
@@ -168,14 +181,16 @@ function ScheduleEditorForm({ organizationId, schedule, workflows, defaultTimeZo
           <FieldDescription>{t("timezoneHint")}</FieldDescription>
           <FieldError errors={[problems.has("timezone") ? t("errors.timezone") : undefined]} />
         </Field>
-        <Field>
-          <FieldLabel>{t("input")}</FieldLabel>
-          <FieldControl>
-            <Textarea className="font-mono text-[13px]" rows={4} spellCheck={false} value={draft.input} onChange={(event) => setDraft({ ...draft, input: event.target.value })} />
-          </FieldControl>
-          <FieldDescription>{t("inputHint")}</FieldDescription>
-          <FieldError errors={[problems.has("input") ? t("errors.input") : undefined]} />
-        </Field>
+        {draft.workflowId === undefined ? null : (
+          <JsonSchemaFields
+            plan={input.plan}
+            draft={input.draft}
+            onDraftChange={input.setDraft}
+            problems={input.problems}
+            labelOf={(field) => inputLabel(draft.workflowId ?? "", field)}
+            jsonHint={t("inputHint")}
+          />
+        )}
       </FieldGroup>
       <p className="text-xs text-muted-foreground">{t("nextFireAfterSave")}</p>
       <DialogFooter className="sticky bottom-0 bg-background pt-2">
@@ -194,7 +209,7 @@ function ScheduleEditorForm({ organizationId, schedule, workflows, defaultTimeZo
  * Creates or edits a tenant schedule (`POST /v1/schedules`, `PATCH /v1/schedules/{id}`,
  * core.schedule.write): a schedulable workflow, a slug (both fixed after creation: they are the
  * schedule's id), the cron from a preset or a 5-field expression, the IANA zone the cron is read
- * in, and the JSON input of every fire. The server owns the semantics: it refuses an interval
+ * in, and the input of every fire (fields from the workflow's JSON Schema, or JSON text). The server owns the semantics: it refuses an interval
  * under its minimum, a workflow that is not schedulable and a slug in use, each with its own copy
  * here. The next fire is the server's; this dialog computes none.
  */

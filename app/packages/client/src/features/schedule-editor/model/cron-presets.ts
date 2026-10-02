@@ -1,5 +1,4 @@
 import { CronExpressionSchema } from "@core/contracts";
-import { z } from "zod";
 
 /** How often a schedule fires, as the editor offers it; `custom` is a hand-written 5-field cron. */
 export const CRON_PRESET_KINDS = ["hourly", "daily", "weekdays", "weekly", "monthly", "custom"] as const;
@@ -69,17 +68,4 @@ export const draftOfCron = (cron: string): CronDraft => {
   if (monthDay === "*" && /^[0-6]$/u.test(weekday)) return { ...DEFAULT_CRON_DRAFT, kind: "weekly", time, weekday: Number(weekday) };
   if (weekday === "*" && NUMBER.test(monthDay) && inRange(Number(monthDay), 1, 28)) return { ...DEFAULT_CRON_DRAFT, kind: "monthly", time, monthDay: Number(monthDay) };
   return custom;
-};
-
-const JsonObjectSchema = z.record(z.string(), z.unknown());
-
-/** A JSON object typed in a text field, or `null` when the text is not one (arrays and scalars are refused). */
-export const parseJsonObject = (text: string): Record<string, unknown> | null => {
-  if (text.trim() === "") return {};
-  try {
-    const parsed = JsonObjectSchema.safeParse(JSON.parse(text));
-    return parsed.success ? parsed.data : null;
-  } catch {
-    return null;
-  }
 };
