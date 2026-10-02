@@ -22,7 +22,7 @@ describe("AdminOverviewSchema", () => {
 
   it("names the numbers that are not measured, none when an older answer omits the list", () => {
     expect(AdminOverviewContract.schema.parse({ ...overview, unmeasured: ["tripwireRate"] }).unmeasured).toEqual(["tripwireRate"]);
-    const { unmeasured: _omitted, ...older } = overview;
+    const older = Object.fromEntries(Object.entries(overview).filter(([key]) => key !== "unmeasured"));
     expect(AdminOverviewContract.schema.parse(older).unmeasured).toEqual([]);
     expect(AdminOverviewContract.schema.safeParse({ ...overview, unmeasured: ["organizations"] }).success).toBe(false);
   });
