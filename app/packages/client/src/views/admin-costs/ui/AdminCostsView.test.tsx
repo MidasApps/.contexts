@@ -143,6 +143,44 @@ describe("AdminCostsView", () => {
     await waitFor(() => expect(within(screen.getByRole("table", { name: "Orçamentos por organização" })).getAllByRole("row")).toHaveLength(6));
   });
 
+  it("warns that the counts, the alerts and the budgets cover only the organizations read when the list is capped", async () => {
+    // Every page says more exist: the client stops at its page cap (20 × 100) and must say so.
+    const endless: FakeRoutes[string] = (request) => {
+      const index = Number(request.query.get("cursor") ?? "0");
+      const over = buildOrganizationSummary({ id: `Org${String(index).padStart(17, "0")}`, name: `Org ${index}`, budget: caps(10_000_000), costMtdMicroUsd: 12_000_000 });
+      return page([over], { cursor: String(index + 1) });
+    };
+    const { container } = render({ routes: routes({ "GET /v1/admin/organizations": endless }) });
+    const warning = await screen.findByText("Os números abaixo cobrem só parte das organizações");
+    expect(plain(warning.closest("[data-slot='alert']")?.textContent)).toContain("20");
+    const summary = screen.getByRole("heading", { level: 2, name: "Resumo do mês" });
+    expect(warning.compareDocumentPosition(summary) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(kpi("Acima do limite")).toBe("20");
+    await expectNoAxeViolations(container);
+  });
+
+  it("does not warn when every page was read", async () => {
+    render();
+    await screen.findByRole("heading", { level: 2, name: "Resumo do mês" });
+    expect(screen.queryByText("Os números abaixo cobrem só parte das organizações")).toBeNull();
+  });
+
+  it("puts the organizations that need attention right under the numbers, ten at most, with a way to see them all", async () => {
+    const flagged = Array.from({ length: 12 }, (_, index) =>
+      buildOrganizationSummary({ id: `Org${String(index).padStart(17, "0")}`, name: `Org ${String(index + 1).padStart(2, "0")}`, budget: caps(10_000_000), costMtdMicroUsd: 9_000_000 + index }),
+    );
+    const { user, router } = render({ routes: routes({ "GET /v1/admin/organizations": page([NORTHWIND, ...flagged]) }) });
+    const attention = await screen.findByRole("region", { name: "Precisam de atenção" });
+    expect(within(attention).getAllByRole("listitem")).toHaveLength(10);
+    expect(within(attention).getByText("Mostrando 10 de 12")).toBeDefined();
+    const chart = screen.getByRole("table", { name: "Custo no mês e limite" });
+    const summary = screen.getByRole("heading", { level: 2, name: "Resumo do mês" });
+    expect(summary.compareDocumentPosition(attention) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(attention.compareDocumentPosition(chart) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    await user.click(within(attention).getByRole("button", { name: "Ver todas as 12" }));
+    expect(router.current()).toBe("/admin/costs?level=alert");
+  });
+
   it("explains an empty platform and links to the organizations", async () => {
     const { container } = render({ routes: routes({ "GET /v1/admin/organizations": page([]) }) });
     expect(await screen.findByRole("heading", { level: 2, name: "Nenhum custo para mostrar" })).toBeDefined();

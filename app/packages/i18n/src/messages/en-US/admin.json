@@ -235,6 +235,8 @@
     "title": "Costs",
     "description": "Model cost this month per organization, against each one's cap.",
     "loading": "Loading costs…",
+    "organizationsTruncatedTitle": "The numbers below cover only part of the organizations",
+    "organizationsTruncatedDescription": "The list stopped at the first {count} organizations, the limit of this page. The counts, the attention list, the chart and the budgets may be incomplete; the total cost comes from the platform summary when it answers.",
     "caption": "Budgets per organization",
     "pagination": "Budget pages",
     "adjust": "Adjust budget",
@@ -265,7 +267,9 @@
       "title": "Need attention",
       "description": "The alert fires at {threshold} of the monthly cap; at 100% runs stop.",
       "none": "No organization is near its cap.",
-      "costOfCap": "{cost} of {cap}"
+      "costOfCap": "{cost} of {cap}",
+      "shown": "Showing {shown} of {count}",
+      "viewAll": "View all {count}"
     },
     "columns": {
       "organization": "Organization",

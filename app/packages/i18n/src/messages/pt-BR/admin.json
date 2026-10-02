@@ -235,6 +235,8 @@
     "title": "Custos",
     "description": "Custo de modelos no mês, por organização, comparado ao limite de cada uma.",
     "loading": "Carregando custos…",
+    "organizationsTruncatedTitle": "Os números abaixo cobrem só parte das organizações",
+    "organizationsTruncatedDescription": "A lista parou nas primeiras {count} organizações, o limite desta página. As contagens, a lista de atenção, o gráfico e os orçamentos podem estar incompletos; o custo total vem do resumo da plataforma quando ele responde.",
     "caption": "Orçamentos por organização",
     "pagination": "Páginas de orçamentos",
     "adjust": "Ajustar orçamento",
@@ -265,7 +267,9 @@
       "title": "Precisam de atenção",
       "description": "O alerta dispara em {threshold} do limite mensal; em 100% as execuções param.",
       "none": "Nenhuma organização perto do limite.",
-      "costOfCap": "{cost} de {cap}"
+      "costOfCap": "{cost} de {cap}",
+      "shown": "Mostrando {shown} de {count}",
+      "viewAll": "Ver todas as {count}"
     },
     "columns": {
       "organization": "Organização",
