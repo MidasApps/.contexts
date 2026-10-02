@@ -741,6 +741,15 @@
       "warnHint": "The detector records the finding and lets the message through.",
       "redact": "Redact",
       "redactHint": "Personal data is masked before it reaches the model."
+    },
+    "confirm": {
+      "firecrawlTitle": "Turn on web search and page reading in {organization}?",
+      "browserTitle": "Turn on the automated browser in {organization}?",
+      "webDescription": "This organization's agents will reach the public web in every conversation. The change is recorded in the audit log.",
+      "webConfirm": "Turn on",
+      "piiTitle": "Let personal data reach the model in {organization}?",
+      "piiDescription": "With “Warn”, the detector only records what it finds: personal data goes on to the model in every conversation of the organization until someone masks it again.",
+      "piiConfirm": "Only warn"
     }
   },
   "prompts": {

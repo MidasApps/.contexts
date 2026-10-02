@@ -741,6 +741,15 @@
       "warnHint": "O detector registra o achado e deixa a mensagem seguir.",
       "redact": "Mascarar",
       "redactHint": "Os dados pessoais são mascarados antes de chegar ao modelo."
+    },
+    "confirm": {
+      "firecrawlTitle": "Ligar busca e leitura de páginas em {organization}?",
+      "browserTitle": "Ligar o navegador automatizado em {organization}?",
+      "webDescription": "Os agentes desta organização passam a acessar a web pública em todas as conversas. A alteração fica registrada na auditoria.",
+      "webConfirm": "Ligar",
+      "piiTitle": "Deixar dados pessoais chegarem ao modelo em {organization}?",
+      "piiDescription": "Com “Avisar”, o detector só registra o achado: os dados pessoais seguem para o modelo em todas as conversas da organização até alguém voltar a mascarar.",
+      "piiConfirm": "Só avisar"
     }
   },
   "prompts": {

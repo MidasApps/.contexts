@@ -157,7 +157,8 @@
       "node": "Where:",
       "when": "Deadline",
       "updated": "Updated on {when}",
-      "reason": "Reason given: {reason}"
+      "reason": "Reason given: {reason}",
+      "failed": "The action was approved but did not run. Ask the requester to ask again."
     },
     "preview": {
       "before": "Before",

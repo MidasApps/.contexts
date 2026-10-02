@@ -529,6 +529,11 @@
         "bodyTooLong": "Usa como máximo {maximum} caracteres.",
         "bodyUnchanged": "El texto es igual al de la versión activa.",
         "created": "Versión {version} guardada. Evalúala para poder activarla."
+      },
+      "confirmActivate": {
+        "title": "¿Activar la versión {version} de {agent}?",
+        "rollbackTitle": "¿Volver {agent} a la versión {version}?",
+        "description": "Estas instrucciones pasan a regir en todas las conversaciones de la organización con {agent}. El cambio queda en el historial de activaciones."
       }
     },
     "intro": "La organización crea sus propios agentes y también activa, limita e instruye a los agentes de la plataforma y de los módulos instalados. Un agente de la organización se elige directamente al iniciar una conversación; el asistente no le delega tareas.",
@@ -1344,7 +1349,10 @@
       "problems": {
         "spend": "Ingresa el límite de gasto.",
         "tokens": "Ingresa un número entero de tokens."
-      }
+      },
+      "removeTitle": "¿Quitar el límite propio de la organización?",
+      "removeDescription": "Vuelven a regir los límites del plan, que pueden ser mayores. El gasto deja de detenerse en el límite propio.",
+      "removeConfirm": "Quitar límite"
     }
   },
   "workflows": {

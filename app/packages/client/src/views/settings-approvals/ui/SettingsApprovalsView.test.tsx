@@ -133,6 +133,19 @@ describe("SettingsApprovalsView inbox", () => {
     expect(screen.getByRole("tab", { name: "Aguardando minha decisão (0)" })).toBeDefined();
   });
 
+  it("keeps saying that an approved action failed to run, in the history after the toast is gone", async () => {
+    const failed = { ...waiting, status: "failed" as const, decidedBy: IDS.user };
+    const { user } = renderView({
+      routes: { [LIST]: (request: FakeRequest) => page(request.query.get("status") === "pending" ? [waiting] : [failed]), [APPROVE]: ok(failed) },
+    });
+    const list = await screen.findByRole("list", { name: "Aguardando minha decisão" });
+    await user.click(await within(list).findByRole("button", { name: "Aprovar" }));
+    expect(await screen.findByText("A solicitação foi aprovada, mas a ação falhou ao executar.")).toBeDefined();
+    await user.click(screen.getByRole("tab", { name: "Histórico" }));
+    const history = await screen.findByRole("list", { name: "Histórico" });
+    expect(within(history).getByText(/A ação foi aprovada, mas não foi executada./u)).toBeDefined();
+  });
+
   it("rejects only after a confirmation", async () => {
     const bodies: FakeRequest[] = [];
     const { user } = renderView({

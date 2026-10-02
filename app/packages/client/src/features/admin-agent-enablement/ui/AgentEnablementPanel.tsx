@@ -13,6 +13,7 @@ import { RadioGroup, RadioGroupItem } from "#/shared/ui/atoms/RadioGroup/RadioGr
 import { Switch } from "#/shared/ui/atoms/Switch/Switch.tsx";
 import { Alert, AlertDescription, AlertTitle } from "#/shared/ui/molecules/Alert/Alert.tsx";
 import { notify } from "#/shared/ui/molecules/Toaster/notify.ts";
+import { ConfirmDialog } from "#/shared/ui/organisms/ConfirmDialog/ConfirmDialog.tsx";
 
 export type AgentEnablementPanelProps = {
   organizationId: string;
@@ -23,6 +24,8 @@ export type AgentEnablementPanelProps = {
 };
 
 type Change = { patch: UpdateAgentSettingsInput; next: AgentSettings; done: string };
+/** A change that widens what reaches the model or the web: it waits for a confirmation. */
+type RiskyChange = { readonly kind: "pii" } | { readonly kind: "web"; readonly tool: "firecrawl" | "browser" };
 type Failure = { message: string; requestId: string | undefined };
 
 /**
@@ -117,7 +120,9 @@ function PiiMode({ value, disabled, onChange }: { value: "warn" | "redact"; disa
 /**
  * Agent settings of one organization edited by staff (`PUT /v1/admin/organizations/{id}/agent-settings`,
  * platform.agent.manage, audited with the organization as target): which subagents the supervisor
- * may delegate to, the web tool opt-ins and the PII guardrail mode. Each control saves on change.
+ * may delegate to, the web tool opt-ins and the PII guardrail mode. Each control saves on change;
+ * turning a web tool on and weakening PII from "redact" to "warn" ask first, naming the
+ * organization (a misclick would send personal data or reach the web for all its members).
  */
 export function AgentEnablementPanel({ organizationId, organizationName, settings, registeredAgents }: AgentEnablementPanelProps) {
   const t = useTranslations("admin.agentSettings");
@@ -126,6 +131,7 @@ export function AgentEnablementPanel({ organizationId, organizationName, setting
   const online = useOnlineStatus();
   const { save, saving, failure } = useSaveAgentSettings(organizationId);
   const disabled = saving || !online;
+  const [risky, setRisky] = useState<RiskyChange | null>(null);
   const agentName = (key: string): string => (names.has(key) ? names(key) : key);
 
   const toggleAgent = (key: string, enabled: boolean): void => {
@@ -134,10 +140,18 @@ export function AgentEnablementPanel({ organizationId, organizationName, setting
     void save(settings, { patch: { enabledAgents }, next: { ...settings, enabledAgents }, done });
   };
   const toggleWebTool = (tool: "firecrawl" | "browser", enabled: boolean): void => {
+    if (enabled && risky === null) {
+      setRisky({ kind: "web", tool });
+      return;
+    }
     const webTools = { ...settings.webTools, [tool]: enabled };
     void save(settings, { patch: { webTools }, next: { ...settings, webTools }, done: t("saved", { organization: organizationName }) });
   };
   const setPii = (pii: "warn" | "redact"): void => {
+    if (pii === "warn" && risky === null) {
+      setRisky({ kind: "pii" });
+      return;
+    }
     const guardrails = { pii };
     void save(settings, { patch: { guardrails }, next: { ...settings, guardrails }, done: t("saved", { organization: organizationName }) });
   };
@@ -165,6 +179,19 @@ export function AgentEnablementPanel({ organizationId, organizationName, setting
         </ul>
       </Group>
       <PiiMode value={settings.guardrails.pii} disabled={disabled} onChange={setPii} />
+      <ConfirmDialog
+        open={risky !== null}
+        onOpenChange={(open) => (open ? undefined : setRisky(null))}
+        title={risky?.kind === "web" ? t(`confirm.${risky.tool}Title`, { organization: organizationName }) : t("confirm.piiTitle", { organization: organizationName })}
+        description={risky?.kind === "web" ? t("confirm.webDescription") : t("confirm.piiDescription")}
+        confirmLabel={risky?.kind === "web" ? t("confirm.webConfirm") : t("confirm.piiConfirm")}
+        destructive={risky?.kind === "pii"}
+        onConfirm={() => {
+          // The dialog closes at once; the save shows its own outcome (toast or the alert above).
+          if (risky?.kind === "web") toggleWebTool(risky.tool, true);
+          else if (risky?.kind === "pii") setPii("warn");
+        }}
+      />
     </div>
   );
 }

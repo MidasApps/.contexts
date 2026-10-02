@@ -157,7 +157,8 @@
       "node": "Dónde:",
       "when": "Plazo",
       "updated": "Actualizada el {when}",
-      "reason": "Motivo informado: {reason}"
+      "reason": "Motivo informado: {reason}",
+      "failed": "La acción fue aprobada, pero no se ejecutó. Pide a quien la solicitó que la pida de nuevo."
     },
     "preview": {
       "before": "Antes",

@@ -529,6 +529,11 @@
         "bodyTooLong": "Use at most {maximum} characters.",
         "bodyUnchanged": "The text is the same as the active version.",
         "created": "Version {version} saved. Evaluate it to be able to activate."
+      },
+      "confirmActivate": {
+        "title": "Activate version {version} of {agent}?",
+        "rollbackTitle": "Roll {agent} back to version {version}?",
+        "description": "These instructions apply to every conversation of the organization with {agent}. The change is kept in the activation history."
       }
     },
     "intro": "The organization creates its own agents and also turns on, limits and instructs the agents of the platform and the installed modules. An organization's agent is chosen directly when starting a conversation; the assistant does not delegate tasks to it.",
@@ -1344,7 +1349,10 @@
       "problems": {
         "spend": "Enter the spend cap.",
         "tokens": "Enter a whole number of tokens."
-      }
+      },
+      "removeTitle": "Remove the organization's own cap?",
+      "removeDescription": "The plan's caps apply again, and they may be higher. Spending no longer stops at the own cap.",
+      "removeConfirm": "Remove cap"
     }
   },
   "workflows": {

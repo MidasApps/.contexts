@@ -242,6 +242,8 @@ describe("SettingsAgentsView", { timeout: 30_000 }, () => {
 
       const activate = await within(knowledge).findByRole("button", { name: "Ativar a versão 1 de Knowledge" });
       expect(activate).toHaveProperty("disabled", true);
+      // The reason is written next to the button, not hidden in a tooltip.
+      expect(within(knowledge).getByText("Avalie a versão antes de ativar.").id).toBe(activate.getAttribute("aria-describedby"));
       await user.click(within(knowledge).getByRole("button", { name: "Avaliar a versão 1 de Knowledge" }));
       await waitFor(() => expect(posts).toHaveLength(2));
       expect(posts[1]?.params["versionId"]).toBe(NEW_VERSION_ID);
@@ -249,6 +251,9 @@ describe("SettingsAgentsView", { timeout: 30_000 }, () => {
 
       await waitFor(() => expect(within(knowledge).getByRole<HTMLButtonElement>("button", { name: "Ativar a versão 1 de Knowledge" }).disabled).toBe(false));
       await user.click(within(knowledge).getByRole("button", { name: "Ativar a versão 1 de Knowledge" }));
+      const confirm = await screen.findByRole("alertdialog", { name: "Ativar a versão 1 de Knowledge?" });
+      expect(posts).toHaveLength(2);
+      await user.click(within(confirm).getByRole("button", { name: "Ativar" }));
       await waitFor(() => expect(posts).toHaveLength(3));
       expect(posts[2]?.body).toEqual({ versionId: NEW_VERSION_ID });
       expect(posts[2]?.query.get("organizationId")).toBe(IDS.organization);
@@ -263,6 +268,7 @@ describe("SettingsAgentsView", { timeout: 30_000 }, () => {
     });
     const knowledge = await expanded(user, "Knowledge");
     await user.click(await within(knowledge).findByRole("button", { name: "Ativar a versão 1 de Knowledge" }));
+    await user.click(within(await screen.findByRole("alertdialog")).getByRole("button", { name: "Ativar" }));
     expect((await within(knowledge).findByRole("alert")).textContent).toContain("Execute uma avaliação aprovada antes de ativar esta versão.");
   });
 

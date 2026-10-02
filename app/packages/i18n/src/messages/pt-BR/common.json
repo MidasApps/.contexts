@@ -157,7 +157,8 @@
       "node": "Onde:",
       "when": "Prazo",
       "updated": "Atualizada em {when}",
-      "reason": "Motivo informado: {reason}"
+      "reason": "Motivo informado: {reason}",
+      "failed": "A ação foi aprovada, mas não foi executada. Peça a quem a solicitou para pedir de novo."
     },
     "preview": {
       "before": "Antes",

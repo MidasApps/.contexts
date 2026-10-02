@@ -109,16 +109,38 @@ describe("AdminAgentsView", () => {
     await user.click(await screen.findByRole("switch", { name: "Web" }));
     expect(await screen.findByText("Web habilitado em Northwind.")).toBeDefined();
     await waitFor(() => expect(screen.getByRole("switch", { name: "Web" }).getAttribute("aria-checked")).toBe("true"));
+    // Opening the web and weakening the PII guardrail ask first, naming the organization.
     await user.click(screen.getByRole("switch", { name: "Busca e leitura de páginas" }));
+    const web = await screen.findByRole("alertdialog", { name: "Ligar busca e leitura de páginas em Northwind?" });
+    expect(api.calls.filter((call) => call.method === "PUT")).toHaveLength(1);
+    await user.click(within(web).getByRole("button", { name: "Ligar" }));
     await waitFor(() => expect(screen.getByRole("switch", { name: "Busca e leitura de páginas" }).getAttribute("aria-checked")).toBe("true"));
     await waitFor(() => expect(screen.getByRole("radio", { name: "Avisar" }).hasAttribute("disabled")).toBe(false));
     await user.click(screen.getByRole("radio", { name: "Avisar" }));
+    const pii = await screen.findByRole("alertdialog", { name: "Deixar dados pessoais chegarem ao modelo em Northwind?" });
+    expect(screen.getByRole("radio", { name: "Mascarar", hidden: true }).getAttribute("aria-checked")).toBe("true");
+    await user.click(within(pii).getByRole("button", { name: "Só avisar" }));
     await waitFor(() => expect(api.calls.filter((call) => call.method === "PUT")).toHaveLength(3));
     expect(api.calls.filter((call) => call.method === "PUT").map((call) => call.body)).toEqual([
       { enabledAgents: ["knowledge", "data", "action", "web"] },
       { webTools: { firecrawl: true, browser: false } },
       { guardrails: { pii: "warn" } },
     ]);
+  });
+
+  it("keeps the PII guardrail when the confirmation is cancelled, and saves the safe direction at once", async () => {
+    const { user, api } = render({
+      path: WITH_ORGANIZATION,
+      routes: routes({ [`GET ${SETTINGS_PATH}`]: ok(buildAgentSettings({ guardrails: { pii: "warn" } })), [`PUT ${SETTINGS_PATH}`]: (request) => ok(buildAgentSettings({ ...(request.body as Record<string, unknown>) })) }),
+    });
+    await user.click(await screen.findByRole("radio", { name: "Mascarar" }));
+    await waitFor(() => expect(api.calls.filter((call) => call.method === "PUT").map((call) => call.body)).toEqual([{ guardrails: { pii: "redact" } }]));
+    expect(screen.queryByRole("alertdialog")).toBeNull();
+    await waitFor(() => expect(screen.getByRole("radio", { name: "Avisar" }).hasAttribute("disabled")).toBe(false));
+    await user.click(screen.getByRole("radio", { name: "Avisar" }));
+    await user.click(within(await screen.findByRole("alertdialog")).getByRole("button", { name: "Cancelar" }));
+    expect(screen.getByRole("radio", { name: "Mascarar" }).getAttribute("aria-checked")).toBe("true");
+    expect(api.calls.filter((call) => call.method === "PUT")).toHaveLength(1);
   });
 
   it("puts the switch back and shows the error with its reference when saving fails", async () => {

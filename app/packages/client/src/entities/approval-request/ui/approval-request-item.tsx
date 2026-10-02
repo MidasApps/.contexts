@@ -119,6 +119,8 @@ export function ApprovalRequestItem({ request, requesterName, node, titleRoute, 
         </div>
       </dl>
       {request.reason === null ? null : <p className="text-sm">{t("item.reason", { reason: request.reason })}</p>}
+      {/* Approved but not done: said where the request stays (history, its page), not only in a toast. */}
+      {request.status === "failed" ? <p className="text-sm font-medium text-destructive-text">{t("item.failed")}</p> : null}
       <Preview request={request} />
       {actions === undefined || actions === null ? null : <footer className="flex flex-col gap-2">{actions}</footer>}
     </article>

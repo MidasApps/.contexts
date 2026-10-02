@@ -91,12 +91,21 @@ describe("SettingsUsageView", () => {
     const tokens = within(card).getByRole("textbox", { name: /Limite mensal de tokens/u });
     await user.clear(tokens);
     await user.type(tokens, "10000000");
+    await user.tab();
+    // The token cap reads grouped once typed.
+    expect((tokens as HTMLInputElement).value).toBe("10.000.000");
     await user.click(within(card).getByRole("button", { name: "Salvar limite" }));
     await waitFor(() => expect(patches).toHaveLength(1));
     expect(patches[0]?.query.get("organizationId")).toBe(IDS.organization);
     expect(patches[0]?.body).toEqual({ budget: { monthlyMicroUsd: 20_000_000, monthlyTokens: 10_000_000 } });
 
+    // Removing lifts a cost guard: it asks first, and Cancel sends nothing.
     await user.click(await within(card).findByRole("button", { name: "Remover limite próprio" }));
+    const confirm = await screen.findByRole("alertdialog", { name: "Remover o limite próprio da organização?" });
+    await user.click(within(confirm).getByRole("button", { name: "Cancelar" }));
+    expect(patches).toHaveLength(1);
+    await user.click(within(card).getByRole("button", { name: "Remover limite próprio" }));
+    await user.click(within(await screen.findByRole("alertdialog")).getByRole("button", { name: "Remover limite" }));
     await waitFor(() => expect(patches).toHaveLength(2));
     expect(patches[1]?.body).toEqual({ budget: null });
   });
