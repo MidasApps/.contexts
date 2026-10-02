@@ -66,7 +66,12 @@ test.describe("after a chat turn of the organization", () => {
     await chooseOrganization(staffPage, usage.getByRole("combobox", { name: "Organização", exact: true }), sp5Org.name);
     await expect(staffPage).toHaveURL(new RegExp(`organizationId=${sp5Org.id}`));
     const status = usage.getByRole("status").filter({ hasText: "chamadas" });
-    await expect(status).toHaveText(/em [1-9]\d* chamadas e [\d.]+ tokens\./);
+    // The ledger row is written by the runtime's exporter after the turn's stream ends, so the
+    // first read can come before it: reload until it is there.
+    await expect(async () => {
+      await staffPage.reload();
+      await expect(status).toHaveText(/em [1-9]\d* chamadas e [\d.]+ tokens\./, { timeout: 5_000 });
+    }).toPass({ timeout: 60_000 });
     await expect(usage.getByText(/chamadas? sem preço conhecido/)).toBeVisible();
     await expect(usage.getByRole("table", { name: "Custo por dia" }).getByRole("row")).not.toHaveCount(1);
     const byModel = usage.getByRole("table", { name: "Custo por modelo" });

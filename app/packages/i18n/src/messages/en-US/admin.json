@@ -303,7 +303,8 @@
       },
       "emptyTitle": "No usage in the range",
       "emptyDescription": "No model call was recorded with these filters.",
-      "clear": "Back to the current month"
+      "clear": "Back to the current month",
+      "rangeInvalid": "Choose a period of up to {days} days, with the start before the end."
     }
   },
   "organizationDetail": {

@@ -1,6 +1,6 @@
 "use client";
 
-import type { AdminUsage } from "@core/contracts";
+import { ADMIN_USAGE_MAX_DAYS, type AdminUsage } from "@core/contracts";
 import { useId, useMemo } from "react";
 import { useFormatter, useTranslations } from "use-intl";
 import { useAdminUsage } from "#/entities/admin-usage/index.ts";
@@ -120,13 +120,28 @@ function Charts({ usage, onClear }: { usage: AdminUsage; onClear: () => void }) 
  * days) narrow it, all in the URL. Its own loading, error and empty states: the budgets above do
  * not wait for it.
  */
+const DAY_MS = 86_400_000;
+
+/**
+ * Whether the API can serve the chosen UTC days: an end before the start, or more than
+ * ADMIN_USAGE_MAX_DAYS days (an absent end means today), is answered 400 by the API, so the page
+ * asks for another range instead of sending it.
+ */
+export const isUsageRangeValid = (range: { from?: string | undefined; to?: string | undefined }, now: Date = new Date()): boolean => {
+  if (range.from === undefined) return true;
+  const end = Date.parse(`${range.to ?? now.toISOString().slice(0, 10)}T00:00:00.000Z`);
+  const days = (end - Date.parse(`${range.from}T00:00:00.000Z`)) / DAY_MS + 1;
+  return days >= 1 && days <= ADMIN_USAGE_MAX_DAYS;
+};
+
 export function UsageBreakdown() {
   const t = useTranslations("admin.costs.usage");
   const fromId = useId();
   const toId = useId();
   const search = useAdminSearch(["organizationId", "from", "to"]);
   const filters = { organizationId: search.values.organizationId, from: dayOf(search.values.from), to: dayOf(search.values.to) };
-  const usage = useAdminUsage(filters);
+  const validRange = isUsageRangeValid(filters);
+  const usage = useAdminUsage(filters, { enabled: validRange });
   const clear = (): void => search.set({ organizationId: undefined, from: undefined, to: undefined });
   return (
     <section aria-labelledby="costs-usage-title" className="flex flex-col gap-4 rounded-xl border border-border bg-card p-4">
@@ -147,14 +162,20 @@ export function UsageBreakdown() {
           <Input id={toId} type="date" className="lg:w-40" value={filters.to ?? ""} min={filters.from} onChange={(event) => search.set({ to: event.target.value })} />
         </div>
       </div>
-      <AdminQuerySection query={usage} loadingLabel={t("loading")} rows={4}>
-        {(data) => (
-          <div className="flex flex-col gap-4">
-            <Totals usage={data} />
-            <Charts usage={data} onClear={clear} />
-          </div>
-        )}
-      </AdminQuerySection>
+      {validRange ? (
+        <AdminQuerySection query={usage} loadingLabel={t("loading")} rows={4}>
+          {(data) => (
+            <div className="flex flex-col gap-4">
+              <Totals usage={data} />
+              <Charts usage={data} onClear={clear} />
+            </div>
+          )}
+        </AdminQuerySection>
+      ) : (
+        <p role="status" className="text-sm text-muted-foreground">
+          {t("rangeInvalid", { days: ADMIN_USAGE_MAX_DAYS })}
+        </p>
+      )}
     </section>
   );
 }

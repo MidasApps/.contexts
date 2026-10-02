@@ -82,6 +82,17 @@ describe("AdminCostsView", () => {
     await waitFor(() => expect(new URLSearchParams(api.calls.filter((call) => call.path === "/v1/admin/usage").at(-1)?.query).get("to")).toBe("2026-09-15"));
   });
 
+  it("asks for an end day instead of sending a range the API refuses (more than 92 days)", async () => {
+    // Found by the e2e: picking an old start day before the end day sent from=2020-01-01 with the
+    // default end (today) and the API answered 400 RANGE_TOO_LONG.
+    const { api } = render({ path: "/admin/costs?from=2020-01-01&to=2020-06-30" });
+    const usage = await screen.findByRole("region", { name: "Uso por dia e por modelo" });
+    expect(await within(usage).findByText("Escolha um período de até 92 dias, com o início antes do fim.")).toBeDefined();
+    expect(api.calls.filter((call) => call.path === "/v1/admin/usage")).toHaveLength(0);
+    fireEvent.change(within(usage).getByLabelText("Até"), { target: { value: "2020-01-31" } });
+    await waitFor(() => expect(new URLSearchParams(api.calls.find((call) => call.path === "/v1/admin/usage")?.query).get("to")).toBe("2020-01-31"));
+  });
+
   it("explains a range without usage and an unreadable ledger, without hiding the budgets", async () => {
     const zero = { calls: 0, inputTokens: 0, outputTokens: 0, costMicroUsd: 0, unpricedCalls: 0 };
     const empty = render({ path: "/admin/costs?from=2026-09-29", routes: routes({ "GET /v1/admin/usage": ok(buildAdminUsage({ totals: zero, byDay: [], byModel: [] })) }) });
