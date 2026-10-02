@@ -37,6 +37,8 @@ export type UploadItem = {
   readonly progress: number;
   readonly fileId?: string | undefined;
   readonly problem?: UploadProblem | undefined;
+  /** The server's validation is taking long (follow-up 79): the chip says "processing", not a failure. */
+  readonly slow?: boolean | undefined;
   /** Local object URL of an image, for the chip preview (never a remote URL). */
   readonly previewUrl?: string | undefined;
 };
@@ -126,17 +128,17 @@ export const createUploadQueue = (deps: UploadQueueDeps): UploadQueue => {
     const organizationId = deps.getOrganizationId();
     try {
       const ticket = await requestUpload(deps.callEndpoint, { organizationId, purpose: entry.item.purpose, source, signal });
-      update(id, { status: "uploading", fileId: ticket.fileId, progress: 0 });
+      update(id, { status: "uploading", fileId: ticket.fileId, progress: 0, slow: false });
       await sendBytes(ticket.upload, source.blob, { ...deps.transfer, signal, onProgress: (progress) => update(id, { progress }) });
       update(id, { status: "validating", progress: 1 });
-      const file = await waitForValidation(deps.callEndpoint, ticket.fileId, { ...deps.wait, signal });
+      const file = await waitForValidation(deps.callEndpoint, ticket.fileId, { ...deps.wait, signal, onSlow: () => update(id, { slow: true }) });
       if (file.status === "rejected") {
         update(id, { status: "rejected", problem: file.rejectionReason ?? "CONTENT_MISMATCH" });
         return;
       }
       if (entry.item.purpose === "knowledge") await addKnowledgeSource(deps.callEndpoint, { organizationId, fileId: ticket.fileId, signal });
       // The server's view of the file (detected type, real size) is what the message shows.
-      update(id, { status: "ready", mediaType: file.contentType, sizeBytes: file.sizeBytes });
+      update(id, { status: "ready", mediaType: file.contentType, sizeBytes: file.sizeBytes, slow: false });
     } catch (error: unknown) {
       settle(id, error);
     }

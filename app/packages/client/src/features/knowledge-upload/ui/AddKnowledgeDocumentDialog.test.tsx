@@ -20,7 +20,7 @@ const noWait = (): Promise<void> => Promise.resolve();
 
 type Sent = { upload: UploadInstructions; size: number };
 
-function Harness({ sendBytes, projectId, fileAllowed }: { sendBytes: SendBytes; projectId: string | undefined; fileAllowed: boolean | undefined }) {
+function Harness({ sendBytes, projectId, fileAllowed, wait }: { sendBytes: SendBytes; projectId: string | undefined; fileAllowed: boolean | undefined; wait: (ms: number) => Promise<void> }) {
   const [open, setOpen] = useState(true);
   const [started, setStarted] = useState<StartedKnowledgeIngestion | null>(null);
   return (
@@ -32,7 +32,7 @@ function Harness({ sendBytes, projectId, fileAllowed }: { sendBytes: SendBytes; 
         onOpenChange={setOpen}
         onAdded={setStarted}
         sendBytes={sendBytes}
-        wait={noWait}
+        wait={wait}
         fileAllowed={fileAllowed}
       />
       {started === null ? null : <p>{`started ${started.runId} ${started.sourceRef} ${started.projectId ?? "organization"}`}</p>}
@@ -40,13 +40,13 @@ function Harness({ sendBytes, projectId, fileAllowed }: { sendBytes: SendBytes; 
   );
 }
 
-const setup = (routes: FakeRoutes, options: { accepted?: boolean; projectId?: string; fileAllowed?: boolean } = {}) => {
+const setup = (routes: FakeRoutes, options: { accepted?: boolean; projectId?: string; fileAllowed?: boolean; wait?: (ms: number) => Promise<void> } = {}) => {
   const sent: Sent[] = [];
   const sendBytes: SendBytes = (upload, file) => {
     sent.push({ upload, size: file.size });
     return Promise.resolve(options.accepted ?? true);
   };
-  const view = renderApp(<Harness sendBytes={sendBytes} projectId={options.projectId} fileAllowed={options.fileAllowed} />, {
+  const view = renderApp(<Harness sendBytes={sendBytes} projectId={options.projectId} fileAllowed={options.fileAllowed} wait={options.wait ?? noWait} />, {
     path: `/o/${IDS.organization}/settings/knowledge`,
     routes: shellRoutes(["core.organization.read", "core.knowledge.read", "core.knowledge.write", "core.file.upload"], routes),
   });
@@ -98,7 +98,7 @@ describe("AddKnowledgeDocumentDialog", () => {
   it("cannot be closed while the upload runs", async () => {
     let release: () => void = () => undefined;
     const sendBytes: SendBytes = () => new Promise((resolve) => (release = () => resolve(true)));
-    const { user } = renderApp(<Harness sendBytes={sendBytes} projectId={undefined} fileAllowed={true} />, {
+    const { user } = renderApp(<Harness sendBytes={sendBytes} projectId={undefined} fileAllowed={true} wait={noWait} />, {
       path: `/o/${IDS.organization}/settings/knowledge`,
       routes: shellRoutes(["core.organization.read", "core.knowledge.read", "core.knowledge.write", "core.file.upload"], {
         "POST /v1/organizations/:organizationId/files": ok(buildUploadTicket(), 201),
@@ -114,6 +114,33 @@ describe("AddKnowledgeDocumentDialog", () => {
     expect(screen.getByRole("dialog", { name: "Adicionar documento" })).toBeDefined();
     release();
     expect(await screen.findByText(`started ${RUN_ID} ${KNOWLEDGE_IDS.file} organization`)).toBeDefined();
+  });
+
+  // Follow-up 79: the first validation on a fresh stack waits for the Functions trigger to start.
+  it("keeps waiting with a processing note when the validation is slow, then starts the indexing", async () => {
+    let polls = 0;
+    let waits = 0;
+    let release!: () => void;
+    const hold = new Promise<void>((resolve) => (release = resolve));
+    const { user } = setup(
+      {
+        "POST /v1/organizations/:organizationId/files": () => ok(buildUploadTicket(), 201),
+        "GET /v1/files/:fileId": () => {
+          polls += 1;
+          return ok(buildStoredFile(polls <= 45 ? { status: "pending" } : {}));
+        },
+        "POST /v1/organizations/:organizationId/knowledge/sources": () => ok({ runId: RUN_ID }, 202),
+      },
+      { wait: () => ((waits += 1) === 31 ? hold : Promise.resolve()) },
+    );
+    const dialog = await screen.findByRole("dialog", { name: "Adicionar documento" });
+    await user.upload(within(dialog).getByLabelText("Arquivo", { selector: "input" }), markdown());
+    await user.click(within(dialog).getByRole("button", { name: "Adicionar" }));
+    expect(await within(dialog).findByText(/Ainda processando o arquivo/u)).toBeDefined();
+    expect(within(dialog).queryByRole("alert")).toBeNull();
+    release();
+    expect(await screen.findByText(`started ${RUN_ID} ${KNOWLEDGE_IDS.file} organization`)).toBeDefined();
+    expect(polls).toBe(46);
   });
 
   it("shows why the server rejected the uploaded file and starts no indexing", async () => {

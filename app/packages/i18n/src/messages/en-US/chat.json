@@ -240,7 +240,8 @@
         "TOO_LARGE": "File too large",
         "CONTENT_MISMATCH": "The content does not match the file type",
         "TOO_MANY": "Limit of {max} attachments per message"
-      }
+      },
+      "processing": "Processing… the check can take a few minutes"
     },
     "announce": {
       "ready": "{name}: ready.",

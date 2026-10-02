@@ -93,6 +93,37 @@ describe("upload queue", () => {
     await vi.waitFor(() => expect(item().status).toBe("ready"));
   });
 
+  // Follow-up 79: the first Functions trigger of a fresh stack can take about a minute.
+  it("keeps validating past 30 s with a visible processing state, then becomes ready", async () => {
+    let now = 0;
+    const pending = ok(storedFile(FILE_A, { status: "pending" }));
+    const { queue, transfer, item, seen } = setup(
+      { files: { [FILE_A]: [pending, pending, pending, pending, pending, pending, ok(storedFile(FILE_A))] } },
+      { wait: { now: () => now, sleep: () => Promise.resolve().then(() => void (now += 10_000)) } },
+    );
+    queue.add([source("notes.txt", "text/plain")], "chat-attachment");
+    (await transfer()).finish();
+    await vi.waitFor(() => expect(item().status).toBe("ready"));
+    expect(seen.flat()).not.toContain("failed");
+    // It was marked slow while it waited, and a ready item is no longer slow.
+    expect(item().slow).toBe(false);
+  });
+
+  it("marks the item slow after 30 s of validation, without failing it", async () => {
+    let now = 0;
+    let release!: () => void;
+    const hold = new Promise<void>((resolve) => (release = resolve));
+    const { queue, transfer, item } = setup(
+      { files: { [FILE_A]: [ok(storedFile(FILE_A, { status: "pending" })), ok(storedFile(FILE_A, { status: "pending" })), ok(storedFile(FILE_A, { status: "pending" })), ok(storedFile(FILE_A, { status: "pending" })), ok(storedFile(FILE_A))] } },
+      { wait: { now: () => now, sleep: () => (now >= 30_000 ? hold : Promise.resolve()).then(() => void (now += 10_000)) } },
+    );
+    queue.add([source("notes.txt", "text/plain")], "chat-attachment");
+    (await transfer()).finish();
+    await vi.waitFor(() => expect(item()).toMatchObject({ status: "validating", slow: true }));
+    release();
+    await vi.waitFor(() => expect(item()).toMatchObject({ status: "ready", slow: false }));
+  });
+
   it("fails with a timeout when validation takes longer than the limit", async () => {
     let now = 0;
     const { queue, transfer, item } = setup({ files: { [FILE_A]: [ok(storedFile(FILE_A, { status: "pending" }))] } }, { wait: { now: () => now, sleep: () => Promise.resolve().then(() => void (now += 10_000)), timeoutMs: 30_000 } });

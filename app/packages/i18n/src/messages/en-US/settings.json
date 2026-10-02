@@ -1254,7 +1254,8 @@
         "requesting": "preparing the upload",
         "uploading": "uploading the file",
         "validating": "checking the file",
-        "starting": "starting the indexing"
+        "starting": "starting the indexing",
+        "slow": "Still processing the file. The first check can take a few minutes; you can wait with this window open."
       },
       "failures": {
         "UPLOAD_FAILED": "The file could not be uploaded. Check your connection and try again.",

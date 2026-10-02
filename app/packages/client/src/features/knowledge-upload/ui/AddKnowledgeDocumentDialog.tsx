@@ -51,12 +51,14 @@ type Problem = KnowledgeFileProblem | "FILE_REQUIRED" | "URL_INVALID";
 
 const MIB = 1024 * 1024;
 
-function Progress({ step }: { step: UploadStep | null }) {
+function Progress({ step, slow }: { step: UploadStep | null; slow: boolean }) {
   const t = useTranslations("settings.knowledge.add.steps");
   if (step === null) return null;
   return (
     <p role="status" className="text-sm text-muted-foreground">
       {t("progress", { current: UPLOAD_STEPS.indexOf(step) + 1, total: UPLOAD_STEPS.length, step: t(step) })}
+      {/* Follow-up 79: a slow first validation is not a failure; say so and keep waiting. */}
+      {slow && step === "validating" ? <span className="block">{t("slow")}</span> : null}
     </p>
   );
 }
@@ -82,6 +84,7 @@ function AddKnowledgeDocumentBody({ organizationId, target, onOpenChange, onAdde
   const [url, setUrl] = useState("");
   const [problem, setProblem] = useState<Problem | null>(null);
   const [step, setStep] = useState<UploadStep | null>(null);
+  const [slow, setSlow] = useState(false);
   const [failure, setFailure] = useState<unknown>(null);
   const [pending, setPending] = useState(false);
   // Steps 1–3 (ticket, bytes, validation) run while pending: closing then would orphan the upload.
@@ -95,7 +98,7 @@ function AddKnowledgeDocumentBody({ organizationId, target, onOpenChange, onAdde
   const start = async (): Promise<StartedKnowledgeIngestion> => {
     const projectId = target.projectId;
     if (kind === "file" && file !== null) {
-      const { runId, fileId, source } = await uploadKnowledgeFile({ callEndpoint, organizationId, projectId, file, onStep: setStep, sendBytes, wait });
+      const { runId, fileId, source } = await uploadKnowledgeFile({ callEndpoint, organizationId, projectId, file, onStep: setStep, onSlow: () => setSlow(true), sendBytes, wait });
       return { runId, label: file.name, sourceRef: fileId, projectId, source };
     }
     const address = url.trim();
@@ -123,6 +126,7 @@ function AddKnowledgeDocumentBody({ organizationId, target, onOpenChange, onAdde
     } finally {
       setPending(false);
       setStep(null);
+      setSlow(false);
     }
   };
 
@@ -176,7 +180,7 @@ function AddKnowledgeDocumentBody({ organizationId, target, onOpenChange, onAdde
           </TabsContent>
         </Tabs>
         {fileAllowed ? null : <p className="text-sm text-muted-foreground">{t("fileNotAllowed")}</p>}
-        <Progress step={step} />
+        <Progress step={step} slow={slow} />
         <DialogFooter>
           <Button type="button" variant="secondary" disabled={pending} onClick={() => onOpenChange(false)}>
             {t("cancel")}

@@ -33,7 +33,13 @@ export const sendBytesWithFetch: SendBytes = async (upload, file, signal) => {
 };
 
 export const VALIDATION_POLL_MS = 1_000;
-export const VALIDATION_MAX_POLLS = 60;
+/** Polls before the dialog says the file is still being processed (30 s; follow-up 79). */
+export const VALIDATION_SLOW_POLLS = 30;
+/**
+ * Five minutes: the first validation of a fresh stack waits for the Functions worker to start
+ * (about a minute under load, follow-up 79), so the client keeps waiting instead of failing.
+ */
+export const VALIDATION_MAX_POLLS = 300;
 
 const waitFor = (milliseconds: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, milliseconds));
 
@@ -44,6 +50,8 @@ export type UploadKnowledgeFileArgs = {
   readonly projectId?: string | undefined;
   readonly file: File;
   readonly onStep: (step: UploadStep) => void;
+  /** Called once when the validation has taken `VALIDATION_SLOW_POLLS` polls; the upload goes on. */
+  readonly onSlow?: (() => void) | undefined;
   readonly sendBytes?: SendBytes | undefined;
   /** Pause between validation polls (tests pass a no-op). */
   readonly wait?: ((milliseconds: number) => Promise<void>) | undefined;
@@ -56,6 +64,7 @@ const untilValidated = async (args: UploadKnowledgeFileArgs, fileId: string): Pr
     const { data } = await args.callEndpoint(getFileEndpoint, { params: { fileId }, ...(args.signal === undefined ? {} : { signal: args.signal }) });
     if (data.status === "ready") return;
     if (data.status === "rejected") throw new KnowledgeUploadError(data.rejectionReason ?? "CONTENT_MISMATCH");
+    if (attempt + 1 === VALIDATION_SLOW_POLLS) args.onSlow?.();
     await wait(VALIDATION_POLL_MS);
   }
   throw new KnowledgeUploadError("VALIDATION_TIMEOUT");

@@ -99,15 +99,23 @@ export class UploadValidationTimeoutError extends Error {
 
 export type WaitOptions = {
   readonly signal?: AbortSignal | undefined;
-  /** Spec §4.3 / plan Task 11: at most 30 s. */
+  /** How long to keep polling before giving up (`VALIDATION_TIMEOUT_MS`). */
   readonly timeoutMs?: number | undefined;
+  /** Called once when the validation has taken `VALIDATION_SLOW_MS`: the caller shows "processing". */
+  readonly onSlow?: (() => void) | undefined;
   readonly intervalMs?: number | undefined;
   /** Test seams. */
   readonly sleep?: ((ms: number, signal?: AbortSignal) => Promise<void>) | undefined;
   readonly now?: (() => number) | undefined;
 };
 
-export const VALIDATION_TIMEOUT_MS = 30_000;
+/**
+ * Spec §4.3 / plan Task 11 expected 30 s, but the first `onObjectFinalized` of a fresh stack waits
+ * for the Functions worker to start (about a minute under load, follow-up 79): past 30 s the
+ * upload shows "processing" and keeps waiting, and gives up only after 5 minutes.
+ */
+export const VALIDATION_SLOW_MS = 30_000;
+export const VALIDATION_TIMEOUT_MS = 300_000;
 export const VALIDATION_POLL_MS = 1000;
 
 const defaultSleep = (ms: number, signal?: AbortSignal): Promise<void> =>
@@ -125,17 +133,24 @@ const defaultSleep = (ms: number, signal?: AbortSignal): Promise<void> =>
 
 /**
  * Polls `GET /v1/files/{id}` until the server validated the bytes (`ready`) or refused them
- * (`rejected`): the client never decides that a file is acceptable.
+ * (`rejected`): the client never decides that a file is acceptable. After `VALIDATION_SLOW_MS` it
+ * calls `onSlow` once and keeps polling.
  * @throws {UploadValidationTimeoutError} after `timeoutMs`.
  */
 export const waitForValidation = async (callEndpoint: CallEndpoint, fileId: string, options: WaitOptions = {}): Promise<StoredFile> => {
   const sleep = options.sleep ?? defaultSleep;
   const now = options.now ?? Date.now;
-  const deadline = now() + (options.timeoutMs ?? VALIDATION_TIMEOUT_MS);
+  const startedAt = now();
+  const deadline = startedAt + (options.timeoutMs ?? VALIDATION_TIMEOUT_MS);
+  let slow = false;
   for (;;) {
     const answer = await callEndpoint(getFileEndpoint, { params: { fileId }, ...(options.signal === undefined ? {} : { signal: options.signal }) });
     if (answer.data.status !== "pending") return answer.data;
     if (now() >= deadline) throw new UploadValidationTimeoutError();
+    if (!slow && now() - startedAt >= VALIDATION_SLOW_MS) {
+      slow = true;
+      options.onSlow?.();
+    }
     await sleep(options.intervalMs ?? VALIDATION_POLL_MS, options.signal);
   }
 };

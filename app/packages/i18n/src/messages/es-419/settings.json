@@ -1254,7 +1254,8 @@
         "requesting": "preparando la carga",
         "uploading": "subiendo el archivo",
         "validating": "verificando el archivo",
-        "starting": "iniciando la indexación"
+        "starting": "iniciando la indexación",
+        "slow": "Todavía procesando el archivo. La primera verificación puede tardar unos minutos; puedes esperar con esta ventana abierta."
       },
       "failures": {
         "UPLOAD_FAILED": "No se pudo subir el archivo. Revisa la conexión e inténtalo de nuevo.",

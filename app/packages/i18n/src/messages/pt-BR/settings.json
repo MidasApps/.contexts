@@ -1254,7 +1254,8 @@
         "requesting": "preparando o envio",
         "uploading": "enviando o arquivo",
         "validating": "conferindo o arquivo",
-        "starting": "iniciando a indexação"
+        "starting": "iniciando a indexação",
+        "slow": "Ainda processando o arquivo. A primeira conferência pode levar alguns minutos; você pode esperar com esta janela aberta."
       },
       "failures": {
         "UPLOAD_FAILED": "Não foi possível enviar o arquivo. Verifique a conexão e tente novamente.",

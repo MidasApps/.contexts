@@ -28,6 +28,7 @@ const detailOf = (item: UploadItem, t: Translate, percent: (value: number) => st
   if (problem !== undefined) return problem;
   if (item.status === "uploading") return t("status.uploading", { percent: percent(item.progress) });
   if (item.status === "ready") return item.purpose === "knowledge" ? t("status.indexing") : t("status.ready");
+  if (item.status === "validating" && item.slow === true) return t("status.processing");
   return t(`status.${item.status as "pending" | "validating"}`);
 };
 

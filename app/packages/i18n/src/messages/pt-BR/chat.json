@@ -240,7 +240,8 @@
         "TOO_LARGE": "Arquivo grande demais",
         "CONTENT_MISMATCH": "O conteúdo não corresponde ao tipo do arquivo",
         "TOO_MANY": "Limite de {max} anexos por mensagem"
-      }
+      },
+      "processing": "Processando… a verificação pode levar alguns minutos"
     },
     "announce": {
       "ready": "{name}: pronto.",
