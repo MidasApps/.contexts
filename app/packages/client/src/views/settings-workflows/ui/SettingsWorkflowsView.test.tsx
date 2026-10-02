@@ -352,6 +352,24 @@ describe("SettingsWorkflowsView: schedules", () => {
     expect(calls).toEqual([`pause ${id} ${IDS.organization}`, `run ${id} ${IDS.organization}`, `delete ${id} ${IDS.organization}`]);
   });
 
+  it("resumes a paused schedule at once and names its workflow in the toast", async () => {
+    const { user } = await openSchedules({
+      "GET /v1/schedules": ok([buildSchedule({ status: "paused", nextFireAt: null })]),
+      "POST /v1/schedules/:scheduleId/resume": ok(buildSchedule()),
+    });
+    await user.click(screen.getByRole("button", { name: "Retomar o agendamento daily-usage de Relatório de uso" }));
+    expect(await screen.findByText("Agendamento de Relatório de uso retomado.")).toBeDefined();
+  });
+
+  it("names the workflow when a resume fails", async () => {
+    const { user } = await openSchedules({
+      "GET /v1/schedules": ok([buildSchedule({ status: "paused", nextFireAt: null })]),
+      "POST /v1/schedules/:scheduleId/resume": apiError(503, "INTERNAL_ERROR"),
+    });
+    await user.click(screen.getByRole("button", { name: "Retomar o agendamento daily-usage de Relatório de uso" }));
+    expect(await screen.findByText("Não foi possível retomar o agendamento de Relatório de uso.")).toBeDefined();
+  });
+
   it("is read-only without core.schedule.write", async () => {
     await openSchedules({}, [...MEMBER, "core.schedule.read"]);
     expect(screen.queryByRole("button", { name: "Novo agendamento" })).toBeNull();
