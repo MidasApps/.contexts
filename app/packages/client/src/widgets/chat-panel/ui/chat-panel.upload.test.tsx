@@ -1,5 +1,5 @@
 import { ConversationContract } from "@core/contracts";
-import { act, screen, waitFor, within } from "@testing-library/react";
+import { act, fireEvent, screen, waitFor, within } from "@testing-library/react";
 import type { UIMessage } from "ai";
 import { describe, expect, it } from "vitest";
 import { createFakeTransfers, routeFilesApi, storedFile } from "#/features/chat-upload/testing/fake-upload.ts";
@@ -105,6 +105,29 @@ describe("ChatPanel uploads", () => {
     const stream = await firstStream(transport);
     expect(stream.body).toBeUndefined();
     expect(stream.messages.at(-1)?.metadata).toBeUndefined();
+  });
+
+  it("attaches files pasted into the field or dropped on the composer, and keeps pasted text as text", async () => {
+    const api = createFakeApi();
+    routeFilesApi(api, [FILE_A, "FileB000000000000002"]);
+    const { field } = setup({}, api);
+    fireEvent.paste(field(), { clipboardData: { files: [png("pasted.png")], types: ["Files"] } });
+    expect(await within(chips()).findByText("pasted.png")).toBeTruthy();
+    const composer = field().closest("form") as HTMLFormElement;
+    fireEvent.dragOver(composer, { dataTransfer: { files: [], types: ["Files"] } });
+    expect(composer.getAttribute("data-dragging")).toBe("true");
+    fireEvent.drop(composer, { dataTransfer: { files: [png("dropped.png")], types: ["Files"] } });
+    expect(await within(chips()).findByText("dropped.png")).toBeTruthy();
+    expect(composer.hasAttribute("data-dragging")).toBe(false);
+    fireEvent.paste(field(), { clipboardData: { files: [], types: ["text/plain"] } });
+    expect(within(chips()).getAllByRole("listitem")).toHaveLength(2);
+  });
+
+  it("ignores pasted files without the upload permission", async () => {
+    const { field } = setup({}, createFakeApi(), new Set());
+    fireEvent.paste(field(), { clipboardData: { files: [png("pasted.png")], types: ["Files"] } });
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(screen.queryByRole("list", { name: "Anexos da mensagem" })).toBeNull();
   });
 
   it("offers a retry after a failed transfer and cancels an upload in flight", async () => {

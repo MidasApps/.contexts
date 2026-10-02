@@ -1,7 +1,7 @@
 "use client";
 
 import { MAX_CHAT_TEXT_CHARS } from "@core/contracts";
-import { useId, useState, type ReactNode, type Ref } from "react";
+import { useId, useState, type ClipboardEvent, type DragEvent, type ReactNode, type Ref } from "react";
 import { useTranslations } from "use-intl";
 import {
   PromptInput,
@@ -24,6 +24,8 @@ export type ChatInputProps = {
   disabled?: boolean | undefined;
   /** Tools on the left of the footer: the attach menu, push-to-talk. */
   tools?: ReactNode;
+  /** Files pasted or dropped on the composer; without it they are ignored (no upload permission, offline). */
+  onFiles?: ((files: readonly File[]) => void) | undefined;
   /** The files of the message being written, above the field (the upload feature's chips). */
   attachments?: ReactNode;
   /** Why sending must wait (uploads in flight, an attachment with an error); said under the field. */
@@ -45,7 +47,7 @@ const COUNTER_FROM = 0.9;
  * and the send button becomes stop. Over the limit the text is kept and the reason is said;
  * nothing is truncated silently.
  */
-export function ChatInput({ status, onSend, onStop, offline = false, disabled = false, tools, attachments, blocked, value, onValueChange, inputRef, maxLength = MAX_CHAT_TEXT_CHARS }: ChatInputProps) {
+export function ChatInput({ status, onSend, onStop, offline = false, disabled = false, tools, onFiles, attachments, blocked, value, onValueChange, inputRef, maxLength = MAX_CHAT_TEXT_CHARS }: ChatInputProps) {
   const t = useTranslations("chat.input");
   const [ownText, setOwnText] = useState("");
   const text = value ?? ownText;
@@ -62,6 +64,27 @@ export function ChatInput({ status, onSend, onStop, offline = false, disabled = 
   const canSend = !busy && !offline && !disabled && trimmed !== "" && !tooLong && blocked === undefined;
   const problem = tooLong ? t("tooLong", { max: maxLength, over }) : offline ? t("offline") : (blocked ?? null);
 
+  const [dragging, setDragging] = useState(false);
+  const carriesFiles = (types: readonly string[]): boolean => onFiles !== undefined && types.includes("Files");
+  // Pasted or dropped files join the message like picked ones; plain pasted text stays text.
+  const onPaste = (event: ClipboardEvent<HTMLFormElement>) => {
+    const files = [...event.clipboardData.files];
+    if (onFiles === undefined || files.length === 0) return;
+    event.preventDefault();
+    onFiles(files);
+  };
+  const onDragOver = (event: DragEvent<HTMLFormElement>) => {
+    if (!carriesFiles([...event.dataTransfer.types])) return;
+    event.preventDefault();
+    setDragging(true);
+  };
+  const onDrop = (event: DragEvent<HTMLFormElement>) => {
+    setDragging(false);
+    if (!carriesFiles([...event.dataTransfer.types])) return;
+    event.preventDefault();
+    onFiles?.([...event.dataTransfer.files]);
+  };
+
   const submit = () => {
     if (!canSend) return;
     onSend(trimmed);
@@ -70,7 +93,16 @@ export function ChatInput({ status, onSend, onStop, offline = false, disabled = 
 
   return (
     <div data-slot="chat-input" className="flex flex-col gap-1.5">
-      <PromptInput onSubmit={submit} aria-label={t("label")}>
+      <PromptInput
+        onSubmit={submit}
+        aria-label={t("label")}
+        onPaste={onPaste}
+        onDragOver={onDragOver}
+        onDragLeave={() => setDragging(false)}
+        onDrop={onDrop}
+        data-dragging={dragging || undefined}
+        className="data-dragging:border-ring data-dragging:bg-accent"
+      >
         {attachments}
         <PromptInputTextarea
           ref={inputRef}

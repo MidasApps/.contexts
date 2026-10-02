@@ -3,7 +3,7 @@
 import type { ReactNode, RefObject } from "react";
 import { useTranslations } from "use-intl";
 import { ChatInput } from "#/features/chat-send/index.ts";
-import { AttachMenu, AttachmentChips, hasUploadProblems, hasUploadsInFlight, useUploadQueue, type UseUploadQueueArgs } from "#/features/chat-upload/index.ts";
+import { AttachMenu, AttachmentChips, hasUploadProblems, hasUploadsInFlight, uploadSourcesOf, useUploadQueue, type UseUploadQueueArgs } from "#/features/chat-upload/index.ts";
 import { ComposerVoice, type ComposerVoiceProps, type VoicePreferences } from "#/features/chat-voice/index.ts";
 import type { ChatSession } from "../model/use-chat-session.ts";
 
@@ -63,6 +63,7 @@ export function ChatComposer({ session, draft, onDraftChange: setDraft, organiza
       value={draft}
       onValueChange={setDraft}
       blocked={blocked}
+      onFiles={canUpload && !offline ? (files) => queue.add(uploadSourcesOf(files), "chat-attachment") : undefined}
       attachments={<AttachmentChips items={items} onRemove={queue.remove} onRetry={queue.retry} />}
       tools={
         <>

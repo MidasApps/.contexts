@@ -5,7 +5,8 @@ import { LibraryBigIcon, PaperclipIcon } from "lucide-react";
 import { useRef, type ChangeEvent } from "react";
 import { useTranslations } from "use-intl";
 import { PromptInputActionMenu, PromptInputActionMenuItem } from "#/shared/ui/ai/prompt-input.tsx";
-import { FALLBACK_MEDIA_TYPE, type UploadSource } from "../api/request-upload.ts";
+import type { UploadSource } from "../api/request-upload.ts";
+import { uploadSourcesOf } from "../model/upload-sources.ts";
 
 export type AttachMenuProps = {
   /** Files the member picked, and what they are for. */
@@ -14,9 +15,6 @@ export type AttachMenuProps = {
   canAddKnowledge?: boolean | undefined;
   disabled?: boolean | undefined;
 };
-
-const toSources = (files: FileList | null): UploadSource[] =>
-  [...(files ?? [])].map((file) => ({ name: file.name, mediaType: file.type === "" ? FALLBACK_MEDIA_TYPE : file.type, sizeBytes: file.size, blob: file }));
 
 /**
  * The "+" menu of the composer (decision 0035): attach files to the message, or send documents
@@ -29,7 +27,7 @@ export function AttachMenu({ onPick, canAddKnowledge = false, disabled }: Attach
   const knowledgeRef = useRef<HTMLInputElement>(null);
 
   const picked = (purpose: FilePurpose) => (event: ChangeEvent<HTMLInputElement>) => {
-    const sources = toSources(event.target.files);
+    const sources = uploadSourcesOf(event.target.files);
     // Reset so picking the same file again fires `change`.
     event.target.value = "";
     if (sources.length > 0) onPick(sources, purpose);
