@@ -89,6 +89,19 @@ describe("SettingsUnitsView", () => {
     expect(api.callLines()).toContain("DELETE /v1/units/site-1");
   });
 
+  it("does not offer a sub-unit under a type that allows none, and says why", async () => {
+    const room = buildUnit({ id: "room-1", name: "Room 1", type: "sample.room" });
+    const { user, container } = renderView({ "GET /v1/projects/:projectId/units": (request: FakeRequest) => page(request.query.get("parentUnitId") === null ? [SITE_A, room] : []) });
+    await selectUnit(user, "Room 1");
+    const create = screen.getByRole("button", { name: "Nova subunidade" });
+    expect(create.hasAttribute("disabled")).toBe(true);
+    const reason = document.getElementById(create.getAttribute("aria-describedby") ?? "");
+    expect(reason?.textContent).toBe("Este tipo de unidade não aceita subunidades.");
+    await expectNoAxeViolations(container);
+    await selectUnit(user, "Site A");
+    expect(screen.getByRole("button", { name: "Nova subunidade" }).hasAttribute("disabled")).toBe(false);
+  });
+
   it("offers the first unit when the project has none, and hides writes without permission", async () => {
     const empty = renderView({ "GET /v1/projects/:projectId/units": page([]) });
     expect(await screen.findByRole("heading", { name: "Nenhuma unidade ainda" })).toBeDefined();

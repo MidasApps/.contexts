@@ -1,7 +1,7 @@
 "use client";
 
 import type { Unit, UnitTypeDefinition } from "@core/contracts";
-import { useMemo, useState } from "react";
+import { useId, useMemo, useState } from "react";
 import { useLocale, useTranslations } from "use-intl";
 import { buildUnitTree, MAX_TREE_UNITS, unitPathIn, useUnitTree, useUnitTypes } from "#/entities/unit/index.ts";
 import { useConfirmedAction } from "#/shared/lib/errors/use-confirmed-action.ts";
@@ -32,18 +32,20 @@ const useTypeLabel = () => {
 };
 
 /** Actions on the selected unit (or the project root when nothing is selected). */
-function SelectionBar(props: { selected: Unit | null; path: string; typeName: string | null; can: UnitTreeEditorProps["can"]; open: (dialog: Dialog) => void }) {
+function SelectionBar(props: { selected: Unit | null; path: string; typeName: string | null; canNest: boolean; can: UnitTreeEditorProps["can"]; open: (dialog: Dialog) => void }) {
   const t = useTranslations("settings.units");
+  const reasonId = useId();
   const { selected, can, open } = props;
   return (
-    <div className="flex flex-col gap-3 rounded-lg border border-border p-3 sm:flex-row sm:items-center">
+    <div className="flex flex-col gap-3 rounded-lg border border-border p-3 sm:flex-row sm:flex-wrap sm:items-center">
       <div className="flex min-w-0 flex-1 flex-col">
         <span className="truncate text-sm font-medium">{selected === null ? t("noSelection") : props.path}</span>
         {props.typeName === null ? null : <span className="text-xs text-muted-foreground">{props.typeName}</span>}
       </div>
       <div className="flex flex-wrap gap-2">
         {can.create ? (
-          <Button size="sm" onClick={() => open("create")}>
+          // Disabled with the reason beside it, rather than a dialog that can only say no.
+          <Button size="sm" disabled={!props.canNest} aria-describedby={props.canNest ? undefined : reasonId} onClick={() => open("create")}>
             <Icon name="plus" />
             {selected === null ? t("createRoot") : t("createChild")}
           </Button>
@@ -64,6 +66,11 @@ function SelectionBar(props: { selected: Unit | null; path: string; typeName: st
           </Button>
         ) : null}
       </div>
+      {can.create && !props.canNest ? (
+        <p id={reasonId} className="text-xs text-muted-foreground sm:basis-full">
+          {selected === null ? t("noRootTypes") : t("noChildTypes")}
+        </p>
+      ) : null}
     </div>
   );
 }
@@ -106,14 +113,21 @@ export function UnitTreeEditor({ organizationId, project, can }: UnitTreeEditorP
   const selectedType = selected === null ? undefined : typeOf(selected.type);
   return (
     <div className="flex flex-col gap-4">
-      <SelectionBar selected={selected} path={selected === null ? "" : pathOf(selected)} typeName={selectedType === undefined ? null : typeLabel(selectedType)} can={can} open={setDialog} />
+      <SelectionBar
+        selected={selected}
+        path={selected === null ? "" : pathOf(selected)}
+        typeName={selectedType === undefined ? null : typeLabel(selectedType)}
+        canNest={creatable.length > 0}
+        can={can}
+        open={setDialog}
+      />
       {nodes.length === 0 ? (
         <EmptyState
           headingLevel={3}
           icon="network"
           title={t("emptyTitle")}
           description={can.create ? t("emptyDescription", { project: project.name }) : t("emptyDescriptionNoPermission")}
-          action={can.create ? <Button onClick={() => setDialog("create")}>{t("createRoot")}</Button> : undefined}
+          action={can.create && creatable.length > 0 ? <Button onClick={() => setDialog("create")}>{t("createRoot")}</Button> : undefined}
         />
       ) : (
         <div className="rounded-lg border border-border p-2">

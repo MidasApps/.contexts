@@ -229,6 +229,8 @@
     "noSelection": "Ninguna unidad seleccionada",
     "createRoot": "Nueva unidad",
     "createChild": "Nueva subunidad",
+    "noChildTypes": "Este tipo de unidad no admite subunidades.",
+    "noRootTypes": "Ningún tipo de unidad puede ir directo en el proyecto.",
     "rename": "Renombrar",
     "moveAction": "Mover a…",
     "deleteAction": "Eliminar",

@@ -229,6 +229,8 @@
     "noSelection": "No unit selected",
     "createRoot": "New unit",
     "createChild": "New sub-unit",
+    "noChildTypes": "This type of unit does not take sub-units.",
+    "noRootTypes": "No type of unit can sit directly in the project.",
     "rename": "Rename",
     "moveAction": "Move to…",
     "deleteAction": "Delete",
