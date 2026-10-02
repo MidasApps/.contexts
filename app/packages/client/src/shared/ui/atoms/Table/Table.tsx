@@ -21,7 +21,7 @@ export function Table({ className, scrollLabel, ...props }: ComponentProps<"tabl
       {...scrollable}
       className="relative w-full overflow-x-auto rounded-md focus-visible:outline-offset-2"
     >
-      <table data-slot="table" className={cn("w-full caption-top border-collapse text-[13px]", className)} {...props} />
+      <table data-slot="table" className={cn("w-full caption-top border-collapse text-body", className)} {...props} />
     </div>
   );
 }
@@ -56,7 +56,7 @@ export function TableHead({ className, scope = "col", ...props }: ComponentProps
       scope={scope}
       className={cn(
         "h-9 px-3 text-left align-middle font-medium whitespace-nowrap text-muted-foreground",
-        "text-[11.5px] tracking-[0.06em] uppercase [&:has([role=checkbox])]:pr-0",
+        "text-caption tracking-[0.06em] uppercase [&:has([role=checkbox])]:pr-0",
         className,
       )}
       {...props}

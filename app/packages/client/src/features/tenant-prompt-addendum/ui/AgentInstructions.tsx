@@ -29,7 +29,7 @@ function ActiveText({ active }: { active: PromptVersion | undefined }) {
   return (
     <div className="flex flex-col gap-1.5">
       <p className="text-xs font-medium text-muted-foreground-strong">{t("activeLabel", { version: active.version })}</p>
-      <pre className="max-h-48 overflow-auto rounded-md bg-muted p-3 font-mono text-[12.5px] whitespace-pre-wrap">
+      <pre className="max-h-48 overflow-auto rounded-md bg-muted p-3 font-mono text-body-sm whitespace-pre-wrap">
         {active.body}
       </pre>
     </div>

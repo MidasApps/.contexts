@@ -46,7 +46,7 @@ function ExperimentName({ experiment }: { experiment: EvalExperimentSummary }) {
   return (
     <span className="flex min-w-0 flex-col">
       <span className="font-medium">{labels.name(experiment)}</span>
-      <span className="font-mono text-[11.5px] break-all text-muted-foreground">{experiment.experimentId}</span>
+      <span className="font-mono text-caption break-all text-muted-foreground">{experiment.experimentId}</span>
     </span>
   );
 }

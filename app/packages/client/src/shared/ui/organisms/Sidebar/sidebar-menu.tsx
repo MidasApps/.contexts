@@ -21,7 +21,7 @@ export function SidebarMenuItem({ className, ...props }: ComponentProps<"li">) {
 // scroll container never clips it.
 const sidebarMenuButtonVariants = cva(
   [
-    "peer/menu-button flex w-full cursor-pointer items-center gap-2 overflow-hidden rounded-xs p-2 text-left text-[13px] text-sidebar-foreground",
+    "peer/menu-button flex w-full cursor-pointer items-center gap-2 overflow-hidden rounded-xs p-2 text-left text-body text-sidebar-foreground",
     "transition-[width,height,padding,background-color] focus-visible:-outline-offset-2",
     "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
     "disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50",
@@ -114,7 +114,7 @@ export function SidebarMenuBadge({ className, ...props }: ComponentProps<"span">
       data-slot="sidebar-menu-badge"
       className={cn(
         "pointer-events-none absolute top-1.5 right-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-sidebar-primary px-1.5",
-        "font-mono text-[10.5px] text-sidebar-primary-foreground tabular-nums select-none group-data-[collapsible=icon]:hidden",
+        "font-mono text-tiny text-sidebar-primary-foreground tabular-nums select-none group-data-[collapsible=icon]:hidden",
         className,
       )}
       {...props}
@@ -164,7 +164,7 @@ export function SidebarMenuSubButton({
       data-active={isActive}
       aria-current={isActive ? "page" : undefined}
       className={cn(
-        "flex h-7 min-w-0 -translate-x-px items-center gap-2 overflow-hidden rounded-xs px-2 text-[12.5px] text-sidebar-foreground",
+        "flex h-7 min-w-0 -translate-x-px items-center gap-2 overflow-hidden rounded-xs px-2 text-body-sm text-sidebar-foreground",
         "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:-outline-offset-2",
         "data-[active=true]:bg-sidebar-accent data-[active=true]:font-medium [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0",
         className,

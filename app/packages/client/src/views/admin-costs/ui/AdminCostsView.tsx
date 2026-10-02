@@ -92,7 +92,7 @@ function Attention({ organizations }: { organizations: readonly OrganizationAdmi
             <li key={organization.id} className="flex flex-wrap items-center justify-between gap-2 py-2">
               <span className="flex min-w-0 flex-col">
                 <span className="truncate font-medium">{organization.name}</span>
-                <span className="font-mono text-[11.5px] text-muted-foreground tabular-nums">
+                <span className="font-mono text-caption text-muted-foreground tabular-nums">
                   {t("costOfCap", { cost: formatCost(organization.costMtdMicroUsd), cap: formatCost(organization.budget.caps.monthlyMicroUsd) })}
                 </span>
               </span>

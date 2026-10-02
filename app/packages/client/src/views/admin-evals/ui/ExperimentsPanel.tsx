@@ -41,7 +41,7 @@ function ExperimentName({ experiment }: { experiment: EvalExperimentSummary }) {
         {labels.name(experiment)}
         {experiment.promptVersionId === null ? null : ` · ${t("promptEval")}`}
       </span>
-      <span className="font-mono text-[11.5px] break-all text-muted-foreground">{experiment.experimentId}</span>
+      <span className="font-mono text-caption break-all text-muted-foreground">{experiment.experimentId}</span>
     </span>
   );
 }

@@ -55,7 +55,7 @@ export function TabsTrigger({ className, ...props }: ComponentProps<typeof TabsP
     <TabsPrimitive.Trigger
       data-slot="tabs-trigger"
       className={cn(
-        "relative inline-flex min-h-7 cursor-pointer items-center justify-center gap-1.5 px-3 py-1 text-[12.5px] font-medium whitespace-nowrap transition-colors",
+        "relative inline-flex min-h-7 cursor-pointer items-center justify-center gap-1.5 px-3 py-1 text-body-sm font-medium whitespace-nowrap transition-colors",
         "hover:text-foreground disabled:pointer-events-none disabled:opacity-50 data-[state=active]:text-foreground",
         "group-data-[orientation=vertical]/tabs:w-full group-data-[orientation=vertical]/tabs:justify-start",
         "group-data-[variant=segmented]/tabs-list:rounded-xs group-data-[variant=segmented]/tabs-list:data-[state=active]:bg-card",

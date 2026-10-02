@@ -41,7 +41,7 @@ export function ReadAloudAction({ organizationId, text, autoPlay = false, seams 
         {active ? <SquareIcon aria-hidden="true" className="fill-current" /> : <Volume2Icon aria-hidden="true" />}
       </MessageAction>
       {playback.status === "ready" ? <AudioPlayer label={t("player")} src={playback.url} autoPlay onEnded={stop} className="basis-full" /> : null}
-      <span role="status" className={playback.status === "error" ? "text-[12px] text-destructive-text" : "sr-only"}>
+      <span role="status" className={playback.status === "error" ? "text-xs text-destructive-text" : "sr-only"}>
         {playback.status === "loading" ? t("loadingAudio") : ""}
         {playback.status === "error" ? t(playback.reason === "unavailable" ? "readUnavailable" : "readFailed") : ""}
       </span>

@@ -57,7 +57,7 @@ export function ToolHeader({ title, state, icon, className, ...props }: ToolHead
   return (
     <CollapsibleTrigger
       data-slot="tool-header"
-      className={cn("flex w-full items-center justify-between gap-3 rounded-md px-3 py-2 text-left text-[13px]", className)}
+      className={cn("flex w-full items-center justify-between gap-3 rounded-md px-3 py-2 text-left text-body", className)}
       {...props}
     >
       <span className="flex min-w-0 items-center gap-2">
@@ -95,7 +95,7 @@ export function ToolInput({ value, className, ...props }: ToolSectionProps) {
   const t = useTranslations("chat.elements.tool");
   return (
     <div data-slot="tool-input" className={cn("space-y-1.5 p-3", className)} {...props}>
-      <h4 className="text-[11px] font-medium tracking-wide text-muted-foreground uppercase">{t("input")}</h4>
+      <h4 className="text-label font-medium tracking-wide text-muted-foreground uppercase">{t("input")}</h4>
       <CodeBlock code={toJson(value)} language="json" label={t("input")} />
     </div>
   );
@@ -110,7 +110,7 @@ export function ToolOutput({ value, errorText, className, ...props }: ToolOutput
   const failed = errorText !== undefined;
   return (
     <div data-slot="tool-output" className={cn("space-y-1.5 p-3", className)} {...props}>
-      <h4 className={cn("text-[11px] font-medium tracking-wide uppercase", failed ? "text-destructive-text" : "text-muted-foreground")}>
+      <h4 className={cn("text-label font-medium tracking-wide uppercase", failed ? "text-destructive-text" : "text-muted-foreground")}>
         {failed ? t("error") : t("output")}
       </h4>
       <CodeBlock code={failed ? errorText : toJson(value)} language={failed ? undefined : "json"} label={failed ? t("error") : t("output")} />

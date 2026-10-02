@@ -88,7 +88,7 @@ export function KnowledgeDocumentsTable({ caption, documents, collectionName, on
             <span className="font-medium break-all">{documentName(document)}</span>
             <KnowledgeStatusPill status={document.status} />
           </span>
-          <span className="text-[13px]">{collectionName(document.namespace)}</span>
+          <span className="text-body">{collectionName(document.namespace)}</span>
           <span className="text-xs text-muted-foreground">{t("cardMeta", { source: t(`sources.${document.source}`), date: formatDateTime(document.createdAt, "date") })}</span>
           <DeleteAction document={document} onDelete={onDelete} />
         </div>

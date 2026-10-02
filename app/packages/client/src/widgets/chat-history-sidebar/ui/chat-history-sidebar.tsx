@@ -114,7 +114,7 @@ export function ChatHistorySidebar({ organizationId, projectId, activeConversati
       <div className="flex shrink-0 flex-col gap-2 px-3 py-2">
         <HistorySearch onSearch={setQ} />
         <div className="flex items-center justify-between gap-2">
-          <p role="status" data-slot="history-count" className="text-[11.5px] text-muted-foreground">
+          <p role="status" data-slot="history-count" className="text-caption text-muted-foreground">
             {/* While more pages exist, the loaded rows are not the total. */}
             {query.isSuccess ? t(query.hasNextPage ? "countLoaded" : "count", { count: conversations.length }) : ""}
           </p>

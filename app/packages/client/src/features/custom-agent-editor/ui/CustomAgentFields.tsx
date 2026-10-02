@@ -55,7 +55,7 @@ function TextFields({ draft, setDraft, problems, maximum }: Shared & { maximum: 
       <Field>
         <FieldLabel>{t("fields.instructions")}</FieldLabel>
         <FieldControl>
-          <Textarea required rows={8} className="font-mono text-[12.5px]" value={draft.instructions} onChange={(event) => setDraft({ ...draft, instructions: event.target.value })} />
+          <Textarea required rows={8} className="font-mono text-body-sm" value={draft.instructions} onChange={(event) => setDraft({ ...draft, instructions: event.target.value })} />
         </FieldControl>
         <FieldDescription>
           {t("hints.instructions")} {t("counter", { count: draft.instructions.length, maximum })}
@@ -109,7 +109,7 @@ function CheckList({ legend, hint, empty, choices, selected, onChange, errors }:
           </FieldControl>
           <FieldLabel className="flex flex-wrap items-center gap-2 font-normal">
             {/* A choice no catalog names shows its id, in mono; a named one reads as text. */}
-            <span className={choice.label === choice.value ? "font-mono text-[12.5px] break-all" : "text-sm"}>{choice.label}</span>
+            <span className={choice.label === choice.value ? "font-mono text-body-sm break-all" : "text-sm"}>{choice.label}</span>
             {choice.badge}
             {choice.detail === undefined ? null : <span className="basis-full text-xs text-muted-foreground">{choice.detail}</span>}
           </FieldLabel>

@@ -56,7 +56,7 @@ function ModuleGroup({ group, label, selected, grantable, onToggle }: ModuleGrou
       </FieldLegend>
       {group.resources.map((resource) => (
         <div key={resource.resource} className="flex flex-col gap-2">
-          <p className="font-mono text-[11.5px] tracking-wide text-muted-foreground uppercase">{resource.resource}</p>
+          <p className="font-mono text-caption tracking-wide text-muted-foreground uppercase">{resource.resource}</p>
           <ul className="flex flex-col gap-2">
             {resource.permissions.map((permission) => {
               const checked = selected.has(permission.id);
@@ -71,7 +71,7 @@ function ModuleGroup({ group, label, selected, grantable, onToggle }: ModuleGrou
                   />
                   <Label htmlFor={`${id}-${permission.id}`} className="flex flex-col items-start gap-0.5 font-normal">
                     <span>{labelOf(permission)}</span>
-                    <span className="font-mono text-[11.5px] text-muted-foreground">{permission.id}</span>
+                    <span className="font-mono text-caption text-muted-foreground">{permission.id}</span>
                   </Label>
                 </li>
               );

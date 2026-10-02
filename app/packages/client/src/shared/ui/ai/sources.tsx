@@ -14,7 +14,7 @@ export function Sources({ count, className, children, ...props }: SourcesProps) 
   const t = useTranslations("chat.elements");
   return (
     <Collapsible data-slot="sources" className={cn("group/sources w-full", className)} {...props}>
-      <CollapsibleTrigger className="flex items-center gap-2 rounded-xs text-[13px] text-muted-foreground hover:text-foreground">
+      <CollapsibleTrigger className="flex items-center gap-2 rounded-xs text-body text-muted-foreground hover:text-foreground">
         <BookOpenIcon aria-hidden="true" className="size-4" />
         {t("sources.count", { count })}
         <ChevronDownIcon aria-hidden="true" className="size-4 transition-transform group-data-[state=open]/sources:rotate-180" />
@@ -40,8 +40,8 @@ export function Source({ index, title, href, snippet, className, id, ...props }:
   const t = useTranslations("chat.markdown");
   const link = resolveSafeLink(href);
   return (
-    <li data-slot="source" id={id} className={cn("flex gap-2 text-[13px]", className)} {...props}>
-      <span aria-hidden="true" className="font-mono text-[11.5px] text-muted-foreground tabular-nums">
+    <li data-slot="source" id={id} className={cn("flex gap-2 text-body", className)} {...props}>
+      <span aria-hidden="true" className="font-mono text-caption text-muted-foreground tabular-nums">
         {index}.
       </span>
       <div className="min-w-0 space-y-0.5">

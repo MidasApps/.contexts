@@ -90,7 +90,7 @@ function Budget({ summary }: { summary: UsageSummary }) {
   return (
     <section aria-labelledby="usage-budget-title" className="flex flex-col gap-4 rounded-xl border border-border bg-card p-4 sm:p-5">
       <div className="flex flex-col gap-1">
-        <h2 id="usage-budget-title" className="text-[15px] font-semibold">
+        <h2 id="usage-budget-title" className="text-title font-semibold">
           {t("title")}
         </h2>
         <p className="text-sm text-muted-foreground">{t("description", { threshold })}</p>

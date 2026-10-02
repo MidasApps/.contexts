@@ -30,7 +30,7 @@ function UserName({ user }: { user: AdminUserSummary }) {
   return (
     <span className="flex min-w-0 flex-col">
       <span className="truncate font-medium">{user.displayName.trim() === "" ? t("noName") : user.displayName}</span>
-      <span className="font-mono text-[11.5px] break-all text-muted-foreground">{user.id}</span>
+      <span className="font-mono text-caption break-all text-muted-foreground">{user.id}</span>
     </span>
   );
 }
@@ -94,7 +94,7 @@ function Results({ search, onSelect, selectedId }: UserSearchSectionProps & { se
                 <UserName user={user} />
                 <AdminUserStatusPill status={user.status} />
               </span>
-              <span className="text-[13px]">
+              <span className="text-body">
                 <UserEmail user={user} />
               </span>
               {onSelect === undefined ? null : (

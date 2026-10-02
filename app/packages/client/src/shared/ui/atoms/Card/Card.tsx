@@ -33,11 +33,11 @@ export type CardTitleProps = ComponentProps<"h3"> & { as?: "h2" | "h3" | "h4" | 
 
 /** Semibold 15 px title; pick `as` to keep the page's heading hierarchy (one h1, no skipped levels). */
 export function CardTitle({ className, as: Tag = "h3", ...props }: CardTitleProps) {
-  return <Tag data-slot="card-title" className={cn("text-[15px] leading-snug font-semibold", className)} {...props} />;
+  return <Tag data-slot="card-title" className={cn("text-title leading-snug font-semibold", className)} {...props} />;
 }
 
 export function CardDescription({ className, ...props }: ComponentProps<"p">) {
-  return <p data-slot="card-description" className={cn("text-[13px] text-muted-foreground", className)} {...props} />;
+  return <p data-slot="card-description" className={cn("text-body text-muted-foreground", className)} {...props} />;
 }
 
 export function CardAction({ className, ...props }: ComponentProps<"div">) {

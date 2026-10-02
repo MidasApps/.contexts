@@ -38,7 +38,7 @@ function KeyName({ apiKey }: { apiKey: ApiKey }) {
   return (
     <span className="flex flex-col">
       <span className="font-medium">{apiKey.name}</span>
-      <span className="font-mono text-[11.5px] text-muted-foreground">{apiKey.publicId}</span>
+      <span className="font-mono text-caption text-muted-foreground">{apiKey.publicId}</span>
     </span>
   );
 }
@@ -98,7 +98,7 @@ function ApiKeysTable({ context, onCreate }: { context: AccessContext; onCreate:
               <KeyName apiKey={key} />
               <KeyStatus apiKey={key} now={now} />
             </span>
-            <span className="text-[13px]">
+            <span className="text-body">
               <NodeName node={key.node} />
             </span>
             <span className="text-xs text-muted-foreground">{t("cardMeta", { scopes: key.scopes.length, date: formatDateTime(key.expiresAt, "date") })}</span>

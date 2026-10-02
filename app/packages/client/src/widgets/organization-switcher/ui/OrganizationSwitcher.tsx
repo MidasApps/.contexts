@@ -94,8 +94,8 @@ export function OrganizationSwitcher() {
                   <OrganizationAvatar name={current.name} size="md" decorative className="size-8" />
                 )}
                 <span className="grid min-w-0 flex-1 text-left leading-tight">
-                  {loadingName ? <Skeleton className="h-4 w-24" /> : <span className="truncate text-[13px] font-medium">{name}</span>}
-                  <span className="truncate text-[11.5px] text-muted-foreground">{t("organizationLabel")}</span>
+                  {loadingName ? <Skeleton className="h-4 w-24" /> : <span className="truncate text-body font-medium">{name}</span>}
+                  <span className="truncate text-caption text-muted-foreground">{t("organizationLabel")}</span>
                 </span>
                 {switching ? <Spinner decorative className="ml-auto" /> : <Icon name="chevron-down" className="ml-auto size-4" />}
               </SidebarMenuButton>

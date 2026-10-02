@@ -30,7 +30,7 @@ function PageStateLayout({ icon, tone, title, description, reference, actions, r
       </span>
       <h1 className="text-xl font-semibold tracking-tight">{title}</h1>
       <p className="mt-2 text-sm text-muted-foreground">{description}</p>
-      {reference === undefined ? null : <p className="mt-2 font-mono text-[11.5px] text-muted-foreground">{reference}</p>}
+      {reference === undefined ? null : <p className="mt-2 font-mono text-caption text-muted-foreground">{reference}</p>}
       <div className="mt-5 flex flex-wrap justify-center gap-2">{actions}</div>
     </div>
   );

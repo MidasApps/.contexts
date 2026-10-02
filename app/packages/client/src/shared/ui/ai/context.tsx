@@ -38,7 +38,7 @@ export function Context({ usage, maxTokens, className, ...props }: ContextProps)
       <PopoverTrigger
         data-slot="context"
         aria-label={t("label", { percent })}
-        className={cn("inline-flex h-8 items-center gap-1.5 rounded-sm px-2 font-mono text-[11.5px] text-muted-foreground tabular-nums hover:bg-muted", className)}
+        className={cn("inline-flex h-8 items-center gap-1.5 rounded-sm px-2 font-mono text-caption text-muted-foreground tabular-nums hover:bg-muted", className)}
         {...props}
       >
         <svg aria-hidden="true" viewBox="0 0 18 18" className="size-4 -rotate-90">
@@ -47,7 +47,7 @@ export function Context({ usage, maxTokens, className, ...props }: ContextProps)
         </svg>
         {percent}
       </PopoverTrigger>
-      <PopoverContent align="end" className="w-56 text-[13px]">
+      <PopoverContent align="end" className="w-56 text-body">
         <p className="font-medium text-foreground">{t("title")}</p>
         <dl className="mt-2 grid grid-cols-[1fr_auto] gap-x-4 gap-y-1">
           {rows.map(([label, value]) => (

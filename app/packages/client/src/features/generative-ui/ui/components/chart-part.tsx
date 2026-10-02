@@ -92,8 +92,8 @@ export function ChartPart({ props }: GenerativeComponentProps<ChartProps>) {
   const title = t("label", { kind: t(`kinds.${props.kind}`), series: shownSeries.map((series) => series.label).join(", ") });
   return (
     <figure data-slot="chart-part" data-kind={props.kind} className="flex flex-col gap-3 rounded-md border border-border bg-card p-4">
-      <figcaption className="text-[13px] font-medium text-foreground">{title}</figcaption>
-      <div aria-hidden="true" className="h-56 w-full font-mono text-[11px] tabular-nums">
+      <figcaption className="text-body font-medium text-foreground">{title}</figcaption>
+      <div aria-hidden="true" className="h-56 w-full font-mono text-label tabular-nums">
         <ResponsiveContainer width="100%" height="100%" initialDimension={{ width: 480, height: 224 }}>
           {props.kind === "pie" ? pie(props, data, formatValue) : cartesian(props, data, formatValue)}
         </ResponsiveContainer>

@@ -24,14 +24,14 @@ export function Reasoning({ text, streaming = false, className, ...props }: Reas
   const t = useTranslations("chat.elements");
   return (
     <Collapsible data-slot="reasoning" className={cn("group/reasoning w-full", className)} {...props}>
-      <CollapsibleTrigger className="flex items-center gap-2 rounded-xs text-[13px] text-muted-foreground hover:text-foreground">
+      <CollapsibleTrigger className="flex items-center gap-2 rounded-xs text-body text-muted-foreground hover:text-foreground">
         <BrainIcon aria-hidden="true" className="size-4" />
         {streaming ? <Shimmer>{t("reasoning.thinking")}</Shimmer> : <span>{t("reasoning.done")}</span>}
         <ChevronDownIcon aria-hidden="true" className="size-4 transition-transform group-data-[state=open]/reasoning:rotate-180" />
       </CollapsibleTrigger>
       <CollapsibleContent>
         <div className="mt-2 border-l-2 border-border pl-3">
-          <SafeMarkdown streaming={streaming} className="text-[13px] text-muted-foreground">
+          <SafeMarkdown streaming={streaming} className="text-body text-muted-foreground">
             {text}
           </SafeMarkdown>
         </div>

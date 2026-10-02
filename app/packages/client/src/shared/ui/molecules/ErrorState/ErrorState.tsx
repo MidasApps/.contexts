@@ -45,7 +45,7 @@ export function ErrorState({ title, description, requestId, onRetry, retrying = 
       {...props}
     >
       {requestId === undefined ? null : (
-        <p className="mt-2 font-mono text-[11.5px] text-muted-foreground">{t("errorState.reference", { requestId })}</p>
+        <p className="mt-2 font-mono text-caption text-muted-foreground">{t("errorState.reference", { requestId })}</p>
       )}
       {children}
     </StatePanel>

@@ -27,8 +27,8 @@ function Payload({ label, value }: { label: string; value: unknown }) {
   const scrollable = { tabIndex: 0, role: "region", "aria-label": label } as const;
   return (
     <div className="flex flex-col gap-1">
-      <span className="text-[11.5px] font-medium text-muted-foreground">{label}</span>
-      <pre {...scrollable} className="max-h-64 overflow-auto rounded-md border border-border bg-muted p-2 font-mono text-[11.5px] leading-relaxed focus-visible:outline-offset-2">
+      <span className="text-caption font-medium text-muted-foreground">{label}</span>
+      <pre {...scrollable} className="max-h-64 overflow-auto rounded-md border border-border bg-muted p-2 font-mono text-caption leading-relaxed focus-visible:outline-offset-2">
         {pretty(value)}
       </pre>
     </div>

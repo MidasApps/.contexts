@@ -110,8 +110,8 @@ export function UserMenu() {
                   <Skeleton className="h-4 w-28" />
                 ) : (
                   <>
-                    <span className="truncate text-[13px] font-medium">{name}</span>
-                    <span className="truncate text-[11.5px] text-muted-foreground">{me.data.email}</span>
+                    <span className="truncate text-body font-medium">{name}</span>
+                    <span className="truncate text-caption text-muted-foreground">{me.data.email}</span>
                   </>
                 )}
               </span>
@@ -120,7 +120,7 @@ export function UserMenu() {
           </DropdownMenuTrigger>
           <DropdownMenuContent side={isMobile ? "top" : "right"} align="end" sideOffset={4} className="min-w-60">
             <DropdownMenuLabel className="normal-case tracking-normal">
-              <span className="block truncate text-[13px] font-medium text-foreground">{name}</span>
+              <span className="block truncate text-body font-medium text-foreground">{name}</span>
               {me.data === undefined ? null : <span className="block truncate font-sans text-xs text-muted-foreground">{me.data.email}</span>}
             </DropdownMenuLabel>
             <DropdownMenuSeparator />

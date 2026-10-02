@@ -53,9 +53,9 @@ function FlagName({ flag }: { flag: FeatureFlag }) {
   return (
     <span className="flex max-w-prose min-w-0 flex-col gap-0.5 whitespace-normal">
       <span className="font-medium">{label.name(flag.key)}</span>
-      <span className="font-mono text-[12.5px] text-muted-foreground">{flag.key}</span>
-      <span className="text-[12.5px] text-muted-foreground">{flag.reason}</span>
-      <span className="text-[11.5px] text-muted-foreground">{t("owner", { owner: flag.owner })}</span>
+      <span className="font-mono text-body-sm text-muted-foreground">{flag.key}</span>
+      <span className="text-body-sm text-muted-foreground">{flag.reason}</span>
+      <span className="text-caption text-muted-foreground">{t("owner", { owner: flag.owner })}</span>
     </span>
   );
 }
@@ -86,7 +86,7 @@ function EnvironmentSwitch({ flag }: { flag: FeatureFlag }) {
         aria-label={t("environmentSwitch", { key: flag.key })}
         onCheckedChange={(value) => context.onChange({ flag, value })}
       />
-      <span className="text-[12.5px]">{flag.value ? t("on") : t("off")}</span>
+      <span className="text-body-sm">{flag.value ? t("on") : t("off")}</span>
     </span>
   );
 }
@@ -113,7 +113,7 @@ function OrganizationOverride({ flag }: { flag: FeatureFlag }) {
   return (
     <span className="flex flex-col items-start gap-1.5">
       <StatusPill tone={override === null ? "neutral" : override ? "emerald" : "amber"}>{t(override === null ? "override.none" : override ? "override.on" : "override.off")}</StatusPill>
-      <span className="text-[11.5px] text-muted-foreground">{t(seen.value ? "override.effectiveOn" : "override.effectiveOff")}</span>
+      <span className="text-caption text-muted-foreground">{t(seen.value ? "override.effectiveOn" : "override.effectiveOff")}</span>
       <span className="flex flex-wrap gap-1.5">
         {override === true ? null : offer(true)}
         {override === false ? null : offer(false)}

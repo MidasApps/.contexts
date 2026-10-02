@@ -24,7 +24,7 @@ export type QueueItemProps = ComponentProps<"li"> & {
 
 export function QueueItem({ status, statusLabel, className, children, ...props }: QueueItemProps) {
   return (
-    <li data-slot="queue-item" data-status={status} className={cn("flex items-start gap-2 text-[13px]", status === "done" ? "text-muted-foreground" : "text-foreground", className)} {...props}>
+    <li data-slot="queue-item" data-status={status} className={cn("flex items-start gap-2 text-body", status === "done" ? "text-muted-foreground" : "text-foreground", className)} {...props}>
       <span className="mt-0.5">{MARKS[status]}</span>
       <span className="min-w-0 flex-1">
         {children}

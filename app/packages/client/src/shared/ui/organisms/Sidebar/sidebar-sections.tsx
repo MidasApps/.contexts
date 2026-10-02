@@ -45,7 +45,7 @@ export function SidebarGroupLabel({ className, asChild = false, ...props }: Comp
     <Component
       data-slot="sidebar-group-label"
       className={cn(
-        "flex h-7 shrink-0 items-center px-2 font-mono text-[10px] tracking-[0.1em] text-muted-foreground uppercase",
+        "flex h-7 shrink-0 items-center px-2 font-mono text-tiny tracking-[0.1em] text-muted-foreground uppercase",
         "transition-[margin,opacity] duration-200 ease-out group-data-[collapsible=icon]:-mt-7 group-data-[collapsible=icon]:opacity-0",
         className,
       )}

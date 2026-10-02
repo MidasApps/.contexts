@@ -76,7 +76,7 @@ function VersionActions({ version, activeVersion, evalRun, online, onActivate, o
         </Button>
       </span>
       {isActive || allowed ? null : (
-        <span id={hintId} className="text-[11.5px] text-muted-foreground">
+        <span id={hintId} className="text-caption text-muted-foreground">
           {t("activateBlocked")}
         </span>
       )}
@@ -131,7 +131,7 @@ export function PromptVersionsTable({ agentName, versions, onCreate, ...context 
             <VersionLabel version={version} active={context.activeVersion?.id === version.id} />
             <PromptVerdictPill verdict={version.evalVerdict} />
           </span>
-          {version.note === null ? null : <span className="text-[13px]">{version.note}</span>}
+          {version.note === null ? null : <span className="text-body">{version.note}</span>}
           <span className="text-xs text-muted-foreground">{t("cardMeta", { author: context.userLabel(version.createdBy), date: formatDateTime(version.createdAt) })}</span>
           <VersionActions version={version} {...context} />
         </div>

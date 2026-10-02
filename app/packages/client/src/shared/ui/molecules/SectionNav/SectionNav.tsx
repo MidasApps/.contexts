@@ -46,7 +46,7 @@ function SectionLink({ item }: { item: SectionNavItem }) {
       to={item.to}
       aria-current={item.current ? "page" : undefined}
       className={cn(
-        "flex min-h-8 items-center gap-2 rounded-xs px-2.5 text-[13px] whitespace-nowrap text-muted-foreground transition-colors hover:bg-muted hover:text-foreground",
+        "flex min-h-8 items-center gap-2 rounded-xs px-2.5 text-body whitespace-nowrap text-muted-foreground transition-colors hover:bg-muted hover:text-foreground",
         item.current && "bg-accent font-medium text-accent-foreground hover:bg-accent",
       )}
     >

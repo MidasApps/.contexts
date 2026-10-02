@@ -83,7 +83,7 @@ function DevicesTable({ context, onCreate }: { context: AccessContext; onCreate:
               <span className="font-medium">{device.label}</span>
               <DeviceStatus device={device} />
             </span>
-            <span className="text-[13px]">
+            <span className="text-body">
               <NodeName node={device.node} />
             </span>
             <span className="text-xs text-muted-foreground">{device.lastSeenAt === null ? t("neverSeen") : t("lastSeenOn", { date: formatDateTime(device.lastSeenAt) })}</span>

@@ -37,7 +37,7 @@ export function Attachment({ name, mediaType, detail, preview, action, tone = "d
     <li
       data-slot="attachment"
       data-tone={tone}
-      className={cn("flex max-w-full items-center gap-2 rounded-sm border bg-card py-1.5 pr-1.5 pl-2 text-[12.5px]", tone === "error" ? "border-destructive/40" : "border-border", className)}
+      className={cn("flex max-w-full items-center gap-2 rounded-sm border bg-card py-1.5 pr-1.5 pl-2 text-body-sm", tone === "error" ? "border-destructive/40" : "border-border", className)}
       {...props}
     >
       <span className="grid size-7 shrink-0 place-items-center overflow-hidden rounded-xs bg-muted text-muted-foreground">{preview ?? iconOf(mediaType)}</span>

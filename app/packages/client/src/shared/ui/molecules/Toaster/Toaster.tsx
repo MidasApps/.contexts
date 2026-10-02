@@ -22,8 +22,8 @@ const CLASS_NAMES = {
   toast:
     "group flex w-(--width) items-start gap-3 rounded-md border border-border bg-card px-3.5 py-3 text-card-foreground shadow-popover",
   content: "flex min-w-0 flex-1 flex-col gap-0.5",
-  title: "text-[13px] leading-snug font-semibold",
-  description: "text-[12.5px] leading-snug text-muted-foreground",
+  title: "text-body leading-snug font-semibold",
+  description: "text-body-sm leading-snug text-muted-foreground",
   icon: "shrink-0",
   actionButton:
     "ml-auto shrink-0 cursor-pointer self-center rounded-xs bg-primary px-2.5 py-1 text-xs font-medium text-primary-foreground hover:bg-primary/90",

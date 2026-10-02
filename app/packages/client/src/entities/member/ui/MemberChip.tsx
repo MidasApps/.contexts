@@ -15,8 +15,8 @@ export function MemberChip({ displayName, email, className }: MemberChipProps) {
     <span data-slot="member-chip" className={cn("flex min-w-0 items-center gap-2.5", className)}>
       <Avatar name={name} size="sm" decorative />
       <span className="flex min-w-0 flex-col">
-        <span className="truncate text-[13px] font-medium">{name}</span>
-        {name === email ? null : <span className="truncate text-[11.5px] text-muted-foreground">{email}</span>}
+        <span className="truncate text-body font-medium">{name}</span>
+        {name === email ? null : <span className="truncate text-caption text-muted-foreground">{email}</span>}
       </span>
     </span>
   );

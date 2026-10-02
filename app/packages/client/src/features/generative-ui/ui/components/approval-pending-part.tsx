@@ -20,7 +20,7 @@ export function ApprovalPendingPart({ props }: GenerativeComponentProps<Approval
         <UsersIcon aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-amber" />
         <div className="min-w-0 space-y-0.5">
           <h3 className="font-semibold text-foreground">{t("title")}</h3>
-          <p className="text-[13px] text-muted-foreground">{props.summary}</p>
+          <p className="text-body text-muted-foreground">{props.summary}</p>
         </div>
       </div>
       <div className="flex justify-end">

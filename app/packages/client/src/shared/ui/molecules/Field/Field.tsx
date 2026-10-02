@@ -67,7 +67,7 @@ export function FieldLabel({ className, htmlFor, ...props }: ComponentProps<type
     <Label
       data-slot="field-label"
       htmlFor={htmlFor ?? field?.controlId}
-      className={cn("text-[13px] leading-snug group-data-[disabled=true]/field:opacity-50", className)}
+      className={cn("text-body leading-snug group-data-[disabled=true]/field:opacity-50", className)}
       {...props}
     />
   );

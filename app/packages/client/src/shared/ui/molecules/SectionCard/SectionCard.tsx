@@ -28,7 +28,7 @@ export function SectionCard({ title, description, actions, children, tone = "def
     >
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex min-w-0 flex-col gap-1">
-          <h2 id={`${id}-title`} className="text-[15px] font-semibold">
+          <h2 id={`${id}-title`} className="text-title font-semibold">
             {title}
           </h2>
           {description === undefined ? null : <p className="text-sm text-muted-foreground">{description}</p>}

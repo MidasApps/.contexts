@@ -23,7 +23,7 @@ export type AgentHeaderProps = Omit<ComponentProps<typeof CollapsibleTrigger>, "
 
 export function AgentHeader({ name, status, className, ...props }: AgentHeaderProps) {
   return (
-    <CollapsibleTrigger data-slot="agent-header" className={cn("flex w-full items-center justify-between gap-3 rounded-md px-3 py-2 text-left text-[13px]", className)} {...props}>
+    <CollapsibleTrigger data-slot="agent-header" className={cn("flex w-full items-center justify-between gap-3 rounded-md px-3 py-2 text-left text-body", className)} {...props}>
       <span className="flex min-w-0 items-center gap-2">
         <BotIcon aria-hidden="true" className="size-4 text-violet" />
         <span className="truncate font-medium text-foreground">{name}</span>
@@ -46,7 +46,7 @@ export type AgentSectionProps = Omit<ComponentProps<"div">, "title"> & { title: 
 export function AgentSection({ title, className, children, ...props }: AgentSectionProps) {
   return (
     <div data-slot="agent-section" className={cn("space-y-1.5 p-3", className)} {...props}>
-      <h4 className="text-[11px] font-medium tracking-wide text-muted-foreground uppercase">{title}</h4>
+      <h4 className="text-label font-medium tracking-wide text-muted-foreground uppercase">{title}</h4>
       {children}
     </div>
   );

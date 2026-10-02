@@ -36,11 +36,11 @@ function RunEvents({ events }: { events: readonly WorkflowEvent[] }) {
             <li key={event.index} className="flex flex-col gap-1 py-2 first:pt-0 last:pb-0 sm:flex-row sm:items-center sm:justify-between">
               <span className="flex min-w-0 flex-col">
                 <span className="text-sm font-medium">{t(`eventTypes.${event.type}`)}</span>
-                <span className="font-mono text-[11.5px] break-all text-muted-foreground">{event.stepId ?? t("runLevel")}</span>
+                <span className="font-mono text-caption break-all text-muted-foreground">{event.stepId ?? t("runLevel")}</span>
               </span>
               <span className="flex shrink-0 items-center gap-2">
                 {event.status === null ? null : <RunStatusPill status={event.status} />}
-                <span className="font-mono text-[11.5px] text-muted-foreground tabular-nums">{formatDateTime(event.occurredAt)}</span>
+                <span className="font-mono text-caption text-muted-foreground tabular-nums">{formatDateTime(event.occurredAt)}</span>
               </span>
             </li>
           ))}
@@ -66,7 +66,7 @@ function RunDetails({ run, organizationId, canSeeApprovals, starterLabel, schedu
           </div>
           <div className="flex flex-col">
             <dt className="text-xs text-muted-foreground">{t("id")}</dt>
-            <dd className="font-mono text-[13px] break-all">{run.runId}</dd>
+            <dd className="font-mono text-body break-all">{run.runId}</dd>
           </div>
         </dl>
         <RunTimeline

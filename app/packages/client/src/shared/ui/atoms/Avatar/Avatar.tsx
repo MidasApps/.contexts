@@ -10,9 +10,9 @@ import { avatarToneFor, initialsOf, type AvatarTone } from "./avatar-identity.ts
 const avatarVariants = cva("group/avatar relative flex shrink-0 rounded-full select-none", {
   variants: {
     size: {
-      xs: "size-5 text-[9px]",
-      sm: "size-7 text-[11px]",
-      md: "size-9 text-[13px]",
+      xs: "size-5 text-micro",
+      sm: "size-7 text-label",
+      md: "size-9 text-body",
       lg: "size-12 text-base",
       xl: "size-16 text-xl",
     },

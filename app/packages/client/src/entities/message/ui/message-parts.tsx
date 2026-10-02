@@ -80,7 +80,7 @@ function DelegationCard({ tool, delegation }: { tool: ToolPartView; delegation: 
       <AgentContent>
         {delegation.prompt === undefined ? null : (
           <AgentSection title={t("request")}>
-            <p className="text-[13px] whitespace-pre-wrap text-foreground">{delegation.prompt}</p>
+            <p className="text-body whitespace-pre-wrap text-foreground">{delegation.prompt}</p>
           </AgentSection>
         )}
         {delegation.steps.length === 0 ? null : (

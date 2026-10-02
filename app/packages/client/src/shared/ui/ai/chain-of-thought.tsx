@@ -14,7 +14,7 @@ export type ChainOfThoughtHeaderProps = Omit<ComponentProps<typeof CollapsibleTr
 
 export function ChainOfThoughtHeader({ className, children, ...props }: ChainOfThoughtHeaderProps) {
   return (
-    <CollapsibleTrigger data-slot="chain-of-thought-header" className={cn("flex items-center gap-2 rounded-xs text-[13px] text-muted-foreground hover:text-foreground", className)} {...props}>
+    <CollapsibleTrigger data-slot="chain-of-thought-header" className={cn("flex items-center gap-2 rounded-xs text-body text-muted-foreground hover:text-foreground", className)} {...props}>
       <span>{children}</span>
       <ChevronDownIcon aria-hidden="true" className="size-4 transition-transform group-data-[state=open]/cot:rotate-180" />
     </CollapsibleTrigger>
@@ -43,7 +43,7 @@ export function ChainOfThoughtStep({ title, description, icon, status = "complet
       data-slot="chain-of-thought-step"
       data-status={status}
       aria-current={status === "active" ? "step" : undefined}
-      className={cn("flex gap-2 text-[13px]", status === "pending" ? "text-muted-foreground" : "text-foreground", className)}
+      className={cn("flex gap-2 text-body", status === "pending" ? "text-muted-foreground" : "text-foreground", className)}
       {...props}
     >
       <span aria-hidden="true" className="mt-0.5 text-muted-foreground">

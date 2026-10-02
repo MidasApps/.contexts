@@ -160,7 +160,7 @@ export function StartImpersonationForm({ target, onTargetClear, organizationId, 
             <span className="flex min-w-0 flex-1 flex-col">
               <span className="truncate text-sm font-medium">{target.label}</span>
               {target.detail === undefined ? null : <span className="truncate text-xs text-muted-foreground">{target.detail}</span>}
-              <span className="font-mono text-[11.5px] break-all text-muted-foreground">{target.id}</span>
+              <span className="font-mono text-caption break-all text-muted-foreground">{target.id}</span>
             </span>
             <Button type="button" variant="ghost" size="sm" onClick={onTargetClear} aria-label={t("targetChangeNamed", { name: target.label })}>
               {t("targetChange")}

@@ -64,7 +64,7 @@ export function BarChartFigure({ title, description, series, rows, rowHeader, fo
         <span className="text-sm font-medium">{title}</span>
         {description === undefined ? null : <span className="text-xs text-muted-foreground">{description}</span>}
       </figcaption>
-      <div aria-hidden="true" className="h-64 w-full font-mono text-[11px] tabular-nums">
+      <div aria-hidden="true" className="h-64 w-full font-mono text-label tabular-nums">
         <ResponsiveContainer width="100%" height="100%" initialDimension={{ width: 640, height: 256 }}>
           <BarChart data={data} margin={{ top: 4, right: 4, bottom: 0, left: 4 }} accessibilityLayer={false}>
             <CartesianGrid vertical={false} stroke="var(--border)" />

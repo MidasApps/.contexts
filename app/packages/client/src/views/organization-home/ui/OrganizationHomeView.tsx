@@ -27,7 +27,7 @@ function ProjectCard({ organizationId, project }: { organizationId: string; proj
     >
       <span className="flex items-center gap-2">
         <Icon name="folder" className="size-4 text-muted-foreground" />
-        <span className="truncate text-[15px] font-semibold">{project.name}</span>
+        <span className="truncate text-title font-semibold">{project.name}</span>
         {project.status === "archived" ? (
           <StatusPill tone="neutral" className="ml-auto">
             {t("archived")}
@@ -35,7 +35,7 @@ function ProjectCard({ organizationId, project }: { organizationId: string; proj
         ) : null}
       </span>
       {project.description === undefined || project.description === "" ? null : (
-        <span className="line-clamp-2 text-[13px] text-muted-foreground">{project.description}</span>
+        <span className="line-clamp-2 text-body text-muted-foreground">{project.description}</span>
       )}
     </RouteLink>
   );

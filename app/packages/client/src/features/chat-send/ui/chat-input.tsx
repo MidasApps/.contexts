@@ -119,7 +119,7 @@ export function ChatInput({ status, onSend, onStop, offline = false, disabled = 
           <PromptInputTools>{tools}</PromptInputTools>
           <div className="flex items-center gap-2">
             {trimmed.length >= maxLength * COUNTER_FROM ? (
-              <span className={tooLong ? "font-mono text-[11.5px] text-destructive-text tabular-nums" : "font-mono text-[11.5px] text-muted-foreground tabular-nums"}>
+              <span className={tooLong ? "font-mono text-caption text-destructive-text tabular-nums" : "font-mono text-caption text-muted-foreground tabular-nums"}>
                 {t("counter", { count: trimmed.length, max: maxLength })}
               </span>
             ) : null}
@@ -127,11 +127,11 @@ export function ChatInput({ status, onSend, onStop, offline = false, disabled = 
           </div>
         </PromptInputFooter>
       </PromptInput>
-      <p id={problemId} role="status" className={problem === null ? "sr-only" : tooLong ? "text-[12.5px] text-destructive-text" : "text-[12.5px] text-amber-foreground"}>
+      <p id={problemId} role="status" className={problem === null ? "sr-only" : tooLong ? "text-body-sm text-destructive-text" : "text-body-sm text-amber-foreground"}>
         {problem ?? ""}
       </p>
       {/* Keyboard keys mean nothing on a touch screen; the hint stays in the field description. */}
-      <p id={hintId} className="text-[11.5px] text-muted-foreground pointer-coarse:hidden">
+      <p id={hintId} className="text-caption text-muted-foreground pointer-coarse:hidden">
         {t("hint")}
       </p>
     </div>

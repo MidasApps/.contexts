@@ -34,8 +34,8 @@ export function SchemaFormPart({ props, toolCallId, toolName, interactive, fallb
   const label = t("label", { command: commandLabel(props.commandId) });
   return (
     <section data-slot="schema-form-part" aria-label={label} className="flex flex-col gap-3 rounded-md border border-border bg-card p-4">
-      <h3 className="text-[13px] font-medium text-muted-foreground">{label}</h3>
-      <p role="status" className={submitted ? "text-[13px] text-emerald-foreground" : "sr-only"}>
+      <h3 className="text-body font-medium text-muted-foreground">{label}</h3>
+      <p role="status" className={submitted ? "text-body text-emerald-foreground" : "sr-only"}>
         {submitted ? t("submitted") : ""}
       </p>
       {submitted || !interactive ? null : (

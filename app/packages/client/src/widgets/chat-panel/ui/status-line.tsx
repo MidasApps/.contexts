@@ -66,7 +66,7 @@ export function StatusLine({ phase, failure, onRetry, className }: StatusLinePro
   return (
     <div data-slot="chat-status" data-phase={phase} className={cn("flex flex-col gap-2", className)}>
       <div className={cn("flex min-h-5 items-center justify-between gap-3", line?.visible === true ? undefined : "sr-only")}>
-        <p role="status" aria-live="polite" className={cn("flex items-center gap-2 text-[12.5px]", line?.tone === "warning" ? "text-amber-foreground" : "text-muted-foreground")}>
+        <p role="status" aria-live="polite" className={cn("flex items-center gap-2 text-body-sm", line?.tone === "warning" ? "text-amber-foreground" : "text-muted-foreground")}>
           {line?.icon}
           {line === null ? "" : BUSY.has(phase) ? <Shimmer>{line.text}</Shimmer> : line.text}
         </p>
@@ -82,7 +82,7 @@ export function StatusLine({ phase, failure, onRetry, className }: StatusLinePro
           <AlertTitle>{t("error.title")}</AlertTitle>
           <AlertDescription className="text-inherit">
             <p>{reason}</p>
-            {failure?.requestId === undefined ? null : <p className="font-mono text-[11.5px]">{tCommon("errorState.reference", { requestId: failure.requestId })}</p>}
+            {failure?.requestId === undefined ? null : <p className="font-mono text-caption">{tCommon("errorState.reference", { requestId: failure.requestId })}</p>}
             <Button variant="outline" size="sm" onClick={onRetry} className="mt-1 text-foreground">
               {t("error.retry")}
             </Button>

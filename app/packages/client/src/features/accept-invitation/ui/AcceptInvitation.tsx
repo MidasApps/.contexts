@@ -98,7 +98,7 @@ export function AcceptInvitation({ token, mismatchAction }: AcceptInvitationProp
           ? t("previewNoInviter", { organization: invitation.organizationName })
           : t("preview", { inviter: invitation.inviterDisplayName, organization: invitation.organizationName })}
       </p>
-      <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5 text-[13px]">
+      <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5 text-body">
         <dt className="text-muted-foreground">{t("invitedEmail")}</dt>
         <dd className="font-mono">{invitation.maskedEmail}</dd>
         <dt className="text-muted-foreground">{t("expires")}</dt>

@@ -44,7 +44,7 @@ function RealtimeToggle({ organizationId, disabled, connect }: { organizationId:
         <AudioLinesIcon aria-hidden="true" />
       </PromptInputButton>
       {/* In words and visible: a failed start must not just put the button back to idle. */}
-      <span role="status" data-slot="realtime-status" className={cn("flex items-center gap-1.5 truncate text-[12px]", realtime.status === "error" ? "text-destructive-text" : "text-muted-foreground")}>
+      <span role="status" data-slot="realtime-status" className={cn("flex items-center gap-1.5 truncate text-xs", realtime.status === "error" ? "text-destructive-text" : "text-muted-foreground")}>
         {realtime.status === "live" ? <span aria-hidden="true" className="size-2 shrink-0 rounded-full bg-destructive motion-safe:animate-pulse" /> : null}
         {realtime.status === "connecting" || realtime.status === "live" || realtime.status === "error" ? t(realtime.status) : ""}
       </span>
@@ -95,7 +95,7 @@ export function ComposerVoice({ organizationId, voice, disabled = false, onTrans
         </DropdownMenuContent>
       </DropdownMenu>
       {talk.phase === "recording" ? <RecordingClock /> : null}
-      <span role="status" data-slot="voice-status" className={talk.problem === undefined ? "truncate text-[12px] text-muted-foreground" : "truncate text-[12px] text-destructive-text"}>
+      <span role="status" data-slot="voice-status" className={talk.problem === undefined ? "truncate text-xs text-muted-foreground" : "truncate text-xs text-destructive-text"}>
         {status}
       </span>
     </>

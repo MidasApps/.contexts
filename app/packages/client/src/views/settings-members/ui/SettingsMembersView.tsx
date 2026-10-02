@@ -46,7 +46,7 @@ function Grants({ member, roles, actions }: { member: Member; roles: readonly Ro
     <ul className="flex flex-col gap-2">
       {member.grants.map((grant) => (
         <li key={grant.membershipId} className="flex flex-wrap items-center gap-1.5">
-          <span className="text-[13px]">
+          <span className="text-body">
             <NodeName node={grant.node} />
           </span>
           {grant.roles.map((ref) => (

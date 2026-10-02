@@ -87,7 +87,7 @@ function AddendumVersionForm({ organizationId, agentId, initialBody, onOpenChang
       <Field invalid={bodyError !== undefined}>
         <FieldLabel>{t("body")}</FieldLabel>
         <FieldControl>
-          <Textarea ref={bodyRef} value={body} onChange={(event) => setBody(event.target.value)} required rows={10} className="max-h-[50vh] font-mono text-[12.5px]" />
+          <Textarea ref={bodyRef} value={body} onChange={(event) => setBody(event.target.value)} required rows={10} className="max-h-[50vh] font-mono text-body-sm" />
         </FieldControl>
         <FieldDescription>{t("bodyHint")}</FieldDescription>
         <FieldError>{bodyError}</FieldError>

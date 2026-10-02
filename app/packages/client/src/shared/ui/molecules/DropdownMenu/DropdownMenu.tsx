@@ -126,7 +126,7 @@ export function DropdownMenuLabel({
     <DropdownMenuPrimitive.Label
       data-slot="dropdown-menu-label"
       data-inset={inset}
-      className={cn("px-2 pt-2 pb-1 font-mono text-[10px] tracking-widest text-muted-foreground uppercase data-[inset]:pl-8", className)}
+      className={cn("px-2 pt-2 pb-1 font-mono text-tiny tracking-widest text-muted-foreground uppercase data-[inset]:pl-8", className)}
       {...props}
     />
   );

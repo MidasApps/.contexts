@@ -20,11 +20,11 @@ function IdList({ ids, empty, more }: { ids: readonly string[]; empty: string; m
   return (
     <span className="flex flex-wrap gap-1.5">
       {ids.map((id) => (
-        <code key={id} className="rounded bg-muted px-1.5 py-0.5 font-mono text-[11.5px] break-all">
+        <code key={id} className="rounded bg-muted px-1.5 py-0.5 font-mono text-caption break-all">
           {id}
         </code>
       ))}
-      {more === undefined ? null : <span className="text-[12.5px] text-muted-foreground">{more}</span>}
+      {more === undefined ? null : <span className="text-body-sm text-muted-foreground">{more}</span>}
     </span>
   );
 }
@@ -53,11 +53,11 @@ function AgentRow({ agent, canManagePrompts }: { agent: AdminAgent; canManagePro
           <span className="flex min-w-0 flex-col gap-0.5">
             <span className="flex flex-wrap items-center gap-2">
               <span className="font-medium">{name}</span>
-              <span className="font-mono text-[11.5px] text-muted-foreground">{agent.id}</span>
+              <span className="font-mono text-caption text-muted-foreground">{agent.id}</span>
               <StatusPill tone={ROLE_TONES[agent.role]}>{t(`catalog.role.${agent.role}`)}</StatusPill>
             </span>
             {description === "" ? null : <span className="text-sm text-muted-foreground">{description}</span>}
-            <span className="text-[12.5px] text-muted-foreground">{t(agent.enablement === "always" ? "catalog.enablement.always" : "catalog.enablement.perOrganization")}</span>
+            <span className="text-body-sm text-muted-foreground">{t(agent.enablement === "always" ? "catalog.enablement.always" : "catalog.enablement.perOrganization")}</span>
           </span>
         </span>
         {canManagePrompts && hasPrompt(agent.id) ? (

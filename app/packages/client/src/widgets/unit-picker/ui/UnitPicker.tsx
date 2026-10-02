@@ -76,7 +76,7 @@ export function UnitPicker() {
           <PopoverTrigger asChild>
             <SidebarMenuButton tooltip={label} aria-label={t("pickerTrigger", { unit: label })} className="data-[state=open]:bg-sidebar-accent">
               <Icon name="network" />
-              {current === undefined ? <span className="truncate">{label}</span> : <UnitBreadcrumb path={path} className="text-[13px]" />}
+              {current === undefined ? <span className="truncate">{label}</span> : <UnitBreadcrumb path={path} className="text-body" />}
               <Icon name="chevron-down" className="ml-auto" />
             </SidebarMenuButton>
           </PopoverTrigger>

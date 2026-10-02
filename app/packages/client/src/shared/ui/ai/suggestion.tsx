@@ -32,8 +32,8 @@ export function Suggestion({ title, description, prompt, onSelect, className, ..
         )}
         {...props}
       >
-        <span className="text-[13px] font-medium text-foreground">{title}</span>
-        {description === undefined ? null : <span className="text-[12.5px] text-muted-foreground">{description}</span>}
+        <span className="text-body font-medium text-foreground">{title}</span>
+        {description === undefined ? null : <span className="text-body-sm text-muted-foreground">{description}</span>}
       </button>
     </li>
   );

@@ -78,10 +78,10 @@ export function PickerPart({ props, toolCallId, toolName, interactive }: Generat
           </RadioGroup>
         )}
       </fieldset>
-      <p id={errorId} role="alert" className={missing ? "text-[12.5px] text-destructive-text" : "sr-only"}>
+      <p id={errorId} role="alert" className={missing ? "text-body-sm text-destructive-text" : "sr-only"}>
         {missing ? t("required") : ""}
       </p>
-      <p role="status" className={submitted ? "text-[13px] text-emerald-foreground" : "sr-only"}>
+      <p role="status" className={submitted ? "text-body text-emerald-foreground" : "sr-only"}>
         {submitted ? t("submitted") : ""}
       </p>
       {locked ? null : (

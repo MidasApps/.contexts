@@ -53,7 +53,7 @@ function OwnSkillsTable({ skills, organizationName, actions }: { skills: readonl
           <TableRow key={skill.id}>
             <TableHead scope="row" className="font-normal whitespace-normal">
               <span className="flex flex-col gap-0.5">
-                <span className="font-mono text-[12.5px] font-medium">{skill.name}</span>
+                <span className="font-mono text-body-sm font-medium">{skill.name}</span>
                 <span className="text-xs text-muted-foreground">{skill.description}</span>
               </span>
             </TableHead>

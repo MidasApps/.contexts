@@ -10,7 +10,7 @@ import type { IconName } from "#/shared/ui/atoms/Icon/icon-registry.ts";
  * icon use the raw accent (non-text, ≥ 3:1).
  */
 const statusPillVariants = cva(
-  "inline-flex w-fit shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[11.5px] leading-5 font-medium whitespace-nowrap",
+  "inline-flex w-fit shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-caption leading-5 font-medium whitespace-nowrap",
   {
     variants: {
       tone: {

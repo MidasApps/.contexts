@@ -52,7 +52,7 @@ function FailedNotice({ organizationId, run, onDismiss, onRestarted }: Omit<Noti
       <AlertTitle id={titleId}>{t("failedTitle", { name: run.label })}</AlertTitle>
       <AlertDescription className="text-inherit">
         <p>{t("failedDescription")}</p>
-        <span className="block font-mono text-[11.5px]">{t("reference", { runId: run.runId })}</span>
+        <span className="block font-mono text-caption">{t("reference", { runId: run.runId })}</span>
         {retryError === null ? null : <ApiErrorAlert error={retryError} />}
         <span className="mt-2 flex flex-wrap gap-2">
           <Button variant="outline" size="sm" disabled={pending} onClick={() => void retry()} aria-label={t("retryNamed", { name: run.label })}>

@@ -35,8 +35,8 @@ function Step({ title, when, children }: { title: string; when?: string | undefi
     <li className="relative flex flex-col gap-0.5 border-l border-border pb-4 pl-4 last:pb-0">
       <span aria-hidden="true" className="absolute top-1.5 -left-[4.5px] size-2 rounded-full bg-muted-foreground" />
       <span className="text-sm font-medium">{title}</span>
-      {when === undefined ? null : <span className="font-mono text-[11.5px] text-muted-foreground tabular-nums">{when}</span>}
-      {children === undefined ? null : <span className="text-[13px] text-muted-foreground">{children}</span>}
+      {when === undefined ? null : <span className="font-mono text-caption text-muted-foreground tabular-nums">{when}</span>}
+      {children === undefined ? null : <span className="text-body text-muted-foreground">{children}</span>}
     </li>
   );
 }
@@ -61,13 +61,13 @@ export function RunTimeline({ run, label, starterLabel, scheduleLabel, renderApp
         {origin}
       </Step>
       {waiting && run.approvalRequestId !== null ? (
-        <Step title={t("waitingApproval")}>{renderApproval?.(run.approvalRequestId) ?? <span className="font-mono text-[11.5px]">{run.approvalRequestId}</span>}</Step>
+        <Step title={t("waitingApproval")}>{renderApproval?.(run.approvalRequestId) ?? <span className="font-mono text-caption">{run.approvalRequestId}</span>}</Step>
       ) : null}
       {failure === null ? null : (
         <Step title={t(`failure.${failure.code}`)}>
           {failure.stepId === null ? undefined : (
             <>
-              {t("failedStep")} <span className="font-mono text-[11.5px] break-all">{failure.stepId}</span>
+              {t("failedStep")} <span className="font-mono text-caption break-all">{failure.stepId}</span>
             </>
           )}
         </Step>

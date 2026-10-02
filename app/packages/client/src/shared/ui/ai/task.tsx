@@ -14,7 +14,7 @@ export type TaskTriggerProps = Omit<ComponentProps<typeof CollapsibleTrigger>, "
 
 export function TaskTrigger({ title, className, ...props }: TaskTriggerProps) {
   return (
-    <CollapsibleTrigger data-slot="task-trigger" className={cn("flex items-center gap-2 rounded-xs text-[13px] text-muted-foreground hover:text-foreground", className)} {...props}>
+    <CollapsibleTrigger data-slot="task-trigger" className={cn("flex items-center gap-2 rounded-xs text-body text-muted-foreground hover:text-foreground", className)} {...props}>
       <ListChecksIcon aria-hidden="true" className="size-4" />
       <span>{title}</span>
       <ChevronDownIcon aria-hidden="true" className="size-4 transition-transform group-data-[state=open]/task:rotate-180" />
@@ -31,10 +31,10 @@ export function TaskContent({ className, children, ...props }: ComponentProps<ty
 }
 
 export function TaskItem({ className, ...props }: ComponentProps<"li">) {
-  return <li data-slot="task-item" className={cn("text-[13px] text-muted-foreground", className)} {...props} />;
+  return <li data-slot="task-item" className={cn("text-body text-muted-foreground", className)} {...props} />;
 }
 
 /** A file or record a step touched, as a mono chip. */
 export function TaskItemFile({ className, ...props }: ComponentProps<"span">) {
-  return <span data-slot="task-item-file" className={cn("inline-flex items-center gap-1 rounded-2xs border border-border bg-muted px-1.5 py-0.5 font-mono text-[11.5px] text-foreground", className)} {...props} />;
+  return <span data-slot="task-item-file" className={cn("inline-flex items-center gap-1 rounded-2xs border border-border bg-muted px-1.5 py-0.5 font-mono text-caption text-foreground", className)} {...props} />;
 }

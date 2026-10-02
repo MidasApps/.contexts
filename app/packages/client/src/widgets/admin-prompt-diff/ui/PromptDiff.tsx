@@ -49,7 +49,7 @@ function VersionPicker({ label, versions, value, onChange, activeId }: { label: 
 function DiffRows({ lines }: { lines: readonly DiffLine[] }) {
   const t = useTranslations("admin.prompts.diff");
   return (
-    <ol className="min-w-max font-mono text-[12.5px] leading-relaxed">
+    <ol className="min-w-max font-mono text-body-sm leading-relaxed">
       {lines.map((line, index) => (
         <li key={index} data-kind={line.kind} className={cn("flex gap-2 px-3 whitespace-pre", ROW_TONES[line.kind])}>
           <span aria-hidden="true" className="w-3 shrink-0 text-muted-foreground select-none">

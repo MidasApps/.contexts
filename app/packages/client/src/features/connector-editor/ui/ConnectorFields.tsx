@@ -43,7 +43,7 @@ function ListInput({ field, draft, setDraft, problems }: FieldsProps & { field: 
     <Field>
       <FieldLabel>{t(`fields.${field}`)}</FieldLabel>
       <FieldControl>
-        <Textarea rows={3} spellCheck={false} className="font-mono text-[12.5px]" value={draft[field]} onChange={(event) => setDraft({ ...draft, [field]: event.target.value })} />
+        <Textarea rows={3} spellCheck={false} className="font-mono text-body-sm" value={draft[field]} onChange={(event) => setDraft({ ...draft, [field]: event.target.value })} />
       </FieldControl>
       <FieldDescription>{t(`hints.${field}`)}</FieldDescription>
       <FieldError errors={problem(field)} />
@@ -128,7 +128,7 @@ function ReadOnlyTools({ draft, setDraft, problems }: FieldsProps) {
           <FieldControl>
             <Checkbox checked={draft.readOnly.includes(tool)} onCheckedChange={(checked) => toggle(tool, checked === true)} />
           </FieldControl>
-          <FieldLabel className="font-mono text-[12.5px]">{tool}</FieldLabel>
+          <FieldLabel className="font-mono text-body-sm">{tool}</FieldLabel>
         </Field>
       ))}
       <FieldError errors={problem("readOnly")} />
@@ -154,7 +154,7 @@ export function ConnectorFields({ draft, setDraft, problems, typeLocked }: Field
       <AuthSelect {...shared} />
       {draft.type === "openapi" && draft.auth === "api-key" ? <TextInput field="apiKeyHeader" {...shared} /> : null}
       <ListInput field="allow" {...shared} />
-      <p className="text-[13px] text-muted-foreground">{t("toolsLimit")}</p>
+      <p className="text-body text-muted-foreground">{t("toolsLimit")}</p>
       <ReadOnlyTools {...shared} />
     </FieldGroup>
   );

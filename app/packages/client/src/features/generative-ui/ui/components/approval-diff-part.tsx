@@ -29,7 +29,7 @@ export function ApprovalDiff({ before, after, fields }: ApprovalDiffProps) {
       <TableBody>
         {fields.map((field) => (
           <TableRow key={field} className="hover:bg-transparent">
-            <TableHead scope="row" className="font-mono text-[12.5px] font-normal">
+            <TableHead scope="row" className="font-mono text-body-sm font-normal">
               {field}
             </TableHead>
             <TableCell className="text-muted-foreground">{display(before?.[field], none)}</TableCell>

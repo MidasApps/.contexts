@@ -27,8 +27,8 @@ function FlagName({ flag }: { flag: FeatureFlag }) {
   return (
     <span className="flex min-w-0 flex-col">
       <span className="font-medium">{label.name(flag.key)}</span>
-      <span className="text-[13px] text-muted-foreground">{label.description(flag.key, flag.reason)}</span>
-      <span className="font-mono text-[11.5px] text-muted-foreground">{flag.key}</span>
+      <span className="text-body text-muted-foreground">{label.description(flag.key, flag.reason)}</span>
+      <span className="font-mono text-caption text-muted-foreground">{flag.key}</span>
     </span>
   );
 }
@@ -44,7 +44,7 @@ function OnOff({ value }: { value: boolean }) {
  */
 function PlatformValue({ flag }: { flag: FeatureFlag }) {
   const t = useTranslations("settings.flags");
-  return flag.tenantOverride === null ? <OnOff value={flag.value} /> : <span className="text-[13px] text-muted-foreground">{t("platformUnknown")}</span>;
+  return flag.tenantOverride === null ? <OnOff value={flag.value} /> : <span className="text-body text-muted-foreground">{t("platformUnknown")}</span>;
 }
 
 function Override({ flag }: { flag: FeatureFlag }) {
@@ -62,7 +62,7 @@ function FlagAction({ flag, onChange }: { flag: FeatureFlag; onChange: (change: 
   const t = useTranslations("settings.flags.actions");
   const change = changeOf(flag);
   const name = useFlagLabel().name(flag.key);
-  if (change === null) return <span className="text-[13px] text-muted-foreground">{t("platformOff")}</span>;
+  if (change === null) return <span className="text-body text-muted-foreground">{t("platformOff")}</span>;
   return (
     <Button variant="outline" size="sm" onClick={() => onChange(change)} aria-label={t(change.value ? "turnOnNamed" : "turnOffNamed", { key: name })}>
       {t(change.value ? "turnOn" : "turnOff")}

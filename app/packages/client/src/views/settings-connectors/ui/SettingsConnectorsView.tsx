@@ -33,7 +33,7 @@ function ConnectorName({ connector }: { connector: Connector }) {
   return (
     <span className="flex min-w-0 flex-col">
       <span className="font-medium">{connector.name}</span>
-      <span className="text-[11.5px] text-muted-foreground">{t(`types.${connector.type}`)}</span>
+      <span className="text-caption text-muted-foreground">{t(`types.${connector.type}`)}</span>
     </span>
   );
 }

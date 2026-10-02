@@ -23,7 +23,7 @@ function ConnectorName({ connector }: { connector: Connector }) {
   return (
     <span className="flex min-w-0 flex-col">
       <span className="font-medium">{connector.name}</span>
-      <span className="font-mono text-[11.5px] text-muted-foreground">{connector.id}</span>
+      <span className="font-mono text-caption text-muted-foreground">{connector.id}</span>
     </span>
   );
 }
@@ -40,8 +40,8 @@ function Reach({ connector }: { connector: Connector }) {
   const [first, ...others] = items;
   return (
     <span className="flex flex-col">
-      <span className="font-mono text-[12.5px] break-all">{first}</span>
-      {others.length === 0 ? null : <span className="text-[11.5px] text-muted-foreground">{t("moreReach", { count: others.length })}</span>}
+      <span className="font-mono text-body-sm break-all">{first}</span>
+      {others.length === 0 ? null : <span className="text-caption text-muted-foreground">{t("moreReach", { count: others.length })}</span>}
     </span>
   );
 }
@@ -99,7 +99,7 @@ function ConnectorsTable({ organizationId }: { organizationId: string }) {
                 <ConnectorName connector={connector} />
                 <ConnectorStatus status={connector.status} />
               </span>
-              <span className="text-[13px]">{t(`types.${connector.type}`)}</span>
+              <span className="text-body">{t(`types.${connector.type}`)}</span>
               <Reach connector={connector} />
               <span className="text-xs text-muted-foreground">
                 <Tools connector={connector} /> · <Secret connector={connector} />

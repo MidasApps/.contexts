@@ -29,7 +29,7 @@ function OrganizationName({ organization }: { organization: OrganizationAdminSum
   return (
     <span className="flex min-w-0 flex-col">
       <span className="truncate font-medium">{organization.name}</span>
-      <span className="font-mono text-[11.5px] text-muted-foreground">{organization.id}</span>
+      <span className="font-mono text-caption text-muted-foreground">{organization.id}</span>
     </span>
   );
 }
@@ -69,7 +69,7 @@ const useColumns = (planName: (organization: OrganizationAdminSummary) => string
         cell: ({ row }) => (
           <span className="flex flex-col items-end">
             <span>{formatCost(row.original.budget.caps.monthlyMicroUsd)}</span>
-            <span className="font-sans text-[11.5px] text-muted-foreground">{t(`budgetSource.${row.original.budget.source}`)}</span>
+            <span className="font-sans text-caption text-muted-foreground">{t(`budgetSource.${row.original.budget.source}`)}</span>
           </span>
         ),
       }),
@@ -135,7 +135,7 @@ function Results({ filter, filtering, plans, onClear }: { filter: AdminOrganizat
                 <OrganizationName organization={organization} />
                 <OrganizationStatusPill status={organization.status} />
               </span>
-              <span className="text-[13px]">{planName(organization)}</span>
+              <span className="text-body">{planName(organization)}</span>
               <span className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                 {t("cardCost", { cost: formatCost(organization.costMtdMicroUsd), cap: formatCost(organization.budget.caps.monthlyMicroUsd) })}
                 <BudgetUsagePill organization={organization} />

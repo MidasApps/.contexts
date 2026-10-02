@@ -54,7 +54,7 @@ export function CopyField({ label, value, sensitive = false, description, classN
 
   return (
     <div data-slot="copy-field" className={cn("flex flex-col gap-2", className)}>
-      <Label htmlFor={`${id}-value`} className="text-[13px]">
+      <Label htmlFor={`${id}-value`} className="text-body">
         {label}
       </Label>
       <div className="flex items-center gap-2">
@@ -63,7 +63,7 @@ export function CopyField({ label, value, sensitive = false, description, classN
           readOnly
           value={revealed ? value : MASK}
           aria-describedby={description === undefined ? undefined : `${id}-description`}
-          className={cn(textControlClasses, "h-9 px-3 font-mono text-[13px] tabular-nums")}
+          className={cn(textControlClasses, "h-9 px-3 font-mono text-body tabular-nums")}
           onFocus={(event) => revealed && event.currentTarget.select()}
         />
         {sensitive ? (

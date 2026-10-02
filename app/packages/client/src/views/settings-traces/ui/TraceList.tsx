@@ -32,7 +32,7 @@ function TraceName({ trace, organizationId }: { trace: TraceSummary; organizatio
       >
         {trace.name}
       </SettingsSectionLink>
-      <span className="font-mono text-[11.5px] text-muted-foreground">{trace.traceId}</span>
+      <span className="font-mono text-caption text-muted-foreground">{trace.traceId}</span>
     </span>
   );
 }
@@ -110,7 +110,7 @@ function TraceTable({ organization, data, paging, filtering, onClear }: TraceTab
             <TraceName trace={trace} organizationId={organization.id} />
             <TraceStatusPill status={trace.status} />
           </span>
-          <span className="text-[13px]">
+          <span className="text-body">
             <TraceTarget trace={trace} />
           </span>
           <span className="text-xs text-muted-foreground">

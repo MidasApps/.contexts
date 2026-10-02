@@ -60,8 +60,8 @@ export function DataTablePart({ props }: GenerativeComponentProps<DataTableProps
   );
   return (
     <div data-slot="data-table-part" className="flex flex-col gap-2">
-      <DataTable caption={t("caption")} captionHidden columns={columns} data={rows} getRowId={(row) => String(row.index)} empty={<p className="p-4 text-center text-[13px] text-muted-foreground">{t("empty")}</p>} />
-      {props.truncated ? <p className="text-[12.5px] text-muted-foreground">{t("truncated", { count: props.rows.length })}</p> : null}
+      <DataTable caption={t("caption")} captionHidden columns={columns} data={rows} getRowId={(row) => String(row.index)} empty={<p className="p-4 text-center text-body text-muted-foreground">{t("empty")}</p>} />
+      {props.truncated ? <p className="text-body-sm text-muted-foreground">{t("truncated", { count: props.rows.length })}</p> : null}
     </div>
   );
 }

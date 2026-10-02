@@ -160,7 +160,7 @@ function ChatPanelHeader(props: { titleId: string; organizationId: string; agent
           {t("panel.title")}
         </h2>
         {props.fixed ? (
-          <p data-slot="conversation-agent" className="truncate text-[12.5px] text-muted-foreground">
+          <p data-slot="conversation-agent" className="truncate text-body-sm text-muted-foreground">
             {t("agents.current", { name: props.agentName })}
           </p>
         ) : (

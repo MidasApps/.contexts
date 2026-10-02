@@ -44,24 +44,24 @@ function Outcome({ tool }: { tool: ToolPartView }) {
     <>
       <ConfirmationAccepted>
         {tool.state === "approval-responded" ? (
-          <p className="flex items-center gap-2 text-[13px] text-muted-foreground">
+          <p className="flex items-center gap-2 text-body text-muted-foreground">
             <Spinner decorative className="size-3.5" />
             {t("approved")}
           </p>
         ) : tool.state === "output-error" ? (
-          <p className="flex items-center gap-2 text-[13px] text-destructive-text">
+          <p className="flex items-center gap-2 text-body text-destructive-text">
             <TriangleAlertIcon aria-hidden="true" className="size-4 text-destructive" />
             {t("failed")}
           </p>
         ) : (
-          <p className="flex items-center gap-2 text-[13px] text-emerald-foreground">
+          <p className="flex items-center gap-2 text-body text-emerald-foreground">
             <CircleCheckIcon aria-hidden="true" className="size-4 text-emerald" />
             {t("executed")}
           </p>
         )}
       </ConfirmationAccepted>
       <ConfirmationRejected>
-        <p className="flex items-center gap-2 text-[13px] text-muted-foreground">
+        <p className="flex items-center gap-2 text-body text-muted-foreground">
           <CircleXIcon aria-hidden="true" className="size-4" />
           {reason === undefined || reason === "" ? t("declined") : t("declinedReason", { reason })}
         </p>
@@ -107,20 +107,20 @@ export function ToolConfirmation({ tool, preview, request, onRespond, diff, inte
         <ShieldQuestionIcon aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-amber" />
         <div className="min-w-0 space-y-0.5">
           <ConfirmationTitle>{requested ? t("title") : summary}</ConfirmationTitle>
-          {requested ? <p className="text-[13px] text-foreground">{summary}</p> : null}
+          {requested ? <p className="text-body text-foreground">{summary}</p> : null}
           {preview?.permission === undefined ? null : (
-            <p className="text-[12.5px] text-muted-foreground">
+            <p className="text-body-sm text-muted-foreground">
               {t("permission")}: <span title={preview.permission}>{permissionLabel(preview.permission)}</span>
             </p>
           )}
         </div>
       </div>
-      {diff ?? (requested ? <p className="text-[12.5px] text-muted-foreground">{t("noPreview")}</p> : null)}
+      {diff ?? (requested ? <p className="text-body-sm text-muted-foreground">{t("noPreview")}</p> : null)}
       {request?.args === undefined || !requested ? null : <CodeBlock code={toJson(request.args)} language="json" label={t("details")} />}
       <ConfirmationRequest>
         {approval.stage === "asking-reason" ? (
           <div className="flex flex-col gap-1.5">
-            <label htmlFor={reasonId} className="text-[13px] font-medium text-foreground">
+            <label htmlFor={reasonId} className="text-body font-medium text-foreground">
               {t("reasonLabel")}
             </label>
             <Textarea
@@ -133,7 +133,7 @@ export function ToolConfirmation({ tool, preview, request, onRespond, diff, inte
               disabled={locked}
               className="min-h-16"
             />
-            <p id={hintId} className="text-[12.5px] text-muted-foreground">
+            <p id={hintId} className="text-body-sm text-muted-foreground">
               {t("reasonHint")}
             </p>
           </div>

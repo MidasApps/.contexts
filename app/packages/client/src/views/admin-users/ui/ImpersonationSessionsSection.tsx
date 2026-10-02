@@ -126,8 +126,8 @@ function SessionsTable({ scope, canEnd, onScopeReset }: { scope: ImpersonationSe
                   <span className="text-sm">{t("cardWho", { staff: userLabel(session.staffUid), user: userLabel(session.targetUid) })}</span>
                   <SessionStatus session={session} />
                 </span>
-                <span className="text-[13px]">{helpers.organizationLabel(session.tenantId)}</span>
-                <span className="text-[13px] text-muted-foreground">{session.reason}</span>
+                <span className="text-body">{helpers.organizationLabel(session.tenantId)}</span>
+                <span className="text-body text-muted-foreground">{session.reason}</span>
                 <span className="text-xs text-muted-foreground">
                   <Until session={session} />
                 </span>

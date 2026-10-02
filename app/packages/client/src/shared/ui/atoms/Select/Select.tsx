@@ -90,7 +90,7 @@ export function SelectLabel({ className, ...props }: ComponentProps<typeof Selec
   return (
     <SelectPrimitive.Label
       data-slot="select-label"
-      className={cn("px-2 py-1.5 font-mono text-[10px] tracking-widest text-muted-foreground uppercase", className)}
+      className={cn("px-2 py-1.5 font-mono text-tiny tracking-widest text-muted-foreground uppercase", className)}
       {...props}
     />
   );

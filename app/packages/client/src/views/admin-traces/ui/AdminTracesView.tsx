@@ -25,7 +25,7 @@ function TraceName({ trace }: { trace: TraceSummary }) {
       <RouteLink to={{ id: "admin", rest: `traces/${trace.traceId}` }} aria-label={t("open", { name: trace.name })} className="truncate font-medium underline-offset-4 hover:underline">
         {trace.name}
       </RouteLink>
-      <span className="font-mono text-[11.5px] text-muted-foreground">{trace.traceId}</span>
+      <span className="font-mono text-caption text-muted-foreground">{trace.traceId}</span>
     </span>
   );
 }
@@ -127,7 +127,7 @@ function TraceTable({ page, labels, fetching, filtering, search, onClear }: Trac
             <TraceName trace={trace} />
             <TraceStatusPill status={trace.status} />
           </span>
-          <span className="text-[13px]">
+          <span className="text-body">
             {labels.organization(trace.tenantId)} · {labels.target(trace)}
           </span>
           <span className="text-xs text-muted-foreground">

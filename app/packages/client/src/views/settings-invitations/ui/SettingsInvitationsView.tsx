@@ -119,7 +119,7 @@ function InvitationsTable({ context, filter, onInvite }: { context: AccessContex
               <span className="truncate font-medium">{invitation.email}</span>
               <InvitationStatusPill status={invitation.status} />
             </span>
-            <span className="text-[13px]">
+            <span className="text-body">
               <NodeName node={invitation.node} />
             </span>
             <RoleBadges invitation={invitation} labelOf={labelOf} />

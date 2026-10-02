@@ -39,7 +39,7 @@ function RunName({ run }: { run: AdminWorkflowRun }) {
   return (
     <span className="flex min-w-0 flex-col">
       <span className="font-medium">{workflowLabel.name(run.workflowId)}</span>
-      <span className="font-mono text-[11.5px] text-muted-foreground">{run.runId}</span>
+      <span className="font-mono text-caption text-muted-foreground">{run.runId}</span>
     </span>
   );
 }
@@ -58,7 +58,7 @@ function Origin({ run }: { run: AdminWorkflowRun }) {
   return (
     <span className="flex min-w-0 flex-col">
       <span className="break-all">{origin}</span>
-      {run.approvalRequestId === null ? null : <span className="text-[11.5px] break-all text-muted-foreground">{t("waitsApproval")}</span>}
+      {run.approvalRequestId === null ? null : <span className="text-caption break-all text-muted-foreground">{t("waitsApproval")}</span>}
     </span>
   );
 }
@@ -124,7 +124,7 @@ export function RunsTable({ runs, pagination, empty, ...state }: RunsTableProps)
               <RunName run={run} />
               <RunStatusPill status={run.status} />
             </span>
-            <span className="text-[13px]">
+            <span className="text-body">
               <Organization run={run} />
             </span>
             <span className="text-xs text-muted-foreground">

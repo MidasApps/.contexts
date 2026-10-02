@@ -70,13 +70,13 @@ export function RenameConversationForm({ organizationId, conversation, onDone }:
         aria-label={t("rename.label", { title: conversation.title ?? t("untitled") })}
         aria-invalid={problem !== undefined || undefined}
         aria-describedby={problem === undefined ? hintId : `${problemId} ${hintId}`}
-        className="h-7 text-[13px]"
+        className="h-7 text-body"
       />
-      <p id={hintId} className="text-[11.5px] text-muted-foreground">
+      <p id={hintId} className="text-caption text-muted-foreground">
         {t("rename.hint")}
       </p>
       {problem === undefined ? null : (
-        <p id={problemId} role="alert" className="text-[11.5px] text-destructive-text">
+        <p id={problemId} role="alert" className="text-caption text-destructive-text">
           {problem}
         </p>
       )}

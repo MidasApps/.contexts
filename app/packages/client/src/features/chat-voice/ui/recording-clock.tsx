@@ -32,7 +32,7 @@ export function RecordingClock() {
   const endsSoon = MAX_SECONDS - elapsed <= ENDS_SOON_SECONDS;
   return (
     <>
-      <span aria-hidden="true" data-slot="recording-clock" className={endsSoon ? "font-mono text-[12px] text-amber-foreground tabular-nums" : "font-mono text-[12px] text-muted-foreground tabular-nums"}>
+      <span aria-hidden="true" data-slot="recording-clock" className={endsSoon ? "font-mono text-xs text-amber-foreground tabular-nums" : "font-mono text-xs text-muted-foreground tabular-nums"}>
         {`${clock(elapsed)} / ${clock(MAX_SECONDS)}`}
       </span>
       <span role="status" className="sr-only">

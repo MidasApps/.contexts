@@ -91,7 +91,7 @@ export function ApprovalRequestItem({ request, requesterName, node, titleRoute, 
   return (
     <article className="flex flex-col gap-3 rounded-lg border border-border bg-card p-4" aria-labelledby={`approval-${request.id}`}>
       <header className="flex flex-wrap items-start justify-between gap-2">
-        <Heading id={`approval-${request.id}`} className="min-w-0 text-[15px] font-medium break-words">
+        <Heading id={`approval-${request.id}`} className="min-w-0 text-title font-medium break-words">
           {titleRoute === undefined ? (
             request.action.summary
           ) : (

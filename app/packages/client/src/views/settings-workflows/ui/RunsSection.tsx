@@ -34,7 +34,7 @@ function RunName({ run }: { run: WorkflowRun }) {
   return (
     <span className="flex min-w-0 flex-col">
       <span className="font-medium">{workflowLabel.name(run.workflowId)}</span>
-      <span className="font-mono text-[11.5px] break-all text-muted-foreground">{run.runId}</span>
+      <span className="font-mono text-caption break-all text-muted-foreground">{run.runId}</span>
     </span>
   );
 }
@@ -50,7 +50,7 @@ function Origin({ run, labels }: { run: WorkflowRun; labels: Labels }) {
   return (
     <span className="flex min-w-0 flex-col">
       <span className="break-all">{origin}</span>
-      {run.approvalRequestId === null || run.status !== "suspended" ? null : <span className="text-[11.5px] text-muted-foreground">{t("waitsApproval")}</span>}
+      {run.approvalRequestId === null || run.status !== "suspended" ? null : <span className="text-caption text-muted-foreground">{t("waitsApproval")}</span>}
     </span>
   );
 }

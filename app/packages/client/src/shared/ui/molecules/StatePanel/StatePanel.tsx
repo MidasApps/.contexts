@@ -54,9 +54,9 @@ export function StatePanel({
       <span className={cn("mb-3.5 grid size-12 place-items-center rounded-lg", GLYPH_TONES[tone])}>
         <Icon name={icon} className="size-5" />
       </span>
-      <Heading className="text-[14.5px] leading-snug font-semibold">{title}</Heading>
+      <Heading className="text-title leading-snug font-semibold">{title}</Heading>
       {description === undefined ? null : (
-        <p className="mt-1 max-w-sm text-[12.5px] leading-normal text-muted-foreground">{description}</p>
+        <p className="mt-1 max-w-sm text-body-sm leading-normal text-muted-foreground">{description}</p>
       )}
       {children}
       {action === undefined ? null : <div className="mt-3.5 flex flex-wrap justify-center gap-2">{action}</div>}

@@ -52,11 +52,11 @@ function ToolList({ tools }: { tools: readonly AgentCatalogTool[] }) {
 
 /** The tool's label with its id as secondary text; a tool no catalog names (a connector's) shows its id once. */
 function ToolName({ id, label }: { id: string; label: string }) {
-  if (label === id) return <span className="font-mono text-[12.5px] break-all">{id}</span>;
+  if (label === id) return <span className="font-mono text-body-sm break-all">{id}</span>;
   return (
     <span className="flex min-w-0 flex-col">
       <span>{label}</span>
-      <span className="font-mono text-[11.5px] break-all text-muted-foreground">{id}</span>
+      <span className="font-mono text-caption break-all text-muted-foreground">{id}</span>
     </span>
   );
 }
@@ -97,7 +97,7 @@ function AgentDetails({ organizationId, agent, prompt }: Omit<AgentCardProps, "s
             <ul className="flex flex-col gap-1.5">
               {agent.skills.map((skill) => (
                 <li key={skill.name} className="flex flex-col text-sm">
-                  <span className="font-mono text-[12.5px]">{skill.name}</span>
+                  <span className="font-mono text-body-sm">{skill.name}</span>
                   <span className="text-xs text-muted-foreground">{skill.description}</span>
                 </li>
               ))}
@@ -123,7 +123,7 @@ export function AgentCard({ organizationId, agent, status, prompt }: AgentCardPr
     <article aria-labelledby={headingId} data-slot="agent-card" className="flex flex-col gap-2 rounded-lg border border-border p-4">
       <header className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex min-w-0 flex-col gap-1">
-          <h3 id={headingId} className="text-[15px] font-semibold">
+          <h3 id={headingId} className="text-title font-semibold">
             {agent.name}
           </h3>
           <p className="text-sm text-muted-foreground">{agent.description}</p>

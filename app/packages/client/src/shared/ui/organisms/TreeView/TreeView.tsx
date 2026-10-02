@@ -62,7 +62,7 @@ function TreeItem({ node, level, tree }: ItemProps) {
         data-slot="tree-row"
         style={{ paddingInlineStart: `${(level - 1) * 16 + 4}px` }}
         className={cn(
-          "flex min-h-8 cursor-pointer items-center gap-1.5 rounded-xs pr-2 text-[13px] hover:bg-muted",
+          "flex min-h-8 cursor-pointer items-center gap-1.5 rounded-xs pr-2 text-body hover:bg-muted",
           tree.selectedId === node.id && "bg-accent font-medium text-accent-foreground",
         )}
       >

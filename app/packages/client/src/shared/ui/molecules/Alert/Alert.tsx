@@ -54,7 +54,7 @@ export function AlertDescription({ className, ...props }: ComponentProps<"div">)
     <div
       data-slot="alert-description"
       className={cn(
-        "col-start-2 grid justify-items-start gap-1 text-[13px] [[data-variant=default]_&]:text-muted-foreground [&_p]:leading-relaxed",
+        "col-start-2 grid justify-items-start gap-1 text-body [[data-variant=default]_&]:text-muted-foreground [&_p]:leading-relaxed",
         className,
       )}
       {...props}

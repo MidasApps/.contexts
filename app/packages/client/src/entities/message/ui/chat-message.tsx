@@ -42,7 +42,7 @@ export function ChatMessage({ message, streaming = false, interrupted = false, i
         <MessageParts message={message} streaming={streaming} showReasoning={showReasoning} renderTool={renderTool} attachmentAction={attachmentAction} />
       </MessageContent>
       {lowConfidence || interrupted || incomplete ? (
-        <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[12.5px] text-muted-foreground">
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-body-sm text-muted-foreground">
           {lowConfidence ? (
             <>
               <StatusPill tone="amber" icon="alert-triangle" data-slot="low-confidence">

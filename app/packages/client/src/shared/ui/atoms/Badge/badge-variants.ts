@@ -20,12 +20,12 @@ export const badgeVariants = cva(
         outline: "rounded-full border-border px-2 py-0.5 text-xs font-medium text-foreground",
         destructive: "rounded-full border-transparent bg-destructive px-2 py-0.5 text-xs font-medium text-destructive-foreground",
         count:
-          "min-w-5 rounded-full border-transparent bg-sidebar-primary px-1.5 font-mono text-[10.5px] leading-[1.4] text-sidebar-primary-foreground tabular-nums",
-        tag: "rounded-[4px] border-border px-1.5 font-mono text-[9.5px] tracking-[0.08em] text-muted-foreground uppercase",
+          "min-w-5 rounded-full border-transparent bg-sidebar-primary px-1.5 font-mono text-tiny leading-[1.4] text-sidebar-primary-foreground tabular-nums",
+        tag: "rounded-[4px] border-border px-1.5 font-mono text-micro tracking-[0.08em] text-muted-foreground uppercase",
         "tag-blue":
-          "rounded-[4px] border-blue/30 bg-blue/14 px-1.5 font-mono text-[9.5px] tracking-[0.08em] text-blue-foreground uppercase",
+          "rounded-[4px] border-blue/30 bg-blue/14 px-1.5 font-mono text-micro tracking-[0.08em] text-blue-foreground uppercase",
         "tag-violet":
-          "rounded-[4px] border-violet/30 bg-violet/14 px-1.5 font-mono text-[9.5px] tracking-[0.08em] text-violet-foreground uppercase",
+          "rounded-[4px] border-violet/30 bg-violet/14 px-1.5 font-mono text-micro tracking-[0.08em] text-violet-foreground uppercase",
       },
     },
     defaultVariants: { variant: "default" },

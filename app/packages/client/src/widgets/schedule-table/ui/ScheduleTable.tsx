@@ -86,7 +86,7 @@ function Fire({ iso, timezone }: { iso: string | null; timezone: string }) {
     <span className="flex flex-col">
       <span>{t("inZone", { when: inSchedule, zone: timezone })}</span>
       {viewerZone === timezone ? null : (
-        <span className="text-[11.5px] text-muted-foreground">{t("inYourZone", { when: formatDateTime(iso, { locale, timeZone: viewerZone, style: "datetime" }), zone: viewerZone })}</span>
+        <span className="text-caption text-muted-foreground">{t("inYourZone", { when: formatDateTime(iso, { locale, timeZone: viewerZone, style: "datetime" }), zone: viewerZone })}</span>
       )}
     </span>
   );
@@ -108,8 +108,8 @@ function Workflow({ schedule }: { schedule: ScheduleRow }) {
         <span className="font-medium">{workflow}</span>
         {schedule.scope === undefined ? null : <StatusPill tone={schedule.scope === "platform" ? "violet" : "blue"}>{t(`scope.${schedule.scope}`)}</StatusPill>}
       </span>
-      {ownerLabel === undefined ? null : <span className="text-[13px] text-muted-foreground">{ownerLabel(schedule)}</span>}
-      {slug === null ? null : <span className="font-mono text-[11.5px] text-muted-foreground">{slug}</span>}
+      {ownerLabel === undefined ? null : <span className="text-body text-muted-foreground">{ownerLabel(schedule)}</span>}
+      {slug === null ? null : <span className="font-mono text-caption text-muted-foreground">{slug}</span>}
     </span>
   );
 }
@@ -120,8 +120,8 @@ function Cron({ schedule }: { schedule: ScheduleRow }) {
   return (
     <span className="flex flex-col">
       {description === null ? null : <span>{description}</span>}
-      <code className={description === null ? "font-mono text-[13px]" : "font-mono text-[11.5px] text-muted-foreground"}>{schedule.cron}</code>
-      <span className="text-[11.5px] text-muted-foreground">{schedule.timezone}</span>
+      <code className={description === null ? "font-mono text-body" : "font-mono text-caption text-muted-foreground"}>{schedule.cron}</code>
+      <span className="text-caption text-muted-foreground">{schedule.timezone}</span>
     </span>
   );
 }

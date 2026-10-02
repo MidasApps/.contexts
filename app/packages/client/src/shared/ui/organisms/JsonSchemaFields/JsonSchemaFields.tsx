@@ -137,7 +137,7 @@ export function JsonSchemaFields({ plan, draft, onDraftChange, problems, labelOf
           <FieldLabel>{t("label")}</FieldLabel>
           <FieldControl>
             <Textarea
-              className="font-mono text-[13px]"
+              className="font-mono text-body"
               rows={5}
               spellCheck={false}
               value={draft.json}

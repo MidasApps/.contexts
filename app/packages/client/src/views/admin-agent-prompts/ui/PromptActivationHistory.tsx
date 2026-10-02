@@ -76,7 +76,7 @@ export function PromptActivationHistory({
             <Kind forced={activation.forced} />
           </span>
           <span className="text-xs text-muted-foreground">{t("cardMeta", { who: userLabel(activation.activatedBy), date: formatDateTime(activation.activatedAt) })}</span>
-          {activation.reason === null ? null : <span className="text-[13px]">{activation.reason}</span>}
+          {activation.reason === null ? null : <span className="text-body">{activation.reason}</span>}
         </div>
       )}
     />

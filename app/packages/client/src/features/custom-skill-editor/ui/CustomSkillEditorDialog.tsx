@@ -57,7 +57,7 @@ function SkillFields({ draft, setDraft, problems, maxInstructionChars }: FieldsP
       <Field>
         <FieldLabel>{t("fields.instructions")}</FieldLabel>
         <FieldControl>
-          <Textarea required rows={10} className="font-mono text-[12.5px]" value={draft.instructions} onChange={(event) => setDraft({ ...draft, instructions: event.target.value })} />
+          <Textarea required rows={10} className="font-mono text-body-sm" value={draft.instructions} onChange={(event) => setDraft({ ...draft, instructions: event.target.value })} />
         </FieldControl>
         <FieldDescription>
           {t("hints.instructions")} {t("counter", { count: draft.instructions.length, maximum: maxInstructionChars })}

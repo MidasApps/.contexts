@@ -41,7 +41,7 @@ function Fields({ line, index }: { line: LogLine; index: number }) {
       <CollapsibleContent>
         {/* A scrollable region needs a tab stop so keyboard users can scroll it (WCAG 2.1.1). */}
         {/* eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex */}
-        <pre tabIndex={0} aria-label={t("fieldsOf", { message: line.message, position: index + 1 })} className="mt-1 max-h-64 overflow-auto rounded-sm bg-muted p-2 font-mono text-[11.5px] leading-relaxed">
+        <pre tabIndex={0} aria-label={t("fieldsOf", { message: line.message, position: index + 1 })} className="mt-1 max-h-64 overflow-auto rounded-sm bg-muted p-2 font-mono text-caption leading-relaxed">
           {JSON.stringify(line.fields, null, 2)}
         </pre>
       </CollapsibleContent>
@@ -63,14 +63,14 @@ export function LogLines({ lines }: { lines: readonly LogLine[] }) {
         <li key={`${line.timestamp}-${String(index)}`} className="flex flex-col gap-1.5 rounded-lg border border-border bg-card p-3">
           <span className="flex flex-wrap items-center gap-2">
             <StatusPill tone={LEVEL_TONES[line.level]}>{t(`levels.${line.level}`)}</StatusPill>
-            <time dateTime={line.timestamp} className="font-mono text-[11.5px] text-muted-foreground tabular-nums">
+            <time dateTime={line.timestamp} className="font-mono text-caption text-muted-foreground tabular-nums">
               {formatDateTime(line.timestamp, "precise")}
             </time>
-            <span className="text-[11.5px] text-muted-foreground">{t("service", { service: line.service, env: line.env })}</span>
+            <span className="text-caption text-muted-foreground">{t("service", { service: line.service, env: line.env })}</span>
           </span>
-          <span className="font-mono text-[13px] break-all">{line.message}</span>
+          <span className="font-mono text-body break-all">{line.message}</span>
           {line.requestId === null && line.traceId === null ? null : (
-            <span className="flex flex-col gap-0.5 text-[11.5px] sm:flex-row sm:flex-wrap sm:gap-x-4">
+            <span className="flex flex-col gap-0.5 text-caption sm:flex-row sm:flex-wrap sm:gap-x-4">
               <Reference label={t("requestId")} value={line.requestId} />
               <Reference label={t("traceId")} value={line.traceId} traceLink />
             </span>

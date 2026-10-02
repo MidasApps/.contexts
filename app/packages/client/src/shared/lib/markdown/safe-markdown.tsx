@@ -42,10 +42,10 @@ const transformUrl = (url: string, key: string): string | null => {
 
 const PROSE = [
   "text-sm leading-relaxed break-words text-foreground",
-  "[&_a]:underline [&_a]:underline-offset-4 [&_code]:font-mono [&_code]:text-[12.5px]",
+  "[&_a]:underline [&_a]:underline-offset-4 [&_code]:font-mono [&_code]:text-body-sm",
   "[&_h1]:text-lg [&_h1]:font-semibold [&_h2]:text-base [&_h2]:font-semibold [&_h3]:text-sm [&_h3]:font-semibold",
   "[&_ol]:list-decimal [&_ol]:pl-5 [&_ul]:list-disc [&_ul]:pl-5 [&_li]:my-0.5",
-  "[&_table]:w-full [&_table]:text-[13px] [&_td]:border [&_td]:border-border [&_td]:px-2 [&_td]:py-1 [&_th]:border [&_th]:border-border [&_th]:px-2 [&_th]:py-1 [&_th]:text-left",
+  "[&_table]:w-full [&_table]:text-body [&_td]:border [&_td]:border-border [&_td]:px-2 [&_td]:py-1 [&_th]:border [&_th]:border-border [&_th]:px-2 [&_th]:py-1 [&_th]:text-left",
   "[&_blockquote]:border-l-2 [&_blockquote]:border-border [&_blockquote]:pl-3 [&_blockquote]:text-muted-foreground",
   "[&>*+*]:mt-3",
 ].join(" ");

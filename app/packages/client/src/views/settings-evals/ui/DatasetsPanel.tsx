@@ -18,7 +18,7 @@ function DatasetName({ dataset }: { dataset: EvalDataset }) {
   return (
     <span className="flex min-w-0 flex-col">
       <span className="font-medium">{dataset.name}</span>
-      <span className="font-mono text-[11.5px] text-muted-foreground">{dataset.id}</span>
+      <span className="font-mono text-caption text-muted-foreground">{dataset.id}</span>
     </span>
   );
 }

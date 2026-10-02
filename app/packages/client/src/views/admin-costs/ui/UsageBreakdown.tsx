@@ -30,7 +30,7 @@ const useModelColumns = () => {
   const formatCost = useFormatMicroUsd();
   return useMemo(
     () => [
-      column.accessor("model", { header: () => t("columns.model"), cell: ({ getValue }) => <span className="font-mono text-[12.5px]">{getValue()}</span> }),
+      column.accessor("model", { header: () => t("columns.model"), cell: ({ getValue }) => <span className="font-mono text-body-sm">{getValue()}</span> }),
       column.accessor("provider", { header: () => t("columns.provider") }),
       column.accessor("calls", { header: () => t("columns.calls"), meta: { numeric: true }, cell: ({ getValue }) => format.number(getValue()) }),
       column.accessor("inputTokens", { header: () => t("columns.inputTokens"), meta: { numeric: true }, cell: ({ getValue }) => format.number(getValue()) }),
