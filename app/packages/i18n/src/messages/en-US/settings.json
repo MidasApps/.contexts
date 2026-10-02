@@ -447,7 +447,12 @@
       "skillsTitle": "Skills",
       "skillsEmpty": "This agent has no skills.",
       "description": "Defined by the platform and the installed modules. The assistant delegates to them when they are on.",
-      "sourceCustom": "Organization"
+      "sourceCustom": "Organization",
+      "counts": "{tools, plural, =0 {no tools} one {# tool} other {# tools}} · {skills, plural, =0 {no skills} one {# skill} other {# skills}}",
+      "showDetails": "Show details",
+      "hideDetails": "Hide details",
+      "showDetailsNamed": "Show details of {name}",
+      "hideDetailsNamed": "Hide details of {name}"
     },
     "assistant": {
       "name": "Assistant",

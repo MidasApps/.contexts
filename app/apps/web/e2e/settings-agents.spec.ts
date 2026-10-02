@@ -32,6 +32,8 @@ test.describe("platform agents", () => {
     test.setTimeout(300_000);
     await page.goto(settingsPath(sp5Org.id, "agents"));
     const assistant = page.getByRole("article", { name: "Assistente" });
+    // Instructions, tools and skills sit behind each agent's details (they load when opened).
+    await assistant.getByRole("button", { name: "Ver detalhes de Assistente" }).click();
     await assistant.getByRole("button", { name: "Escrever instruções para Assistente" }).click();
     const editor = dialog(page, "Instruções para Assistente");
     await editor.getByRole("textbox", { name: /^Instruções/ }).fill("Responda sempre em frases curtas e cite a política interna quando houver.");

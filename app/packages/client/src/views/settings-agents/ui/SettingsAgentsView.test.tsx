@@ -92,6 +92,13 @@ const renderView = (permissions: readonly Permission[] = ADMIN, routes: FakeRout
   );
 
 const card = async (name: string) => (await screen.findByRole("heading", { level: 3, name })).closest("article") as HTMLElement;
+type User = ReturnType<typeof renderView>["user"];
+/** The card with its details (instructions, tools, skills) opened: they load only then. */
+const expanded = async (user: User, name: string) => {
+  const article = await card(name);
+  await user.click(within(article).getByRole("button", { name: `Ver detalhes de ${name}` }));
+  return article;
+};
 
 // The whole app shell renders per test; under a loaded machine the defaults (1 s, 5 s) are too short.
 beforeAll(() => {
@@ -103,22 +110,38 @@ afterAll(() => {
 
 describe("SettingsAgentsView", { timeout: 30_000 }, () => {
   it("lists the platform agents with their tools and skills and says how the organization's agents are used", async () => {
-    const { container, api } = renderView();
-    const knowledge = await card("Knowledge");
+    const { container, api, user } = renderView();
+    const knowledge = await expanded(user, "Knowledge");
     expect(within(knowledge).getByText("knowledge.search")).toBeDefined();
     expect(within(knowledge).getByText("knowledge-citations")).toBeDefined();
-    const action = await card("Action");
+    const action = await expanded(user, "Action");
     expect(within(action).getByText("command.tenancy.CreateProjectInput").closest("li")?.textContent).toContain("altera dados");
     // Tools read as their labels (a command as its permission); connector tools keep their own names.
     expect(within(action).getByText("Criar projetos")).toBeDefined();
     expect(within(action).getByText("issues-api.listIssues")).toBeDefined();
     expect(within(action).getByText("De conectores")).toBeDefined();
-    expect(within(await card("Notes")).getByText("Módulo example")).toBeDefined();
+    expect(within(await card("Notes")).getByText(/^Módulo example · /u)).toBeDefined();
     expect(screen.queryByText(/Não é possível criar um novo agente aqui\./u)).toBeNull();
     expect(screen.getAllByText(/escolhido diretamente ao iniciar uma conversa; o assistente não delega/u).length).toBeGreaterThan(0);
     expect(await screen.findByRole("heading", { name: "Nenhum agente da organização" })).toBeDefined();
     expect(screen.getByText(/1 de 5 agentes do plano em uso\./u)).toBeDefined();
     expect(api.calls.find((call) => call.path === "/v1/agents")?.query).toContain(`organizationId=${IDS.organization}`);
+    await expectNoAxeViolations(container);
+  });
+
+  it("keeps each agent compact and loads its instructions only when its details open", async () => {
+    const { user, api, container } = renderView();
+    const knowledge = await card("Knowledge");
+    expect(within(knowledge).getByText(/1 ferramenta · 1 habilidade/u)).toBeDefined();
+    expect(within(knowledge).queryByText("knowledge.search")).toBeNull();
+    const addendum = () => api.calls.filter((call) => call.path.includes("/prompt-addendum/"));
+    expect(addendum()).toHaveLength(0);
+    const toggle = within(knowledge).getByRole("button", { name: "Ver detalhes de Knowledge" });
+    expect(toggle.getAttribute("aria-expanded")).toBe("false");
+    await user.click(toggle);
+    expect(within(knowledge).getByRole("button", { name: "Ocultar detalhes de Knowledge" }).getAttribute("aria-expanded")).toBe("true");
+    expect(within(knowledge).getByText("knowledge.search")).toBeDefined();
+    await waitFor(() => expect(addendum().map((call) => call.path)).toEqual(["/v1/agents/knowledge/prompt-addendum/versions", "/v1/agents/knowledge/prompt-addendum/activations"]));
     await expectNoAxeViolations(container);
   });
 
@@ -195,7 +218,7 @@ describe("SettingsAgentsView", { timeout: 30_000 }, () => {
           return ok(activation, 201);
         },
       });
-      const knowledge = await card("Knowledge");
+      const knowledge = await expanded(user, "Knowledge");
       expect(await within(knowledge).findByText(/Nenhuma instrução da organização está ativa/u)).toBeDefined();
       await user.click(within(knowledge).getByRole("button", { name: "Escrever instruções para Knowledge" }));
       const dialog = await screen.findByRole("dialog", { name: "Instruções para Knowledge" });
@@ -226,20 +249,20 @@ describe("SettingsAgentsView", { timeout: 30_000 }, () => {
       "GET /v1/agents/:agentId/prompt-addendum/versions": (request) => ok(request.params["agentId"] === "knowledge" ? [version({ evalVerdict: "passed", evalExperimentId: "exp_1" })] : []),
       "POST /v1/agents/:agentId/prompt-addendum/activations": apiError(409, "EVAL_REQUIRED"),
     });
-    const knowledge = await card("Knowledge");
+    const knowledge = await expanded(user, "Knowledge");
     await user.click(await within(knowledge).findByRole("button", { name: "Ativar a versão 1 de Knowledge" }));
     expect((await within(knowledge).findByRole("alert")).textContent).toContain("Execute uma avaliação aprovada antes de ativar esta versão.");
   });
 
   it("lets a prompt reader see the instructions without the write actions", async () => {
-    renderView([...READ, "core.prompt.read"], {
+    const { user } = renderView([...READ, "core.prompt.read"], {
       "GET /v1/agents/:agentId/prompt-addendum/versions": (request) => ok(request.params["agentId"] === "knowledge" ? [version()] : []),
     });
-    const knowledge = await card("Knowledge");
+    const knowledge = await expanded(user, "Knowledge");
     expect(await within(knowledge).findByText("First draft")).toBeDefined();
     expect(within(knowledge).queryByRole("button", { name: /Escrever instruções/u })).toBeNull();
     expect(within(knowledge).queryByRole("button", { name: /Avaliar/u })).toBeNull();
-    expect(within(await card("Notes")).getByText("Este agente ainda não aceita instruções da organização.")).toBeDefined();
+    expect(within(await expanded(user, "Notes")).getByText("Este agente ainda não aceita instruções da organização.")).toBeDefined();
   });
 
   it("creates an agent of the organization with a model, tools, skills and a knowledge scope", { timeout: 60_000 }, async () => {
@@ -293,8 +316,8 @@ describe("SettingsAgentsView", { timeout: 30_000 }, () => {
         return apiError(400, "VALIDATION_FAILED", [{ field: "instructions", issue: "TOO_BIG" }]);
       },
     });
-    const guide = await card("Onboarding guide");
-    expect(within(guide).getByText("Organização")).toBeDefined();
+    const guide = await expanded(user, "Onboarding guide");
+    expect(within(guide).getByText(/^Organização/u)).toBeDefined();
     expect(within(guide).getByText("org-weekly-report")).toBeDefined();
     expect(within(guide).queryByText("Este agente ainda não aceita instruções da organização.")).toBeNull();
     await user.click(within(guide).getByRole("button", { name: "Editar Onboarding guide" }));

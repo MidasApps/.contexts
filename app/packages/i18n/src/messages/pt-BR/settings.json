@@ -447,7 +447,12 @@
       "skillsTitle": "Habilidades",
       "skillsEmpty": "Este agente não tem habilidades.",
       "description": "Definidos pela plataforma e pelos módulos instalados. O assistente delega a eles quando estão ativados.",
-      "sourceCustom": "Organização"
+      "sourceCustom": "Organização",
+      "counts": "{tools, plural, =0 {nenhuma ferramenta} one {# ferramenta} other {# ferramentas}} · {skills, plural, =0 {nenhuma habilidade} one {# habilidade} other {# habilidades}}",
+      "showDetails": "Ver detalhes",
+      "hideDetails": "Ocultar detalhes",
+      "showDetailsNamed": "Ver detalhes de {name}",
+      "hideDetailsNamed": "Ocultar detalhes de {name}"
     },
     "assistant": {
       "name": "Assistente",

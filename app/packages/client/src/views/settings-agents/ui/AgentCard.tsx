@@ -1,12 +1,15 @@
 "use client";
 
 import type { AgentCatalogEntry, AgentCatalogTool } from "@core/contracts";
-import { useId, type ReactNode } from "react";
+import { useId, useState, type ReactNode } from "react";
 import { useTranslations } from "use-intl";
 import { isPromptAgentId } from "#/entities/prompt-version/index.ts";
 import { AgentInstructions } from "#/features/tenant-prompt-addendum/index.ts";
 import { useModuleLabel, useToolLabel } from "#/shared/lib/labels/use-catalog-labels.ts";
 import { Badge } from "#/shared/ui/atoms/Badge/Badge.tsx";
+import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
+import { Icon } from "#/shared/ui/atoms/Icon/Icon.tsx";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "#/shared/ui/molecules/Collapsible/Collapsible.tsx";
 
 const TOOL_SOURCES = ["core", "module", "connector"] as const;
 
@@ -71,32 +74,11 @@ function Part({ title, children }: { title: string; children: ReactNode }) {
   );
 }
 
-/**
- * One agent as the organization sees it: what it is, whether it is on, the tools and skills it has
- * there, and the organization's instructions for it (the way an organization customizes an agent).
- */
-export function AgentCard({ organizationId, agent, status, prompt }: AgentCardProps) {
+/** Instructions, tools and skills of one agent: mounted only while open, so its queries wait for it. */
+function AgentDetails({ organizationId, agent, prompt }: Omit<AgentCardProps, "status">) {
   const t = useTranslations("settings.agents");
-  const moduleLabel = useModuleLabel();
-  const headingId = useId();
   return (
-    <article aria-labelledby={headingId} data-slot="agent-card" className="flex flex-col gap-4 rounded-lg border border-border p-4">
-      <header className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div className="flex min-w-0 flex-col gap-1">
-          <h3 id={headingId} className="text-[15px] font-semibold">
-            {agent.name}
-          </h3>
-          <p className="text-sm text-muted-foreground">{agent.description}</p>
-          <p className="text-xs text-muted-foreground-strong">
-            {agent.source === "custom"
-              ? t("catalog.sourceCustom")
-              : agent.source === "module" && agent.moduleId !== null
-                ? t("catalog.sourceModule", { module: moduleLabel(agent.moduleId) })
-                : t("catalog.sourceCore")}
-          </p>
-        </div>
-        {status}
-      </header>
+    <div className="flex flex-col gap-4 pt-2">
       {prompt.canRead ? (
         isPromptAgentId(agent.key) ? (
           <AgentInstructions organizationId={organizationId} agentId={agent.key} agentName={agent.name} canWrite={prompt.canWrite} />
@@ -123,6 +105,49 @@ export function AgentCard({ organizationId, agent, status, prompt }: AgentCardPr
           )}
         </Part>
       </div>
+    </div>
+  );
+}
+
+/**
+ * One agent as the organization sees it: a compact row with what it is, its counts and whether it
+ * is on (the switch stays in reach), and a disclosure with the tools, skills and the
+ * organization's instructions (the way an organization customizes an agent), loaded when opened.
+ */
+export function AgentCard({ organizationId, agent, status, prompt }: AgentCardProps) {
+  const t = useTranslations("settings.agents");
+  const moduleLabel = useModuleLabel();
+  const headingId = useId();
+  const [open, setOpen] = useState(false);
+  return (
+    <article aria-labelledby={headingId} data-slot="agent-card" className="flex flex-col gap-2 rounded-lg border border-border p-4">
+      <header className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div className="flex min-w-0 flex-col gap-1">
+          <h3 id={headingId} className="text-[15px] font-semibold">
+            {agent.name}
+          </h3>
+          <p className="text-sm text-muted-foreground">{agent.description}</p>
+          <p className="text-xs text-muted-foreground-strong">
+            {agent.source === "custom"
+              ? t("catalog.sourceCustom")
+              : agent.source === "module" && agent.moduleId !== null
+                ? t("catalog.sourceModule", { module: moduleLabel(agent.moduleId) })
+                : t("catalog.sourceCore")}
+            {" · "}
+            {t("catalog.counts", { tools: agent.tools.length, skills: agent.skills.length })}
+          </p>
+        </div>
+        {status}
+      </header>
+      <Collapsible open={open} onOpenChange={setOpen}>
+        <CollapsibleTrigger asChild>
+          <Button variant="ghost" size="sm" className="-ml-2 self-start" aria-label={t(open ? "catalog.hideDetailsNamed" : "catalog.showDetailsNamed", { name: agent.name })}>
+            <Icon name="chevron-down" className={open ? "rotate-180 transition-transform" : "transition-transform"} />
+            {t(open ? "catalog.hideDetails" : "catalog.showDetails")}
+          </Button>
+        </CollapsibleTrigger>
+        <CollapsibleContent>{open ? <AgentDetails organizationId={organizationId} agent={agent} prompt={prompt} /> : null}</CollapsibleContent>
+      </Collapsible>
     </article>
   );
 }
