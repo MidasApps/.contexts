@@ -56,6 +56,15 @@ describe("ScheduleTable", () => {
     expect(within(row).getByRole("button", { name: "Pausar o agendamento daily-usage de Relatório de uso" })).toBeDefined();
   });
 
+  it("names a platform schedule's actions by its workflow alone, since it has no slug", () => {
+    renderTable([{ ...ROW, id: "schedule_platform-catalog-reindex", workflowId: "catalog-reindex", status: "paused" }]);
+    const row = screen.getAllByRole("row")[1]!;
+    expect(within(row).getAllByRole("button").map((button) => button.getAttribute("aria-label"))).toEqual([
+      "Retomar o agendamento de Reindexação do catálogo",
+      "Executar agora o agendamento de Reindexação do catálogo",
+    ]);
+  });
+
   it("keeps pause and run-now on the row and groups the caller's actions in a menu", async () => {
     const onEdit = vi.fn();
     const { user } = renderWithProviders(

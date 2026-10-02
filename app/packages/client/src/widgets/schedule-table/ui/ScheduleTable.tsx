@@ -158,22 +158,24 @@ function Actions({ schedule }: { schedule: ScheduleRow }) {
   if (!canManage) return null;
   const pending = pendingId === schedule.id;
   const blocked = disabled || pendingId !== null;
-  const id = slug ?? name;
+  // A platform schedule has no slug: its workflow alone names it ("… de Relatório de uso").
+  const labelOf = (action: "pause" | "resume" | "runNow" | "moreActions"): string =>
+    slug === null ? t(`${action}Of`, { name }) : t(`${action}Named`, { name, id: slug });
   return (
     <span className="flex flex-wrap items-center justify-end gap-2">
       {schedule.status === "active" ? (
-        <Button variant="outline" size="sm" pending={pending} disabled={blocked} onClick={() => onPause(schedule)} aria-label={t("pauseNamed", { name, id })}>
+        <Button variant="outline" size="sm" pending={pending} disabled={blocked} onClick={() => onPause(schedule)} aria-label={labelOf("pause")}>
           {t("pause")}
         </Button>
       ) : (
-        <Button variant="outline" size="sm" pending={pending} disabled={blocked} onClick={() => onResume(schedule)} aria-label={t("resumeNamed", { name, id })}>
+        <Button variant="outline" size="sm" pending={pending} disabled={blocked} onClick={() => onResume(schedule)} aria-label={labelOf("resume")}>
           {t("resume")}
         </Button>
       )}
-      <Button variant="outline" size="sm" disabled={blocked} onClick={() => onRunNow(schedule)} aria-label={t("runNowNamed", { name, id })}>
+      <Button variant="outline" size="sm" disabled={blocked} onClick={() => onRunNow(schedule)} aria-label={labelOf("runNow")}>
         {t("runNow")}
       </Button>
-      <MoreActions items={rowMenuItems?.(schedule) ?? []} label={t("moreActionsNamed", { name, id })} />
+      <MoreActions items={rowMenuItems?.(schedule) ?? []} label={labelOf("moreActions")} />
     </span>
   );
 }
