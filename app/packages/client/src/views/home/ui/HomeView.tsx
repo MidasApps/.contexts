@@ -19,7 +19,8 @@ export const lastContextRoute = (lastContext: Me["lastContext"]): Route => {
 
 /**
  * `/` (SP2 spec §4): sends the user to the last organization/project/unit they used, or to the
- * organizations page. A context that is no longer visible renders not-found there, with a way on.
+ * organizations page. `GET /v1/me` empties the context once the user left its organization; a
+ * project deleted since renders not-found there, which also offers the organizations page.
  */
 export function HomeView() {
   const t = useTranslations("shell.home");

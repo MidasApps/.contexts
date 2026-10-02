@@ -210,6 +210,7 @@
   },
   "pageState": {
     "goHome": "Ir al inicio",
+    "goToOrganizations": "Ver organizaciones",
     "notFoundTitle": "Página no encontrada",
     "notFoundDescription": "Esta dirección no existe o no tienes acceso. Revisa el enlace o vuelve al inicio.",
     "forbiddenTitle": "No tienes acceso a esta página",

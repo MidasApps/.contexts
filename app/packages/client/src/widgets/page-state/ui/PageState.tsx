@@ -44,10 +44,38 @@ function HomeAction({ variant = "default" }: { variant?: "default" | "secondary"
   );
 }
 
-/** A page the user cannot see or that does not exist (SP1 answers 404 for both, SP2 spec §4). */
+/** The organization list: a way on that never redirects (home follows the last context). */
+function OrganizationsAction() {
+  const t = useTranslations("shell.pageState");
+  return (
+    <Button variant="secondary" asChild>
+      <RouteLink to={{ id: "organizations" }}>{t("goToOrganizations")}</RouteLink>
+    </Button>
+  );
+}
+
+/**
+ * A page the user cannot see or that does not exist (SP1 answers 404 for both, SP2 spec §4).
+ * Besides home, it offers the organization list: home redirects to the last context, which may
+ * be this very page (a project deleted after the member last used it), so it must not be the only
+ * way out (UX review U-06).
+ */
 export function PageNotFound() {
   const t = useTranslations("shell.pageState");
-  return <PageStateLayout icon="search" tone="neutral" title={t("notFoundTitle")} description={t("notFoundDescription")} actions={<HomeAction />} />;
+  return (
+    <PageStateLayout
+      icon="search"
+      tone="neutral"
+      title={t("notFoundTitle")}
+      description={t("notFoundDescription")}
+      actions={
+        <>
+          <HomeAction />
+          <OrganizationsAction />
+        </>
+      }
+    />
+  );
 }
 
 /** Signed in but without the permission for this page (API 403, SP2 spec §4). */

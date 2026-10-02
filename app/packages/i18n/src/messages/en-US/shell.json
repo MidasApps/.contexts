@@ -210,6 +210,7 @@
   },
   "pageState": {
     "goHome": "Go to home",
+    "goToOrganizations": "See organizations",
     "notFoundTitle": "Page not found",
     "notFoundDescription": "This address doesn't exist or you don't have access to it. Check the link or go back home.",
     "forbiddenTitle": "You don't have access to this page",

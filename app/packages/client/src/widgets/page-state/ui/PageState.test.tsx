@@ -13,6 +13,8 @@ describe("page states", () => {
     const notFound = renderWithClient(<PageNotFound />);
     expect(screen.getByRole("heading", { level: 1, name: "Página não encontrada" })).toBeDefined();
     expect(screen.getByRole("link", { name: "Ir para o início" }).getAttribute("href")).toBe("/");
+    // Home may lead back here (a stale last context), so the organization list is offered too.
+    expect(screen.getByRole("link", { name: "Ver organizações" }).getAttribute("href")).toBe("/organizations");
     await expectNoAxeViolations(notFound.container);
     notFound.unmount();
     const forbidden = renderWithClient(<PageForbidden />);
