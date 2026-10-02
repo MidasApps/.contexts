@@ -44,6 +44,24 @@ describe("AdminOverviewView", () => {
     await expectNoAxeViolations(container);
   });
 
+  it("links each KPI to its area, only when the role may open it, and shows no second staff badge", async () => {
+    const { container } = renderAdmin(<AdminOverviewView />, { routes: { "GET /v1/admin/overview": ok(buildAdminOverview()) } });
+    await screen.findByRole("heading", { level: 2, name: "Números da plataforma" });
+    expect(within(kpi("Organizações ativas")).getByRole("link", { name: "Organizações ativas" }).getAttribute("href")).toBe("/admin/organizations");
+    expect(within(kpi("Custo no mês")).getByRole("link", { name: "Custo no mês" }).getAttribute("href")).toBe("/admin/costs");
+    expect(within(kpi("Avaliação dos agentes")).getByRole("link", { name: "Avaliação dos agentes" }).getAttribute("href")).toBe("/admin/evals");
+    expect(within(kpi("Aprovações")).queryByRole("link")).toBeNull();
+    expect(screen.queryByText("Equipe da plataforma")).toBeNull();
+    await expectNoAxeViolations(container);
+  });
+
+  it("keeps a KPI as plain text when the role cannot open its area", async () => {
+    renderAdmin(<AdminOverviewView />, { role: "platform-support", routes: { "GET /v1/admin/overview": ok(buildAdminOverview()) } });
+    await screen.findByRole("heading", { level: 2, name: "Números da plataforma" });
+    expect(within(kpi("Avaliação dos agentes")).queryByRole("link")).toBeNull();
+    expect(within(kpi("Custo no mês")).getByRole("link", { name: "Custo no mês" })).toBeDefined();
+  });
+
   it("formats the numbers in another locale", async () => {
     renderAdmin(<AdminOverviewView />, { locale: "en-US", routes: { "GET /v1/admin/overview": ok(buildAdminOverview({ evalStatus: "failed" })) } });
     expect(await screen.findByRole("heading", { level: 2, name: "Platform numbers" })).toBeDefined();
