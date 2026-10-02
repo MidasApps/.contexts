@@ -76,41 +76,44 @@ export function OrganizationSwitcher() {
   const name = current?.name ?? t("chooseOrganization");
   const switching = useIsSwitchingOrganization();
   return (
-    <SidebarMenu>
+    <>
+      {/* Outside the menu list: a list may only hold items. */}
       <span role="status" className="sr-only">
         {switching ? t("switching") : null}
       </span>
-      <SidebarMenuItem>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <SidebarMenuButton size="lg" tooltip={name} aria-label={t("organizationTrigger", { name })} aria-busy={switching || undefined} className="data-[state=open]:bg-sidebar-accent">
-              {current === undefined ? (
-                <span className="grid size-8 shrink-0 place-items-center rounded-xs bg-muted text-muted-foreground">
-                  <Icon name="building" />
+      <SidebarMenu>
+        <SidebarMenuItem>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <SidebarMenuButton size="lg" tooltip={name} aria-label={t("organizationTrigger", { name })} aria-busy={switching || undefined} className="data-[state=open]:bg-sidebar-accent">
+                {current === undefined ? (
+                  <span className="grid size-8 shrink-0 place-items-center rounded-xs bg-muted text-muted-foreground">
+                    <Icon name="building" />
+                  </span>
+                ) : (
+                  <OrganizationAvatar name={current.name} size="md" decorative className="size-8" />
+                )}
+                <span className="grid min-w-0 flex-1 text-left leading-tight">
+                  {loadingName ? <Skeleton className="h-4 w-24" /> : <span className="truncate text-[13px] font-medium">{name}</span>}
+                  <span className="truncate text-[11.5px] text-muted-foreground">{t("organizationLabel")}</span>
                 </span>
-              ) : (
-                <OrganizationAvatar name={current.name} size="md" decorative className="size-8" />
-              )}
-              <span className="grid min-w-0 flex-1 text-left leading-tight">
-                {loadingName ? <Skeleton className="h-4 w-24" /> : <span className="truncate text-[13px] font-medium">{name}</span>}
-                <span className="truncate text-[11.5px] text-muted-foreground">{t("organizationLabel")}</span>
-              </span>
-              {switching ? <Spinner decorative className="ml-auto" /> : <Icon name="chevron-down" className="ml-auto size-4" />}
-            </SidebarMenuButton>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent side={isMobile ? "bottom" : "right"} align="start" sideOffset={4} className="w-(--radix-dropdown-menu-trigger-width) min-w-60">
-            <DropdownMenuLabel>{t("organizations")}</DropdownMenuLabel>
-            <OrganizationItems currentId={node?.organizationId} />
-            <DropdownMenuSeparator />
-            <DropdownMenuItem asChild>
-              <RouteLink to={{ id: "organizations" }}>
-                <Icon name="building" />
-                {t("allOrganizations")}
-              </RouteLink>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </SidebarMenuItem>
-    </SidebarMenu>
+                {switching ? <Spinner decorative className="ml-auto" /> : <Icon name="chevron-down" className="ml-auto size-4" />}
+              </SidebarMenuButton>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent side={isMobile ? "bottom" : "right"} align="start" sideOffset={4} className="w-(--radix-dropdown-menu-trigger-width) min-w-60">
+              <DropdownMenuLabel>{t("organizations")}</DropdownMenuLabel>
+              <OrganizationItems currentId={node?.organizationId} />
+              <DropdownMenuSeparator />
+              <DropdownMenuItem asChild>
+                <RouteLink to={{ id: "organizations" }}>
+                  <Icon name="building" />
+                  {t("allOrganizations")}
+                </RouteLink>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </SidebarMenuItem>
+      </SidebarMenu>
+    </>
   );
 }
