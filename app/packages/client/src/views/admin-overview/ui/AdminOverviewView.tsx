@@ -5,7 +5,6 @@ import { useAdminOverview } from "#/entities/admin-overview/index.ts";
 import { RouteLink } from "#/shared/lib/router/router-context.tsx";
 import { Icon } from "#/shared/ui/atoms/Icon/Icon.tsx";
 import { EmptyState } from "#/shared/ui/molecules/EmptyState/EmptyState.tsx";
-import { StatusPill } from "#/shared/ui/molecules/StatusPill/StatusPill.tsx";
 import { AdminKpiCards } from "#/widgets/admin-kpi-cards/index.ts";
 import { AdminPageFrame, AdminQuerySection } from "#/widgets/admin-nav/index.ts";
 import { useAdminItems, type AdminItem } from "#/widgets/admin-sidebar/index.ts";
@@ -63,11 +62,6 @@ export function AdminOverviewView() {
       permission="platform.usage.read"
       title={t("overview.title")}
       description={t("overview.description")}
-      meta={
-        <StatusPill tone="violet" icon="shield">
-          {t("topbar.badge")}
-        </StatusPill>
-      }
     >
       <div className="flex flex-col gap-8">
         <AdminQuerySection query={overview} loadingLabel={t("overview.loading")} rows={3}>
