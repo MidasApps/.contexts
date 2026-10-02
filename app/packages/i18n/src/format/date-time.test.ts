@@ -21,6 +21,12 @@ describe("formatDateTime", () => {
     );
   });
 
+  it("formats the precise style to the millisecond with the zone, so log lines of one minute can be ordered", () => {
+    const at = "2026-01-15T12:00:07.042Z";
+    expect(plain(formatDateTime(at, { locale: "pt-BR", timeZone: "America/Sao_Paulo", style: "precise" }))).toBe("15/01/2026, 09:00:07,042 BRT");
+    expect(plain(formatDateTime(at, { locale: "en-US", timeZone: "UTC", style: "precise" }))).toBe("01/15/2026, 12:00:07.042 UTC");
+  });
+
   it("rejects strings that are not UTC ISO instants", () => {
     expect(() => formatDateTime("2026-01-15 12:00", { locale: "pt-BR", timeZone: "UTC" })).toThrow(RangeError);
   });

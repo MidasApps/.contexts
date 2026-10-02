@@ -1,4 +1,5 @@
-export type DateTimeStyle = "date" | "time" | "datetime";
+/** `precise`: date, time to the millisecond and the zone name, for log lines and span starts. */
+export type DateTimeStyle = "date" | "time" | "datetime" | "precise";
 
 export type FormatDateTimeOptions = {
   locale: string;
@@ -14,6 +15,18 @@ const STYLE_OPTIONS: Record<DateTimeStyle, Intl.DateTimeFormatOptions> = {
   date: { dateStyle: "medium" },
   time: { timeStyle: "short" },
   datetime: { dateStyle: "medium", timeStyle: "short" },
+  // `dateStyle`/`timeStyle` cannot be mixed with `fractionalSecondDigits`, hence the fields.
+  precise: {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    fractionalSecondDigits: 3,
+    hourCycle: "h23",
+    timeZoneName: "short",
+  },
 };
 
 const parseUtcIso = (iso: string): Date => {
