@@ -21,9 +21,11 @@ export type ConnectorEditorDialogProps = {
   onOpenChange: (open: boolean) => void;
   /** The connector to edit; absent creates one. */
   connector?: Connector | null | undefined;
+  /** Called with a created connector after the dialog closes (the page then asks for its secret). */
+  onCreated?: ((connector: Connector) => void) | undefined;
 };
 
-function ConnectorEditorBody({ organizationId, onOpenChange, connector = null }: ConnectorEditorDialogProps) {
+function ConnectorEditorBody({ organizationId, onOpenChange, connector = null, onCreated }: ConnectorEditorDialogProps) {
   const t = useTranslations("settings.connectors.editor");
   const callEndpoint = useCallEndpoint();
   const queryClient = useQueryClient();
@@ -43,9 +45,10 @@ function ConnectorEditorBody({ organizationId, onOpenChange, connector = null }:
     if (!result.ok) return;
     const { input } = result;
     setPending(true);
+    let created: Connector | null = null;
     try {
       if (connector === null) {
-        await callEndpoint(createConnectorEndpoint, { params: { organizationId }, body: input, idempotencyKey: idempotency.keyFor(input) });
+        created = (await callEndpoint(createConnectorEndpoint, { params: { organizationId }, body: input, idempotencyKey: idempotency.keyFor(input) })).data;
         idempotency.reset();
       } else {
         // The type never changes: `config` replaces the whole config of the connector's own type.
@@ -54,6 +57,7 @@ function ConnectorEditorBody({ organizationId, onOpenChange, connector = null }:
       await queryClient.invalidateQueries({ queryKey: tenantConnectorKeys.all(organizationId) });
       notify.success(t(mode === "create" ? "created" : "saved", { name: input.name }));
       onOpenChange(false);
+      if (created !== null) onCreated?.(created);
     } catch (error: unknown) {
       setFailure(error);
       if (error instanceof ApiError) setProblems(problemsFromDetails(error.details));

@@ -1,5 +1,5 @@
 import { type AgentRuntimePorts, createWebContentPort, embeddingModelIdOf, type FilesPort, type PromptStorePort } from "@core/agents";
-import { TenantIdSchema } from "@core/contracts";
+import { ConnectorIdSchema, TenantIdSchema } from "@core/contracts";
 import {
   type AccessReaders,
   type AgentCommandExecutor,
@@ -176,7 +176,11 @@ export const createRuntimePorts = (args: {
     settings: { getAgentSettings: ({ tenantId }) => settings.getAgentSettings({ tenantId }) },
     approvals: bindApprovalsPort(core.approvals),
     commands,
-    connectors: { listActive: ({ tenantId }) => connectors.listActiveConnectors({ tenantId: TenantIdSchema.parse(tenantId) }) },
+    connectors: {
+      listActive: ({ tenantId }) => connectors.listActiveConnectors({ tenantId: TenantIdSchema.parse(tenantId) }),
+      recordLoad: ({ tenantId, connectorId, lastError }) =>
+        connectors.recordConnectorLoad({ tenantId: TenantIdSchema.parse(tenantId), connectorId: ConnectorIdSchema.parse(connectorId), lastError }),
+    },
     secrets: { get: (secretRef) => connectors.secrets.get(secretRef) },
     webContent: createWebContentPort({ env: args.env, secrets: { get: (secretRef) => connectors.secrets.get(secretRef) } }),
     knowledge: bindKnowledgePort(knowledge),

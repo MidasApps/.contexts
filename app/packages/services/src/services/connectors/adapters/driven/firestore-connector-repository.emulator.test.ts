@@ -65,6 +65,27 @@ describe("firestore connector repository (emulator)", () => {
     expect(await repository.get(undefined, { tenantId: TENANT, connectorId: connector.id })).toBeNull();
   });
 
+  it("records and clears the runtime's load error of its own tenant's connector only", async () => {
+    const connector = connectorOf(TENANT, "2026-09-03T00:00:00.000Z");
+    await unitOfWork.run((tx) => Promise.resolve(repository.create(tx, { connector })));
+    const lastError = { code: "CONNECT_FAILED" as const, at: "2026-10-01T10:00:00.000Z" };
+    await repository.recordLoad({ tenantId: OTHER, connectorId: connector.id, lastError });
+    expect((await repository.get(undefined, { tenantId: TENANT, connectorId: connector.id }))?.lastError).toBeUndefined();
+    await repository.recordLoad({ tenantId: TENANT, connectorId: connector.id, lastError });
+    const stored = await firestore.collection(CONNECTORS_COLLECTION).doc(connector.id).get();
+    expect(stored.get("lastError.at")).toBeInstanceOf(Timestamp);
+    const failing = await repository.get(undefined, { tenantId: TENANT, connectorId: connector.id });
+    if (failing === null) throw new Error("connector missing");
+    expect(failing.lastError).toEqual(lastError);
+    expect(failing.updatedAt).toBe(connector.updatedAt);
+    // An edit keeps the error until the runtime loads the connector again.
+    await unitOfWork.run((tx) => Promise.resolve(repository.replace(tx, { connector: { ...failing, name: "docs" }, actorId: "bob" })));
+    expect((await repository.get(undefined, { tenantId: TENANT, connectorId: connector.id }))?.lastError).toEqual(lastError);
+    await repository.recordLoad({ tenantId: TENANT, connectorId: connector.id, lastError: null });
+    expect((await repository.get(undefined, { tenantId: TENANT, connectorId: connector.id }))?.lastError).toBeNull();
+    await repository.recordLoad({ tenantId: TENANT, connectorId: repository.newId(), lastError });
+  });
+
   it("keeps local secrets in the emulator collection", async () => {
     const store = createLocalSecretStore({ firestore, appEnv: "local" });
     await store.put("connector-emulator-test", "value-1");

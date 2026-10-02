@@ -1,12 +1,13 @@
 import { type Connector, ConnectorSchema } from "@core/contracts";
 import { createTool } from "@mastra/core/tools";
 import { RequestContext } from "@mastra/core/request-context";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { z } from "zod";
 import { buildAgentContextEntries, TEST_TENANT } from "../testing/agent-context-fixture.ts";
 import { createFakeAccessPort, createFakeApprovalPort, createFakeAuditPort } from "../testing/fake-ports.ts";
 import { type CoreToolDefinition, defineCoreTool } from "../tools/define-core-tool.ts";
-import type { McpTool } from "./mcp/mcp-connector.ts";
+import { McpConnectorError, type McpTool } from "./mcp/mcp-connector.ts";
+import { OpenApiConnectorError } from "./openapi/openapi-document.ts";
 import { type ConnectorLoaders, createConnectorToolResolver } from "./connector-registry.ts";
 
 const base = { tenantId: TEST_TENANT, status: "active", createdBy: "uA1b2C3d4E5f6G7h8I9j", createdAt: "2026-09-30T12:00:00.000Z", updatedAt: "2026-09-30T12:00:00.000Z" };
@@ -117,5 +118,54 @@ describe("connector tool resolver", () => {
     });
     expect(Object.keys(await failing(context(), "action"))).toEqual(["mcp_docs_search"]);
     await resolver.close();
+  });
+});
+
+describe("connector load errors", () => {
+  type Recorded = { tenantId: string; connectorId: string; lastError: { code: string; at: string } | null };
+  const record = (connectors: readonly Connector[], loaders: Partial<ConnectorLoaders>) => {
+    const recorded: Recorded[] = [];
+    const resolver = createConnectorToolResolver({
+      connectors: {
+        listActive: () => Promise.resolve(connectors),
+        recordLoad: (input) => Promise.resolve(void recorded.push(input)),
+      },
+      secrets: { get: (ref) => Promise.resolve(ref === "connector-secret-a" ? "tok" : null) },
+      toolDeps: { access: createFakeAccessPort({}), audit: createFakeAuditPort(), approvals: createFakeApprovalPort() },
+      loaders: { openApiTools: () => Promise.resolve([]), mcpToolset: () => Promise.resolve({ tools: {}, disconnect: () => Promise.resolve() }), postgresTools: () => [], ...loaders },
+      now: () => Date.UTC(2026, 9, 1, 10, 0, 0),
+    });
+    return { resolver, recorded };
+  };
+  const AT = "2026-10-01T10:00:00.000Z";
+
+  it("records why a connector failed to load, as a code, and keeps the others' tools", async () => {
+    const { resolver, recorded } = record([openapi, docsMcp], {
+      openApiTools: () => Promise.reject(new OpenApiConnectorError("SPEC_UNAVAILABLE")),
+      mcpToolset: () => Promise.resolve({ tools: { mcp_docs_search: mcpTool("search") }, disconnect: () => Promise.resolve() }),
+    });
+    expect(Object.keys(await resolver(context(), "supervisor"))).toEqual(["mcp_docs_search"]);
+    await vi.waitFor(() => expect(recorded).toEqual([{ tenantId: TEST_TENANT, connectorId: openapi.id, lastError: { code: "SPEC_UNAVAILABLE", at: AT } }]));
+  });
+
+  it("classifies a missing secret, an MCP refusal and anything else", async () => {
+    const noSecret = ConnectorSchema.parse({ ...openapi, id: "Cn0000000000000000D4", secretRef: null });
+    const { resolver, recorded } = record([noSecret, docsMcp, browser], {
+      mcpToolset: (connector) => Promise.reject(connector.type === "mcp" ? new McpConnectorError("CONNECT_FAILED") : new Error("boom")),
+    });
+    await resolver(context(), "action");
+    await vi.waitFor(() => expect(recorded).toHaveLength(3));
+    expect(Object.fromEntries(recorded.map((entry) => [entry.connectorId, entry.lastError?.code]))).toEqual({
+      [noSecret.id]: "SECRET_MISSING",
+      [docsMcp.id]: "CONNECT_FAILED",
+      [browser.id]: "LOAD_FAILED",
+    });
+  });
+
+  it("clears a past error once the connector loads, and writes nothing when nothing changed", async () => {
+    const healed = ConnectorSchema.parse({ ...docsMcp, lastError: { code: "CONNECT_FAILED", at: "2026-09-30T10:00:00.000Z" } });
+    const { resolver, recorded } = record([healed, openapi], {});
+    await resolver(context(), "action");
+    await vi.waitFor(() => expect(recorded).toEqual([{ tenantId: TEST_TENANT, connectorId: healed.id, lastError: null }]));
   });
 });

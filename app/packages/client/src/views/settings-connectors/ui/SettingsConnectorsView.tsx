@@ -1,6 +1,6 @@
 "use client";
 
-import type { AccessContext, Connector } from "@core/contracts";
+import { connectorNeedsSecret, type AccessContext, type Connector } from "@core/contracts";
 import { useMemo, useState } from "react";
 import { useTranslations } from "use-intl";
 import { TENANT_CONNECTORS_PAGE_LIMIT, useTenantConnectors } from "#/entities/connector/index.ts";
@@ -38,9 +38,25 @@ function ConnectorName({ connector }: { connector: Connector }) {
   );
 }
 
-function ConnectorStatus({ status }: { status: Connector["status"] }) {
-  const t = useTranslations("settings.connectors.status");
-  return <StatusPill tone={STATUS_TONES[status]}>{t(status)}</StatusPill>;
+/**
+ * The status pill and, when the agent runtime could not load the connector, why and when (UX
+ * review U-59). An active connector with a load error reads as "with error": agents cannot use it.
+ */
+function ConnectorStatus({ connector }: { connector: Connector }) {
+  const t = useTranslations("settings.connectors");
+  const formatDateTime = useFormatDateTime();
+  const lastError = connector.lastError ?? null;
+  const status = lastError !== null && connector.status === "active" ? "error" : connector.status;
+  return (
+    <span className="flex flex-col items-start gap-1">
+      <StatusPill tone={STATUS_TONES[status]}>{t(`status.${status}`)}</StatusPill>
+      {lastError === null ? null : (
+        <span className="text-xs text-muted-foreground">
+          {t(`loadErrors.${lastError.code}`)} {t("lastErrorAt", { when: formatDateTime(lastError.at) })}
+        </span>
+      )}
+    </span>
+  );
 }
 
 /** Only whether a secret is stored: the reference and the secret never reach the page. */
@@ -81,7 +97,7 @@ const useColumns = (actions: RowActions | null) => {
   return useMemo(
     () => [
       column.display({ id: "name", header: () => t("columns.name"), cell: ({ row }) => <ConnectorName connector={row.original} /> }),
-      column.accessor("status", { header: () => t("columns.status"), cell: ({ getValue }) => <ConnectorStatus status={getValue()} /> }),
+      column.accessor("status", { header: () => t("columns.status"), cell: ({ row }) => <ConnectorStatus connector={row.original} /> }),
       column.display({ id: "secret", header: () => t("columns.secret"), cell: ({ row }) => <SecretState connector={row.original} /> }),
       column.display({ id: "tools", header: () => t("columns.tools"), cell: ({ row }) => <Tools connector={row.original} /> }),
       column.accessor("updatedAt", { header: () => t("columns.updatedAt"), cell: ({ getValue }) => formatDateTime(getValue()) }),
@@ -116,7 +132,7 @@ function ConnectorsTable({ context, actions, onCreate }: { context: AccessContex
         <div className="flex flex-col gap-2">
           <span className="flex items-start justify-between gap-2">
             <ConnectorName connector={connector} />
-            <ConnectorStatus status={connector.status} />
+            <ConnectorStatus connector={connector} />
           </span>
           <span className="text-xs text-muted-foreground">
             <Tools connector={connector} /> · <SecretState connector={connector} />
@@ -185,7 +201,16 @@ function SettingsConnectors({ context }: { context: AccessContext }) {
       </div>
       {canWrite ? (
         <>
-          <ConnectorEditorDialog organizationId={organization.id} open={dialogs.editor !== null} connector={dialogs.editor?.connector ?? null} onOpenChange={(open) => !open && dialogs.setEditor(null)} />
+          <ConnectorEditorDialog
+            organizationId={organization.id}
+            open={dialogs.editor !== null}
+            connector={dialogs.editor?.connector ?? null}
+            onOpenChange={(open) => !open && dialogs.setEditor(null)}
+            // A connector that authenticates is unusable until its secret is stored: ask for it now.
+            onCreated={(connector) => {
+              if (connectorNeedsSecret(connector) && connector.secretRef === null) dialogs.setSecret(connector);
+            }}
+          />
           <ConnectorSecretDialog organizationId={organization.id} connector={dialogs.secret} onOpenChange={(open) => !open && dialogs.setSecret(null)} />
           <ToggleConnectorDialog organizationId={organization.id} connector={dialogs.toggling} onOpenChange={(open) => !open && dialogs.setToggling(null)} />
           <DeleteConnectorDialog organizationId={organization.id} connector={dialogs.removing} onOpenChange={(open) => !open && dialogs.setRemoving(null)} />

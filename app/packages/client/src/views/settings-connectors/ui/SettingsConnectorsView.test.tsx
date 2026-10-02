@@ -71,6 +71,35 @@ describe("SettingsConnectorsView", { timeout: 30_000 }, () => {
     await expectNoAxeViolations(container);
   });
 
+  it("says why a connector did not load, under its status, and when", async () => {
+    const { container } = renderView({
+      [LIST]: page([buildConnector({ lastError: { code: "SPEC_UNAVAILABLE", at: "2026-10-01T13:00:00.000Z" } }), buildConnector({ id: "Cn4sK2lPq0WnR5tYu3bZ", name: "warehouse", type: "postgres", secretRef: null, toolPolicy: { allow: ["query"], readOnly: ["query"] }, config: { allowedRelations: ["public.orders"] }, lastError: { code: "SECRET_MISSING", at: "2026-10-01T13:00:00.000Z" } })]),
+    });
+    const table = await screen.findByRole("table", { name: "Conectores de Northwind" });
+    const issues = await within(table).findByRole("row", { name: /issues-api/u });
+    expect(within(issues).getByText("Com erro")).toBeDefined();
+    expect(within(issues).getByText(/O documento OpenAPI não pôde ser baixado/u)).toBeDefined();
+    const warehouse = within(table).getByRole("row", { name: /warehouse/u });
+    expect(within(warehouse).getByText(/Falta o segredo/u)).toBeDefined();
+    await expectNoAxeViolations(container);
+  });
+
+  it("goes straight to the secret after creating a connector that needs one", async () => {
+    const created = buildConnector({ ...MCP, status: "active", config: { url: "https://mcp.example.com/mcp", allowedHosts: ["mcp.example.com"], auth: "bearer" } });
+    const { user } = renderView({ "POST /v1/organizations/:organizationId/connectors": ok(created, 201) });
+    await user.click(await screen.findByRole("button", { name: "Novo conector" }));
+    const dialog = await screen.findByRole("dialog", { name: "Novo conector" });
+    await paste(user, within(dialog).getByRole("textbox", { name: "Nome" }), "docs-mcp");
+    await user.click(within(dialog).getByRole("combobox", { name: "Tipo" }));
+    await user.click(await screen.findByRole("option", { name: "Servidor MCP" }));
+    await paste(user, within(dialog).getByRole("textbox", { name: "URL do servidor" }), "https://mcp.example.com/mcp");
+    await paste(user, within(dialog).getByRole("textbox", { name: "Hosts permitidos" }), "mcp.example.com");
+    await user.type(within(dialog).getByRole("textbox", { name: "Ferramentas permitidas" }), "search");
+    await user.click(within(dialog).getByRole("button", { name: "Criar conector" }));
+    const secret = await screen.findByRole("dialog", { name: "Definir o segredo de docs-mcp" });
+    expect(within(secret).getByLabelText("Token de acesso")).toHaveProperty("value", "");
+  });
+
   it("shows no write action to a viewer who can only read", async () => {
     renderView({}, READER);
     await screen.findByRole("table", { name: "Conectores de Northwind" });

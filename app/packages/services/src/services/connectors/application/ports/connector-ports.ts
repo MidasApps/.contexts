@@ -1,4 +1,4 @@
-import type { Connector, ConnectorId, TenantId } from "@core/contracts";
+import type { Connector, ConnectorId, ConnectorLoadError, TenantId } from "@core/contracts";
 import type { Transaction } from "firebase-admin/firestore";
 import type { Page, PageRequest } from "../../../shared/pagination/page.ts";
 
@@ -11,6 +11,11 @@ export type ConnectorRepository = {
   readonly list: (args: { tenantId: TenantId; page: PageRequest }) => Promise<Page<Connector>>;
   /** Active connectors of a tenant (the agent runtime's toolsets). */
   readonly listActive: (args: { tenantId: TenantId }) => Promise<readonly Connector[]>;
+  /**
+   * Stores (or clears with `null`) why the agent runtime could not load a connector. Not an edit:
+   * `updatedAt` stays. A connector of another tenant, or a deleted one, is left alone.
+   */
+  readonly recordLoad: (args: { tenantId: TenantId; connectorId: ConnectorId; lastError: ConnectorLoadError | null }) => Promise<void>;
   readonly create: (tx: Transaction, args: { connector: Connector }) => void;
   readonly replace: (tx: Transaction, args: { connector: Connector; actorId: string }) => void;
   readonly delete: (tx: Transaction, args: { connectorId: ConnectorId }) => void;

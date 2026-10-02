@@ -3,6 +3,7 @@ import { type RequestContextReader, readAgentContext } from "../context/agent-re
 import type { ConnectorsPort, SecretStore } from "../runtime/runtime-ports.ts";
 import type { CoreToolDefinition, CoreToolDeps } from "../tools/define-core-tool.ts";
 import { bindCoreTool } from "../tools/tool-registry.ts";
+import { type ConnectorLoadOutcome, recordConnectorLoads } from "./connector-load-errors.ts";
 import { postgresConnectorTools } from "./db/postgres-readonly-connector.ts";
 import { loadMcpConnectorToolset, type McpConnectorToolset, type McpTool } from "./mcp/mcp-connector.ts";
 import type { BoundCoreTool } from "../tools/tool-registry.ts";
@@ -13,7 +14,8 @@ import { openApiToTools } from "./openapi/openapi-to-tools.ts";
  * Per-tenant connector tools (spec §9, decision 0027): the active connectors of the run's
  * tenant (from the server-side context, never the model), loaded once per tenant and kept
  * 5 minutes; MCP clients are disconnected when their entry is evicted. A connector that
- * fails to load is left out of the run (fail-closed) and retried after the TTL.
+ * fails to load is left out of the run (fail-closed) and retried after the TTL; why it failed
+ * (a code) is recorded on the connector for the settings page.
  */
 
 export const CONNECTOR_CACHE_TTL_MS = 5 * 60_000;
@@ -97,10 +99,19 @@ export const createConnectorToolResolver = (args: {
   };
   const loadTenant = async (tenantId: string): Promise<LoadedConnector[]> => {
     const active = await args.connectors.listActive({ tenantId });
-    const settled = await Promise.allSettled(
-      active.map(async (connector) => loadOne(connector, connector.secretRef === null ? null : await args.secrets.get(connector.secretRef), args.loaders)),
+    const settled = await Promise.all(
+      active.map(async (connector): Promise<ConnectorLoadOutcome & { loaded: LoadedConnector | null }> => {
+        let secret: string | null = null;
+        try {
+          secret = connector.secretRef === null ? null : await args.secrets.get(connector.secretRef);
+          return { connector, secret, error: null, failed: false, loaded: await loadOne(connector, secret, args.loaders) };
+        } catch (error: unknown) {
+          return { connector, secret, error, failed: true, loaded: null };
+        }
+      }),
     );
-    return settled.flatMap((result) => (result.status === "fulfilled" ? [result.value] : []));
+    recordConnectorLoads({ connectors: args.connectors, tenantId, outcomes: settled, at: new Date(now()).toISOString() });
+    return settled.flatMap((outcome) => (outcome.loaded === null ? [] : [outcome.loaded]));
   };
   const tenantConnectors = async (tenantId: string): Promise<LoadedConnector[]> => {
     const entry = cache.get(tenantId);

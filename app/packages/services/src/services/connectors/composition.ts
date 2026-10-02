@@ -23,6 +23,8 @@ export type ConnectorsServices = {
   readonly setConnectorSecret: SetConnectorSecret;
   /** Server-side reads for the agent runtime (no authorization: the tenant comes from the verified context). */
   readonly listActiveConnectors: ConnectorRepository["listActive"];
+  /** The agent runtime's record of why a connector failed to load (shown on the settings page). */
+  readonly recordConnectorLoad: ConnectorRepository["recordLoad"];
   readonly secrets: Pick<SecretStore, "get">;
 };
 
@@ -35,6 +37,7 @@ export const createConnectorsServices = (deps: ConnectorsDeps): ConnectorsServic
   deleteConnector: makeDeleteConnector(deps),
   setConnectorSecret: makeSetConnectorSecret(deps),
   listActiveConnectors: deps.connectors.listActive,
+  recordConnectorLoad: deps.connectors.recordLoad,
   secrets: { get: deps.secrets.get },
 });
 

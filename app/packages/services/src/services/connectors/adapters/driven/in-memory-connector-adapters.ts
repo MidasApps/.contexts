@@ -15,6 +15,11 @@ export const createInMemoryConnectorRepository = (): ConnectorRepository & { rea
     list: ({ tenantId, page }) =>
       Promise.resolve(paginateInMemory({ items: own(tenantId), page, positionOf: (connector) => [String(9e15 - Date.parse(connector.createdAt)), connector.id] })),
     listActive: ({ tenantId }) => Promise.resolve(own(tenantId).filter((connector) => connector.status === "active")),
+    recordLoad: ({ tenantId, connectorId, lastError }) => {
+      const connector = rows.get(connectorId);
+      if (connector?.tenantId === tenantId) rows.set(connectorId, { ...connector, lastError });
+      return Promise.resolve();
+    },
     create: (_tx, { connector }) => void rows.set(connector.id, connector),
     replace: (_tx, { connector }) => void rows.set(connector.id, connector),
     delete: (_tx, { connectorId }) => void rows.delete(connectorId),

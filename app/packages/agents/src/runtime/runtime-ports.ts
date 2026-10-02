@@ -5,6 +5,7 @@ import type {
   Citation,
   EvalExperimentSummary,
   Connector,
+  ConnectorLoadErrorCode,
   CustomAgent,
   CustomSkill,
   KnowledgeDocument,
@@ -213,7 +214,11 @@ export type KnowledgeEventsPort = {
   }) => Promise<void>;
 };
 
-export type ConnectorsPort = { readonly listActive: (input: { tenantId: string }) => Promise<readonly Connector[]> };
+export type ConnectorsPort = {
+  readonly listActive: (input: { tenantId: string }) => Promise<readonly Connector[]>;
+  /** Stores why a connector failed to load (`null` clears it) for the settings page; optional for hosts without one. */
+  readonly recordLoad?: (input: { tenantId: string; connectorId: string; lastError: { code: ConnectorLoadErrorCode; at: string } | null }) => Promise<void>;
+};
 
 /** Secret values by reference (Secret Manager outside local); never logged. */
 export type SecretStore = {
