@@ -3,14 +3,13 @@
 import type { EvalExperimentSummary } from "@core/contracts";
 import { useMemo, useState } from "react";
 import { useFormatter, useTranslations } from "use-intl";
-import { useTenantExperiments, type ExperimentPage } from "#/entities/eval-experiment/index.ts";
+import { useTenantExperimentPair, useTenantExperiments, type ExperimentPage } from "#/entities/eval-experiment/index.ts";
 import { useFormatDateTime } from "#/shared/lib/format/use-format-date-time.ts";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
-import { Alert, AlertDescription } from "#/shared/ui/molecules/Alert/Alert.tsx";
 import { EmptyState } from "#/shared/ui/molecules/EmptyState/EmptyState.tsx";
 import { DataTable } from "#/shared/ui/organisms/DataTable/DataTable.tsx";
 import { dataTableColumnHelper } from "#/shared/ui/organisms/DataTable/data-table-columns.ts";
-import { ExperimentCompare } from "#/widgets/experiment-compare/index.ts";
+import { ExperimentComparisonPanel } from "#/widgets/experiment-compare/index.ts";
 import { QuerySection } from "#/widgets/page-state/index.ts";
 import { ExperimentScores, ExperimentStatusPill, ExperimentVerdictPill } from "./eval-pills.tsx";
 
@@ -73,35 +72,12 @@ const useColumns = (compare: Compare) => {
   );
 };
 
-/** The comparison of the two chosen experiments, or what is still missing to see one. */
-function Comparison({ experiments, compare }: { experiments: readonly EvalExperimentSummary[]; compare: Compare }) {
+/** The comparison of the two chosen experiments; one that left the page (paged, refreshed) is read by id. */
+function Comparison({ organizationId, experiments, compare }: { organizationId: string; experiments: readonly EvalExperimentSummary[]; compare: Compare }) {
   const t = useTranslations("settings.evals.compare");
-  const [a, b] = compare.ids.map((id) => experiments.find((experiment) => experiment.experimentId === id));
-  // A chosen experiment can leave the page when the list is paged or refreshed.
-  const stale = compare.ids.length > 0 && (a === undefined || (compare.ids.length === 2 && b === undefined));
-  return (
-    <section aria-labelledby="experiment-compare-title" className="flex flex-col gap-3">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <h2 id="experiment-compare-title" className="text-sm font-medium">
-          {t("title")}
-        </h2>
-        {compare.ids.length === 0 ? null : (
-          <Button variant="ghost" size="sm" onClick={compare.clear}>
-            {t("clear")}
-          </Button>
-        )}
-      </div>
-      {stale ? (
-        <Alert variant="warning">
-          <AlertDescription>{t("missing")}</AlertDescription>
-        </Alert>
-      ) : a !== undefined && b !== undefined ? (
-        <ExperimentCompare a={a} b={b} />
-      ) : (
-        <p className="text-sm text-muted-foreground">{compare.ids.length === 1 ? t("hintOne") : t("hint")}</p>
-      )}
-    </section>
-  );
+  const pair = useTenantExperimentPair(organizationId, compare.ids, experiments);
+  const copy = { title: t("title"), hint: t("hint"), hintOne: t("hintOne"), missing: t("missing"), loading: t("loading"), clear: t("clear") };
+  return <ExperimentComparisonPanel ids={compare.ids} pair={pair} onClear={compare.clear} copy={copy} />;
 }
 
 type Paging = { page: number; setPage: (page: number) => void; pending: boolean };
@@ -119,7 +95,8 @@ function ExperimentsTable({ organization, data, paging, compare, onStart }: Expe
       ? undefined
       : { hasPrevious: page > 1, hasNext: data.meta.hasMore, pending: paging.pending, onPrevious: () => setPage(page - 1), onNext: () => setPage(page + 1), label: t("pagination") };
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-6">
+      {data.data.length === 0 && compare.ids.length === 0 ? null : <Comparison organizationId={organization.id} experiments={data.data} compare={compare} />}
       <DataTable
         caption={t("caption", { organization: organization.name })}
         captionHidden
@@ -152,15 +129,15 @@ function ExperimentsTable({ organization, data, paging, compare, onStart }: Expe
           />
         }
       />
-      {data.data.length === 0 ? null : <Comparison experiments={data.data} compare={compare} />}
     </div>
   );
 }
 
 /**
  * The organization's experiments (`GET /v1/evals/experiments`, paged by number) with scores per
- * scorer and the gate verdict, and the comparison of two of them (computed here: the API has no
- * compare endpoint). `onStart` is `null` for a viewer who cannot start one.
+ * scorer and the gate verdict, and the comparison of two of them above the list, from any page
+ * (computed here: the API has no compare endpoint). `onStart` is `null` for a viewer who cannot
+ * start one.
  */
 export function ExperimentsPanel({ organization, onStart }: { organization: Organization; onStart: (() => void) | null }) {
   const t = useTranslations("settings.evals.experiments");

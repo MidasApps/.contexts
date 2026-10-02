@@ -814,9 +814,10 @@
     },
     "compare": {
       "title": "Experiment comparison",
-      "hint": "Choose two experiments on this page to compare their scores per scorer.",
+      "hint": "Choose two experiments, from any page, to compare their scores per scorer.",
       "hintOne": "Choose one more experiment to compare.",
-      "missing": "One of the chosen experiments is not on this page. Clear the comparison and choose again.",
+      "missing": "One of the chosen experiments was not found. Clear the comparison and choose again.",
+      "loading": "Loading the chosen experiments…",
       "clear": "Clear comparison"
     },
     "start": {

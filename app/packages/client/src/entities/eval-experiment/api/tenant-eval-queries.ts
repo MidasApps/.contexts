@@ -1,9 +1,10 @@
 "use client";
 
-import { listEvalDatasetsEndpoint, listEvalExperimentsEndpoint, type EvalDataset } from "@core/contracts";
+import { getEvalExperimentEndpoint, listEvalDatasetsEndpoint, listEvalExperimentsEndpoint, type EvalDataset, type EvalExperimentSummary } from "@core/contracts";
 import { keepPreviousData, queryOptions, useQuery } from "@tanstack/react-query";
 import { useCallEndpoint } from "#/shared/api/api-context.tsx";
 import type { CallEndpoint } from "#/shared/api/call-endpoint.ts";
+import { nullOnNotFound } from "#/shared/api/cursor-list.ts";
 import { queryKeys, type QueryKey } from "#/shared/api/query-keys.ts";
 import { useIsSignedIn } from "#/shared/lib/session/use-signed-in.ts";
 import { EXPERIMENTS_PAGE_SIZE, type ExperimentPage } from "./eval-queries.ts";
@@ -12,6 +13,7 @@ import { EXPERIMENTS_PAGE_SIZE, type ExperimentPage } from "./eval-queries.ts";
 export const tenantEvalKeys = {
   all: (organizationId: string): QueryKey => queryKeys.organizationScoped(organizationId, "evals"),
   experiments: (organizationId: string, page: number): QueryKey => queryKeys.organizationScoped(organizationId, "evals", "experiments", { page }),
+  experiment: (organizationId: string, experimentId: string): QueryKey => queryKeys.organizationScoped(organizationId, "evals", "experiment", experimentId),
   datasets: (organizationId: string): QueryKey => queryKeys.organizationScoped(organizationId, "evals", "datasets"),
 };
 
@@ -32,6 +34,17 @@ export const useTenantExperiments = (organizationId: string, page: number, optio
     enabled: signedIn && organizationId !== "" && options.enabled !== false,
   });
 };
+
+/**
+ * `GET /v1/evals/experiments/{id}?organizationId=` (core.eval.read): one of the organization's
+ * experiments, `null` when it does not exist or belongs to another organization (decision 0048).
+ */
+export const tenantExperimentQuery = (callEndpoint: CallEndpoint, organizationId: string, experimentId: string) =>
+  queryOptions({
+    queryKey: tenantEvalKeys.experiment(organizationId, experimentId),
+    queryFn: ({ signal }): Promise<EvalExperimentSummary | null> =>
+      nullOnNotFound(async () => (await callEndpoint(getEvalExperimentEndpoint, { params: { experimentId }, query: { organizationId }, signal })).data),
+  });
 
 /** `GET /v1/evals/datasets?organizationId=` (core.eval.read): the organization's own datasets. */
 export const tenantDatasetsQuery = (callEndpoint: CallEndpoint, organizationId: string) =>

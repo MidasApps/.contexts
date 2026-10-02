@@ -4,7 +4,7 @@ import { renderAdmin } from "#/app-shell/testing/render-admin.tsx";
 import { buildOrganizationSummary } from "#/shared/testing/admin-fixtures.ts";
 import { buildDataset, buildExperiment, numberedPage } from "#/shared/testing/admin-observability-fixtures.ts";
 import { expectNoAxeViolations } from "#/shared/testing/axe.ts";
-import { apiError, FAKE_REQUEST_ID, ok, page } from "#/shared/testing/fake-api.ts";
+import { apiError, FAKE_REQUEST_ID, ok, page, type FakeHandler } from "#/shared/testing/fake-api.ts";
 import { IDS } from "#/shared/testing/fixtures.ts";
 import { AdminEvalsView } from "./AdminEvalsView.tsx";
 
@@ -22,8 +22,16 @@ const CANDIDATE = buildExperiment({
 });
 const RUNNING = buildExperiment({ experimentId: "exp_running", status: "running", verdict: "pending", scores: [], finishedAt: null });
 
+// An experiment that sits on an older page of the list: only the by-id read finds it.
+const OLD_BASELINE = buildExperiment({ experimentId: "exp_old_baseline", scores: [{ scorer: "tool-routing", mean: 0.8, baseline: 0.9 }] });
+const byId: FakeHandler = (request) => {
+  const found = [BASE, CANDIDATE, RUNNING, OLD_BASELINE].find((experiment) => experiment["experimentId"] === request.params["experimentId"]);
+  return found === undefined ? apiError(404, "NOT_FOUND") : ok(found);
+};
+
 const routes = (experiments: readonly unknown[] = [BASE, CANDIDATE, RUNNING], hasMore = false) => ({
   "GET /v1/admin/experiments": numberedPage(experiments, hasMore),
+  "GET /v1/admin/experiments/:experimentId": byId,
   "GET /v1/admin/datasets": ok([buildDataset(), buildDataset({ id: "ds_feedback", name: "feedback", tenantId: IDS.organization, targetIds: [] })]),
   "GET /v1/admin/organizations": page([buildOrganizationSummary()]),
 });
@@ -47,15 +55,15 @@ describe("AdminEvalsView", () => {
     expect(within(running).getByText("Pendente")).toBeDefined();
     expect(within(running).getByText("Sem notas")).toBeDefined();
     expect(within(running).getAllByText("Em andamento")).toHaveLength(2);
-    expect(screen.getByText("Escolha dois experimentos desta página para comparar as notas por avaliador.")).toBeDefined();
+    expect(screen.getByText("Escolha dois experimentos, de qualquer página, para comparar as notas por avaliador.")).toBeDefined();
     expect(api.calls.find((call) => call.path === "/v1/admin/experiments")?.query).toBe("?page=0&perPage=20");
     // Only the open tab loads.
     expect(api.callLines()).not.toContain("GET /v1/admin/datasets");
     await expectNoAxeViolations(container);
   });
 
-  it("compares two experiments chosen on the page, in the URL, with a verdict per scorer", async () => {
-    const { user, router, container } = render();
+  it("compares two experiments chosen on the page, in the URL, with a verdict per scorer, above the list", async () => {
+    const { user, router, container, api } = render();
     await user.click(await screen.findByRole("button", { name: "Comparar o experimento exp_01J8Z3K4M5" }));
     expect(router.current()).toBe("/admin/evals?a=exp_01J8Z3K4M5");
     expect(await screen.findByText("Escolha mais um experimento para comparar.")).toBeDefined();
@@ -67,25 +75,47 @@ describe("AdminEvalsView", () => {
     const verdicts = screen.getByRole("list", { name: "Resultado por avaliador" });
     expect(within(verdicts).getAllByRole("listitem").map((item) => plain(item.textContent))).toEqual(["tool-routing: B pior que A (-9%)", "tenant-leak: sem diferença"]);
     expect(screen.getByRole("button", { name: "Comparar o experimento exp_candidate" }).getAttribute("aria-pressed")).toBe("true");
+    // The comparison sits above the list, next to what was chosen; both were on the page, so no extra read.
+    const comparison = screen.getByRole("region", { name: /Comparação de experimentos/u });
+    expect(comparison.compareDocumentPosition(screen.getByRole("table", { name: "Experimentos de avaliação" })) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(within(comparison).getByText("exp_01J8Z3K4M5 × exp_candidate")).toBeDefined();
+    expect(api.calls.filter((call) => call.path.startsWith("/v1/admin/experiments/"))).toHaveLength(0);
     await expectNoAxeViolations(container);
     await user.click(screen.getByRole("button", { name: "Limpar comparação" }));
     expect(router.current()).toBe("/admin/evals");
   });
 
-  it("restores a comparison from the URL and flags one that is not on the page", async () => {
+  it("restores a comparison from the URL and says when a chosen experiment no longer exists", async () => {
     const restored = render({ path: "/admin/evals?a=exp_candidate&b=exp_01J8Z3K4M5" });
     const verdicts = await screen.findByRole("list", { name: "Resultado por avaliador" });
     expect(plain(within(verdicts).getAllByRole("listitem")[0]?.textContent ?? null)).toBe("tool-routing: B melhor que A (+9%)");
     restored.unmount();
     render({ path: "/admin/evals?a=exp_gone&b=exp_candidate" });
-    expect(await screen.findByText(/não está nesta página/u)).toBeDefined();
+    expect(await screen.findByText(/não foi encontrado/u)).toBeDefined();
   });
 
-  it("pages experiments by number and drops the comparison with the page", async () => {
+  it("compares with an experiment of another page, read by id", async () => {
+    const { api, container } = render({ path: "/admin/evals?a=exp_old_baseline&b=exp_candidate" });
+    const verdicts = await screen.findByRole("list", { name: "Resultado por avaliador" });
+    expect(plain(within(verdicts).getAllByRole("listitem")[0]?.textContent ?? null)).toBe("tool-routing: B melhor que A (+5%)");
+    expect(api.calls.filter((call) => call.path.startsWith("/v1/admin/experiments/")).map((call) => call.path)).toEqual(["/v1/admin/experiments/exp_old_baseline"]);
+    await expectNoAxeViolations(container);
+  });
+
+  it("shows a failed read of a chosen experiment with its reference and a retry", async () => {
+    const { user, api } = render({ path: "/admin/evals?a=exp_old_baseline&b=exp_candidate", routes: { ...routes(), "GET /v1/admin/experiments/:experimentId": apiError(409, "CONFLICT") } });
+    const comparison = await screen.findByRole("region", { name: /Comparação de experimentos/u });
+    expect(await within(comparison).findByText(new RegExp(FAKE_REQUEST_ID, "u"))).toBeDefined();
+    api.route("GET /v1/admin/experiments/:experimentId", byId);
+    await user.click(within(comparison).getByRole("button", { name: "Tentar novamente" }));
+    expect(await screen.findByRole("list", { name: "Resultado por avaliador" })).toBeDefined();
+  });
+
+  it("pages experiments by number and keeps the comparison across pages", async () => {
     const { user, router, api } = render({ path: "/admin/evals?a=exp_candidate", routes: routes([BASE, CANDIDATE], true) });
     const pages = await screen.findByRole("navigation", { name: "Páginas de experimentos" });
     await user.click(within(pages).getByRole("button", { name: "Próxima" }));
-    expect(router.current()).toBe("/admin/evals?page=2");
+    expect(router.current()).toBe("/admin/evals?a=exp_candidate&page=2");
     await waitFor(() => expect(api.calls.filter((call) => call.path === "/v1/admin/experiments").at(-1)?.query).toBe("?page=1&perPage=20"));
   });
 

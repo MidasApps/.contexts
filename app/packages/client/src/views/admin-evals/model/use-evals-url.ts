@@ -12,7 +12,7 @@ export type EvalsUrl = {
   /** Experiments chosen for the comparison (A, then B), from `?a=&b=`. */
   readonly compare: readonly string[];
   readonly setTab: (tab: EvalTab) => void;
-  /** Another page shows other experiments, so the comparison is dropped with it. */
+  /** The comparison stays: a chosen experiment of another page is read by id (decision 0048). */
   readonly setPage: (page: number) => void;
   /** Adds the experiment to the comparison or removes it; a third choice replaces B. */
   readonly toggleCompare: (experimentId: string) => void;
@@ -24,7 +24,8 @@ const isTab = (value: string | null): value is EvalTab => (EVAL_TABS as readonly
 /**
  * URL state of `/admin/evals` (decision 0042 §3): the tab, the experiments page and the two
  * experiments under comparison, so a comparison is a link staff can share. Unlike a filter, the
- * comparison must survive nothing but its own page, hence the dedicated hook.
+ * comparison survives paging (its experiments are read by id) and goes with the tab, hence the
+ * dedicated hook.
  */
 export const useEvalsUrl = (): EvalsUrl => {
   const router = useRouter();
@@ -57,7 +58,6 @@ export const useEvalsUrl = (): EvalsUrl => {
       }),
     setPage: (page) =>
       write((next) => {
-        writeCompare(next, []);
         if (page <= 1) next.delete("page");
         else next.set("page", String(page));
       }),

@@ -814,9 +814,10 @@
     },
     "compare": {
       "title": "Comparación de experimentos",
-      "hint": "Elige dos experimentos de esta página para comparar las notas por evaluador.",
+      "hint": "Elige dos experimentos, de cualquier página, para comparar las notas por evaluador.",
       "hintOne": "Elige un experimento más para comparar.",
-      "missing": "Uno de los experimentos elegidos no está en esta página. Limpia la comparación y elige de nuevo.",
+      "missing": "Uno de los experimentos elegidos no se encontró. Limpia la comparación y elige de nuevo.",
+      "loading": "Cargando los experimentos elegidos…",
       "clear": "Limpiar comparación"
     },
     "start": {

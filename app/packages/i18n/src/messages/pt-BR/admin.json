@@ -634,9 +634,10 @@
     },
     "compare": {
       "title": "Comparação de experimentos",
-      "hint": "Escolha dois experimentos desta página para comparar as notas por avaliador.",
+      "hint": "Escolha dois experimentos, de qualquer página, para comparar as notas por avaliador.",
       "hintOne": "Escolha mais um experimento para comparar.",
-      "missing": "Um dos experimentos escolhidos não está nesta página. Limpe a comparação e escolha de novo.",
+      "missing": "Um dos experimentos escolhidos não foi encontrado. Limpe a comparação e escolha de novo.",
+      "loading": "Carregando os experimentos escolhidos…",
       "clear": "Limpar comparação",
       "chartTitle": "Nota média por avaliador",
       "chartDescription": "A é {a}; B é {b}.",

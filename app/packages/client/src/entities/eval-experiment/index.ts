@@ -1,6 +1,7 @@
 // Public API of the eval-experiment entity (SP5 Task 13): experiments and datasets as staff read them.
 export {
   adminDatasetsQuery,
+  adminExperimentQuery,
   adminExperimentsQuery,
   evalKeys,
   EXPERIMENTS_PAGE_SIZE,
@@ -13,7 +14,17 @@ export { compareExperiments, type ScoreComparison, type ScoreOutcome } from "./l
 export {
   tenantDatasetsQuery,
   tenantEvalKeys,
+  tenantExperimentQuery,
   tenantExperimentsQuery,
   useTenantDatasets,
   useTenantExperiments,
 } from "./api/tenant-eval-queries.ts";
+// Decision 0048: the chosen experiments of a comparison, from the page or read by id.
+export {
+  type ChosenExperiment,
+  type ExperimentPair,
+  type ExperimentPairState,
+  resolveExperimentPair,
+  useAdminExperimentPair,
+  useTenantExperimentPair,
+} from "./model/use-experiment-pair.ts";

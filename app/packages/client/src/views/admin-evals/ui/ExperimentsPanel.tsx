@@ -3,15 +3,14 @@
 import type { EvalExperimentSummary } from "@core/contracts";
 import { useMemo } from "react";
 import { useFormatter, useTranslations } from "use-intl";
-import { useAdminExperiments, type ExperimentPage } from "#/entities/eval-experiment/index.ts";
+import { useAdminExperimentPair, useAdminExperiments, type ExperimentPage } from "#/entities/eval-experiment/index.ts";
 import { useFormatDateTime } from "#/shared/lib/format/use-format-date-time.ts";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
-import { Alert, AlertDescription } from "#/shared/ui/molecules/Alert/Alert.tsx";
 import { EmptyState } from "#/shared/ui/molecules/EmptyState/EmptyState.tsx";
 import { DataTable } from "#/shared/ui/organisms/DataTable/DataTable.tsx";
 import { dataTableColumnHelper } from "#/shared/ui/organisms/DataTable/data-table-columns.ts";
 import { AdminQuerySection, numberedPagination } from "#/widgets/admin-nav/index.ts";
-import { ExperimentCompare } from "#/widgets/experiment-compare/index.ts";
+import { ExperimentComparisonPanel } from "#/widgets/experiment-compare/index.ts";
 import type { EvalsUrl } from "../model/use-evals-url.ts";
 import { ExperimentScores, ExperimentStatusPill, ExperimentVerdictPill } from "./eval-pills.tsx";
 
@@ -60,34 +59,12 @@ const useColumns = (url: EvalsUrl) => {
   );
 };
 
-/** The comparison of the two chosen experiments, or what is still missing to see one. */
+/** The comparison of the two chosen experiments, from this page or read by id from another one. */
 function Comparison({ experiments, url }: { experiments: readonly EvalExperimentSummary[]; url: EvalsUrl }) {
   const t = useTranslations("admin.evals.compare");
-  const [a, b] = url.compare.map((id) => experiments.find((experiment) => experiment.experimentId === id));
-  const stale = url.compare.length > 0 && (a === undefined || (url.compare.length === 2 && b === undefined));
-  return (
-    <section aria-labelledby="experiment-compare-title" className="flex flex-col gap-3">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <h2 id="experiment-compare-title" className="text-sm font-medium">
-          {t("title")}
-        </h2>
-        {url.compare.length === 0 ? null : (
-          <Button variant="ghost" size="sm" onClick={url.clearCompare}>
-            {t("clear")}
-          </Button>
-        )}
-      </div>
-      {stale ? (
-        <Alert variant="warning">
-          <AlertDescription>{t("missing")}</AlertDescription>
-        </Alert>
-      ) : a !== undefined && b !== undefined ? (
-        <ExperimentCompare a={a} b={b} />
-      ) : (
-        <p className="text-sm text-muted-foreground">{url.compare.length === 1 ? t("hintOne") : t("hint")}</p>
-      )}
-    </section>
-  );
+  const pair = useAdminExperimentPair(url.compare, experiments);
+  const copy = { title: t("title"), hint: t("hint"), hintOne: t("hintOne"), missing: t("missing"), loading: t("loading"), clear: t("clear") };
+  return <ExperimentComparisonPanel ids={url.compare} pair={pair} onClear={url.clearCompare} copy={copy} />;
 }
 
 function ExperimentsTable({ page, url, fetching }: { page: ExperimentPage; url: EvalsUrl; fetching: boolean }) {
@@ -95,7 +72,8 @@ function ExperimentsTable({ page, url, fetching }: { page: ExperimentPage; url: 
   const formatDateTime = useFormatDateTime();
   const columns = useColumns(url);
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-6">
+      {page.data.length === 0 && url.compare.length === 0 ? null : <Comparison experiments={page.data} url={url} />}
       <DataTable
         caption={t("caption")}
         captionHidden
@@ -132,7 +110,6 @@ function ExperimentsTable({ page, url, fetching }: { page: ExperimentPage; url: 
           />
         }
       />
-      {page.data.length === 0 ? null : <Comparison experiments={page.data} url={url} />}
     </div>
   );
 }

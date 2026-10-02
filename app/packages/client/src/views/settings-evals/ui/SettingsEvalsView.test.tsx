@@ -71,10 +71,12 @@ describe("SettingsEvalsView", () => {
     await expectNoAxeViolations(container);
   });
 
-  it("compares two experiments chosen on the page", async () => {
+  it("compares two experiments chosen on the page, shown above the list", async () => {
     const { user } = renderView();
-    await screen.findByRole("table", { name: "Experimentos de Northwind" });
-    expect(screen.getByText("Escolha dois experimentos desta página para comparar as notas por avaliador.")).toBeDefined();
+    const table = await screen.findByRole("table", { name: "Experimentos de Northwind" });
+    expect(screen.getByText("Escolha dois experimentos, de qualquer página, para comparar as notas por avaliador.")).toBeDefined();
+    const comparison = screen.getByRole("region", { name: /Comparação de experimentos/u });
+    expect(comparison.compareDocumentPosition(table) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     await user.click(screen.getByRole("button", { name: "Comparar o experimento exp_base" }));
     expect(screen.getByText("Escolha mais um experimento para comparar.")).toBeDefined();
     await user.click(screen.getByRole("button", { name: "Comparar o experimento exp_candidate" }));
@@ -82,6 +84,22 @@ describe("SettingsEvalsView", () => {
     expect(within(verdicts).getByText(/tool-routing: B pior que A/u)).toBeDefined();
     await user.click(screen.getByRole("button", { name: "Limpar comparação" }));
     expect(screen.queryByRole("list", { name: "Resultado por avaliador" })).toBeNull();
+  });
+
+  it("keeps a chosen experiment across pages and reads it by id for the organization", async () => {
+    const OLDER = buildExperiment({ experimentId: "exp_older", datasetId: "ds_feedback", scores: [{ scorer: "tool-routing", mean: 0.7, baseline: 0.9 }] });
+    const { user, api } = renderView({
+      "GET /v1/evals/experiments": (request: FakeRequest) => (request.query.get("page") === "0" ? numberedPage([BASE, CANDIDATE], true) : numberedPage([OLDER])),
+      "GET /v1/evals/experiments/:experimentId": (request: FakeRequest) => (request.params["experimentId"] === "exp_candidate" ? ok(CANDIDATE) : apiError(404, "NOT_FOUND")),
+    });
+    await screen.findByRole("table", { name: "Experimentos de Northwind" });
+    await user.click(screen.getByRole("button", { name: "Comparar o experimento exp_candidate" }));
+    await user.click(within(screen.getByRole("navigation", { name: "Páginas de experimentos" })).getByRole("button", { name: "Próxima" }));
+    await user.click(await screen.findByRole("button", { name: "Comparar o experimento exp_older" }));
+    const verdicts = await screen.findByRole("list", { name: "Resultado por avaliador" });
+    expect(within(verdicts).getByText(/tool-routing: B pior que A/u)).toBeDefined();
+    const byId = api.calls.filter((call) => call.path === "/v1/evals/experiments/exp_candidate");
+    expect(byId.map(organizationOf)).toEqual([IDS.organization]);
   });
 
   it("lists the organization's datasets in their tab", async () => {
