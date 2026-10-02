@@ -13,6 +13,7 @@ const SYSTEM = { type: "system", id: "system" } as const;
 export type GetApprovalRequest = (id: ApprovalRequestId) => Promise<ApprovalRequest | null>;
 export type ExpireApprovalRequests = (args: { requestId: string; limit?: number }) => Promise<{ expired: number }>;
 export type FailInterruptedApprovals = (args: { requestId: string; limit?: number }) => Promise<{ failed: number }>;
+export type CancelApprovalRequest = (args: { id: ApprovalRequestId; requestId: string }) => Promise<{ cancelled: boolean }>;
 
 /**
  * System read of one request with its effective status (decision 0036). The workflow HITL step
@@ -62,6 +63,29 @@ export const makeExpireApprovalRequests =
     }
     return { expired };
   };
+
+/**
+ * Follow-up 82: the system cancels a request whose workflow run was cancelled, so approvers no
+ * longer see it as waiting and a later decision answers 409. One transaction after a re-read:
+ * only a request still effectively `pending` moves to `cancelled`, with an `APPROVAL_CANCELLED`
+ * audit entry by the system. The caller (the agent runtime) checks the request names its run.
+ */
+export const makeCancelApprovalRequest =
+  (deps: ApprovalDeps): CancelApprovalRequest =>
+  ({ id, requestId }) =>
+    deps.unitOfWork.run(async (tx) => {
+      const now = deps.clock.now();
+      const current = await deps.approvals.get(tx, id);
+      if (current === null || effectiveApprovalStatus(current, now) !== "pending") return { cancelled: false };
+      const status = nextApprovalStatus(current.status, "cancel");
+      if (status === null) return { cancelled: false };
+      deps.approvals.setStatus(tx, { id: current.id, status, updatedAt: now.toISOString(), actorId: SYSTEM.id });
+      await deps.audit.record(
+        { log: "tenant", tenantId: current.tenantId, action: "APPROVAL_CANCELLED", actor: SYSTEM, target: { type: "approval-request", id: current.id }, node: current.node, outcome: "success", requestId },
+        tx,
+      );
+      return { cancelled: true };
+    });
 
 /**
  * Decision 0030 A3: a request still `approved` 15 min after `updatedAt` was interrupted between

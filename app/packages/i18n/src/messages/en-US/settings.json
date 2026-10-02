@@ -973,7 +973,7 @@
       "errors": {
         "SELF_APPROVAL_FORBIDDEN": "You cannot decide a request you made yourself. Another person must decide.",
         "FORBIDDEN": "You do not have permission to decide this request at this place.",
-        "CONFLICT": "This request was already decided or has expired. The list was refreshed.",
+        "CONFLICT": "This request is no longer pending: it was decided, cancelled with its workflow, or expired. The list was refreshed.",
         "NOT_FOUND": "This request no longer exists or you lost access to it."
       }
     }

@@ -1,6 +1,7 @@
 import type { Mastra } from "@mastra/core/mastra";
 import { InMemoryStore } from "@mastra/core/storage";
 import { describe, expect, it } from "vitest";
+import { createFakeWorkflowApprovalPort } from "../testing/fake-ports.ts";
 import type { StoredRun } from "../workflows/runs/workflow-run-view.ts";
 import { platformScheduleIdOf } from "../workflows/schedules/platform-schedules.ts";
 import { scheduleIdOf, type StoredSchedule } from "../workflows/schedules/tenant-schedule-view.ts";
@@ -18,7 +19,7 @@ type WorkflowsStore = {
 };
 
 // Runs in Mastra's real in-memory workflow store; the workflow object only records cancels.
-const mastraWithRuns = async (runs: { runId: string; workflowName: string; tenantId: string | null; status: string }[]) => {
+const mastraWithRuns = async (runs: { runId: string; workflowName: string; tenantId: string | null; status: string; approvalRequestId?: string }[]) => {
   const storage = new InMemoryStore();
   const store = (await storage.getStore("workflows")) as unknown as WorkflowsStore;
   for (const run of runs) {
@@ -26,7 +27,7 @@ const mastraWithRuns = async (runs: { runId: string; workflowName: string; tenan
       workflowName: run.workflowName,
       runId: run.runId,
       ...(run.tenantId === null ? {} : { resourceId: `${run.tenantId}:${USER}` }),
-      snapshot: { runId: run.runId, status: run.status, value: {}, context: {}, activePaths: [], serializedStepGraph: [], suspendedPaths: {}, waitingPaths: {}, timestamp: NOW, requestContext: run.tenantId === null ? {} : { userId: USER } },
+      snapshot: { runId: run.runId, status: run.status, value: {}, context: contextOf(run.approvalRequestId), activePaths: [], serializedStepGraph: [], suspendedPaths: {}, waitingPaths: {}, timestamp: NOW, requestContext: run.tenantId === null ? {} : { userId: USER } },
     });
   }
   const canceled: { runId: string | undefined; resourceId: string | undefined }[] = [];
@@ -36,6 +37,12 @@ const mastraWithRuns = async (runs: { runId: string; workflowName: string; tenan
   const mastra = { getStorage: () => storage, getWorkflow: () => workflow } as unknown as Mastra;
   return { mastra, canceled };
 };
+
+// A run suspended in the HITL step stores the approval request id as the step's suspend payload.
+const contextOf = (approvalRequestId: string | undefined) =>
+  approvalRequestId === undefined ? {} : { "request-human-approval": { status: "suspended", startedAt: NOW, suspendPayload: { approvalRequestId } } };
+
+const CANCEL = { approvals: createFakeWorkflowApprovalPort(), requestId: "r", logger: { error: () => undefined } };
 
 const RUNS = [
   { runId: "run-a", workflowName: "approval-demo", tenantId: TENANT_A, status: "suspended" },
@@ -74,14 +81,31 @@ describe("staff workflow runs over Mastra storage (decision 0043)", () => {
 
   it("cancels any tenant's run with its resource and returns the run for the audit; unknown is null", async () => {
     const { mastra, canceled } = await mastraWithRuns(RUNS);
-    expect(await cancelAdminRun(mastra, "run-b")).toMatchObject({ runId: "run-b", tenantId: TENANT_B, workflowId: "approval-demo" });
-    expect(await cancelAdminRun(mastra, "run-platform")).toMatchObject({ tenantId: null });
+    expect(await cancelAdminRun(mastra, "run-b", CANCEL)).toMatchObject({ runId: "run-b", tenantId: TENANT_B, workflowId: "approval-demo" });
+    expect(await cancelAdminRun(mastra, "run-platform", CANCEL)).toMatchObject({ tenantId: null });
     expect(canceled).toEqual([
       { runId: "run-b", resourceId: `${TENANT_B}:${USER}` },
       { runId: "run-platform", resourceId: undefined },
     ]);
-    expect(await cancelAdminRun(mastra, "nope")).toBeNull();
-    expect(await cancelAdminRun(mastra, "../etc")).toBeNull();
+    expect(await cancelAdminRun(mastra, "nope", CANCEL)).toBeNull();
+    expect(await cancelAdminRun(mastra, "../etc", CANCEL)).toBeNull();
+  });
+
+  // Follow-up 82: a staff cancel settles the request the run waited for, like a tenant cancel.
+  it("cancels the approval request a suspended run waits for", async () => {
+    const approvals = createFakeWorkflowApprovalPort();
+    const { approvalId } = await approvals.requestWorkflowApproval({
+      principal: { type: "user", uid: USER, mfa: false },
+      node: { level: "organization", tenantId: TENANT_A },
+      permission: "core.workflow-run.approve-demo",
+      action: { workflowId: "approval-demo", runId: "run-wait", stepId: "request-human-approval" },
+      summary: "s",
+      requestId: "r",
+    });
+    const { mastra, canceled } = await mastraWithRuns([{ runId: "run-wait", workflowName: "approval-demo", tenantId: TENANT_A, status: "suspended", approvalRequestId: approvalId }]);
+    expect(await cancelAdminRun(mastra, "run-wait", { ...CANCEL, approvals })).toMatchObject({ runId: "run-wait", approvalRequestId: approvalId });
+    expect(canceled.map((run) => run.runId)).toEqual(["run-wait"]);
+    expect(approvals.records.get(approvalId)?.status).toBe("cancelled");
   });
 });
 

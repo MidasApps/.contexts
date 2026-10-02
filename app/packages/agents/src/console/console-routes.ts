@@ -5,7 +5,7 @@ import { type ApiRoute, registerApiRoute } from "@mastra/core/server";
 import { z } from "zod";
 import { buildAgentPrincipal } from "../auth/agent-principal.ts";
 import { buildAgentRequestContext, writeAgentContext } from "../context/write-agent-context.ts";
-import type { AccessPort } from "../runtime/runtime-ports.ts";
+import type { AccessPort, WorkflowApprovalPort } from "../runtime/runtime-ports.ts";
 import { addFeedbackItem, listDatasets } from "./dataset-console.ts";
 import { EvalRunRecordSchema, type ExperimentStore, getExperimentSummary, listExperimentSummaries, recordEvalRun } from "./eval-console.ts";
 import { actOnAdminSchedule, AdminRunsQuerySchema, cancelAdminRun, listAdminRuns, listAdminSchedules, SCHEDULE_ACTIONS } from "./operations-console.ts";
@@ -21,6 +21,8 @@ export const CONSOLE_ROUTES_PREFIX = "/console";
 
 export type ConsoleRouteDeps = {
   readonly access: Pick<AccessPort, "resolveAccessContext">;
+  /** Settles the approval request of a run staff cancel (follow-up 82). */
+  readonly approvals: Pick<WorkflowApprovalPort, "cancelWorkflowApproval">;
   readonly aiMode: AgentRequestContext["aiMode"];
   readonly logger: Pick<Logger, "info" | "error">;
   /** The registered agents for the staff catalog (decision 0044); absent: an empty catalog. */
@@ -221,7 +223,8 @@ const operationRoutes = (deps: ConsoleRouteDeps): ApiRoute[] => [
     method: "POST",
     requiresAuth: false,
     handler: guarded(deps, "console_workflow_run_cancel_failed", async (ctx) => {
-      const run = await cancelAdminRun(ctx.mastra, ctx.param("runId"));
+      const runId = ctx.param("runId");
+      const run = await cancelAdminRun(ctx.mastra, runId, { approvals: deps.approvals, requestId: ctx.header("x-request-id") ?? runId, logger: deps.logger });
       if (run === null) return fail(404, "NOT_FOUND");
       deps.logger.info("console_workflow_run_canceled", { ...requestIdOf(ctx), runId: run.runId, workflowId: run.workflowId, tenantId: run.tenantId });
       return json(200, { data: run });

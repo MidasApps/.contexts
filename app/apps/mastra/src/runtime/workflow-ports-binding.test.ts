@@ -21,6 +21,7 @@ describe("bindWorkflowApprovalsPort", () => {
         return Promise.resolve({ ok: true, data: { id: "Ap1sK2lPq0WnR5tYu3bV" } } as never);
       },
       getApprovalRequest: () => Promise.resolve(null),
+      cancelApprovalRequest: () => Promise.reject(new Error("unused")),
     });
     const input = { principal: MEMBER, node: NODE, permission: "core.workflow-run.approve-demo", action: ACTION, summary: "Create the note", requestId: "r" };
     expect(await port.requestWorkflowApproval(input)).toEqual({ approvalId: "Ap1sK2lPq0WnR5tYu3bV" });
@@ -34,6 +35,7 @@ describe("bindWorkflowApprovalsPort", () => {
     const port = bindWorkflowApprovalsPort({
       requestApproval: () => Promise.resolve({ ok: false, error: { code: "APPROVAL_NOT_REQUIRED" } } as never),
       getApprovalRequest: () => Promise.resolve(null),
+      cancelApprovalRequest: () => Promise.reject(new Error("unused")),
     });
     const refused = port.requestWorkflowApproval({ principal: MEMBER, node: NODE, permission: "core.project.read", action: ACTION, summary: "s", requestId: "r" });
     await expect(refused).rejects.toBeInstanceOf(ApprovalRefusedError);
@@ -50,7 +52,7 @@ describe("bindWorkflowApprovalsPort", () => {
       decidedBy: "admin-uid",
       reason: null,
     } as unknown as ApprovalRequest;
-    const port = bindWorkflowApprovalsPort({ requestApproval: () => Promise.reject(new Error("unused")), getApprovalRequest: (id) => Promise.resolve(id === stored.id ? stored : null) });
+    const port = bindWorkflowApprovalsPort({ requestApproval: () => Promise.reject(new Error("unused")), getApprovalRequest: (id) => Promise.resolve(id === stored.id ? stored : null), cancelApprovalRequest: () => Promise.reject(new Error("unused")) });
     expect(await port.getApprovalRequest({ approvalRequestId: stored.id })).toEqual({
       id: stored.id,
       tenantId: TENANT,
@@ -63,6 +65,26 @@ describe("bindWorkflowApprovalsPort", () => {
     });
     expect(await port.getApprovalRequest({ approvalRequestId: "other" })).toBeNull();
     expect(await port.getApprovalRequest({ approvalRequestId: "" })).toBeNull();
+  });
+
+  // Follow-up 82: a cancelled run settles its request, and only a request that names that run.
+  it("cancels the workflow-resume request of the cancelled run, and nothing else", async () => {
+    const pending = { id: "Ap1sK2lPq0WnR5tYu3bV", tenantId: TENANT, status: "pending", action: { kind: "workflow-resume", input: ACTION, summary: "s" } } as unknown as ApprovalRequest;
+    const other = { ...pending, id: "Ap2sK2lPq0WnR5tYu3bV", action: { kind: "agent-command", input: { runId: "run-1" }, summary: "s" } } as unknown as ApprovalRequest;
+    const cancelled: string[] = [];
+    const port = bindWorkflowApprovalsPort({
+      requestApproval: () => Promise.reject(new Error("unused")),
+      getApprovalRequest: (id) => Promise.resolve([pending, other].find((request) => request.id === id) ?? null),
+      cancelApprovalRequest: ({ id, requestId }) => {
+        cancelled.push(`${id}:${requestId}`);
+        return Promise.resolve({ cancelled: true });
+      },
+    });
+    expect(await port.cancelWorkflowApproval({ approvalRequestId: pending.id, runId: "run-1", requestId: "r" })).toEqual({ cancelled: true });
+    expect(await port.cancelWorkflowApproval({ approvalRequestId: pending.id, runId: "run-2", requestId: "r" })).toEqual({ cancelled: false });
+    expect(await port.cancelWorkflowApproval({ approvalRequestId: other.id, runId: "run-1", requestId: "r" })).toEqual({ cancelled: false });
+    expect(await port.cancelWorkflowApproval({ approvalRequestId: "missing", runId: "run-1", requestId: "r" })).toEqual({ cancelled: false });
+    expect(cancelled).toEqual([`${pending.id}:r`]);
   });
 });
 

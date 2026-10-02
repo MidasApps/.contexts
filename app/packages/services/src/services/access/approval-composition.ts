@@ -11,9 +11,11 @@ import { makeReadApprovalRequest, type ReadApprovalRequest } from "./application
 import { makeRejectRequest, type RejectRequest } from "./application/use-cases/reject-request.ts";
 import { makeRequestApproval, type RequestApproval } from "./application/use-cases/request-approval.ts";
 import {
+  type CancelApprovalRequest,
   type ExpireApprovalRequests,
   type FailInterruptedApprovals,
   type GetApprovalRequest,
+  makeCancelApprovalRequest,
   makeExpireApprovalRequests,
   makeFailInterruptedApprovals,
   makeGetApprovalRequest,
@@ -32,6 +34,8 @@ export type ApprovalServices = {
   /** Platform sweeps run by `approval-expiry-sweep` (decisions 0036 and 0030 A3). */
   readonly expireApprovalRequests: ExpireApprovalRequests;
   readonly failInterruptedApprovals: FailInterruptedApprovals;
+  /** System cancel of a pending request whose workflow run was cancelled (follow-up 82). */
+  readonly cancelApprovalRequest: CancelApprovalRequest;
   /** Open registry: SP3 registers `agent-command`, SP5 its workflow handler. */
   readonly handlers: ApprovalHandlerRegistry;
 };
@@ -46,6 +50,7 @@ export const createApprovalServices = (deps: ApprovalDeps): ApprovalServices => 
   getApprovalRequest: makeGetApprovalRequest(deps),
   expireApprovalRequests: makeExpireApprovalRequests(deps),
   failInterruptedApprovals: makeFailInterruptedApprovals(deps),
+  cancelApprovalRequest: makeCancelApprovalRequest(deps),
   handlers: deps.handlers,
 });
 

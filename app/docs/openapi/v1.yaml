@@ -18536,6 +18536,7 @@ components:
             - APPROVAL_EXECUTED
             - APPROVAL_FAILED
             - APPROVAL_EXPIRED
+            - APPROVAL_CANCELLED
             - PLATFORM_STAFF_GRANTED
             - PLATFORM_ACCESS_DENIED
             - AGENT_TOOL_EXECUTED
@@ -18867,6 +18868,7 @@ components:
             - APPROVAL_EXECUTED
             - APPROVAL_FAILED
             - APPROVAL_EXPIRED
+            - APPROVAL_CANCELLED
             - PLATFORM_STAFF_GRANTED
             - PLATFORM_ACCESS_DENIED
             - AGENT_TOOL_EXECUTED
@@ -19011,6 +19013,7 @@ components:
             - APPROVAL_EXECUTED
             - APPROVAL_FAILED
             - APPROVAL_EXPIRED
+            - APPROVAL_CANCELLED
             - PLATFORM_STAFF_GRANTED
             - PLATFORM_ACCESS_DENIED
             - AGENT_TOOL_EXECUTED

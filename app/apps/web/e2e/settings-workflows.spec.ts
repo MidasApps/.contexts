@@ -47,6 +47,7 @@ test.describe("workflow runs", () => {
     await expect(steps.getByRole("listitem").filter({ hasText: "Etapa concluída" }).filter({ hasText: "collect-input" })).toBeVisible({ timeout: 90_000 });
     await expect(steps.getByRole("listitem").filter({ hasText: "Etapa suspensa" }).filter({ hasText: "request-human-approval" })).toBeVisible({ timeout: 90_000 });
     await expect(page.getByRole("link", { name: "Abrir aprovações" })).toHaveAttribute("href", new RegExp(`/settings/approvals/[^/]+$`));
+    const approvalPath = ((await page.getByRole("link", { name: "Abrir aprovações" }).getAttribute("href")) ?? "").replace(/^\/pt-BR\//, "");
 
     await page.getByRole("link", { name: "Voltar às execuções" }).click();
     const runs = page.getByRole("table", { name: `Execuções de fluxos de ${sp5Org.name}` });
@@ -62,6 +63,11 @@ test.describe("workflow runs", () => {
     await expect(toast(page, `Execução de ${APPROVAL_DEMO} cancelada.`)).toBeVisible();
     await expect(page.getByText("Cancelada").first()).toBeVisible({ timeout: 60_000 });
     await expect(page.getByText("A execução terminou. O estado não muda mais.")).toBeVisible();
+
+    // Follow-up 82: the approval request the run waited for is cancelled with it.
+    await page.goto(approvalPath);
+    await expect(page.getByRole("heading", { level: 1, name: "Solicitação de aprovação" })).toBeVisible();
+    await expect(page.getByText("Cancelada", { exact: true }).first()).toBeVisible({ timeout: 30_000 });
   });
 });
 

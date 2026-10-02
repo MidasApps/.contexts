@@ -447,12 +447,13 @@ export const composeAgentRuntime = (args: ComposeAgentRuntimeArgs): RuntimeParts
       // SP5 console (decision 0040): traces, experiments, datasets and eval runs over Mastra storage, tenant-filtered.
       ...createConsoleRoutes({
         access: args.ports.access,
+        approvals: args.ports.workflowApprovals,
         aiMode: args.env.AI_MODE,
         logger: processLogger,
         // Decision 0044: the staff catalog of what this runtime registered.
         agentCatalog: () => buildAgentCatalog({ definitions, built: { ...agents, ...subagents }, isEntry, supervisor: { id: SUPERVISOR_AGENT_ID, ceiling: SUPERVISOR_CEILING } }),
       }),
-      ...createWorkflowRunRoutes({ access: args.ports.access, catalog: workflowCatalog, logger: processLogger }),
+      ...createWorkflowRunRoutes({ access: args.ports.access, approvals: args.ports.workflowApprovals, catalog: workflowCatalog, logger: processLogger }),
       ...createWorkflowChatRoutes({ access: args.ports.access, catalog: workflowCatalog, logger: processLogger }),
       ...createTenantScheduleRoutes({ access: args.ports.access, catalog: workflowCatalog, minIntervalMinutes: minIntervalMinutesOf(args.env), logger: processLogger }),
       // SP5 tenant settings (Task 14): the subagents, tools, skills and workflows an organization has, read only.

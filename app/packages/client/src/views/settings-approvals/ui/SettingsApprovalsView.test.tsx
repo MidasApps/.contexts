@@ -188,7 +188,7 @@ describe("SettingsApprovalsView inbox", () => {
   it.each([
     ["SELF_APPROVAL_FORBIDDEN", 403, "Você não pode decidir uma solicitação que você mesmo pediu. Outra pessoa precisa decidir."],
     ["FORBIDDEN", 403, "Você não tem permissão para decidir esta solicitação neste local."],
-    ["CONFLICT", 409, "Esta solicitação já foi decidida ou expirou. A lista foi atualizada."],
+    ["CONFLICT", 409, "Esta solicitação não está mais pendente: foi decidida, cancelada com o fluxo ou expirou. A lista foi atualizada."],
     ["NOT_FOUND", 404, "Esta solicitação não existe mais ou você perdeu o acesso a ela."],
   ])("explains a refused decision: %s", async (code, status, message) => {
     const { user } = renderView({ routes: { [APPROVE]: apiError(status, code) } });

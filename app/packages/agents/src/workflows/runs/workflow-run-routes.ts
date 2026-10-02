@@ -3,8 +3,9 @@ import type { Logger } from "@core/services";
 import type { Mastra } from "@mastra/core/mastra";
 import { type ApiRoute, registerApiRoute } from "@mastra/core/server";
 import { z } from "zod";
-import type { AccessPort } from "../../runtime/runtime-ports.ts";
+import type { AccessPort, WorkflowApprovalPort } from "../../runtime/runtime-ports.ts";
 import type { WorkflowCatalog } from "../workflow-catalog.ts";
+import { cancelStoredRun } from "./cancel-stored-run.ts";
 import { eventsOfRun, isTenantRun, type StoredRun, toWorkflowRunView } from "./workflow-run-view.ts";
 import { authorizeCaller, dataJson, inputsOf, type RouteInputs, routeError, validateWorkflowInput } from "./workflow-route-http.ts";
 
@@ -35,6 +36,8 @@ const StartBodySchema = z.strictObject({ inputData: z.record(z.string(), z.unkno
 
 export type WorkflowRunRouteDeps = {
   readonly access: AccessPort;
+  /** Settles the approval request of a cancelled run (follow-up 82). */
+  readonly approvals: Pick<WorkflowApprovalPort, "cancelWorkflowApproval">;
   readonly catalog: WorkflowCatalog;
   readonly logger: Pick<Logger, "info" | "error">;
 };
@@ -112,9 +115,9 @@ export const handleCancelRun = (deps: WorkflowRunRouteDeps, runId: string) =>
     if (!caller.ok) return caller.response;
     const run = await tenantRunOf(mastra, caller.data.context.tenantId, runId);
     if (run === null) return routeError("NOT_FOUND", requestContext);
-    const live = await mastra.getWorkflow(run.workflowName).createRun({ runId, ...(run.resourceId === undefined ? {} : { resourceId: run.resourceId }) });
-    await live.cancel();
-    deps.logger.info("workflow_run_canceled", { requestId: requestContext.get("requestId"), runId, workflowId: run.workflowName });
+    const requestId = String(requestContext.get("requestId") ?? runId);
+    const { approvalRequestCancelled } = await cancelStoredRun(mastra, run, { approvals: deps.approvals, requestId, logger: deps.logger });
+    deps.logger.info("workflow_run_canceled", { requestId, runId, workflowId: run.workflowName, approvalRequestCancelled });
     return new Response(null, { status: 204 });
   });
 

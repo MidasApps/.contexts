@@ -52,9 +52,9 @@ test.describe("four-eyes approvals", () => {
     const approver = await signInAdmin({ browser, ownerApi, createUser, org: sp5Org });
     const admin = approver.page;
     await admin.goto(settingsPath(sp5Org.id, "approvals"));
-    // Both requests wait for this admin. The count is not asserted exactly: a run cancelled while
-    // suspended (settings-workflows, same organization) leaves its request pending (follow-up 46).
-    await expect(admin.getByRole("tab", { name: /^Aguardando minha decisão \((?:[2-9]|\d{2,})\)$/ })).toBeVisible();
+    // Exactly the two requests of this test wait for this admin (one organization per test; a
+    // cancelled run cancels its request, follow-up 82).
+    await expect(admin.getByRole("tab", { name: "Aguardando minha decisão (2)", exact: true })).toBeVisible();
     await expect(admin.getByRole("tabpanel").getByText(approveTitle).first()).toBeVisible();
     await expect(admin.getByRole("tabpanel").getByText(rejectTitle).first()).toBeVisible();
 

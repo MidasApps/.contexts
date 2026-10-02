@@ -973,7 +973,7 @@
       "errors": {
         "SELF_APPROVAL_FORBIDDEN": "Você não pode decidir uma solicitação que você mesmo pediu. Outra pessoa precisa decidir.",
         "FORBIDDEN": "Você não tem permissão para decidir esta solicitação neste local.",
-        "CONFLICT": "Esta solicitação já foi decidida ou expirou. A lista foi atualizada.",
+        "CONFLICT": "Esta solicitação não está mais pendente: foi decidida, cancelada com o fluxo ou expirou. A lista foi atualizada.",
         "NOT_FOUND": "Esta solicitação não existe mais ou você perdeu o acesso a ela."
       }
     }

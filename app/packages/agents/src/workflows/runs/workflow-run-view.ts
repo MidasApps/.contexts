@@ -93,6 +93,9 @@ const failureOf = (snapshot: Snapshot): WorkflowRunFailure | null => {
   return stepId === null ? { code: "RUN_FAILED", stepId: null } : { code: "STEP_FAILED", stepId };
 };
 
+/** The approval request a run suspended in the HITL step waits for, or `null`. */
+export const waitingApprovalRequestIdOf = (run: Pick<StoredRun, "snapshot">): string | null => approvalRequestIdOf(parseSnapshot(run.snapshot).steps);
+
 const viewFieldsOf = (run: StoredRun, tenantId: string | null) => {
   const snapshot = parseSnapshot(run.snapshot);
   return {

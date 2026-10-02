@@ -269,7 +269,10 @@ export type WorkflowApprovalRecord = {
 /**
  * Workflow HITL on SP1 approval requests (decision 0036). `requestWorkflowApproval` creates a
  * request of kind `workflow-resume` as the run's principal (rejects when SP1 refuses);
- * `getApprovalRequest` is a system read used to verify every resume and by the settle route.
+ * `getApprovalRequest` is a system read used to verify every resume and by the settle route;
+ * `cancelWorkflowApproval` cancels the pending request a cancelled run waited for (follow-up 82):
+ * only a `workflow-resume` request that names `runId` (else `cancelled: false`); rejects on
+ * infrastructure errors.
  */
 export type WorkflowApprovalPort = {
   readonly requestWorkflowApproval: (input: {
@@ -281,6 +284,7 @@ export type WorkflowApprovalPort = {
     readonly requestId: string;
   }) => Promise<{ readonly approvalId: string }>;
   readonly getApprovalRequest: (input: { readonly approvalRequestId: string }) => Promise<WorkflowApprovalRecord | null>;
+  readonly cancelWorkflowApproval: (input: { readonly approvalRequestId: string; readonly runId: string; readonly requestId: string }) => Promise<{ readonly cancelled: boolean }>;
 };
 
 /**

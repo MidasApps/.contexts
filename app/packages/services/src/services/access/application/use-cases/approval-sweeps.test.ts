@@ -46,6 +46,34 @@ describe("expireApprovalRequests (approval-expiry-sweep)", () => {
   });
 });
 
+// Follow-up 82: a cancelled workflow run settles the request it waited for.
+describe("cancelApprovalRequest (system, a cancelled workflow run)", () => {
+  it("stores cancelled on a pending request, audited by the system, and then refuses decisions", async () => {
+    const world = await buildApprovalWorld();
+    const created = await request(world);
+    expect(await world.services.cancelApprovalRequest({ id: created.id, requestId: "cancel" })).toEqual({ cancelled: true });
+    expect(world.approvals.rowOf(created.id)?.status).toBe("cancelled");
+    expect(world.auditEntries().filter((entry) => entry.action === "APPROVAL_CANCELLED")).toEqual([
+      expect.objectContaining({ tenantId, actor: { type: "system", id: "system" }, target: { type: "approval-request", id: created.id }, outcome: "success", requestId: "cancel" }),
+    ]);
+    expect(await approve(world, created.id)).toMatchObject({ ok: false, error: { code: "CONFLICT" } });
+    expect(world.executions).toHaveLength(0);
+  });
+
+  it("leaves decided, expired and unknown requests alone", async () => {
+    const world = await buildApprovalWorld();
+    const decided = await request(world);
+    await approve(world, decided.id);
+    const overdue = await request(world);
+    world.setNow("2026-10-07T12:00:00.000Z");
+    expect(await world.services.cancelApprovalRequest({ id: decided.id, requestId: "cancel" })).toEqual({ cancelled: false });
+    expect(await world.services.cancelApprovalRequest({ id: overdue.id, requestId: "cancel" })).toEqual({ cancelled: false });
+    expect(await world.services.cancelApprovalRequest({ id: ApprovalRequestIdSchema.parse("missing"), requestId: "cancel" })).toEqual({ cancelled: false });
+    expect(world.approvals.rowOf(decided.id)?.status).toBe("executed");
+    expect(world.auditEntries().some((entry) => entry.action === "APPROVAL_CANCELLED")).toBe(false);
+  });
+});
+
 describe("failInterruptedApprovals (decision 0030 A3)", () => {
   it("fails requests still approved 15 minutes after updatedAt, audited, never re-executed", async () => {
     const world = await buildApprovalWorld({ hangOnExecute: true });

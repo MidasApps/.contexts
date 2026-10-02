@@ -196,4 +196,19 @@ describe("workflow HITL with four eyes (Auth + Firestore emulators, real Mastra 
     expect(state?.status).toBe("suspended");
     expect((await notesOf()).map((note) => note.title)).not.toContain("Forged");
   }, 60_000);
+  // Follow-up 82: cancelling a run that waits for approval settles its request in SP1.
+  it("cancelling a run that waits for approval cancels its request, and a later decision is refused", async () => {
+    const before = (await notesOf()).length;
+    const { runId, approvalRequestId } = await startDemo("Cancelled note");
+    const gateway = createMastraWorkflowGateway({ baseUrl, serverlessToken: null });
+    const scope = { bearer: admin.idToken, tenantId: TENANT, regional: REGIONAL, requestId: "01J8Z3K4M5N6P7Q8R9S0T1V2C1" };
+    expect(await gateway.cancelRun(scope, runId)).toEqual({ ok: true, data: null });
+    await waitForStatus(runId, "canceled");
+    expect((await core.approvals.getApprovalRequest(approvalRequestId))?.status).toBe("cancelled");
+    expect(await decide("approveRequest", admin.uid, approvalRequestId)).toMatchObject({ ok: false, error: { code: "CONFLICT" } });
+    // What the settle trigger does on the `cancelled` request: the run no longer waits.
+    const settled = await createMastraWorkflowApprovalSettler({ baseUrl, serverlessToken: null }).settle({ approvalRequestId, requestId: "evt" });
+    expect(settled).toEqual({ ok: true, data: { settled: false, reason: "NOT_SUSPENDED" } });
+    expect(await notesOf()).toHaveLength(before);
+  }, 60_000);
 });

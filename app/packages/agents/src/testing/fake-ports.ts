@@ -414,6 +414,12 @@ export const createFakeWorkflowApprovalPort = (): FakeWorkflowApprovalPort => {
       return Promise.resolve({ approvalId: id });
     },
     getApprovalRequest: ({ approvalRequestId }) => Promise.resolve(records.get(approvalRequestId) ?? null),
+    cancelWorkflowApproval: ({ approvalRequestId, runId }) => {
+      const record = records.get(approvalRequestId);
+      if (record === undefined || record.status !== "pending" || record.input["runId"] !== runId) return Promise.resolve({ cancelled: false });
+      records.set(approvalRequestId, { ...record, status: "cancelled" });
+      return Promise.resolve({ cancelled: true });
+    },
     settle: (approvalRequestId, status, decidedBy) => {
       const record = records.get(approvalRequestId);
       if (record === undefined) throw new Error(`unknown approval request ${approvalRequestId}`);

@@ -1,6 +1,7 @@
 import { type AdminSchedule, type AdminWorkflowRun, type PageMeta, WorkflowRunStatusSchema } from "@core/contracts";
 import type { Mastra } from "@mastra/core/mastra";
 import { z } from "zod";
+import { cancelStoredRun, type CancelStoredRunOptions } from "../workflows/runs/cancel-stored-run.ts";
 import { isTenantRun, type StoredRun, toAdminWorkflowRunView } from "../workflows/runs/workflow-run-view.ts";
 import { type StoredSchedule, toAdminScheduleView } from "../workflows/schedules/tenant-schedule-view.ts";
 
@@ -59,16 +60,15 @@ export const listAdminRuns = async (mastra: Mastra, query: AdminRunsQuery): Prom
 };
 
 /**
- * Cancels any run.
+ * Cancels any run, and the approval request it waits for (follow-up 82).
  * @returns the run as stored before the cancel (its tenant feeds the audit), or `null` when unknown.
  */
-export const cancelAdminRun = async (mastra: Mastra, runId: string): Promise<AdminWorkflowRun | null> => {
+export const cancelAdminRun = async (mastra: Mastra, runId: string, options: CancelStoredRunOptions): Promise<AdminWorkflowRun | null> => {
   if (!/^[A-Za-z0-9_-]{1,128}$/.test(runId)) return null;
   const run = await (await storeOf(mastra)).getWorkflowRunById({ runId });
   const view = run === null ? null : toAdminWorkflowRunView(run);
   if (run === null || view === null) return null;
-  const live = await mastra.getWorkflow(run.workflowName).createRun({ runId, ...(run.resourceId === undefined ? {} : { resourceId: run.resourceId }) });
-  await live.cancel();
+  await cancelStoredRun(mastra, run, options);
   return view;
 };
 

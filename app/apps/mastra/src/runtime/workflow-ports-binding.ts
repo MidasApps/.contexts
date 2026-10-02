@@ -6,6 +6,7 @@ import {
   TenantIdSchema,
   TenantNodeRefSchema,
   WORKFLOW_RESUME_ACTION_KIND,
+  WorkflowResumeActionInputSchema,
 } from "@core/contracts";
 import { type AccessCore, AgentCommandError, type AgentCommandExecutors, type ApprovalServices, type CommandIdempotency, type WorkflowApprovalSettler } from "@core/services";
 import { ApprovalRefusedError } from "./approvals-port-binding.ts";
@@ -23,9 +24,10 @@ class WorkflowApprovalNodeError extends Error {
 /**
  * Binds `WorkflowApprovalPort` to SP1 (decision 0036): `requestApproval` with an action of kind
  * `workflow-resume` (SP1 checks the caller's own right, `requiresApproval` and the handler's
- * input schema; a refusal rejects with SP1's code) and the system read `getApprovalRequest`.
+ * input schema; a refusal rejects with SP1's code), the system read `getApprovalRequest` and the
+ * system cancel of the request a cancelled run waited for (follow-up 82).
  */
-export const bindWorkflowApprovalsPort = (approvals: Pick<ApprovalServices, "requestApproval" | "getApprovalRequest">): WorkflowApprovalPort => ({
+export const bindWorkflowApprovalsPort = (approvals: Pick<ApprovalServices, "requestApproval" | "getApprovalRequest" | "cancelApprovalRequest">): WorkflowApprovalPort => ({
   requestWorkflowApproval: async ({ principal, node, permission, action, summary, requestId }) => {
     if (node.level === "platform") throw new WorkflowApprovalNodeError();
     const input = CreateApprovalRequestInputSchema.parse({ node, permission, action: { kind: WORKFLOW_RESUME_ACTION_KIND, input: action, summary } });
@@ -49,6 +51,16 @@ export const bindWorkflowApprovalsPort = (approvals: Pick<ApprovalServices, "req
       reason: request.reason,
     };
     return record;
+  },
+  cancelWorkflowApproval: async ({ approvalRequestId, runId, requestId }) => {
+    const id = ApprovalRequestIdSchema.safeParse(approvalRequestId);
+    if (!id.success) return { cancelled: false };
+    const request = await approvals.getApprovalRequest(id.data);
+    if (request === null || request.action.kind !== WORKFLOW_RESUME_ACTION_KIND) return { cancelled: false };
+    // Only the request this very run waits for: the run id comes from the stored action, never the caller.
+    const action = WorkflowResumeActionInputSchema.safeParse(request.action.input);
+    if (!action.success || action.data.runId !== runId) return { cancelled: false };
+    return approvals.cancelApprovalRequest({ id: id.data, requestId });
   },
 });
 

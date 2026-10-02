@@ -2,7 +2,7 @@ import type { Mastra } from "@mastra/core/mastra";
 import { RequestContext } from "@mastra/core/request-context";
 import { describe, expect, it } from "vitest";
 import { buildAgentContextEntries, TEST_TENANT, TEST_UID } from "../../testing/agent-context-fixture.ts";
-import { createFakeAccessPort } from "../../testing/fake-ports.ts";
+import { createFakeAccessPort, createFakeWorkflowApprovalPort, type FakeWorkflowApprovalPort } from "../../testing/fake-ports.ts";
 import { createWorkflowCatalog, policyOf } from "../workflow-catalog.ts";
 import { handleCancelRun, handleGetRun, handleListRuns, handleStartRun, type WorkflowRunRouteDeps } from "./workflow-run-routes.ts";
 import type { StoredRun } from "./workflow-run-view.ts";
@@ -45,8 +45,9 @@ const fakeMastra = (runs: StoredRun[]) => {
   return { mastra, canceled, started };
 };
 
-const deps = (permissions: readonly string[]): WorkflowRunRouteDeps => ({
+const deps = (permissions: readonly string[], approvals: FakeWorkflowApprovalPort = createFakeWorkflowApprovalPort()): WorkflowRunRouteDeps => ({
   access: createFakeAccessPort({ memberships: [{ tenantId: TEST_TENANT, uid: TEST_UID, permissions }] }),
+  approvals,
   catalog: createWorkflowCatalog([policyOf("approval-demo", { startable: true }), policyOf("catalog-reindex")]),
   logger: { info: () => undefined, error: () => undefined },
 });
@@ -81,6 +82,42 @@ describe("workflow run routes", () => {
     expect((await handleCancelRun(deps(READ), "a")({ mastra, requestContext: context() })).status).toBe(403);
     expect((await handleCancelRun(cancelDeps, "a")({ mastra, requestContext: context() })).status).toBe(204);
     expect(canceled).toEqual(["a"]);
+  });
+
+  // Follow-up 82: approvers must not keep seeing a request whose run is gone.
+  it("cancels the approval request a suspended run waits for, after the run", async () => {
+    const approvals = createFakeWorkflowApprovalPort();
+    const { approvalId } = await approvals.requestWorkflowApproval({
+      principal: { type: "user", uid: TEST_UID, mfa: false },
+      node: { level: "organization", tenantId: TEST_TENANT },
+      permission: "core.workflow-run.approve-demo",
+      action: { workflowId: "approval-demo", runId: "s", stepId: "request-human-approval" },
+      summary: "s",
+      requestId: "r",
+    });
+    const suspended: StoredRun = {
+      ...stored("s", TEST_TENANT),
+      snapshot: { status: "suspended", context: { "request-human-approval": { status: "suspended", startedAt: 1, suspendPayload: { approvalRequestId: approvalId } } }, requestContext: { userId: TEST_UID } },
+    };
+    const { mastra, canceled } = fakeMastra([suspended]);
+    expect((await handleCancelRun(deps(["core.workflow-run.cancel"], approvals), "s")({ mastra, requestContext: context() })).status).toBe(204);
+    expect(canceled).toEqual(["s"]);
+    expect(approvals.records.get(approvalId)?.status).toBe("cancelled");
+  });
+
+  it("keeps the run cancelled and logs when its approval request cannot be cancelled", async () => {
+    const approvals = createFakeWorkflowApprovalPort();
+    const failing = { ...approvals, cancelWorkflowApproval: () => Promise.reject(new Error("firestore down")) };
+    const errors: string[] = [];
+    const suspended: StoredRun = {
+      ...stored("s", TEST_TENANT),
+      snapshot: { status: "suspended", context: { "request-human-approval": { status: "suspended", startedAt: 1, suspendPayload: { approvalRequestId: "wfApproval0001" } } }, requestContext: {} },
+    };
+    const { mastra, canceled } = fakeMastra([suspended]);
+    const routeDeps = { ...deps(["core.workflow-run.cancel"], failing), logger: { info: () => undefined, error: (event: string) => void errors.push(event) } };
+    expect((await handleCancelRun(routeDeps, "s")({ mastra, requestContext: context() })).status).toBe(204);
+    expect(canceled).toEqual(["s"]);
+    expect(errors).toEqual(["workflow_run_approval_cancel_failed"]);
   });
 
   it("starts only startable workflows with valid input", async () => {
