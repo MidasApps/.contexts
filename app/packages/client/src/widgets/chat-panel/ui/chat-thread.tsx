@@ -158,8 +158,11 @@ export function ChatThread(props: ChatThreadProps) {
     inputRef.current?.focus();
   };
 
-  const send = (text: string) => {
-    session.send(text);
+  // The draft is the composer's, kept here so a suggestion can fill it.
+  const [draft, setDraft] = useState("");
+  // A suggestion fills the draft for review instead of sending at once: the member can edit it.
+  const suggest = (prompt: string) => {
+    setDraft(prompt);
     inputRef.current?.focus();
   };
 
@@ -188,7 +191,7 @@ export function ChatThread(props: ChatThreadProps) {
             <ConversationEmptyState title={t("panel.empty.title")} description={t("panel.empty.description")} icon={<SparklesIcon className="size-5" />}>
               <Suggestions label={t("panel.empty.suggestionsLabel")}>
                 {props.suggestions.map((suggestion) => (
-                  <Suggestion key={suggestion.id} title={suggestion.title} description={suggestion.description} prompt={suggestion.prompt} onSelect={send} disabled={phase === "offline"} />
+                  <Suggestion key={suggestion.id} title={suggestion.title} description={suggestion.description} prompt={suggestion.prompt} onSelect={suggest} />
                 ))}
               </Suggestions>
             </ConversationEmptyState>
@@ -224,7 +227,7 @@ export function ChatThread(props: ChatThreadProps) {
         </Conversation>
         <div className="flex flex-col gap-2 border-t border-border px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
           <StatusLine phase={phase} failure={session.failure} onRetry={retry} />
-          <ChatComposer session={session} organizationId={props.scope.organizationId} offline={phase === "offline"} inputRef={inputRef} onStop={stop} can={props.can} voice={voice} tools={props.tools} uploadSeams={props.uploadSeams} voiceSeams={props.voiceSeams} />
+          <ChatComposer session={session} draft={draft} onDraftChange={setDraft} organizationId={props.scope.organizationId} offline={phase === "offline"} inputRef={inputRef} onStop={stop} can={props.can} voice={voice} tools={props.tools} uploadSeams={props.uploadSeams} voiceSeams={props.voiceSeams} />
         </div>
       </div>
     </GenerativeUiProvider>

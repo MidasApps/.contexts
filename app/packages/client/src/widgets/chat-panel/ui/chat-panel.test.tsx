@@ -68,9 +68,13 @@ describe("ChatPanel", () => {
     await expectNoAxeViolations(container);
   });
 
-  it("sends the prompt of a suggestion", async () => {
-    const { user, transport } = setup();
+  it("puts the prompt of a suggestion in the draft to review, and sends it on Enter", async () => {
+    const { user, transport, field } = setup();
     await user.click(screen.getByRole("button", { name: /Consultar dados/ }));
+    expect(field().value).toBe("Quais dados eu posso consultar?");
+    expect(document.activeElement).toBe(field());
+    expect(transport.streams).toHaveLength(0);
+    await user.keyboard("{Enter}");
     const stream = await firstStream(transport);
     expect(stream.messages.at(-1)).toMatchObject({ role: "user", parts: [{ type: "text", text: "Quais dados eu posso consultar?" }] });
   });

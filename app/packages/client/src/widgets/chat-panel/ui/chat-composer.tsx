@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode, type RefObject } from "react";
+import type { ReactNode, RefObject } from "react";
 import { useTranslations } from "use-intl";
 import { ChatInput } from "#/features/chat-send/index.ts";
 import { AttachMenu, AttachmentChips, hasUploadProblems, hasUploadsInFlight, useUploadQueue, type UseUploadQueueArgs } from "#/features/chat-upload/index.ts";
@@ -9,6 +9,9 @@ import type { ChatSession } from "../model/use-chat-session.ts";
 
 export type ChatComposerProps = {
   session: ChatSession;
+  /** The message being written (owned by the thread, so a suggestion can fill it). */
+  draft: string;
+  onDraftChange: (draft: string) => void;
   organizationId: string;
   offline: boolean;
   inputRef: RefObject<HTMLTextAreaElement | null>;
@@ -30,9 +33,8 @@ export type ChatComposerProps = {
  * features). A message waits for its uploads, and a rejected file never goes with it. A
  * transcript lands in the draft for review; with auto-send on it goes at once when nothing blocks.
  */
-export function ChatComposer({ session, organizationId, offline, inputRef, onStop, can, voice, tools, uploadSeams, voiceSeams }: ChatComposerProps) {
+export function ChatComposer({ session, draft, onDraftChange: setDraft, organizationId, offline, inputRef, onStop, can, voice, tools, uploadSeams, voiceSeams }: ChatComposerProps) {
   const t = useTranslations("chat.input");
-  const [draft, setDraft] = useState("");
   const { queue, items } = useUploadQueue({ organizationId, seams: uploadSeams });
   const canUpload = can?.("core.file.upload") === true;
   const blocked = hasUploadsInFlight(items) ? t("uploading") : hasUploadProblems(items) ? t("attachmentProblem") : undefined;
