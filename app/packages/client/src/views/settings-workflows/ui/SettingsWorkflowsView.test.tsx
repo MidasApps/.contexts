@@ -383,6 +383,45 @@ describe("SettingsWorkflowsView: run page", () => {
     expect(screen.queryByRole("button", { name: "Cancelar execução" })).toBeNull();
   });
 
+  it("says why a run failed and at which step, and offers to run the workflow again", async () => {
+    const requests: FakeRequest[] = [];
+    const { user, router, container } = renderView(
+      {
+        "GET /v1/workflows/runs/:runId": (request) =>
+          ok(request.params["runId"] === "run-new" ? buildWorkflowRun({ runId: "run-new" }) : buildWorkflowRun({ status: "failed", failure: { code: "STEP_FAILED", stepId: "apply-note" } })),
+        "POST /v1/workflows/:workflowId/runs": (request) => {
+          requests.push(request);
+          return ok({ runId: "run-new" }, 202);
+        },
+      },
+      ADMIN,
+      runPath("run-1"),
+    );
+    const timeline = await screen.findByRole("list", { name: "Linha do tempo da execução run-1" });
+    expect(within(timeline).getByText("Uma etapa falhou")).toBeDefined();
+    expect(within(timeline).getByText("apply-note")).toBeDefined();
+    expect(screen.getByText(/Revise os dados de entrada e execute o fluxo de novo/u)).toBeDefined();
+    await expectNoAxeViolations(container);
+    await user.click(screen.getByRole("button", { name: "Executar de novo" }));
+    const dialog = await screen.findByRole("dialog", { name: "Iniciar fluxo" });
+    // The workflow comes preselected; its input is asked again.
+    await user.type(within(dialog).getByRole("textbox", { name: /Título/u }), "Retry");
+    await user.click(within(dialog).getByRole("button", { name: "Iniciar" }));
+    await waitFor(() => expect(router.current()).toBe(runPath("run-new")));
+    expect(requests[0]?.params["workflowId"]).toBe("approval-demo");
+  });
+
+  it("names a guardrail stop, and offers no rerun without the start permission", async () => {
+    renderView(
+      { "GET /v1/workflows/runs/:runId": ok(buildWorkflowRun({ status: "tripwire", failure: { code: "TRIPWIRE", stepId: null } })) },
+      [...BASE, "core.workflow-run.read"],
+      runPath("run-1"),
+    );
+    const timeline = await screen.findByRole("list", { name: "Linha do tempo da execução run-1" });
+    expect(within(timeline).getByText("Uma proteção interrompeu a execução")).toBeDefined();
+    expect(screen.queryByRole("button", { name: "Executar de novo" })).toBeNull();
+  });
+
   it("answers not-found for a run of another organization and for an unknown address", async () => {
     const first = renderView({ "GET /v1/workflows/runs/:runId": apiError(404, "NOT_FOUND") }, ADMIN, runPath("other"));
     expect(await screen.findByRole("heading", { level: 2, name: "Execução não encontrada" })).toBeDefined();

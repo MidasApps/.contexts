@@ -3,6 +3,7 @@ import {
   AdminWorkflowRunSchema,
   type WorkflowEvent,
   type WorkflowRun as WorkflowRunView,
+  type WorkflowRunFailure,
   WorkflowRunSchema,
   type WorkflowRunStatus,
   WorkflowRunStatusSchema,
@@ -35,6 +36,8 @@ type StepRecord = {
   readonly suspendedAt?: unknown;
   readonly resumedAt?: unknown;
   readonly suspendPayload?: unknown;
+  /** Set by Mastra when a processor (guardrail) stopped the step. */
+  readonly tripwire?: unknown;
 };
 
 type Snapshot = {
@@ -74,6 +77,22 @@ const approvalRequestIdOf = (steps: Snapshot["steps"]): string | null => {
   return isRecord(payload) ? stringOrNull(payload["approvalRequestId"]) : null;
 };
 
+// Steps that ended the run; a guardrail stop may carry `tripwire` on a step marked failed.
+const STOPPING_STEP = new Set(["failed", "tripwire"]);
+
+/**
+ * Why a failed or stopped run ended, as a code and the step (the last one that failed), never
+ * the error message or the guardrail's reason: those may name hosts, data or prompts (rule
+ * `error-handling`) and stay in logs and traces.
+ */
+const failureOf = (snapshot: Snapshot): WorkflowRunFailure | null => {
+  if (snapshot.status !== "failed" && snapshot.status !== "tripwire") return null;
+  const stopped = snapshot.steps.findLast(([, step]) => (typeof step.status === "string" && STOPPING_STEP.has(step.status)) || step.tripwire !== undefined);
+  const stepId = stopped?.[0] ?? null;
+  if (snapshot.status === "tripwire") return { code: "TRIPWIRE", stepId };
+  return stepId === null ? { code: "RUN_FAILED", stepId: null } : { code: "STEP_FAILED", stepId };
+};
+
 const viewFieldsOf = (run: StoredRun, tenantId: string | null) => {
   const snapshot = parseSnapshot(run.snapshot);
   return {
@@ -84,6 +103,7 @@ const viewFieldsOf = (run: StoredRun, tenantId: string | null) => {
     startedBy: stringOrNull(snapshot.requestContext["userId"]),
     scheduleId: stringOrNull(snapshot.requestContext[SCHEDULE_ID_CONTEXT_KEY]),
     approvalRequestId: snapshot.status === "suspended" ? approvalRequestIdOf(snapshot.steps) : null,
+    failure: failureOf(snapshot),
     createdAt: run.createdAt.toISOString(),
     updatedAt: run.updatedAt.toISOString(),
   };

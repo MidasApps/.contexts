@@ -222,7 +222,13 @@
     "startedByPlatform": "By the platform",
     "waitingApproval": "Waits for approval",
     "current": "Current state",
-    "updatedAt": "Since {when}"
+    "updatedAt": "Since {when}",
+    "failure": {
+      "STEP_FAILED": "A step failed",
+      "TRIPWIRE": "A safeguard stopped the run",
+      "RUN_FAILED": "The run failed outside a step"
+    },
+    "failedStep": "Step:"
   },
   "scheduleTable": {
     "noFire": "—",

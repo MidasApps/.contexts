@@ -222,7 +222,13 @@
     "startedByPlatform": "Por la plataforma",
     "waitingApproval": "Espera aprobación",
     "current": "Estado actual",
-    "updatedAt": "Desde {when}"
+    "updatedAt": "Desde {when}",
+    "failure": {
+      "STEP_FAILED": "Un paso falló",
+      "TRIPWIRE": "Una protección detuvo la ejecución",
+      "RUN_FAILED": "La ejecución falló fuera de un paso"
+    },
+    "failedStep": "Paso:"
   },
   "scheduleTable": {
     "noFire": "—",

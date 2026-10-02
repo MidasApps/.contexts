@@ -1102,6 +1102,16 @@
       "enableConfirm": "Activar",
       "doneDisabled": "Conector {name} desactivado.",
       "doneEnabled": "Conector {name} activado."
+    },
+    "lastErrorAt": "(último intento: {when})",
+    "loadErrors": {
+      "SECRET_MISSING": "Falta el secreto: defínelo para que los agentes usen este conector.",
+      "SPEC_UNAVAILABLE": "No se pudo descargar el documento OpenAPI.",
+      "SPEC_INVALID": "El documento OpenAPI no es válido.",
+      "SPEC_TOO_LARGE": "El documento OpenAPI supera el tamaño máximo (2 MB).",
+      "SERVER_NOT_ALLOWED": "El servidor del documento no está entre los hosts permitidos.",
+      "CONNECT_FAILED": "El servidor rechazó la conexión; revisa la URL y el secreto.",
+      "LOAD_FAILED": "No se pudo cargar el conector."
     }
   },
   "flags": {
@@ -1422,6 +1432,12 @@
         "workflow-step-suspended": "Paso suspendido",
         "workflow-finish": "Ejecución terminada",
         "workflow-canceled": "Ejecución cancelada"
+      },
+      "runAgain": "Ejecutar de nuevo",
+      "failureHint": {
+        "STEP_FAILED": "Revisa los datos de entrada y ejecuta el flujo de nuevo. Si la falla continúa, comparte el identificador de la ejecución con soporte.",
+        "RUN_FAILED": "Revisa los datos de entrada y ejecuta el flujo de nuevo. Si la falla continúa, comparte el identificador de la ejecución con soporte.",
+        "TRIPWIRE": "Una protección de seguridad bloqueó el contenido de esta ejecución. Revisa los datos de entrada antes de ejecutarla de nuevo; si crees que fue un error, comparte el identificador de la ejecución con soporte."
       }
     },
     "schedules": {

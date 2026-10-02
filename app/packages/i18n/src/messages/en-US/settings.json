@@ -1102,6 +1102,16 @@
       "enableConfirm": "Enable",
       "doneDisabled": "Connector {name} disabled.",
       "doneEnabled": "Connector {name} enabled."
+    },
+    "lastErrorAt": "(last attempt {when})",
+    "loadErrors": {
+      "SECRET_MISSING": "The secret is missing: set it so agents can use this connector.",
+      "SPEC_UNAVAILABLE": "The OpenAPI document could not be downloaded.",
+      "SPEC_INVALID": "The OpenAPI document is invalid.",
+      "SPEC_TOO_LARGE": "The OpenAPI document is over the size limit (2 MB).",
+      "SERVER_NOT_ALLOWED": "The document's server is not one of the allowed hosts.",
+      "CONNECT_FAILED": "The server refused the connection; check the URL and the secret.",
+      "LOAD_FAILED": "The connector could not be loaded."
     }
   },
   "flags": {
@@ -1422,6 +1432,12 @@
         "workflow-step-suspended": "Step suspended",
         "workflow-finish": "Run finished",
         "workflow-canceled": "Run canceled"
+      },
+      "runAgain": "Run again",
+      "failureHint": {
+        "STEP_FAILED": "Check the input and run the workflow again. If it keeps failing, give the run id to support.",
+        "RUN_FAILED": "Check the input and run the workflow again. If it keeps failing, give the run id to support.",
+        "TRIPWIRE": "A safety safeguard blocked the content of this run. Check the input before running it again; if you think it was a mistake, give the run id to support."
       }
     },
     "schedules": {

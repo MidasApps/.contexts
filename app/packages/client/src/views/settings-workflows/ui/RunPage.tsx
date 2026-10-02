@@ -3,13 +3,15 @@
 import type { AccessContext, WorkflowEvent, WorkflowRun } from "@core/contracts";
 import { useState } from "react";
 import { useTranslations } from "use-intl";
-import { isRunCancelable, RunStatusPill, useTenantWorkflowRun } from "#/entities/workflow-run/index.ts";
+import { isRunCancelable, RunStatusPill, useTenantWorkflowRun, useWorkflowCatalog } from "#/entities/workflow-run/index.ts";
 import { CancelWorkflowRunDialog } from "#/features/cancel-workflow-run/index.ts";
+import { StartWorkflowRunDialog } from "#/features/start-workflow-run/index.ts";
 import { useFormatDateTime } from "#/shared/lib/format/use-format-date-time.ts";
 import { useWorkflowLabel } from "#/shared/lib/labels/use-catalog-labels.ts";
 import { useOnlineStatus } from "#/shared/lib/network/use-online-status.ts";
-import { RouteLink } from "#/shared/lib/router/router-context.tsx";
+import { RouteLink, useRouter } from "#/shared/lib/router/router-context.tsx";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
+import { Alert, AlertDescription } from "#/shared/ui/molecules/Alert/Alert.tsx";
 import { EmptyState } from "#/shared/ui/molecules/EmptyState/EmptyState.tsx";
 import { OfflineNotice } from "#/shared/ui/molecules/OfflineNotice/OfflineNotice.tsx";
 import { SectionCard } from "#/shared/ui/molecules/SectionCard/SectionCard.tsx";
@@ -84,6 +86,11 @@ function RunDetails({ run, organizationId, canSeeApprovals, starterLabel, schedu
           )}
         />
       </SectionCard>
+      {run.failure === undefined || run.failure === null ? null : (
+        <Alert variant="warning">
+          <AlertDescription className="text-inherit">{t(`failureHint.${run.failure.code}`)}</AlertDescription>
+        </Alert>
+      )}
       <RunEvents events={events} />
     </div>
   );
@@ -108,7 +115,8 @@ function RunNotFound({ organizationId }: { organizationId: string }) {
 
 /**
  * `/o/:organizationId/settings/workflows/runs/:runId` (core.workflow-run.read): one run of the
- * organization: status, how it started, what it waits for, and its step events. Progress is
+ * organization: status, how it started, what it waits for, why it failed (with what to do next
+ * and "run again" when the workflow is startable), and its step events. Progress is
  * live two ways: the run is re-read every 2 s while it can still change, and the SSE progress
  * stream adds step events when the server offers it. A run of another organization (or a purged one) answers 404 and
  * reads as not found, with a way back to the runs.
@@ -122,8 +130,16 @@ export function RunPage({ context, runId }: { context: AccessContext; runId: str
   const scheduleLabel = useTenantScheduleLabels(context);
   const starterName = useStarterNames({ organizationId: organization.id, canReadMembers: context.permissions.includes("core.member.read") });
   const [canceling, setCanceling] = useState(false);
+  const [rerunning, setRerunning] = useState(false);
+  const router = useRouter();
   const current = run.data ?? null;
   const canCancel = context.permissions.includes("core.workflow-run.cancel") && current !== null && isRunCancelable(current.status);
+  const canStart = context.permissions.includes("core.workflow-run.start");
+  const catalog = useWorkflowCatalog(organization.id, { enabled: canStart });
+  const workflows = catalog.data ?? [];
+  // "Run again" after a failure or a guardrail stop, when the workflow can still be started by hand.
+  const rerunWorkflowId = current !== null && current.failure !== undefined && current.failure !== null ? current.workflowId : null;
+  const canRunAgain = canStart && rerunWorkflowId !== null && workflows.some((workflow) => workflow.id === rerunWorkflowId && workflow.startable);
   return (
     <SettingsPageFrame
       organizationId={organization.id}
@@ -138,6 +154,11 @@ export function RunPage({ context, runId }: { context: AccessContext; runId: str
               <Button variant="secondary" asChild>
                 <RouteLink to={{ id: "settings", organizationId: organization.id, section: "workflows" }}>{t("backToRuns")}</RouteLink>
               </Button>
+              {canRunAgain ? (
+                <Button variant="outline" disabled={!online} onClick={() => setRerunning(true)}>
+                  {t("run.runAgain")}
+                </Button>
+              ) : null}
               {canCancel ? (
                 <Button variant="outline" disabled={!online} onClick={() => setCanceling(true)}>
                   {t("run.cancel")}
@@ -161,6 +182,16 @@ export function RunPage({ context, runId }: { context: AccessContext; runId: str
         )}
       </QuerySection>
       <CancelWorkflowRunDialog organizationId={organization.id} run={canceling ? current : null} onOpenChange={(open) => !open && setCanceling(false)} />
+      {canRunAgain ? (
+        <StartWorkflowRunDialog
+          organizationId={organization.id}
+          workflows={workflows}
+          open={rerunning}
+          onOpenChange={setRerunning}
+          initialWorkflowId={rerunWorkflowId ?? undefined}
+          onStarted={(nextRunId) => router.navigate({ id: "settings", organizationId: organization.id, section: "workflows", rest: `runs/${nextRunId}` })}
+        />
+      ) : null}
     </SettingsPageFrame>
   );
 }

@@ -31,6 +31,31 @@ describe("toWorkflowRunView", () => {
     expect(view).toMatchObject({ runId: "run-1", workflowId: "approval-demo", tenantId: "org1", status: "suspended", startedBy: "u1", approvalRequestId: "ap1", scheduleId: null });
   });
 
+  it("says which step a failed run stopped at, never the error message", () => {
+    const view = toWorkflowRunView(
+      run({
+        status: "failed",
+        error: { name: "Error", message: "connect ECONNREFUSED 10.0.0.4:5432" },
+        context: {
+          input: { title: "x" },
+          a: { status: "success", startedAt: T0 + 1, endedAt: T0 + 2 },
+          "apply-note": { status: "failed", startedAt: T0 + 3, endedAt: T0 + 4, error: { message: "connect ECONNREFUSED 10.0.0.4:5432" } },
+        },
+      }),
+    );
+    expect(view?.failure).toEqual({ code: "STEP_FAILED", stepId: "apply-note" });
+    expect(JSON.stringify(view)).not.toContain("ECONNREFUSED");
+  });
+
+  it("tells a guardrail stop from a failure, and a failure outside any step", () => {
+    const tripped = toWorkflowRunView(run({ status: "tripwire", tripwire: { reason: "blocked by moderation" }, context: { a: { status: "failed", startedAt: T0 + 1, tripwire: { reason: "x" } } } }));
+    expect(tripped?.failure).toEqual({ code: "TRIPWIRE", stepId: "a" });
+    expect(JSON.stringify(tripped)).not.toContain("moderation");
+    expect(toWorkflowRunView(run({ status: "failed", context: {} }))?.failure).toEqual({ code: "RUN_FAILED", stepId: null });
+    expect(toWorkflowRunView(run({ status: "success" }))?.failure).toBeNull();
+    expect(toWorkflowRunView(run({ status: "canceled" }))?.failure).toBeNull();
+  });
+
   it("returns null for a run without a tenant resource", () => {
     expect(toWorkflowRunView({ ...run({}), resourceId: undefined })).toBeNull();
   });

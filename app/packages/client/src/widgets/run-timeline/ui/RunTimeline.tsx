@@ -1,6 +1,6 @@
 "use client";
 
-import type { WorkflowRunStatus } from "@core/contracts";
+import type { WorkflowRunFailure, WorkflowRunStatus } from "@core/contracts";
 import type { ReactNode } from "react";
 import { useTranslations } from "use-intl";
 import { RunStatusPill } from "#/entities/workflow-run/index.ts";
@@ -12,6 +12,8 @@ export type RunTimelineRun = {
   readonly startedBy: string | null;
   readonly scheduleId: string | null;
   readonly approvalRequestId: string | null;
+  /** Why a failed or stopped run ended (code and step only). */
+  readonly failure?: WorkflowRunFailure | null | undefined;
   readonly createdAt: string;
   readonly updatedAt: string;
 };
@@ -41,7 +43,8 @@ function Step({ title, when, children }: { title: string; when?: string | undefi
 
 /**
  * Lifecycle of a workflow run from the fields the run itself carries: how it started (a person, a
- * schedule or the platform), what it waits for while suspended, and its current status with the
+ * schedule or the platform), what it waits for while suspended, why it failed (a code and the
+ * step, never the error), and its current status with the
  * time of the last change. Step-by-step events come from the progress stream, which callers add
  * around this widget where an endpoint exists.
  */
@@ -51,6 +54,7 @@ export function RunTimeline({ run, label, starterLabel, scheduleLabel, renderApp
   const bySchedule = scheduleLabel === undefined ? t("startedByAnySchedule") : t("startedBySchedule", { schedule: scheduleLabel });
   const origin = run.scheduleId !== null ? bySchedule : run.startedBy !== null ? t("startedByUser", { user: starterLabel ?? run.startedBy }) : t("startedByPlatform");
   const waiting = run.status === "suspended" && run.approvalRequestId !== null;
+  const failure = run.failure ?? null;
   return (
     <ol aria-label={label} data-slot="run-timeline" className="flex flex-col">
       <Step title={t("started")} when={formatDateTime(run.createdAt)}>
@@ -59,6 +63,15 @@ export function RunTimeline({ run, label, starterLabel, scheduleLabel, renderApp
       {waiting && run.approvalRequestId !== null ? (
         <Step title={t("waitingApproval")}>{renderApproval?.(run.approvalRequestId) ?? <span className="font-mono text-[11.5px]">{run.approvalRequestId}</span>}</Step>
       ) : null}
+      {failure === null ? null : (
+        <Step title={t(`failure.${failure.code}`)}>
+          {failure.stepId === null ? undefined : (
+            <>
+              {t("failedStep")} <span className="font-mono text-[11.5px] break-all">{failure.stepId}</span>
+            </>
+          )}
+        </Step>
+      )}
       <Step title={t("current")} when={t("updatedAt", { when: formatDateTime(run.updatedAt) })}>
         <RunStatusPill status={run.status} />
       </Step>
