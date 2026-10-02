@@ -2,7 +2,7 @@
 
 import type { ContractDefinition } from "@core/contracts";
 import { currencyMinorDigits } from "@core/i18n";
-import { useMemo, useRef, useState, type ComponentProps, type FormEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type ComponentProps, type FormEvent } from "react";
 import { FormProvider, useForm, type FieldErrors, type FieldValues, type UseFormReturn } from "react-hook-form";
 import { useLocale, useTranslations } from "use-intl";
 import type { z } from "zod";
@@ -35,6 +35,8 @@ export type SchemaFormProps<Schema extends z.ZodType> = Omit<ComponentProps<"for
   defaultCurrency?: string | undefined;
   /** Values still loading: shows a skeleton instead of the form. */
   loading?: boolean | undefined;
+  /** Called when the values start or stop differing from the defaults (a dialog guards dismissal with it). */
+  onDirtyChange?: ((dirty: boolean) => void) | undefined;
 };
 
 const denyAll = (): boolean => false;
@@ -114,6 +116,7 @@ export function SchemaForm<Schema extends z.ZodType>({
   successMessageKey = "common.states.saved",
   defaultCurrency,
   loading = false,
+  onDirtyChange,
   className,
   ...formProps
 }: SchemaFormProps<Schema>) {
@@ -128,6 +131,10 @@ export function SchemaForm<Schema extends z.ZodType>({
     defaultValues: withSwitchDefaults(plan, defaultValues ?? {}),
     resolver: createContractResolver(contract.schema, (issue, value) => translate(describeZodIssue(issue, value)), money.read),
   });
+
+  // Read during render so react-hook-form subscribes to it.
+  const dirty = form.formState.isDirty;
+  useEffect(() => onDirtyChange?.(dirty), [dirty, onDirtyChange]);
 
   const submit = form.handleSubmit(
     async (values) => {

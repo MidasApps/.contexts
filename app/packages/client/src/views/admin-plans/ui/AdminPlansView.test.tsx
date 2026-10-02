@@ -72,6 +72,22 @@ describe("AdminPlansView", () => {
     expect(await screen.findByText("Plano Standard+ atualizado.")).toBeDefined();
   });
 
+  it("closes an untouched plan on Escape and asks before discarding an edited one", async () => {
+    const { user } = render();
+    await user.click(await screen.findByRole("button", { name: "Editar o plano Standard" }));
+    await screen.findByRole("dialog", { name: "Editar o plano Standard" });
+    await user.keyboard("{Escape}");
+    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+    expect(screen.queryByRole("alertdialog")).toBeNull();
+    await user.click(screen.getByRole("button", { name: "Editar o plano Standard" }));
+    const dialog = await screen.findByRole("dialog", { name: "Editar o plano Standard" });
+    await user.type(within(dialog).getByRole("textbox", { name: /^Nome/u }), " Plus");
+    await user.keyboard("{Escape}");
+    const question = await screen.findByRole("alertdialog", { name: "Descartar alterações?" });
+    await user.click(within(question).getByRole("button", { name: "Descartar" }));
+    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+  });
+
   it("keeps the dialog open with the error and its reference when saving fails", async () => {
     const { user } = render({ routes: { "GET /v1/admin/plans": ok([buildPlan()]), "PUT /v1/admin/plans/:planId": apiError(403, "FORBIDDEN") } });
     await user.click(await screen.findByRole("button", { name: "Editar o plano Standard" }));

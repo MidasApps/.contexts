@@ -2,13 +2,14 @@
 
 import { createPlanEndpoint, updatePlanEndpoint, type Plan } from "@core/contracts";
 import { useQueryClient } from "@tanstack/react-query";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { useTranslations } from "use-intl";
 import { adminOrganizationKeys } from "#/entities/admin-organization/index.ts";
 import { planKeys } from "#/entities/plan/index.ts";
 import { useCallEndpoint } from "#/shared/api/api-context.tsx";
 import { ApiError } from "#/shared/api/api-error.ts";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "#/shared/ui/molecules/Dialog/Dialog.tsx";
+import { useDialogDismissGuard } from "#/shared/ui/molecules/Dialog/dialog-dismiss-guard.tsx";
 import { notify } from "#/shared/ui/molecules/Toaster/notify.ts";
 import { SchemaForm } from "#/shared/ui/organisms/SchemaForm/SchemaForm.tsx";
 import type { SchemaFormResult } from "#/shared/ui/organisms/SchemaForm/server-errors.ts";
@@ -20,6 +21,23 @@ export type PlanFormDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 };
+
+/** The plan form inside the dialog: Esc, outside click or X ask before dropping edited values. */
+function GuardedPlanForm({ plan, submit }: { plan: Plan | null; submit: (values: PlanForm) => Promise<SchemaFormResult> }) {
+  const [dirty, setDirty] = useState(false);
+  useDialogDismissGuard(dirty ? "confirmUnsaved" : "allow");
+  return (
+    <SchemaForm
+      contract={PlanFormContract}
+      defaultValues={planFormDefaults(plan)}
+      defaultCurrency="USD"
+      onSubmit={submit}
+      onDirtyChange={setDirty}
+      submitLabelKey={plan === null ? "admin.plans.form.createSubmit" : "admin.plans.form.editSubmit"}
+      successMessageKey="admin.plans.form.savedStatus"
+    />
+  );
+}
 
 /**
  * Creates or replaces a plan (staff, platform.plan.manage; audited). Replacing a plan moves the
@@ -64,15 +82,7 @@ export function PlanFormDialog({ plan, open, onOpenChange }: PlanFormDialogProps
           <DialogTitle>{plan === null ? t("createTitle") : t("editTitle", { name: plan.name })}</DialogTitle>
           <DialogDescription>{plan === null ? t("createDescription") : t("editDescription")}</DialogDescription>
         </DialogHeader>
-        <SchemaForm
-          key={plan?.id ?? "new"}
-          contract={PlanFormContract}
-          defaultValues={planFormDefaults(plan)}
-          defaultCurrency="USD"
-          onSubmit={submit}
-          submitLabelKey={plan === null ? "admin.plans.form.createSubmit" : "admin.plans.form.editSubmit"}
-          successMessageKey="admin.plans.form.savedStatus"
-        />
+        <GuardedPlanForm key={plan?.id ?? "new"} plan={plan} submit={submit} />
       </DialogContent>
     </Dialog>
   );

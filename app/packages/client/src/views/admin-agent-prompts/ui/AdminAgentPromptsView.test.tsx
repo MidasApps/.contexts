@@ -180,6 +180,28 @@ describe("AdminAgentPromptsView", () => {
     expect(await within(await versionsTable()).findByText("Mais gentil.")).toBeDefined();
   });
 
+  it("asks before Escape or Cancel discards an edited prompt, and closes an untouched one at once", async () => {
+    const { user } = render();
+    await versionsTable();
+    await user.click(screen.getByRole("button", { name: "Nova versão" }));
+    let dialog = await screen.findByRole("dialog", { name: "Nova versão do prompt de Assistente" });
+    await user.keyboard("{Escape}");
+    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+    expect(screen.queryByRole("alertdialog")).toBeNull();
+
+    await user.click(screen.getByRole("button", { name: "Nova versão" }));
+    dialog = await screen.findByRole("dialog", { name: "Nova versão do prompt de Assistente" });
+    const body = within(dialog).getByRole("textbox", { name: /^Texto do prompt/u });
+    await user.type(body, " Be kind.");
+    await user.keyboard("{Escape}");
+    const question = await screen.findByRole("alertdialog", { name: "Descartar alterações?" });
+    await user.click(within(question).getByRole("button", { name: "Continuar editando" }));
+    expect((within(dialog).getByRole("textbox", { name: /^Texto do prompt/u }) as HTMLTextAreaElement).value).toContain("Be kind.");
+    await user.click(within(dialog).getByRole("button", { name: "Cancelar" }));
+    await user.click(within(await screen.findByRole("alertdialog")).getByRole("button", { name: "Descartar" }));
+    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+  });
+
   it("shows the line diff between the active and the newest version and follows the URL", async () => {
     const { user, router, container } = render();
     const diff = await screen.findByRole("region", { name: "Diferenças da versão 2 para a versão 3" });

@@ -40,6 +40,15 @@ const fillValidNote = async (user: ReturnType<typeof renderForm>["user"]) => {
 };
 
 describe("SchemaForm", () => {
+  it("reports clean values on mount and dirty ones once the user changes something", async () => {
+    const onDirtyChange = vi.fn<(dirty: boolean) => void>();
+    const { user } = renderForm({ onDirtyChange, defaultValues: { id: "note-1", title: "Fornecedor" } });
+    expect(onDirtyChange).toHaveBeenLastCalledWith(false);
+    const title = screen.getByRole("textbox", { name: /^Título/ });
+    await user.type(title, "s");
+    expect(onDirtyChange).toHaveBeenLastCalledWith(true);
+  });
+
   it("renders the contract's fields with labels, required marks, hints and group legends", async () => {
     const { container } = renderForm();
     const form = screen.getByRole("form", { name: "Nota" });

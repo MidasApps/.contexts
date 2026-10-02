@@ -10,7 +10,8 @@ import { useDescribeError } from "#/shared/lib/errors/describe-error.ts";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
 import { Input } from "#/shared/ui/atoms/Input/Input.tsx";
 import { Textarea } from "#/shared/ui/atoms/Textarea/Textarea.tsx";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "#/shared/ui/molecules/Dialog/Dialog.tsx";
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "#/shared/ui/molecules/Dialog/Dialog.tsx";
+import { useDialogDismissGuard } from "#/shared/ui/molecules/Dialog/dialog-dismiss-guard.tsx";
 import { Field, FieldControl, FieldDescription, FieldError, FieldLabel } from "#/shared/ui/molecules/Field/Field.tsx";
 import { notify } from "#/shared/ui/molecules/Toaster/notify.ts";
 
@@ -43,6 +44,9 @@ function PromptVersionForm({ agentId, initialBody, onOpenChange, onCreated }: Fo
   const [bodyError, setBodyError] = useState<string | undefined>();
   const [failure, setFailure] = useState<string | undefined>();
   const [pending, setPending] = useState(false);
+  // Up to 50 000 characters with no draft: Esc, outside click, X or Cancel ask before dropping edits.
+  const dirty = body !== initialBody || note !== "";
+  useDialogDismissGuard(pending ? "block" : dirty ? "confirmUnsaved" : "allow");
 
   const validate = (): string | undefined => {
     if (body.trim() === "") return t("bodyRequired");
@@ -97,9 +101,11 @@ function PromptVersionForm({ agentId, initialBody, onOpenChange, onCreated }: Fo
         <FieldDescription>{t("noteHint")}</FieldDescription>
       </Field>
       <DialogFooter>
-        <Button variant="secondary" onClick={() => onOpenChange(false)} disabled={pending}>
-          {tCommon("actions.cancel")}
-        </Button>
+        <DialogClose asChild>
+          <Button variant="secondary" disabled={pending}>
+            {tCommon("actions.cancel")}
+          </Button>
+        </DialogClose>
         <Button type="submit" pending={pending}>
           {t("submit")}
         </Button>
