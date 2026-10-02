@@ -42,7 +42,9 @@ test.describe("after a chat turn of the organization", () => {
     await expect(staffPage.getByRole("heading", { level: 1, name: "agent run: 'assistant-chat'" })).toBeVisible();
     const summary = staffPage.getByRole("region", { name: "Resumo do trace" });
     await expect(summary.getByRole("definition").filter({ hasText: sp5Org.name })).toBeVisible();
-    await expect(summary).toContainText("Preço desconhecido");
+    // Fake mode prices the fake models (follow-up 83): the trace has a cost.
+    await expect(summary).toContainText(/CustoUS\$\s?\d/);
+    await expect(summary).not.toContainText("Preço desconhecido");
     const spans = staffPage.getByRole("list", { name: /^\d+ spans$/ });
     const root = spans.getByRole("listitem").first();
     await expect(root).toContainText("agent_run");
