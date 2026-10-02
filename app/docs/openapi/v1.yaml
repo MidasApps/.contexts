@@ -750,6 +750,78 @@ paths:
       tags:
         - evals
       x-auth: user
+  /v1/admin/experiments/{experimentId}:
+    get:
+      operationId: evals.adminGetExperiment
+      parameters:
+        - description: Experiment id.
+          in: path
+          name: experimentId
+          required: true
+          schema:
+            pattern: ^[A-Za-z0-9_-]{1,128}$
+            type: string
+            x-pii: none
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: "#/components/schemas/observability.EvalExperimentSummary"
+                required:
+                  - data
+                type: object
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: VALIDATION_FAILED
+          x-error-codes:
+            - VALIDATION_FAILED
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UNAUTHORIZED
+          x-error-codes:
+            - UNAUTHORIZED
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: FORBIDDEN, MFA_REQUIRED
+          x-error-codes:
+            - FORBIDDEN
+            - MFA_REQUIRED
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: NOT_FOUND
+          x-error-codes:
+            - NOT_FOUND
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: INTERNAL_ERROR
+          x-error-codes:
+            - INTERNAL_ERROR
+      security:
+        - bearerAuth: []
+      summary: Reads any experiment, to compare experiments of different list pages (staff, platform.eval.manage).
+      tags:
+        - evals
+      x-auth: user
   /v1/admin/flags:
     get:
       operationId: flags.adminList
@@ -5765,6 +5837,85 @@ paths:
       tags:
         - evals
       x-auth: user
+  /v1/evals/experiments/{experimentId}:
+    get:
+      operationId: evals.getExperiment
+      parameters:
+        - description: Experiment id.
+          in: path
+          name: experimentId
+          required: true
+          schema:
+            pattern: ^[A-Za-z0-9_-]{1,128}$
+            type: string
+            x-pii: none
+        - description: Organization to act in; required for users, and when given it must be an API key's own organization.
+          in: query
+          name: organizationId
+          required: false
+          schema:
+            minLength: 1
+            type: string
+            x-pii: none
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: "#/components/schemas/observability.EvalExperimentSummary"
+                required:
+                  - data
+                type: object
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: VALIDATION_FAILED
+          x-error-codes:
+            - VALIDATION_FAILED
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UNAUTHORIZED
+          x-error-codes:
+            - UNAUTHORIZED
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: FORBIDDEN
+          x-error-codes:
+            - FORBIDDEN
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: NOT_FOUND
+          x-error-codes:
+            - NOT_FOUND
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: INTERNAL_ERROR
+          x-error-codes:
+            - INTERNAL_ERROR
+      security:
+        - bearerAuth: []
+      summary: Reads one of the organization's experiments, to compare experiments of different list pages; another tenant's answers 404 (core.eval.read).
+      tags:
+        - evals
+      x-auth: principal
   /v1/files/{fileId}:
     get:
       operationId: files.getFile

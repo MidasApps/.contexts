@@ -31,6 +31,7 @@ const traceFilters = PageNumberQuerySchema.extend({
   startedBefore: IsoDateTimeSchema.optional().meta(none("Only traces that started before this instant (UTC); must be after `startedAfter`.")),
 });
 const traceParams = z.object({ traceId: TraceIdSchema.meta(none("Trace id.")) });
+const experimentParams = z.object({ experimentId: z.string().regex(/^[A-Za-z0-9_-]{1,128}$/).meta(none("Experiment id.")) });
 
 export const listTracesEndpoint = defineEndpoint({
   id: "traces.list",
@@ -99,6 +100,18 @@ export const listEvalExperimentsEndpoint = defineEndpoint({
   summary: "Lists the organization's experiments with scores and verdicts (core.eval.read).",
 });
 
+export const getEvalExperimentEndpoint = defineEndpoint({
+  id: "evals.getExperiment",
+  method: "GET",
+  path: "/v1/evals/experiments/{experimentId}",
+  auth: "principal",
+  params: experimentParams,
+  query: OrganizationQuerySchema,
+  responses: { 200: dataEnvelope(EvalExperimentSummarySchema) },
+  errors: { 403: ["FORBIDDEN"], 404: ["NOT_FOUND"] },
+  summary: "Reads one of the organization's experiments, to compare experiments of different list pages; another tenant's answers 404 (core.eval.read).",
+});
+
 export const startEvalExperimentEndpoint = defineEndpoint({
   id: "evals.startExperiment",
   method: "POST",
@@ -132,6 +145,17 @@ export const adminListExperimentsEndpoint = defineEndpoint({
   summary: "Lists every experiment: CI eval runs, prompt evals and tenant experiments (staff, platform.eval.manage).",
 });
 
+export const adminGetExperimentEndpoint = defineEndpoint({
+  id: "evals.adminGetExperiment",
+  method: "GET",
+  path: "/v1/admin/experiments/{experimentId}",
+  auth: "user",
+  params: experimentParams,
+  responses: { 200: dataEnvelope(EvalExperimentSummarySchema) },
+  errors: { ...STAFF, 404: ["NOT_FOUND"] },
+  summary: "Reads any experiment, to compare experiments of different list pages (staff, platform.eval.manage).",
+});
+
 export const recordMessageFeedbackEndpoint = defineEndpoint({
   id: "conversations.recordFeedback",
   method: "POST",
@@ -151,8 +175,10 @@ export const OBSERVABILITY_ENDPOINTS: readonly EndpointDefinition[] = [
   adminGetTraceEndpoint,
   listEvalDatasetsEndpoint,
   listEvalExperimentsEndpoint,
+  getEvalExperimentEndpoint,
   startEvalExperimentEndpoint,
   adminListDatasetsEndpoint,
   adminListExperimentsEndpoint,
+  adminGetExperimentEndpoint,
   recordMessageFeedbackEndpoint,
 ];
