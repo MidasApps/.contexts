@@ -19,14 +19,15 @@ import { QueryPage } from "#/widgets/page-state/index.ts";
 import { SettingsPageFrame } from "#/widgets/settings-nav/index.ts";
 
 const column = dataTableColumnHelper<Role>();
-type RoleActions = { onEdit: ((role: Role) => void) | null; onDelete: ((role: Role) => void) | null };
+/** `waiting`: the permission registry is still loading, so editing (which needs the picker) waits too. */
+type RoleActions = { onEdit: ((role: Role) => void) | null; onDelete: ((role: Role) => void) | null; waiting: boolean };
 
 function RoleRowActions({ item: role, actions }: { item: Role; actions: RoleActions }) {
   const t = useTranslations("settings.roles");
   return (
     <span className="flex gap-1">
       {actions.onEdit === null ? null : (
-        <Button variant="outline" size="sm" onClick={() => actions.onEdit?.(role)} aria-label={t("editNamed", { name: role.name })}>
+        <Button variant="outline" size="sm" disabled={actions.waiting} onClick={() => actions.onEdit?.(role)} aria-label={t("editNamed", { name: role.name })}>
           {t("edit")}
         </Button>
       )}
@@ -83,7 +84,8 @@ function CustomRoles({ context, onCreate }: { context: AccessContext; onCreate: 
   const [deleting, setDeleting] = useState<Role | null>(null);
   const canUpdate = context.permissions.includes("core.role.update");
   const canDelete = context.permissions.includes("core.role.delete");
-  const actions = useMemo<RoleActions>(() => ({ onEdit: canUpdate ? setEditing : null, onDelete: canDelete ? setDeleting : null }), [canUpdate, canDelete]);
+  const waiting = catalog.isPending;
+  const actions = useMemo<RoleActions>(() => ({ onEdit: canUpdate ? setEditing : null, onDelete: canDelete ? setDeleting : null, waiting }), [canUpdate, canDelete, waiting]);
   const columns = useColumns(actions);
   const grantable = (permission: Permission): boolean => context.permissions.includes(permission);
   return (
@@ -110,7 +112,13 @@ function CustomRoles({ context, onCreate }: { context: AccessContext; onCreate: 
             icon="shield"
             title={t("emptyTitle")}
             description={onCreate === null ? t("emptyDescriptionNoPermission") : t("emptyDescription")}
-            action={onCreate === null ? undefined : <Button onClick={onCreate}>{t("create")}</Button>}
+            action={
+              onCreate === null ? undefined : (
+                <Button onClick={onCreate} disabled={waiting} pending={waiting}>
+                  {t("create")}
+                </Button>
+              )
+            }
           />
         }
       />
@@ -119,7 +127,6 @@ function CustomRoles({ context, onCreate }: { context: AccessContext; onCreate: 
         customRole={editing}
         open={editing !== null}
         onOpenChange={(open) => !open && setEditing(null)}
-        permissions={catalog.data ?? []}
         grantable={grantable}
       />
       <DeleteRoleDialog organizationId={organization.id} customRole={deleting} onOpenChange={(open) => !open && setDeleting(null)} />
@@ -165,7 +172,7 @@ function SettingsRoles({ context }: { context: AccessContext }) {
         </SectionCard>
       </div>
       {canCreate ? (
-        <RoleEditorDialog organizationId={organization.id} customRole={null} open={creating} onOpenChange={setCreating} permissions={catalog.data ?? []} grantable={grantable} />
+        <RoleEditorDialog organizationId={organization.id} customRole={null} open={creating} onOpenChange={setCreating} grantable={grantable} />
       ) : null}
     </SettingsPageFrame>
   );

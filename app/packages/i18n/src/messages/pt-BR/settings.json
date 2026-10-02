@@ -183,7 +183,11 @@
     },
     "picker": {
       "coreModule": "Plataforma",
-      "selectedCount": "({count} de {total})"
+      "selectedCount": "({count} de {total})",
+      "loading": "Carregando permissões…",
+      "loadError": "Não foi possível carregar as permissões",
+      "grantsError": "Não foi possível conferir o que você pode conceder",
+      "empty": "Nenhuma permissão disponível para conceder."
     },
     "editor": {
       "createTitle": "Novo papel",
@@ -314,7 +318,6 @@
       "expiryOption": "{days} dias",
       "expiresOn": "Expira em {date}.",
       "scopes": "Permissões",
-      "loadingScopes": "Carregando permissões…",
       "errors": {
         "required": "Dê um nome à chave.",
         "tooLong": "Use no máximo 80 caracteres.",

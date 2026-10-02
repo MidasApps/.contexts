@@ -115,6 +115,22 @@ describe("SettingsApiKeysView", () => {
     expect(api.callLines().some((line) => line.startsWith("POST"))).toBe(false);
   });
 
+  it("explains a failed permission catalog instead of an empty scope list, and retries", async () => {
+    let catalogUp = false;
+    const { user, api } = renderView({
+      "GET /v1/permissions": () => (catalogUp ? page(PERMISSION_REGISTRY) : apiError(429, "RATE_LIMITED")),
+    });
+    await user.click(await screen.findByRole("button", { name: "Nova chave" }));
+    const dialog = await screen.findByRole("dialog", { name: "Nova chave de API" });
+    const alert = await within(dialog).findByRole("alert");
+    expect(alert.textContent).toContain("Não foi possível carregar as permissões");
+    expect(within(dialog).getByRole("button", { name: "Criar chave" }).hasAttribute("disabled")).toBe(true);
+    catalogUp = true;
+    await user.click(within(alert).getByRole("button", { name: "Tentar novamente" }));
+    expect(await within(dialog).findByRole("checkbox", { name: /Ver projetos/u })).toBeDefined();
+    expect(api.callLines().some((line) => line.startsWith("POST"))).toBe(false);
+  });
+
   it("revokes a key: the status changes at once and rolls back on failure", async () => {
     const { user, api } = renderView({ "DELETE /v1/api-keys/:apiKeyId": apiError(503, "INTERNAL_ERROR") });
     await user.click(await screen.findByRole("button", { name: "Revogar chave Reporting export" }));

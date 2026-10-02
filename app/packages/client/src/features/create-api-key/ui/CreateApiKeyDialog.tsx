@@ -7,7 +7,7 @@ import { useTranslations } from "use-intl";
 import { apiKeyKeys } from "#/entities/api-key/index.ts";
 import { usePermissions } from "#/entities/permission/index.ts";
 import { NodeSelect } from "#/entities/project/index.ts";
-import { PermissionPicker, usePermissionsCatalog } from "#/entities/role/index.ts";
+import { PermissionCatalogField, usePermissionCatalogReady } from "#/entities/role/index.ts";
 import { useCallEndpoint } from "#/shared/api/api-context.tsx";
 import { useIdempotencyKey } from "#/shared/api/use-idempotency-key.ts";
 import { useFormatDateTime } from "#/shared/lib/format/use-format-date-time.ts";
@@ -18,7 +18,6 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { useDialogDismissGuard } from "#/shared/ui/molecules/Dialog/dialog-dismiss-guard.tsx";
 import { ApiErrorAlert } from "#/shared/ui/molecules/ErrorState/ApiErrorAlert.tsx";
 import { Field, FieldControl, FieldDescription, FieldError, FieldGroup, FieldLabel } from "#/shared/ui/molecules/Field/Field.tsx";
-import { LoadingState } from "#/shared/ui/molecules/LoadingState/LoadingState.tsx";
 import { OneTimeSecret } from "#/shared/ui/molecules/OneTimeSecret/OneTimeSecret.tsx";
 import { EXPIRY_OPTIONS_DAYS, emptyApiKeyDraft, expiryFrom, validateApiKeyDraft, type ApiKeyDraft, type ApiKeyDraftProblems, type ExpiryDays } from "../model/api-key-draft.ts";
 
@@ -40,7 +39,6 @@ const nodeParams = (draft: ApiKeyDraft) =>
 function ApiKeyFields({ organization, draft, setDraft, problems, nameInput, now }: { organization: CreateApiKeyDialogProps["organization"]; draft: ApiKeyDraft; setDraft: (draft: ApiKeyDraft) => void; problems: ApiKeyDraftProblems; nameInput: RefObject<HTMLInputElement | null>; now: () => Date }) {
   const t = useTranslations("settings.apiKeys.createDialog");
   const formatDateTime = useFormatDateTime();
-  const catalog = usePermissionsCatalog();
   // Scopes are limited to what the actor holds at the chosen node (no escalation, SP1 spec §5.3).
   const atNode = usePermissions(nodeParams(draft));
   return (
@@ -78,18 +76,14 @@ function ApiKeyFields({ organization, draft, setDraft, problems, nameInput, now 
         </Select>
         <FieldDescription>{t("expiresOn", { date: formatDateTime(expiryFrom(now(), draft.expiryDays), "date") })}</FieldDescription>
       </Field>
-      {catalog.isPending || atNode.status === "pending" ? (
-        <LoadingState label={t("loadingScopes")} rows={3} />
-      ) : (
-        <PermissionPicker
-          legend={t("scopes")}
-          permissions={catalog.data ?? []}
-          value={draft.scopes}
-          onChange={(scopes: Permission[]) => setDraft({ ...draft, scopes })}
-          grantable={atNode.can}
-          error={problems.scopes === true ? t("errors.scopes") : undefined}
-        />
-      )}
+      <PermissionCatalogField
+        legend={t("scopes")}
+        value={draft.scopes}
+        onChange={(scopes: Permission[]) => setDraft({ ...draft, scopes })}
+        grantable={atNode.can}
+        grants={atNode}
+        error={problems.scopes === true ? t("errors.scopes") : undefined}
+      />
     </FieldGroup>
   );
 }
@@ -110,6 +104,7 @@ function CreateApiKeyDialogBody({ organization, onOpenChange, now = systemNow }:
   const [pending, setPending] = useState(false);
   const [secret, setSecret] = useState<{ name: string; value: string } | null>(null);
   const nameInput = useRef<HTMLInputElement>(null);
+  const catalogReady = usePermissionCatalogReady();
   // Closing mid-request would create the key and drop its only copy of the secret.
   useDialogDismissGuard(pending ? "block" : "allow");
 
@@ -151,7 +146,7 @@ function CreateApiKeyDialogBody({ organization, onOpenChange, now = systemNow }:
               <Button type="button" variant="secondary" disabled={pending} onClick={() => onOpenChange(false)}>
                 {t("cancel")}
               </Button>
-              <Button type="submit" pending={pending}>
+              <Button type="submit" pending={pending} disabled={!catalogReady}>
                 {t("submit")}
               </Button>
             </DialogFooter>

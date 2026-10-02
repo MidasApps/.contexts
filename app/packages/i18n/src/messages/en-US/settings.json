@@ -183,7 +183,11 @@
     },
     "picker": {
       "coreModule": "Platform",
-      "selectedCount": "({count} of {total})"
+      "selectedCount": "({count} of {total})",
+      "loading": "Loading permissions…",
+      "loadError": "Couldn't load the permissions",
+      "grantsError": "Couldn't check what you can grant",
+      "empty": "No permissions are available to grant."
     },
     "editor": {
       "createTitle": "New role",
@@ -314,7 +318,6 @@
       "expiryOption": "{days} days",
       "expiresOn": "Expires on {date}.",
       "scopes": "Permissions",
-      "loadingScopes": "Loading permissions…",
       "errors": {
         "required": "Give the key a name.",
         "tooLong": "Use at most 80 characters.",

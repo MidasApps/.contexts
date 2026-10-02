@@ -1,10 +1,10 @@
 "use client";
 
-import { createRoleEndpoint, updateRoleEndpoint, type Permission, type PermissionDefinition, type Role } from "@core/contracts";
+import { createRoleEndpoint, updateRoleEndpoint, type Permission, type Role } from "@core/contracts";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRef, useState, type FormEvent } from "react";
 import { useTranslations } from "use-intl";
-import { PermissionPicker, roleKeys } from "#/entities/role/index.ts";
+import { PermissionCatalogField, roleKeys, usePermissionCatalogReady } from "#/entities/role/index.ts";
 import { useCallEndpoint } from "#/shared/api/api-context.tsx";
 import { useIdempotencyKey } from "#/shared/api/use-idempotency-key.ts";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
@@ -22,8 +22,6 @@ export type RoleEditorDialogProps = {
   customRole: Role | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  /** The permission registry (`GET /v1/permissions`). */
-  permissions: readonly PermissionDefinition[];
   /** What the actor holds at the organization: only those can be granted (no escalation). */
   grantable: (permission: Permission) => boolean;
 };
@@ -52,9 +50,12 @@ const useSaveRole = (organizationId: string, role: Role | null) => {
  * Role editor (SP2 spec §8 settings/roles): name, description and the permission picker grouped
  * by module with each permission's description. Permissions the actor does not hold are disabled
  * (the API answers `ESCALATION_FORBIDDEN` anyway); failures stay in the dialog with the reference.
+ * The registry is read here, with its loading and error states, so every entry point gets them.
  */
-function RoleEditorDialogBody({ organizationId, customRole: role, onOpenChange, permissions, grantable }: RoleEditorDialogProps) {
+function RoleEditorDialogBody({ organizationId, customRole: role, onOpenChange, grantable }: RoleEditorDialogProps) {
   const t = useTranslations("settings.roles.editor");
+  // Without the registry the picker has nothing to offer; saving would only fail "choose a permission".
+  const catalogReady = usePermissionCatalogReady();
   const save = useSaveRole(organizationId, role);
   const [draft, setDraft] = useState<RoleDraft>(() => draftOf(role));
   const [problems, setProblems] = useState<RoleDraftProblems>({});
@@ -104,9 +105,8 @@ function RoleEditorDialogBody({ organizationId, customRole: role, onOpenChange, 
                 <Textarea rows={2} maxLength={500} value={draft.description} onChange={(event) => setDraft({ ...draft, description: event.target.value })} />
               </FieldControl>
             </Field>
-            <PermissionPicker
+            <PermissionCatalogField
               legend={t("permissions")}
-              permissions={permissions}
               value={draft.permissions}
               onChange={(next) => setDraft({ ...draft, permissions: next })}
               grantable={grantable}
@@ -117,7 +117,7 @@ function RoleEditorDialogBody({ organizationId, customRole: role, onOpenChange, 
             <Button type="button" variant="secondary" disabled={pending} onClick={() => onOpenChange(false)}>
               {t("cancel")}
             </Button>
-            <Button type="submit" pending={pending}>
+            <Button type="submit" pending={pending} disabled={!catalogReady}>
               {role === null ? t("create") : t("save")}
             </Button>
           </DialogFooter>

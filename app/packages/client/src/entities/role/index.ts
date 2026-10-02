@@ -3,5 +3,6 @@
 export { permissionsCatalogQuery, roleKeys, rolesQuery, usePermissionsCatalog, useRoles } from "./api/role-queries.ts";
 export { groupPermissionsByModule, type PermissionModuleGroup, type PermissionResourceGroup } from "./model/group-permissions.ts";
 export { DEVICE_SYSTEM_ROLES, PERSON_SYSTEM_ROLES, useRoleOptions, useRoleRefLabel, type RoleOption } from "./model/role-options.ts";
+export { PermissionCatalogField, usePermissionCatalogReady, type PermissionCatalogFieldProps, type PermissionGrantsState } from "./ui/PermissionCatalogField.tsx";
 export { PermissionPicker, type PermissionPickerProps } from "./ui/PermissionPicker.tsx";
 export { RoleChecklist, type RoleChecklistProps } from "./ui/RoleChecklist.tsx";

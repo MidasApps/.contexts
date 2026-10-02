@@ -183,7 +183,11 @@
     },
     "picker": {
       "coreModule": "Plataforma",
-      "selectedCount": "({count} de {total})"
+      "selectedCount": "({count} de {total})",
+      "loading": "Cargando permisos…",
+      "loadError": "No se pudieron cargar los permisos",
+      "grantsError": "No se pudo verificar qué puedes conceder",
+      "empty": "No hay permisos disponibles para conceder."
     },
     "editor": {
       "createTitle": "Nuevo rol",
@@ -314,7 +318,6 @@
       "expiryOption": "{days} días",
       "expiresOn": "Vence el {date}.",
       "scopes": "Permisos",
-      "loadingScopes": "Cargando permisos…",
       "errors": {
         "required": "Ponle un nombre a la clave.",
         "tooLong": "Usa como máximo 80 caracteres.",

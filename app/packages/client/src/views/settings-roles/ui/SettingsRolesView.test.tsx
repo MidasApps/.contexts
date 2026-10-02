@@ -77,6 +77,39 @@ describe("SettingsRolesView", () => {
     expect((await within(confirm).findByRole("alert")).textContent).toContain("Este papel ainda está atribuído a membros.");
   });
 
+  it("explains a failed permission catalog inside the editor and recovers on retry", async () => {
+    let catalogUp = false;
+    const { user } = renderView({
+      "GET /v1/permissions": () => (catalogUp ? page(PERMISSION_REGISTRY) : apiError(429, "RATE_LIMITED")),
+    });
+    const edit = await screen.findByRole("button", { name: "Editar papel Project editor" });
+    await waitFor(() => expect(edit.hasAttribute("disabled")).toBe(false));
+    await user.click(edit);
+    const dialog = await screen.findByRole("dialog", { name: "Editar Project editor" });
+    const alert = await within(dialog).findByRole("alert");
+    expect(alert.textContent).toContain("Muitas tentativas");
+    expect(alert.textContent).toContain("Não foi possível carregar as permissões");
+    expect(within(dialog).getByRole("button", { name: "Salvar papel" }).hasAttribute("disabled")).toBe(true);
+    await expectNoAxeViolations(dialog);
+    catalogUp = true;
+    await user.click(within(alert).getByRole("button", { name: "Tentar novamente" }));
+    expect(await within(dialog).findByRole("checkbox", { name: /Ver unidades/u })).toBeDefined();
+    expect(within(dialog).getByRole("button", { name: "Salvar papel" }).hasAttribute("disabled")).toBe(false);
+  });
+
+  it("keeps every create and edit entry point waiting while the permission catalog loads", async () => {
+    renderView({ "GET /v1/permissions": () => new Promise(() => undefined), "GET /v1/organizations/:organizationId/roles": page([]) });
+    await screen.findByText("Nenhum papel personalizado");
+    const create = screen.getAllByRole("button", { name: "Novo papel" });
+    expect(create.length).toBe(2);
+    for (const button of create) expect(button.hasAttribute("disabled")).toBe(true);
+  });
+
+  it("disables row edits while the permission catalog loads", async () => {
+    renderView({ "GET /v1/permissions": () => new Promise(() => undefined) });
+    expect((await screen.findByRole("button", { name: "Editar papel Project editor" })).hasAttribute("disabled")).toBe(true);
+  });
+
   it("offers no create/edit/delete without the write permissions", async () => {
     renderView({}, ["core.organization.read", "core.role.read"]);
     await screen.findByText("Project editor");
