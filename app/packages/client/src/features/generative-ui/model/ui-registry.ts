@@ -1,6 +1,6 @@
 import type { ComponentType, ReactNode } from "react";
 import type { z } from "zod";
-import type { GenerativeUiView } from "#/entities/message/index.ts";
+import type { GenerativeUiView, UiSubmission } from "#/entities/message/index.ts";
 
 /** What every generative component receives (decision 0032, D4-03). */
 export type GenerativeComponentProps<Props> = {
@@ -11,6 +11,13 @@ export type GenerativeComponentProps<Props> = {
   readonly toolName: string;
   /** The member may still answer: this is the latest turn and no answer is on its way. */
   readonly interactive: boolean;
+  /**
+   * The conversation moved past this turn: the component can no longer be answered. Unlike
+   * `!interactive`, never true for the latest turn while its answer streams.
+   */
+  readonly stale?: boolean | undefined;
+  /** What the member answered in the next turn (history), so the component shows it. */
+  readonly answer?: UiSubmission | undefined;
   /** The generic view of the tool call, for a component that cannot render after all. */
   readonly fallback: ReactNode;
 };

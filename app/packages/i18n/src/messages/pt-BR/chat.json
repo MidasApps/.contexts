@@ -93,7 +93,8 @@
     "tooLong": "Limite de {max} caracteres. Remova {over, plural, one {# caractere} other {# caracteres}}.",
     "offline": "Sem conexão. Envio indisponível até a conexão voltar.",
     "uploading": "Aguarde o envio dos anexos terminar.",
-    "attachmentProblem": "Remova ou reenvie os anexos com erro antes de enviar."
+    "attachmentProblem": "Remova ou reenvie os anexos com erro antes de enviar.",
+    "awaitingApproval": "Aprove ou recuse a ação acima antes de continuar."
   },
   "status": {
     "connecting": "Conectando…",
@@ -181,13 +182,16 @@
     "executed": "Aprovado e executado.",
     "declined": "Recusado.",
     "declinedReason": "Recusado: {reason}",
-    "failed": "Aprovado, mas a execução falhou."
+    "failed": "Aprovado, mas a execução falhou.",
+    "expired": "Esta aprovação não está mais ativa. A ação não foi executada."
   },
   "ui": {
     "form": {
       "label": "Formulário: {command}",
       "submit": "Enviar",
-      "submitted": "Formulário enviado. O assistente pede confirmação antes de salvar."
+      "submitted": "Formulário enviado. O assistente pede confirmação antes de salvar.",
+      "answered": "Formulário enviado.",
+      "inactive": "Este formulário não está mais ativo."
     },
     "table": {
       "caption": "Resultado",
@@ -211,7 +215,8 @@
       "legendMultiple": "Escolha uma ou mais opções",
       "submit": "Confirmar escolha",
       "required": "Escolha ao menos uma opção.",
-      "submitted": "Escolha enviada."
+      "submitted": "Escolha enviada.",
+      "inactive": "Esta escolha não está mais ativa."
     },
     "approvalPending": {
       "title": "Aguardando aprovação de outra pessoa",

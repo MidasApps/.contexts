@@ -1,7 +1,7 @@
 "use client";
 
 import { Component, type ReactNode, Suspense, useEffect } from "react";
-import type { GenerativeUiView } from "#/entities/message/index.ts";
+import type { GenerativeUiView, UiSubmission } from "#/entities/message/index.ts";
 import { cn } from "#/shared/lib/cn.ts";
 import { type ErrorReporter, useReportError } from "#/shared/lib/errors/error-reporter.tsx";
 import { Skeleton } from "#/shared/ui/atoms/Skeleton/Skeleton.tsx";
@@ -54,6 +54,10 @@ export type GenerativePartProps = {
   toolCallId: string;
   toolName: string;
   interactive: boolean;
+  /** The conversation moved past this turn (see `GenerativeComponentProps`). */
+  stale?: boolean | undefined;
+  /** What the member answered in the next turn. */
+  answer?: UiSubmission | undefined;
   /** The generic view of the tool call: shown for an unknown component, invalid props or a render failure. */
   fallback: ReactNode;
 };
@@ -63,7 +67,15 @@ export type GenerativePartProps = {
  * registry, props validated with the contract schema. Unknown id, invalid props or a component
  * that fails → the generic tool view, plus one report to the app's logger (no props in it).
  */
-export function GenerativePart({ ui, toolCallId, toolName, interactive, fallback }: GenerativePartProps) {
+export function GenerativePart({
+  ui,
+  toolCallId,
+  toolName,
+  interactive,
+  stale,
+  answer,
+  fallback,
+}: GenerativePartProps) {
   const { registry } = useGenerativeUi();
   const reportError = useReportError();
   const resolution = resolveGenerativeUi(registry, ui);
@@ -89,6 +101,8 @@ export function GenerativePart({ ui, toolCallId, toolName, interactive, fallback
             toolCallId={toolCallId}
             toolName={toolName}
             interactive={interactive}
+            stale={stale}
+            answer={answer}
             fallback={fallback}
           />
         </div>

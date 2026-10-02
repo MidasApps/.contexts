@@ -75,6 +75,11 @@ export type ChatSession = {
   /** The partial answer of a turn that failed mid-way (kept on screen, marked incomplete). */
   readonly incompleteMessageId: string | undefined;
   readonly busy: boolean;
+  /**
+   * The last answer stops at a tool call the member must approve or decline. A new turn would
+   * leave that approval stranded (`/v1/chat` does not refuse it), so the composer holds it.
+   */
+  readonly awaitingApproval: boolean;
   /** Sends a turn; `attachments` are ready files of the upload queue (sent by id, shown from metadata). */
   readonly send: (text: string, attachments?: readonly MessageAttachment[]) => void;
   readonly stop: () => void;
@@ -288,6 +293,7 @@ export const useChatSession = (args: UseChatSessionArgs): ChatSession => {
     interruptedMessageId: outcome.kind === "stopped" || outcome.kind === "lost" ? outcome.messageId : undefined,
     incompleteMessageId: outcome.kind === "failed" ? outcome.messageId : undefined,
     busy,
+    awaitingApproval: awaitsApproval(messages),
     send,
     stop,
     retry,

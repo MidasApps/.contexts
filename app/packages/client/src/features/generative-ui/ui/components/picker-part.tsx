@@ -10,12 +10,24 @@ import { RadioGroup, RadioGroupItem } from "#/shared/ui/atoms/RadioGroup/RadioGr
 import { useGenerativeUi } from "../../model/generative-ui-context.tsx";
 import type { GenerativeComponentProps } from "../../model/ui-registry.ts";
 
+/** The status line: green once sent, muted for "no longer active", hidden while it waits. */
+const statusClass = (sent: boolean, note: string): string =>
+  sent ? "text-body text-emerald-foreground" : note === "" ? "sr-only" : "text-body-sm text-muted-foreground";
+
 /**
  * `picker` (SP4 spec §5.2): a single (radio) or multiple (checkbox) choice the member answers
  * in the conversation. The group is a `fieldset` named by its legend; confirming with nothing
- * chosen says so next to the group instead of silently doing nothing.
+ * chosen says so next to the group instead of silently doing nothing. In the history it shows
+ * the choice the next turn carried, or says it is no longer active when nobody answered it.
  */
-export function PickerPart({ props, toolCallId, toolName, interactive }: GenerativeComponentProps<PickerProps>) {
+export function PickerPart({
+  props,
+  toolCallId,
+  toolName,
+  interactive,
+  stale = false,
+  answer,
+}: GenerativeComponentProps<PickerProps>) {
   const t = useTranslations("chat.ui.picker");
   const { submit } = useGenerativeUi();
   const [chosen, setChosen] = useState<readonly string[]>([]);
@@ -24,7 +36,11 @@ export function PickerPart({ props, toolCallId, toolName, interactive }: Generat
   const [submitted, setSubmitted] = useState(false);
   const baseId = useId();
   const errorId = `${baseId}-error`;
-  const locked = submitted || !interactive;
+  const answered = answer?.kind === "picker" ? answer.values : undefined;
+  const sent = submitted || answered !== undefined;
+  const locked = sent || !interactive;
+  const shown = submitted || answered === undefined ? chosen : answered;
+  const note = sent ? t("submitted") : stale ? t("inactive") : "";
 
   const toggle = (value: string, on: boolean) => {
     setMissing(false);
@@ -69,7 +85,7 @@ export function PickerPart({ props, toolCallId, toolName, interactive }: Generat
             <div key={option.value} className="flex items-center gap-2.5">
               <Checkbox
                 id={`${baseId}-${index}`}
-                checked={chosen.includes(option.value)}
+                checked={shown.includes(option.value)}
                 onCheckedChange={(state) => toggle(option.value, state === true)}
                 disabled={locked}
               />
@@ -79,7 +95,7 @@ export function PickerPart({ props, toolCallId, toolName, interactive }: Generat
         ) : (
           <RadioGroup
             aria-labelledby={`${baseId}-legend`}
-            value={chosen[0] ?? ""}
+            value={shown[0] ?? ""}
             onValueChange={(value) => {
               setMissing(false);
               setChosen([value]);
@@ -98,8 +114,8 @@ export function PickerPart({ props, toolCallId, toolName, interactive }: Generat
       <p id={errorId} role="alert" className={missing ? "text-body-sm text-destructive-text" : "sr-only"}>
         {missing ? t("required") : ""}
       </p>
-      <p role="status" className={submitted ? "text-body text-emerald-foreground" : "sr-only"}>
-        {submitted ? t("submitted") : ""}
+      <p role="status" className={statusClass(sent, note)}>
+        {note}
       </p>
       {locked ? null : (
         <div className="flex justify-end">

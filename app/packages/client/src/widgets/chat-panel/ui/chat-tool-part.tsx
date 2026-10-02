@@ -2,12 +2,16 @@
 
 import type { ReactNode } from "react";
 import { useTranslations } from "use-intl";
+import type { UIMessage } from "ai";
 import {
   type GenerativeUiView,
   generativeUiOf,
+  parseUiSubmission,
   pendingApprovalOf,
   type RenderToolPart,
   type ToolPartContext,
+  textOf,
+  type UiSubmission,
 } from "#/entities/message/index.ts";
 import { ToolConfirmation } from "#/features/chat-approval/index.ts";
 import { ApprovalDiff, diffPropsOf, GenerativePart } from "#/features/generative-ui/index.ts";
@@ -40,6 +44,12 @@ const uiRequestsOf = (
   return [own, ...nested].filter((request): request is UiRequest => request !== null);
 };
 
+/** What the member answered right after `messageId` (a form or picker submission), if anything. */
+const answerAfter = (messages: readonly UIMessage[], messageId: string): UiSubmission | undefined => {
+  const next = messages[messages.findIndex((message) => message.id === messageId) + 1];
+  return next?.role === "user" ? (parseUiSubmission(textOf(next)) ?? undefined) : undefined;
+};
+
 function ChatToolPart({
   context,
   fallback,
@@ -52,7 +62,11 @@ function ChatToolPart({
   const t = useTranslations("chat.approval");
   const { tool, delegation, preview, request, message } = context;
   // Answers go to the latest turn only: a form of an older turn was already answered or abandoned.
-  const interactive = !session.busy && session.messages.at(-1)?.id === message.id;
+  const latest = session.messages.at(-1)?.id === message.id;
+  const interactive = !session.busy && latest;
+  // The conversation moved past this turn: what it asks can no longer be answered.
+  const stale = !latest;
+  const answer = stale ? answerAfter(session.messages, message.id) : undefined;
   const requests = uiRequestsOf(context, (toolName) => preview?.summary ?? t("fallbackSummary", { tool: toolName }));
   const diff = diffPropsOf(preview?.preview ?? null);
   const replacesCard = delegation === null && requests.some((item) => item.toolCallId === tool.toolCallId);
@@ -67,6 +81,8 @@ function ChatToolPart({
           toolCallId={item.toolCallId}
           toolName={item.toolName}
           interactive={interactive}
+          stale={stale}
+          answer={answer}
           fallback={item.toolCallId === tool.toolCallId && delegation === null ? fallback : null}
         />
       ))}
@@ -77,6 +93,7 @@ function ChatToolPart({
           request={request}
           onRespond={session.respondToApproval}
           interactive={interactive}
+          stale={stale}
           diff={diff === null ? undefined : <ApprovalDiff {...diff} />}
         />
       )}

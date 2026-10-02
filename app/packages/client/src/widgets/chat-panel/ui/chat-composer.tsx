@@ -35,11 +35,25 @@ export type ChatComposerProps = {
   voiceSeams?: ComposerVoiceProps["seams"];
 };
 
+type BlockedArgs = {
+  awaitingApproval: boolean;
+  items: Parameters<typeof hasUploadsInFlight>[0];
+  t: ReturnType<typeof useTranslations<"chat.input">>;
+};
+
+/** Why the next message must wait, in words; `undefined` when nothing holds it. */
+const blockedReason = ({ awaitingApproval, items, t }: BlockedArgs): string | undefined => {
+  if (awaitingApproval) return t("awaitingApproval");
+  if (hasUploadsInFlight(items)) return t("uploading");
+  return hasUploadProblems(items) ? t("attachmentProblem") : undefined;
+};
+
 /**
  * The composer of a chat thread: the draft, the upload queue of the message being written and
  * push-to-talk around the prompt input (FSD: the widget composes the send, upload and voice
- * features). A message waits for its uploads, and a rejected file never goes with it. A
- * transcript lands in the draft for review; with auto-send on it goes at once when nothing blocks.
+ * features). A message waits for its uploads and for a pending approval, and a rejected file
+ * never goes with it. A transcript lands in the draft for review; with auto-send on it goes at
+ * once when nothing blocks.
  */
 export function ChatComposer({
   session,
@@ -58,11 +72,7 @@ export function ChatComposer({
   const t = useTranslations("chat.input");
   const { queue, items } = useUploadQueue({ organizationId, seams: uploadSeams });
   const canUpload = can?.("core.file.upload") === true;
-  const blocked = hasUploadsInFlight(items)
-    ? t("uploading")
-    : hasUploadProblems(items)
-      ? t("attachmentProblem")
-      : undefined;
+  const blocked = blockedReason({ awaitingApproval: session.awaitingApproval, items, t });
 
   const send = (text: string) => {
     session.send(text, queue.take());

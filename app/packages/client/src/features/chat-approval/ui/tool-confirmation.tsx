@@ -32,6 +32,8 @@ export type ToolConfirmationProps = {
   diff?: ReactNode;
   /** The decision can be taken now: latest turn, nothing streaming. */
   interactive: boolean;
+  /** The conversation moved past this turn: an unanswered request can no longer be decided. */
+  stale?: boolean | undefined;
 };
 
 const toJson = (value: unknown): string => JSON.stringify(value, null, 2) ?? "";
@@ -187,7 +189,15 @@ function ApprovalActions({
  * `/v1/chat` audits it before the tool runs. After the decision the card keeps the result, and
  * moves the focus to it so keyboard and screen-reader users are not left on a vanished button.
  */
-export function ToolConfirmation({ tool, preview, request, onRespond, diff, interactive }: ToolConfirmationProps) {
+export function ToolConfirmation({
+  tool,
+  preview,
+  request,
+  onRespond,
+  diff,
+  interactive,
+  stale = false,
+}: ToolConfirmationProps) {
   const t = useTranslations("chat.approval");
   const approval = useToolApproval({ approvalId: tool.approval?.id ?? "", onRespond });
   const resultRef = useRef<HTMLDivElement>(null);
@@ -195,6 +205,8 @@ export function ToolConfirmation({ tool, preview, request, onRespond, diff, inte
   const toolName = request?.toolName ?? preview?.toolName ?? tool.toolName;
   const summary = preview?.summary ?? t("fallbackSummary", { tool: toolLabel(toolName) });
   const requested = tool.state === "approval-requested";
+  // Nothing ran: the tool part still waits, but no answer can reach it any more.
+  const expired = requested && stale;
   const locked = approval.sent !== null || !interactive;
 
   useEffect(() => {
@@ -212,10 +224,16 @@ export function ToolConfirmation({ tool, preview, request, onRespond, diff, inte
     >
       <ToolHeading requested={requested} summary={summary} permission={preview?.permission} />
       <ToolDetails requested={requested} diff={diff} args={request?.args} />
-      <ConfirmationRequest>
-        {approval.stage === "asking-reason" ? <DeclineReasonField approval={approval} locked={locked} /> : null}
-        <ApprovalActions approval={approval} locked={locked} interactive={interactive} />
-      </ConfirmationRequest>
+      {expired ? (
+        <p data-slot="approval-expired" className="text-body-sm text-muted-foreground">
+          {t("expired")}
+        </p>
+      ) : (
+        <ConfirmationRequest>
+          {approval.stage === "asking-reason" ? <DeclineReasonField approval={approval} locked={locked} /> : null}
+          <ApprovalActions approval={approval} locked={locked} interactive={interactive} />
+        </ConfirmationRequest>
+      )}
       <div ref={resultRef} tabIndex={-1}>
         <Outcome tool={tool} />
       </div>

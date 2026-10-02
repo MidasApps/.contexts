@@ -93,7 +93,8 @@
     "tooLong": "Limit of {max} characters. Remove {over, plural, one {# character} other {# characters}}.",
     "offline": "Offline. Sending is unavailable until the connection is back.",
     "uploading": "Wait for the attachments to finish uploading.",
-    "attachmentProblem": "Remove or retry the attachments with errors before sending."
+    "attachmentProblem": "Remove or retry the attachments with errors before sending.",
+    "awaitingApproval": "Approve or decline the action above before you continue."
   },
   "status": {
     "connecting": "Connecting…",
@@ -181,13 +182,16 @@
     "executed": "Approved and executed.",
     "declined": "Declined.",
     "declinedReason": "Declined: {reason}",
-    "failed": "Approved, but the execution failed."
+    "failed": "Approved, but the execution failed.",
+    "expired": "This approval is no longer active. The action did not run."
   },
   "ui": {
     "form": {
       "label": "Form: {command}",
       "submit": "Submit",
-      "submitted": "Form submitted. The assistant asks for confirmation before saving."
+      "submitted": "Form submitted. The assistant asks for confirmation before saving.",
+      "answered": "Form sent.",
+      "inactive": "This form is no longer active."
     },
     "table": {
       "caption": "Result",
@@ -211,7 +215,8 @@
       "legendMultiple": "Choose one or more options",
       "submit": "Confirm choice",
       "required": "Choose at least one option.",
-      "submitted": "Choice sent."
+      "submitted": "Choice sent.",
+      "inactive": "This choice is no longer active."
     },
     "approvalPending": {
       "title": "Waiting for another person's approval",

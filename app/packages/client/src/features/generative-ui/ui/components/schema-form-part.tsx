@@ -14,13 +14,16 @@ import type { GenerativeComponentProps } from "../../model/ui-registry.ts";
  * `SchemaForm`, prefilled with what the agent proposed. Submitting validates with the contract
  * schema and sends the values back to the conversation; the agent then calls the command, which
  * asks for confirmation — the form itself saves nothing. Without the contract on the client
- * (a module that did not register it) the generic tool view is shown.
+ * (a module that did not register it) the generic tool view is shown. In the history it says
+ * whether the next turn sent it, or that it is no longer active, instead of an empty card.
  */
 export function SchemaFormPart({
   props,
   toolCallId,
   toolName,
   interactive,
+  stale = false,
+  answer,
   fallback,
 }: GenerativeComponentProps<SchemaFormProps>) {
   const t = useTranslations("chat.ui.form");
@@ -47,6 +50,14 @@ export function SchemaFormPart({
   };
 
   const label = t("label", { command: commandLabel(props.commandId) });
+  const answered = answer?.kind === "schema-form" && answer.commandId === props.commandId;
+  const note = submitted ? t("submitted") : answered ? t("answered") : stale ? t("inactive") : "";
+  const statusClass =
+    submitted || answered
+      ? "text-body text-emerald-foreground"
+      : note === ""
+        ? "sr-only"
+        : "text-body-sm text-muted-foreground";
   return (
     <section
       data-slot="schema-form-part"
@@ -54,10 +65,10 @@ export function SchemaFormPart({
       className="flex flex-col gap-3 rounded-md border border-border bg-card p-4"
     >
       <h3 className="text-body font-medium text-muted-foreground">{label}</h3>
-      <p role="status" className={submitted ? "text-body text-emerald-foreground" : "sr-only"}>
-        {submitted ? t("submitted") : ""}
+      <p role="status" className={statusClass}>
+        {note}
       </p>
-      {submitted || !interactive ? null : (
+      {submitted || answered || !interactive ? null : (
         <SchemaForm
           contract={contract}
           defaultValues={props.initialValues}
