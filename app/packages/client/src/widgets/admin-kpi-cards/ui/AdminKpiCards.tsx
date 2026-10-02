@@ -55,7 +55,12 @@ export function AdminKpiCards({ overview }: AdminKpiCardsProps) {
         <KpiCard label={t("organizations")} value={format.number(overview.organizations)} hint={t("organizationsHint")} />
         <KpiCard label={t("activeUsers")} value={format.number(overview.activeUsers7d)} hint={t("last7Days")} />
         <KpiCard label={t("costMtd")} value={formatCost(overview.costMtdMicroUsd)} hint={t("costMtdHint")} />
-        <KpiCard label={t("tripwireRate")} value={percent(overview.tripwireRate)} hint={t("tripwireHint")} />
+        {/* Never shown as a measurement while the API lists it as unmeasured (follow-up 57). */}
+        {overview.unmeasured.includes("tripwireRate") ? (
+          <KpiCard label={t("tripwireRate")} value={<span className="font-sans text-base font-medium text-muted-foreground">{t("notMeasured")}</span>} hint={t("tripwireUnmeasuredHint")} />
+        ) : (
+          <KpiCard label={t("tripwireRate")} value={percent(overview.tripwireRate)} hint={t("tripwireHint")} />
+        )}
         <KpiCard label={t("approvalRate")} value={percent(overview.approvalRate)} hint={t("approvalHint")} />
         <KpiCard
           label={t("evalStatus")}

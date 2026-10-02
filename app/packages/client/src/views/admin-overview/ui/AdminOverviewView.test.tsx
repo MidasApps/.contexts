@@ -33,6 +33,17 @@ describe("AdminOverviewView", () => {
     await expectNoAxeViolations(container);
   });
 
+  it("says a number is not measured instead of showing its placeholder value", async () => {
+    const { container } = renderAdmin(<AdminOverviewView />, { routes: { "GET /v1/admin/overview": ok(buildAdminOverview({ tripwireRate: 0, unmeasured: ["tripwireRate"] })) } });
+    await screen.findByRole("heading", { level: 2, name: "Números da plataforma" });
+    const card = kpi("Paradas por guardrail");
+    expect(card.textContent).not.toContain("0%");
+    expect(within(card).getByText("Não medido")).toBeDefined();
+    expect(within(card).getByText("As paradas por guardrail ainda não são registradas")).toBeDefined();
+    expect(plain(kpi("Aprovações").querySelector("dd")?.textContent ?? null)).toBe("92%");
+    await expectNoAxeViolations(container);
+  });
+
   it("formats the numbers in another locale", async () => {
     renderAdmin(<AdminOverviewView />, { locale: "en-US", routes: { "GET /v1/admin/overview": ok(buildAdminOverview({ evalStatus: "failed" })) } });
     expect(await screen.findByRole("heading", { level: 2, name: "Platform numbers" })).toBeDefined();

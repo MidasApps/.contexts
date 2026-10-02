@@ -65,6 +65,8 @@
       "costMtdHint": "Models, all organizations",
       "tripwireRate": "Guardrail stops",
       "tripwireHint": "Runs stopped, last 7 days",
+      "tripwireUnmeasuredHint": "Guardrail stops are not recorded yet",
+      "notMeasured": "Not measured",
       "approvalRate": "Approvals",
       "approvalHint": "Requests approved, last 7 days",
       "evalStatus": "Agent evaluation",

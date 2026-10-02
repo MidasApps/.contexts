@@ -65,6 +65,8 @@
       "costMtdHint": "Modelos, todas las organizaciones",
       "tripwireRate": "Paradas por guardrail",
       "tripwireHint": "Ejecuciones interrumpidas, últimos 7 días",
+      "tripwireUnmeasuredHint": "Las paradas por guardrail aún no se registran",
+      "notMeasured": "Sin medir",
       "approvalRate": "Aprobaciones",
       "approvalHint": "Solicitudes aprobadas, últimos 7 días",
       "evalStatus": "Evaluación de los agentes",
