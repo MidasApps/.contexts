@@ -79,7 +79,7 @@ function SettingsKnowledge({ context }: { context: AccessContext }) {
   const canDelete = permissions.includes("core.knowledge.delete");
   const openAdd = canWrite && online ? () => setAdding(true) : null;
   return (
-    <SettingsPageFrame
+    <SettingsPageFrame width="wide"
       organizationId={organization.id}
       allowed={allowed}
       header={

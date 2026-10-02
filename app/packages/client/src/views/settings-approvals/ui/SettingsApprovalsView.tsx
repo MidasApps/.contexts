@@ -20,7 +20,7 @@ function SettingsApprovals({ context, approvalRequestId }: { context: AccessCont
   const { organization } = context;
   const detail = approvalRequestId !== undefined;
   return (
-    <SettingsPageFrame
+    <SettingsPageFrame width="wide"
       organizationId={organization.id}
       allowed={context.permissions.includes("core.approval.read")}
       header={

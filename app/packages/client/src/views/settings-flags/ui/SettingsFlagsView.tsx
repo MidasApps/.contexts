@@ -126,7 +126,7 @@ function SettingsFlags({ context }: { context: AccessContext }) {
   const flags = useTenantFlags(organization.id, { enabled: allowed });
   const [change, setChange] = useState<TenantFlagChange | null>(null);
   return (
-    <SettingsPageFrame
+    <SettingsPageFrame width="wide"
       organizationId={organization.id}
       allowed={allowed}
       header={<PageHeader eyebrow={t("eyebrow", { organization: organization.name })} title={t("title")} description={t("description")} />}

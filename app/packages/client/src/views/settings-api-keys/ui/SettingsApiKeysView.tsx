@@ -131,7 +131,7 @@ function SettingsApiKeys({ context }: { context: AccessContext }) {
   const [creating, setCreating] = useState(false);
   const canCreate = context.permissions.includes("core.api-key.create");
   return (
-    <SettingsPageFrame
+    <SettingsPageFrame width="wide"
       organizationId={organization.id}
       allowed={context.permissions.includes("core.api-key.read")}
       header={

@@ -137,7 +137,7 @@ function SettingsRoles({ context }: { context: AccessContext }) {
   const grantable = (permission: Permission): boolean => context.permissions.includes(permission);
   const create = canCreate && online ? () => setCreating(true) : null;
   return (
-    <SettingsPageFrame
+    <SettingsPageFrame width="wide"
       organizationId={organization.id}
       allowed={context.permissions.includes("core.role.read")}
       header={

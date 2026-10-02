@@ -117,7 +117,7 @@ function SettingsDevices({ context }: { context: AccessContext }) {
   const canCreate = context.permissions.includes("core.device.create");
   const roles = useRoles(canCreate ? organization.id : undefined);
   return (
-    <SettingsPageFrame
+    <SettingsPageFrame width="wide"
       organizationId={organization.id}
       allowed={context.permissions.includes("core.device.read")}
       header={

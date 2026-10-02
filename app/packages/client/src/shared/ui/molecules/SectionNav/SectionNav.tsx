@@ -25,21 +25,21 @@ export type SectionNavProps = {
 
 /**
  * Section links of settings/profile pages (navegacao.html secondary nav): a vertical list from
- * `md`, a horizontally scrolling row of pills on small screens. The current section carries
- * `aria-current="page"`. Goes inside the `nav` of `SettingsTemplate`.
+ * `lg` (the side column of `SettingsTemplate`), a horizontally scrolling row of pills below it.
+ * The current section carries `aria-current="page"`. Goes inside the `nav` of `SettingsTemplate`.
  */
 export function SectionNav({ items, loading = false, loadingLabel, className }: SectionNavProps) {
   if (loading) {
     return (
-      <div role="status" aria-label={loadingLabel} className="flex gap-2 md:flex-col">
+      <div role="status" aria-label={loadingLabel} className="flex gap-2 lg:flex-col">
         {[0, 1, 2, 3].map((index) => (
-          <Skeleton key={index} className="h-8 w-28 rounded-xs md:w-full" />
+          <Skeleton key={index} className="h-8 w-28 rounded-xs lg:w-full" />
         ))}
       </div>
     );
   }
   return (
-    <ul className={cn("-mx-1 flex gap-1 overflow-x-auto px-1 pb-1 md:mx-0 md:flex-col md:overflow-visible md:px-0 md:pb-0", className)}>
+    <ul className={cn("-mx-1 flex gap-1 overflow-x-auto px-1 pb-1 lg:mx-0 lg:flex-col lg:overflow-visible lg:px-0 lg:pb-0", className)}>
       {items.map((item) => (
         <li key={item.id} className="shrink-0">
           <RouteLink

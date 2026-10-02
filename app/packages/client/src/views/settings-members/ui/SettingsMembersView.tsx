@@ -157,7 +157,7 @@ function SettingsMembers({ context }: { context: AccessContext }) {
     </Button>
   ) : undefined;
   return (
-    <SettingsPageFrame
+    <SettingsPageFrame width="wide"
       organizationId={organization.id}
       allowed={allowed}
       header={<PageHeader eyebrow={t("eyebrow", { organization: organization.name })} title={t("title")} description={t("description")} actions={allowed ? inviteButton : undefined} />}

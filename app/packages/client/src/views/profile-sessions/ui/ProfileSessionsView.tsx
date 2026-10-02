@@ -114,7 +114,7 @@ export function ProfileSessionsView() {
   const columns = useColumns(setTarget);
   const paged = useCursorPages(sessions, SESSIONS_PAGE_LIMIT, t("pagination"));
   return (
-    <ProfilePageFrame header={<PageHeader title={t("title")} description={t("description")} />}>
+    <ProfilePageFrame width="wide" header={<PageHeader title={t("title")} description={t("description")} />}>
       <div className="flex flex-col gap-6">
         <SectionCard title={t("listTitle")} description={t("listDescription")}>
           <DataTable

@@ -9,7 +9,7 @@ import { navItemRoute } from "#/shared/lib/shell/nav-item-route.ts";
 import { useNavigationRegistry } from "#/shared/lib/shell/shell-registry-context.tsx";
 import { NoAccessState } from "#/shared/ui/molecules/NoAccessState/NoAccessState.tsx";
 import { SectionNav, type SectionNavItem } from "#/shared/ui/molecules/SectionNav/SectionNav.tsx";
-import { SettingsTemplate } from "#/shared/ui/templates/SettingsTemplate/SettingsTemplate.tsx";
+import { SettingsTemplate, type SettingsTemplateProps } from "#/shared/ui/templates/SettingsTemplate/SettingsTemplate.tsx";
 
 const pathOf = (route: Route): string => routeHref(route).split(/[?#]/u)[0] ?? "";
 // A section stays current on its detail pages (`approvals/{id}`, `workflows/runs/{id}`).
@@ -40,6 +40,8 @@ export type SettingsPageFrameProps = {
   header: ReactNode;
   /** The viewer holds the section's read permission; otherwise the content is a no-access state. */
   allowed: boolean;
+  /** `wide` for sections whose main content is a data table (see `SettingsTemplate`). */
+  width?: SettingsTemplateProps["width"] | undefined;
   children: ReactNode;
 };
 
@@ -47,10 +49,15 @@ export type SettingsPageFrameProps = {
  * Frame of every settings page: header, the labelled section navigation and the section content,
  * or `NoAccessState` when the viewer cannot read the section (the navigation stays usable).
  */
-export function SettingsPageFrame({ organizationId, header, allowed, children }: SettingsPageFrameProps) {
+export function SettingsPageFrame({ organizationId, header, allowed, width, children }: SettingsPageFrameProps) {
   const t = useTranslations("settings");
   return (
-    <SettingsTemplate header={header} navigation={<SettingsNav organizationId={organizationId} />} navigationLabel={t("navLabel")}>
+    <SettingsTemplate
+      header={header}
+      navigation={<SettingsNav organizationId={organizationId} />}
+      navigationLabel={t("navLabel")}
+      width={allowed ? width : "reading"}
+    >
       {allowed ? children : <NoAccessState description={t("noAccessDescription")} />}
     </SettingsTemplate>
   );

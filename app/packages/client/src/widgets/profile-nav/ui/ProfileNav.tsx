@@ -9,7 +9,7 @@ import { Icon } from "#/shared/ui/atoms/Icon/Icon.tsx";
 import type { IconName } from "#/shared/ui/atoms/Icon/icon-registry.ts";
 import { Alert, AlertDescription } from "#/shared/ui/molecules/Alert/Alert.tsx";
 import { SectionNav } from "#/shared/ui/molecules/SectionNav/SectionNav.tsx";
-import { SettingsTemplate } from "#/shared/ui/templates/SettingsTemplate/SettingsTemplate.tsx";
+import { SettingsTemplate, type SettingsTemplateProps } from "#/shared/ui/templates/SettingsTemplate/SettingsTemplate.tsx";
 
 const ICONS: Record<ProfileSection, IconName> = {
   account: "user",
@@ -49,7 +49,7 @@ function ImpersonationReadOnlyNotice() {
   const t = useTranslations("profile");
   if (!useIsImpersonating()) return null;
   return (
-    <Alert variant="warning" role={undefined} className="mb-6">
+    <Alert variant="warning" role={undefined}>
       <Icon name="eye" />
       <AlertDescription className="text-inherit">{t("impersonationReadOnly")}</AlertDescription>
     </Alert>
@@ -57,10 +57,10 @@ function ImpersonationReadOnlyNotice() {
 }
 
 /** Frame of every profile page: header, the labelled section navigation, the content. */
-export function ProfilePageFrame({ header, children }: { header: ReactNode; children: ReactNode }) {
+export function ProfilePageFrame({ header, width, children }: { header: ReactNode; width?: SettingsTemplateProps["width"]; children: ReactNode }) {
   const t = useTranslations("profile");
   return (
-    <SettingsTemplate header={header} navigation={<ProfileNav />} navigationLabel={t("navLabel")}>
+    <SettingsTemplate header={header} navigation={<ProfileNav />} navigationLabel={t("navLabel")} width={width}>
       <ImpersonationReadOnlyNotice />
       {children}
     </SettingsTemplate>

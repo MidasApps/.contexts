@@ -130,7 +130,7 @@ function SettingsInvitations({ context }: { context: AccessContext }) {
   const canInvite = context.permissions.includes("core.member.invite");
   const roles = useRoles(canInvite ? organization.id : undefined);
   return (
-    <SettingsPageFrame
+    <SettingsPageFrame width="wide"
       organizationId={organization.id}
       allowed={canInvite}
       header={

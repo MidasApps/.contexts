@@ -36,7 +36,7 @@ function TracesPage({ context }: { context: AccessContext }) {
   const t = useTranslations("settings.traces");
   const { organization } = context;
   return (
-    <SettingsPageFrame
+    <SettingsPageFrame width="wide"
       organizationId={organization.id}
       allowed={context.permissions.includes(READ)}
       header={<PageHeader eyebrow={t("eyebrow", { organization: organization.name })} title={t("title")} description={t("description")} />}
@@ -55,7 +55,7 @@ function TraceDetailPage({ context, traceId }: { context: AccessContext; traceId
   // Another organization's trace answers 404 too: the page never says which case it was.
   const missing = !valid || isApiErrorStatus(trace.error, 404);
   return (
-    <SettingsPageFrame
+    <SettingsPageFrame width="wide"
       organizationId={organization.id}
       allowed={allowed}
       header={

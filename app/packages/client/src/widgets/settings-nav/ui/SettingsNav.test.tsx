@@ -24,6 +24,29 @@ describe("settings and profile navigation", () => {
     await expectNoAxeViolations(container);
   });
 
+  it("lets list sections use the full width, and keeps no-access at reading width", async () => {
+    const wide = renderApp(
+      <main>
+        <SettingsPageFrame organizationId={IDS.organization} header={<h1>Chaves</h1>} allowed width="wide">
+          <p>Tabela</p>
+        </SettingsPageFrame>
+      </main>,
+      { path: `/o/${IDS.organization}/settings/api-keys`, routes: shellRoutes(["core.organization.read"]) },
+    );
+    expect((await screen.findByText("Tabela")).parentElement?.getAttribute("data-width")).toBe("wide");
+    wide.unmount();
+    renderApp(
+      <main>
+        <SettingsPageFrame organizationId={IDS.organization} header={<h1>Chaves</h1>} allowed={false} width="wide">
+          <p>Tabela</p>
+        </SettingsPageFrame>
+      </main>,
+      { path: `/o/${IDS.organization}/settings/api-keys`, routes: shellRoutes(["core.organization.read"]) },
+    );
+    const heading = await screen.findByRole("heading", { name: "Você não tem acesso a esta página" });
+    expect(heading.closest("section")?.getAttribute("data-width")).toBe("reading");
+  });
+
   it("replaces the content with no-access when not allowed", async () => {
     renderApp(
       <main>

@@ -33,4 +33,28 @@ describe("SettingsTemplate", () => {
     expect(screen.getByRole("heading", { level: 2, name: "Geral" })).toBeDefined();
     await expectNoAxeViolations(container);
   });
+
+  it("spaces the blocks of a section and caps it for reading by default", () => {
+    renderWithProviders(
+      <SettingsTemplate header={<h1>Uso</h1>} navigationLabel="Seções" navigation={<ul />}>
+        <p>Mês</p>
+        <p>Resumo</p>
+      </SettingsTemplate>,
+    );
+    const section = screen.getByText("Mês").parentElement;
+    expect(section?.className).toContain("gap-6");
+    expect(section?.className).toContain("max-w-[720px]");
+    expect(section?.getAttribute("data-width")).toBe("reading");
+  });
+
+  it("lets list sections use the full width", () => {
+    renderWithProviders(
+      <SettingsTemplate header={<h1>Traces</h1>} navigationLabel="Seções" navigation={<ul />} width="wide">
+        <p>Tabela</p>
+      </SettingsTemplate>,
+    );
+    const section = screen.getByText("Tabela").parentElement;
+    expect(section?.className).not.toContain("max-w-[720px]");
+    expect(section?.getAttribute("data-width")).toBe("wide");
+  });
 });

@@ -58,7 +58,7 @@ function SettingsEvals({ context }: { context: AccessContext }) {
   const allowed = context.permissions.includes("core.eval.read");
   const canStart = context.permissions.includes("core.eval.write");
   return (
-    <SettingsPageFrame
+    <SettingsPageFrame width="wide"
       organizationId={organization.id}
       allowed={allowed}
       header={

@@ -157,7 +157,7 @@ function SettingsConnectors({ context }: { context: AccessContext }) {
   const writable = canWrite && online;
   const create = (): void => dialogs.setEditor({ connector: null });
   return (
-    <SettingsPageFrame
+    <SettingsPageFrame width="wide"
       organizationId={organization.id}
       allowed={context.permissions.includes("core.connector.read")}
       header={

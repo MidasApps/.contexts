@@ -38,7 +38,7 @@ function WorkflowsHome({ context }: { context: AccessContext }) {
   const openStart = canStart && online && startable ? () => setStarting(true) : null;
   const runs = <RunsSection context={context} workflows={workflows} onStart={openStart} online={online} />;
   return (
-    <SettingsPageFrame
+    <SettingsPageFrame width="wide"
       organizationId={organization.id}
       allowed={canRead}
       header={
@@ -96,7 +96,7 @@ function UnknownPage({ context }: { context: AccessContext }) {
   const t = useTranslations("settings.workflows");
   const { organization } = context;
   return (
-    <SettingsPageFrame
+    <SettingsPageFrame width="wide"
       organizationId={organization.id}
       allowed={context.permissions.includes("core.workflow-run.read")}
       header={<PageHeader eyebrow={t("eyebrow", { organization: organization.name })} title={t("title")} />}
