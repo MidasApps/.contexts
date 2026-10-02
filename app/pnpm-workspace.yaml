@@ -108,6 +108,7 @@ catalog:
   typescript: 7.0.2
   typescript-eslint: 8.71.0 # E2: runs on the TS 6 API via .pnpmfile.cjs
   ulid: 3.0.2
+  uqr: 0.1.3 # QR matrix for the TOTP setup code (UX review U-05); zero dependencies, rendered as SVG by the client
   use-stick-to-bottom: 1.1.6 # chat scroll anchoring (AI Elements conversation, decision 0035)
   use-intl: 4.14.8 # same release as next-intl (web wraps it)
   vite: 8.3.1

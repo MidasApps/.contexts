@@ -2,12 +2,12 @@
 
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useTranslations } from "use-intl";
-import { useClientConfig } from "#/shared/config/config-context.tsx";
 import { useAuth } from "#/shared/lib/auth/auth-context.tsx";
 import { authErrorCode } from "#/shared/lib/auth/auth-error-code.ts";
 import type { AuthErrorCode, TotpEnrollment } from "#/shared/lib/auth/auth-port.ts";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
 import { Icon } from "#/shared/ui/atoms/Icon/Icon.tsx";
+import { QrCode } from "#/shared/ui/atoms/QrCode/QrCode.tsx";
 import { CopyField } from "#/shared/ui/molecules/CopyField/CopyField.tsx";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "#/shared/ui/molecules/Dialog/Dialog.tsx";
 import { LoadingState } from "#/shared/ui/molecules/LoadingState/LoadingState.tsx";
@@ -15,10 +15,14 @@ import { CODE_PATTERN, CodeField, EnrollmentAlert, FactorNameField } from "./enr
 
 type Props = { open: boolean; onOpenChange: (open: boolean) => void; onEnrolled: () => Promise<void> };
 
-/** Starts a TOTP enrollment when opened; the secret lives only in this component's state. */
+/**
+ * Starts a TOTP enrollment when opened; the secret lives only in this component's state. The
+ * issuer (how the authenticator app lists the entry) is the product name, from the same copy key
+ * as the entry pages (decision 0050), never the Firebase project id.
+ */
 const useTotpEnrollment = () => {
   const auth = useAuth();
-  const issuer = useClientConfig().firebase.projectId;
+  const issuer = useTranslations("auth.entry")("appName");
   const [enrollment, setEnrollment] = useState<TotpEnrollment | null>(null);
   const [failure, setFailure] = useState<AuthErrorCode | null>(null);
   const [attempt, setAttempt] = useState(0);
@@ -41,8 +45,9 @@ const useTotpEnrollment = () => {
 };
 
 /**
- * Authenticator-app enrollment (TOTP, SP1 decision 0007): the setup link (opens the app on this
- * device) and the setup key to type or copy, then the 6-digit code confirms it. A wrong code is a
+ * Authenticator-app enrollment (TOTP, SP1 decision 0007): a QR code to scan with the phone, the
+ * setup link (opens the app on this device) and the setup key to type or copy as fallbacks, then
+ * the 6-digit code confirms it. A wrong code is a
  * field error; other failures (e.g. `REQUIRES_RECENT_LOGIN`) are a focused alert.
  */
 function EnrollTotpDialogBody({ onOpenChange, onEnrolled }: Props) {
@@ -100,6 +105,7 @@ function EnrollTotpDialogBody({ onOpenChange, onEnrolled }: Props) {
               <li>{t("totpStepScan")}</li>
               <li>{t("totpStepCode")}</li>
             </ol>
+            <QrCode value={enrollment.uri} label={t("totpQrLabel")} className="self-center" />
             <Button variant="outline" asChild className="self-start">
               <a href={enrollment.uri}>
                 <Icon name="external-link" />

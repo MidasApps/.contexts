@@ -1,5 +1,5 @@
 import { screen, waitFor, within } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { renderApp } from "#/app-shell/testing/render-app.tsx";
 import type { MfaFactor } from "#/shared/config/client-config.schema.ts";
 import { createFakeAuth, FAKE_MFA_CODE, FAKE_TOTP_SECRET, type FakeAuthOptions } from "#/shared/lib/auth/fake-auth.ts";
@@ -54,6 +54,21 @@ describe("ProfileSecurityView", () => {
     expect(within(list).getByText("App autenticador")).toBeDefined();
     expect(await screen.findByText("Verificação em duas etapas atualizada.")).toBeDefined();
     expect(api.callLines().filter((line) => line === "GET /v1/me").length).toBeGreaterThanOrEqual(2);
+  });
+
+  it("shows the setup as a QR code to scan from the phone, listed under the product name", async () => {
+    const { user, auth } = renderView(["totp"]);
+    const start = vi.spyOn(auth, "startTotpEnrollment");
+    await user.click(await screen.findByRole("button", { name: "Adicionar app autenticador" }));
+    const dialog = await screen.findByRole("dialog", { name: "Adicionar app autenticador" });
+    expect(await within(dialog).findByRole("img", { name: "QR code para configurar o app autenticador" })).toBeDefined();
+    expect(within(dialog).getByText(/Escaneie o QR code/u)).toBeDefined();
+    // The authenticator lists the entry under the product name, not the Firebase project id.
+    expect(start).toHaveBeenCalledWith("Core");
+    // The link and the key stay as fallbacks (authenticator on this device, or no camera).
+    expect(within(dialog).getByRole("link", { name: "Abrir no app autenticador" })).toBeDefined();
+    expect(within(dialog).getByRole("textbox", { name: "Chave de configuração" })).toBeDefined();
+    await expectNoAxeViolations(dialog);
   });
 
   it("never shows a setup key again after the dialog closes", async () => {
