@@ -61,6 +61,19 @@ describe("AdminPageFrame and AdminQuerySection", () => {
     await expectNoAxeViolations(container);
   });
 
+  it("reserves the actions slot while the staff role loads, so the header does not shift", () => {
+    const { container } = renderAdmin(<Plans />, { routes: { "GET /v1/me": () => new Promise(() => undefined) } });
+    const header = container.querySelector('[data-slot="page-header"]');
+    expect(header?.querySelector('[data-slot="page-actions"] [data-slot="skeleton"]')).not.toBeNull();
+    expect(screen.queryByRole("button", { name: "Novo" })).toBeNull();
+  });
+
+  it("drops the reserved slot once the role is known to lack the permission", async () => {
+    const { container } = renderAdmin(<Plans />, { role: "platform-support", path: "/admin/plans" });
+    await screen.findByRole("heading", { level: 2, name: "Você não tem acesso a esta página" });
+    expect(container.querySelector('[data-slot="page-actions"]')).toBeNull();
+  });
+
   it("shows no-access when the staff role lacks the permission", async () => {
     const { container } = renderAdmin(<Plans />, { role: "platform-support", path: "/admin/plans" });
     expect(await screen.findByRole("heading", { level: 2, name: "Você não tem acesso a esta página" })).toBeDefined();

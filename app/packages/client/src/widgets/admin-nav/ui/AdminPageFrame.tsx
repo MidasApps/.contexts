@@ -6,6 +6,7 @@ import { useTranslations } from "use-intl";
 import { usePlatformPermissions } from "#/entities/permission/index.ts";
 import { RouteLink } from "#/shared/lib/router/router-context.tsx";
 import { Icon } from "#/shared/ui/atoms/Icon/Icon.tsx";
+import { Skeleton } from "#/shared/ui/atoms/Skeleton/Skeleton.tsx";
 import { ApiErrorState } from "#/shared/ui/molecules/ErrorState/ApiErrorState.tsx";
 import { LoadingState } from "#/shared/ui/molecules/LoadingState/LoadingState.tsx";
 import { NoAccessState } from "#/shared/ui/molecules/NoAccessState/NoAccessState.tsx";
@@ -23,7 +24,10 @@ export type AdminPageFrameProps = {
   back?: { rest: string; label: string } | undefined;
   /** Status next to the title. */
   meta?: ReactNode;
-  /** Page actions; rendered only when the role holds the permission. */
+  /**
+   * Page actions; rendered only when the role holds the permission. While the role loads, a
+   * button-sized placeholder keeps their place so the header does not shift.
+   */
   actions?: ReactNode;
   children: ReactNode;
 };
@@ -59,7 +63,15 @@ export function AdminPageFrame({ permission, title, description, back, meta, act
           </div>
           {description === undefined ? null : <p className="max-w-prose text-sm text-muted-foreground">{description}</p>}
         </div>
-        {allowed && actions !== undefined ? <div className="flex shrink-0 flex-wrap items-center gap-2">{actions}</div> : null}
+        {actions === undefined ? null : allowed ? (
+          <div data-slot="page-actions" className="flex shrink-0 flex-wrap items-center gap-2">
+            {actions}
+          </div>
+        ) : permissions.status === "pending" ? (
+          <div data-slot="page-actions" className="flex shrink-0 items-center">
+            <Skeleton className="h-9 w-28 rounded-sm" />
+          </div>
+        ) : null}
       </div>
       {permissions.status === "pending" ? (
         <LoadingState label={t("loading")} rows={4} />
