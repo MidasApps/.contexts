@@ -4,6 +4,7 @@ import type { ComponentProps, ReactNode } from "react";
 import { Streamdown, type Components } from "streamdown";
 import { useTranslations } from "use-intl";
 import { cn } from "#/shared/lib/cn.ts";
+import { CodeBlock } from "#/shared/ui/ai/code-block.tsx";
 import { isCitationHref, resolveSafeLink } from "./link-policy.ts";
 
 export type SafeMarkdownProps = {
@@ -18,6 +19,16 @@ export type SafeMarkdownProps = {
 
 type AnchorProps = ComponentProps<"a"> & { node?: unknown };
 type ImageProps = ComponentProps<"img"> & { node?: unknown };
+type CodeProps = ComponentProps<"code"> & { node?: unknown };
+
+const textOf = (node: ReactNode): string => {
+  if (typeof node === "string" || typeof node === "number") return String(node);
+  if (Array.isArray(node)) return node.map(textOf).join("");
+  return "";
+};
+
+/** Streamdown marks fenced code with `data-block`; inline code has no such prop. */
+const isBlock = (props: CodeProps): boolean => "data-block" in props;
 
 const NO_PLUGINS: [] = [];
 const NO_LINK_SAFETY = { enabled: false } as const;
@@ -34,7 +45,6 @@ const PROSE = [
   "[&_a]:underline [&_a]:underline-offset-4 [&_code]:font-mono [&_code]:text-[12.5px]",
   "[&_h1]:text-lg [&_h1]:font-semibold [&_h2]:text-base [&_h2]:font-semibold [&_h3]:text-sm [&_h3]:font-semibold",
   "[&_ol]:list-decimal [&_ol]:pl-5 [&_ul]:list-disc [&_ul]:pl-5 [&_li]:my-0.5",
-  "[&_pre]:overflow-x-auto [&_pre]:rounded-sm [&_pre]:border [&_pre]:border-border [&_pre]:bg-muted [&_pre]:p-3",
   "[&_table]:w-full [&_table]:text-[13px] [&_td]:border [&_td]:border-border [&_td]:px-2 [&_td]:py-1 [&_th]:border [&_th]:border-border [&_th]:px-2 [&_th]:py-1 [&_th]:text-left",
   "[&_blockquote]:border-l-2 [&_blockquote]:border-border [&_blockquote]:pl-3 [&_blockquote]:text-muted-foreground",
   "[&>*+*]:mt-3",
@@ -71,8 +81,18 @@ export function SafeMarkdown({ children, streaming = false, renderCitation, clas
     </span>
   );
 
+  // Fenced code becomes the kit block: the fence language, a labelled keyboard-scrollable region and
+  // a copy button; still no highlighter (no wasm, decision 0016). Inline code stays a plain `code`.
+  const Code = (props: CodeProps) => {
+    const { className: codeClass, children: code } = props;
+    if (!isBlock(props)) return <code className={codeClass}>{code}</code>;
+    const language = /language-([\w+#.-]+)/u.exec(codeClass ?? "")?.[1];
+    const text = textOf(code).replace(/\n$/u, "");
+    return <CodeBlock code={text} language={language} label={language === undefined ? t("code") : t("codeWithLanguage", { language })} />;
+  };
+
   // Streamdown styles emphasis with spans; the native elements keep the semantics.
-  const components: Components = { a: Anchor, img: Image, strong: "strong", em: "em" };
+  const components: Components = { a: Anchor, img: Image, strong: "strong", em: "em", code: Code };
 
   return (
     <Streamdown

@@ -1,5 +1,5 @@
 import { screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { expectNoAxeViolations } from "#/shared/testing/axe.ts";
 import { renderWithProviders } from "#/shared/testing/render.tsx";
 import { SafeMarkdown } from "./safe-markdown.tsx";
@@ -61,6 +61,17 @@ describe("SafeMarkdown", () => {
     );
     expect(screen.getByTestId("cite").textContent).toBe("1");
     expect(screen.getByText(/const a = 1;/)).toBeTruthy();
+  });
+
+  it("gives fenced code a labelled region with its language and a copy button, and keeps inline code inline", async () => {
+    const { user, container } = renderWithProviders(<SafeMarkdown>{"Use `npm ci` first.\n\n```ts\nconst a = 1;\n```"}</SafeMarkdown>);
+    const region = screen.getByRole("region", { name: "Código ts" });
+    expect(region.textContent).toBe("const a = 1;");
+    expect(screen.getByText("npm ci").closest("[data-slot=code-block]")).toBeNull();
+    await user.click(screen.getByRole("button", { name: "Copiar" }));
+    // user-event stands in for the clipboard.
+    await vi.waitFor(async () => expect(await navigator.clipboard.readText()).toBe("const a = 1;"));
+    await expectNoAxeViolations(container);
   });
 
   it("has no axe violations", async () => {

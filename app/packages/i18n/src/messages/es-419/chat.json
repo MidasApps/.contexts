@@ -2,7 +2,9 @@
   "markdown": {
     "newTab": "(se abre en una pestaña nueva)",
     "image": "[imagen: {alt}]",
-    "imageOmitted": "[imagen omitida]"
+    "imageOmitted": "[imagen omitida]",
+    "code": "Código",
+    "codeWithLanguage": "Código {language}"
   },
   "elements": {
     "scrollToBottom": "Ir al final",
