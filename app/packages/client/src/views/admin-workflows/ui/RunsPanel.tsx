@@ -96,13 +96,14 @@ type RunLabels = {
 
 /**
  * The run of `?run=`: found among the loaded rows, its timeline; while the list
- * loads, nothing yet; not among them (another page, other filters, or gone), a dialog that says so
+ * loads or fails, nothing yet; not among them (another page, other filters, or gone), a dialog that says so
  * instead of an empty one. There is no endpoint for one run by id (follow-up 95).
  */
-function RunDetailsDialog({ runId, run, loading, labels, onClose }: { runId: string | undefined; run: AdminWorkflowRun | undefined; loading: boolean; labels: RunLabels; onClose: () => void }) {
+function RunDetailsDialog({ runId, run, ready, labels, onClose }: { runId: string | undefined; run: AdminWorkflowRun | undefined; ready: boolean; labels: RunLabels; onClose: () => void }) {
   const t = useTranslations("admin.workflows.runs");
   const workflowLabel = useWorkflowLabel();
-  const open = runId !== undefined && !loading;
+  // Only once the list loaded: while it loads or fails, the page shows its own loading or retry.
+  const open = runId !== undefined && ready;
   return (
     <Dialog open={open} onOpenChange={(next) => !next && onClose()}>
       <DialogContent>
@@ -191,7 +192,7 @@ export function RunsPanel({ values, onChange, openRunId, onOpenRunChange, organi
       <RunDetailsDialog
         runId={openRunId}
         run={paged.rows.find((run) => run.runId === openRunId)}
-        loading={runs.isPending}
+        ready={runs.isSuccess}
         labels={{ organizationLabel, userLabel, scheduleLabel }}
         onClose={() => onOpenRunChange(undefined)}
       />
