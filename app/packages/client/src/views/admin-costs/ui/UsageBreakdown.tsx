@@ -42,6 +42,34 @@ const useModelColumns = () => {
   );
 };
 
+/** One model on phones and narrow columns: name and provider, then cost, calls and tokens in words. */
+function ModelCard({ model }: { model: ModelRow }) {
+  const t = useTranslations("admin.costs.usage");
+  const format = useFormatter();
+  const formatCost = useFormatMicroUsd();
+  const fact = (label: string, value: string) => (
+    <div className="flex justify-between gap-2">
+      <dt className="text-muted-foreground">{label}</dt>
+      <dd className="font-mono tabular-nums">{value}</dd>
+    </div>
+  );
+  return (
+    <div className="flex flex-col gap-2">
+      <span className="flex flex-wrap items-baseline justify-between gap-2">
+        <span className="font-mono text-xs font-medium break-all">{model.model}</span>
+        <span className="text-xs text-muted-foreground">{model.provider}</span>
+      </span>
+      <dl className="grid gap-1 text-xs">
+        {fact(t("columns.cost"), formatCost(model.costMicroUsd))}
+        {fact(t("columns.calls"), format.number(model.calls))}
+        {fact(t("columns.inputTokens"), format.number(model.inputTokens))}
+        {fact(t("columns.outputTokens"), format.number(model.outputTokens))}
+        {model.unpricedCalls === 0 ? null : fact(t("columns.unpriced"), format.number(model.unpricedCalls))}
+      </dl>
+    </div>
+  );
+}
+
 function Totals({ usage }: { usage: AdminUsage }) {
   const t = useTranslations("admin.costs.usage");
   const format = useFormatter();
@@ -109,7 +137,7 @@ function Charts({ usage, onClear }: { usage: AdminUsage; onClear: () => void }) 
         rowHeader={t("columns.model")}
         formatValue={(value) => formatCost(value)}
       />
-      <DataTable caption={t("modelsCaption")} columns={columns} data={usage.byModel} getRowId={(model) => `${model.provider}/${model.model}`} stateHeadingLevel={3} empty={null} />
+      <DataTable caption={t("modelsCaption")} columns={columns} data={usage.byModel} getRowId={(model) => `${model.provider}/${model.model}`} stateHeadingLevel={3} empty={null} renderCard={(model) => <ModelCard model={model} />} />
     </div>
   );
 }

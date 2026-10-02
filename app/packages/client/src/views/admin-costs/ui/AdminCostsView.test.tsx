@@ -68,6 +68,23 @@ describe("AdminCostsView", () => {
     await expectNoAxeViolations(container);
   });
 
+  it("lists the usage by model as cards on phones", async () => {
+    const matchMedia = globalThis.matchMedia;
+    globalThis.matchMedia = (query: string) => ({ ...matchMedia(query), matches: query.includes("max-width") });
+    try {
+      const { container } = render();
+      const usage = await screen.findByRole("region", { name: "Uso por dia e por modelo" });
+      const models = await within(usage).findByRole("list", { name: "Uso por modelo" });
+      expect(within(usage).queryByRole("table", { name: "Uso por modelo" })).toBeNull();
+      const haiku = within(models).getAllByRole("listitem").find((item) => item.textContent.includes("claude-haiku"));
+      expect(plain(haiku?.textContent)).toContain("anthropic");
+      expect(plain(haiku?.textContent)).toContain("US$ 0,50");
+      await expectNoAxeViolations(container);
+    } finally {
+      globalThis.matchMedia = matchMedia;
+    }
+  });
+
   it("sends the organization and the days of the URL, writes a picked day back and warns when truncated", async () => {
     const { api, router } = render({
       path: `/admin/costs?organizationId=${IDS.organization}&from=2026-09-01&to=2026-09-30`,
