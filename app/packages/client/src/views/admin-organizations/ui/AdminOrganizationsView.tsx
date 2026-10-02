@@ -166,11 +166,6 @@ function Results({ filter, filtering, plans, onClear }: { filter: AdminOrganizat
                 icon="building"
                 title={t("emptyTitle")}
                 description={t("emptyDescription")}
-                action={
-                  <Button variant="secondary" asChild>
-                    <RouteLink to={{ id: "organizations" }}>{t("emptyAction")}</RouteLink>
-                  </Button>
-                }
               />
             )
           }

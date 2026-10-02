@@ -92,7 +92,6 @@
     "clearFilters": "Clear filters",
     "emptyTitle": "No organizations yet",
     "emptyDescription": "Organizations appear here once someone creates one in the app.",
-    "emptyAction": "See my organizations",
     "columns": {
       "organization": "Organization",
       "status": "Status",
@@ -529,7 +528,7 @@
     "clearFilters": "Clear filters",
     "emptyTitle": "No traces yet",
     "emptyDescription": "Traces appear here when an agent or workflow runs.",
-    "emptyAction": "Back to the overview",
+    "emptyAction": "See the logs",
     "columns": {
       "trace": "Trace",
       "organization": "Organization",
@@ -968,7 +967,6 @@
     "pagination": "Connector pages",
     "emptyTitle": "This organization has no connectors",
     "emptyDescription": "Connectors are created in the organization's settings by its administrators.",
-    "emptyAction": "Open the organization",
     "moreReach": "{count, plural, one {and # more} other {and # more}}",
     "tools": "{allowed, plural, =0 {no tools} one {# tool} other {# tools}}, {readOnly} without approval",
     "noSecret": "No secret",

@@ -99,7 +99,7 @@ function TraceEmpty({ filtering, onClear }: { filtering: boolean; onClear: () =>
       description={t("emptyDescription")}
       action={
         <Button variant="secondary" asChild>
-          <RouteLink to={{ id: "admin", rest: "" }}>{t("emptyAction")}</RouteLink>
+          <RouteLink to={{ id: "admin", rest: "logs" }}>{t("emptyAction")}</RouteLink>
         </Button>
       }
     />

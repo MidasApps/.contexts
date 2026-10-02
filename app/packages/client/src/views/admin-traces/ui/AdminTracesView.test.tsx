@@ -108,7 +108,7 @@ describe("AdminTracesView", () => {
   it("tells an empty platform from filters that match nothing", async () => {
     const empty = render({ routes: routes([]) });
     expect(await screen.findByRole("heading", { level: 2, name: "Nenhum trace ainda" })).toBeDefined();
-    expect(screen.getByRole("link", { name: "Voltar à visão geral" }).getAttribute("href")).toBe("/admin");
+    expect(screen.getByRole("link", { name: "Ver os logs" }).getAttribute("href")).toBe("/admin/logs");
     await expectNoAxeViolations(empty.container);
     empty.unmount();
     const { user, router } = render({ path: "/admin/traces?status=error", routes: routes([]) });

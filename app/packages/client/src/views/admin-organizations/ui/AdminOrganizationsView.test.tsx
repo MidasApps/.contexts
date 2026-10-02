@@ -96,10 +96,11 @@ describe("AdminOrganizationsView", () => {
     expect(api.callLines()).not.toContain("GET /v1/admin/plans");
   });
 
-  it("explains an empty platform and offers a way on", async () => {
+  it("explains how organizations appear, without leaving the console", async () => {
     const { container } = render({ routes: routes([]) });
     expect(await screen.findByRole("heading", { level: 2, name: "Nenhuma organização ainda" })).toBeDefined();
-    expect(screen.getByRole("link", { name: "Ver minhas organizações" }).getAttribute("href")).toBe("/organizations");
+    expect(screen.getByText("As organizações aparecem aqui quando alguém cria uma no app.")).toBeDefined();
+    expect(screen.queryByRole("link", { name: "Ver minhas organizações" })).toBeNull();
     await expectNoAxeViolations(container);
   });
 

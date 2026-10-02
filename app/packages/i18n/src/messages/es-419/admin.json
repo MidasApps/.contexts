@@ -92,7 +92,6 @@
     "clearFilters": "Limpiar filtros",
     "emptyTitle": "Todavía no hay organizaciones",
     "emptyDescription": "Las organizaciones aparecen aquí cuando alguien crea una en la app.",
-    "emptyAction": "Ver mis organizaciones",
     "columns": {
       "organization": "Organización",
       "status": "Estado",
@@ -529,7 +528,7 @@
     "clearFilters": "Limpiar filtros",
     "emptyTitle": "Todavía no hay traces",
     "emptyDescription": "Los traces aparecen aquí cuando se ejecuta un agente o un workflow.",
-    "emptyAction": "Volver al resumen",
+    "emptyAction": "Ver los registros",
     "columns": {
       "trace": "Trace",
       "organization": "Organización",
@@ -968,7 +967,6 @@
     "pagination": "Páginas de conectores",
     "emptyTitle": "Esta organización no tiene conectores",
     "emptyDescription": "Los conectores se crean en la configuración de la organización por quienes la administran.",
-    "emptyAction": "Abrir la organización",
     "moreReach": "{count, plural, one {y # más} other {y # más}}",
     "tools": "{allowed, plural, =0 {ninguna herramienta} one {# herramienta} other {# herramientas}}, {readOnly} sin aprobación",
     "noSecret": "Sin secreto",
