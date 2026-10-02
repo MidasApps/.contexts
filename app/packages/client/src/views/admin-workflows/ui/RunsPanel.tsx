@@ -6,7 +6,10 @@ import { useTranslations } from "use-intl";
 import { useAdminUserNames } from "#/entities/admin-user/index.ts";
 import { usePlatformPermissions } from "#/entities/permission/index.ts";
 import { useAdminWorkflowRuns, ADMIN_RUNS_PAGE_LIMIT } from "#/entities/workflow-run/index.ts";
+import { useAdminSchedules } from "#/entities/schedule/index.ts";
 import { CancelRunDialog } from "#/features/admin-cancel-run/index.ts";
+import { useScheduleLabels } from "#/features/schedule-editor/index.ts";
+import { useWorkflowLabel } from "#/shared/lib/labels/use-catalog-labels.ts";
 import { useCursorPages } from "#/shared/lib/pagination/use-cursor-pages.ts";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
 import { Input } from "#/shared/ui/atoms/Input/Input.tsx";
@@ -89,22 +92,30 @@ function RunDetailsDialog({
   run,
   organizationLabel,
   userLabel,
+  scheduleLabel,
   onOpenChange,
 }: {
   run: AdminWorkflowRun | null;
   organizationLabel: (tenantId: string | null) => string;
   userLabel: (userId: string) => string;
+  scheduleLabel: (scheduleId: string) => string | undefined;
   onOpenChange: (open: boolean) => void;
 }) {
   const t = useTranslations("admin.workflows.runs");
+  const workflowLabel = useWorkflowLabel();
   return (
     <Dialog open={run !== null} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{t("detailsTitle", { workflow: run?.workflowId ?? "" })}</DialogTitle>
+          <DialogTitle>{t("detailsTitle", { workflow: run === null ? "" : workflowLabel.name(run.workflowId) })}</DialogTitle>
           <DialogDescription>{run === null ? "" : t("detailsDescription", { organization: organizationLabel(run.tenantId), id: run.runId })}</DialogDescription>
         </DialogHeader>
-        {run === null ? null : <RunTimeline run={run} label={t("timelineLabel")} starterLabel={run.startedBy === null ? undefined : userLabel(run.startedBy)} />}
+        {run === null ? null : <RunTimeline
+            run={run}
+            label={t("timelineLabel")}
+            starterLabel={run.startedBy === null ? undefined : userLabel(run.startedBy)}
+            scheduleLabel={run.scheduleId === null ? undefined : scheduleLabel(run.scheduleId)}
+          />}
         <p className="text-xs text-muted-foreground">{t("noStepEvents")}</p>
       </DialogContent>
     </Dialog>
@@ -144,6 +155,8 @@ export function RunsPanel({ values, onChange, organizationLabel, onSeeSchedules 
   // One lookup for the starters of the page on screen (decision 0044), never one per row.
   const canReadUsers = usePlatformPermissions().can("platform.user.read");
   const userLabel = useAdminUserNames(paged.rows.map((run) => run.startedBy), { enabled: canReadUsers });
+  // The schedules of the same organization filter (the schedules tab's cached list) name the runs they started.
+  const scheduleLabel = useScheduleLabels(useAdminSchedules(filters.organizationId).data);
   const [details, setDetails] = useState<AdminWorkflowRun | null>(null);
   const [canceling, setCanceling] = useState<AdminWorkflowRun | null>(null);
   const filtering = Object.values(filters).some((value) => value !== undefined);
@@ -157,13 +170,14 @@ export function RunsPanel({ values, onChange, organizationLabel, onSeeSchedules 
             pagination={paged.pagination}
             organizationLabel={organizationLabel}
             userLabel={userLabel}
+            scheduleLabel={scheduleLabel}
             onDetails={setDetails}
             onCancel={setCanceling}
             empty={<RunsEmpty filtering={filtering} onClear={() => onChange({ organizationId: undefined, workflowId: undefined, status: undefined })} onSchedules={onSeeSchedules} />}
           />
         )}
       </AdminQuerySection>
-      <RunDetailsDialog run={details} organizationLabel={organizationLabel} userLabel={userLabel} onOpenChange={(open) => !open && setDetails(null)} />
+      <RunDetailsDialog run={details} organizationLabel={organizationLabel} userLabel={userLabel} scheduleLabel={scheduleLabel} onOpenChange={(open) => !open && setDetails(null)} />
       <CancelRunDialog run={canceling} onOpenChange={(open) => !open && setCanceling(null)} />
     </div>
   );

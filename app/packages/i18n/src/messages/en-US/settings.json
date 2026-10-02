@@ -1395,6 +1395,7 @@
     },
     "run": {
       "title": "Run of {workflow}",
+      "titleUnknown": "Run",
       "loading": "Loading the run…",
       "notFoundTitle": "Run not found",
       "notFoundDescription": "This run no longer exists or belongs to another organization.",

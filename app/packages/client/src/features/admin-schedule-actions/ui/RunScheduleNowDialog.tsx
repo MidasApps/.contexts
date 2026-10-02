@@ -7,6 +7,7 @@ import { scheduleKeys } from "#/entities/schedule/index.ts";
 import { workflowRunKeys } from "#/entities/workflow-run/index.ts";
 import { useCallEndpoint } from "#/shared/api/api-context.tsx";
 import { useConfirmedAction } from "#/shared/lib/errors/use-confirmed-action.ts";
+import { useWorkflowLabel } from "#/shared/lib/labels/use-catalog-labels.ts";
 import { notify } from "#/shared/ui/molecules/Toaster/notify.ts";
 import { ConfirmDialog } from "#/shared/ui/organisms/ConfirmDialog/ConfirmDialog.tsx";
 
@@ -19,6 +20,7 @@ export type RunScheduleNowDialogProps = { schedule: AdminSchedule | null; onOpen
  */
 export function RunScheduleNowDialog({ schedule, onOpenChange }: RunScheduleNowDialogProps) {
   const t = useTranslations("admin.workflows.runNow");
+  const workflowLabel = useWorkflowLabel();
   const callEndpoint = useCallEndpoint();
   const queryClient = useQueryClient();
   const action = useConfirmedAction(
@@ -27,7 +29,7 @@ export function RunScheduleNowDialog({ schedule, onOpenChange }: RunScheduleNowD
       await callEndpoint(adminRunScheduleNowEndpoint, { params: { scheduleId: schedule.id } });
       await Promise.all([queryClient.invalidateQueries({ queryKey: scheduleKeys.all() }), queryClient.invalidateQueries({ queryKey: workflowRunKeys.all() })]);
     },
-    () => notify.success(t("done", { workflow: schedule?.workflowId ?? "" })),
+    () => notify.success(t("done", { workflow: schedule === null ? "" : workflowLabel.name(schedule.workflowId) })),
   );
   return (
     <ConfirmDialog
@@ -36,7 +38,7 @@ export function RunScheduleNowDialog({ schedule, onOpenChange }: RunScheduleNowD
         if (!open) action.reset();
         onOpenChange(open);
       }}
-      title={t("title", { workflow: schedule?.workflowId ?? "" })}
+      title={t("title", { workflow: schedule === null ? "" : workflowLabel.name(schedule.workflowId) })}
       description={schedule?.scope === "tenant" ? t("descriptionTenant") : t("descriptionPlatform")}
       confirmLabel={t("confirm")}
       onConfirm={action.confirm}

@@ -1395,6 +1395,7 @@
     },
     "run": {
       "title": "Execução de {workflow}",
+      "titleUnknown": "Execução",
       "loading": "Carregando a execução…",
       "notFoundTitle": "Execução não encontrada",
       "notFoundDescription": "Esta execução não existe mais ou pertence a outra organização.",

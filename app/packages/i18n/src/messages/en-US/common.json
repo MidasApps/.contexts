@@ -216,7 +216,8 @@
       "tripwire": "Stopped by guardrail"
     },
     "started": "Started",
-    "startedBySchedule": "By the schedule {schedule}",
+    "startedBySchedule": "By a schedule: {schedule}",
+    "startedByAnySchedule": "By a schedule",
     "startedByUser": "By the user {user}",
     "startedByPlatform": "By the platform",
     "waitingApproval": "Waits for approval",

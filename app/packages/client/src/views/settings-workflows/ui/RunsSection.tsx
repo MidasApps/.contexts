@@ -5,6 +5,7 @@ import { useId, useMemo, useState } from "react";
 import { useTranslations } from "use-intl";
 import { isRunCancelable, RunStatusPill, TENANT_RUNS_PAGE_LIMIT, useTenantWorkflowRuns, type TenantRunFilters } from "#/entities/workflow-run/index.ts";
 import { CancelWorkflowRunDialog } from "#/features/cancel-workflow-run/index.ts";
+import { useWorkflowLabel } from "#/shared/lib/labels/use-catalog-labels.ts";
 import { useFormatDateTime } from "#/shared/lib/format/use-format-date-time.ts";
 import { useCursorPages } from "#/shared/lib/pagination/use-cursor-pages.ts";
 import { RouteLink } from "#/shared/lib/router/router-context.tsx";
@@ -16,6 +17,7 @@ import { DataTable } from "#/shared/ui/organisms/DataTable/DataTable.tsx";
 import { dataTableColumnHelper } from "#/shared/ui/organisms/DataTable/data-table-columns.ts";
 import { QuerySection } from "#/widgets/page-state/index.ts";
 import { useStarterNames } from "../model/use-starter-names.ts";
+import { useTenantScheduleLabels } from "../model/use-tenant-schedule-labels.ts";
 
 const ANY = "any";
 const isStatus = (value: string): value is WorkflowRunStatus => (WORKFLOW_RUN_STATUSES as readonly string[]).includes(value);
@@ -23,21 +25,27 @@ const column = dataTableColumnHelper<WorkflowRun>();
 
 type RowActions = { organizationId: string; onCancel: ((run: WorkflowRun) => void) | null };
 type StarterName = (uid: string | null) => string | undefined;
+type ScheduleLabel = (scheduleId: string) => string | undefined;
+type Labels = { starterName: StarterName; scheduleLabel: ScheduleLabel };
 
 function RunName({ run }: { run: WorkflowRun }) {
+  const workflowLabel = useWorkflowLabel();
   return (
     <span className="flex min-w-0 flex-col">
-      <span className="font-medium">{run.workflowId}</span>
+      <span className="font-medium">{workflowLabel.name(run.workflowId)}</span>
       <span className="font-mono text-[11.5px] break-all text-muted-foreground">{run.runId}</span>
     </span>
   );
 }
 
 /** Who or what started the run, and whether it waits for an approval. */
-function Origin({ run, starterName }: { run: WorkflowRun; starterName: StarterName }) {
+function Origin({ run, labels }: { run: WorkflowRun; labels: Labels }) {
   const t = useTranslations("settings.workflows.runs");
   const tTimeline = useTranslations("common.runTimeline");
-  const origin = run.scheduleId !== null ? tTimeline("startedBySchedule", { schedule: run.scheduleId }) : run.startedBy !== null ? tTimeline("startedByUser", { user: starterName(run.startedBy) ?? run.startedBy }) : tTimeline("startedByPlatform");
+  const { starterName, scheduleLabel } = labels;
+  const schedule = run.scheduleId === null ? undefined : scheduleLabel(run.scheduleId);
+  const bySchedule = schedule === undefined ? tTimeline("startedByAnySchedule") : tTimeline("startedBySchedule", { schedule });
+  const origin = run.scheduleId !== null ? bySchedule : run.startedBy !== null ? tTimeline("startedByUser", { user: starterName(run.startedBy) ?? run.startedBy }) : tTimeline("startedByPlatform");
   return (
     <span className="flex min-w-0 flex-col">
       <span className="break-all">{origin}</span>
@@ -52,15 +60,16 @@ function When({ iso }: { iso: string }) {
 
 function RunActions({ run, organizationId, onCancel }: RowActions & { run: WorkflowRun }) {
   const t = useTranslations("settings.workflows.runs");
+  const workflow = useWorkflowLabel().name(run.workflowId);
   return (
     <span className="flex flex-wrap justify-end gap-2">
       <Button variant="outline" size="sm" asChild>
-        <RouteLink to={{ id: "settings", organizationId, section: "workflows", rest: `runs/${run.runId}` }} aria-label={t("openNamed", { workflow: run.workflowId, id: run.runId })}>
+        <RouteLink to={{ id: "settings", organizationId, section: "workflows", rest: `runs/${run.runId}` }} aria-label={t("openNamed", { workflow, id: run.runId })}>
           {t("open")}
         </RouteLink>
       </Button>
       {onCancel !== null && isRunCancelable(run.status) ? (
-        <Button variant="outline" size="sm" onClick={() => onCancel(run)} aria-label={t("cancelNamed", { workflow: run.workflowId, id: run.runId })}>
+        <Button variant="outline" size="sm" onClick={() => onCancel(run)} aria-label={t("cancelNamed", { workflow, id: run.runId })}>
           {t("cancel")}
         </Button>
       ) : null}
@@ -68,23 +77,24 @@ function RunActions({ run, organizationId, onCancel }: RowActions & { run: Workf
   );
 }
 
-const useColumns = ({ organizationId, onCancel }: RowActions, starterName: StarterName) => {
+const useColumns = ({ organizationId, onCancel }: RowActions, labels: Labels) => {
   const t = useTranslations("settings.workflows.runs");
   return useMemo(
     () => [
       column.display({ id: "run", header: () => t("columns.run"), cell: ({ row }) => <RunName run={row.original} /> }),
       column.accessor("status", { header: () => t("columns.status"), cell: ({ getValue }) => <RunStatusPill status={getValue()} /> }),
-      column.display({ id: "origin", header: () => t("columns.origin"), cell: ({ row }) => <Origin run={row.original} starterName={starterName} /> }),
+      column.display({ id: "origin", header: () => t("columns.origin"), cell: ({ row }) => <Origin run={row.original} labels={labels} /> }),
       column.accessor("createdAt", { header: () => t("columns.createdAt"), cell: ({ getValue }) => <When iso={getValue()} /> }),
       column.accessor("updatedAt", { header: () => t("columns.updatedAt"), cell: ({ getValue }) => <When iso={getValue()} /> }),
       column.display({ id: "actions", header: () => t("columns.actions"), meta: { headerHidden: true }, cell: ({ row }) => <RunActions run={row.original} organizationId={organizationId} onCancel={onCancel} /> }),
     ],
-    [t, organizationId, onCancel, starterName],
+    [t, organizationId, onCancel, labels],
   );
 };
 
 function RunFilters({ filters, onChange, workflows }: { filters: TenantRunFilters; onChange: (filters: TenantRunFilters) => void; workflows: readonly WorkflowCatalogEntry[] }) {
   const t = useTranslations("settings.workflows.runs.filters");
+  const workflowLabel = useWorkflowLabel();
   const tStatus = useTranslations("common.runTimeline.status");
   const workflowId = useId();
   const statusId = useId();
@@ -100,7 +110,7 @@ function RunFilters({ filters, onChange, workflows }: { filters: TenantRunFilter
             <SelectItem value={ANY}>{t("anyWorkflow")}</SelectItem>
             {workflows.map((workflow) => (
               <SelectItem key={workflow.id} value={workflow.id}>
-                {workflow.id}
+                {workflowLabel.name(workflow.id)}
               </SelectItem>
             ))}
           </SelectContent>
@@ -151,7 +161,9 @@ export function RunsSection({ context, workflows, onStart, online }: RunsSection
   const canCancel = context.permissions.includes("core.workflow-run.cancel") && online;
   const actions: RowActions = { organizationId: organization.id, onCancel: canCancel ? setCanceling : null };
   const starterName = useStarterNames({ organizationId: organization.id, canReadMembers: context.permissions.includes("core.member.read") });
-  const columns = useColumns(actions, starterName);
+  const scheduleLabel = useTenantScheduleLabels(context);
+  const labels = useMemo((): Labels => ({ starterName, scheduleLabel }), [starterName, scheduleLabel]);
+  const columns = useColumns(actions, labels);
   const filtering = filters.workflowId !== undefined || filters.status !== undefined;
   return (
     <div className="flex flex-col gap-4">
@@ -173,7 +185,7 @@ export function RunsSection({ context, workflows, onStart, online }: RunsSection
                   <RunStatusPill status={run.status} />
                 </span>
                 <span className="text-xs text-muted-foreground">
-                  <Origin run={run} starterName={starterName} />
+                  <Origin run={run} labels={labels} />
                 </span>
                 <span className="text-xs text-muted-foreground">{formatDateTime(run.createdAt)}</span>
                 <span className="self-start">

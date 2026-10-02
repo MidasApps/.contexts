@@ -3,8 +3,9 @@
 import type { AccessContext, Schedule, WorkflowCatalogEntry } from "@core/contracts";
 import { useState } from "react";
 import { useTranslations } from "use-intl";
-import { useTenantSchedules } from "#/entities/schedule/index.ts";
+import { scheduleSlugOf, useTenantSchedules } from "#/entities/schedule/index.ts";
 import { ScheduleActionDialog, ScheduleEditorDialog, useResumeSchedule, type ScheduleActionTarget } from "#/features/schedule-editor/index.ts";
+import { useWorkflowLabel } from "#/shared/lib/labels/use-catalog-labels.ts";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
 import { Icon } from "#/shared/ui/atoms/Icon/Icon.tsx";
 import { EmptyState } from "#/shared/ui/molecules/EmptyState/EmptyState.tsx";
@@ -27,6 +28,7 @@ type Editing = { schedule: Schedule | null } | null;
  */
 export function SchedulesSection({ context, workflows, online }: SchedulesSectionProps) {
   const t = useTranslations("settings.workflows.schedules");
+  const workflowLabel = useWorkflowLabel();
   const { organization } = context;
   const schedules = useTenantSchedules(organization.id);
   const resume = useResumeSchedule(organization.id);
@@ -59,10 +61,10 @@ export function SchedulesSection({ context, workflows, online }: SchedulesSectio
             onRunNow={(schedule) => setTarget({ action: "run", schedule })}
             renderRowActions={(schedule) => (
               <>
-                <Button variant="outline" size="sm" disabled={!online} onClick={() => setEditing({ schedule })} aria-label={t("editNamed", { name: schedule.workflowId, id: schedule.id })}>
+                <Button variant="outline" size="sm" disabled={!online} onClick={() => setEditing({ schedule })} aria-label={t("editNamed", { name: workflowLabel.name(schedule.workflowId), id: scheduleSlugOf(schedule.id) ?? schedule.id })}>
                   {t("edit")}
                 </Button>
-                <Button variant="outline" size="sm" disabled={!online} onClick={() => setTarget({ action: "delete", schedule })} aria-label={t("deleteNamed", { name: schedule.workflowId, id: schedule.id })}>
+                <Button variant="outline" size="sm" disabled={!online} onClick={() => setTarget({ action: "delete", schedule })} aria-label={t("deleteNamed", { name: workflowLabel.name(schedule.workflowId), id: scheduleSlugOf(schedule.id) ?? schedule.id })}>
                   {t("delete")}
                 </Button>
               </>

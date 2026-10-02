@@ -8,6 +8,7 @@ import { useTranslations } from "use-intl";
 import { tenantScheduleKeys } from "#/entities/schedule/index.ts";
 import { useCallEndpoint } from "#/shared/api/api-context.tsx";
 import { ApiError } from "#/shared/api/api-error.ts";
+import { useWorkflowLabel } from "#/shared/lib/labels/use-catalog-labels.ts";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
 import { Input } from "#/shared/ui/atoms/Input/Input.tsx";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "#/shared/ui/atoms/Select/Select.tsx";
@@ -78,6 +79,7 @@ function Refusal({ error }: { error: unknown }) {
 
 function IdentityFields({ draft, setDraft, problems, schedulable }: { draft: Draft; setDraft: (draft: Draft) => void; problems: Set<Problem>; schedulable: readonly WorkflowCatalogEntry[] }) {
   const t = useTranslations("settings.workflows.editor");
+  const workflowLabel = useWorkflowLabel();
   const selected = schedulable.find((workflow) => workflow.id === draft.workflowId);
   return (
     <>
@@ -92,12 +94,12 @@ function IdentityFields({ draft, setDraft, problems, schedulable }: { draft: Dra
           <SelectContent>
             {schedulable.map((workflow) => (
               <SelectItem key={workflow.id} value={workflow.id}>
-                {workflow.id}
+                {workflowLabel.name(workflow.id)}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
-        {selected === undefined || selected.description === "" ? null : <FieldDescription>{selected.description}</FieldDescription>}
+        {selected === undefined || workflowLabel.description(selected.id, selected.description) === "" ? null : <FieldDescription>{workflowLabel.description(selected.id, selected.description)}</FieldDescription>}
         <FieldError errors={[problems.has("workflow") ? t("errors.workflow") : undefined]} />
       </Field>
       <Field>
@@ -114,6 +116,7 @@ function IdentityFields({ draft, setDraft, problems, schedulable }: { draft: Dra
 
 function ScheduleEditorForm({ organizationId, schedule, workflows, defaultTimeZone, onOpenChange }: ScheduleEditorDialogProps) {
   const t = useTranslations("settings.workflows.editor");
+  const workflowLabel = useWorkflowLabel();
   const callEndpoint = useCallEndpoint();
   const queryClient = useQueryClient();
   const creating = schedule === null;
@@ -142,7 +145,7 @@ function ScheduleEditorForm({ organizationId, schedule, workflows, defaultTimeZo
     try {
       const workflow = await save(cron, inputData);
       await queryClient.invalidateQueries({ queryKey: tenantScheduleKeys.all(organizationId) });
-      notify.success(t(creating ? "created" : "updated", { workflow }));
+      notify.success(t(creating ? "created" : "updated", { workflow: workflowLabel.name(workflow) }));
       onOpenChange(false);
     } catch (error: unknown) {
       setFailure(error);
@@ -197,12 +200,13 @@ function ScheduleEditorForm({ organizationId, schedule, workflows, defaultTimeZo
  */
 export function ScheduleEditorDialog(props: ScheduleEditorDialogProps) {
   const t = useTranslations("settings.workflows.editor");
+  const workflowLabel = useWorkflowLabel();
   const { schedule } = props;
   return (
     <Dialog open={props.open} onOpenChange={props.onOpenChange}>
       <DialogContent className="sm:max-w-xl">
         <DialogHeader>
-          <DialogTitle>{schedule === null ? t("createTitle") : t("editTitle", { workflow: schedule.workflowId })}</DialogTitle>
+          <DialogTitle>{schedule === null ? t("createTitle") : t("editTitle", { workflow: workflowLabel.name(schedule.workflowId) })}</DialogTitle>
           <DialogDescription>{t("description")}</DialogDescription>
         </DialogHeader>
         <ScheduleEditorForm key={schedule?.id ?? "new"} {...props} />

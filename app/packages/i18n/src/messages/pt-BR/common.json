@@ -216,7 +216,8 @@
       "tripwire": "Parada por guardrail"
     },
     "started": "Iniciada",
-    "startedBySchedule": "Pelo agendamento {schedule}",
+    "startedBySchedule": "Por um agendamento: {schedule}",
+    "startedByAnySchedule": "Por um agendamento",
     "startedByUser": "Pelo usuário {user}",
     "startedByPlatform": "Pela plataforma",
     "waitingApproval": "Aguarda aprovação",

@@ -6,6 +6,7 @@ import { useTranslations } from "use-intl";
 import { workflowRunKeys } from "#/entities/workflow-run/index.ts";
 import { useCallEndpoint } from "#/shared/api/api-context.tsx";
 import { useConfirmedAction } from "#/shared/lib/errors/use-confirmed-action.ts";
+import { useWorkflowLabel } from "#/shared/lib/labels/use-catalog-labels.ts";
 import { notify } from "#/shared/ui/molecules/Toaster/notify.ts";
 import { ConfirmDialog } from "#/shared/ui/organisms/ConfirmDialog/ConfirmDialog.tsx";
 
@@ -19,6 +20,7 @@ export type CancelRunDialogProps = { run: AdminWorkflowRun | null; onOpenChange:
  */
 export function CancelRunDialog({ run, onOpenChange }: CancelRunDialogProps) {
   const t = useTranslations("admin.workflows.cancel");
+  const workflowLabel = useWorkflowLabel();
   const callEndpoint = useCallEndpoint();
   const queryClient = useQueryClient();
   const action = useConfirmedAction(
@@ -27,7 +29,7 @@ export function CancelRunDialog({ run, onOpenChange }: CancelRunDialogProps) {
       await callEndpoint(adminCancelWorkflowRunEndpoint, { params: { runId: run.runId } });
       await queryClient.invalidateQueries({ queryKey: workflowRunKeys.all() });
     },
-    () => notify.success(t("done", { workflow: run?.workflowId ?? "" })),
+    () => notify.success(t("done", { workflow: run === null ? "" : workflowLabel.name(run.workflowId) })),
   );
   return (
     <ConfirmDialog
@@ -36,7 +38,7 @@ export function CancelRunDialog({ run, onOpenChange }: CancelRunDialogProps) {
         if (!open) action.reset();
         onOpenChange(open);
       }}
-      title={t("title", { workflow: run?.workflowId ?? "" })}
+      title={t("title", { workflow: run === null ? "" : workflowLabel.name(run.workflowId) })}
       description={run?.approvalRequestId === null || run === null ? t("description") : t("descriptionSuspended")}
       confirmLabel={t("confirm")}
       cancelLabel={t("keep")}

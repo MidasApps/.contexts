@@ -3,6 +3,9 @@
 import { formatDateTime } from "@core/i18n";
 import { createContext, use, useMemo, type ReactNode } from "react";
 import { useLocale, useTimeZone, useTranslations } from "use-intl";
+import { scheduleSlugOf } from "#/entities/schedule/index.ts";
+import { useDescribeCron } from "#/features/schedule-editor/index.ts";
+import { useWorkflowLabel } from "#/shared/lib/labels/use-catalog-labels.ts";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
 import { StatusPill } from "#/shared/ui/molecules/StatusPill/StatusPill.tsx";
 import { DataTable } from "#/shared/ui/organisms/DataTable/DataTable.tsx";
@@ -72,25 +75,35 @@ function Fire({ iso, timezone }: { iso: string | null; timezone: string }) {
   );
 }
 
+/** The workflow label and the slug a person chose; the full ids stay in the API. */
+const useScheduleName = (schedule: ScheduleRow): { workflow: string; slug: string | null } => ({
+  workflow: useWorkflowLabel().name(schedule.workflowId),
+  slug: scheduleSlugOf(schedule.id),
+});
+
 function Workflow({ schedule }: { schedule: ScheduleRow }) {
   const t = useTranslations("common.scheduleTable");
   const { ownerLabel } = useTableState();
+  const { workflow, slug } = useScheduleName(schedule);
   return (
     <span className="flex min-w-0 flex-col gap-0.5">
       <span className="flex flex-wrap items-center gap-2">
-        <span className="font-medium">{schedule.workflowId}</span>
+        <span className="font-medium">{workflow}</span>
         {schedule.scope === undefined ? null : <StatusPill tone={schedule.scope === "platform" ? "violet" : "blue"}>{t(`scope.${schedule.scope}`)}</StatusPill>}
       </span>
       {ownerLabel === undefined ? null : <span className="text-[13px] text-muted-foreground">{ownerLabel(schedule)}</span>}
-      <span className="font-mono text-[11.5px] text-muted-foreground">{schedule.id}</span>
+      {slug === null ? null : <span className="font-mono text-[11.5px] text-muted-foreground">{slug}</span>}
     </span>
   );
 }
 
+/** The cron in words when it has a preset's shape, with the expression kept as secondary text. */
 function Cron({ schedule }: { schedule: ScheduleRow }) {
+  const description = useDescribeCron()(schedule.cron);
   return (
     <span className="flex flex-col">
-      <code className="font-mono text-[13px]">{schedule.cron}</code>
+      {description === null ? null : <span>{description}</span>}
+      <code className={description === null ? "font-mono text-[13px]" : "font-mono text-[11.5px] text-muted-foreground"}>{schedule.cron}</code>
       <span className="text-[11.5px] text-muted-foreground">{schedule.timezone}</span>
     </span>
   );
@@ -107,19 +120,20 @@ function Actions({ schedule }: { schedule: ScheduleRow }) {
   if (!canManage) return null;
   const pending = pendingId === schedule.id;
   const blocked = disabled || pendingId !== null;
-  const name = schedule.workflowId;
+  const { workflow: name, slug } = useScheduleName(schedule);
+  const id = slug ?? name;
   return (
     <span className="flex flex-wrap justify-end gap-2">
       {schedule.status === "active" ? (
-        <Button variant="outline" size="sm" pending={pending} disabled={blocked} onClick={() => onPause(schedule)} aria-label={t("pauseNamed", { name, id: schedule.id })}>
+        <Button variant="outline" size="sm" pending={pending} disabled={blocked} onClick={() => onPause(schedule)} aria-label={t("pauseNamed", { name, id })}>
           {t("pause")}
         </Button>
       ) : (
-        <Button variant="outline" size="sm" pending={pending} disabled={blocked} onClick={() => onResume(schedule)} aria-label={t("resumeNamed", { name, id: schedule.id })}>
+        <Button variant="outline" size="sm" pending={pending} disabled={blocked} onClick={() => onResume(schedule)} aria-label={t("resumeNamed", { name, id })}>
           {t("resume")}
         </Button>
       )}
-      <Button variant="outline" size="sm" disabled={blocked} onClick={() => onRunNow(schedule)} aria-label={t("runNowNamed", { name, id: schedule.id })}>
+      <Button variant="outline" size="sm" disabled={blocked} onClick={() => onRunNow(schedule)} aria-label={t("runNowNamed", { name, id })}>
         {t("runNow")}
       </Button>
       {renderRowActions?.(schedule)}
@@ -171,6 +185,10 @@ export function ScheduleTable<Row extends ScheduleRow>({ caption, schedules, emp
             <span className="text-xs">
               <span className="text-muted-foreground">{t("columns.nextFire")}: </span>
               <Fire iso={schedule.nextFireAt} timezone={schedule.timezone} />
+            </span>
+            <span className="text-xs">
+              <span className="text-muted-foreground">{t("columns.lastFire")}: </span>
+              <Fire iso={schedule.lastFireAt} timezone={schedule.timezone} />
             </span>
             <span className="self-start">
               <Actions schedule={schedule} />

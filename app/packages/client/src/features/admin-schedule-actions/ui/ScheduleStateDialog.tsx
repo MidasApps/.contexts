@@ -6,6 +6,7 @@ import { useTranslations } from "use-intl";
 import { scheduleKeys } from "#/entities/schedule/index.ts";
 import { useCallEndpoint } from "#/shared/api/api-context.tsx";
 import { useConfirmedAction } from "#/shared/lib/errors/use-confirmed-action.ts";
+import { useWorkflowLabel } from "#/shared/lib/labels/use-catalog-labels.ts";
 import { notify } from "#/shared/ui/molecules/Toaster/notify.ts";
 import { ConfirmDialog } from "#/shared/ui/organisms/ConfirmDialog/ConfirmDialog.tsx";
 
@@ -28,9 +29,10 @@ const descriptionKey = (request: ScheduleStateRequest | null) => {
  */
 export function ScheduleStateDialog({ request, onOpenChange }: ScheduleStateDialogProps) {
   const t = useTranslations("admin.workflows.scheduleState");
+  const workflowLabel = useWorkflowLabel();
   const callEndpoint = useCallEndpoint();
   const queryClient = useQueryClient();
-  const workflow = request?.schedule.workflowId ?? "";
+  const workflow = request === null ? "" : workflowLabel.name(request.schedule.workflowId);
   const pausing = request?.action !== "resume";
   const platformPause = pausing && request?.schedule.scope === "platform";
   const action = useConfirmedAction(

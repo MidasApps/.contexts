@@ -7,6 +7,7 @@ import { tenantScheduleKeys } from "#/entities/schedule/index.ts";
 import { tenantWorkflowRunKeys } from "#/entities/workflow-run/index.ts";
 import { useCallEndpoint } from "#/shared/api/api-context.tsx";
 import { useConfirmedAction } from "#/shared/lib/errors/use-confirmed-action.ts";
+import { useWorkflowLabel } from "#/shared/lib/labels/use-catalog-labels.ts";
 import { notify } from "#/shared/ui/molecules/Toaster/notify.ts";
 import { ConfirmDialog } from "#/shared/ui/organisms/ConfirmDialog/ConfirmDialog.tsx";
 
@@ -35,10 +36,11 @@ const COPY = {
  */
 export function ScheduleActionDialog({ organizationId, target, onOpenChange }: ScheduleActionDialogProps) {
   const t = useTranslations("settings.workflows.scheduleActions");
+  const workflowLabel = useWorkflowLabel();
   const callEndpoint = useCallEndpoint();
   const queryClient = useQueryClient();
   const copy = COPY[target?.action ?? "pause"];
-  const workflow = target?.schedule.workflowId ?? "";
+  const workflow = target === null ? "" : workflowLabel.name(target.schedule.workflowId);
   const action = useConfirmedAction(
     async () => {
       if (target === null) return;

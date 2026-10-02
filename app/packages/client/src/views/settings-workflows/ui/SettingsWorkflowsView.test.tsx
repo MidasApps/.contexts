@@ -52,7 +52,11 @@ describe("SettingsWorkflowsView: runs", () => {
     expect(within(table).getByText("run-1")).toBeDefined();
     expect(within(table).getByText("Em execução")).toBeDefined();
     expect(within(table).getByText("Concluída")).toBeDefined();
-    expect(within(table).getByRole("link", { name: "Abrir a execução run-1 de approval-demo" }).getAttribute("href")).toBe(`${SETTINGS_PATH}/runs/run-1`);
+    expect(within(table).getByRole("link", { name: "Abrir a execução run-1 de Demonstração de aprovação" }).getAttribute("href")).toBe(`${SETTINGS_PATH}/runs/run-1`);
+    // Workflows and schedules read as names, never as their ids.
+    expect(within(table).getByText("Relatório de uso")).toBeDefined();
+    expect(await within(table).findByText("Por um agendamento: Todos os dias às 09:00 (America/Sao_Paulo)")).toBeDefined();
+    expect(within(table).queryByText(/schedule_3fa9c0e1b2d4a6f8/u)).toBeNull();
     expect(new URLSearchParams(lastCall(api, "GET", "/v1/workflows/runs")?.query).get("organizationId")).toBe(IDS.organization);
     await expectNoAxeViolations(container);
   });
@@ -91,8 +95,8 @@ describe("SettingsWorkflowsView: runs", () => {
     expect(within(dialog).getByText("Escolha um fluxo.")).toBeDefined();
     await user.click(within(dialog).getByRole("combobox", { name: /Fluxo/u }));
     // Only startable workflows are offered.
-    expect(screen.queryByRole("option", { name: /usage-report/u })).toBeNull();
-    await user.click(await screen.findByRole("option", { name: /approval-demo/u }));
+    expect(screen.queryByRole("option", { name: /Relatório de uso/u })).toBeNull();
+    await user.click(await screen.findByRole("option", { name: /Demonstração de aprovação/u }));
     const input = within(dialog).getByRole("textbox", { name: /Dados de entrada/u });
     await user.clear(input);
     await user.click(input);
@@ -115,7 +119,7 @@ describe("SettingsWorkflowsView: runs", () => {
     await user.click(await screen.findByRole("button", { name: "Iniciar fluxo" }));
     const dialog = await screen.findByRole("dialog", { name: "Iniciar fluxo" });
     await user.click(within(dialog).getByRole("combobox", { name: /Fluxo/u }));
-    await user.click(await screen.findByRole("option", { name: /approval-demo/u }));
+    await user.click(await screen.findByRole("option", { name: /Demonstração de aprovação/u }));
     await user.click(within(dialog).getByRole("button", { name: "Iniciar" }));
     expect((await within(dialog).findByRole("alert")).textContent).toContain("Este fluxo não pode ser iniciado manualmente.");
   });
@@ -128,11 +132,11 @@ describe("SettingsWorkflowsView: runs", () => {
         return noContent();
       },
     });
-    await user.click(await screen.findByRole("button", { name: "Cancelar a execução run-1 de approval-demo" }));
-    expect(screen.queryByRole("button", { name: "Cancelar a execução run-2 de usage-report" })).toBeNull();
-    const confirm = await screen.findByRole("alertdialog", { name: "Cancelar a execução de approval-demo?" });
+    await user.click(await screen.findByRole("button", { name: "Cancelar a execução run-1 de Demonstração de aprovação" }));
+    expect(screen.queryByRole("button", { name: "Cancelar a execução run-2 de Relatório de uso" })).toBeNull();
+    const confirm = await screen.findByRole("alertdialog", { name: "Cancelar a execução de Demonstração de aprovação?" });
     await user.click(within(confirm).getByRole("button", { name: "Cancelar execução" }));
-    expect(await screen.findByText("Execução de approval-demo cancelada.")).toBeDefined();
+    expect(await screen.findByText("Execução de Demonstração de aprovação cancelada.")).toBeDefined();
     expect(requests[0]?.params["runId"]).toBe("run-1");
     expect(requests[0]?.query.get("organizationId")).toBe(IDS.organization);
   });
@@ -187,14 +191,14 @@ describe("SettingsWorkflowsView: schedules", () => {
     expect(requests).toHaveLength(0);
     await user.click(within(dialog).getByRole("combobox", { name: /^Fluxo/u }));
     // Only schedulable workflows are offered.
-    expect(screen.queryByRole("option", { name: /approval-demo/u })).toBeNull();
-    await user.click(await screen.findByRole("option", { name: /usage-report/u }));
+    expect(screen.queryByRole("option", { name: /Demonstração de aprovação/u })).toBeNull();
+    await user.click(await screen.findByRole("option", { name: /Relatório de uso/u }));
     await user.type(within(dialog).getByRole("textbox", { name: /Nome curto/u }), "weekdays");
     await user.click(within(dialog).getByRole("combobox", { name: /Frequência/u }));
     await user.click(await screen.findByRole("option", { name: "De segunda a sexta" }));
     expect(within(dialog).getByText("Expressão: 0 9 * * 1-5")).toBeDefined();
     await user.click(within(dialog).getByRole("button", { name: "Criar agendamento" }));
-    expect(await screen.findByText("Agendamento de usage-report criado.")).toBeDefined();
+    expect(await screen.findByText("Agendamento de Relatório de uso criado.")).toBeDefined();
     expect(requests[0]?.query.get("organizationId")).toBe(IDS.organization);
     expect(requests[0]?.body).toEqual({ workflowId: "usage-report", slug: "weekdays", cron: "0 9 * * 1-5", timezone: "America/Sao_Paulo", inputData: {} });
   });
@@ -204,7 +208,7 @@ describe("SettingsWorkflowsView: schedules", () => {
     await user.click(screen.getByRole("button", { name: "Novo agendamento" }));
     const dialog = await screen.findByRole("dialog", { name: "Novo agendamento" });
     await user.click(within(dialog).getByRole("combobox", { name: /^Fluxo/u }));
-    await user.click(await screen.findByRole("option", { name: /usage-report/u }));
+    await user.click(await screen.findByRole("option", { name: /Relatório de uso/u }));
     await user.type(within(dialog).getByRole("textbox", { name: /Nome curto/u }), "fast");
     await user.click(within(dialog).getByRole("combobox", { name: /Frequência/u }));
     await user.click(await screen.findByRole("option", { name: "Expressão cron" }));
@@ -231,8 +235,8 @@ describe("SettingsWorkflowsView: schedules", () => {
         return ok(buildSchedule({ cron: "30 * * * *" }));
       },
     });
-    await user.click(screen.getByRole("button", { name: "Editar o agendamento schedule_3fa9c0e1b2d4a6f8-daily-usage de usage-report" }));
-    const dialog = await screen.findByRole("dialog", { name: "Editar agendamento de usage-report" });
+    await user.click(screen.getByRole("button", { name: "Editar o agendamento daily-usage de Relatório de uso" }));
+    const dialog = await screen.findByRole("dialog", { name: "Editar agendamento de Relatório de uso" });
     expect(within(dialog).queryByRole("textbox", { name: /Nome curto/u })).toBeNull();
     expect(within(dialog).getByText("Expressão: 0 9 * * *")).toBeDefined();
     await user.click(within(dialog).getByRole("combobox", { name: /Frequência/u }));
@@ -241,7 +245,7 @@ describe("SettingsWorkflowsView: schedules", () => {
     await user.clear(minute);
     await user.type(minute, "30");
     await user.click(within(dialog).getByRole("button", { name: "Salvar agendamento" }));
-    expect(await screen.findByText("Agendamento de usage-report atualizado.")).toBeDefined();
+    expect(await screen.findByText("Agendamento de Relatório de uso atualizado.")).toBeDefined();
     expect(requests[0]?.params["scheduleId"]).toBe("schedule_3fa9c0e1b2d4a6f8-daily-usage");
     expect(requests[0]?.query.get("organizationId")).toBe(IDS.organization);
     expect(requests[0]?.body).toEqual({ cron: "30 * * * *", timezone: "America/Sao_Paulo", inputData: {} });
@@ -259,21 +263,21 @@ describe("SettingsWorkflowsView: schedules", () => {
       "DELETE /v1/schedules/:scheduleId": record("delete", noContent()),
     });
     const id = "schedule_3fa9c0e1b2d4a6f8-daily-usage";
-    await user.click(screen.getByRole("button", { name: `Pausar o agendamento ${id} de usage-report` }));
+    await user.click(screen.getByRole("button", { name: `Pausar o agendamento daily-usage de Relatório de uso` }));
     expect(calls).toEqual([]);
-    const pause = await screen.findByRole("alertdialog", { name: "Pausar o agendamento de usage-report?" });
+    const pause = await screen.findByRole("alertdialog", { name: "Pausar o agendamento de Relatório de uso?" });
     await user.click(within(pause).getByRole("button", { name: "Pausar agendamento" }));
-    expect(await screen.findByText("Agendamento de usage-report pausado.")).toBeDefined();
+    expect(await screen.findByText("Agendamento de Relatório de uso pausado.")).toBeDefined();
 
-    await user.click(screen.getByRole("button", { name: `Executar agora o agendamento ${id} de usage-report` }));
-    const run = await screen.findByRole("alertdialog", { name: "Executar usage-report agora?" });
+    await user.click(screen.getByRole("button", { name: `Executar agora o agendamento daily-usage de Relatório de uso` }));
+    const run = await screen.findByRole("alertdialog", { name: "Executar Relatório de uso agora?" });
     await user.click(within(run).getByRole("button", { name: "Executar agora" }));
-    expect(await screen.findByText("Execução de usage-report iniciada.")).toBeDefined();
+    expect(await screen.findByText("Execução de Relatório de uso iniciada.")).toBeDefined();
 
-    await user.click(screen.getByRole("button", { name: `Excluir o agendamento ${id} de usage-report` }));
-    const remove = await screen.findByRole("alertdialog", { name: "Excluir o agendamento de usage-report?" });
+    await user.click(screen.getByRole("button", { name: `Excluir o agendamento daily-usage de Relatório de uso` }));
+    const remove = await screen.findByRole("alertdialog", { name: "Excluir o agendamento de Relatório de uso?" });
     await user.click(within(remove).getByRole("button", { name: "Excluir agendamento" }));
-    expect(await screen.findByText("Agendamento de usage-report excluído.")).toBeDefined();
+    expect(await screen.findByText("Agendamento de Relatório de uso excluído.")).toBeDefined();
     expect(calls).toEqual([`pause ${id} ${IDS.organization}`, `run ${id} ${IDS.organization}`, `delete ${id} ${IDS.organization}`]);
   });
 
@@ -294,7 +298,7 @@ describe("SettingsWorkflowsView: run page", () => {
       ADMIN,
       runPath("run-1"),
     );
-    expect(await screen.findByRole("heading", { level: 1, name: "Execução de approval-demo" })).toBeDefined();
+    expect(await screen.findByRole("heading", { level: 1, name: "Execução de Demonstração de aprovação" })).toBeDefined();
     const timeline = screen.getByRole("list", { name: "Linha do tempo da execução run-1" });
     expect(within(timeline).getByText("Suspensa")).toBeDefined();
     expect(within(timeline).getByRole("link", { name: "Abrir aprovações" }).getAttribute("href")).toBe(`/o/${IDS.organization}/settings/approvals/Ap3rQ9vLr3TnB7pWc1aZ`);

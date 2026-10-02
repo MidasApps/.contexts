@@ -4,6 +4,7 @@ import type { AdminWorkflowRun } from "@core/contracts";
 import { createContext, use, useMemo, type ReactNode } from "react";
 import { useTranslations } from "use-intl";
 import { isRunCancelable, RunStatusPill } from "#/entities/workflow-run/index.ts";
+import { useWorkflowLabel } from "#/shared/lib/labels/use-catalog-labels.ts";
 import { useFormatDateTime } from "#/shared/lib/format/use-format-date-time.ts";
 import { useOnlineStatus } from "#/shared/lib/network/use-online-status.ts";
 import type { CursorPagination } from "#/shared/lib/pagination/use-cursor-pages.ts";
@@ -16,6 +17,8 @@ export type RunsTableState = {
   readonly organizationLabel: (tenantId: string | null) => string;
   /** Name of the user who started a run, or the id itself while unknown. */
   readonly userLabel: (userId: string) => string;
+  /** When a schedule fires, in words, for the schedules the page knows; `undefined` says "a schedule". */
+  readonly scheduleLabel: (scheduleId: string) => string | undefined;
   readonly onDetails: (run: AdminWorkflowRun) => void;
   readonly onCancel: (run: AdminWorkflowRun) => void;
 };
@@ -32,9 +35,10 @@ const useRunsState = (): RunsTableState => {
 const column = dataTableColumnHelper<AdminWorkflowRun>();
 
 function RunName({ run }: { run: AdminWorkflowRun }) {
+  const workflowLabel = useWorkflowLabel();
   return (
     <span className="flex min-w-0 flex-col">
-      <span className="font-medium">{run.workflowId}</span>
+      <span className="font-medium">{workflowLabel.name(run.workflowId)}</span>
       <span className="font-mono text-[11.5px] text-muted-foreground">{run.runId}</span>
     </span>
   );
@@ -47,12 +51,14 @@ function Organization({ run }: { run: AdminWorkflowRun }) {
 /** Who or what started the run, and the approval a suspended run waits for. */
 function Origin({ run }: { run: AdminWorkflowRun }) {
   const t = useTranslations("admin.workflows.runs");
-  const { userLabel } = useRunsState();
-  const origin = run.scheduleId !== null ? t("bySchedule", { schedule: run.scheduleId }) : run.startedBy !== null ? t("byUser", { user: userLabel(run.startedBy) }) : t("byPlatform");
+  const { userLabel, scheduleLabel } = useRunsState();
+  const schedule = run.scheduleId === null ? undefined : scheduleLabel(run.scheduleId);
+  const bySchedule = schedule === undefined ? t("byAnySchedule") : t("bySchedule", { schedule });
+  const origin = run.scheduleId !== null ? bySchedule : run.startedBy !== null ? t("byUser", { user: userLabel(run.startedBy) }) : t("byPlatform");
   return (
     <span className="flex min-w-0 flex-col">
       <span className="break-all">{origin}</span>
-      {run.approvalRequestId === null ? null : <span className="text-[11.5px] break-all text-muted-foreground">{t("waitsApproval", { id: run.approvalRequestId })}</span>}
+      {run.approvalRequestId === null ? null : <span className="text-[11.5px] break-all text-muted-foreground">{t("waitsApproval")}</span>}
     </span>
   );
 }
@@ -65,13 +71,14 @@ function RunActions({ run }: { run: AdminWorkflowRun }) {
   const t = useTranslations("admin.workflows.runs");
   const online = useOnlineStatus();
   const { onDetails, onCancel } = useRunsState();
+  const workflow = useWorkflowLabel().name(run.workflowId);
   return (
     <span className="flex flex-wrap justify-end gap-2">
-      <Button variant="outline" size="sm" onClick={() => onDetails(run)} aria-label={t("detailsNamed", { workflow: run.workflowId, id: run.runId })}>
+      <Button variant="outline" size="sm" onClick={() => onDetails(run)} aria-label={t("detailsNamed", { workflow, id: run.runId })}>
         {t("details")}
       </Button>
       {isRunCancelable(run.status) ? (
-        <Button variant="outline" size="sm" disabled={!online} onClick={() => onCancel(run)} aria-label={t("cancelNamed", { workflow: run.workflowId, id: run.runId })}>
+        <Button variant="outline" size="sm" disabled={!online} onClick={() => onCancel(run)} aria-label={t("cancelNamed", { workflow, id: run.runId })}>
           {t("cancel")}
         </Button>
       ) : null}

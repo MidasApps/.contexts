@@ -30,15 +30,18 @@ describe("AdminWorkflowsView: runs", () => {
   it("lists runs of organizations and of the platform, with what a suspended run waits for", async () => {
     const { container } = render();
     const table = await screen.findByRole("table", { name: "Execuções de workflows" });
-    const suspended = within(table).getByRole("row", { name: /approval-demo/u });
+    const suspended = within(table).getByRole("row", { name: /Demonstração de aprovação/u });
     await waitFor(() => expect(within(suspended).getByText("Northwind")).toBeDefined());
     expect(within(suspended).getByText("Suspensa")).toBeDefined();
-    expect(within(suspended).getByText(`Aguarda a aprovação ${OPS_IDS.approval}`)).toBeDefined();
+    expect(within(suspended).getByText("Aguarda aprovação")).toBeDefined();
     expect(within(suspended).getByRole("button", { name: /^Cancelar a execução/u })).toBeDefined();
-    const done = within(table).getByRole("row", { name: /usage-report/u });
+    const done = within(table).getByRole("row", { name: /Relatório de uso/u });
     expect(within(done).getByText("Plataforma")).toBeDefined();
     expect(within(done).getByText("Concluída")).toBeDefined();
     expect(within(done).queryByRole("button", { name: /^Cancelar a execução/u })).toBeNull();
+    // A run a schedule started names the schedule by when it fires, never by its id.
+    expect(await within(done).findByText("Agendamento: De hora em hora, aos 15 min (UTC)")).toBeDefined();
+    expect(within(done).queryByText(new RegExp(OPS_IDS.platformSchedule, "u"))).toBeNull();
     await expectNoAxeViolations(container);
   });
 
@@ -70,14 +73,14 @@ describe("AdminWorkflowsView: runs", () => {
     const { user, api, container } = render({ routes: routes({ "POST /v1/admin/workflow-runs/:runId/cancel": noContent() }) });
     const table = await screen.findByRole("table", { name: "Execuções de workflows" });
     await user.click(within(table).getByRole("button", { name: /^Cancelar a execução/u }));
-    const dialog = await screen.findByRole("alertdialog", { name: "Cancelar a execução de approval-demo?" });
+    const dialog = await screen.findByRole("alertdialog", { name: "Cancelar a execução de Demonstração de aprovação?" });
     expect(within(dialog).getByText(/solicitação de aprovação que ela aguardava continua aberta/u)).toBeDefined();
     await expectNoAxeViolations(container.ownerDocument.body);
     api.route("GET /v1/admin/workflow-runs", page([{ ...SUSPENDED, status: "canceled" }, PLATFORM_DONE]));
     await user.click(within(dialog).getByRole("button", { name: "Cancelar execução" }));
     await waitFor(() => expect(screen.queryByRole("alertdialog")).toBeNull());
     expect(api.callLines()).toContain(`POST /v1/admin/workflow-runs/${OPS_IDS.run}/cancel`);
-    expect(await screen.findByText("Execução de approval-demo cancelada.")).toBeDefined();
+    expect(await screen.findByText("Execução de Demonstração de aprovação cancelada.")).toBeDefined();
     expect(await screen.findByText("Cancelada")).toBeDefined();
   });
 
@@ -95,8 +98,8 @@ describe("AdminWorkflowsView: runs", () => {
   it("opens the timeline of a run", async () => {
     const { user, container } = render();
     const table = await screen.findByRole("table", { name: "Execuções de workflows" });
-    await user.click(within(table).getByRole("button", { name: /^Detalhes da execução .* de approval-demo/u }));
-    const dialog = await screen.findByRole("dialog", { name: "Execução de approval-demo" });
+    await user.click(within(table).getByRole("button", { name: /^Detalhes da execução .* de Demonstração de aprovação/u }));
+    const dialog = await screen.findByRole("dialog", { name: "Execução de Demonstração de aprovação" });
     const steps = within(within(dialog).getByRole("list", { name: "Linha do tempo da execução" })).getAllByRole("listitem");
     expect(steps.map((step) => step.querySelector("span.font-medium")?.textContent)).toEqual(["Iniciada", "Aguarda aprovação", "Estado atual"]);
     expect(steps[0]?.textContent).toContain(`Pelo usuário ${IDS.user}`);
@@ -112,7 +115,7 @@ describe("AdminWorkflowsView: runs", () => {
     const table = await screen.findByRole("table", { name: "Execuções de workflows" });
     expect(within(table).getAllByRole("row")).toHaveLength(21);
     await user.click(within(screen.getByRole("navigation", { name: "Páginas de execuções" })).getByRole("button", { name: "Próxima" }));
-    expect(await screen.findByRole("row", { name: /usage-report/u })).toBeDefined();
+    expect(await screen.findByRole("row", { name: /Relatório de uso/u })).toBeDefined();
     expect(api.calls.filter((call) => call.path === "/v1/admin/workflow-runs").map((call) => call.query)).toEqual(["?limit=20", "?limit=20&cursor=20"]);
   });
 
@@ -137,7 +140,7 @@ describe("AdminWorkflowsView: runs", () => {
     await expectNoAxeViolations(container);
     api.route("GET /v1/admin/workflow-runs", page([PLATFORM_DONE]));
     await user.click(screen.getByRole("button", { name: "Tentar novamente" }));
-    expect(await screen.findByRole("row", { name: /usage-report/u })).toBeDefined();
+    expect(await screen.findByRole("row", { name: /Relatório de uso/u })).toBeDefined();
   });
 
   it("is closed to the support role without calling the API", async () => {
@@ -177,11 +180,11 @@ describe("AdminWorkflowsView: schedules", () => {
   it("lists platform and organization schedules with the next fire in the schedule's zone", async () => {
     const { container, api } = renderSchedules();
     const table = await screen.findByRole("table", { name: "Agendamentos da plataforma e das organizações" });
-    const platform = within(table).getByRole("row", { name: new RegExp(OPS_IDS.platformSchedule, "u") });
+    const platform = within(table).getByRole("row", { name: /Plataforma/u });
     expect(within(platform).getAllByText("Plataforma").length).toBeGreaterThan(0);
     expect(within(platform).getByText("15 * * * *")).toBeDefined();
     expect(within(platform).getByText(/12:15.*\(UTC\)/u)).toBeDefined();
-    const tenant = within(table).getByRole("row", { name: new RegExp(OPS_IDS.tenantSchedule, "u") });
+    const tenant = within(table).getByRole("row", { name: /daily-usage/u });
     await waitFor(() => expect(within(tenant).getByText("Northwind")).toBeDefined());
     expect(within(tenant).getByText(/09:00.*\(Asia\/Tokyo\)/u)).toBeDefined();
     expect(within(tenant).getByText("Ativo")).toBeDefined();
@@ -192,25 +195,25 @@ describe("AdminWorkflowsView: schedules", () => {
   it("pauses a schedule, then offers to resume it", async () => {
     const { user, api } = renderSchedules({ "POST /v1/admin/schedules/:scheduleId/pause": ok(buildAdminSchedule({ status: "paused", nextFireAt: null })) });
     const table = await screen.findByRole("table", { name: "Agendamentos da plataforma e das organizações" });
-    const tenant = within(table).getByRole("row", { name: new RegExp(OPS_IDS.tenantSchedule, "u") });
+    const tenant = within(table).getByRole("row", { name: /daily-usage/u });
     api.route("GET /v1/admin/schedules", ok([buildPlatformSchedule(), buildAdminSchedule({ status: "paused", nextFireAt: null })]));
     await user.click(within(tenant).getByRole("button", { name: /^Pausar o agendamento/u }));
-    const dialog = await screen.findByRole("alertdialog", { name: "Pausar o agendamento de usage-report?" });
+    const dialog = await screen.findByRole("alertdialog", { name: "Pausar o agendamento de Relatório de uso?" });
     expect(dialog.textContent).toContain("deixa de disparar para a organização");
     expect(dialog.textContent).not.toContain("todas as organizações");
     expect(api.callLines()).not.toContain(`POST /v1/admin/schedules/${OPS_IDS.tenantSchedule}/pause`);
     await user.click(within(dialog).getByRole("button", { name: "Pausar agendamento" }));
-    expect(await screen.findByText("Agendamento de usage-report pausado.")).toBeDefined();
+    expect(await screen.findByText("Agendamento de Relatório de uso pausado.")).toBeDefined();
     expect(api.callLines()).toContain(`POST /v1/admin/schedules/${OPS_IDS.tenantSchedule}/pause`);
-    const paused = await screen.findByRole("row", { name: new RegExp(`${OPS_IDS.tenantSchedule}.*Pausado`, "u") });
+    const paused = await screen.findByRole("row", { name: /daily-usage.*Pausado/u });
     expect(within(paused).getByRole("button", { name: /^Retomar o agendamento/u })).toBeDefined();
   });
 
   it("says so when a pause fails, with the request reference", async () => {
     const { user } = renderSchedules({ "POST /v1/admin/schedules/:scheduleId/pause": apiError(502, "UPSTREAM_UNAVAILABLE") });
     const table = await screen.findByRole("table", { name: "Agendamentos da plataforma e das organizações" });
-    await user.click(within(within(table).getByRole("row", { name: new RegExp(OPS_IDS.tenantSchedule, "u") })).getByRole("button", { name: /^Pausar o agendamento/u }));
-    const dialog = await screen.findByRole("alertdialog", { name: "Pausar o agendamento de usage-report?" });
+    await user.click(within(within(table).getByRole("row", { name: /daily-usage/u })).getByRole("button", { name: /^Pausar o agendamento/u }));
+    const dialog = await screen.findByRole("alertdialog", { name: "Pausar o agendamento de Relatório de uso?" });
     await user.click(within(dialog).getByRole("button", { name: "Pausar agendamento" }));
     const alert = await within(dialog).findByRole("alert");
     expect(alert.textContent).toContain(FAKE_REQUEST_ID);
@@ -219,9 +222,9 @@ describe("AdminWorkflowsView: schedules", () => {
   it("warns that pausing a platform schedule stops the job for every organization, and does nothing on cancel", async () => {
     const { user, api, container } = renderSchedules({ "POST /v1/admin/schedules/:scheduleId/pause": ok(buildPlatformSchedule({ status: "paused", nextFireAt: null })) });
     const table = await screen.findByRole("table", { name: "Agendamentos da plataforma e das organizações" });
-    const platform = within(table).getByRole("row", { name: new RegExp(OPS_IDS.platformSchedule, "u") });
+    const platform = within(table).getByRole("row", { name: /Plataforma/u });
     await user.click(within(platform).getByRole("button", { name: /^Pausar o agendamento/u }));
-    const dialog = await screen.findByRole("alertdialog", { name: "Pausar o agendamento de usage-report?" });
+    const dialog = await screen.findByRole("alertdialog", { name: "Pausar o agendamento de Relatório de uso?" });
     expect(dialog.textContent).toContain("job da plataforma");
     expect(dialog.textContent).toContain("todas as organizações");
     await expectNoAxeViolations(container.ownerDocument.body);
@@ -240,24 +243,24 @@ describe("AdminWorkflowsView: schedules", () => {
     });
     const table = await screen.findByRole("table", { name: "Agendamentos da plataforma e das organizações" });
     await user.click(within(table).getByRole("button", { name: /^Retomar o agendamento/u }));
-    const dialog = await screen.findByRole("alertdialog", { name: "Retomar o agendamento de usage-report?" });
+    const dialog = await screen.findByRole("alertdialog", { name: "Retomar o agendamento de Relatório de uso?" });
     expect(api.callLines()).not.toContain(`POST /v1/admin/schedules/${OPS_IDS.tenantSchedule}/resume`);
     await user.click(within(dialog).getByRole("button", { name: "Retomar agendamento" }));
-    expect(await screen.findByText("Agendamento de usage-report retomado.")).toBeDefined();
+    expect(await screen.findByText("Agendamento de Relatório de uso retomado.")).toBeDefined();
     expect(api.callLines()).toContain(`POST /v1/admin/schedules/${OPS_IDS.tenantSchedule}/resume`);
   });
 
   it("runs a schedule now after a confirmation", async () => {
     const { user, api, container } = renderSchedules({ "POST /v1/admin/schedules/:scheduleId/run": ok({ scheduleId: OPS_IDS.platformSchedule }, 202) });
     const table = await screen.findByRole("table", { name: "Agendamentos da plataforma e das organizações" });
-    await user.click(within(within(table).getByRole("row", { name: new RegExp(OPS_IDS.platformSchedule, "u") })).getByRole("button", { name: /^Executar agora o agendamento/u }));
-    const dialog = await screen.findByRole("alertdialog", { name: "Executar usage-report agora?" });
+    await user.click(within(within(table).getByRole("row", { name: /Plataforma/u })).getByRole("button", { name: /^Executar agora o agendamento/u }));
+    const dialog = await screen.findByRole("alertdialog", { name: "Executar Relatório de uso agora?" });
     expect(within(dialog).getByText(/para todas as organizações/u)).toBeDefined();
     await expectNoAxeViolations(container.ownerDocument.body);
     await user.click(within(dialog).getByRole("button", { name: "Executar agora" }));
     await waitFor(() => expect(screen.queryByRole("alertdialog")).toBeNull());
     expect(api.callLines()).toContain(`POST /v1/admin/schedules/${OPS_IDS.platformSchedule}/run`);
-    expect(await screen.findByText("Execução de usage-report solicitada.")).toBeDefined();
+    expect(await screen.findByText("Execução de Relatório de uso solicitada.")).toBeDefined();
   });
 
   it("filters by organization in the URL and explains an organization without schedules", async () => {
@@ -266,7 +269,7 @@ describe("AdminWorkflowsView: schedules", () => {
     expect(api.calls.find((call) => call.path === "/v1/admin/schedules")?.query).toBe(`?organizationId=${IDS.organization}`);
     await user.click(screen.getByRole("button", { name: "Ver todos" }));
     expect(router.current()).toBe("/admin/workflows?tab=schedules");
-    expect(await screen.findByRole("row", { name: new RegExp(OPS_IDS.platformSchedule, "u") })).toBeDefined();
+    expect(await screen.findByRole("row", { name: /Plataforma/u })).toBeDefined();
   });
 
   it("holds schedule actions while offline", async () => {
@@ -302,11 +305,11 @@ describe("AdminWorkflowsView: who started a run", () => {
       }),
     });
     const table = await screen.findByRole("table", { name: "Execuções de workflows" });
-    expect(await within(within(table).getByRole("row", { name: /approval-demo/u })).findByText("Usuário Ana Souza")).toBeDefined();
+    expect(await within(within(table).getByRole("row", { name: /Demonstração de aprovação/u })).findByText("Usuário Ana Souza")).toBeDefined();
     expect(within(within(table).getByRole("row", { name: /onboarding/u })).getByText("Usuário bo@example.com")).toBeDefined();
     const lookups = api.calls.filter((call) => call.path === "/v1/admin/users");
     expect(lookups.map((call) => new URLSearchParams(call.query).get("ids"))).toEqual([[IDS.user, "uOther"].sort().join(",")]);
-    await user.click(within(within(table).getByRole("row", { name: /approval-demo/u })).getByRole("button", { name: /^Detalhes/u }));
+    await user.click(within(within(table).getByRole("row", { name: /Demonstração de aprovação/u })).getByRole("button", { name: /^Detalhes/u }));
     expect(await within(await screen.findByRole("dialog")).findByText("Pelo usuário Ana Souza")).toBeDefined();
   });
 

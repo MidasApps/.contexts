@@ -7,6 +7,7 @@ import { useTranslations } from "use-intl";
 import { tenantWorkflowRunKeys } from "#/entities/workflow-run/index.ts";
 import { useCallEndpoint } from "#/shared/api/api-context.tsx";
 import { useIdempotencyKey } from "#/shared/api/use-idempotency-key.ts";
+import { useWorkflowLabel } from "#/shared/lib/labels/use-catalog-labels.ts";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "#/shared/ui/atoms/Select/Select.tsx";
 import { Textarea } from "#/shared/ui/atoms/Textarea/Textarea.tsx";
@@ -58,6 +59,7 @@ function StartWorkflowRunForm({ organizationId, workflows, onOpenChange, onStart
   const [failure, setFailure] = useState<unknown>(null);
   const [pending, setPending] = useState(false);
   const selected = startable.find((workflow) => workflow.id === workflowId);
+  const workflowLabel = useWorkflowLabel();
 
   const submit = async (event: FormEvent<HTMLFormElement>): Promise<void> => {
     event.preventDefault();
@@ -77,7 +79,7 @@ function StartWorkflowRunForm({ organizationId, workflows, onOpenChange, onStart
       });
       idempotency.reset();
       await queryClient.invalidateQueries({ queryKey: tenantWorkflowRunKeys.all(organizationId) });
-      notify.success(t("started", { workflow: selected.id }));
+      notify.success(t("started", { workflow: workflowLabel.name(selected.id) }));
       onOpenChange(false);
       onStarted(data.runId);
     } catch (error: unknown) {
@@ -103,12 +105,12 @@ function StartWorkflowRunForm({ organizationId, workflows, onOpenChange, onStart
             <SelectContent>
               {startable.map((workflow) => (
                 <SelectItem key={workflow.id} value={workflow.id}>
-                  {workflow.id}
+                  {workflowLabel.name(workflow.id)}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
-          {selected === undefined || selected.description === "" ? null : <FieldDescription>{selected.description}</FieldDescription>}
+          {selected === undefined || workflowLabel.description(selected.id, selected.description) === "" ? null : <FieldDescription>{workflowLabel.description(selected.id, selected.description)}</FieldDescription>}
           <FieldError errors={[problems.workflow === true ? t("errors.workflow") : undefined]} />
         </Field>
         <Field>

@@ -6,6 +6,7 @@ import { useTranslations } from "use-intl";
 import { isRunCancelable, RunStatusPill, useTenantWorkflowRun } from "#/entities/workflow-run/index.ts";
 import { CancelWorkflowRunDialog } from "#/features/cancel-workflow-run/index.ts";
 import { useFormatDateTime } from "#/shared/lib/format/use-format-date-time.ts";
+import { useWorkflowLabel } from "#/shared/lib/labels/use-catalog-labels.ts";
 import { useOnlineStatus } from "#/shared/lib/network/use-online-status.ts";
 import { RouteLink } from "#/shared/lib/router/router-context.tsx";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
@@ -17,6 +18,7 @@ import { QuerySection } from "#/widgets/page-state/index.ts";
 import { RunTimeline } from "#/widgets/run-timeline/index.ts";
 import { SettingsPageFrame } from "#/widgets/settings-nav/index.ts";
 import { useRunEvents } from "../model/use-run-events.ts";
+import { useTenantScheduleLabels } from "../model/use-tenant-schedule-labels.ts";
 import { useStarterNames } from "../model/use-starter-names.ts";
 
 function RunEvents({ events }: { events: readonly WorkflowEvent[] }) {
@@ -45,8 +47,11 @@ function RunEvents({ events }: { events: readonly WorkflowEvent[] }) {
   );
 }
 
-function RunDetails({ run, organizationId, canSeeApprovals, starterLabel }: { run: WorkflowRun; organizationId: string; canSeeApprovals: boolean; starterLabel: string | undefined }) {
+type RunDetailsProps = { run: WorkflowRun; organizationId: string; canSeeApprovals: boolean; starterLabel: string | undefined; scheduleLabel: string | undefined };
+
+function RunDetails({ run, organizationId, canSeeApprovals, starterLabel, scheduleLabel }: RunDetailsProps) {
   const t = useTranslations("settings.workflows.run");
+  const workflowLabel = useWorkflowLabel();
   const events = useRunEvents(organizationId, run.runId);
   const live = isRunCancelable(run.status);
   return (
@@ -55,7 +60,7 @@ function RunDetails({ run, organizationId, canSeeApprovals, starterLabel }: { ru
         <dl className="grid gap-x-6 gap-y-2 text-sm sm:grid-cols-2">
           <div className="flex flex-col">
             <dt className="text-xs text-muted-foreground">{t("workflow")}</dt>
-            <dd className="font-medium">{run.workflowId}</dd>
+            <dd className="font-medium">{workflowLabel.name(run.workflowId)}</dd>
           </div>
           <div className="flex flex-col">
             <dt className="text-xs text-muted-foreground">{t("id")}</dt>
@@ -66,6 +71,7 @@ function RunDetails({ run, organizationId, canSeeApprovals, starterLabel }: { ru
           run={run}
           label={t("timelineLabel", { id: run.runId })}
           starterLabel={starterLabel}
+          scheduleLabel={run.scheduleId === null ? undefined : scheduleLabel}
           renderApproval={(approvalRequestId) => (
             <span className="flex flex-col gap-1">
               <span>{t("approvalHint")}</span>
@@ -112,6 +118,8 @@ export function RunPage({ context, runId }: { context: AccessContext; runId: str
   const online = useOnlineStatus();
   const { organization } = context;
   const run = useTenantWorkflowRun(organization.id, runId);
+  const workflowLabel = useWorkflowLabel();
+  const scheduleLabel = useTenantScheduleLabels(context);
   const starterName = useStarterNames({ organizationId: organization.id, canReadMembers: context.permissions.includes("core.member.read") });
   const [canceling, setCanceling] = useState(false);
   const current = run.data ?? null;
@@ -123,7 +131,7 @@ export function RunPage({ context, runId }: { context: AccessContext; runId: str
       header={
         <PageHeader
           eyebrow={t("eyebrow", { organization: organization.name })}
-          title={t("run.title", { workflow: current?.workflowId ?? runId })}
+          title={current === null ? t("run.titleUnknown") : t("run.title", { workflow: workflowLabel.name(current.workflowId) })}
           meta={current === null ? undefined : <RunStatusPill status={current.status} />}
           actions={
             <>
@@ -142,7 +150,15 @@ export function RunPage({ context, runId }: { context: AccessContext; runId: str
     >
       {online ? null : <OfflineNotice className="mb-4" />}
       <QuerySection query={run} loadingLabel={t("run.loading")} notFound={<RunNotFound organizationId={organization.id} />}>
-        {(data) => <RunDetails run={data} organizationId={organization.id} canSeeApprovals={context.permissions.includes("core.approval.read")} starterLabel={starterName(data.startedBy)} />}
+        {(data) => (
+          <RunDetails
+            run={data}
+            organizationId={organization.id}
+            canSeeApprovals={context.permissions.includes("core.approval.read")}
+            starterLabel={starterName(data.startedBy)}
+            scheduleLabel={data.scheduleId === null ? undefined : scheduleLabel(data.scheduleId)}
+          />
+        )}
       </QuerySection>
       <CancelWorkflowRunDialog organizationId={organization.id} run={canceling ? current : null} onOpenChange={(open) => !open && setCanceling(false)} />
     </SettingsPageFrame>

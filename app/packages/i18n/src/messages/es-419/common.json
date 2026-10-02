@@ -216,7 +216,8 @@
       "tripwire": "Detenida por guardrail"
     },
     "started": "Iniciada",
-    "startedBySchedule": "Por la programación {schedule}",
+    "startedBySchedule": "Por una programación: {schedule}",
+    "startedByAnySchedule": "Por una programación",
     "startedByUser": "Por el usuario {user}",
     "startedByPlatform": "Por la plataforma",
     "waitingApproval": "Espera aprobación",
