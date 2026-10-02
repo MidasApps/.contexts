@@ -354,7 +354,8 @@
     "loadingAudio": "Preparing the audio…",
     "player": "Answer as audio",
     "readFailed": "The answer could not be read aloud.",
-    "readUnavailable": "Read aloud is turned off for this organization."
+    "readUnavailable": "Read aloud is turned off for this organization.",
+    "endsSoon": "The recording stops by itself in {seconds} seconds."
   },
   "tools": {
     "catalog": {

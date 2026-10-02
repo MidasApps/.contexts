@@ -354,7 +354,8 @@
     "loadingAudio": "Preparando o áudio…",
     "player": "Resposta em áudio",
     "readFailed": "Não foi possível ler a resposta em voz alta.",
-    "readUnavailable": "A leitura em voz alta está desativada para esta organização."
+    "readUnavailable": "A leitura em voz alta está desativada para esta organização.",
+    "endsSoon": "A gravação para sozinha em {seconds} segundos."
   },
   "tools": {
     "catalog": {

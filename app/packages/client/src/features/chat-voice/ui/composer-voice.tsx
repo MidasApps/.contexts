@@ -3,11 +3,13 @@
 import { AudioLinesIcon, Settings2Icon } from "lucide-react";
 import { useState } from "react";
 import { useTranslations } from "use-intl";
+import { cn } from "#/shared/lib/cn.ts";
 import { PromptInputButton } from "#/shared/ui/ai/prompt-input.tsx";
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from "#/shared/ui/molecules/DropdownMenu/DropdownMenu.tsx";
 import { usePushToTalk, type VoiceSeams } from "../model/use-push-to-talk.ts";
 import { useRealtimeVoice, type RealtimeConnector } from "../model/use-realtime-voice.ts";
 import { PushToTalkButton } from "./push-to-talk-button.tsx";
+import { RecordingClock } from "./recording-clock.tsx";
 
 /** Voice preferences of a chat thread (kept by the widget; both start off). */
 export type VoicePreferences = {
@@ -41,7 +43,9 @@ function RealtimeToggle({ organizationId, disabled, connect }: { organizationId:
       <PromptInputButton type="button" label={live ? t("stop") : t("start")} aria-pressed={live} disabled={disabled} onClick={live ? realtime.stop : realtime.start}>
         <AudioLinesIcon aria-hidden="true" />
       </PromptInputButton>
-      <span role="status" className="sr-only">
+      {/* In words and visible: a failed start must not just put the button back to idle. */}
+      <span role="status" data-slot="realtime-status" className={cn("flex items-center gap-1.5 truncate text-[12px]", realtime.status === "error" ? "text-destructive-text" : "text-muted-foreground")}>
+        {realtime.status === "live" ? <span aria-hidden="true" className="size-2 shrink-0 rounded-full bg-destructive motion-safe:animate-pulse" /> : null}
         {realtime.status === "connecting" || realtime.status === "live" || realtime.status === "error" ? t(realtime.status) : ""}
       </span>
     </>
@@ -90,6 +94,7 @@ export function ComposerVoice({ organizationId, voice, disabled = false, onTrans
           </DropdownMenuCheckboxItem>
         </DropdownMenuContent>
       </DropdownMenu>
+      {talk.phase === "recording" ? <RecordingClock /> : null}
       <span role="status" data-slot="voice-status" className={talk.problem === undefined ? "truncate text-[12px] text-muted-foreground" : "truncate text-[12px] text-destructive-text"}>
         {status}
       </span>

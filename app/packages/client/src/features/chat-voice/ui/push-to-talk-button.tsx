@@ -14,12 +14,15 @@ export type PushToTalkButtonProps = {
   disabled?: boolean | undefined;
 };
 
-/** `Ctrl+Space` (spec §5.3): starts and stops a recording from anywhere in the page. */
-const isShortcut = (event: globalThis.KeyboardEvent): boolean => event.ctrlKey && !event.altKey && !event.metaKey && (event.code === "Space" || event.key === " ");
+/**
+ * `Ctrl+Shift+Space` starts and stops a recording from anywhere in the page. Not `Ctrl+Space`
+ * (spec §5.3 as first written): that is the input-method switch on Windows and macOS.
+ */
+const isShortcut = (event: globalThis.KeyboardEvent): boolean => event.ctrlKey && event.shiftKey && !event.altKey && !event.metaKey && (event.code === "Space" || event.key === " ");
 
 /**
  * The push-to-talk control (spec §5.3). With a pointer it records while held. With the keyboard
- * (Enter or Space on the button, or `Ctrl+Space` anywhere) one press starts and the next stops —
+ * (Enter or Space on the button, or `Ctrl+Shift+Space` anywhere) one press starts and the next stops —
  * holding a key is not something every member can do (WCAG 2.5.1 asks for a simple alternative).
  * Esc discards the recording. The button says what a press does and is `aria-pressed` while it
  * records; its state is also said in words next to it by the composer.
@@ -79,7 +82,7 @@ export function PushToTalkButton({ phase, onStart, onStop, onCancel, disabled = 
       type="button"
       recording={recording}
       label={recording ? t("stopRecording") : t("talk")}
-      aria-keyshortcuts="Control+Space"
+      aria-keyshortcuts="Control+Shift+Space"
       disabled={disabled || busy}
       onPointerDown={onPointerDown}
       onPointerUp={release}

@@ -98,7 +98,7 @@ describe("ChatPanel voice (flag gated)", () => {
     expect(upload?.headers.get("authorization")).toMatch(/^Bearer /);
   });
 
-  it("records while the pointer is held and with Ctrl+Space from anywhere", async () => {
+  it("records while the pointer is held and with Ctrl+Shift+Space from anywhere, leaving Ctrl+Space to the system", async () => {
     const api = voiceApi({ voice: true, realtime: false });
     const { user, microphone, field } = setup(api);
     const button = await talkButton();
@@ -107,9 +107,12 @@ describe("ChatPanel voice (flag gated)", () => {
     await user.pointer({ keys: "[/MouseLeft]", target: button });
     await waitFor(() => expect(field().value).toBe("qual é o prazo"));
     await user.clear(field());
+    // Ctrl+Space switches the input method on Windows and macOS: it must not start a recording.
     await user.keyboard("{Control>} {/Control}");
+    expect(microphone.recorders).toHaveLength(1);
+    await user.keyboard("{Control>}{Shift>} {/Shift}{/Control}");
     await waitFor(() => expect(microphone.recorders[1]?.state()).toBe("recording"));
-    await user.keyboard("{Control>} {/Control}");
+    await user.keyboard("{Control>}{Shift>} {/Shift}{/Control}");
     await waitFor(() => expect(field().value).toBe("qual é o prazo"));
   });
 
@@ -166,6 +169,23 @@ describe("ChatPanel voice (flag gated)", () => {
     await user.type(field(), "oi{Enter}");
     await answer(transport, "Olá.");
     await waitFor(() => expect(container.querySelector("audio")?.getAttribute("src")).toBe("blob:speech-1"));
+  });
+
+  it("shows the realtime conversation live, and a failed start in visible words", async () => {
+    const api = voiceApi({ voice: true, realtime: true });
+    api.route("POST /v1/voice/realtime-sessions", ok({ clientSecret: "ek_test", expiresAt: "2026-10-01T12:01:00.000Z", model: "gpt-realtime" }, 201));
+    let fail = false;
+    const connectRealtime = () => (fail ? Promise.reject(new Error("webrtc failed")) : Promise.resolve({ close: () => undefined }));
+    const { user } = setup(api, VOICE, { voiceSeams: { connectRealtime } });
+    await user.click(await screen.findByRole("button", { name: "Iniciar conversa por voz (experimental)" }, LOADED));
+    const status = () => document.querySelector("[data-slot=realtime-status]") as HTMLElement;
+    await waitFor(() => expect(status().textContent).toBe("Conversa por voz ativa."));
+    expect(status().classList.contains("sr-only")).toBe(false);
+    await user.click(screen.getByRole("button", { name: "Encerrar conversa por voz" }));
+    fail = true;
+    await user.click(screen.getByRole("button", { name: "Iniciar conversa por voz (experimental)" }));
+    await waitFor(() => expect(status().textContent).toBe("A conversa por voz falhou."));
+    expect(status().className).toContain("text-destructive-text");
   });
 
   it("offers the realtime conversation only with its flag on, and withdraws it when the session route refuses", async () => {
