@@ -102,6 +102,25 @@ describe("SettingsInvitationsView", () => {
     await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
   });
 
+  it("asks before Escape drops the link while the invitation list is still refreshing", async () => {
+    let listCalls = 0;
+    const { user } = renderView({
+      // The refresh after the invitation never answers: the link is on screen meanwhile.
+      "GET /v1/organizations/:organizationId/invitations": () => (++listCalls === 1 ? page([buildInvitation()]) : new Promise(() => undefined)),
+      "POST /v1/organizations/:organizationId/invitations": ok({ invitation: buildInvitation({ email: "dora@example.com" }), acceptUrl: ACCEPT_URL }, 201),
+    });
+    await user.click(await screen.findByRole("button", { name: "Convidar" }));
+    const dialog = await screen.findByRole("dialog", { name: "Convidar pessoa" });
+    await user.type(within(dialog).getByRole("textbox", { name: "E-mail" }), "dora@example.com");
+    await user.click(within(dialog).getByRole("button", { name: "Enviar convite" }));
+    await within(dialog).findByRole("textbox", { name: "Link do convite" });
+    await waitFor(() => expect(listCalls).toBe(2));
+
+    expect(within(dialog).getByRole("button", { name: "Fechar" })).toBeDefined();
+    await user.keyboard("{Escape}");
+    expect(await screen.findByRole("alertdialog", { name: "Fechar sem guardar?" })).toBeDefined();
+  });
+
   it("keeps ESCALATION_FORBIDDEN in the dialog with the request reference", async () => {
     const { user } = renderView({ "POST /v1/organizations/:organizationId/invitations": apiError(403, "ESCALATION_FORBIDDEN") });
     await user.click(await screen.findByRole("button", { name: "Convidar" }));

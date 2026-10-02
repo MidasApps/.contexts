@@ -112,14 +112,15 @@ function InviteMemberDialogBody({ organization, customRoles, onOpenChange }: Inv
       const { data } = await callEndpoint(createInvitationEndpoint, { params: { organizationId: organization.id }, body, idempotencyKey: idempotency.keyFor(body) });
       idempotency.reset();
       setCreated({ email: body.email, acceptUrl: data.acceptUrl });
-      await queryClient.invalidateQueries({ queryKey: invitationKeys.all(organization.id) });
     } catch (error: unknown) {
       if (!emailIssueOf(error)) return setFailure(error);
       setProblems({ email: "invalid" });
-      emailInput.current?.focus();
+      return emailInput.current?.focus();
     } finally {
+      // The link is on screen now: the list refresh below must not keep dismissal blocked.
       setPending(false);
     }
+    await queryClient.invalidateQueries({ queryKey: invitationKeys.all(organization.id) });
   };
 
   return (

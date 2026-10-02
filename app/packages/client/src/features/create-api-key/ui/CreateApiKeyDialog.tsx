@@ -122,12 +122,13 @@ function CreateApiKeyDialogBody({ organization, onOpenChange, now = systemNow }:
       const { data } = await callEndpoint(createApiKeyEndpoint, { params: { organizationId: organization.id }, body, idempotencyKey: idempotency.keyFor({ ...body, expiresAt: draft.expiryDays }) });
       idempotency.reset();
       setSecret({ name: data.apiKey.name, value: data.secret });
-      await queryClient.invalidateQueries({ queryKey: apiKeyKeys.all(organization.id) });
     } catch (error: unknown) {
-      setFailure(error);
+      return setFailure(error);
     } finally {
+      // The secret is on screen now: the list refresh below must not keep dismissal blocked.
       setPending(false);
     }
+    await queryClient.invalidateQueries({ queryKey: apiKeyKeys.all(organization.id) });
   };
 
   return (

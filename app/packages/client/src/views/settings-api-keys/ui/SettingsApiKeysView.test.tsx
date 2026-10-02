@@ -102,6 +102,26 @@ describe("SettingsApiKeysView", () => {
     expect(screen.queryByRole("alertdialog")).toBeNull();
   });
 
+  it("asks before Escape drops the secret while the key list is still refreshing", async () => {
+    let listCalls = 0;
+    const { user } = renderView({
+      // The refresh after the creation never answers: the secret is on screen meanwhile.
+      "GET /v1/organizations/:organizationId/api-keys": () => (++listCalls === 1 ? page([buildApiKey()]) : new Promise(() => undefined)),
+      "POST /v1/organizations/:organizationId/api-keys": ok({ apiKey: buildApiKey({ id: "AkNew000000000000000", name: "Sync" }), secret: SECRET }, 201),
+    });
+    await user.click(await screen.findByRole("button", { name: "Nova chave" }));
+    const dialog = await screen.findByRole("dialog", { name: "Nova chave de API" });
+    await user.type(within(dialog).getByRole("textbox", { name: /Nome/u }), "Sync");
+    await user.click(await within(dialog).findByRole("checkbox", { name: /Ver projetos/u }));
+    await user.click(within(dialog).getByRole("button", { name: "Criar chave" }));
+    await within(dialog).findByRole("textbox", { name: "Chave de API" });
+    await waitFor(() => expect(listCalls).toBe(2));
+
+    expect(within(dialog).getByRole("button", { name: "Fechar" })).toBeDefined();
+    await user.keyboard("{Escape}");
+    expect(await screen.findByRole("alertdialog", { name: "Fechar sem guardar?" })).toBeDefined();
+  });
+
   it("requires a name and a scope before calling the API", async () => {
     const { user, api } = renderView();
     await user.click(await screen.findByRole("button", { name: "Nova chave" }));
