@@ -92,6 +92,17 @@ describe("SettingsApprovalsView inbox", () => {
     await waitFor(() => expect(router.current()).toBe(`/o/${IDS.organization}/settings/approvals`));
   });
 
+  it("carries the tab to a request and back, so the inbox reopens where it was", async () => {
+    renderView({ search: "?tab=mine" });
+    const own = await screen.findByRole("list", { name: "Pedidas por mim" });
+    expect(within(own).getAllByRole("link")[0]?.getAttribute("href")).toBe(`/o/${IDS.organization}/settings/approvals/ApMine00000000000000?tab=mine`);
+  });
+
+  it("returns from a request to the tab it was opened from", async () => {
+    renderView({ rest: "ApWaiting00000000000", search: "?tab=history", routes: { [ONE]: ok(waiting) } });
+    expect((await screen.findByRole("link", { name: /Voltar/u })).getAttribute("href")).toBe(`/o/${IDS.organization}/settings/approvals?tab=history`);
+  });
+
   it("pages the history by cursor instead of reading it whole", async () => {
     const older = Array.from({ length: 25 }, (_, index) => ({ ...settled, id: `ApOld${String(index).padStart(15, "0")}`, reason: `Old ${index}` }));
     const history = (request: FakeRequest) => {

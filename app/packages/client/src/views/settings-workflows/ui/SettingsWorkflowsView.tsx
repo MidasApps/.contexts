@@ -8,7 +8,7 @@ import { useWorkflowCatalog } from "#/entities/workflow-run/index.ts";
 import { StartWorkflowRunDialog } from "#/features/start-workflow-run/index.ts";
 import { useOnlineStatus } from "#/shared/lib/network/use-online-status.ts";
 import { searchOption, useSettingsSearch } from "#/shared/lib/router/use-route-search.ts";
-import { RouteLink, useRouter } from "#/shared/lib/router/router-context.tsx";
+import { useRouter } from "#/shared/lib/router/router-context.tsx";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
 import { Icon } from "#/shared/ui/atoms/Icon/Icon.tsx";
 import { Alert, AlertDescription } from "#/shared/ui/molecules/Alert/Alert.tsx";
@@ -17,7 +17,7 @@ import { OfflineNotice } from "#/shared/ui/molecules/OfflineNotice/OfflineNotice
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "#/shared/ui/molecules/Tabs/Tabs.tsx";
 import { PageHeader } from "#/widgets/page-header/index.ts";
 import { QueryPage } from "#/widgets/page-state/index.ts";
-import { SettingsPageFrame } from "#/widgets/settings-nav/index.ts";
+import { SettingsPageFrame, SettingsSectionLink } from "#/widgets/settings-nav/index.ts";
 import { RunPage } from "./RunPage.tsx";
 import { RunsSection } from "./RunsSection.tsx";
 import { SchedulesSection } from "./SchedulesSection.tsx";
@@ -112,7 +112,7 @@ function UnknownPage({ context }: { context: AccessContext }) {
         description={t("notFoundDescription")}
         action={
           <Button variant="secondary" asChild>
-            <RouteLink to={{ id: "settings", organizationId: organization.id, section: "workflows" }}>{t("backToRuns")}</RouteLink>
+            <SettingsSectionLink organizationId={organization.id} section="workflows">{t("backToRuns")}</SettingsSectionLink>
           </Button>
         }
       />

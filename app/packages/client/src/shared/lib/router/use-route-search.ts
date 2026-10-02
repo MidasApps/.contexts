@@ -83,3 +83,10 @@ export const useSettingsSearch = <K extends string>(keys: readonly K[]): RouteSe
 /** A search value that must be one of `options`, else `fallback` (hand-edited or stale links). */
 export const searchOption = <T extends string>(value: string | undefined, options: readonly T[], fallback: T): T =>
   value !== undefined && (options as readonly string[]).includes(value) ? (value as T) : fallback;
+
+/**
+ * The current query string as a route search: links between a settings list and its detail
+ * pages carry it, so "back" from a run, a trace or a request returns to the same tab, filters and
+ * page.
+ */
+export const useCarriedSearch = (): Readonly<Record<string, string>> => Object.fromEntries(new URLSearchParams(useRouter().useSearch()));

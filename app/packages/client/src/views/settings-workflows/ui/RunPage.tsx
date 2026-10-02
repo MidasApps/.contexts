@@ -18,7 +18,7 @@ import { SectionCard } from "#/shared/ui/molecules/SectionCard/SectionCard.tsx";
 import { PageHeader } from "#/widgets/page-header/index.ts";
 import { QuerySection } from "#/widgets/page-state/index.ts";
 import { RunTimeline } from "#/widgets/run-timeline/index.ts";
-import { SettingsPageFrame } from "#/widgets/settings-nav/index.ts";
+import { SettingsPageFrame, SettingsSectionLink } from "#/widgets/settings-nav/index.ts";
 import { useRunEvents } from "../model/use-run-events.ts";
 import { useTenantScheduleLabels } from "../model/use-tenant-schedule-labels.ts";
 import { useStarterNames } from "../model/use-starter-names.ts";
@@ -106,7 +106,7 @@ function RunNotFound({ organizationId }: { organizationId: string }) {
       description={t("run.notFoundDescription")}
       action={
         <Button variant="secondary" asChild>
-          <RouteLink to={{ id: "settings", organizationId, section: "workflows" }}>{t("backToRuns")}</RouteLink>
+          <SettingsSectionLink organizationId={organizationId} section="workflows">{t("backToRuns")}</SettingsSectionLink>
         </Button>
       }
     />
@@ -152,7 +152,7 @@ export function RunPage({ context, runId }: { context: AccessContext; runId: str
           actions={
             <>
               <Button variant="secondary" asChild>
-                <RouteLink to={{ id: "settings", organizationId: organization.id, section: "workflows" }}>{t("backToRuns")}</RouteLink>
+                <SettingsSectionLink organizationId={organization.id} section="workflows">{t("backToRuns")}</SettingsSectionLink>
               </Button>
               {canRunAgain ? (
                 <Button variant="outline" disabled={!online} onClick={() => setRerunning(true)}>

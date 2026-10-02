@@ -6,23 +6,23 @@ import { ApprovalRequestItem, useApprovalRequest } from "#/entities/approval-req
 import { ApprovalDecision } from "#/features/approval-decision/index.ts";
 import { useFormatDateTime } from "#/shared/lib/format/use-format-date-time.ts";
 import { usePermissionLabel } from "#/shared/lib/labels/use-catalog-labels.ts";
-import { RouteLink } from "#/shared/lib/router/router-context.tsx";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
 import { Icon } from "#/shared/ui/atoms/Icon/Icon.tsx";
 import { EmptyState } from "#/shared/ui/molecules/EmptyState/EmptyState.tsx";
 import { ApiErrorState } from "#/shared/ui/molecules/ErrorState/ApiErrorState.tsx";
 import { LoadingState } from "#/shared/ui/molecules/LoadingState/LoadingState.tsx";
 import { NodeName } from "#/widgets/access-node/index.ts";
+import { SettingsSectionLink } from "#/widgets/settings-nav/index.ts";
 import { useRequesterNames } from "./use-requester-names.ts";
 
 function BackToInbox({ organizationId, variant = "ghost" }: { organizationId: string; variant?: "ghost" | "secondary" }) {
   const t = useTranslations("settings.approvals.detail");
   return (
     <Button variant={variant} size="sm" asChild className="self-start">
-      <RouteLink to={{ id: "settings", organizationId, section: "approvals" }}>
+      <SettingsSectionLink organizationId={organizationId} section="approvals">
         <Icon name="arrow-left" />
         {t("back")}
-      </RouteLink>
+      </SettingsSectionLink>
     </Button>
   );
 }

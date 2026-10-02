@@ -6,13 +6,13 @@ import { useFormatter, useTranslations } from "use-intl";
 import { useSettingsSearch } from "#/shared/lib/router/use-route-search.ts";
 import { TraceCost, TraceDuration, TraceStatusPill, useTenantTraces, type TracePage } from "#/entities/trace/index.ts";
 import { useFormatDateTime } from "#/shared/lib/format/use-format-date-time.ts";
-import { RouteLink } from "#/shared/lib/router/router-context.tsx";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
 import { EmptyState } from "#/shared/ui/molecules/EmptyState/EmptyState.tsx";
 import { DataTable } from "#/shared/ui/organisms/DataTable/DataTable.tsx";
 import { dataTableColumnHelper } from "#/shared/ui/organisms/DataTable/data-table-columns.ts";
 import { QuerySection } from "#/widgets/page-state/index.ts";
 import { TraceFilters, type TraceFilterValues } from "./TraceFilters.tsx";
+import { SettingsSectionLink } from "#/widgets/settings-nav/index.ts";
 import { useTargetLabel } from "./trace-target.ts";
 
 const column = dataTableColumnHelper<TraceSummary>();
@@ -23,13 +23,15 @@ function TraceName({ trace, organizationId }: { trace: TraceSummary; organizatio
   const t = useTranslations("settings.traces");
   return (
     <span className="flex min-w-0 flex-col">
-      <RouteLink
-        to={{ id: "settings", organizationId, section: "traces", rest: trace.traceId }}
+      <SettingsSectionLink
+        organizationId={organizationId}
+        section="traces"
+        rest={trace.traceId}
         aria-label={t("open", { name: trace.name })}
         className="truncate font-medium underline-offset-4 hover:underline"
       >
         {trace.name}
-      </RouteLink>
+      </SettingsSectionLink>
       <span className="font-mono text-[11.5px] text-muted-foreground">{trace.traceId}</span>
     </span>
   );

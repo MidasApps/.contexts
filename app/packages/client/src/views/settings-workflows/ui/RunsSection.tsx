@@ -9,7 +9,6 @@ import { useWorkflowLabel } from "#/shared/lib/labels/use-catalog-labels.ts";
 import { useFormatDateTime } from "#/shared/lib/format/use-format-date-time.ts";
 import { useSettingsSearch } from "#/shared/lib/router/use-route-search.ts";
 import { useCursorPages } from "#/shared/lib/pagination/use-cursor-pages.ts";
-import { RouteLink } from "#/shared/lib/router/router-context.tsx";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
 import { Label } from "#/shared/ui/atoms/Label/Label.tsx";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "#/shared/ui/atoms/Select/Select.tsx";
@@ -18,6 +17,7 @@ import { DataTable } from "#/shared/ui/organisms/DataTable/DataTable.tsx";
 import { dataTableColumnHelper } from "#/shared/ui/organisms/DataTable/data-table-columns.ts";
 import { QuerySection } from "#/widgets/page-state/index.ts";
 import { useStarterNames } from "../model/use-starter-names.ts";
+import { SettingsSectionLink } from "#/widgets/settings-nav/index.ts";
 import { useTenantScheduleLabels } from "../model/use-tenant-schedule-labels.ts";
 
 const ANY = "any";
@@ -65,9 +65,9 @@ function RunActions({ run, organizationId, onCancel }: RowActions & { run: Workf
   return (
     <span className="flex flex-wrap justify-end gap-2">
       <Button variant="outline" size="sm" asChild>
-        <RouteLink to={{ id: "settings", organizationId, section: "workflows", rest: `runs/${run.runId}` }} aria-label={t("openNamed", { workflow, id: run.runId })}>
+        <SettingsSectionLink organizationId={organizationId} section="workflows" rest={`runs/${run.runId}`} aria-label={t("openNamed", { workflow, id: run.runId })}>
           {t("open")}
-        </RouteLink>
+        </SettingsSectionLink>
       </Button>
       {onCancel !== null && isRunCancelable(run.status) ? (
         <Button variant="outline" size="sm" onClick={() => onCancel(run)} aria-label={t("cancelNamed", { workflow, id: run.runId })}>

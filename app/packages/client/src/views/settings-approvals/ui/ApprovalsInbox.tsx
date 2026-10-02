@@ -2,11 +2,10 @@
 
 import type { AccessContext, ApprovalRequest } from "@core/contracts";
 import { useTranslations } from "use-intl";
-import { searchOption, useSettingsSearch } from "#/shared/lib/router/use-route-search.ts";
+import { searchOption, useCarriedSearch, useSettingsSearch } from "#/shared/lib/router/use-route-search.ts";
 import {
   APPROVAL_HISTORY_PAGE_SIZE,
   ApprovalRequestItem,
-  approvalRequestRoute,
   useApprovalHistory,
   useApprovalRequests,
   waitingForDecision,
@@ -41,6 +40,8 @@ type ListProps = {
 
 function RequestList({ tab, requests, viewerUid, requesterName }: ListProps) {
   const t = useTranslations("settings.approvals");
+  // The request page carries the inbox tab, so its "back" returns to the same tab.
+  const search = useCarriedSearch();
   if (requests.length === 0) return <EmptyState icon="inbox" title={t(`empty.${tab}Title`)} description={t(`empty.${tab}Description`)} />;
   return (
     <ul className="flex flex-col gap-3" aria-label={t(`tabs.${tab}`)}>
@@ -51,7 +52,7 @@ function RequestList({ tab, requests, viewerUid, requesterName }: ListProps) {
             headingLevel={2}
             requesterName={requesterName(request)}
             node={<NodeName node={request.node} />}
-            titleRoute={approvalRequestRoute(request.tenantId, request.id)}
+            titleRoute={{ id: "settings", organizationId: request.tenantId, section: "approvals", rest: request.id, search }}
             actions={tab === "waiting" ? <ApprovalDecision request={request} viewerUid={viewerUid} /> : undefined}
           />
         </li>

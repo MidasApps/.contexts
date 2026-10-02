@@ -5,13 +5,13 @@ import { useTranslations } from "use-intl";
 import { useAccessContext, useCurrentNode } from "#/entities/session/index.ts";
 import { TraceStatusPill, useTenantTrace } from "#/entities/trace/index.ts";
 import { isApiErrorStatus } from "#/shared/api/cursor-list.ts";
-import { RouteLink, useRouter } from "#/shared/lib/router/router-context.tsx";
+import { useRouter } from "#/shared/lib/router/router-context.tsx";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
 import { Icon } from "#/shared/ui/atoms/Icon/Icon.tsx";
 import { EmptyState } from "#/shared/ui/molecules/EmptyState/EmptyState.tsx";
 import { PageHeader } from "#/widgets/page-header/index.ts";
 import { QueryPage, QuerySection } from "#/widgets/page-state/index.ts";
-import { SettingsPageFrame } from "#/widgets/settings-nav/index.ts";
+import { SettingsPageFrame, SettingsSectionLink } from "#/widgets/settings-nav/index.ts";
 import { TraceDetail } from "./TraceDetail.tsx";
 import { TraceList } from "./TraceList.tsx";
 
@@ -24,10 +24,10 @@ function BackToTraces({ organizationId }: { organizationId: string }) {
   const t = useTranslations("settings.traces.detail");
   return (
     <Button variant="secondary" asChild>
-      <RouteLink to={{ id: "settings", organizationId, section: "traces" }}>
+      <SettingsSectionLink organizationId={organizationId} section="traces">
         <Icon name="arrow-left" />
         {t("back")}
-      </RouteLink>
+      </SettingsSectionLink>
     </Button>
   );
 }
