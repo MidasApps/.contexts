@@ -2,9 +2,11 @@
 export {
   activeVersionOf,
   promptActivationsQuery,
+  promptSeedQuery,
   promptVersionKeys,
   promptVersionsQuery,
   usePromptActivations,
+  usePromptSeed,
   usePromptVersions,
 } from "./api/prompt-version-queries.ts";
 export { PromptVerdictPill } from "./ui/PromptVerdictPill.tsx";

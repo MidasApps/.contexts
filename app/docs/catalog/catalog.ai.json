@@ -6788,6 +6788,76 @@
     },
     {
       "context": "agents",
+      "description": "The instructions an agent ships with in code; the prompt editor starts from them when the store has no version.",
+      "examples": [
+        {
+          "agentId": "knowledge",
+          "body": "You answer from the organization's knowledge base and cite every source."
+        }
+      ],
+      "fields": [
+        {
+          "description": "Agent whose instructions these are.",
+          "name": "agentId",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "The instructions as the code ships them; the editor starts from them when no version exists.",
+          "name": "body",
+          "pii": "none",
+          "required": true
+        }
+      ],
+      "id": "agents.PromptSeed",
+      "jsonSchema": {
+        "additionalProperties": false,
+        "description": "The instructions an agent ships with in code; the prompt editor starts from them when the store has no version.",
+        "examples": [
+          {
+            "agentId": "knowledge",
+            "body": "You answer from the organization's knowledge base and cite every source."
+          }
+        ],
+        "properties": {
+          "agentId": {
+            "description": "Agent whose instructions these are.",
+            "enum": [
+              "assistant",
+              "knowledge",
+              "data",
+              "action",
+              "web"
+            ],
+            "type": "string",
+            "x-pii": "none"
+          },
+          "body": {
+            "description": "The instructions as the code ships them; the editor starts from them when no version exists.",
+            "type": "string",
+            "x-pii": "none"
+          }
+        },
+        "required": [
+          "agentId",
+          "body"
+        ],
+        "type": "object",
+        "x-kind": "view",
+        "x-permission": "platform.prompt.manage",
+        "x-pii": "none",
+        "x-relations": [],
+        "x-tenancyScope": "platform"
+      },
+      "kind": "view",
+      "name": "PromptSeed",
+      "permission": "platform.prompt.manage",
+      "pii": "none",
+      "relations": [],
+      "tenancyScope": "platform"
+    },
+    {
+      "context": "agents",
       "description": "An immutable version of an agent prompt (platform instructions or a tenant addendum).",
       "examples": [
         {

@@ -57,6 +57,10 @@ const fakeOperations = () => {
       return Promise.resolve({ ok: true, data: run({ runId, tenantId: runId === "platform-run" ? null : (ORG_B as TenantId) }) });
     },
     listAgents: () => (calls.push(["listAgents"]), Promise.resolve({ ok: true, data: [KNOWLEDGE] })),
+    getPromptSeed: ({ agentId }) => {
+      calls.push(["getPromptSeed", agentId]);
+      return Promise.resolve(agentId === "knowledge" ? { ok: true, data: { agentId: "knowledge", body: "Seed instructions." } } : { ok: false, error: { code: "NOT_FOUND", status: 404 } });
+    },
     listSchedules: (query) => (calls.push(["listSchedules", query.tenantId]), Promise.resolve({ ok: true, data: query.tenantId === null ? [PLATFORM, schedule()] : [schedule()] })),
     actOnSchedule: ({ scheduleId, action }) => {
       calls.push(["actOnSchedule", scheduleId, action]);
@@ -119,6 +123,30 @@ describe("GET /v1/admin/agents", () => {
     expect(await answers({ data: [KNOWLEDGE] }).listAgents({ requestId: "r1" })).toEqual({ ok: true, data: [KNOWLEDGE] });
     expect(await answers({ data: [{ id: "knowledge" }] }).listAgents({ requestId: "r1" })).toEqual({ ok: false, error: { code: "UPSTREAM_UNAVAILABLE", status: 502 } });
     expect(await answers({}, 500).listAgents({ requestId: "r1" })).toEqual({ ok: false, error: { code: "UPSTREAM_UNAVAILABLE", status: 502 } });
+  });
+});
+
+// Follow-up 86: the prompt editor starts from the code seed when the store has no version.
+describe("GET /v1/admin/agents/{agentId}/prompt-seed", () => {
+  it("answers the agent's code seed to staff with platform.prompt.manage only, 404 from the runtime as is", async () => {
+    const { routes, calls } = setup();
+    const seed = await callRoute(routes, "prompts.adminGetSeed", "/v1/admin/agents/knowledge/prompt-seed", { as: "sam" });
+    expect(seed.status).toBe(200);
+    expect(await seed.json()).toEqual({ data: { agentId: "knowledge", body: "Seed instructions." } });
+    expect((await callRoute(routes, "prompts.adminGetSeed", "/v1/admin/agents/web/prompt-seed", { as: "sam" })).status).toBe(404);
+    for (const as of ["alice", "nomfa"]) expect((await callRoute(routes, "prompts.adminGetSeed", "/v1/admin/agents/knowledge/prompt-seed", { as })).status).toBe(403);
+    expect(calls).toEqual([
+      ["getPromptSeed", "knowledge"],
+      ["getPromptSeed", "web"],
+    ]);
+  });
+
+  it("reads the seed from the runtime and answers 502 when it is malformed", async () => {
+    const answers = (body: unknown, status = 200) => createMastraOperationsGateway({ baseUrl: "http://runtime/", serverlessToken: null, fetch: () => Promise.resolve(Response.json(body, { status })) });
+    const seed = { agentId: "knowledge", body: "Seed instructions." };
+    expect(await answers({ data: seed }).getPromptSeed({ agentId: "knowledge", requestId: "r1" })).toEqual({ ok: true, data: seed });
+    expect(await answers({ data: { agentId: "knowledge" } }).getPromptSeed({ agentId: "knowledge", requestId: "r1" })).toEqual({ ok: false, error: { code: "UPSTREAM_UNAVAILABLE", status: 502 } });
+    expect(await answers({}, 404).getPromptSeed({ agentId: "knowledge", requestId: "r1" })).toEqual({ ok: false, error: { code: "NOT_FOUND", status: 404 } });
   });
 });
 

@@ -11,6 +11,7 @@ import { createActionAgentDefinition } from "../agents/action-agent.ts";
 import { createDataAgentDefinition } from "../agents/data-agent.ts";
 import { createKnowledgeAgentDefinition } from "../agents/knowledge-agent.ts";
 import { PING_AGENT } from "../agents/ping-agent.ts";
+import { createPromptSeedReader } from "../agents/prompt-seed.ts";
 import { createSupervisorAgent, SUPERVISOR_AGENT_ID } from "../agents/supervisor-agent.ts";
 import { createTenantAgentSettingsReader } from "../agents/tenant-agent-settings.ts";
 import { createInstructionsResolver } from "../agents/prompt-instructions.ts";
@@ -450,6 +451,7 @@ export const composeAgentRuntime = (args: ComposeAgentRuntimeArgs): RuntimeParts
         approvals: args.ports.workflowApprovals,
         aiMode: args.env.AI_MODE,
         logger: processLogger,
+        promptSeed: createPromptSeedReader(args.instructionsDirs),
         // Decision 0044: the staff catalog of what this runtime registered.
         agentCatalog: () => buildAgentCatalog({ definitions, built: { ...agents, ...subagents }, isEntry, supervisor: { id: SUPERVISOR_AGENT_ID, ceiling: SUPERVISOR_CEILING } }),
       }),

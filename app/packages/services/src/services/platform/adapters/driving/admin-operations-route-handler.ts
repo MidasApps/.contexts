@@ -1,5 +1,6 @@
 import {
   adminCancelWorkflowRunEndpoint,
+  adminGetPromptSeedEndpoint,
   adminListAgentsEndpoint,
   adminListConnectorsEndpoint,
   adminListSchedulesEndpoint,
@@ -21,7 +22,7 @@ import type { OperationsError, OperationsGateway, ScheduleAction } from "../../a
 import { type GuardContext, requireStaff } from "./console-guards.ts";
 
 /** `platform.*` permissions of the staff operations (SP5 spec §2.1). */
-export const OPERATIONS_PERMISSIONS = { workflows: "platform.workflow.manage", connectors: "platform.connector.read", agents: "platform.agent.manage" } as const;
+export const OPERATIONS_PERMISSIONS = { workflows: "platform.workflow.manage", connectors: "platform.connector.read", agents: "platform.agent.manage", prompts: "platform.prompt.manage" } as const;
 
 export type AdminOperationsRouteDeps = {
   readonly pipeline: ApiRouteDeps;
@@ -107,6 +108,13 @@ const buildAgentCatalogRoutes = (deps: AdminOperationsRouteDeps): Record<string,
     const denied = await requireStaff(ctx, { permission: OPERATIONS_PERMISSIONS.agents });
     if (denied !== null) return denied;
     const result = await deps.operations.listAgents({ requestId: ctx.requestId });
+    return result.ok ? dataResponse({ data: result.data }) : failed(result.error, ctx.requestId);
+  }),
+  // Follow-up 86: the instructions an agent ships with, so the prompt editor never starts empty.
+  [adminGetPromptSeedEndpoint.id]: withApiRoute(adminGetPromptSeedEndpoint, deps.pipeline, async (ctx) => {
+    const denied = await requireStaff(ctx, { permission: OPERATIONS_PERMISSIONS.prompts });
+    if (denied !== null) return denied;
+    const result = await deps.operations.getPromptSeed({ agentId: ctx.input.params.agentId, requestId: ctx.requestId });
     return result.ok ? dataResponse({ data: result.data }) : failed(result.error, ctx.requestId);
   }),
 });

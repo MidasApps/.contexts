@@ -1,6 +1,6 @@
 "use client";
 
-import { adminListPromptActivationsEndpoint, adminListPromptVersionsEndpoint, type PromptActivation, type PromptAgentId, type PromptVersion } from "@core/contracts";
+import { adminGetPromptSeedEndpoint, adminListPromptActivationsEndpoint, adminListPromptVersionsEndpoint, type PromptActivation, type PromptAgentId, type PromptSeed, type PromptVersion } from "@core/contracts";
 import { queryOptions, useQuery } from "@tanstack/react-query";
 import { useCallEndpoint } from "#/shared/api/api-context.tsx";
 import type { CallEndpoint } from "#/shared/api/call-endpoint.ts";
@@ -12,6 +12,7 @@ export const promptVersionKeys = {
   agent: (agentId: string): QueryKey => ["admin", "prompts", agentId],
   versions: (agentId: string): QueryKey => ["admin", "prompts", agentId, "versions"],
   activations: (agentId: string): QueryKey => ["admin", "prompts", agentId, "activations"],
+  seed: (agentId: string): QueryKey => ["admin", "prompts", agentId, "seed"],
 };
 
 /** `GET /v1/admin/agents/{agentId}/prompt-versions` (staff, platform.prompt.manage), newest first. */
@@ -27,6 +28,22 @@ export const promptActivationsQuery = (callEndpoint: CallEndpoint, agentId: Prom
     queryKey: promptVersionKeys.activations(agentId),
     queryFn: async ({ signal }): Promise<PromptActivation[]> => (await callEndpoint(adminListPromptActivationsEndpoint, { params: { agentId }, signal })).data,
   });
+
+/** `GET /v1/admin/agents/{agentId}/prompt-seed`: the instructions the agent ships with in code (follow-up 86). */
+export const promptSeedQuery = (callEndpoint: CallEndpoint, agentId: PromptAgentId) =>
+  queryOptions({
+    queryKey: promptVersionKeys.seed(agentId),
+    queryFn: async ({ signal }): Promise<PromptSeed> => (await callEndpoint(adminGetPromptSeedEndpoint, { params: { agentId }, signal })).data,
+    // The code text only changes with a deploy.
+    staleTime: Number.POSITIVE_INFINITY,
+    retry: false,
+  });
+
+export const usePromptSeed = (agentId: PromptAgentId, options: { enabled?: boolean } = {}) => {
+  const callEndpoint = useCallEndpoint();
+  const signedIn = useIsSignedIn();
+  return useQuery({ ...promptSeedQuery(callEndpoint, agentId), enabled: signedIn && options.enabled !== false });
+};
 
 export const usePromptVersions = (agentId: PromptAgentId, options: { enabled?: boolean } = {}) => {
   const callEndpoint = useCallEndpoint();

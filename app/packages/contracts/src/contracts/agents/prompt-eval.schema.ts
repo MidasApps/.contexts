@@ -8,6 +8,24 @@ export const PROMPT_AGENT_IDS = ["assistant", "knowledge", "data", "action", "we
 export const PromptAgentIdSchema = z.enum(PROMPT_AGENT_IDS);
 export type PromptAgentId = z.infer<typeof PromptAgentIdSchema>;
 
+/** The code-defined instructions of an agent (`instructions/<agent>.v1.md`), read by the runtime (follow-up 86). */
+export const PromptSeedSchema = z.strictObject({
+  agentId: PromptAgentIdSchema.meta(none("Agent whose instructions these are.")),
+  body: z.string().meta(none("The instructions as the code ships them; the editor starts from them when no version exists.")),
+});
+export type PromptSeed = z.infer<typeof PromptSeedSchema>;
+
+export const PromptSeedContract = defineContract(PromptSeedSchema, {
+  id: "agents.PromptSeed",
+  kind: "view",
+  description: "The instructions an agent ships with in code; the prompt editor starts from them when the store has no version.",
+  examples: [{ agentId: "knowledge", body: "You answer from the organization's knowledge base and cite every source." }],
+  pii: "none",
+  tenancyScope: "platform",
+  relations: [],
+  permission: "platform.prompt.manage",
+});
+
 /** Verdict of a candidate prompt on its agent's eval set against the baseline (decision 0038). */
 export const PromptEvalResultSchema = z.strictObject({
   versionId: PromptVersionIdSchema.meta(none("Evaluated version.")),

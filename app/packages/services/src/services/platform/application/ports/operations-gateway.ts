@@ -1,4 +1,4 @@
-import type { AdminAgent, AdminSchedule, AdminWorkflowRun, PageMeta, WorkflowRunStatus } from "@core/contracts";
+import type { AdminAgent, AdminSchedule, AdminWorkflowRun, PageMeta, PromptSeed, WorkflowRunStatus } from "@core/contracts";
 import type { Result } from "../../../shared/result/result.ts";
 
 /** A runtime call refused or failed upstream: the status and code `/v1` answers with. */
@@ -32,4 +32,6 @@ export type OperationsGateway = {
   readonly actOnSchedule: (input: { readonly scheduleId: string; readonly action: ScheduleAction; readonly requestId: string }) => Promise<OperationsResult<AdminSchedule>>;
   /** The agents the runtime registered (`/console/agents`, decision 0044): registry data, no tenant data. */
   readonly listAgents: (input: { readonly requestId: string }) => Promise<OperationsResult<AdminAgent[]>>;
+  /** The code seed of an agent's versioned prompt (`/console/agents/:agentId/prompt-seed`, follow-up 86). */
+  readonly getPromptSeed: (input: { readonly agentId: string; readonly requestId: string }) => Promise<OperationsResult<PromptSeed>>;
 };

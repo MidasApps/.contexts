@@ -1,4 +1,4 @@
-import { AdminAgentSchema, AdminScheduleSchema, AdminWorkflowRunSchema, FORWARDED_HEADERS, PageMetaSchema } from "@core/contracts";
+import { AdminAgentSchema, AdminScheduleSchema, AdminWorkflowRunSchema, FORWARDED_HEADERS, PageMetaSchema, PromptSeedSchema } from "@core/contracts";
 import { z } from "zod";
 import type { ServerlessIdTokenSource } from "../../../agents/adapters/driven/serverless-id-token.ts";
 import type { OperationsError, OperationsGateway, OperationsResult } from "../../application/ports/operations-gateway.ts";
@@ -14,6 +14,7 @@ const RunSchema = z.object({ data: AdminWorkflowRunSchema });
 const SchedulesSchema = z.object({ data: z.array(AdminScheduleSchema) });
 const ScheduleSchema = z.object({ data: AdminScheduleSchema });
 const AgentsSchema = z.object({ data: z.array(AdminAgentSchema) });
+const SeedSchema = z.object({ data: PromptSeedSchema });
 
 type Call = { readonly method: "GET" | "POST"; readonly path: string; readonly query?: Record<string, string | number | undefined>; readonly requestId?: string };
 
@@ -73,6 +74,10 @@ export const createMastraOperationsGateway = (options: {
     },
     listAgents: async ({ requestId }) => {
       const result = await call({ method: "GET", path: "/agents", requestId }, AgentsSchema);
+      return result.ok ? { ok: true, data: result.data.data } : result;
+    },
+    getPromptSeed: async ({ agentId, requestId }) => {
+      const result = await call({ method: "GET", path: `/agents/${encodeURIComponent(agentId)}/prompt-seed`, requestId }, SeedSchema);
       return result.ok ? { ok: true, data: result.data.data } : result;
     },
   };

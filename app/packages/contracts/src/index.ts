@@ -581,10 +581,11 @@ export {
   updateOrganizationAdminEndpoint, updateOrganizationAgentSettingsEndpoint, updatePlanEndpoint,
 } from "./contracts/platform/admin-endpoints.ts";
 export {
-  PROMPT_AGENT_IDS, PromptAgentIdSchema, PromptEvalResultContract, PromptEvalResultSchema, type PromptAgentId, type PromptEvalResult,
+  PROMPT_AGENT_IDS, PromptAgentIdSchema, PromptEvalResultContract, PromptEvalResultSchema, PromptSeedContract, PromptSeedSchema, type PromptAgentId, type PromptEvalResult,
+  type PromptSeed,
 } from "./contracts/agents/prompt-eval.schema.ts";
 export {
-  activateAddendumEndpoint, adminActivatePromptEndpoint, adminCreatePromptVersionEndpoint, adminEvaluatePromptVersionEndpoint,
+  activateAddendumEndpoint, adminActivatePromptEndpoint, adminCreatePromptVersionEndpoint, adminEvaluatePromptVersionEndpoint, adminGetPromptSeedEndpoint,
   adminListPromptActivationsEndpoint, adminListPromptVersionsEndpoint, createAddendumVersionEndpoint, evaluateAddendumVersionEndpoint,
   listAddendumActivationsEndpoint, listAddendumVersionsEndpoint, PROMPT_ENDPOINTS,
 } from "./contracts/agents/prompt-endpoints.ts";

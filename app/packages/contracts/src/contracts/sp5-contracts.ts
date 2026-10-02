@@ -20,7 +20,7 @@ import {
   UpdateOrganizationAdminInputContract,
 } from "./platform/organization-admin.schema.ts";
 import { UpdateAgentSettingsInputContract } from "./agents/update-agent-settings.schema.ts";
-import { PromptEvalResultContract } from "./agents/prompt-eval.schema.ts";
+import { PromptEvalResultContract, PromptSeedContract } from "./agents/prompt-eval.schema.ts";
 import { EvalDatasetContract, StartEvalExperimentInputContract } from "./observability/eval-dataset.schema.ts";
 import { UsageDailyRollupContract } from "./usage/usage-daily-rollup.schema.ts";
 import { HumanApprovalResumeContract, WorkflowResumeActionInputContract } from "./workflows/human-approval-resume.schema.ts";
@@ -59,6 +59,7 @@ export const SP5_CONTRACTS: readonly ContractDefinition[] = [
   SetTenantBudgetInputContract,
   UpdateAgentSettingsInputContract,
   PromptEvalResultContract,
+  PromptSeedContract,
   EvalDatasetContract,
   StartEvalExperimentInputContract,
   MessageFeedbackContract,

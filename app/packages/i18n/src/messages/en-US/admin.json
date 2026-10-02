@@ -864,7 +864,8 @@
       "note": "Note",
       "noteHint": "Optional: why the prompt changes.",
       "submit": "Create version",
-      "created": "Version {version} created."
+      "created": "Version {version} created.",
+      "descriptionSeed": "The text starts from the instructions the agent ships with in code, because there is no version yet. Saving creates the first version; nothing changes in production until it is evaluated and activated."
     },
     "activation": {
       "title": "Activate version {version}?",

@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "use-intl";
 import { useAdminUserNames } from "#/entities/admin-user/index.ts";
 import { usePlatformPermissions } from "#/entities/permission/index.ts";
-import { activeVersionOf, usePromptActivations, usePromptVersions } from "#/entities/prompt-version/index.ts";
+import { activeVersionOf, usePromptActivations, usePromptSeed, usePromptVersions } from "#/entities/prompt-version/index.ts";
 import { PromptActivationDialog, PromptEvalResultTable, useRunPromptEval, type PromptActivationRequest, type RunPromptEval } from "#/features/admin-prompt-activation/index.ts";
 import { PromptVersionDialog } from "#/features/admin-prompt-version-editor/index.ts";
 import { useDescribeError } from "#/shared/lib/errors/describe-error.ts";
@@ -146,6 +146,10 @@ function AgentPrompts({ agentId }: { agentId: PromptAgentId }) {
   const [creating, setCreating] = useState(false);
   const agentName = t(`agents.names.${agentId}`);
   const active = data.data === undefined ? undefined : activeVersionOf(data.data.versions, data.data.activations);
+  // Without any version the editor starts from the code instructions (follow-up 86), not from nothing.
+  const firstVersion = data.data?.versions.length === 0;
+  const seed = usePromptSeed(agentId, { enabled: firstVersion });
+  const seedBody = firstVersion ? seed.data?.body : undefined;
   return (
     <AdminPageFrame
       permission="platform.prompt.manage"
@@ -162,7 +166,15 @@ function AgentPrompts({ agentId }: { agentId: PromptAgentId }) {
       <AdminQuerySection query={data} loadingLabel={t("prompts.loading")}>
         {(loaded) => <PromptSections agentId={agentId} agentName={agentName} data={loaded} online={online} onCreate={() => setCreating(true)} />}
       </AdminQuerySection>
-      <PromptVersionDialog key={active?.id ?? "seed"} agentId={agentId} agentName={agentName} initialBody={active?.body ?? data.data?.versions[0]?.body ?? ""} open={creating} onOpenChange={setCreating} />
+      <PromptVersionDialog
+        key={active?.id ?? (seedBody === undefined ? "empty" : "seed")}
+        agentId={agentId}
+        agentName={agentName}
+        initialBody={active?.body ?? data.data?.versions[0]?.body ?? seedBody ?? ""}
+        initialSource={seedBody === undefined ? "active" : "seed"}
+        open={creating}
+        onOpenChange={setCreating}
+      />
     </AdminPageFrame>
   );
 }

@@ -27,6 +27,8 @@ export type ConsoleRouteDeps = {
   readonly logger: Pick<Logger, "info" | "error">;
   /** The registered agents for the staff catalog (decision 0044); absent: an empty catalog. */
   readonly agentCatalog?: () => readonly AdminAgent[];
+  /** The code seed of an agent's versioned prompt (follow-up 86); absent or `null`: not found. */
+  readonly promptSeed?: (agentId: string) => { readonly agentId: string; readonly body: string } | null;
 };
 
 /** What a console handler reads from the Hono context of its custom route. */
@@ -255,6 +257,14 @@ const agentRoutes = (deps: ConsoleRouteDeps): ApiRoute[] => [
     method: "GET",
     requiresAuth: false,
     handler: guarded(deps, "console_agents_failed", () => Promise.resolve(json(200, { data: deps.agentCatalog?.() ?? [] }))),
+  }),
+  registerApiRoute(`${CONSOLE_ROUTES_PREFIX}/agents/:agentId/prompt-seed`, {
+    method: "GET",
+    requiresAuth: false,
+    handler: guarded(deps, "console_prompt_seed_failed", (ctx) => {
+      const seed = deps.promptSeed?.(ctx.param("agentId")) ?? null;
+      return Promise.resolve(seed === null ? fail(404, "NOT_FOUND") : json(200, { data: seed }));
+    }),
   }),
 ];
 

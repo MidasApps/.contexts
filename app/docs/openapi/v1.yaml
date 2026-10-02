@@ -228,6 +228,91 @@ paths:
       tags:
         - prompts
       x-auth: user
+  /v1/admin/agents/{agentId}/prompt-seed:
+    get:
+      operationId: prompts.adminGetSeed
+      parameters:
+        - description: Agent whose prompt this is.
+          in: path
+          name: agentId
+          required: true
+          schema:
+            enum:
+              - assistant
+              - knowledge
+              - data
+              - action
+              - web
+            type: string
+            x-pii: none
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: "#/components/schemas/agents.PromptSeed"
+                required:
+                  - data
+                type: object
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: VALIDATION_FAILED
+          x-error-codes:
+            - VALIDATION_FAILED
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UNAUTHORIZED
+          x-error-codes:
+            - UNAUTHORIZED
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: FORBIDDEN, MFA_REQUIRED
+          x-error-codes:
+            - FORBIDDEN
+            - MFA_REQUIRED
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: NOT_FOUND
+          x-error-codes:
+            - NOT_FOUND
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: INTERNAL_ERROR
+          x-error-codes:
+            - INTERNAL_ERROR
+        "502":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UPSTREAM_UNAVAILABLE
+          x-error-codes:
+            - UPSTREAM_UNAVAILABLE
+      security:
+        - bearerAuth: []
+      summary: The instructions the agent ships with in code, to start a first version from (staff, platform.prompt.manage).
+      tags:
+        - prompts
+      x-auth: user
   /v1/admin/agents/{agentId}/prompt-versions:
     get:
       operationId: prompts.adminListVersions
@@ -18124,6 +18209,36 @@ components:
       x-pii: none
       x-relations: []
       x-tenancyScope: organization
+    agents.PromptSeed:
+      additionalProperties: false
+      description: The instructions an agent ships with in code; the prompt editor starts from them when the store has no version.
+      examples:
+        - agentId: knowledge
+          body: You answer from the organization's knowledge base and cite every source.
+      properties:
+        agentId:
+          description: Agent whose instructions these are.
+          enum:
+            - assistant
+            - knowledge
+            - data
+            - action
+            - web
+          type: string
+          x-pii: none
+        body:
+          description: The instructions as the code ships them; the editor starts from them when no version exists.
+          type: string
+          x-pii: none
+      required:
+        - agentId
+        - body
+      type: object
+      x-kind: view
+      x-permission: platform.prompt.manage
+      x-pii: none
+      x-relations: []
+      x-tenancyScope: platform
     agents.PromptVersion:
       additionalProperties: false
       description: An immutable version of an agent prompt (platform instructions or a tenant addendum).

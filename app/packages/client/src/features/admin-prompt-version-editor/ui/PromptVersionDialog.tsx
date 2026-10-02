@@ -24,8 +24,13 @@ export type PromptVersionDialogProps = {
   agentId: PromptAgentId;
   /** Display name of the agent. */
   agentName: string;
-  /** Text the new version starts from (the active version); `""` for the first version. */
+  /** Text the new version starts from: the active version, the code seed for a first version, or `""`. */
   initialBody: string;
+  /**
+   * Where `initialBody` comes from. `seed`: the agent's code instructions (no version yet, follow-up
+   * 86); saving it unchanged is allowed, since it becomes the first stored version.
+   */
+  initialSource?: "active" | "seed" | undefined;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   /** Called with the written version (the page selects it for the diff). */
@@ -34,7 +39,7 @@ export type PromptVersionDialogProps = {
 
 type FormProps = Omit<PromptVersionDialogProps, "open">;
 
-function PromptVersionForm({ agentId, initialBody, onOpenChange, onCreated }: FormProps) {
+function PromptVersionForm({ agentId, initialBody, initialSource = "active", onOpenChange, onCreated }: FormProps) {
   const t = useTranslations("admin.prompts.editor");
   const tCommon = useTranslations("common");
   const callEndpoint = useCallEndpoint();
@@ -54,7 +59,7 @@ function PromptVersionForm({ agentId, initialBody, onOpenChange, onCreated }: Fo
   const validate = (): string | undefined => {
     if (body.trim() === "") return t("bodyRequired");
     if (body.trim().length > MAX_BODY) return t("bodyTooLong", { maximum: MAX_BODY });
-    if (body.trim() === initialBody.trim() && initialBody !== "") return t("bodyUnchanged");
+    if (initialSource === "active" && body.trim() === initialBody.trim() && initialBody !== "") return t("bodyUnchanged");
     return undefined;
   };
 
@@ -142,7 +147,7 @@ export function PromptVersionDialog({ open, onOpenChange, ...form }: PromptVersi
       >
         <DialogHeader>
           <DialogTitle>{t("title", { agent: form.agentName })}</DialogTitle>
-          <DialogDescription>{t("description")}</DialogDescription>
+          <DialogDescription>{t(form.initialSource === "seed" ? "descriptionSeed" : "description")}</DialogDescription>
         </DialogHeader>
         <PromptVersionForm {...form} onOpenChange={onOpenChange} />
       </DialogContent>

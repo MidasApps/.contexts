@@ -247,12 +247,28 @@ describe("AdminAgentPromptsView", () => {
     expect(await screen.findByRole("region", { name: "Diferenças da versão 1 para a versão 2" })).toBeDefined();
   });
 
-  it("offers to write the first version when the agent still uses the code prompt", async () => {
-    const { user, container } = render({ routes: routes({ [`GET ${BASE}/prompt-versions`]: ok([]), [`GET ${BASE}/activations`]: ok([]) }) });
+  it("offers to write the first version from the code prompt when the agent has no version", async () => {
+    const seed = { agentId: "assistant", body: "Você é o assistente da organização." };
+    const { user, api, container } = render({
+      routes: routes({ [`GET ${BASE}/prompt-versions`]: ok([]), [`GET ${BASE}/activations`]: ok([]), [`GET ${BASE}/prompt-seed`]: ok(seed), [`POST ${BASE}/prompt-versions`]: ok(buildPromptVersion(), 201) }),
+    });
     const empty = await screen.findByRole("heading", { level: 3, name: "Nenhuma versão ainda" });
     expect(screen.getByText("Nenhuma versão ativada: o prompt do código está em produção.")).toBeDefined();
     expect(screen.getByText("Nenhuma ativação registrada.")).toBeDefined();
     await expectNoAxeViolations(container);
+    await user.click(within(empty.closest("[data-slot='state-panel']") as HTMLElement).getByRole("button", { name: "Nova versão" }));
+    const dialog = await screen.findByRole("dialog", { name: "Nova versão do prompt de Assistente" });
+    // Follow-up 86: the editor starts from the instructions the agent ships with in code.
+    expect(within(dialog).getByText(/O texto parte das instruções que o agente tem no código/u)).toBeDefined();
+    expect((within(dialog).getByRole("textbox", { name: /^Texto do prompt/u }) as HTMLTextAreaElement).value).toBe(seed.body);
+    // Saving the seed as it is creates version 1 (the code text is not a stored version).
+    await user.click(within(dialog).getByRole("button", { name: "Criar versão" }));
+    await waitFor(() => expect(api.calls.find((call) => call.method === "POST")?.body).toEqual({ body: seed.body }));
+  });
+
+  it("starts the first version empty when the code prompt cannot be read", async () => {
+    const { user } = render({ routes: routes({ [`GET ${BASE}/prompt-versions`]: ok([]), [`GET ${BASE}/activations`]: ok([]), [`GET ${BASE}/prompt-seed`]: apiError(502, "UPSTREAM_UNAVAILABLE") }) });
+    const empty = await screen.findByRole("heading", { level: 3, name: "Nenhuma versão ainda" });
     await user.click(within(empty.closest("[data-slot='state-panel']") as HTMLElement).getByRole("button", { name: "Nova versão" }));
     const dialog = await screen.findByRole("dialog", { name: "Nova versão do prompt de Assistente" });
     await user.click(within(dialog).getByRole("button", { name: "Criar versão" }));

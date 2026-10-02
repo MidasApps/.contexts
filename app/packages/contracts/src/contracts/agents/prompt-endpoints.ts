@@ -5,7 +5,7 @@ import { defineEndpoint, type EndpointDefinition } from "../http/endpoint.ts";
 import { dataEnvelope } from "../http/envelopes.schema.ts";
 import { OrganizationQuerySchema } from "../workflows/endpoints.ts";
 import { ActivatePromptVersionInputSchema, PromptActivationSchema } from "./prompt-activation.schema.ts";
-import { PromptAgentIdSchema, PromptEvalResultSchema } from "./prompt-eval.schema.ts";
+import { PromptAgentIdSchema, PromptEvalResultSchema, PromptSeedSchema } from "./prompt-eval.schema.ts";
 import { CreatePromptVersionInputSchema, PromptVersionIdSchema, PromptVersionSchema } from "./prompt-version.schema.ts";
 
 const agentParams = z.object({ agentId: PromptAgentIdSchema.meta(none("Agent whose prompt this is.")) });
@@ -133,8 +133,20 @@ export const activateAddendumEndpoint = defineEndpoint({
   summary: "Activates an addendum version with a passing eval (core.prompt.write; only staff may force).",
 });
 
+export const adminGetPromptSeedEndpoint = defineEndpoint({
+  id: "prompts.adminGetSeed",
+  method: "GET",
+  path: "/v1/admin/agents/{agentId}/prompt-seed",
+  auth: "user",
+  params: agentParams,
+  responses: { 200: dataEnvelope(PromptSeedSchema) },
+  errors: { ...STAFF, 404: ["NOT_FOUND"], 502: ["UPSTREAM_UNAVAILABLE"] },
+  summary: "The instructions the agent ships with in code, to start a first version from (staff, platform.prompt.manage).",
+});
+
 export const PROMPT_ENDPOINTS: readonly EndpointDefinition[] = [
   adminListPromptVersionsEndpoint,
+  adminGetPromptSeedEndpoint,
   adminCreatePromptVersionEndpoint,
   adminEvaluatePromptVersionEndpoint,
   adminListPromptActivationsEndpoint,

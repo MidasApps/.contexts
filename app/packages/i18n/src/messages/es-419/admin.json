@@ -864,7 +864,8 @@
       "note": "Nota",
       "noteHint": "Opcional: por qué cambia el prompt.",
       "submit": "Crear versión",
-      "created": "Versión {version} creada."
+      "created": "Versión {version} creada.",
+      "descriptionSeed": "El texto parte de las instrucciones que el agente tiene en el código, porque aún no hay versión. Guardar crea la primera versión; nada cambia en producción hasta que se evalúe y active."
     },
     "activation": {
       "title": "¿Activar la versión {version}?",
