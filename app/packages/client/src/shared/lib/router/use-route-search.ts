@@ -10,8 +10,8 @@ export type RouteSearch<K extends string> = {
   /** 1-based page of a numbered list (`?page=`), 1 when absent or invalid. */
   readonly page: number;
   /**
-   * Writes values into the URL (replace, so "back" leaves the page). `undefined` or "" removes a
-   * key. Changing a value returns to the first page.
+   * Writes values into the URL (replace, so "back" leaves the page; `samePage`, so the page is not
+   * built again). `undefined` or "" removes a key. Changing a value returns to the first page.
    */
   readonly set: (patch: Partial<Record<K, string | undefined>>) => void;
   readonly setPage: (page: number) => void;
@@ -37,9 +37,12 @@ export const useRouteSearch = <K extends string>(keys: readonly K[], toRoute: (s
   const base = (): URLSearchParams => new URLSearchParams(pending.current ?? search);
   const values = Object.fromEntries(keys.map((key) => [key, params.get(key) ?? undefined])) as Record<K, string | undefined>;
   const parsedPage = Number.parseInt(params.get(PAGE) ?? "1", 10);
+  // Same page, another address: the web writes the address bar instead of navigating, so a tab or
+  // filter changes at once. A navigation waited for the server, and a second tab clicked meanwhile
+  // was ignored (the first was still selected) and then lost to the first one.
   const write = (next: URLSearchParams): void => {
     pending.current = next.toString();
-    router.navigate(toRoute(Object.fromEntries(next)), { replace: true });
+    router.navigate(toRoute(Object.fromEntries(next)), { replace: true, samePage: true });
   };
   return {
     values,
