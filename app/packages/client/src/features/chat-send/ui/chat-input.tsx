@@ -98,7 +98,8 @@ export function ChatInput({ status, onSend, onStop, offline = false, disabled = 
       <p id={problemId} role="status" className={problem === null ? "sr-only" : tooLong ? "text-[12.5px] text-destructive-text" : "text-[12.5px] text-amber-foreground"}>
         {problem ?? ""}
       </p>
-      <p id={hintId} className="text-[11.5px] text-muted-foreground">
+      {/* Keyboard keys mean nothing on a touch screen; the hint stays in the field description. */}
+      <p id={hintId} className="text-[11.5px] text-muted-foreground pointer-coarse:hidden">
         {t("hint")}
       </p>
     </div>

@@ -20,6 +20,16 @@ describe("ChatInput", () => {
     expect(document.activeElement).toBe(field());
   });
 
+  it("invites a question instead of repeating the send button, and keeps the keyboard hint off touch screens", () => {
+    const { field } = setup();
+    expect(field().getAttribute("placeholder")).toBe("Pergunte ou peça algo…");
+    expect(field().getAttribute("placeholder")).not.toBe(screen.getByRole("button", { name: "Enviar mensagem" }).getAttribute("aria-label"));
+    const hint = screen.getByText(/Enter envia/u);
+    // Still part of the field description; only hidden visually on a coarse pointer (no keyboard).
+    expect(field().getAttribute("aria-describedby")).toContain(hint.id);
+    expect(hint.className).toContain("pointer-coarse:hidden");
+  });
+
   it("breaks the line on Shift+Enter and sends nothing for blank text", async () => {
     const { user, onSend, field } = setup();
     await user.type(field(), "a{Shift>}{Enter}{/Shift}b");

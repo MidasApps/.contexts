@@ -86,7 +86,7 @@
   },
   "input": {
     "label": "Mensagem",
-    "placeholder": "Enviar mensagem",
+    "placeholder": "Pergunte ou peça algo…",
     "hint": "Enter envia · Shift+Enter quebra linha · Esc interrompe",
     "counter": "{count} de {max} caracteres",
     "tooLong": "Limite de {max} caracteres. Remova {over, plural, one {# caractere} other {# caracteres}}.",
