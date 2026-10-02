@@ -874,6 +874,8 @@
     "filters": {
       "label": "Filtrar trazas",
       "agent": "Agente",
+      "anyAgent": "Cualquier agente",
+      "agentsLoading": "Cargando agentes…",
       "agentPlaceholder": "assistant",
       "agentInvalid": "Usa letras minúsculas, números y guiones, empezando por una letra.",
       "status": "Estado",

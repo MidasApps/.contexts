@@ -874,6 +874,8 @@
     "filters": {
       "label": "Filter traces",
       "agent": "Agent",
+      "anyAgent": "Any agent",
+      "agentsLoading": "Loading agents…",
       "agentPlaceholder": "assistant",
       "agentInvalid": "Use lowercase letters, numbers and hyphens, starting with a letter.",
       "status": "Status",

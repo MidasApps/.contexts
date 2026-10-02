@@ -137,7 +137,7 @@ export function TraceList({ organization }: { organization: Organization }) {
   const filtering = values.agentId !== undefined || values.status !== undefined;
   return (
     <div className="flex flex-col gap-4">
-      <TraceFilters key={values.agentId ?? ""} values={values} onChange={change} />
+      <TraceFilters key={values.agentId ?? ""} organizationId={organization.id} values={values} onChange={change} />
       <QuerySection query={traces} loadingLabel={t("loading")}>
         {(data) => (
           <TraceTable

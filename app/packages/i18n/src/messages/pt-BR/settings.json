@@ -874,6 +874,8 @@
     "filters": {
       "label": "Filtrar rastros",
       "agent": "Agente",
+      "anyAgent": "Qualquer agente",
+      "agentsLoading": "Carregando agentes…",
       "agentPlaceholder": "assistant",
       "agentInvalid": "Use letras minúsculas, números e hífens, começando por uma letra.",
       "status": "Status",

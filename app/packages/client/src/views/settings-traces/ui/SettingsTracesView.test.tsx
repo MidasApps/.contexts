@@ -5,8 +5,9 @@ import { renderApp } from "#/app-shell/testing/render-app.tsx";
 import { shellRoutes } from "#/app-shell/testing/shell-routes.ts";
 import { buildTraceDetail, buildTraceSummary, numberedPage, OBS_IDS } from "#/shared/testing/admin-observability-fixtures.ts";
 import { expectNoAxeViolations } from "#/shared/testing/axe.ts";
-import { apiError, FAKE_REQUEST_ID, type FakeRoutes } from "#/shared/testing/fake-api.ts";
+import { apiError, FAKE_REQUEST_ID, ok, type FakeRoutes } from "#/shared/testing/fake-api.ts";
 import { IDS } from "#/shared/testing/fixtures.ts";
+import { buildCatalogAgent } from "#/entities/agent-catalog/agent-catalog.fixture.ts";
 import { SettingsTracesView } from "./SettingsTracesView.tsx";
 
 const READER: Permission[] = ["core.organization.read", "core.project.read", "core.trace.read"];
@@ -49,7 +50,28 @@ describe("SettingsTracesView", () => {
     await expectNoAxeViolations(container);
   });
 
-  it("filters by status and by a valid agent key, and refuses an invalid key without a request", async () => {
+  it("picks the agent by name from the organization's catalog when the viewer may read it", async () => {
+    const catalog = [buildCatalogAgent(), buildCatalogAgent({ key: "sample-helper", name: "Sample helper", source: "module", moduleId: "sample" }), buildCatalogAgent({ key: "Cu5tomAgent000000001" as never, name: "Guide", source: "custom" })];
+    const { user, api, container } = renderView({ "GET /v1/agents": ok(catalog) }, { permissions: [...READER, "core.agent-settings.read"] });
+    await screen.findByRole("table", { name: "Rastros de Northwind" });
+    const filters = screen.getByRole("search", { name: "Filtrar rastros" });
+    expect(within(filters).queryByRole("textbox", { name: "Agente" })).toBeNull();
+    await waitFor(() => expect(within(screen.getByRole("search", { name: "Filtrar rastros" })).getByRole("combobox", { name: "Agente" }).hasAttribute("disabled")).toBe(false));
+    await user.click(within(screen.getByRole("search", { name: "Filtrar rastros" })).getByRole("combobox", { name: "Agente" }));
+    // Custom agents have no kebab-case key the trace filter accepts, so they are not offered.
+    expect(screen.getAllByRole("option").map((option) => option.textContent)).toEqual(["Qualquer agente", "Assistente", "Conhecimento", "Sample helper"]);
+    await user.click(screen.getByRole("option", { name: "Sample helper" }));
+    await waitFor(() => expect(listQueries(api).at(-1)?.get("agentId")).toBe("sample-helper"));
+    await expectNoAxeViolations(container);
+  });
+
+  it("falls back to typing the agent key when the catalog cannot be read", async () => {
+    renderView({ "GET /v1/agents": apiError(403, "FORBIDDEN") }, { permissions: [...READER, "core.agent-settings.read"] });
+    await screen.findByRole("table", { name: "Rastros de Northwind" });
+    expect(await within(screen.getByRole("search", { name: "Filtrar rastros" })).findByRole("textbox", { name: "Agente" })).toBeDefined();
+  });
+
+  it("without the catalog permission, filters by a typed agent key and refuses an invalid one without a request", async () => {
     const { user, api } = renderView();
     await screen.findByRole("table", { name: "Rastros de Northwind" });
     const filters = screen.getByRole("search", { name: "Filtrar rastros" });
