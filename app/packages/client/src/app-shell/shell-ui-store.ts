@@ -15,9 +15,19 @@ const PersistedShellUiSchema = z.object({ recents: z.array(z.string().min(1).max
 
 const browserStorage = (): StateStorage => globalThis.localStorage;
 
+const rememberedPanel = (
+  current: Readonly<Record<string, string>>,
+  key: string,
+  value: string | undefined,
+): Readonly<Record<string, string>> => {
+  const { [key]: _forgotten, ...rest } = current;
+  return value === undefined ? rest : { ...rest, [key]: value };
+};
+
 /**
  * The shell UI store (decision 0011 §5; rules/state-management.md §14–§15): command palette
- * recents only, persisted with `partialize` and a version, hydrated manually after mount
+ * recents, persisted with `partialize` and a version, and the right panel's memory (in memory
+ * only, decision 0048), hydrated manually after mount
  * (`skipHydration`, so server renders never read storage), with `reset` for sign-out.
  * @param storage defaults to `localStorage`; tests pass an in-memory one.
  */
@@ -30,7 +40,10 @@ export const createShellUiStore = (storage: StateStorage = browserStorage()): Pe
           set((state) => ({
             recents: [commandId, ...state.recents.filter((id) => id !== commandId)].slice(0, MAX_RECENTS),
           })),
-        reset: () => set({ recents: [] }),
+        rightPanel: {},
+        rememberRightPanel: (key, value) =>
+          set((state) => ({ rightPanel: rememberedPanel(state.rightPanel, key, value) })),
+        reset: () => set({ recents: [], rightPanel: {} }),
       }),
       {
         name: SHELL_UI_STORAGE_KEY,

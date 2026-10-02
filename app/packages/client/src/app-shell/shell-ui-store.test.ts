@@ -44,7 +44,23 @@ describe("shell UI store", () => {
   it("resets to the initial state", () => {
     const store = createShellUiStore(memoryStorage());
     store.getState().addRecent("a");
+    store.getState().rememberRightPanel("org:project", "conversation-1");
     store.getState().reset();
     expect(store.getState().recents).toEqual([]);
+    expect(store.getState().rightPanel).toEqual({});
+  });
+
+  it("remembers what the right panel holds per key, in memory only", () => {
+    const storage = memoryStorage();
+    const store = createShellUiStore(storage);
+    store.getState().rememberRightPanel("org:a", "conversation-1");
+    store.getState().rememberRightPanel("org:b", "conversation-2");
+    store.getState().rememberRightPanel("org:b", undefined);
+    expect(store.getState().rightPanel).toEqual({ "org:a": "conversation-1" });
+    store.getState().addRecent("x");
+    expect(JSON.parse(storage.data.get(SHELL_UI_STORAGE_KEY) ?? "{}")).toEqual({
+      state: { recents: ["x"] },
+      version: 1,
+    });
   });
 });

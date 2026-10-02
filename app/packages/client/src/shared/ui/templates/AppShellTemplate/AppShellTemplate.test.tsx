@@ -1,4 +1,4 @@
-import { screen } from "@testing-library/react";
+import { screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { expectNoAxeViolations } from "#/shared/testing/axe.ts";
 import { renderWithProviders } from "#/shared/testing/render.tsx";
@@ -55,7 +55,9 @@ describe("AppShellTemplate", () => {
         <h1>Projeto</h1>
       </AppShellTemplate>,
     );
-    expect(await screen.findByRole("dialog", { name: "Assistente" })).toBeDefined();
+    const sheet = await screen.findByRole("dialog", { name: "Assistente" });
+    // The panel content carries its own close in its header; a corner X would cover its actions.
+    expect(within(sheet).queryByRole("button", { name: "Fechar" })).toBeNull();
   });
 
   it("persists the sidebar state through the injected callback", async () => {

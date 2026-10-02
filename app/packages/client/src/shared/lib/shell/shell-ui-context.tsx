@@ -4,13 +4,21 @@ import { createContext, type ReactNode, use } from "react";
 import { type StoreApi, useStore } from "zustand";
 
 /**
- * UI preferences without server origin (decision 0011 §5): command palette recents only.
- * Server data never goes here (rules/state-management.md §3).
+ * UI state without server origin (decision 0011 §5): command palette recents, and what the right
+ * panel keeps while it is closed (decision 0048). Server data never goes here
+ * (rules/state-management.md §3).
  */
 export type ShellUiState = {
   /** Command ids, most recent first. */
   readonly recents: readonly string[];
   readonly addRecent: (commandId: string) => void;
+  /**
+   * What the right-panel content remembers per key while it is unmounted (the chat: the
+   * conversation it started, per `organizationId:projectId`). Memory only, never persisted.
+   */
+  readonly rightPanel: Readonly<Record<string, string>>;
+  /** Remembers `value` under `key`; `undefined` forgets it. */
+  readonly rememberRightPanel: (key: string, value: string | undefined) => void;
   /** Called on sign-out and tenant switch (rules/state-management.md §15). */
   readonly reset: () => void;
 };

@@ -10,6 +10,7 @@ import { SidebarProvider } from "#/shared/ui/organisms/Sidebar/sidebar-context.t
 export type RightPanelSlot = {
   /** Landmark name (`aside` label) and sheet title below `lg`. */
   label: string;
+  /** Carries its own close button in its header: the sheet adds no corner X that would cover it. */
   content: ReactNode;
   /** Below `lg` the panel is a sheet (breakpoints.html); these control it. */
   open: boolean;
@@ -77,7 +78,7 @@ function RightPanel({ slot, compact }: { slot: RightPanelSlot; compact: boolean 
   if (compact) {
     return (
       <Sheet open={slot.open} onOpenChange={slot.onOpenChange}>
-        <SheetContent side="right" className="w-full p-0 sm:max-w-[360px]">
+        <SheetContent side="right" showCloseButton={false} className="w-full p-0 sm:max-w-[360px]">
           <SheetHeader className="sr-only">
             <SheetTitle>{slot.label}</SheetTitle>
             <SheetDescription>{slot.label}</SheetDescription>
