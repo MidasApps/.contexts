@@ -141,11 +141,11 @@ export const buildE2eEnv = (args: {
 };
 
 /**
- * Default command inside the emulators: the web and desktop `test:e2e`, one at a time (they share
- * the web port). Filtered because turbo still runs a package's `build` dependency when the package
- * has no `test:e2e` (functions, mastra, …), which e2e does not need.
+ * Default command inside the emulators (`scripts/e2e-playwright.ts`): the builds, then the web and
+ * desktop Playwright runs one at a time (they share the web port), started directly: through
+ * `turbo run test:e2e` turbo never exited on Windows after a run (follow-up 87).
  */
-export const DEFAULT_E2E_COMMAND = "pnpm exec turbo run test:e2e --filter=@core/web --filter=@core/desktop --env-mode=loose --concurrency=1";
+export const DEFAULT_E2E_COMMAND = "node scripts/e2e-playwright.ts";
 
 /** `firebase emulators:exec` arguments for the e2e stack. */
 export const buildEmulatorExecArgs = (command: string): string[] => [

@@ -2,8 +2,9 @@
 // stack. Prepares the e2e database in the compose Postgres (`docker compose up -d --wait` first),
 // builds the Functions source the emulator loads, starts the emulators of firebase.e2e.json
 // (project demo-core-e2e, ports apart from `pnpm dev`), exports the e2e env (src/e2e/e2e-env.ts)
-// and runs every package's `test:e2e` through turbo. The Playwright setup seeds the users; the web
-// and desktop builds get the e2e public config; Playwright starts the web and the agent runtime.
+// and runs scripts/e2e-playwright.ts: the builds, then Playwright in web and desktop (follow-up 87).
+// The Playwright setup seeds the users; the web and desktop builds get the e2e public config;
+// Playwright starts the web and the agent runtime.
 // `pnpm test:e2e -- <command>` runs another command in the same stack instead,
 // e.g. `pnpm test:e2e -- pnpm -F @core/web exec playwright test e2e/auth.spec.ts`.
 // Ports: E2E_WEB_PORT (default 3100), E2E_DESKTOP_PORT (1420), E2E_MASTRA_PORT (4191); never 3000.

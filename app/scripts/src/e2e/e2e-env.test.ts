@@ -56,9 +56,8 @@ describe("buildEmulatorExecArgs", () => {
 });
 
 describe("the e2e command", () => {
-  it("runs only the web and desktop e2e tasks, in loose env mode, one at a time", () => {
-    expect(DEFAULT_E2E_COMMAND).toContain("--filter=@core/web --filter=@core/desktop");
-    expect(DEFAULT_E2E_COMMAND).toContain("--env-mode=loose --concurrency=1");
+  it("runs the Playwright script, which never goes through turbo run test:e2e (follow-up 87)", () => {
+    expect(DEFAULT_E2E_COMMAND).toBe("node scripts/e2e-playwright.ts");
   });
 
   it("points the services at their own database in the local compose Postgres, never a remote one", () => {
