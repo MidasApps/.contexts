@@ -92,7 +92,8 @@ test.describe("evals", () => {
     await expect(page.getByRole("heading", { level: 1, name: "Avaliações" })).toBeVisible();
     // The organization's experiments: empty, or the instructions eval of settings-agents when that
     // file ran first on this worker's organization.
-    const experiments = page.getByRole("table", { name: `Experimentos de ${sp5Org.name}` });
+    // Nine columns do not fit the settings column at 1280 px, so the list may render as cards.
+    const experiments = page.getByRole("table", { name: `Experimentos de ${sp5Org.name}` }).or(page.getByRole("list", { name: `Experimentos de ${sp5Org.name}` }));
     await expect(page.getByRole("heading", { name: "Nenhum experimento ainda" }).or(experiments).first()).toBeVisible();
     await page.getByRole("tab", { name: "Conjuntos de dados" }).click();
     await expect(page.getByRole("tabpanel", { name: "Conjuntos de dados" })).toBeVisible();

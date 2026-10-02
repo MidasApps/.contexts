@@ -4,6 +4,7 @@ import { useTable, type RowData } from "@tanstack/react-table";
 import type { ReactNode } from "react";
 import { useTranslations } from "use-intl";
 import { cn } from "#/shared/lib/cn.ts";
+import { useElementWidth } from "#/shared/lib/media/use-element-width.ts";
 import { useIsMobile } from "#/shared/lib/media/use-media-query.ts";
 import { Skeleton } from "#/shared/ui/atoms/Skeleton/Skeleton.tsx";
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "#/shared/ui/atoms/Table/Table.tsx";
@@ -30,10 +31,14 @@ export type DataTableProps<TData extends RowData> = {
   /** Cursor paging driven by `meta.page` (omit when the list is not paged). */
   pagination?: DataTablePaginationProps | undefined;
   /**
-   * Card for one row below `md` (768 px): the table becomes a labelled list of cards so rows stay
-   * readable without horizontal scrolling (breakpoints.html). Omit to keep the scrolling table.
+   * Card for one row: the table becomes a labelled list of cards when its own container is
+   * narrower than `minTableWidth` (a settings column, an open side panel, a phone), so rows and
+   * their actions stay reachable without horizontal scrolling. Before the container is measured
+   * the rule is the viewport below `md` (breakpoints.html). Omit to keep the scrolling table.
    */
   renderCard?: ((row: TData) => ReactNode) | undefined;
+  /** Width in px the table needs to show every column; defaults to {@link COLUMN_MIN_WIDTH} per column (at least {@link TABLE_MIN_WIDTH}). */
+  minTableWidth?: number | undefined;
   /** Heading level of the error state: 2 when the table sits right under the page `h1`, 3 inside a section (default). */
   stateHeadingLevel?: 2 | 3;
   /** Skeleton rows while loading. */
@@ -42,6 +47,20 @@ export type DataTableProps<TData extends RowData> = {
 };
 
 type Instance<TData extends RowData> = ReturnType<typeof useTable<DataTableFeatures, TData>>;
+
+/** Room one column needs on average (a name, a pill, a date, a button): a 7-column list fits the
+ * settings column of a 1280 px screen (~680 px), a 9-column one fits the admin content there. */
+export const COLUMN_MIN_WIDTH = 88;
+/** Below this even a short table reads better as cards. */
+export const TABLE_MIN_WIDTH = 480;
+
+/** Cards when the container is measured narrower than the table needs; until then, on phones. */
+const useCardLayout = (hasCards: boolean, minWidth: number) => {
+  const mobile = useIsMobile();
+  const [observe, width] = useElementWidth<HTMLDivElement>();
+  const cards = hasCards && (width === undefined ? mobile : width < minWidth);
+  return [observe, cards] as const;
+};
 
 const SKELETON_WIDTHS = ["w-3/4", "w-1/2", "w-2/3", "w-5/6"] as const;
 
@@ -153,8 +172,8 @@ function CardList<TData extends RowData>({ caption, captionHidden, data, getRowI
  * `scope="col"` headers always; loading keeps the header and shows skeleton rows (`aria-busy`
  * with a status text); errors render the copy of their code with the request reference and a
  * retry (no-access for a 403); empty pages render
- * the caller's empty state; paging is previous/next over cursors. With `renderCard`, small
- * screens get a card list instead of the table.
+ * the caller's empty state; paging is previous/next over cursors. With `renderCard`, a container
+ * too narrow for the columns gets a card list instead of the table.
  */
 export function DataTable<TData extends RowData>({
   caption,
@@ -168,23 +187,24 @@ export function DataTable<TData extends RowData>({
   renderCard,
   stateHeadingLevel: headingLevel = 3,
   loadingRows = 5,
+  minTableWidth,
   className,
 }: DataTableProps<TData>) {
   const t = useTranslations("common.states");
-  const mobile = useIsMobile();
+  const [observeWidth, cards] = useCardLayout(renderCard !== undefined, minTableWidth ?? Math.max(TABLE_MIN_WIDTH, columns.length * COLUMN_MIN_WIDTH));
   const table = useTable({ features: dataTableFeatures, columns: [...columns], data, getRowId: (row) => getRowId(row) });
   const columnIds = table.getAllLeafColumns().map((column) => column.id);
   const busy = status.kind === "loading";
-  if (mobile && renderCard !== undefined) {
+  if (cards && renderCard !== undefined) {
     return (
-      <div data-slot="data-table" data-layout="cards" className={cn("flex flex-col gap-3", className)}>
+      <div ref={observeWidth} data-slot="data-table" data-layout="cards" className={cn("flex flex-col gap-3", className)}>
         <CardList caption={caption} captionHidden={captionHidden} data={data} getRowId={getRowId} renderCard={renderCard} status={status} empty={empty} loadingRows={loadingRows} headingLevel={headingLevel} />
         {pagination === undefined || status.kind === "error" ? null : <DataTablePagination {...pagination} />}
       </div>
     );
   }
   return (
-    <div data-slot="data-table" className={cn("flex flex-col gap-3", className)}>
+    <div ref={observeWidth} data-slot="data-table" data-layout="table" className={cn("flex flex-col gap-3", className)}>
       <Table scrollLabel={caption} aria-busy={busy || undefined}>
         <TableCaption className={cn(captionHidden && "sr-only")}>{caption}</TableCaption>
         <TableHeader>

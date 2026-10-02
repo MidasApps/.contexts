@@ -94,6 +94,58 @@ describe("DataTable", () => {
   });
 });
 
+/** A ResizeObserver that reports one width for every observed element, at once. */
+const withContainerWidth = async (width: number, run: () => void | Promise<void>) => {
+  const original = globalThis.ResizeObserver;
+  globalThis.ResizeObserver = class {
+    readonly #callback: ResizeObserverCallback;
+    constructor(callback: ResizeObserverCallback) {
+      this.#callback = callback;
+    }
+    observe(target: Element) {
+      this.#callback([{ target, contentRect: { width } } as unknown as ResizeObserverEntry], this);
+    }
+    unobserve() {}
+    disconnect() {}
+  };
+  try {
+    await run();
+  } finally {
+    globalThis.ResizeObserver = original;
+  }
+};
+
+describe("DataTable in a narrow container", () => {
+  const renderCard = (row: Member) => <span>{row.name}</span>;
+
+  it("becomes cards when its container is narrower than its columns need, at any screen size", async () => {
+    await withContainerWidth(320, async () => {
+      const { container } = renderWithProviders(<DataTable caption="Membros" columns={COLUMNS} data={MEMBERS} getRowId={(row) => row.id} empty={EMPTY} renderCard={renderCard} />);
+      expect(screen.getByRole("list", { name: "Membros" })).toBeDefined();
+      expect(screen.queryByRole("table")).toBeNull();
+      await expectNoAxeViolations(container);
+    });
+  });
+
+  it("stays a table when the container fits the columns, or when there is no card form", async () => {
+    await withContainerWidth(900, () => {
+      renderWithProviders(<DataTable caption="Membros" columns={COLUMNS} data={MEMBERS} getRowId={(row) => row.id} empty={EMPTY} renderCard={renderCard} />);
+      expect(screen.getByRole("table", { name: "Membros" })).toBeDefined();
+    });
+    await withContainerWidth(320, () => {
+      renderWithProviders(<DataTable caption="Sem cartões" columns={COLUMNS} data={MEMBERS} getRowId={(row) => row.id} empty={EMPTY} />);
+      expect(screen.getByRole("table", { name: "Sem cartões" })).toBeDefined();
+    });
+  });
+
+  it("takes the width its columns need from the caller", async () => {
+    await withContainerWidth(700, () => {
+      renderWithProviders(<DataTable caption="Membros" columns={COLUMNS} data={MEMBERS} getRowId={(row) => row.id} empty={EMPTY} renderCard={renderCard} minTableWidth={800} />);
+      expect(screen.getByRole("list", { name: "Membros" })).toBeDefined();
+    });
+  });
+});
+
 describe("DataTable on small screens", () => {
   it("renders a labelled card list instead of the table when renderCard is given", async () => {
     const matchMedia = globalThis.matchMedia;
