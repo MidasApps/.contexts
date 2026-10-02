@@ -100,6 +100,7 @@
       "expired": "Expired"
     },
     "expiresOn": "Expires on {date}",
+    "expiresNotApplicable": "Not applicable",
     "revokeAction": "Revoke",
     "revokeNamed": "Revoke invitation for {email}",
     "emptyPendingTitle": "No pending invitations",

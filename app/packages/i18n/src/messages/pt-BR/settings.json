@@ -100,6 +100,7 @@
       "expired": "Expirado"
     },
     "expiresOn": "Expira em {date}",
+    "expiresNotApplicable": "Não se aplica",
     "revokeAction": "Revogar",
     "revokeNamed": "Revogar convite de {email}",
     "emptyPendingTitle": "Nenhum convite pendente",

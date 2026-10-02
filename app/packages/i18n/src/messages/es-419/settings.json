@@ -100,6 +100,7 @@
       "expired": "Vencida"
     },
     "expiresOn": "Vence el {date}",
+    "expiresNotApplicable": "No aplica",
     "revokeAction": "Revocar",
     "revokeNamed": "Revocar invitación de {email}",
     "emptyPendingTitle": "No hay invitaciones pendientes",

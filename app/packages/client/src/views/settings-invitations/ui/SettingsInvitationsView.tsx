@@ -45,6 +45,23 @@ function RoleBadges({ invitation, labelOf }: { invitation: Invitation; labelOf: 
   );
 }
 
+/** Accepted and revoked invitations no longer expire: their expiry date would read as still running. */
+const hasExpiry = (status: InvitationStatus): boolean => status === "pending" || status === "expired";
+
+function ExpiryCell({ invitation }: { invitation: Invitation }) {
+  const t = useTranslations("settings.invitations");
+  const formatDateTime = useFormatDateTime();
+  if (hasExpiry(invitation.status)) return <>{formatDateTime(invitation.expiresAt)}</>;
+  return (
+    <>
+      <span aria-hidden="true" className="text-muted-foreground">
+        —
+      </span>
+      <span className="sr-only">{t("expiresNotApplicable")}</span>
+    </>
+  );
+}
+
 function RevokeButton({ invitation, onRevoke }: { invitation: Invitation; onRevoke: (invitation: Invitation) => void }) {
   const t = useTranslations("settings.invitations");
   if (invitation.status !== "pending") return null;
@@ -57,19 +74,18 @@ function RevokeButton({ invitation, onRevoke }: { invitation: Invitation; onRevo
 
 const useColumns = (labelOf: (ref: Invitation["roles"][number]) => string, onRevoke: ((invitation: Invitation) => void) | null) => {
   const t = useTranslations("settings.invitations");
-  const formatDateTime = useFormatDateTime();
   return useMemo(
     () => [
       column.accessor("email", { header: () => t("columns.email"), cell: ({ getValue }) => <span className="font-medium">{getValue()}</span> }),
       column.display({ id: "node", header: () => t("columns.node"), cell: ({ row }) => <NodeName node={row.original.node} /> }),
       column.display({ id: "roles", header: () => t("columns.roles"), cell: ({ row }) => <RoleBadges invitation={row.original} labelOf={labelOf} /> }),
       column.accessor("status", { header: () => t("columns.status"), cell: ({ getValue }) => <InvitationStatusPill status={getValue()} /> }),
-      column.accessor("expiresAt", { header: () => t("columns.expires"), cell: ({ getValue }) => formatDateTime(getValue()) }),
+      column.display({ id: "expiresAt", header: () => t("columns.expires"), cell: ({ row }) => <ExpiryCell invitation={row.original} /> }),
       ...(onRevoke === null
         ? []
         : [column.display({ id: "actions", header: () => t("columns.actions"), meta: { headerHidden: true }, cell: ({ row }) => <RevokeButton invitation={row.original} onRevoke={onRevoke} /> })]),
     ],
-    [formatDateTime, labelOf, onRevoke, t],
+    [labelOf, onRevoke, t],
   );
 };
 
@@ -106,7 +122,7 @@ function InvitationsTable({ context, filter, onInvite }: { context: AccessContex
               <NodeName node={invitation.node} />
             </span>
             <RoleBadges invitation={invitation} labelOf={labelOf} />
-            <span className="text-xs text-muted-foreground">{t("expiresOn", { date: formatDateTime(invitation.expiresAt) })}</span>
+            {hasExpiry(invitation.status) ? <span className="text-xs text-muted-foreground">{t("expiresOn", { date: formatDateTime(invitation.expiresAt) })}</span> : null}
             {canRevoke ? (
               <span className="self-start">
                 <RevokeButton invitation={invitation} onRevoke={setRevoking} />

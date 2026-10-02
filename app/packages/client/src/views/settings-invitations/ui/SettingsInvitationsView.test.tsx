@@ -41,6 +41,24 @@ describe("SettingsInvitationsView", () => {
     await waitFor(() => expect(api.calls.filter((call) => call.path.endsWith("/invitations")).some((call) => !call.query.includes("status"))).toBe(true));
   });
 
+  it("shows no expiry on accepted or revoked invitations", async () => {
+    renderView({
+      "GET /v1/organizations/:organizationId/invitations": page([
+        buildInvitation(),
+        buildInvitation({ id: "Iv2", email: "dora@example.com", status: "accepted", expiresAt: "2026-10-07T14:30:00.000Z" }),
+        buildInvitation({ id: "Iv3", email: "eva@example.com", status: "revoked", expiresAt: "2026-10-08T14:30:00.000Z" }),
+      ]),
+    });
+    await screen.findByText("dora@example.com");
+    const table = screen.getByRole("table", { name: "Convites pendentes" });
+    const rowOf = (email: string) => within(table).getByText(email).closest("tr") as HTMLElement;
+    expect(within(rowOf("carla@example.com")).getByText(/6 de out\. de 2026/u)).toBeDefined();
+    for (const [email, day] of [["dora@example.com", /7 de out\./u], ["eva@example.com", /8 de out\./u]] as const) {
+      expect(within(rowOf(email)).queryByText(day)).toBeNull();
+      expect(within(rowOf(email)).getByText("Não se aplica")).toBeDefined();
+    }
+  });
+
   it("invites with node and roles, shows the link once, and never again after closing", async () => {
     const bodies: FakeRequest[] = [];
     const { user } = renderView({
