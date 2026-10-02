@@ -72,7 +72,7 @@ export const useTenantWorkflowRun = (organizationId: string, runId: string, opti
   return useQuery({
     ...tenantWorkflowRunQuery(callEndpoint, organizationId, runId),
     enabled: signedIn && organizationId !== "" && runId !== "" && options.enabled !== false,
-    refetchInterval: (query) => (query.state.data != null && isRunCancelable(query.state.data.status) ? RUN_POLL_MS : false),
+    refetchInterval: (query) => (query.state.data !== undefined && query.state.data !== null && isRunCancelable(query.state.data.status) ? RUN_POLL_MS : false),
   });
 };
 
