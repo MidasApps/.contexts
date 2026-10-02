@@ -110,6 +110,22 @@ describe("AdminCostsView", () => {
     await waitFor(() => expect(new URLSearchParams(api.calls.find((call) => call.path === "/v1/admin/usage")?.query).get("to")).toBe("2020-01-31"));
   });
 
+  it("marks both days of an invalid range as a field error and offers to clear the period", async () => {
+    const { router, container } = render({ path: `/admin/costs?organizationId=${IDS.organization}&from=2026-09-30&to=2026-09-01` });
+    const usage = await screen.findByRole("region", { name: "Uso por dia e por modelo" });
+    const message = await within(usage).findByText("Escolha um período de até 92 dias, com o início antes do fim.");
+    expect(message.className).toContain("text-destructive-text");
+    for (const label of ["De", "Até"]) {
+      const input = within(usage).getByLabelText(label);
+      expect(input.getAttribute("aria-invalid")).toBe("true");
+      expect(input.getAttribute("aria-describedby")).toBe(message.id);
+    }
+    fireEvent.click(within(usage).getByRole("button", { name: "Limpar o período" }));
+    await waitFor(() => expect(router.current()).toBe(`/admin/costs?organizationId=${IDS.organization}`));
+    expect(within(usage).getByLabelText("De").getAttribute("aria-invalid")).toBeNull();
+    await expectNoAxeViolations(container);
+  });
+
   it("explains a range without usage and an unreadable ledger, without hiding the budgets", async () => {
     const zero = { calls: 0, inputTokens: 0, outputTokens: 0, costMicroUsd: 0, unpricedCalls: 0 };
     const empty = render({ path: "/admin/costs?from=2026-09-29", routes: routes({ "GET /v1/admin/usage": ok(buildAdminUsage({ totals: zero, byDay: [], byModel: [] })) }) });

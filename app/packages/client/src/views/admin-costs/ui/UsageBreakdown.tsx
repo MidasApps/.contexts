@@ -166,11 +166,15 @@ export function UsageBreakdown() {
   const t = useTranslations("admin.costs.usage");
   const fromId = useId();
   const toId = useId();
+  const rangeErrorId = useId();
   const search = useAdminSearch(["organizationId", "from", "to"]);
   const filters = { organizationId: search.values.organizationId, from: dayOf(search.values.from), to: dayOf(search.values.to) };
   const validRange = isUsageRangeValid(filters);
   const usage = useAdminUsage(filters, { enabled: validRange });
   const clear = (): void => search.set({ organizationId: undefined, from: undefined, to: undefined });
+  const clearRange = (): void => search.set({ from: undefined, to: undefined });
+  // Both days are wrong together (an order or a length), so both carry the error.
+  const invalid = validRange ? {} : { "aria-invalid": true, "aria-describedby": rangeErrorId };
   return (
     <section aria-labelledby="costs-usage-title" className="flex flex-col gap-4 rounded-xl border border-border bg-card p-4">
       <div className="flex flex-col gap-1">
@@ -183,11 +187,11 @@ export function UsageBreakdown() {
         <AdminOrganizationFilter value={filters.organizationId} onValueChange={(organizationId) => search.set({ organizationId })} />
         <div className="flex flex-col gap-1.5">
           <Label htmlFor={fromId}>{t("from")}</Label>
-          <Input id={fromId} type="date" className="lg:w-40" value={filters.from ?? ""} max={filters.to} onChange={(event) => search.set({ from: event.target.value })} />
+          <Input id={fromId} type="date" className="lg:w-40" value={filters.from ?? ""} max={filters.to} onChange={(event) => search.set({ from: event.target.value })} {...invalid} />
         </div>
         <div className="flex flex-col gap-1.5">
           <Label htmlFor={toId}>{t("to")}</Label>
-          <Input id={toId} type="date" className="lg:w-40" value={filters.to ?? ""} min={filters.from} onChange={(event) => search.set({ to: event.target.value })} />
+          <Input id={toId} type="date" className="lg:w-40" value={filters.to ?? ""} min={filters.from} onChange={(event) => search.set({ to: event.target.value })} {...invalid} />
         </div>
       </div>
       {validRange ? (
@@ -200,9 +204,14 @@ export function UsageBreakdown() {
           )}
         </AdminQuerySection>
       ) : (
-        <p role="status" className="text-sm text-muted-foreground">
-          {t("rangeInvalid", { days: ADMIN_USAGE_MAX_DAYS })}
-        </p>
+        <div className="flex flex-col items-start gap-2">
+          <p id={rangeErrorId} role="status" className="text-sm font-medium text-destructive-text">
+            {t("rangeInvalid", { days: ADMIN_USAGE_MAX_DAYS })}
+          </p>
+          <Button variant="secondary" size="sm" onClick={clearRange}>
+            {t("clearRange")}
+          </Button>
+        </div>
       )}
     </section>
   );

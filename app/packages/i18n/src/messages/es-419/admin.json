@@ -308,7 +308,8 @@
       "emptyTitle": "Ningún uso en el período",
       "emptyDescription": "No se registró ninguna llamada de modelo con estos filtros.",
       "clear": "Volver al mes actual",
-      "rangeInvalid": "Elige un período de hasta {days} días, con el inicio antes del fin."
+      "rangeInvalid": "Elige un período de hasta {days} días, con el inicio antes del fin.",
+      "clearRange": "Borrar el período"
     }
   },
   "organizationDetail": {
