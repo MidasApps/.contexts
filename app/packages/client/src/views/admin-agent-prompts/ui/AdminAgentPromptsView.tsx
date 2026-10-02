@@ -1,7 +1,7 @@
 "use client";
 
 import { PROMPT_AGENT_IDS, type PromptActivation, type PromptAgentId, type PromptVersion } from "@core/contracts";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "use-intl";
 import { useAdminUserNames } from "#/entities/admin-user/index.ts";
 import { usePlatformPermissions } from "#/entities/permission/index.ts";
@@ -84,11 +84,31 @@ const useDiffSelection = (versions: readonly PromptVersion[], active: PromptVers
   };
 };
 
+/** Moves to the diff (scroll and focus): its region when there is one, else its wrapper (identical versions). */
+const focusDiffIn = (root: HTMLElement | null): void => {
+  const target = root?.querySelector<HTMLElement>("[role='region']") ?? root;
+  target?.scrollIntoView?.({ block: "start" });
+  target?.focus();
+};
+
 function PromptSections({ agentId, agentName, data, online, onCreate }: { agentId: PromptAgentId; agentName: string; data: PromptData; online: boolean; onCreate: () => void }) {
   const t = useTranslations("admin.prompts");
   const active = activeVersionOf(data.versions, data.activations);
   const evalRun = useRunPromptEval(agentId);
   const diff = useDiffSelection(data.versions, active);
+  // "Compare" on a row moves to the diff two cards below, so the press visibly does something.
+  const diffRef = useRef<HTMLDivElement>(null);
+  const diffFocusPending = useRef(false);
+  useEffect(() => {
+    if (!diffFocusPending.current) return;
+    diffFocusPending.current = false;
+    focusDiffIn(diffRef.current);
+  }, [diff.compareId]);
+  const compareWith = (version: PromptVersion): void => {
+    if (version.id === diff.compareId) return focusDiffIn(diffRef.current);
+    diffFocusPending.current = true;
+    diff.setCompare(version.id);
+  };
   const [request, setRequest] = useState<PromptActivationRequest | null>(null);
   // One lookup for every author and activator on the page (decision 0044), never one per row.
   const canReadUsers = usePlatformPermissions().can("platform.user.read");
@@ -96,7 +116,7 @@ function PromptSections({ agentId, agentName, data, online, onCreate }: { agentI
   return (
     <div className="flex flex-col gap-6">
       <SectionCard title={t("versions.title")} description={active === undefined ? t("versions.seedActive") : t("versions.description", { version: active.version })}>
-        <PromptVersionsTable agentName={agentName} versions={data.versions} activeVersion={active} evalRun={evalRun} online={online} onActivate={setRequest} onCompare={(version) => diff.setCompare(version.id)} onCreate={onCreate} userLabel={userLabel} />
+        <PromptVersionsTable agentName={agentName} versions={data.versions} activeVersion={active} evalRun={evalRun} online={online} onActivate={setRequest} onCompare={compareWith} onCreate={onCreate} userLabel={userLabel} />
       </SectionCard>
       {data.versions.length === 0 ? null : (
         <SectionCard title={t("eval.title")} description={t("eval.description")}>
@@ -105,7 +125,9 @@ function PromptSections({ agentId, agentName, data, online, onCreate }: { agentI
       )}
       {data.versions.length < 2 ? null : (
         <SectionCard title={t("diff.title")} description={t("diff.description")}>
-          <PromptDiff versions={data.versions} baseId={diff.baseId} compareId={diff.compareId} onBaseChange={diff.setBase} onCompareChange={diff.setCompare} activeId={active?.id} />
+          <div ref={diffRef} tabIndex={-1} className="focus-visible:outline-none">
+            <PromptDiff versions={data.versions} baseId={diff.baseId} compareId={diff.compareId} onBaseChange={diff.setBase} onCompareChange={diff.setCompare} activeId={active?.id} />
+          </div>
         </SectionCard>
       )}
       <SectionCard title={t("history.title")} description={t("history.description")}>

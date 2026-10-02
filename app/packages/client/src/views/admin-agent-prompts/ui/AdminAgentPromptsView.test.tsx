@@ -237,7 +237,9 @@ describe("AdminAgentPromptsView", () => {
     await expectNoAxeViolations(container);
     await user.click(within(row(await versionsTable(), "v1")).getByRole("button", { name: "Comparar a versão 1" }));
     expect(router.current()).toBe(`${PATH}?compare=1`);
-    expect(await screen.findByRole("region", { name: "Diferenças da versão 2 para a versão 1" })).toBeDefined();
+    // The diff sits two cards below the table: the press moves there, so it visibly did something.
+    const compared = await screen.findByRole("region", { name: "Diferenças da versão 2 para a versão 1" });
+    await waitFor(() => expect(document.activeElement).toBe(compared));
   });
 
   it("reads the compared versions from the URL", async () => {
