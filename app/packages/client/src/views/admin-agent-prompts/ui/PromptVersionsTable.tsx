@@ -7,6 +7,7 @@ import { AdminUserRef } from "#/entities/admin-user/index.ts";
 import { PromptVerdictPill } from "#/entities/prompt-version/index.ts";
 import { canActivatePrompt, isPromptRollback, type PromptActivationRequest, type RunPromptEval } from "#/features/admin-prompt-activation/index.ts";
 import { useFormatDateTime } from "#/shared/lib/format/use-format-date-time.ts";
+import { PROMPT_ROWS_PER_PAGE, useLocalPages } from "../model/use-local-pages.ts";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
 import { EmptyState } from "#/shared/ui/molecules/EmptyState/EmptyState.tsx";
 import { StatusPill } from "#/shared/ui/molecules/StatusPill/StatusPill.tsx";
@@ -114,12 +115,15 @@ export function PromptVersionsTable({ agentName, versions, onCreate, ...context 
   const t = useTranslations("admin.prompts");
   const formatDateTime = useFormatDateTime();
   const columns = useColumns(context);
+  // The store is append-only: the newest versions first, older ones a page away.
+  const paged = useLocalPages(versions, PROMPT_ROWS_PER_PAGE, t("pagination"));
   return (
     <DataTable
       caption={t("caption", { agent: agentName })}
       captionHidden
       columns={columns}
-      data={versions}
+      data={paged.rows}
+      pagination={paged.pagination}
       getRowId={(version) => version.id}
       renderCard={(version) => (
         <div className="flex flex-col gap-2">

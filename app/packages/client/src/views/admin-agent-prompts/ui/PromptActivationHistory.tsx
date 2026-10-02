@@ -5,6 +5,7 @@ import { useMemo } from "react";
 import { useTranslations } from "use-intl";
 import { AdminUserRef } from "#/entities/admin-user/index.ts";
 import { useFormatDateTime } from "#/shared/lib/format/use-format-date-time.ts";
+import { PROMPT_ROWS_PER_PAGE, useLocalPages } from "../model/use-local-pages.ts";
 import { StatusPill } from "#/shared/ui/molecules/StatusPill/StatusPill.tsx";
 import { DataTable } from "#/shared/ui/organisms/DataTable/DataTable.tsx";
 import { dataTableColumnHelper } from "#/shared/ui/organisms/DataTable/data-table-columns.ts";
@@ -57,13 +58,15 @@ export function PromptActivationHistory({
     ],
     [formatDateTime, t, userLabel, versionLabel],
   );
+  const paged = useLocalPages(activations, PROMPT_ROWS_PER_PAGE, t("pagination"));
   if (activations.length === 0) return <p className="text-sm text-muted-foreground">{t("empty")}</p>;
   return (
     <DataTable
       caption={t("caption", { agent: agentName })}
       captionHidden
       columns={columns}
-      data={activations}
+      data={paged.rows}
+      pagination={paged.pagination}
       getRowId={(activation) => activation.id}
       empty={null}
       renderCard={(activation) => (

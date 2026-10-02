@@ -57,6 +57,22 @@ describe("AdminAgentPromptsView", () => {
     await expectNoAxeViolations(container);
   });
 
+  it("pages long version and activation lists, twenty rows at a time", async () => {
+    const uuid = (index: number) => `01928f6e-7b2a-7c3d-9e4f-${String(index).padStart(12, "0")}`;
+    const versions = Array.from({ length: 25 }, (_, index) => buildPromptVersion({ id: uuid(100 + index), version: 25 - index, body: `Prompt ${25 - index}` }));
+    const activations = Array.from({ length: 23 }, (_, index) => buildPromptActivation({ id: uuid(200 + index), versionId: uuid(100 + index) }));
+    const { user, container } = render({ routes: routes({ [`GET ${BASE}/prompt-versions`]: ok(versions), [`GET ${BASE}/activations`]: ok(activations) }) });
+    const table = await versionsTable();
+    expect(within(table).getAllByRole("row")).toHaveLength(21);
+    await user.click(within(screen.getByRole("navigation", { name: "Páginas de versões" })).getByRole("button", { name: "Próxima" }));
+    await waitFor(() => expect(within(screen.getByRole("table", { name: "Versões do prompt de Assistente" })).getAllByRole("row")).toHaveLength(6));
+    const history = screen.getByRole("table", { name: "Ativações do prompt de Assistente" });
+    expect(within(history).getAllByRole("row")).toHaveLength(21);
+    await user.click(within(screen.getByRole("navigation", { name: "Páginas de ativações" })).getByRole("button", { name: "Próxima" }));
+    await waitFor(() => expect(within(screen.getByRole("table", { name: "Ativações do prompt de Assistente" })).getAllByRole("row")).toHaveLength(4));
+    await expectNoAxeViolations(container);
+  });
+
   it("keeps Activate disabled, with the reason, until the version's eval passed", async () => {
     render();
     const table = await versionsTable();
