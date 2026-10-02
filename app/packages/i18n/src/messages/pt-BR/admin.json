@@ -472,6 +472,7 @@
       "reason": "Motivo",
       "reasonHint": "De 10 a 500 caracteres, por exemplo o número do chamado. Fica na auditoria.",
       "durationMinutes": "Duração em minutos",
+      "durationHint": "De 1 a {max} minutos.",
       "submit": "Iniciar sessão",
       "started": "Sessão de suporte iniciada.",
       "errors": {

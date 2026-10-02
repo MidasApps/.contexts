@@ -472,6 +472,7 @@
       "reason": "Motivo",
       "reasonHint": "De 10 a 500 caracteres, por ejemplo el número del ticket. Queda en la auditoría.",
       "durationMinutes": "Duración en minutos",
+      "durationHint": "De 1 a {max} minutos.",
       "submit": "Iniciar sesión de soporte",
       "started": "Sesión de soporte iniciada.",
       "errors": {

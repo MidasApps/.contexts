@@ -2,7 +2,7 @@
 
 import { endImpersonationEndpoint } from "@core/contracts";
 import { useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "use-intl";
 import { impersonationSessionKeys } from "#/entities/impersonation-session/index.ts";
 import { useCallEndpoint } from "#/shared/api/api-context.tsx";
@@ -22,6 +22,8 @@ export type OpenImpersonationSessionProps = {
   session: StoredImpersonation;
   /** Display name of the session's organization when the caller knows it. */
   organizationName?: string | undefined;
+  /** Moves focus to "open the app as this user" when it appears (right after staff started it). */
+  focusOnMount?: boolean | undefined;
 };
 
 /**
@@ -30,7 +32,7 @@ export type OpenImpersonationSessionProps = {
  * runs as the user, read-only, also after a reload, until the banner's "leave support mode"
  * (which ends it and returns to the staff account) or the expiry.
  */
-export function OpenImpersonationSession({ session, organizationName }: OpenImpersonationSessionProps) {
+export function OpenImpersonationSession({ session, organizationName, focusOnMount = false }: OpenImpersonationSessionProps) {
   const t = useTranslations("admin.impersonation.session");
   const online = useOnlineStatus();
   const sessionController = useSession();
@@ -40,6 +42,12 @@ export function OpenImpersonationSession({ session, organizationName }: OpenImpe
   const formatDateTime = useFormatDateTime();
   const reset = useImpersonationStore((state) => state.reset);
   const [ending, setEnding] = useState(false);
+  const openButton = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    if (!focusOnMount) return;
+    openButton.current?.scrollIntoView({ block: "nearest" });
+    openButton.current?.focus();
+  }, [focusOnMount]);
   const open = useAsyncAction();
   const end = useConfirmedAction(
     async () => {
@@ -61,11 +69,14 @@ export function OpenImpersonationSession({ session, organizationName }: OpenImpe
       <dl className="grid gap-4 sm:grid-cols-3">
         <div className="flex flex-col gap-1">
           <dt className="text-xs font-medium text-muted-foreground">{t("user")}</dt>
-          <dd className="font-mono text-sm break-all">{session.targetUid}</dd>
+          <dd className="flex min-w-0 flex-col gap-0.5">
+            {session.targetLabel === undefined ? null : <span className="text-sm font-medium break-all">{session.targetLabel}</span>}
+            <span className={session.targetLabel === undefined ? "font-mono text-sm break-all" : "font-mono text-xs break-all text-muted-foreground"}>{session.targetUid}</span>
+          </dd>
         </div>
         <div className="flex flex-col gap-1">
           <dt className="text-xs font-medium text-muted-foreground">{t("organization")}</dt>
-          <dd className="text-sm break-all">{organizationName ?? session.organizationId}</dd>
+          <dd className="text-sm break-all">{organizationName ?? session.organizationName ?? session.organizationId}</dd>
         </div>
         <div className="flex flex-col gap-1">
           <dt className="text-xs font-medium text-muted-foreground">{t("expires")}</dt>
@@ -84,7 +95,7 @@ export function OpenImpersonationSession({ session, organizationName }: OpenImpe
         </p>
       )}
       <div className="flex flex-wrap gap-2">
-        <Button onClick={() => void openAsUser()} pending={open.pending} disabled={!online}>
+        <Button ref={openButton} onClick={() => void openAsUser()} pending={open.pending} disabled={!online}>
           {t("open")}
         </Button>
         <Button variant="outline" onClick={() => setEnding(true)} disabled={!online || open.pending}>

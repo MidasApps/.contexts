@@ -10,6 +10,10 @@ export const StoredImpersonationSchema = z.object({
   expiresAt: z.iso.datetime(),
   targetUid: z.string().min(1).max(200),
   organizationId: z.string().min(1).max(200),
+  /** How staff picked the user (name, or email when nameless); optional: older entries lack it. */
+  targetLabel: z.string().min(1).max(200).optional(),
+  /** The organization's name when it was known at start; optional for the same reason. */
+  organizationName: z.string().min(1).max(200).optional(),
 });
 export type StoredImpersonation = z.infer<typeof StoredImpersonationSchema>;
 
@@ -25,8 +29,9 @@ const STORAGE_VERSION = 1;
 
 /**
  * What staff need to open or end an impersonation session started in this tab: the session id,
- * its expiry, the user and the organization, in `sessionStorage` so it survives reloads but not
- * the tab. No token is kept: the server session mints it when the tab enters the session
+ * its expiry, the user and the organization (ids, plus the labels staff saw when starting it, so
+ * the page and the banner name them), in `sessionStorage` so it survives reloads but not the tab.
+ * No token is kept: the server session mints it when the tab enters the session
  * (decision 0047). Hydrated after mount (`skipHydration`), validated before it replaces state,
  * with `reset`.
  */

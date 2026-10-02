@@ -16,25 +16,34 @@ import { UserSearchSection } from "./UserSearchSection.tsx";
 
 const targetOf = (user: AdminUserSummary): ImpersonationTarget => ({ id: user.id, label: adminUserLabel(user), detail: user.displayName.trim() === "" ? undefined : (user.email ?? undefined) });
 
-function CurrentSession() {
+/** The session this tab started; `startedId` is the one started on this page, which takes focus. */
+function CurrentSession({ startedId }: { startedId: string | undefined }) {
   const t = useTranslations("admin.users.session");
   const session = useStoredImpersonation();
   const organizations = useAllAdminOrganizations();
   if (session === null) return <EmptyState frame="plain" headingLevel={3} icon="eye-off" title={t("emptyTitle")} description={t("emptyDescription")} />;
-  const organizationName = organizations.data?.find((organization) => organization.id === session.organizationId)?.name;
-  return <OpenImpersonationSession session={session} organizationName={organizationName} />;
+  const organizationName = organizations.data?.find((organization) => organization.id === session.organizationId)?.name ?? session.organizationName;
+  return <OpenImpersonationSession key={session.sessionId} session={session} organizationName={organizationName} focusOnMount={session.sessionId === startedId} />;
 }
 
-function StartSection({ target, onTargetClear }: { target: ImpersonationTarget | undefined; onTargetClear: () => void }) {
+type StartSectionProps = { target: ImpersonationTarget | undefined; onTargetClear: () => void; onStarted: (sessionId: string) => void };
+
+function StartSection({ target, onTargetClear, onStarted }: StartSectionProps) {
   const t = useTranslations("admin.users");
+  const organizations = useAllAdminOrganizations();
   const [organizationId, setOrganizationId] = useState<string | undefined>();
+  const organizationName = organizations.data?.find((organization) => organization.id === organizationId)?.name;
   return (
     <SectionCard title={t("start.title")} description={t("start.description")}>
       <StartImpersonationForm
         target={target}
         onTargetClear={onTargetClear}
         organizationId={organizationId}
-        organizationField={<AdminOrganizationFilter required value={organizationId} onValueChange={setOrganizationId} label={t("start.organization")} />}
+        organizationName={organizationName}
+        onStarted={onStarted}
+        organizationField={({ invalid, describedBy }) => (
+          <AdminOrganizationFilter required value={organizationId} onValueChange={setOrganizationId} label={t("start.organization")} invalid={invalid} describedBy={describedBy} />
+        )}
       />
     </SectionCard>
   );
@@ -52,6 +61,7 @@ export function AdminUsersView() {
   const permissions = usePlatformPermissions();
   const canImpersonate = permissions.can("platform.user.impersonate");
   const [target, setTarget] = useState<ImpersonationTarget | undefined>();
+  const [startedId, setStartedId] = useState<string | undefined>();
   return (
     <AdminPageFrame permission="platform.user.read" title={t("title")} description={t("description")}>
       <div className="flex flex-col gap-4">
@@ -61,9 +71,9 @@ export function AdminUsersView() {
           </Alert>
           <UserSearchSection selectedId={target?.id} onSelect={canImpersonate ? (user) => setTarget(targetOf(user)) : undefined} />
           <SectionCard title={t("session.title")} description={t("session.description")}>
-            <CurrentSession />
+            <CurrentSession startedId={startedId} />
           </SectionCard>
-          {canImpersonate ? <StartSection target={target} onTargetClear={() => setTarget(undefined)} /> : null}
+          {canImpersonate ? <StartSection target={target} onTargetClear={() => setTarget(undefined)} onStarted={setStartedId} /> : null}
           <ImpersonationSessionsSection canEnd={canImpersonate} />
       </div>
     </AdminPageFrame>

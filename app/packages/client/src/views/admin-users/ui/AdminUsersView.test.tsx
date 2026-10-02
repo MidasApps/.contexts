@@ -7,6 +7,7 @@ import { buildOrganizationSummary } from "#/shared/testing/admin-fixtures.ts";
 import { expectNoAxeViolations } from "#/shared/testing/axe.ts";
 import { apiError, noContent, ok, page } from "#/shared/testing/fake-api.ts";
 import { IDS } from "#/shared/testing/fixtures.ts";
+import { notify } from "#/shared/ui/molecules/Toaster/notify.ts";
 import { AdminUsersView } from "./AdminUsersView.tsx";
 
 const REASON = "Chamado 4821: usuário não vê o projeto.";
@@ -36,7 +37,10 @@ const fillForm = async (user: ReturnType<typeof render>["user"]): Promise<HTMLEl
 };
 
 afterEach(() => {
-  act(() => useImpersonationStore.getState().reset());
+  act(() => {
+    useImpersonationStore.getState().reset();
+    notify.dismiss();
+  });
   globalThis.sessionStorage.clear();
 });
 
@@ -226,6 +230,41 @@ describe("AdminUsersView", () => {
     expect(api.calls.some((call) => call.method === "POST")).toBe(false);
   });
 
+  it("ties each error to its field, says the duration range up front and clears an error once fixed", async () => {
+    const { user } = render();
+    const start = await screen.findByRole("region", { name: "Iniciar acesso como usuário" });
+    const minutes = within(start).getByRole("spinbutton", { name: "Duração em minutos" });
+    expect(within(start).getByText("De 1 a 60 minutos.").id.length).toBeGreaterThan(0);
+    expect(minutes.getAttribute("aria-describedby")).toContain(within(start).getByText("De 1 a 60 minutos.").id);
+    await user.type(within(start).getByRole("textbox", { name: "Motivo" }), "curto");
+    await user.click(within(start).getByRole("button", { name: "Iniciar sessão" }));
+    const organization = within(start).getByRole("combobox", { name: "Organização" });
+    const organizationError = await within(start).findByText("Escolha a organização.");
+    expect(organization.getAttribute("aria-invalid")).toBe("true");
+    expect(organization.getAttribute("aria-describedby")).toContain(organizationError.id);
+    await user.click(organization);
+    await user.click(await screen.findByRole("option", { name: "Northwind" }));
+    expect(within(start).queryByText("Escolha a organização.")).toBeNull();
+    expect(within(start).getByRole("combobox", { name: "Organização" }).getAttribute("aria-invalid")).not.toBe("true");
+    await user.type(within(start).getByRole("textbox", { name: "Motivo" }), " demais");
+    expect(within(start).queryByText("Explique o motivo com 10 a 500 caracteres.")).toBeNull();
+  });
+
+  it("moves focus to the chosen user after a pick, and to opening the app after the start", async () => {
+    const { user } = render({ routes: { ...ORGANIZATIONS, "POST /v1/platform/impersonation-sessions": ok(buildImpersonationStart(), 201) } });
+    const start = await screen.findByRole("region", { name: "Iniciar acesso como usuário" });
+    const search = await searchFor(user, "ana");
+    await user.click(await within(search).findByRole("button", { name: "Selecionar Ana Souza para o acesso de suporte" }));
+    await waitFor(() => expect(document.activeElement).toBe(within(start).getByRole("group", { name: "Usuário" })));
+    await user.click(within(start).getByRole("combobox", { name: "Organização" }));
+    await user.click(await screen.findByRole("option", { name: "Northwind" }));
+    await user.type(within(start).getByRole("textbox", { name: "Motivo" }), REASON);
+    await user.click(within(start).getByRole("button", { name: "Iniciar sessão" }));
+    const session = screen.getByRole("region", { name: "Sessão aberta nesta aba" });
+    const open = await within(session).findByRole("button", { name: "Abrir o app como este usuário" });
+    await waitFor(() => expect(document.activeElement).toBe(open));
+  });
+
   it("starts a session, opens the app as the user and keeps only the session data in storage", async () => {
     const { user, api, router, container, bridge } = render({ routes: { ...ORGANIZATIONS, "POST /v1/platform/impersonation-sessions": ok(buildImpersonationStart(), 201) } });
     const start = await fillForm(user);
@@ -237,10 +276,13 @@ describe("AdminUsersView", () => {
     expect(api.calls.find((call) => call.method === "POST")?.body).toEqual({ targetUid: IMPERSONATION_IDS.target, organizationId: IDS.organization, reason: REASON, durationMinutes: 30 });
     const session = screen.getByRole("region", { name: "Sessão aberta nesta aba" });
     expect(await within(session).findByText(IMPERSONATION_IDS.target)).toBeDefined();
+    // The person is named, not only identified by an opaque uid.
+    expect(within(session).getByText("Ana Souza")).toBeDefined();
     expect(within(session).getByText("Northwind")).toBeDefined();
     expect(within(session).getByText("Somente leitura")).toBeDefined();
     const stored = globalThis.sessionStorage.getItem(IMPERSONATION_STORAGE_KEY) ?? "";
     expect(stored).toContain(IMPERSONATION_IDS.session);
+    expect(stored).toContain("Northwind");
     expect(stored).not.toContain("eyJ");
     await expectNoAxeViolations(container);
     await user.click(within(session).getByRole("button", { name: "Abrir o app como este usuário" }));

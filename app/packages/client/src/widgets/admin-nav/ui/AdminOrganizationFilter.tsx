@@ -17,6 +17,10 @@ export type AdminOrganizationFilterProps = {
   required?: boolean;
   /** Visible label; defaults to "Organização". */
   label?: string;
+  /** Marks the picker invalid (a form's error) … */
+  invalid?: boolean | undefined;
+  /** … and the id of the message that explains it. */
+  describedBy?: string | undefined;
 };
 
 /**
@@ -24,7 +28,7 @@ export type AdminOrganizationFilterProps = {
  * or id, fed by `GET /v1/admin/organizations`. While the list loads or fails the trigger still
  * shows the chosen id, so a shared link keeps its filter.
  */
-export function AdminOrganizationFilter({ value, onValueChange, required = false, label }: AdminOrganizationFilterProps) {
+export function AdminOrganizationFilter({ value, onValueChange, required = false, label, invalid = false, describedBy }: AdminOrganizationFilterProps) {
   const t = useTranslations("admin.organizationFilter");
   const id = useId();
   const organizations = useAllAdminOrganizations();
@@ -46,6 +50,8 @@ export function AdminOrganizationFilter({ value, onValueChange, required = false
         searchLabel={t("search")}
         searchPlaceholder={t("search")}
         emptyText={t("empty")}
+        aria-invalid={invalid || undefined}
+        aria-describedby={describedBy}
       />
     </div>
   );

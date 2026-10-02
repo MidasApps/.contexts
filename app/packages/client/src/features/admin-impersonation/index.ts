@@ -10,4 +10,4 @@ export { useStoredImpersonation } from "./model/use-stored-impersonation.ts";
 export { EndImpersonationSessionDialog, type EndImpersonationSessionDialogProps } from "./ui/EndImpersonationSessionDialog.tsx";
 export { LeaveImpersonationButton } from "./ui/LeaveImpersonationButton.tsx";
 export { OpenImpersonationSession, type OpenImpersonationSessionProps } from "./ui/OpenImpersonationSession.tsx";
-export { StartImpersonationForm, type ImpersonationTarget, type StartImpersonationFormProps } from "./ui/StartImpersonationForm.tsx";
+export { StartImpersonationForm, type ImpersonationTarget, type OrganizationFieldA11y, type StartImpersonationFormProps } from "./ui/StartImpersonationForm.tsx";

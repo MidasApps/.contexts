@@ -472,6 +472,7 @@
       "reason": "Reason",
       "reasonHint": "10 to 500 characters, for example the ticket number. It is kept in the audit log.",
       "durationMinutes": "Duration in minutes",
+      "durationHint": "From 1 to {max} minutes.",
       "submit": "Start session",
       "started": "Support session started.",
       "errors": {
