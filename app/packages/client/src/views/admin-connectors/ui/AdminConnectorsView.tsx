@@ -113,11 +113,6 @@ function ConnectorsTable({ organizationId }: { organizationId: string }) {
               icon="plug"
               title={t("emptyTitle")}
               description={t("emptyDescription")}
-              action={
-                <Button variant="secondary" asChild>
-                  <RouteLink to={{ id: "admin", rest: `organizations/${organizationId}` }}>{t("emptyAction")}</RouteLink>
-                </Button>
-              }
             />
           }
         />

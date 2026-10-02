@@ -43,7 +43,7 @@ describe("AdminOrganizationDetailView", () => {
     expect(plain(within(summary).getByText("Membros").parentElement?.textContent ?? null)).toContain("12 pessoas com acesso");
     const related = section("Ver esta organização em");
     expect(within(related).getAllByRole("link").map((link) => link.getAttribute("href"))).toEqual(
-      ["agents", "traces", "flags", "costs"].map((area) => `/admin/${area}?organizationId=${IDS.organization}`),
+      ["agents", "connectors", "workflows", "traces", "flags", "costs"].map((area) => `/admin/${area}?organizationId=${IDS.organization}`),
     );
     await expectNoAxeViolations(container);
   });
@@ -144,7 +144,7 @@ describe("AdminOrganizationDetailView", () => {
     expect(screen.getByText(/Seu papel na equipe só permite consultar/u)).toBeDefined();
     expect(screen.queryByRole("button", { name: "Suspender organização" })).toBeNull();
     expect(screen.queryByRole("region", { name: "Plano" })).toBeNull();
-    expect(within(section("Ver esta organização em")).getAllByRole("link").map((link) => link.textContent)).toEqual(["Traces", "Custos"]);
+    expect(within(section("Ver esta organização em")).getAllByRole("link").map((link) => link.textContent)).toEqual(["Conectores", "Traces", "Custos"]);
     expect(api.callLines()).not.toContain("GET /v1/admin/plans");
     await expectNoAxeViolations(container);
   });

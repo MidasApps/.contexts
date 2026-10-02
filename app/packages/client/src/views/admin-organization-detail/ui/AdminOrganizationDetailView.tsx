@@ -1,6 +1,6 @@
 "use client";
 
-import type { OrganizationAdminDetail, OrganizationAdminSummary, Plan } from "@core/contracts";
+import type { OrganizationAdminDetail, OrganizationAdminSummary, Permission, Plan } from "@core/contracts";
 import type { ReactNode } from "react";
 import { useFormatter, useTranslations } from "use-intl";
 import { BudgetUsagePill, OrganizationStatusPill, useAdminOrganization } from "#/entities/admin-organization/index.ts";
@@ -15,12 +15,14 @@ import { SectionCard } from "#/shared/ui/molecules/SectionCard/SectionCard.tsx";
 import { AdminPageFrame, AdminQuerySection } from "#/widgets/admin-nav/index.ts";
 import { PageNotFound } from "#/widgets/page-state/index.ts";
 
-/** Areas that take the organization as a URL filter. */
-const RELATED: readonly { rest: string; icon: IconName }[] = [
-  { rest: "agents", icon: "bot" },
-  { rest: "traces", icon: "scroll-text" },
-  { rest: "flags", icon: "flag" },
-  { rest: "costs", icon: "wallet" },
+/** Areas that take the organization as a URL filter, each shown when the role may open it. */
+const RELATED: readonly { rest: string; icon: IconName; permission: Permission }[] = [
+  { rest: "agents", icon: "bot", permission: "platform.agent.manage" },
+  { rest: "connectors", icon: "plug", permission: "platform.connector.read" },
+  { rest: "workflows", icon: "workflow", permission: "platform.workflow.manage" },
+  { rest: "traces", icon: "scroll-text", permission: "platform.trace.read" },
+  { rest: "flags", icon: "flag", permission: "platform.flag.manage" },
+  { rest: "costs", icon: "wallet", permission: "platform.usage.read" },
 ];
 
 function Stat({ label, children }: { label: string; children: ReactNode }) {
@@ -71,7 +73,7 @@ function RelatedLinks({ organization }: { organization: OrganizationAdminSummary
   const t = useTranslations("admin.organizationDetail.related");
   const tNav = useTranslations("shell.nav.admin");
   const permissions = usePlatformPermissions();
-  const visible = RELATED.filter(({ rest }) => rest !== "agents" || permissions.can("platform.agent.manage")).filter(({ rest }) => rest !== "flags" || permissions.can("platform.flag.manage"));
+  const visible = RELATED.filter(({ permission }) => permissions.can(permission));
   return (
     <SectionCard title={t("title")} description={t("description")}>
       <ul className="grid gap-2 sm:grid-cols-2">

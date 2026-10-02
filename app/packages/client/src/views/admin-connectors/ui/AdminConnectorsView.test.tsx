@@ -68,10 +68,11 @@ describe("AdminConnectorsView", () => {
     expect(await screen.findByRole("row", { name: /warehouse/u })).toBeDefined();
   });
 
-  it("explains an organization without connectors and links to it", async () => {
+  it("explains where an organization's connectors are created, without sending staff in a circle", async () => {
     const { container } = render({ routes: routes({ "GET /v1/admin/connectors": page([]) }) });
     expect(await screen.findByRole("heading", { level: 2, name: "Esta organização não tem conectores" })).toBeDefined();
-    expect(screen.getByRole("link", { name: "Abrir a organização" }).getAttribute("href")).toBe(`/admin/organizations/${IDS.organization}`);
+    expect(screen.getByText(/Conectores são criados nas configurações da organização/u)).toBeDefined();
+    expect(screen.queryByRole("link", { name: "Abrir a organização" })).toBeNull();
     await expectNoAxeViolations(container);
   });
 
