@@ -202,12 +202,15 @@ describe("SettingsKnowledgeView", () => {
 
   it("drops the notice of an ingestion that finished and stops reading its run", async () => {
     const runs: string[] = [];
+    let listed = false;
     const { user } = renderView(
       {
-        [DOCUMENTS]: page([]),
+        // The document shows up once the run has finished (the list is read again then).
+        [DOCUMENTS]: () => page(listed ? [buildKnowledgeDocument({ title: null, source: "url", sourceRef: PAGE_URL, sourceUrl: PAGE_URL })] : []),
         [SOURCES]: ok({ runId: "run-1" }, 202),
         [RUN]: (request: FakeRequest) => {
           runs.push(request.params["runId"] ?? "");
+          listed = true;
           return ok(buildWorkflowRun({ runId: "run-1", workflowId: "knowledge-ingest", status: "success" }));
         },
       },
@@ -223,6 +226,37 @@ describe("SettingsKnowledgeView", () => {
     const reads = runs.length;
     await new Promise((resolve) => setTimeout(resolve, 2500));
     expect(runs.length).toBe(reads);
+  });
+
+  // Follow-up 91: the workflow ends its run as a success when it stops early (a file it cannot
+  // read, empty content), so the run alone does not say a document was registered.
+  it("says so when an ingestion finished without a document, with its reference, and retries it", async () => {
+    const sources: FakeRequest[] = [];
+    const { user } = renderView(
+      {
+        [DOCUMENTS]: page([]),
+        [SOURCES]: (request: FakeRequest) => {
+          sources.push(request);
+          return ok({ runId: `run-${String(sources.length)}` }, 202);
+        },
+        [RUN]: (request: FakeRequest) => {
+          const runId = request.params["runId"] ?? "";
+          return ok(buildWorkflowRun({ runId, workflowId: "knowledge-ingest", status: runId === "run-1" ? "success" : "running" }));
+        },
+      },
+      RUN_READER,
+    );
+    await user.click((await screen.findAllByRole("button", { name: "Adicionar documento" }))[0] as HTMLElement);
+    const dialog = await screen.findByRole("dialog", { name: "Adicionar documento" });
+    await user.click(within(dialog).getByRole("tab", { name: "Página da web" }));
+    await user.type(within(dialog).getByRole("textbox", { name: "Endereço da página" }), PAGE_URL);
+    await user.click(within(dialog).getByRole("button", { name: "Adicionar" }));
+    const outcome = await screen.findByRole("alert", { name: `${PAGE_URL} não gerou um documento` });
+    expect(outcome.textContent).toContain("Referência: run-1");
+    expect(screen.queryByText(/Indexando https/u)).toBeNull();
+    await user.click(within(outcome).getByRole("button", { name: `Tentar indexar ${PAGE_URL} de novo` }));
+    expect(await screen.findByText(/Indexando https:\/\/docs\.example\.com\/new/u)).toBeDefined();
+    expect(sources).toHaveLength(2);
   });
 
   it("offers no add or delete action to a viewer who can only read", async () => {

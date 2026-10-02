@@ -1231,7 +1231,9 @@
       "failedDescription": "Reading the content failed before the document reached the list. Try again or check the address or the file.",
       "reference": "Reference: {runId}",
       "retry": "Try again",
-      "retryNamed": "Try indexing {name} again"
+      "retryNamed": "Try indexing {name} again",
+      "noDocumentTitle": "{name} produced no document",
+      "noDocumentDescription": "Indexing finished, but no new document appeared in the list. The content may be empty or could not be read. Try again or send another file."
     },
     "add": {
       "title": "Add document",

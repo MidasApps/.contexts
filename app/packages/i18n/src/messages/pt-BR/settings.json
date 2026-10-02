@@ -1231,7 +1231,9 @@
       "failedDescription": "A leitura do conteúdo falhou antes de o documento entrar na lista. Tente de novo ou confira o endereço ou o arquivo.",
       "reference": "Referência: {runId}",
       "retry": "Tentar de novo",
-      "retryNamed": "Tentar indexar {name} de novo"
+      "retryNamed": "Tentar indexar {name} de novo",
+      "noDocumentTitle": "{name} não gerou um documento",
+      "noDocumentDescription": "A indexação terminou, mas nenhum documento novo apareceu na lista. O conteúdo pode estar vazio ou não ter sido lido. Tente de novo ou envie outro arquivo."
     },
     "add": {
       "title": "Adicionar documento",

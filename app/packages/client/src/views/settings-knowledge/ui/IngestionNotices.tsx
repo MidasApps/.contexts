@@ -28,7 +28,14 @@ export type IngestionNoticesProps = {
 
 type NoticeProps = Omit<IngestionNoticesProps, "runs"> & { readonly run: StartedKnowledgeIngestion };
 
-function FailedNotice({ organizationId, run, onDismiss, onRestarted }: Omit<NoticeProps, "followRuns">) {
+/**
+ * `failed`: the run failed before registering a document. `noDocument`: the run ended as a success
+ * but no document is listed: the workflow stops early with a success (a file it cannot read, empty
+ * content), so the run alone does not say a document exists (follow-up 91).
+ */
+type Outcome = "failed" | "noDocument";
+
+function FailedNotice({ organizationId, run, outcome, onDismiss, onRestarted }: Omit<NoticeProps, "followRuns"> & { readonly outcome: Outcome }) {
   const t = useTranslations("settings.knowledge.indexing");
   const callEndpoint = useCallEndpoint();
   const [pending, setPending] = useState(false);
@@ -49,9 +56,9 @@ function FailedNotice({ organizationId, run, onDismiss, onRestarted }: Omit<Noti
   };
   return (
     <Alert variant="destructive" aria-labelledby={titleId}>
-      <AlertTitle id={titleId}>{t("failedTitle", { name: run.label })}</AlertTitle>
+      <AlertTitle id={titleId}>{t(outcome === "failed" ? "failedTitle" : "noDocumentTitle", { name: run.label })}</AlertTitle>
       <AlertDescription className="text-inherit">
-        <p>{t("failedDescription")}</p>
+        <p>{t(outcome === "failed" ? "failedDescription" : "noDocumentDescription")}</p>
         <span className="block font-mono text-caption">{t("reference", { runId: run.runId })}</span>
         {retryError === null ? null : <ApiErrorAlert error={retryError} />}
         <span className="mt-2 flex flex-wrap gap-2">
@@ -74,12 +81,19 @@ function IngestionNotice({ organizationId, run, followRuns, onDismiss, onRestart
   const followed = useTenantWorkflowRun(organizationId, run.runId, { enabled: followRuns });
   const status = followed.data?.status;
   const finished = status === "success";
+  // Set once the list was read again after the run ended; the notice is still here, so no document is.
+  const [reread, setReread] = useState(false);
   useEffect(() => {
     if (!finished) return;
-    // The workflow registered the document: list it, then the notice has nothing left to say.
-    void queryClient.invalidateQueries({ queryKey: knowledgeKeys.all(organizationId) }).then(() => onDismiss(run.runId));
-  }, [finished, queryClient, organizationId, onDismiss, run.runId]);
-  if (status !== undefined && FAILED.has(status)) return <FailedNotice organizationId={organizationId} run={run} onDismiss={onDismiss} onRestarted={onRestarted} />;
+    // List the document the workflow registered; once it is listed the page drops this notice.
+    let active = true;
+    void queryClient.invalidateQueries({ queryKey: knowledgeKeys.all(organizationId) }).then(() => active && setReread(true));
+    return () => {
+      active = false;
+    };
+  }, [finished, queryClient, organizationId]);
+  if (status !== undefined && FAILED.has(status)) return <FailedNotice organizationId={organizationId} run={run} outcome="failed" onDismiss={onDismiss} onRestarted={onRestarted} />;
+  if (finished && reread) return <FailedNotice organizationId={organizationId} run={run} outcome="noDocument" onDismiss={onDismiss} onRestarted={onRestarted} />;
   if (finished) return null;
   return (
     <Alert variant="info" role="status">
@@ -97,7 +111,8 @@ function IngestionNotice({ organizationId, run, followRuns, onDismiss, onRestart
  * The ingestions started on this page whose document is not listed yet. Each one follows its
  * workflow run (`GET /v1/workflows/runs/{runId}`): a run that fails before registering a document
  * shows the failure with the run id as reference and can be started again or dismissed; a run that
- * succeeds refreshes the list and drops its notice. Without the run permission the notice stays
+ * succeeds refreshes the list, which drops the notice once the document is listed, and says so
+ * (with the same reference, retry and dismiss) when the run ended without one. Without the run permission the notice stays
  * until the document appears or the user dismisses it.
  */
 export function IngestionNotices({ runs, ...rest }: IngestionNoticesProps) {
