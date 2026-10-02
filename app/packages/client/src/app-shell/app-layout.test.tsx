@@ -1,5 +1,5 @@
 import { act, screen, waitFor, within } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { IMPERSONATION_STORAGE_KEY, useImpersonationStore } from "#/features/admin-impersonation/index.ts";
 import { createFakeAuth } from "#/shared/lib/auth/fake-auth.ts";
 import { storedImpersonation } from "#/shared/testing/admin-accounts-fixtures.ts";
@@ -68,9 +68,10 @@ describe("AppLayout", () => {
     expect(
       await screen.findByText(/Você está vendo o app como Ana Souza em Northwind, em modo somente leitura, até /u),
     ).toBeDefined();
-    const banner = container.querySelector("[data-slot='impersonation-banner']");
-    expect(banner?.className.split(" ")).toContain("sticky");
-    expect(banner?.className).toContain("top-14");
+    // The banner strip (measured for full-height pages) stays pinned under the topbar.
+    const strip = container.querySelector("[data-slot='impersonation-banner']")?.closest("[data-slot='shell-banners']");
+    expect(strip?.className.split(" ")).toContain("sticky");
+    expect(strip?.className).toContain("top-14");
     act(() => useImpersonationStore.getState().reset());
     globalThis.sessionStorage.clear();
   });
@@ -95,6 +96,17 @@ describe("AppLayout", () => {
     await user.click(await screen.findByRole("button", { name: "Sair do modo suporte" }));
     await waitFor(() => expect(router.current()).toBe("/sign-in"));
     expect(bridge.ended).toBe(1);
+  });
+
+  it("tells the page how tall the banners above it are, so full-height pages fit the viewport", async () => {
+    // jsdom lays nothing out: every element reports the banners' height here.
+    vi.spyOn(HTMLElement.prototype, "offsetHeight", "get").mockReturnValue(52);
+    const { container } = renderLayout();
+    await screen.findByRole("button", { name: "Ana Souza, menu da conta" });
+    const content = container.querySelector<HTMLElement>("[data-slot='shell-content']");
+    expect(content?.style.getPropertyValue("--shell-banners-height")).toBe("52px");
+    expect(content?.querySelector("[data-slot='shell-banners'] [data-slot='offline-banner']")).not.toBeNull();
+    vi.restoreAllMocks();
   });
 
   it("shows no impersonation notice in a normal session", async () => {

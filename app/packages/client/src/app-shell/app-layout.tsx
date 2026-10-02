@@ -1,7 +1,8 @@
 "use client";
 
-import { type ReactNode, useState } from "react";
+import { useState, type CSSProperties, type ReactNode } from "react";
 import { useTranslations } from "use-intl";
+import { useElementHeight } from "#/shared/lib/media/use-element-height.ts";
 import { BREAKPOINTS, useMediaQuery } from "#/shared/lib/media/use-media-query.ts";
 import { useShellSlots } from "#/shared/lib/shell/shell-registry-context.tsx";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
@@ -42,6 +43,8 @@ export function AppLayout({ children, sidebarDefaultOpen, persistSidebarState }:
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [panelOpen, setPanelOpen] = useState(false);
   const compactPanel = useMediaQuery(`(max-width: ${BREAKPOINTS.lg - 1}px)`);
+  // Full-height pages (the chat) subtract the banners from the viewport: `--shell-banners-height`.
+  const [bannersRef, bannersHeight] = useElementHeight<HTMLDivElement>();
   // The registries are built once per app, so this is the same hook on every render.
   const { rightPanel: RightPanel, useRightPanelAvailable = alwaysAvailable } = useShellSlots();
   const panelAvailable = useRightPanelAvailable() && RightPanel !== undefined;
@@ -86,9 +89,14 @@ export function AppLayout({ children, sidebarDefaultOpen, persistSidebarState }:
         {...(sidebarDefaultOpen === undefined ? {} : { sidebarDefaultOpen })}
         {...(persistSidebarState === undefined ? {} : { persistSidebarState })}
       >
-        <OfflineBanner className="mb-4 empty:mb-0" />
-        <ImpersonationBanner className="sticky top-14 z-10 mb-4 empty:mb-0" />
-        {children}
+        <div data-slot="shell-content" style={{ "--shell-banners-height": `${bannersHeight}px` } as CSSProperties}>
+          {/* flow-root keeps the banners' margins inside the measured box; support mode stays pinned. */}
+          <div ref={bannersRef} data-slot="shell-banners" className="sticky top-14 z-10 flow-root">
+            <OfflineBanner className="mb-4 empty:mb-0" />
+            <ImpersonationBanner className="mb-4 empty:mb-0" />
+          </div>
+          {children}
+        </div>
       </AppShellTemplate>
       <CommandPalette open={paletteOpen} onOpenChange={setPaletteOpen} />
     </>

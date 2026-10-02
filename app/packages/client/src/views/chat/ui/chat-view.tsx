@@ -60,9 +60,10 @@ function ChatWorkspace({ place }: { place: ChatPlace }) {
   );
 
   return (
+    // Viewport minus the topbar, the main padding and the shell banners (offline, support access).
     <div
       data-slot="chat-view"
-      className="flex h-[calc(100svh-3.5rem-3rem)] min-h-[420px] flex-col lg:h-[calc(100svh-3.5rem-4rem)]"
+      className="flex h-[calc(100svh_-_6.5rem_-_var(--shell-banners-height,0px))] min-h-[420px] flex-col lg:h-[calc(100svh_-_7.5rem_-_var(--shell-banners-height,0px))]"
     >
       <div className="mb-3 flex shrink-0 items-center justify-between gap-2">
         <h1 className="text-xl font-semibold tracking-tight">{t("title")}</h1>
