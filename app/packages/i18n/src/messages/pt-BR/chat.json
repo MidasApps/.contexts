@@ -119,7 +119,9 @@
     "formSubmitted": "Formulário enviado: {command}",
     "choiceSubmitted": "Escolha enviada: {choice}",
     "incomplete": "Incompleta",
-    "incompleteHint": "A resposta parou por um erro; o texto acima pode estar incompleto."
+    "incompleteHint": "A resposta parou por um erro; o texto acima pode estar incompleto.",
+    "openAttachment": "Abrir {name}",
+    "openAttachmentFailed": "Não foi possível abrir {name}."
   },
   "error": {
     "title": "Não foi possível responder",

@@ -1,7 +1,7 @@
 import { ConversationContract } from "@core/contracts";
 import { act, fireEvent, screen, waitFor, within } from "@testing-library/react";
 import type { UIMessage } from "ai";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { createFakeTransfers, routeFilesApi, storedFile } from "#/features/chat-upload/testing/fake-upload.ts";
 import { expectNoAxeViolations } from "#/shared/testing/axe.ts";
 import { createFakeApi, ok, page, type FakeApi } from "#/shared/testing/fake-api.ts";
@@ -84,8 +84,16 @@ describe("ChatPanel uploads", () => {
     expect(stream.messages.at(-1)).toMatchObject({ role: "user", metadata: { attachments: [{ fileId: FILE_A, name: "diagram.png", mediaType: "image/png", sizeBytes: 5 }] } });
     // The chip left the composer and the sent message lists the file.
     expect(screen.queryByRole("list", { name: "Anexos da mensagem" })).toBeNull();
-    expect(within(screen.getByRole("list", { name: "Anexos" })).getByText("diagram.png")).toBeTruthy();
+    const sentFiles = screen.getByRole("list", { name: "Anexos" });
+    expect(within(sentFiles).getByText("diagram.png")).toBeTruthy();
+    expect(within(sentFiles).getByText("5 bytes")).toBeTruthy();
     expect(field().value).toBe("");
+    // A sent file opens through a short-lived read URL, fetched only when asked.
+    api.route(`GET /v1/files/${FILE_A}/read-url`, ok({ url: "https://storage.test/diagram.png?sig=1", expiresAt: "2026-10-01T12:05:00.000Z" }));
+    const open = vi.spyOn(window, "open").mockReturnValue(null);
+    await user.click(within(sentFiles).getByRole("button", { name: "Abrir diagram.png" }));
+    await waitFor(() => expect(open).toHaveBeenCalledWith("https://storage.test/diagram.png?sig=1", "_blank", "noopener,noreferrer"));
+    open.mockRestore();
   });
 
   it("says why the server rejected a file and never sends it", async () => {

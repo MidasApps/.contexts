@@ -3,7 +3,8 @@
 import type { UIMessage } from "ai";
 import { ClipboardCheckIcon, ShieldAlertIcon } from "lucide-react";
 import type { ReactNode } from "react";
-import { useTranslations } from "use-intl";
+import { useFormatter, useTranslations } from "use-intl";
+import { formatFileSize } from "#/shared/lib/format/file-size.ts";
 import { useAgentLabel, useCommandLabel, useToolLabel } from "#/shared/lib/labels/use-catalog-labels.ts";
 import { Agent, AgentContent, AgentHeader, AgentSection } from "#/shared/ui/ai/agent.tsx";
 import { Attachment, Attachments } from "#/shared/ui/ai/attachments.tsx";
@@ -25,6 +26,7 @@ import {
   toolPreviewOf,
   tripwireOf,
   type ApprovalRequestView,
+  type AttachmentView,
   type DelegationView,
   type LoosePart,
   type SourceView,
@@ -59,6 +61,8 @@ export type MessagePartsProps = {
   /** `false` hides reasoning (a tenant may disable it, SP4 spec §5.1). */
   showReasoning?: boolean | undefined;
   renderTool?: RenderToolPart | undefined;
+  /** A control for one sent attachment (open it); the host knows how to read files. */
+  attachmentAction?: ((file: AttachmentView) => ReactNode) | undefined;
 };
 
 const KNOWN_AGENTS = new Set(["knowledge", "data", "action", "web"]);
@@ -178,8 +182,9 @@ const indexParts = (message: UIMessage, parts: readonly LoosePart[]): Lookup => 
  * citations, reasoning and tool calls collapsed, delegation as an agent card, a tripwire as an
  * alert, and the sources the text cites. Parts it does not know render nothing.
  */
-export function MessageParts({ message, streaming = false, showReasoning = true, renderTool }: MessagePartsProps) {
+export function MessageParts({ message, streaming = false, showReasoning = true, renderTool, attachmentAction }: MessagePartsProps) {
   const t = useTranslations("chat");
+  const format = useFormatter();
   const parts = partsOf(message);
   const lookup = indexParts(message, parts);
   const lastIndex = parts.length - 1;
@@ -228,7 +233,13 @@ export function MessageParts({ message, streaming = false, showReasoning = true,
       {attachments.length === 0 ? null : (
         <Attachments label={t("message.attachments")}>
           {attachments.map((file) => (
-            <Attachment key={file.fileId} name={file.name} mediaType={file.mediaType} />
+            <Attachment
+              key={file.fileId}
+              name={file.name}
+              mediaType={file.mediaType}
+              detail={file.sizeBytes === undefined ? undefined : formatFileSize(file.sizeBytes, format.number)}
+              action={attachmentAction?.(file)}
+            />
           ))}
         </Attachments>
       )}

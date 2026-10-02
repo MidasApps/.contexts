@@ -119,7 +119,9 @@
     "formSubmitted": "Form submitted: {command}",
     "choiceSubmitted": "Choice sent: {choice}",
     "incomplete": "Incomplete",
-    "incompleteHint": "The answer stopped on an error; the text above may be incomplete."
+    "incompleteHint": "The answer stopped on an error; the text above may be incomplete.",
+    "openAttachment": "Open {name}",
+    "openAttachmentFailed": "Could not open {name}."
   },
   "error": {
     "title": "Could not answer",

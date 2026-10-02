@@ -22,6 +22,7 @@ import { useChatVoice } from "../model/use-chat-voice.ts";
 import { useOlderMessages } from "../model/use-older-messages.ts";
 import { ChatComposer } from "./chat-composer.tsx";
 import { createCoreToolRenderer } from "./chat-tool-part.tsx";
+import { OpenAttachment } from "./open-attachment.tsx";
 import { StatusLine } from "./status-line.tsx";
 
 /** A quick-start card of the empty conversation (chat.html §23.1). */
@@ -209,6 +210,7 @@ export function ChatThread(props: ChatThreadProps) {
                   showReasoning={props.showReasoning}
                   assistantName={props.assistantName}
                   renderTool={renderTool}
+                  attachmentAction={(file) => <OpenAttachment file={file} />}
                   actions={
                     message.role === "assistant" && settled ? (
                       <AnswerActions message={message} canRegenerate={last && phase !== "awaiting-approval"} onRegenerate={session.regenerate} speech={speechFor(message.id)} />

@@ -6,7 +6,7 @@ import { useTranslations } from "use-intl";
 import { Message, MessageContent } from "#/shared/ui/ai/message.tsx";
 import { StatusPill } from "#/shared/ui/molecules/StatusPill/StatusPill.tsx";
 import { isLowConfidence } from "../lib/part-guards.ts";
-import { MessageParts, type RenderToolPart } from "./message-parts.tsx";
+import { MessageParts, type MessagePartsProps, type RenderToolPart } from "./message-parts.tsx";
 
 export type ChatMessageProps = {
   message: UIMessage;
@@ -18,6 +18,8 @@ export type ChatMessageProps = {
   incomplete?: boolean | undefined;
   showReasoning?: boolean | undefined;
   renderTool?: RenderToolPart | undefined;
+  /** A control for each sent attachment (`MessageParts`). */
+  attachmentAction?: MessagePartsProps["attachmentAction"];
   /** Actions under an assistant message (copy, regenerate). */
   actions?: ReactNode;
   /** Who answers (an organization's agent, decision 0046); the assistant by default. */
@@ -29,7 +31,7 @@ export type ChatMessageProps = {
  * citation guard found no source (SP3), "interrompido" when it was cut short. Both are words
  * with an icon or dot, never colour alone.
  */
-export function ChatMessage({ message, streaming = false, interrupted = false, incomplete = false, showReasoning, renderTool, actions, assistantName }: ChatMessageProps) {
+export function ChatMessage({ message, streaming = false, interrupted = false, incomplete = false, showReasoning, renderTool, attachmentAction, actions, assistantName }: ChatMessageProps) {
   const t = useTranslations("chat.message");
   const from = message.role === "user" ? "user" : "assistant";
   // Shown as soon as the stream says so (the knowledge delegation ends before the answer text).
@@ -37,7 +39,7 @@ export function ChatMessage({ message, streaming = false, interrupted = false, i
   return (
     <Message from={from} author={from === "user" ? t("you") : (assistantName ?? t("assistant"))} data-message-id={message.id}>
       <MessageContent>
-        <MessageParts message={message} streaming={streaming} showReasoning={showReasoning} renderTool={renderTool} />
+        <MessageParts message={message} streaming={streaming} showReasoning={showReasoning} renderTool={renderTool} attachmentAction={attachmentAction} />
       </MessageContent>
       {lowConfidence || interrupted || incomplete ? (
         <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[12.5px] text-muted-foreground">
