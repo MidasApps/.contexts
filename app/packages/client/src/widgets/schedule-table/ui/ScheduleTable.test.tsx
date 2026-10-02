@@ -30,6 +30,23 @@ const useMobileViewport = (): void => {
 };
 
 describe("ScheduleTable", () => {
+  it("shows the next fire in the schedule's zone, and in the viewer's zone only when they differ", () => {
+    const tokyo = { ...ROW, timezone: "Asia/Tokyo" };
+    const view = renderWithProviders(
+      <ScheduleTable caption="Agendamentos" schedules={[tokyo]} canManage pendingId={null} onPause={vi.fn()} onResume={vi.fn()} onRunNow={vi.fn()} empty={<p>vazio</p>} />,
+      { timeZone: "America/Sao_Paulo" },
+    );
+    const row = screen.getAllByRole("row")[1]!;
+    expect(within(row).getByText("5 de out. de 2026, 21:00 (Asia/Tokyo)")).toBeDefined();
+    expect(within(row).getByText("5 de out. de 2026, 09:00 no seu fuso (America/Sao_Paulo)")).toBeDefined();
+    view.unmount();
+    renderWithProviders(
+      <ScheduleTable caption="Agendamentos" schedules={[ROW]} canManage pendingId={null} onPause={vi.fn()} onResume={vi.fn()} onRunNow={vi.fn()} empty={<p>vazio</p>} />,
+      { timeZone: "America/Sao_Paulo" },
+    );
+    expect(within(screen.getAllByRole("row")[1]!).queryByText(/no seu fuso/u)).toBeNull();
+  });
+
   it("names the workflow and the schedule's slug instead of their ids", () => {
     renderTable();
     const row = screen.getAllByRole("row")[1]!;
