@@ -13,6 +13,7 @@ import { EmptyState } from "#/shared/ui/molecules/EmptyState/EmptyState.tsx";
 import { ApiErrorState } from "#/shared/ui/molecules/ErrorState/ApiErrorState.tsx";
 import { LoadingState } from "#/shared/ui/molecules/LoadingState/LoadingState.tsx";
 import { Popover, PopoverContent, PopoverTrigger } from "#/shared/ui/molecules/Popover/Popover.tsx";
+import { useSidebar } from "#/shared/ui/organisms/Sidebar/sidebar-context.tsx";
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "#/shared/ui/organisms/Sidebar/sidebar-menu.tsx";
 import { TreeView } from "#/shared/ui/organisms/TreeView/TreeView.tsx";
 import { withUnit } from "../model/unit-route.ts";
@@ -48,6 +49,8 @@ function UnitTreeBody({ query, projectName, selectedId, onSelect }: { query: Tre
 export function UnitPicker() {
   const t = useTranslations("shell.units");
   const router = useRouter();
+  // Inside the phone sheet there is no room to the right: open below, like the other switchers.
+  const { isMobile } = useSidebar();
   const params = router.useRouteParams();
   const routeId = parseRoute(router.useLocationPath())?.id;
   const node = useCurrentNode();
@@ -77,7 +80,7 @@ export function UnitPicker() {
               <Icon name="chevron-down" className="ml-auto" />
             </SidebarMenuButton>
           </PopoverTrigger>
-          <PopoverContent side="right" align="start" className="w-80 p-3" aria-label={t("pickerTitle")}>
+          <PopoverContent side={isMobile ? "bottom" : "right"} align="start" className="w-[min(20rem,calc(100vw-2rem))] p-3" aria-label={t("pickerTitle")}>
             <p className="mb-2 px-1 text-xs font-medium text-muted-foreground">{t("pickerTitle")}</p>
             <UnitTreeBody query={tree} projectName={context.data?.project?.name ?? ""} selectedId={current?.id} onSelect={select} />
           </PopoverContent>

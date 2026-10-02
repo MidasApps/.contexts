@@ -36,6 +36,20 @@ describe("UnitPicker", () => {
     expect(within(alert).getByRole("button", { name: "Tentar novamente" })).toBeDefined();
   });
 
+  it("opens below the trigger and within the screen on phones", async () => {
+    const matchMedia = globalThis.matchMedia;
+    globalThis.matchMedia = (query: string) => ({ ...matchMedia(query), matches: query.includes("max-width") });
+    try {
+      const { user } = renderWidget(<UnitPicker />, { path: PROJECT, routes: { "GET /v1/projects/:projectId/units": page([]) } });
+      await user.click(await screen.findByRole("button", { name: "Unidade: Projeto inteiro. Escolher unidade" }));
+      const popover = await screen.findByRole("dialog", { name: "Escolha uma unidade" });
+      expect(popover.getAttribute("data-side")).toBe("bottom");
+      expect(popover.className).toContain("w-[min(20rem,calc(100vw-2rem))]");
+    } finally {
+      globalThis.matchMedia = matchMedia;
+    }
+  });
+
   it("is hidden without core.unit.read or outside a project", async () => {
     const { container } = renderWidget(<UnitPicker />, { path: PROJECT, permissions: ["core.project.read"] });
     await screen.findByRole("main");
