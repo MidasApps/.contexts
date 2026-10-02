@@ -35,6 +35,26 @@ describe("ProfileNotificationsView", () => {
     expect(bodies).toEqual([{ preferences: { notifications: { productUpdates: true } } }]);
   });
 
+  it("locks the switch while its save is in flight, so fast toggles cannot race", async () => {
+    let finish: () => void = () => undefined;
+    let calls = 0;
+    const { user } = renderView({
+      "PATCH /v1/me": () => {
+        calls += 1;
+        return new Promise((resolve) => (finish = () => resolve(ok(buildMe({ preferences: { theme: "system", notifications: { productUpdates: true, securityAlerts: true } } })))));
+      },
+    });
+    const product = await screen.findByRole("switch", { name: "Novidades do produto" });
+    await user.click(product);
+    await waitFor(() => expect(product.hasAttribute("disabled")).toBe(true));
+    expect(product.getAttribute("aria-checked")).toBe("true");
+    await user.click(product);
+    finish();
+    await waitFor(() => expect(product.hasAttribute("disabled")).toBe(false));
+    expect(calls).toBe(1);
+    expect(product.getAttribute("aria-checked")).toBe("true");
+  });
+
   it("reverts the switch and explains when the save fails", async () => {
     const { user } = renderView({ "PATCH /v1/me": apiError(503, "INTERNAL_ERROR") });
     const product = await screen.findByRole("switch", { name: "Novidades do produto" });

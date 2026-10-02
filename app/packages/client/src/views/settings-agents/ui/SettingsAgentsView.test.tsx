@@ -162,6 +162,18 @@ describe("SettingsAgentsView", { timeout: 30_000 }, () => {
     await waitFor(() => expect(screen.getByRole("switch", { name: "Ativar Action" }).getAttribute("aria-checked")).toBe("true"));
   });
 
+  it("locks every agent switch while one change is saving, so a rollback cannot undo another", async () => {
+    let finish: () => void = () => undefined;
+    const { user } = renderView(ADMIN, {
+      "PATCH /v1/agent-settings": () => new Promise((resolve) => (finish = () => resolve(ok(settings({ enabledAgents: ["knowledge", "action"] }))))),
+    });
+    await user.click(await screen.findByRole("switch", { name: "Ativar Action" }));
+    await waitFor(() => expect(screen.getByRole("switch", { name: "Ativar Notes" }).hasAttribute("disabled")).toBe(true));
+    expect(screen.getByRole("switch", { name: "Ativar Action" }).hasAttribute("disabled")).toBe(true);
+    finish();
+    await waitFor(() => expect(screen.getByRole("switch", { name: "Ativar Notes" }).hasAttribute("disabled")).toBe(false));
+  });
+
   it("shows why a change was refused and puts the switch back", async () => {
     const { user } = renderView(ADMIN, { "PATCH /v1/agent-settings": apiError(403, "FORBIDDEN") });
     await user.click(await screen.findByRole("switch", { name: "Ativar Action" }));

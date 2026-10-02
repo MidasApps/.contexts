@@ -42,7 +42,8 @@ export function NotificationPreferencesForm({ me }: { me: Me }) {
           <FieldDescription>{t("productUpdates.description")}</FieldDescription>
         </FieldContent>
         <FieldControl>
-          <Switch checked={productUpdates} onCheckedChange={toggle} aria-busy={pending || undefined} />
+          {/* Locked while saving: overlapping PATCHes could settle out of order (and toast twice). */}
+          <Switch checked={productUpdates} onCheckedChange={toggle} disabled={pending} aria-busy={pending || undefined} />
         </FieldControl>
       </Field>
       <Field orientation="horizontal" className="p-4" data-disabled="true">

@@ -50,6 +50,18 @@ export function ConversationActionsMenu({ organizationId, conversation, onRename
     },
   );
 
+  // Pin and archive are locked until their change and the list refresh settle: until then the
+  // row still shows the old label, and a second activation would flip it back.
+  const [toggling, setToggling] = useState(false);
+  const toggle = async (change: (conversation: Conversation) => Promise<void>): Promise<void> => {
+    setToggling(true);
+    try {
+      await change(conversation);
+    } finally {
+      setToggling(false);
+    }
+  };
+
   const summarize = async () => {
     setSummary({ status: "loading" });
     try {
@@ -87,11 +99,11 @@ export function ConversationActionsMenu({ organizationId, conversation, onRename
             <PencilIcon aria-hidden="true" />
             {t("actions.rename")}
           </DropdownMenuItem>
-          <DropdownMenuItem onSelect={() => void actions.togglePin(conversation)}>
+          <DropdownMenuItem disabled={toggling} onSelect={() => void toggle(actions.togglePin)}>
             {conversation.pinned ? <PinOffIcon aria-hidden="true" /> : <PinIcon aria-hidden="true" />}
             {t(conversation.pinned ? "actions.unpin" : "actions.pin")}
           </DropdownMenuItem>
-          <DropdownMenuItem onSelect={() => void actions.toggleArchive(conversation)}>
+          <DropdownMenuItem disabled={toggling} onSelect={() => void toggle(actions.toggleArchive)}>
             {conversation.archivedAt === null ? <ArchiveIcon aria-hidden="true" /> : <ArchiveRestoreIcon aria-hidden="true" />}
             {t(conversation.archivedAt === null ? "actions.archive" : "actions.restore")}
           </DropdownMenuItem>

@@ -145,6 +145,21 @@ describe("ChatHistorySidebar", () => {
     expect(await screen.findByRole("menuitem", { name: "Desafixar" })).toBeTruthy();
   });
 
+  it("locks pin and archive of a row until its change has settled, so a second click cannot undo it", async () => {
+    const { user, openMenu, api } = setup();
+    await screen.findByRole("link", { name: "Dúvidas de faturamento" }, LOADED);
+    let finish: () => void = () => undefined;
+    api.route("PATCH /v1/conversations/:conversationId", () => new Promise((resolve) => (finish = () => resolve(ok(buildConversation(B, { title: "Dúvidas de faturamento", pinned: true }))))));
+    await openMenu("Dúvidas de faturamento");
+    await user.click(await screen.findByRole("menuitem", { name: "Fixar" }));
+    await openMenu("Dúvidas de faturamento");
+    expect((await screen.findByRole("menuitem", { name: "Fixar" })).getAttribute("aria-disabled")).toBe("true");
+    expect(screen.getByRole("menuitem", { name: "Arquivar" }).getAttribute("aria-disabled")).toBe("true");
+    await user.keyboard("{Escape}");
+    finish();
+    expect(api.calls.filter((call) => call.method === "PATCH")).toHaveLength(1);
+  });
+
   it("archives a conversation out of the list and shows it under the archived filter, where it can be restored", async () => {
     const { user, openMenu, titles } = setup();
     await openMenu("Plano de integração");
