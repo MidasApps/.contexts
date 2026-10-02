@@ -25,7 +25,9 @@ is Task 17 and is not part of this gate run.
 | `afc706a3` | `fix(workflows): name the member who started a run` |
 | `5b8f66fc` | `fix(identity): stop 404s while the tab changes account` |
 | `4060c4f0` | `test(admin): add the admin and settings console e2e journeys` |
-| (this commit) | `docs(admin): report the sp5 gate` |
+| `31170c64` | `docs(admin): report the sp5 gate` |
+| `af9f4444` | `fix(admin): ask for a valid usage range instead of sending it` |
+| (this commit) | `docs(admin): record the final sp5 gate runs` |
 
 ## Gate criteria → evidence
 
@@ -41,29 +43,34 @@ is Task 17 and is not part of this gate run.
 | Clean browser console | Every journey has an automatic console guard (errors, warnings, uncaught exceptions). Allowances, each scoped to one test and commented: `Failed to load resource` where the test makes a request fail on purpose (forced 500s for error states, the 422 of an agent without an eval set, the 422 of a too-frequent cron), and the Auth Emulator's 501 for the reCAPTCHA Enterprise config during the SMS sign-in of the support-access test. The e2e web is a production build, so React development warnings are covered by the component tests, not here. | PASS |
 | Loading, empty and error states | Loading/error/retry with `page.route` on overview, organizations, costs and usage; empty states on organizations (no match), users, traces, workflows, schedules, connectors, knowledge, logs, evals. | PASS |
 
-## Verification (final tree `4060c4f0`, rebased on `f17ff7a3`; local e2e ports only differ)
+## Verification (final tree `af9f4444`, rebased on `f17ff7a3`; local e2e ports only differ)
 
 The e2e stack used private ports (web 3110, Mastra 4291, emulators 9591–9594/5591/4691/4791) and
 database `app_e2e_sp5`, set locally in `firebase.e2e.json` and `E2E_DATABASE_NAME`, not committed.
 
 ```
-e2e, two consecutive runs, fresh emulators each (scripts/e2e.ts), workers=1:
-  run B: node scripts/e2e.ts -- pnpm exec turbo run test:e2e --filter=@core/web -- --project=setup
-         --project=console --project=chromium --workers=1 e2e/admin e2e/settings-
-         → 58 passed (4.3m)   (turbo then hung at exit; see follow-up 87)
-  run C: node scripts/e2e.ts -- node apps/web/node_modules/@playwright/test/cli.js test
-         -c apps/web/playwright.config.ts (same projects and files) → 58 passed (4.2m), exit 0
+e2e on the final tree af9f4444, two consecutive runs, fresh emulators each, workers=1:
+  node scripts/e2e.ts -- node apps/web/node_modules/@playwright/test/cli.js test
+    -c apps/web/playwright.config.ts --project=setup --project=console --project=chromium
+    --workers=1 e2e/admin e2e/settings-
+  run G → 58 passed (4.3m), exit 0
+  run H → 58 passed (4.3m), exit 0
+  (earlier, on 942258f1 before the last rebase: run B through `pnpm exec turbo run test:e2e`
+   → 58 passed, then turbo hung at exit, follow-up 87; run C → 58 passed. Runs D and E on the
+   rebased tree each failed the costs journey once: a 400 into the console from a transient
+   usage range, fixed in af9f4444.)
   58 = setup 5 + admin.spec.ts on chromium 6 + console 47 (7 admin-* and 7 settings-* spec files)
 pnpm test:emulators → services 41 files/209, functions 3/9, agents 1/6, scripts 1/2,
                       module-example 1/3, mastra 9/41; Tasks 6/6; 7m12s; exit 0
 pnpm test:postgres  → services 9 files/47, agents 7/27; Tasks 2/2
 unit: contracts 37/424 · services 138/957 · agents 82 (+1 skipped)/612 (+1 skipped) ·
-      mastra 14/66 · web 11/77 · client (--maxWorkers=4) 229/1146 — all passed
+      mastra 14/66 · web 11/77 · client (--maxWorkers=4) 229/1147 (rerun after af9f4444) — all passed
 pnpm typecheck → 13/13 · pnpm lint → 13/13
 pnpm contracts:check → ok (148 contracts, 165 endpoints, 299 files)
 pnpm i18n:check → ok (10 namespaces, 30 catalogs)
 AI_MODE=fake pnpm evals → 7 files, 7 tests passed
-web next build → exit 0, no "Ecmascript file had an error" and no warning lines
+web next build → exit 0, no "Ecmascript file had an error" and no warning lines (dev env on
+  4060c4f0 and e2e env on af9f4444)
 mastra build → exit 0 (audit: no high/critical) · functions build → exit 0
 git diff --quiet main -- .contexts .claude → framework-ok
 ```
@@ -95,13 +102,20 @@ dispatching Functions triggers (follow-up 88).
 5. Workflow runs and run page showed the starter's raw user id — `afc706a3`.
 6. Support access: after leaving, the still-mounted user area refetched the user's organization as staff (404s), and admin links prefetched during a session exchange answered 404 into the console and the router cache — `5b8f66fc` (leave loads a new document; `/admin` links are never prefetched).
 7. e2e stack crash: the Storage Emulator's blob folder is shared through the OS temp dir by every emulator suite on the machine — `1ba20e99`.
-8. (Harness) the original `admin.spec.ts` "opens an admin area" lost its slot assertion; it now checks the users page's search section.
+8. `/admin/costs`: choosing a start day before the end day sent a range of more than 92 days (the
+   end defaults to today) and the API answered 400 into the console — `af9f4444` (the page explains
+   the limit and waits for a valid range; red→green component test).
+9. (Harness) the original `admin.spec.ts` "opens an admin area" lost its slot assertion; it now checks the users page's search section.
 
 ## Open (follow-ups 82–92 in `docs/plans/2026-09-29-sp0-app-foundation/follow-ups.md`)
 
 82 cancelling a suspended run leaves its approval request pending · 83 fake models have no price (cost US$ 0 offline) · 84 `_ok` log messages on 4xx · 85 flag descriptions in English on pt-BR pages · 86 prompt editor empty without a seeded version · 87 `turbo run test:e2e` hangs at exit on Windows · 88 Functions emulator stops dispatching in a long-lived stack · 89 organization picker options off-viewport · 90 automatic schedule fire not shown in the browser · 91 a knowledge run that succeeds without a document drops its notice · 92 `/admin` while impersonating has no redirect. Rows 49 and 60 are marked done.
 
 ## Notes
+
+- The plan's Task 16 asked for an axe scan on each admin page. The specs do not call axe: every
+  admin and settings view has `expectNoAxeViolations` in its component tests, and `a11y.spec.ts`
+  (SP2) scans the shell pages in the browser. A browser axe pass over the SP5 pages is not done.
 
 - Work ran in a scratch worktree with forks: emulator reliability (items 2, 3, 7), tool-id validation and the knowledge notice (items 6, 5), impersonation (item 1), admin specs, settings specs (this fork stopped at the session limit; its specs were finished by the coordinator).
 - Console journeys run once, on chromium, in a `console` Playwright project, like the SP4 chat journeys; the four-browser matrix keeps the SP2 specs.
