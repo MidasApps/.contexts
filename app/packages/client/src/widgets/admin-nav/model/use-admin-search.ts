@@ -1,22 +1,9 @@
 "use client";
 
-import { useEffect, useRef } from "react";
 import { useRouter } from "#/shared/lib/router/router-context.tsx";
+import { useRouteSearch, type RouteSearch } from "#/shared/lib/router/use-route-search.ts";
 
-export type AdminSearch<K extends string> = {
-  /** Current value of each filter; `undefined` when absent from the URL. */
-  readonly values: Readonly<Record<K, string | undefined>>;
-  /** 1-based page of a numbered list (`?page=`), 1 when absent or invalid. */
-  readonly page: number;
-  /**
-   * Writes filters into the URL (replace, so "back" leaves the page). `undefined` or "" removes a
-   * filter. Changing a filter returns to the first page.
-   */
-  readonly set: (patch: Partial<Record<K, string | undefined>>) => void;
-  readonly setPage: (page: number) => void;
-};
-
-const PAGE = "page";
+export type AdminSearch<K extends string> = RouteSearch<K>;
 
 /**
  * Filters and paging of an `/admin` page kept in the query string (SP5: a filtered list is a link
@@ -24,42 +11,8 @@ const PAGE = "page";
  * @example const search = useAdminSearch(["status", "organizationId"]); search.set({ status: "error" });
  */
 export const useAdminSearch = <K extends string>(keys: readonly K[]): AdminSearch<K> => {
-  const router = useRouter();
-  const rest = router.useRouteParams()["rest"] ?? "";
-  const search = router.useSearch();
-  const params = new URLSearchParams(search);
-  // The query written last, until the URL shows it: two writes before a re-render (two date fields
-  // changed in a row) must build on each other, not both on the URL of the last render.
-  const pending = useRef<string | null>(null);
-  useEffect(() => {
-    pending.current = null;
-  }, [search]);
-  const base = (): URLSearchParams => new URLSearchParams(pending.current ?? search);
-  const values = Object.fromEntries(keys.map((key) => [key, params.get(key) ?? undefined])) as Record<K, string | undefined>;
-  const parsedPage = Number.parseInt(params.get(PAGE) ?? "1", 10);
-  const write = (next: URLSearchParams): void => {
-    pending.current = next.toString();
-    router.navigate({ id: "admin", rest, search: Object.fromEntries(next) }, { replace: true });
-  };
-  return {
-    values,
-    page: Number.isInteger(parsedPage) && parsedPage >= 1 ? parsedPage : 1,
-    set: (patch) => {
-      const next = base();
-      for (const [key, value] of Object.entries<string | undefined>(patch)) {
-        if (value === undefined || value === "") next.delete(key);
-        else next.set(key, value);
-      }
-      next.delete(PAGE);
-      write(next);
-    },
-    setPage: (page) => {
-      const next = base();
-      if (page <= 1) next.delete(PAGE);
-      else next.set(PAGE, String(page));
-      write(next);
-    },
-  };
+  const rest = useRouter().useRouteParams()["rest"] ?? "";
+  return useRouteSearch(keys, (search) => ({ id: "admin", rest, search }));
 };
 
 /** `DataTable` paging for lists paged by number (`page`/`perPage` + `meta.hasMore`, decision 0040). */

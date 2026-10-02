@@ -16,13 +16,13 @@ const FAILED = buildTraceSummary({ traceId: OBS_IDS.otherTrace, name: "workflow 
 
 const plain = (text: string | null): string => (text ?? "").replace(/\s/gu, " ");
 
-const renderView = (routes: FakeRoutes = {}, options: { permissions?: readonly Permission[]; rest?: string } = {}) =>
+const renderView = (routes: FakeRoutes = {}, options: { permissions?: readonly Permission[]; rest?: string; search?: string } = {}) =>
   renderApp(
     <main>
       <SettingsTracesView />
     </main>,
     {
-      path: `/o/${IDS.organization}/settings/traces${options.rest === undefined ? "" : `/${options.rest}`}`,
+      path: `/o/${IDS.organization}/settings/traces${options.rest === undefined ? "" : `/${options.rest}`}${options.search ?? ""}`,
       routes: shellRoutes(options.permissions ?? READER, { "GET /v1/traces": numberedPage([OK, FAILED]), ...routes }),
     },
   );
@@ -91,6 +91,16 @@ describe("SettingsTracesView", () => {
     await screen.findByRole("table", { name: "Rastros de Northwind" });
     await user.click(within(screen.getByRole("navigation", { name: "Páginas de rastros" })).getByRole("button", { name: /Próxima/u }));
     await waitFor(() => expect(listQueries(api).at(-1)?.get("page")).toBe("1"));
+  });
+
+  it("keeps the status filter and the page in the URL, so a reload or a shared link opens the same list", async () => {
+    const { user, api, router } = renderView({ "GET /v1/traces": numberedPage([OK], true) }, { search: "?status=error&page=2" });
+    await screen.findByRole("table", { name: "Rastros de Northwind" });
+    const first = listQueries(api)[0];
+    expect(first?.get("status")).toBe("error");
+    expect(first?.get("page")).toBe("1");
+    await user.click(within(screen.getByRole("navigation", { name: "Páginas de rastros" })).getByRole("button", { name: /Próxima/u }));
+    await waitFor(() => expect(router.current()).toBe(`/o/${IDS.organization}/settings/traces?status=error&page=3`));
   });
 
   it("shows an empty state without traces", async () => {

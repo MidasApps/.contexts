@@ -38,13 +38,13 @@ const ONE = "GET /v1/approval-requests/:approvalRequestId";
 const APPROVE = "POST /v1/approval-requests/:approvalRequestId/approve";
 const REJECT = "POST /v1/approval-requests/:approvalRequestId/reject";
 
-const renderView = (options: { routes?: FakeRoutes; permissions?: readonly Permission[]; rest?: string } = {}) =>
+const renderView = (options: { routes?: FakeRoutes; permissions?: readonly Permission[]; rest?: string; search?: string } = {}) =>
   renderApp(
     <main>
       <SettingsApprovalsView />
     </main>,
     {
-      path: `/o/${IDS.organization}/settings/approvals${options.rest === undefined ? "" : `/${options.rest}`}`,
+      path: `/o/${IDS.organization}/settings/approvals${options.rest === undefined ? "" : `/${options.rest}`}${options.search ?? ""}`,
       routes: shellRoutes(options.permissions ?? APPROVER, { [LIST]: page([waiting, mine, settled]), "GET /v1/me/grants": ORG_GRANT, ...options.routes }),
     },
   );
@@ -81,6 +81,15 @@ describe("SettingsApprovalsView inbox", () => {
     expect(within(history).getAllByRole("listitem")).toHaveLength(1);
     expect(within(history).getByText("Recusada")).toBeDefined();
     expect(within(history).getByText("Motivo informado: Not this month")).toBeDefined();
+  });
+
+  it("keeps the open tab in the URL, so a reload or a shared link opens the same tab", async () => {
+    const { user, router } = renderView({ search: "?tab=history" });
+    expect((await screen.findByRole("tab", { name: "Histórico" })).getAttribute("aria-selected")).toBe("true");
+    await user.click(screen.getByRole("tab", { name: "Pedidas por mim (1)" }));
+    await waitFor(() => expect(router.current()).toBe(`/o/${IDS.organization}/settings/approvals?tab=mine`));
+    await user.click(screen.getByRole("tab", { name: "Aguardando minha decisão (1)" }));
+    await waitFor(() => expect(router.current()).toBe(`/o/${IDS.organization}/settings/approvals`));
   });
 
   it("pages the history by cursor instead of reading it whole", async () => {

@@ -3,6 +3,7 @@
 import type { EvalExperimentSummary } from "@core/contracts";
 import { createContext, use, useMemo, useState } from "react";
 import { useFormatter, useTranslations } from "use-intl";
+import { useSettingsSearch } from "#/shared/lib/router/use-route-search.ts";
 import { useExperimentLabel, useTenantDatasets, useTenantExperimentPair, useTenantExperiments, type ExperimentLabel, type ExperimentPage } from "#/entities/eval-experiment/index.ts";
 import { useFormatDateTime } from "#/shared/lib/format/use-format-date-time.ts";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
@@ -158,7 +159,8 @@ function ExperimentsTable({ organization, data, paging, compare, onStart }: Expe
  */
 export function ExperimentsPanel({ organization, onStart }: { organization: Organization; onStart: (() => void) | null }) {
   const t = useTranslations("settings.evals.experiments");
-  const [page, setPage] = useState(1);
+  // The page lives in the URL (`?page=`), like the tab above it.
+  const { page, setPage } = useSettingsSearch([]);
   const compare = useCompare();
   const experiments = useTenantExperiments(organization.id, page);
   return (

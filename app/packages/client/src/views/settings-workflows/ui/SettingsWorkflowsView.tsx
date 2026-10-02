@@ -7,6 +7,7 @@ import { useAccessContext, useCurrentNode } from "#/entities/session/index.ts";
 import { useWorkflowCatalog } from "#/entities/workflow-run/index.ts";
 import { StartWorkflowRunDialog } from "#/features/start-workflow-run/index.ts";
 import { useOnlineStatus } from "#/shared/lib/network/use-online-status.ts";
+import { searchOption, useSettingsSearch } from "#/shared/lib/router/use-route-search.ts";
 import { RouteLink, useRouter } from "#/shared/lib/router/router-context.tsx";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
 import { Icon } from "#/shared/ui/atoms/Icon/Icon.tsx";
@@ -34,6 +35,9 @@ function WorkflowsHome({ context }: { context: AccessContext }) {
   const catalog = useWorkflowCatalog(organization.id, { enabled: canRead });
   const workflows = catalog.data ?? [];
   const [starting, setStarting] = useState(false);
+  // The tab lives in the URL: a reload, a shared link or "back" from a run keeps it.
+  const search = useSettingsSearch(["tab"]);
+  const tab = searchOption(search.values.tab, ["runs", "schedules"], "runs");
   const startable = workflows.some((workflow) => workflow.startable);
   const openStart = canStart && online && startable ? () => setStarting(true) : null;
   const runs = <RunsSection context={context} workflows={workflows} onStart={openStart} online={online} />;
@@ -65,7 +69,7 @@ function WorkflowsHome({ context }: { context: AccessContext }) {
           </Alert>
         ) : null}
         {canSeeSchedules ? (
-          <Tabs defaultValue="runs">
+          <Tabs value={tab} onValueChange={(value) => search.set({ tab: value === "schedules" ? "schedules" : undefined })}>
             <TabsList aria-label={t("tabsLabel")}>
               <TabsTrigger value="runs">{t("tabs.runs")}</TabsTrigger>
               <TabsTrigger value="schedules">{t("tabs.schedules")}</TabsTrigger>

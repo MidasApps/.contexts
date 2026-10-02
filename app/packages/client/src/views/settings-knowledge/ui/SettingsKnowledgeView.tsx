@@ -3,6 +3,7 @@
 import type { AccessContext, KnowledgeDocument } from "@core/contracts";
 import { useId, useMemo, useState } from "react";
 import { useTranslations } from "use-intl";
+import { useSettingsSearch } from "#/shared/lib/router/use-route-search.ts";
 import { collectionOfNamespace, namespaceOfTarget, ORGANIZATION_NAMESPACE, useKnowledgeDocuments } from "#/entities/knowledge/index.ts";
 import { useProjects } from "#/entities/project/index.ts";
 import { useAccessContext, useCurrentNode } from "#/entities/session/index.ts";
@@ -58,7 +59,10 @@ function SettingsKnowledge({ context }: { context: AccessContext }) {
   const t = useTranslations("settings.knowledge");
   const online = useOnlineStatus();
   const { organization, permissions } = context;
-  const [selected, setSelected] = useState<string>(ALL);
+  // The collection lives in the URL (`?collection=`): a reload or a shared link opens the same one.
+  const search = useSettingsSearch(["collection"]);
+  const selected = search.values.collection ?? ALL;
+  const setSelected = (next: string): void => search.set({ collection: next === ALL ? undefined : next });
   const [adding, setAdding] = useState(false);
   const [deleting, setDeleting] = useState<KnowledgeDocument | null>(null);
   const ingestions = useStartedIngestions(organization.id);

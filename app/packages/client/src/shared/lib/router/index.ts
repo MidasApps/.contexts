@@ -15,3 +15,4 @@ export {
 } from "./route-paths.ts";
 export { RouteLink, RouterProvider, useRouter } from "./router-context.tsx";
 export type { RouterLinkProps, RouterPort } from "./router-port.ts";
+export { searchOption, useRouteSearch, useSettingsSearch, type RouteSearch } from "./use-route-search.ts";

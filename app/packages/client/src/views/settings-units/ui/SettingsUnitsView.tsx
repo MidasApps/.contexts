@@ -1,8 +1,9 @@
 "use client";
 
 import type { AccessContext, Project } from "@core/contracts";
-import { useId, useState } from "react";
+import { useId } from "react";
 import { useTranslations } from "use-intl";
+import { useSettingsSearch } from "#/shared/lib/router/use-route-search.ts";
 import { useProjects } from "#/entities/project/index.ts";
 import { useAccessContext, useCurrentNode } from "#/entities/session/index.ts";
 import { UnitTreeEditor } from "#/features/manage-units/index.ts";
@@ -44,7 +45,10 @@ function UnitsByProject({ context }: { context: AccessContext }) {
   const t = useTranslations("settings.units");
   const { organization } = context;
   const projects = useProjects(organization.id);
-  const [chosen, setChosen] = useState<string | undefined>();
+  // The project lives in the URL (`?project=`); an unknown one falls back to the first.
+  const search = useSettingsSearch(["project"]);
+  const chosen = search.values.project;
+  const setChosen = (next: string): void => search.set({ project: next });
   if (projects.isPending) return <LoadingState label={t("loadingProjects")} rows={3} />;
   if (projects.isError) return <ApiErrorState error={projects.error} onRetry={() => void projects.refetch()} retrying={projects.isFetching} />;
   const list = projects.data;

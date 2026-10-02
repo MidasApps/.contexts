@@ -150,6 +150,15 @@ describe("AdminUsersView support access sessions", () => {
     await expectNoAxeViolations(container);
   });
 
+  it("keeps the sessions scope in the URL, like every other admin filter", async () => {
+    const { api } = render({ path: "/admin/users?sessions=all", routes: sessionsRoutes([buildAdminImpersonationSession()]) });
+    const section = await screen.findByRole("region", { name: "Sessões de acesso de suporte" });
+    await within(section).findByRole("table", { name: "Sessões de suporte da equipe" });
+    expect(within(section).getByRole("combobox", { name: "Mostrar" }).textContent).toContain("Todas, mais recentes primeiro");
+    const listed = api.calls.filter((call) => call.path === "/v1/admin/impersonation-sessions");
+    expect(listed.map((call) => new URLSearchParams(call.query).get("status"))).toEqual([null]);
+  });
+
   it("ends a colleague's session after a destructive confirmation and reloads the list", async () => {
     const { user, api } = render({
       routes: { ...sessionsRoutes([buildAdminImpersonationSession()]), "POST /v1/admin/impersonation-sessions/:sessionId/end": noContent() },

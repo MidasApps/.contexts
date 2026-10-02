@@ -6,6 +6,7 @@ import { useTranslations } from "use-intl";
 import { useAccessContext, useCurrentNode } from "#/entities/session/index.ts";
 import { StartEvalExperimentDialog } from "#/features/start-eval-experiment/index.ts";
 import { useOnlineStatus } from "#/shared/lib/network/use-online-status.ts";
+import { searchOption, useSettingsSearch } from "#/shared/lib/router/use-route-search.ts";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
 import { Icon } from "#/shared/ui/atoms/Icon/Icon.tsx";
 import { Alert, AlertDescription, AlertTitle } from "#/shared/ui/molecules/Alert/Alert.tsx";
@@ -24,7 +25,10 @@ const isTab = (value: string): value is EvalTab => (TABS as readonly string[]).i
 function EvalsContent({ organization, onStart }: { organization: { id: string; name: string }; onStart: (() => void) | null }) {
   const t = useTranslations("settings.evals");
   const online = useOnlineStatus();
-  const [tab, setTab] = useState<EvalTab>("experiments");
+  const search = useSettingsSearch(["tab"]);
+  const tab = searchOption<EvalTab>(search.values.tab, TABS, "experiments");
+  // Switching tabs drops the experiments' page: it belongs to the other tab.
+  const setTab = (next: EvalTab): void => search.set({ tab: next === "experiments" ? undefined : next });
   return (
     <div className="flex flex-col gap-4">
       {online ? null : <OfflineNotice />}

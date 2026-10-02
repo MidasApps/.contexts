@@ -1,8 +1,8 @@
 "use client";
 
 import type { AccessContext, ApprovalRequest } from "@core/contracts";
-import { useState } from "react";
 import { useTranslations } from "use-intl";
+import { searchOption, useSettingsSearch } from "#/shared/lib/router/use-route-search.ts";
 import {
   APPROVAL_HISTORY_PAGE_SIZE,
   ApprovalRequestItem,
@@ -95,7 +95,10 @@ function TruncatedNotice({ count }: { count: number }) {
  */
 export function ApprovalsInbox({ context, viewerUid }: { context: AccessContext; viewerUid: string | null }) {
   const t = useTranslations("settings.approvals");
-  const [tab, setTab] = useState<Tab>("waiting");
+  // The tab lives in the URL: a reload, a shared link or "back" from a request keeps it.
+  const search = useSettingsSearch(["tab"]);
+  const tab = searchOption<Tab>(search.values.tab, TABS, "waiting");
+  const setTab = (next: Tab): void => search.set({ tab: next === "waiting" ? undefined : next });
   const { organization } = context;
   const inbox = useApprovalRequests({ organizationId: organization.id, status: "pending" });
   const requesterName = useRequesterNames({ organizationId: organization.id, viewerUid, canReadMembers: context.permissions.includes("core.member.read") });

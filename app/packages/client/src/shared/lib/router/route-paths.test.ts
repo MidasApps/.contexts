@@ -51,6 +51,7 @@ describe("route paths", () => {
     expect(routeHref({ id: "settings-index", organizationId: "a" })).toBe("/o/a/settings");
     expect(routeHref({ id: "settings", organizationId: "a", section: "approvals", rest: "ap1" })).toBe("/o/a/settings/approvals/ap1");
     expect(routeHref({ id: "settings", organizationId: "a", section: "workflows", rest: "runs/r1" })).toBe("/o/a/settings/workflows/runs/r1");
+    expect(routeHref({ id: "settings", organizationId: "a", section: "approvals", search: { tab: "history" } })).toBe("/o/a/settings/approvals?tab=history");
     expect(routeHref({ id: "chat", organizationId: "a", projectId: "b" })).toBe("/o/a/p/b/chat");
     expect(routeHref({ id: "chat", organizationId: "a", projectId: "b", conversationId: "c1" })).toBe("/o/a/p/b/chat/c1");
     expect(routeHref({ id: "sign-in", next: "/organizations" })).toBe("/sign-in?next=%2Forganizations");

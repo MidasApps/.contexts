@@ -34,8 +34,8 @@ export type ProfileSection = (typeof PROFILE_SECTIONS)[number];
  * A place in the app (SP2 spec §4, decision 0012), without the web's `/{locale}` prefix, which
  * the web adapter adds. `rest` is the catch-all tail of module and admin routes ("" for the root),
  * and the detail tail of a settings section (absent for the section itself).
- * Admin pages keep their filters and page in `search` (SP5: filters are shareable links); views
- * read them with `useSearchParam`.
+ * Admin pages and settings sections keep their tabs, filters and page in `search` (SP5: filters
+ * are shareable links); views read and write them with `useRouteSearch`.
  */
 export type Route =
   | { id: "sign-in"; next?: string | undefined }
@@ -51,7 +51,7 @@ export type Route =
   | { id: "module"; organizationId: string; projectId: string; moduleId: string; rest: string; unit?: string | undefined }
   /** The chat of a project (SP4): a new conversation, or the stored one named in the path. */
   | { id: "chat"; organizationId: string; projectId: string; conversationId?: string | undefined; unit?: string | undefined }
-  | { id: "settings"; organizationId: string; section: SettingsSection; rest?: string | undefined }
+  | { id: "settings"; organizationId: string; section: SettingsSection; rest?: string | undefined; search?: Readonly<Record<string, string>> | undefined }
   /** `/o/:organizationId/settings` without a section: opens the first section the viewer can read. */
   | { id: "settings-index"; organizationId: string }
   | { id: "settings-module"; organizationId: string; moduleId: string }
@@ -126,7 +126,7 @@ export const routeHref = (route: Route): string => {
       return withSearch(base, { unit: route.unit });
     }
     case "settings":
-      return `${organizationPath(route.organizationId)}/settings/${route.section}${tail(route.rest ?? "")}`;
+      return withSearch(`${organizationPath(route.organizationId)}/settings/${route.section}${tail(route.rest ?? "")}`, route.search ?? {});
     case "settings-index":
       return `${organizationPath(route.organizationId)}/settings`;
     case "settings-module":

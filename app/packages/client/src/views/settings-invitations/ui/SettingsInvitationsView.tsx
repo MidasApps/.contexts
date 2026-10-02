@@ -9,6 +9,7 @@ import { useAccessContext, useCurrentNode } from "#/entities/session/index.ts";
 import { InviteMemberDialog, RevokeInvitationDialog } from "#/features/invite-member/index.ts";
 import { useFormatDateTime } from "#/shared/lib/format/use-format-date-time.ts";
 import { useOnlineStatus } from "#/shared/lib/network/use-online-status.ts";
+import { searchOption, useSettingsSearch } from "#/shared/lib/router/use-route-search.ts";
 import { useCursorPages } from "#/shared/lib/pagination/use-cursor-pages.ts";
 import { Badge } from "#/shared/ui/atoms/Badge/Badge.tsx";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
@@ -141,7 +142,9 @@ function SettingsInvitations({ context }: { context: AccessContext }) {
   const t = useTranslations("settings.invitations");
   const online = useOnlineStatus();
   const { organization } = context;
-  const [filter, setFilter] = useState<Filter>("pending");
+  const search = useSettingsSearch(["filter"]);
+  const filter = searchOption<Filter>(search.values.filter, ["pending", "all"], "pending");
+  const setFilter = (next: Filter): void => search.set({ filter: next === "pending" ? undefined : next });
   const [inviting, setInviting] = useState(false);
   const canInvite = context.permissions.includes("core.member.invite");
   const roles = useRoles(canInvite ? organization.id : undefined);

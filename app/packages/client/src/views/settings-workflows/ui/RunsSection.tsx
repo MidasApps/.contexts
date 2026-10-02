@@ -7,6 +7,7 @@ import { isRunCancelable, RunStatusPill, TENANT_RUNS_PAGE_LIMIT, useTenantWorkfl
 import { CancelWorkflowRunDialog } from "#/features/cancel-workflow-run/index.ts";
 import { useWorkflowLabel } from "#/shared/lib/labels/use-catalog-labels.ts";
 import { useFormatDateTime } from "#/shared/lib/format/use-format-date-time.ts";
+import { useSettingsSearch } from "#/shared/lib/router/use-route-search.ts";
 import { useCursorPages } from "#/shared/lib/pagination/use-cursor-pages.ts";
 import { RouteLink } from "#/shared/lib/router/router-context.tsx";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
@@ -154,7 +155,14 @@ export function RunsSection({ context, workflows, onStart, online }: RunsSection
   const t = useTranslations("settings.workflows.runs");
   const formatDateTime = useFormatDateTime();
   const { organization } = context;
-  const [filters, setFilters] = useState<TenantRunFilters>({});
+  // Filters live in the URL: "back" from a run page, a reload or a shared link keeps them.
+  const search = useSettingsSearch(["workflowId", "status"]);
+  const status = search.values.status;
+  const filters: TenantRunFilters = {
+    ...(search.values.workflowId === undefined ? {} : { workflowId: search.values.workflowId }),
+    ...(status !== undefined && isStatus(status) ? { status } : {}),
+  };
+  const setFilters = (next: TenantRunFilters): void => search.set({ workflowId: next.workflowId, status: next.status });
   const [canceling, setCanceling] = useState<WorkflowRun | null>(null);
   const runs = useTenantWorkflowRuns(organization.id, filters);
   const paged = useCursorPages(runs, TENANT_RUNS_PAGE_LIMIT, t("pagination"));

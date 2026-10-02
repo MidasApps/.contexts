@@ -18,7 +18,7 @@ import { SectionCard } from "#/shared/ui/molecules/SectionCard/SectionCard.tsx";
 import { StatusPill, type StatusTone } from "#/shared/ui/molecules/StatusPill/StatusPill.tsx";
 import { DataTable } from "#/shared/ui/organisms/DataTable/DataTable.tsx";
 import { dataTableColumnHelper } from "#/shared/ui/organisms/DataTable/data-table-columns.ts";
-import { AdminQuerySection } from "#/widgets/admin-nav/index.ts";
+import { AdminQuerySection, useAdminSearch } from "#/widgets/admin-nav/index.ts";
 
 const column = dataTableColumnHelper<AdminImpersonationSession>();
 const STATUS_TONES: Record<AdminImpersonationSession["status"], StatusTone> = { active: "amber", ended: "neutral", expired: "neutral" };
@@ -175,7 +175,10 @@ function SessionsTable({ scope, canEnd, onScopeReset }: { scope: ImpersonationSe
 export function ImpersonationSessionsSection({ canEnd }: { canEnd: boolean }) {
   const t = useTranslations("admin.users.sessions");
   const scopeId = useId();
-  const [scope, setScope] = useState<ImpersonationSessionScope>("active");
+  // The scope lives in the URL (`?sessions=all`), like every other admin filter.
+  const search = useAdminSearch(["sessions"]);
+  const scope: ImpersonationSessionScope = search.values.sessions === "all" ? "all" : "active";
+  const setScope = (next: ImpersonationSessionScope): void => search.set({ sessions: next === "all" ? "all" : undefined });
   return (
     <SectionCard title={t("title")} description={t("description")}>
       <div className="flex flex-col gap-1.5 sm:max-w-xs">

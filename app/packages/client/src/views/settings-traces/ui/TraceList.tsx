@@ -1,8 +1,9 @@
 "use client";
 
 import type { TraceSummary } from "@core/contracts";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { useFormatter, useTranslations } from "use-intl";
+import { useSettingsSearch } from "#/shared/lib/router/use-route-search.ts";
 import { TraceCost, TraceDuration, TraceStatusPill, useTenantTraces, type TracePage } from "#/entities/trace/index.ts";
 import { useFormatDateTime } from "#/shared/lib/format/use-format-date-time.ts";
 import { RouteLink } from "#/shared/lib/router/router-context.tsx";
@@ -122,18 +123,17 @@ function TraceTable({ organization, data, paging, filtering, onClear }: TraceTab
 
 /**
  * The organization's traces, newest first (`GET /v1/traces`, tenant forced on the server),
- * filtered by status and agent and paged by number. Filters and page are page state: the
- * settings route carries no search.
+ * filtered by status and agent and paged by number. Filters and page live in the URL, so "back"
+ * from a trace, a reload or a shared link keeps them.
  */
 export function TraceList({ organization }: { organization: Organization }) {
   const t = useTranslations("settings.traces");
-  const [values, setValues] = useState<TraceFilterValues>({ agentId: undefined, status: undefined });
-  const [page, setPage] = useState(1);
+  const search = useSettingsSearch(["agentId", "status"]);
+  const values: TraceFilterValues = { agentId: search.values.agentId, status: search.values.status === "ok" || search.values.status === "error" ? search.values.status : undefined };
+  const { page, setPage } = search;
   const traces = useTenantTraces(organization.id, { page, ...values });
-  const change = (patch: Partial<TraceFilterValues>): void => {
-    setValues((current) => ({ ...current, ...patch }));
-    setPage(1);
-  };
+  // Writing a filter returns to the first page.
+  const change = (patch: Partial<TraceFilterValues>): void => search.set(patch);
   const filtering = values.agentId !== undefined || values.status !== undefined;
   return (
     <div className="flex flex-col gap-4">
