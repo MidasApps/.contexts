@@ -50,7 +50,9 @@ test.describe("organizations", () => {
     await staffPage.getByRole("button", { name: "Limpar filtros" }).first().click();
     await expect(entry(staffPage, "Alpha Org")).toHaveCount(1);
 
-    await staffPage.goto(`admin/organizations?query=${encodeURIComponent(sp5Org.name)}`);
+    // `q` is the page's search key: with an unknown key the list was unfiltered, and once the run had
+    // created more organizations than a page holds, this one was not on the first page.
+    await staffPage.goto(`admin/organizations?q=${encodeURIComponent(sp5Org.name)}`);
     await staffPage.getByRole("link", { name: `Abrir ${sp5Org.name}` }).click();
     await expect(staffPage.getByRole("heading", { level: 1, name: sp5Org.name })).toBeVisible();
     const summary = staffPage.getByRole("region", { name: "Resumo" });
