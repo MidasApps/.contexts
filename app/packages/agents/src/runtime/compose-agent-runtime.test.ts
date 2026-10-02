@@ -98,6 +98,7 @@ describe("composeAgentRuntime", () => {
       "GET /console/traces",
       "GET /console/traces/:traceId",
       "GET /console/experiments",
+      "GET /console/experiments/:experimentId",
       "POST /console/experiments",
       "POST /console/eval-runs",
       "GET /console/datasets",
