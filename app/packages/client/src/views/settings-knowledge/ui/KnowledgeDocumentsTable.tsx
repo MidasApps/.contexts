@@ -4,12 +4,12 @@ import type { KnowledgeDocument } from "@core/contracts";
 import { useMemo, type ReactNode } from "react";
 import { useTranslations } from "use-intl";
 import { collectionOfNamespace, isOwnCollection, KNOWLEDGE_PAGE_LIMIT, KnowledgeStatusPill, type useKnowledgeDocuments } from "#/entities/knowledge/index.ts";
-import { ApiError } from "#/shared/api/api-error.ts";
 import { useFormatDateTime } from "#/shared/lib/format/use-format-date-time.ts";
 import { useModuleLabel } from "#/shared/lib/labels/use-catalog-labels.ts";
 import { useCursorPages } from "#/shared/lib/pagination/use-cursor-pages.ts";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
-import { DataTable, type DataTableStatus } from "#/shared/ui/organisms/DataTable/DataTable.tsx";
+import { DataTable } from "#/shared/ui/organisms/DataTable/DataTable.tsx";
+import { dataTableStatusOf } from "#/shared/ui/organisms/DataTable/data-table-status.ts";
 import { dataTableColumnHelper } from "#/shared/ui/organisms/DataTable/data-table-columns.ts";
 
 const column = dataTableColumnHelper<KnowledgeDocument>();
@@ -35,12 +35,6 @@ export const useCollectionName = (projectNames: ReadonlyMap<string, string>, pro
     if (collection.kind === "module") return t("module", { name: moduleLabel(collection.moduleId) });
     return t(collection.kind);
   };
-};
-
-const statusOf = (query: ReturnType<typeof useKnowledgeDocuments>): DataTableStatus => {
-  if (query.isPending) return { kind: "loading" };
-  if (query.isError) return { kind: "error", requestId: query.error instanceof ApiError ? query.error.requestId : undefined, onRetry: () => void query.refetch() };
-  return { kind: "ready" };
 };
 
 function DeleteAction({ document, onDelete }: { document: KnowledgeDocument; onDelete: ((document: KnowledgeDocument) => void) | null }) {
@@ -85,7 +79,7 @@ export function KnowledgeDocumentsTable({ caption, documents, collectionName, on
       columns={columns}
       data={paged.rows}
       getRowId={(document) => document.id}
-      status={statusOf(documents)}
+      status={dataTableStatusOf(documents)}
       pagination={paged.pagination}
       stateHeadingLevel={2}
       renderCard={(document) => (

@@ -6,7 +6,6 @@ import { useTranslations } from "use-intl";
 import { TENANT_CONNECTORS_PAGE_LIMIT, useTenantConnectors } from "#/entities/connector/index.ts";
 import { useAccessContext, useCurrentNode } from "#/entities/session/index.ts";
 import { ConnectorEditorDialog, ConnectorSecretDialog, DeleteConnectorDialog, ToggleConnectorDialog } from "#/features/connector-editor/index.ts";
-import { ApiError } from "#/shared/api/api-error.ts";
 import { useFormatDateTime } from "#/shared/lib/format/use-format-date-time.ts";
 import { useOnlineStatus } from "#/shared/lib/network/use-online-status.ts";
 import { useCursorPages } from "#/shared/lib/pagination/use-cursor-pages.ts";
@@ -16,7 +15,8 @@ import { Alert, AlertDescription } from "#/shared/ui/molecules/Alert/Alert.tsx";
 import { EmptyState } from "#/shared/ui/molecules/EmptyState/EmptyState.tsx";
 import { OfflineNotice } from "#/shared/ui/molecules/OfflineNotice/OfflineNotice.tsx";
 import { StatusPill, type StatusTone } from "#/shared/ui/molecules/StatusPill/StatusPill.tsx";
-import { DataTable, type DataTableStatus } from "#/shared/ui/organisms/DataTable/DataTable.tsx";
+import { DataTable } from "#/shared/ui/organisms/DataTable/DataTable.tsx";
+import { dataTableStatusOf } from "#/shared/ui/organisms/DataTable/data-table-status.ts";
 import { dataTableColumnHelper } from "#/shared/ui/organisms/DataTable/data-table-columns.ts";
 import { PageHeader } from "#/widgets/page-header/index.ts";
 import { QueryPage } from "#/widgets/page-state/index.ts";
@@ -96,12 +96,6 @@ const useColumns = (actions: RowActions | null) => {
   );
 };
 
-const statusOf = (query: ReturnType<typeof useTenantConnectors>): DataTableStatus => {
-  if (query.isPending) return { kind: "loading" };
-  if (query.isError) return { kind: "error", requestId: query.error instanceof ApiError ? query.error.requestId : undefined, onRetry: () => void query.refetch() };
-  return { kind: "ready" };
-};
-
 function ConnectorsTable({ context, actions, onCreate }: { context: AccessContext; actions: RowActions | null; onCreate: (() => void) | null }) {
   const t = useTranslations("settings.connectors");
   const { organization } = context;
@@ -115,7 +109,7 @@ function ConnectorsTable({ context, actions, onCreate }: { context: AccessContex
       columns={columns}
       data={paged.rows}
       getRowId={(connector) => connector.id}
-      status={statusOf(connectors)}
+      status={dataTableStatusOf(connectors)}
       pagination={paged.pagination}
       stateHeadingLevel={2}
       renderCard={(connector) => (

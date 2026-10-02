@@ -7,14 +7,14 @@ import { cn } from "#/shared/lib/cn.ts";
 import { useIsMobile } from "#/shared/lib/media/use-media-query.ts";
 import { Skeleton } from "#/shared/ui/atoms/Skeleton/Skeleton.tsx";
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "#/shared/ui/atoms/Table/Table.tsx";
-import { ErrorState } from "#/shared/ui/molecules/ErrorState/ErrorState.tsx";
+import { isApiErrorStatus } from "#/shared/api/cursor-list.ts";
+import { ApiErrorState } from "#/shared/ui/molecules/ErrorState/ApiErrorState.tsx";
+import { NoAccessState } from "#/shared/ui/molecules/NoAccessState/NoAccessState.tsx";
 import { dataTableFeatures, type DataTableColumn, type DataTableFeatures } from "./data-table-columns.ts";
+import type { DataTableStatus } from "./data-table-status.ts";
 import { DataTablePagination, type DataTablePaginationProps } from "./DataTablePagination.tsx";
 
-export type DataTableStatus =
-  | { kind: "ready" }
-  | { kind: "loading" }
-  | { kind: "error"; requestId?: string | undefined; onRetry?: (() => void) | undefined };
+export type { DataTableStatus } from "./data-table-status.ts";
 
 export type DataTableProps<TData extends RowData> = {
   /** Required table name (rules/accessibility.md: every data table has a caption). */
@@ -98,6 +98,12 @@ function HeaderRows<TData extends RowData>({ table }: { table: Instance<TData> }
   ));
 }
 
+/** A failed list: no-access for a 403 (retrying cannot help), else the copy of the error code with its reference and retry. */
+function TableError({ status, headingLevel }: { status: Extract<DataTableStatus, { kind: "error" }>; headingLevel: 2 | 3 }) {
+  if (isApiErrorStatus(status.error, 403)) return <NoAccessState frame="plain" headingLevel={headingLevel} />;
+  return <ApiErrorState frame="plain" headingLevel={headingLevel} error={status.error} onRetry={status.onRetry} retrying={status.retrying ?? false} />;
+}
+
 type CardListProps<TData extends RowData> = {
   caption: string;
   captionHidden: boolean;
@@ -113,7 +119,7 @@ type CardListProps<TData extends RowData> = {
 /** The mobile form of the table: caption as a heading-less label, one card per row. */
 function CardList<TData extends RowData>({ caption, captionHidden, data, getRowId, renderCard, status, empty, loadingRows, headingLevel }: CardListProps<TData>) {
   const t = useTranslations("common.states");
-  if (status.kind === "error") return <ErrorState frame="plain" headingLevel={headingLevel} requestId={status.requestId} onRetry={status.onRetry} />;
+  if (status.kind === "error") return <TableError status={status} headingLevel={headingLevel} />;
   if (status.kind === "loading") {
     return (
       <div role="status" aria-busy="true" className="flex flex-col gap-2">
@@ -145,7 +151,8 @@ function CardList<TData extends RowData>({ caption, captionHidden, data, getRowI
 /**
  * List organism over TanStack Table v9 (server-driven: no client sorting/filtering). Caption and
  * `scope="col"` headers always; loading keeps the header and shows skeleton rows (`aria-busy`
- * with a status text); errors render `ErrorState` with the request reference; empty pages render
+ * with a status text); errors render the copy of their code with the request reference and a
+ * retry (no-access for a 403); empty pages render
  * the caller's empty state; paging is previous/next over cursors. With `renderCard`, small
  * screens get a card list instead of the table.
  */
@@ -196,7 +203,7 @@ export function DataTable<TData extends RowData>({
           {t("loading")}
         </p>
       ) : null}
-      {status.kind === "error" ? <ErrorState frame="plain" headingLevel={headingLevel} requestId={status.requestId} onRetry={status.onRetry} /> : null}
+      {status.kind === "error" ? <TableError status={status} headingLevel={headingLevel} /> : null}
       {pagination === undefined || status.kind === "error" ? null : <DataTablePagination {...pagination} />}
     </div>
   );

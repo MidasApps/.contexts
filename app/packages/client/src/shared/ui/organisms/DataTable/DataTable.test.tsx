@@ -1,5 +1,6 @@
 import { screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
+import { ApiError } from "#/shared/api/api-error.ts";
 import { expectNoAxeViolations } from "#/shared/testing/axe.ts";
 import { renderWithProviders } from "#/shared/testing/render.tsx";
 import { EmptyState } from "#/shared/ui/molecules/EmptyState/EmptyState.tsx";
@@ -64,10 +65,32 @@ describe("DataTable", () => {
     await expectNoAxeViolations(container);
     rerender(<DataTable {...props} data={[]} />);
     expect(screen.getByRole("heading", { name: "Nenhum membro" })).toBeDefined();
-    rerender(<DataTable {...props} data={[]} status={{ kind: "error", requestId: "req-1", onRetry }} />);
-    expect(screen.getByRole("alert").textContent).toContain("Referência: req-1");
+    const error = new ApiError({ status: 0, code: "NETWORK_ERROR", message: "offline", requestId: "req-1" });
+    rerender(<DataTable {...props} data={[]} status={{ kind: "error", error, onRetry }} />);
+    const alert = screen.getByRole("alert");
+    expect(alert.textContent).toContain("Referência: req-1");
+    expect(alert.textContent).toContain("Não foi possível conectar.");
     await user.click(screen.getByRole("button", { name: "Tentar novamente" }));
     expect(onRetry).toHaveBeenCalledTimes(1);
+  });
+
+  it("shows the retry as pending while the list is fetched again", () => {
+    const error = new ApiError({ status: 503, code: "SERVICE_UNAVAILABLE", message: "down" });
+    renderWithProviders(
+      <DataTable caption="Membros" columns={COLUMNS} data={[]} getRowId={(row) => row.id} empty={EMPTY} status={{ kind: "error", error, onRetry: vi.fn(), retrying: true }} />,
+    );
+    const retry = screen.getByRole<HTMLButtonElement>("button", { name: /Tentar novamente/u });
+    expect(retry.disabled).toBe(true);
+  });
+
+  it("renders the no-access state, without a retry, for a 403", async () => {
+    const error = new ApiError({ status: 403, code: "FORBIDDEN", message: "forbidden" });
+    const { container } = renderWithProviders(
+      <DataTable caption="Membros" columns={COLUMNS} data={[]} getRowId={(row) => row.id} empty={EMPTY} status={{ kind: "error", error, onRetry: vi.fn() }} />,
+    );
+    expect(screen.getByRole("heading", { name: "Você não tem acesso a esta página" })).toBeDefined();
+    expect(screen.queryByRole("button", { name: "Tentar novamente" })).toBeNull();
+    await expectNoAxeViolations(container);
   });
 });
 

@@ -82,10 +82,16 @@ describe("ProfileSessionsView", () => {
   });
 
   it("shows the error with a retry when the list fails, and cards on small screens", async () => {
-    const failing = renderView({ "GET /v1/me/sessions": apiError(403, "FORBIDDEN") });
+    const failing = renderView({ "GET /v1/me/sessions": apiError(429, "RATE_LIMITED") });
     expect(await screen.findByText("Referência: 01K6FAKEREQ0000000000000000")).toBeDefined();
+    expect(screen.getByRole("alert").textContent).toContain("Muitas tentativas.");
     expect(screen.getByRole("button", { name: "Tentar novamente" })).toBeDefined();
     failing.unmount();
+
+    const forbidden = renderView({ "GET /v1/me/sessions": apiError(403, "FORBIDDEN") });
+    expect(await screen.findByRole("heading", { name: "Você não tem acesso a esta página" })).toBeDefined();
+    expect(screen.queryByRole("button", { name: "Tentar novamente" })).toBeNull();
+    forbidden.unmount();
 
     const matchMedia = globalThis.matchMedia;
     globalThis.matchMedia = ((query: string) => ({ ...matchMedia(query), matches: query.includes("max-width") }));

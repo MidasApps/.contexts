@@ -6,7 +6,6 @@ import { useTranslations } from "use-intl";
 import { SESSIONS_PAGE_LIMIT, useMySessions } from "#/entities/session/index.ts";
 import { RevokeSessionDialog, SignOutEverywhereButton } from "#/features/revoke-session/index.ts";
 import { SignOutButton } from "#/features/sign-out/index.ts";
-import { ApiError } from "#/shared/api/api-error.ts";
 import { useFormatDateTime } from "#/shared/lib/format/use-format-date-time.ts";
 import { useCursorPages } from "#/shared/lib/pagination/use-cursor-pages.ts";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
@@ -14,7 +13,8 @@ import { Icon } from "#/shared/ui/atoms/Icon/Icon.tsx";
 import { EmptyState } from "#/shared/ui/molecules/EmptyState/EmptyState.tsx";
 import { SectionCard } from "#/shared/ui/molecules/SectionCard/SectionCard.tsx";
 import { StatusPill } from "#/shared/ui/molecules/StatusPill/StatusPill.tsx";
-import { DataTable, type DataTableStatus } from "#/shared/ui/organisms/DataTable/DataTable.tsx";
+import { DataTable } from "#/shared/ui/organisms/DataTable/DataTable.tsx";
+import { dataTableStatusOf } from "#/shared/ui/organisms/DataTable/data-table-status.ts";
 import { dataTableColumnHelper } from "#/shared/ui/organisms/DataTable/data-table-columns.ts";
 import { PageHeader } from "#/widgets/page-header/index.ts";
 import { ProfilePageFrame } from "#/widgets/profile-nav/index.ts";
@@ -101,12 +101,6 @@ function SessionCard({ session, onRevoke }: { session: SessionSummary; onRevoke:
   );
 }
 
-const tableStatus = (query: ReturnType<typeof useMySessions>): DataTableStatus => {
-  if (query.isPending) return { kind: "loading" };
-  if (query.isError) return { kind: "error", requestId: query.error instanceof ApiError ? query.error.requestId : undefined, onRetry: () => void query.refetch() };
-  return { kind: "ready" };
-};
-
 /**
  * `/profile/sessions` (SP2 spec §8): active web and desktop sessions (browser/OS family, second
  * factor, last seen, expiry in the display time zone), "this device" marked (SP1 `current`) with
@@ -129,7 +123,7 @@ export function ProfileSessionsView() {
             columns={columns}
             data={paged.rows}
             getRowId={(session) => session.id}
-            status={tableStatus(sessions)}
+            status={dataTableStatusOf(sessions)}
             pagination={paged.pagination}
             renderCard={(session) => <SessionCard session={session} onRevoke={() => setTarget(session)} />}
             empty={<EmptyState frame="plain" headingLevel={3} icon="monitor" title={t("emptyTitle")} description={t("emptyDescription")} />}

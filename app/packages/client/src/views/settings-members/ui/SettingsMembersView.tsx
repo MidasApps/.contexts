@@ -8,14 +8,14 @@ import { useRoleRefLabel, useRoles } from "#/entities/role/index.ts";
 import { useAccessContext, useCurrentNode, useMe } from "#/entities/session/index.ts";
 import { InviteMemberDialog } from "#/features/invite-member/index.ts";
 import { EditGrantRolesDialog, RemoveMemberDialog } from "#/features/manage-membership/index.ts";
-import { ApiError } from "#/shared/api/api-error.ts";
 import { useOnlineStatus } from "#/shared/lib/network/use-online-status.ts";
 import { useCursorPages } from "#/shared/lib/pagination/use-cursor-pages.ts";
 import { Badge } from "#/shared/ui/atoms/Badge/Badge.tsx";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
 import { Icon } from "#/shared/ui/atoms/Icon/Icon.tsx";
 import { EmptyState } from "#/shared/ui/molecules/EmptyState/EmptyState.tsx";
-import { DataTable, type DataTableStatus } from "#/shared/ui/organisms/DataTable/DataTable.tsx";
+import { DataTable } from "#/shared/ui/organisms/DataTable/DataTable.tsx";
+import { dataTableStatusOf } from "#/shared/ui/organisms/DataTable/data-table-status.ts";
 import { dataTableColumnHelper } from "#/shared/ui/organisms/DataTable/data-table-columns.ts";
 import { NodeName } from "#/widgets/access-node/index.ts";
 import { PageHeader } from "#/widgets/page-header/index.ts";
@@ -88,12 +88,6 @@ const useColumns = (selfUid: string | undefined, roles: readonly Role[] | undefi
   );
 };
 
-const statusOf = (query: ReturnType<typeof useMembers>): DataTableStatus => {
-  if (query.isPending) return { kind: "loading" };
-  if (query.isError) return { kind: "error", requestId: query.error instanceof ApiError ? query.error.requestId : undefined, onRetry: () => void query.refetch() };
-  return { kind: "ready" };
-};
-
 function MembersTable({ context, inviteButton, canInvite }: { context: AccessContext; inviteButton: ReactNode; canInvite: boolean }) {
   const t = useTranslations("settings.members");
   const { organization } = context;
@@ -120,7 +114,7 @@ function MembersTable({ context, inviteButton, canInvite }: { context: AccessCon
         columns={columns}
         data={paged.rows}
         getRowId={(member) => member.uid}
-        status={statusOf(members)}
+        status={dataTableStatusOf(members)}
         pagination={paged.pagination}
         stateHeadingLevel={2}
         renderCard={(member) => (

@@ -8,7 +8,6 @@ import { useRoles } from "#/entities/role/index.ts";
 import { useAccessContext, useCurrentNode } from "#/entities/session/index.ts";
 import { CreateDeviceActivationDialog } from "#/features/create-device-activation/index.ts";
 import { RevokeDeviceDialog } from "#/features/revoke-device/index.ts";
-import { ApiError } from "#/shared/api/api-error.ts";
 import { useFormatDateTime } from "#/shared/lib/format/use-format-date-time.ts";
 import { useOnlineStatus } from "#/shared/lib/network/use-online-status.ts";
 import { useCursorPages } from "#/shared/lib/pagination/use-cursor-pages.ts";
@@ -16,7 +15,8 @@ import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
 import { Icon } from "#/shared/ui/atoms/Icon/Icon.tsx";
 import { EmptyState } from "#/shared/ui/molecules/EmptyState/EmptyState.tsx";
 import { StatusPill } from "#/shared/ui/molecules/StatusPill/StatusPill.tsx";
-import { DataTable, type DataTableStatus } from "#/shared/ui/organisms/DataTable/DataTable.tsx";
+import { DataTable } from "#/shared/ui/organisms/DataTable/DataTable.tsx";
+import { dataTableStatusOf } from "#/shared/ui/organisms/DataTable/data-table-status.ts";
 import { dataTableColumnHelper } from "#/shared/ui/organisms/DataTable/data-table-columns.ts";
 import { NodeName } from "#/widgets/access-node/index.ts";
 import { PageHeader } from "#/widgets/page-header/index.ts";
@@ -56,12 +56,6 @@ const useColumns = (onRevoke: ((device: Device) => void) | null) => {
   );
 };
 
-const statusOf = (query: ReturnType<typeof useDevices>): DataTableStatus => {
-  if (query.isPending) return { kind: "loading" };
-  if (query.isError) return { kind: "error", requestId: query.error instanceof ApiError ? query.error.requestId : undefined, onRetry: () => void query.refetch() };
-  return { kind: "ready" };
-};
-
 function DevicesTable({ context, onCreate }: { context: AccessContext; onCreate: (() => void) | null }) {
   const t = useTranslations("settings.devices");
   const formatDateTime = useFormatDateTime();
@@ -79,7 +73,7 @@ function DevicesTable({ context, onCreate }: { context: AccessContext; onCreate:
         columns={columns}
         data={paged.rows}
         getRowId={(device) => device.id}
-        status={statusOf(devices)}
+        status={dataTableStatusOf(devices)}
         pagination={paged.pagination}
         stateHeadingLevel={2}
         renderCard={(device) => (

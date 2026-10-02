@@ -7,7 +7,6 @@ import { INVITATIONS_PAGE_LIMIT, useInvitations } from "#/entities/invitation/in
 import { useRoleRefLabel, useRoles } from "#/entities/role/index.ts";
 import { useAccessContext, useCurrentNode } from "#/entities/session/index.ts";
 import { InviteMemberDialog, RevokeInvitationDialog } from "#/features/invite-member/index.ts";
-import { ApiError } from "#/shared/api/api-error.ts";
 import { useFormatDateTime } from "#/shared/lib/format/use-format-date-time.ts";
 import { useOnlineStatus } from "#/shared/lib/network/use-online-status.ts";
 import { useCursorPages } from "#/shared/lib/pagination/use-cursor-pages.ts";
@@ -17,7 +16,8 @@ import { Icon } from "#/shared/ui/atoms/Icon/Icon.tsx";
 import { EmptyState } from "#/shared/ui/molecules/EmptyState/EmptyState.tsx";
 import { StatusPill, type StatusTone } from "#/shared/ui/molecules/StatusPill/StatusPill.tsx";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "#/shared/ui/molecules/Tabs/Tabs.tsx";
-import { DataTable, type DataTableStatus } from "#/shared/ui/organisms/DataTable/DataTable.tsx";
+import { DataTable } from "#/shared/ui/organisms/DataTable/DataTable.tsx";
+import { dataTableStatusOf } from "#/shared/ui/organisms/DataTable/data-table-status.ts";
 import { dataTableColumnHelper } from "#/shared/ui/organisms/DataTable/data-table-columns.ts";
 import { NodeName } from "#/widgets/access-node/index.ts";
 import { PageHeader } from "#/widgets/page-header/index.ts";
@@ -73,12 +73,6 @@ const useColumns = (labelOf: (ref: Invitation["roles"][number]) => string, onRev
   );
 };
 
-const statusOf = (query: ReturnType<typeof useInvitations>): DataTableStatus => {
-  if (query.isPending) return { kind: "loading" };
-  if (query.isError) return { kind: "error", requestId: query.error instanceof ApiError ? query.error.requestId : undefined, onRetry: () => void query.refetch() };
-  return { kind: "ready" };
-};
-
 function InvitationsTable({ context, filter, onInvite }: { context: AccessContext; filter: Filter; onInvite: (() => void) | null }) {
   const t = useTranslations("settings.invitations");
   const formatDateTime = useFormatDateTime();
@@ -99,7 +93,7 @@ function InvitationsTable({ context, filter, onInvite }: { context: AccessContex
         columns={columns}
         data={paged.rows}
         getRowId={(invitation) => invitation.id}
-        status={statusOf(invitations)}
+        status={dataTableStatusOf(invitations)}
         pagination={paged.pagination}
         stateHeadingLevel={2}
         renderCard={(invitation) => (
