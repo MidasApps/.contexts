@@ -77,6 +77,83 @@
     },
     "file": {
       "upload": "Upload files"
+    },
+    "workflow-run": {
+      "read": "View workflow runs",
+      "start": "Start workflows",
+      "cancel": "Cancel workflow runs",
+      "approve-demo": "Approve the approval demo's action"
+    },
+    "schedule": {
+      "read": "View schedules",
+      "write": "Create and change schedules"
+    },
+    "trace": {
+      "read": "View agent traces"
+    },
+    "eval": {
+      "read": "View evals",
+      "write": "Start evals"
+    },
+    "prompt": {
+      "read": "View agent instructions",
+      "write": "Change agent instructions"
+    },
+    "flag": {
+      "read": "View the organization's features",
+      "write": "Switch the organization's features on and off"
+    },
+    "conversation": {
+      "send": "Send messages in conversations",
+      "read": "View own conversations",
+      "update": "Rename, pin and archive conversations",
+      "delete": "Delete conversations"
+    },
+    "voice": {
+      "use": "Use voice in chat"
+    }
+  },
+  "platform": {
+    "organization": {
+      "read": "View organizations (staff)",
+      "update": "Change organizations (staff)"
+    },
+    "user": {
+      "read": "View users (staff)",
+      "impersonate": "Impersonate users (staff)"
+    },
+    "audit-log": {
+      "read": "View the audit log (staff)"
+    },
+    "staff": {
+      "manage": "Manage platform staff"
+    },
+    "plan": {
+      "manage": "Manage plans"
+    },
+    "agent": {
+      "manage": "Manage organizations' agents"
+    },
+    "prompt": {
+      "manage": "Manage agent instructions"
+    },
+    "connector": {
+      "read": "View organizations' connectors"
+    },
+    "eval": {
+      "manage": "Manage evals"
+    },
+    "trace": {
+      "read": "View traces (staff)"
+    },
+    "usage": {
+      "read": "View usage and costs (staff)"
+    },
+    "workflow": {
+      "manage": "Manage workflows and schedules"
+    },
+    "flag": {
+      "manage": "Manage feature flags"
     }
   }
 }

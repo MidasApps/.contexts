@@ -5,6 +5,7 @@ import { CircleCheckIcon, CircleXIcon, ShieldQuestionIcon, TriangleAlertIcon } f
 import { useEffect, useId, useRef, type ReactNode } from "react";
 import { useTranslations } from "use-intl";
 import type { ApprovalRequestView, ToolPartView, ToolPreviewView } from "#/entities/message/index.ts";
+import { usePermissionLabel, useToolLabel } from "#/shared/lib/labels/use-catalog-labels.ts";
 import { Spinner } from "#/shared/ui/atoms/Spinner/Spinner.tsx";
 import { Textarea } from "#/shared/ui/atoms/Textarea/Textarea.tsx";
 import { CodeBlock } from "#/shared/ui/ai/code-block.tsx";
@@ -83,8 +84,10 @@ export function ToolConfirmation({ tool, preview, request, onRespond, diff, inte
   const hintId = useId();
   const reasonRef = useRef<HTMLTextAreaElement>(null);
   const resultRef = useRef<HTMLDivElement>(null);
+  const toolLabel = useToolLabel();
+  const permissionLabel = usePermissionLabel();
   const toolName = request?.toolName ?? preview?.toolName ?? tool.toolName;
-  const summary = preview?.summary ?? t("fallbackSummary", { tool: toolName });
+  const summary = preview?.summary ?? t("fallbackSummary", { tool: toolLabel(toolName) });
   const requested = tool.state === "approval-requested";
   const locked = approval.sent !== null || !interactive;
 
@@ -107,7 +110,7 @@ export function ToolConfirmation({ tool, preview, request, onRespond, diff, inte
           {requested ? <p className="text-[13px] text-foreground">{summary}</p> : null}
           {preview?.permission === undefined ? null : (
             <p className="text-[12.5px] text-muted-foreground">
-              {t("permission")}: <span className="font-mono">{preview.permission}</span>
+              {t("permission")}: <span title={preview.permission}>{permissionLabel(preview.permission)}</span>
             </p>
           )}
         </div>

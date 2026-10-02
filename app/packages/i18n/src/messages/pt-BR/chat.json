@@ -153,7 +153,7 @@
   "approval": {
     "label": "Aprovação: {summary}",
     "title": "Aprovação necessária",
-    "fallbackSummary": "Executar {tool}",
+    "fallbackSummary": "Executar: {tool}",
     "permission": "Permissão",
     "details": "Dados enviados",
     "diffCaption": "Alterações propostas",

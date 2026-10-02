@@ -200,7 +200,7 @@ describe("SettingsApprovalsView detail", () => {
     expect(await screen.findByRole("heading", { level: 1, name: "Solicitação de aprovação" })).toBeDefined();
     expect(await screen.findByRole("heading", { level: 2, name: "Delete invoice 42" })).toBeDefined();
     expect(screen.getByText("Permissão da ação")).toBeDefined();
-    expect(screen.getByText("core.workflow-run.approve-demo")).toBeDefined();
+    expect(screen.getByText("Aprovar a ação da demonstração de aprovação").getAttribute("title")).toBe("core.workflow-run.approve-demo");
     expect(await screen.findByRole("button", { name: "Aprovar" })).toBeDefined();
     expect(screen.getByRole("link", { name: "Voltar para aprovações" }).getAttribute("href")).toBe(`/o/${IDS.organization}/settings/approvals`);
     await expectNoAxeViolations(container);

@@ -5,6 +5,7 @@ import { useTranslations } from "use-intl";
 import { ApprovalRequestItem, useApprovalRequest } from "#/entities/approval-request/index.ts";
 import { ApprovalDecision } from "#/features/approval-decision/index.ts";
 import { useFormatDateTime } from "#/shared/lib/format/use-format-date-time.ts";
+import { usePermissionLabel } from "#/shared/lib/labels/use-catalog-labels.ts";
 import { RouteLink } from "#/shared/lib/router/router-context.tsx";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
 import { Icon } from "#/shared/ui/atoms/Icon/Icon.tsx";
@@ -29,10 +30,12 @@ function BackToInbox({ organizationId, variant = "ghost" }: { organizationId: st
 function Facts({ request, decidedByName }: { request: ApprovalRequest; decidedByName: string | undefined }) {
   const t = useTranslations("settings.approvals.detail");
   const formatDateTime = useFormatDateTime();
-  const rows: { label: string; value: string }[] = [
+  const permissionLabel = usePermissionLabel();
+  // The permission reads as its catalog label; its id stays in the tooltip for support.
+  const rows: { label: string; value: string; title?: string }[] = [
     { label: t("created"), value: formatDateTime(request.createdAt) },
     { label: t("expires"), value: formatDateTime(request.expiresAt) },
-    { label: t("permission"), value: request.permission },
+    { label: t("permission"), value: permissionLabel(request.permission), title: request.permission },
     ...(request.decidedBy === null ? [] : [{ label: t("decidedBy"), value: decidedByName ?? request.decidedBy }]),
     { label: t("reference"), value: request.id },
   ];
@@ -41,7 +44,9 @@ function Facts({ request, decidedByName }: { request: ApprovalRequest; decidedBy
       {rows.map((row) => (
         <div key={row.label} className="contents">
           <dt className="text-muted-foreground">{row.label}</dt>
-          <dd className="break-all">{row.value}</dd>
+          <dd className="break-all" title={row.title}>
+            {row.value}
+          </dd>
         </div>
       ))}
     </dl>

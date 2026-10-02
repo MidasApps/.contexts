@@ -77,6 +77,83 @@
     },
     "file": {
       "upload": "Subir archivos"
+    },
+    "workflow-run": {
+      "read": "Ver ejecuciones de workflows",
+      "start": "Iniciar workflows",
+      "cancel": "Cancelar ejecuciones de workflows",
+      "approve-demo": "Aprobar la acción de la demostración de aprobación"
+    },
+    "schedule": {
+      "read": "Ver programaciones",
+      "write": "Crear y cambiar programaciones"
+    },
+    "trace": {
+      "read": "Ver trazas de los agentes"
+    },
+    "eval": {
+      "read": "Ver evaluaciones",
+      "write": "Iniciar evaluaciones"
+    },
+    "prompt": {
+      "read": "Ver instrucciones de los agentes",
+      "write": "Cambiar instrucciones de los agentes"
+    },
+    "flag": {
+      "read": "Ver funcionalidades de la organización",
+      "write": "Activar y desactivar funcionalidades de la organización"
+    },
+    "conversation": {
+      "send": "Enviar mensajes en las conversaciones",
+      "read": "Ver las propias conversaciones",
+      "update": "Renombrar, fijar y archivar conversaciones",
+      "delete": "Eliminar conversaciones"
+    },
+    "voice": {
+      "use": "Usar la voz en el chat"
+    }
+  },
+  "platform": {
+    "organization": {
+      "read": "Ver organizaciones (equipo)",
+      "update": "Cambiar organizaciones (equipo)"
+    },
+    "user": {
+      "read": "Ver usuarios (equipo)",
+      "impersonate": "Acceder como otro usuario (equipo)"
+    },
+    "audit-log": {
+      "read": "Ver el registro de auditoría (equipo)"
+    },
+    "staff": {
+      "manage": "Gestionar el equipo de la plataforma"
+    },
+    "plan": {
+      "manage": "Gestionar planes"
+    },
+    "agent": {
+      "manage": "Gestionar los agentes de las organizaciones"
+    },
+    "prompt": {
+      "manage": "Gestionar instrucciones de los agentes"
+    },
+    "connector": {
+      "read": "Ver conectores de las organizaciones"
+    },
+    "eval": {
+      "manage": "Gestionar evaluaciones"
+    },
+    "trace": {
+      "read": "Ver trazas (equipo)"
+    },
+    "usage": {
+      "read": "Ver el uso y los costos (equipo)"
+    },
+    "workflow": {
+      "manage": "Gestionar workflows y programaciones"
+    },
+    "flag": {
+      "manage": "Gestionar funcionalidades (flags)"
     }
   }
 }

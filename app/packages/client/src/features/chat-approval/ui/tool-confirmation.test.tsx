@@ -45,7 +45,9 @@ describe("ToolConfirmation", () => {
     const card = screen.getByRole("region", { name: "Aprovação: Criar projeto Launch" });
     expect(within(card).getByRole("heading", { name: "Aprovação necessária" })).toBeTruthy();
     expect(within(card).getByText("Criar projeto Launch")).toBeTruthy();
-    expect(within(card).getByText("core.project.create")).toBeTruthy();
+    // The permission reads as its catalog label; the id stays only in the tooltip for support.
+    expect(within(card).getByText("Criar projetos").getAttribute("title")).toBe("core.project.create");
+    expect(within(card).queryByText("core.project.create")).toBeNull();
     expect(within(card).getByText("diff da alteração")).toBeTruthy();
     expect(within(card).getByRole("region", { name: "Dados enviados" }).textContent).toContain('"name": "Launch"');
     await expectNoAxeViolations(container);
@@ -85,8 +87,13 @@ describe("ToolConfirmation", () => {
 
   it("falls back to the tool name without a preview and says there is nothing to compare", () => {
     setup({ preview: undefined, request: undefined, diff: undefined });
-    expect(screen.getByRole("region", { name: "Aprovação: Executar agent-action" })).toBeTruthy();
+    expect(screen.getByRole("region", { name: "Aprovação: Executar: agent-action" })).toBeTruthy();
     expect(screen.getByText("Sem prévia das alterações.")).toBeTruthy();
+  });
+
+  it("names a command tool by its permission label when there is no preview", () => {
+    setup({ preview: undefined, diff: undefined });
+    expect(screen.getByRole("region", { name: "Aprovação: Executar: Criar projetos" })).toBeTruthy();
   });
 
   it("cannot be answered from an older turn or while an answer streams", () => {

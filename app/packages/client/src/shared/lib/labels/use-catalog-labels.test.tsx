@@ -1,3 +1,4 @@
+import { CORE_PERMISSIONS } from "@core/contracts";
 import { loadMessages, type ExtraNamespaces, type SupportedLocale } from "@core/i18n";
 import { renderHook } from "@testing-library/react";
 import type { ReactNode } from "react";
@@ -63,6 +64,12 @@ describe("usePermissionLabel", () => {
     expect(result.current("core.member.remove")).toBe("Remover membros");
     expect(result.current("example.note.archive")).toBe("Arquivar notas");
     expect(result.current("other.thing.do")).toBe("other.thing.do");
+  });
+
+  it.each(["pt-BR", "en-US", "es-419"] as const)("has a label for every core permission in %s", (locale) => {
+    const { result } = renderHook(() => usePermissionLabel(), { wrapper: wrapperFor(locale) });
+    const unlabelled = CORE_PERMISSIONS.map((definition) => definition.id).filter((id) => result.current(id) === id);
+    expect(unlabelled).toEqual([]);
   });
 });
 
