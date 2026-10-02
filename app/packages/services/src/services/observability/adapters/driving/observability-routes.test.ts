@@ -1,4 +1,4 @@
-import { type TraceDetail, TenantIdSchema, UserIdSchema } from "@core/contracts";
+import { type EvalExperimentSummary, type TraceDetail, TenantIdSchema, UserIdSchema } from "@core/contracts";
 import { describe, expect, it } from "vitest";
 import { createInMemoryConsoleStores } from "../../../platform/adapters/driven/in-memory-console-stores.ts";
 import { createConsoleServices } from "../../../platform/composition.ts";
@@ -26,6 +26,10 @@ const fakeConsole = () => {
       return Promise.resolve(query.tenantId === ORG_B ? { ok: false, error: { code: "NOT_FOUND", status: 404 } } : { ok: true, data: { summary: {}, spans: [] } as unknown as TraceDetail });
     },
     listExperiments: (query) => (calls.push({ op: "listExperiments", tenantId: query.tenantId }), Promise.resolve({ ok: true, data: { experiments: [], hasMore: false } })),
+    getExperiment: (query) => {
+      calls.push({ op: "getExperiment", tenantId: query.tenantId, extra: query.experimentId });
+      return Promise.resolve(query.experimentId === "missing" ? { ok: false, error: { code: "NOT_FOUND", status: 404 } } : { ok: true, data: { experimentId: query.experimentId } as unknown as EvalExperimentSummary });
+    },
     listDatasets: (query) => (calls.push({ op: "listDatasets", tenantId: query.tenantId }), Promise.resolve({ ok: true, data: [] })),
     startExperiment: (input) => (calls.push({ op: "startExperiment", tenantId: input.tenantId, extra: input }), Promise.resolve({ ok: true, data: { experimentId: "exp-1" } })),
     addFeedbackItem: (input) => (calls.push({ op: "addFeedbackItem", tenantId: input.tenantId, extra: input }), Promise.resolve({ ok: true, data: { datasetId: "ds", itemId: "it" } })),
@@ -105,6 +109,28 @@ describe("trace time range", () => {
     expect((await callRoute(routes, "traces.adminList", `/v1/admin/traces?startedAfter=${AFTER}&startedBefore=${AFTER}`, { as: "sam" })).status).toBe(400);
     expect((await callRoute(routes, "traces.adminList", "/v1/admin/traces?startedAfter=yesterday", { as: "sam" })).status).toBe(400);
     expect(calls).toEqual([]);
+  });
+});
+
+describe("one experiment by id", () => {
+  it("reads a tenant's experiment under the caller's organization only", async () => {
+    const { routes, calls } = await setup();
+    const own = await callRoute(routes, "evals.getExperiment", `/v1/evals/experiments/exp-1?organizationId=${ORG_A}`, { as: "alice" });
+    expect(own.status).toBe(200);
+    expect(await own.json()).toEqual({ data: { experimentId: "exp-1" } });
+    expect((await callRoute(routes, "evals.getExperiment", `/v1/evals/experiments/exp-1?organizationId=${ORG_B}`, { as: "alice" })).status).toBe(404);
+    expect((await callRoute(routes, "evals.getExperiment", `/v1/evals/experiments/missing?organizationId=${ORG_A}`, { as: "alice" })).status).toBe(404);
+    expect(calls.map((call) => [call.op, call.tenantId, call.extra])).toEqual([
+      ["getExperiment", ORG_A, "exp-1"],
+      ["getExperiment", ORG_A, "missing"],
+    ]);
+  });
+
+  it("lets staff read any experiment and refuses a tenant admin", async () => {
+    const { routes, calls } = await setup();
+    expect((await callRoute(routes, "evals.adminGetExperiment", "/v1/admin/experiments/exp-9", { as: "sam" })).status).toBe(200);
+    expect((await callRoute(routes, "evals.adminGetExperiment", "/v1/admin/experiments/exp-9", { as: "alice" })).status).toBe(403);
+    expect(calls.map((call) => [call.op, call.tenantId])).toEqual([["getExperiment", null]]);
   });
 });
 

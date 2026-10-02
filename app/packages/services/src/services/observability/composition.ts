@@ -3,6 +3,7 @@ import type { AgentSettings } from "@core/contracts";
 import type { GetConversation } from "../conversations/application/use-cases/get-conversation.ts";
 import type { MessageFeedbackStore } from "../conversations/application/ports/message-feedback-store.ts";
 import { makeRecordMessageFeedback, type RecordMessageFeedback } from "../conversations/application/use-cases/record-message-feedback.ts";
+import { type GetExperiment, makeGetExperiment } from "../evals/application/use-cases/get-experiment.ts";
 import { type ListDatasets, makeListDatasets } from "../evals/application/use-cases/list-datasets.ts";
 import { type ListExperiments, makeListExperiments } from "../evals/application/use-cases/list-experiments.ts";
 import { makeStartExperiment, type StartExperiment } from "../evals/application/use-cases/start-experiment.ts";
@@ -18,6 +19,7 @@ export type ObservabilityServices = {
   readonly getTrace: GetTrace;
   readonly listDatasets: ListDatasets;
   readonly listExperiments: ListExperiments;
+  readonly getExperiment: GetExperiment;
   readonly startExperiment: StartExperiment;
   readonly recordFeedback: RecordMessageFeedback;
 };
@@ -37,6 +39,7 @@ export const createObservabilityServices = (deps: {
   getTrace: makeGetTrace(deps),
   listDatasets: makeListDatasets(deps),
   listExperiments: makeListExperiments(deps),
+  getExperiment: makeGetExperiment(deps),
   startExperiment: makeStartExperiment(deps),
   recordFeedback: makeRecordMessageFeedback(deps),
 });

@@ -21,6 +21,8 @@ export type ConsoleGateway = {
   readonly listTraces: (query: TenantFilter & PageNumber & TraceTimeRange & { readonly agentId?: string; readonly status?: "ok" | "error" }) => Promise<ConsoleResult<{ readonly traces: TraceSummary[]; readonly hasMore: boolean }>>;
   readonly getTrace: (query: TenantFilter & { readonly traceId: string }) => Promise<ConsoleResult<TraceDetail>>;
   readonly listExperiments: (query: TenantFilter & PageNumber) => Promise<ConsoleResult<{ readonly experiments: EvalExperimentSummary[]; readonly hasMore: boolean }>>;
+  /** One experiment; another tenant's is `NOT_FOUND` like a missing one. */
+  readonly getExperiment: (query: TenantFilter & { readonly experimentId: string }) => Promise<ConsoleResult<EvalExperimentSummary>>;
   readonly listDatasets: (query: TenantFilter) => Promise<ConsoleResult<EvalDataset[]>>;
   readonly startExperiment: (input: {
     readonly tenantId: string;

@@ -1,8 +1,10 @@
 import {
+  adminGetExperimentEndpoint,
   adminGetTraceEndpoint,
   adminListDatasetsEndpoint,
   adminListExperimentsEndpoint,
   adminListTracesEndpoint,
+  getEvalExperimentEndpoint,
   getTraceEndpoint,
   listEvalDatasetsEndpoint,
   listEvalExperimentsEndpoint,
@@ -88,7 +90,10 @@ const buildTraceRoutes = (deps: { readonly pipeline: ApiRouteDeps; readonly obse
   }),
 });
 
-/** `/v1/evals/*` (the organization's datasets and experiments) and `/v1/admin/datasets|experiments` (staff). */
+/**
+ * `/v1/evals/*` (the organization's datasets and experiments) and `/v1/admin/datasets|experiments`
+ * (staff). One experiment by id lets a comparison span list pages (decision 0048).
+ */
 const buildEvalRoutes = (deps: { readonly pipeline: ApiRouteDeps; readonly observability: ObservabilityServices }): Record<string, RouteHandler> => ({
   [listEvalDatasetsEndpoint.id]: withApiRoute(listEvalDatasetsEndpoint, deps.pipeline, async (ctx) => {
     const tenantId = await requireTenant(ctx, { organizationId: ctx.input.query.organizationId, permission: OBSERVABILITY_PERMISSIONS.evalRead });
@@ -99,6 +104,11 @@ const buildEvalRoutes = (deps: { readonly pipeline: ApiRouteDeps; readonly obser
     if (tenantId instanceof Response) return tenantId;
     const result = await deps.observability.listExperiments({ tenantId, page: ctx.input.query.page, perPage: ctx.input.query.perPage });
     return answer(result, ctx.requestId, (data) => ({ data: data.experiments, meta: { hasMore: data.hasMore } }));
+  }),
+  [getEvalExperimentEndpoint.id]: withApiRoute(getEvalExperimentEndpoint, deps.pipeline, async (ctx) => {
+    const tenantId = await requireTenant(ctx, { organizationId: ctx.input.query.organizationId, permission: OBSERVABILITY_PERMISSIONS.evalRead });
+    if (tenantId instanceof Response) return tenantId;
+    return answer(await deps.observability.getExperiment({ experimentId: ctx.input.params.experimentId, tenantId }), ctx.requestId, (data) => ({ data }));
   }),
   [startEvalExperimentEndpoint.id]: withApiRoute(startEvalExperimentEndpoint, deps.pipeline, async (ctx) => {
     const tenantId = await requireTenant(ctx, { organizationId: ctx.input.query.organizationId, permission: OBSERVABILITY_PERMISSIONS.evalWrite });
@@ -115,6 +125,10 @@ const buildEvalRoutes = (deps: { readonly pipeline: ApiRouteDeps; readonly obser
     if (denied !== null) return denied;
     const result = await deps.observability.listExperiments({ tenantId: null, page: ctx.input.query.page, perPage: ctx.input.query.perPage });
     return answer(result, ctx.requestId, (data) => ({ data: data.experiments, meta: { hasMore: data.hasMore } }));
+  }),
+  [adminGetExperimentEndpoint.id]: withApiRoute(adminGetExperimentEndpoint, deps.pipeline, async (ctx) => {
+    const denied = await requireStaff(ctx, { permission: OBSERVABILITY_PERMISSIONS.platformEvals });
+    return denied ?? answer(await deps.observability.getExperiment({ experimentId: ctx.input.params.experimentId, tenantId: null }), ctx.requestId, (data) => ({ data }));
   }),
 });
 

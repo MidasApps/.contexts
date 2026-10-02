@@ -61,6 +61,10 @@ export const createMastraConsoleGateway = (options: {
       const result = unwrapPage(await call({ method: "GET", path: "/experiments", query: { ...tenant(query.tenantId), page: query.page, perPage: query.perPage } }, paged(EvalExperimentSummarySchema)));
       return result.ok ? { ok: true, data: { experiments: result.data.items, hasMore: result.data.hasMore } } : result;
     },
+    getExperiment: async (query) => {
+      const result = await call({ method: "GET", path: `/experiments/${encodeURIComponent(query.experimentId)}`, query: tenant(query.tenantId) }, z.object({ data: EvalExperimentSummarySchema }));
+      return result.ok ? { ok: true, data: result.data.data } : result;
+    },
     listDatasets: async (query) => {
       const result = await call({ method: "GET", path: "/datasets", query: tenant(query.tenantId) }, z.object({ data: z.array(EvalDatasetSchema) }));
       return result.ok ? { ok: true, data: result.data.data } : result;

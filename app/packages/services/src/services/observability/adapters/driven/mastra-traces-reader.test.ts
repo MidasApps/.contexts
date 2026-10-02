@@ -20,6 +20,19 @@ describe("Mastra console gateway", () => {
     expect(Object.keys(seen[0]?.headers ?? {})).not.toContain("authorization");
   });
 
+  it("reads one experiment by id with the tenant filter", async () => {
+    const urls: string[] = [];
+    const experiment = { experimentId: "exp/1", datasetId: "ds", agentId: "assistant", promptVersionId: null, status: "completed", itemCount: 3, scores: [], verdict: "passed", startedAt: "2026-10-01T10:00:00.000Z", finishedAt: "2026-10-01T10:05:00.000Z" };
+    const gateway = createMastraConsoleGateway({
+      baseUrl: "http://m",
+      serverlessToken: null,
+      fetch: ((url: string) => (urls.push(url), Promise.resolve(answer(200, { data: experiment })))) as unknown as typeof fetch,
+    });
+    expect(await gateway.getExperiment({ experimentId: "exp/1", tenantId: "TenantAaaaaaaaaaaaaaa" })).toEqual({ ok: true, data: experiment });
+    expect(await gateway.getExperiment({ experimentId: "exp-2", tenantId: null })).toEqual({ ok: true, data: experiment });
+    expect(urls).toEqual(["http://m/console/experiments/exp%2F1?tenantId=TenantAaaaaaaaaaaaaaa", "http://m/console/experiments/exp-2"]);
+  });
+
   it("maps statuses without reading error bodies and refuses a malformed answer", async () => {
     const respond = (response: Response) => createMastraConsoleGateway({ baseUrl: "http://m", serverlessToken: null, fetch: () => Promise.resolve(response) });
     expect(await respond(answer(404, { secret: "x" })).getTrace({ traceId: "t", tenantId: null })).toEqual({ ok: false, error: { code: "NOT_FOUND", status: 404 } });
