@@ -1,6 +1,7 @@
 import type { Auth, MultiFactorError, User } from "firebase/auth";
 import type { ClientConfig } from "#/shared/config/client-config.schema.ts";
 import { AuthError, type AuthPort, type AuthState, type AuthUser, type SignInResult } from "./auth-port.ts";
+import { createFirebaseAccountActions } from "./firebase-account.ts";
 import { firebaseCodeOf, guardAuth, toAuthError } from "./firebase-errors.ts";
 import { createFirebaseMfa, toMfaChallenge } from "./firebase-mfa.ts";
 import { FIREBASE_SDK, type FirebaseSdk } from "./firebase-sdk.ts";
@@ -95,6 +96,7 @@ export const createFirebaseAuthClient = (config: ClientConfig, sdk: FirebaseSdk 
   return {
     ...createAuthStateStore(sdk, auth),
     ...createFirebaseMfa(sdk, auth),
+    ...createFirebaseAccountActions(sdk, auth),
     signInWithEmail: signInWithEmail(sdk, auth),
     reauthenticate: reauthenticate(sdk, auth),
     updatePassword: (newPassword) =>

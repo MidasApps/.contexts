@@ -2,6 +2,7 @@
 import { initializeApp } from "firebase/app";
 import {
   connectAuthEmulator,
+  createUserWithEmailAndPassword,
   EmailAuthProvider,
   getMultiFactorResolver,
   inMemoryPersistence,
@@ -12,11 +13,13 @@ import {
   PhoneMultiFactorGenerator,
   reauthenticateWithCredential,
   RecaptchaVerifier,
+  sendPasswordResetEmail,
   signInWithCustomToken,
   signInWithEmailAndPassword,
   signOut,
   TotpMultiFactorGenerator,
   updatePassword,
+  updateProfile,
 } from "firebase/auth";
 
 export const FIREBASE_SDK = {
@@ -37,6 +40,9 @@ export const FIREBASE_SDK = {
   EmailAuthProvider,
   reauthenticateWithCredential,
   updatePassword,
+  createUserWithEmailAndPassword,
+  updateProfile,
+  sendPasswordResetEmail,
 };
 
 export type FirebaseSdk = typeof FIREBASE_SDK;

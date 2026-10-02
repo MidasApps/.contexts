@@ -6,6 +6,8 @@ export type FakeAuthOptions = {
   password?: string;
   /** Second factors already enrolled (they make `reauthenticate` answer `mfa-required`). */
   factors?: readonly EnrolledFactor[];
+  /** Emails that already have an account (`createAccount` answers `EMAIL_ALREADY_IN_USE`). */
+  takenEmails?: readonly string[];
 };
 
 export type FakeAuth = AuthPort & {
@@ -15,6 +17,10 @@ export type FakeAuth = AuthPort & {
   setClaims: (claims: Readonly<Record<string, unknown>>, claimsAfterRefresh?: Readonly<Record<string, unknown>>) => void;
   /** The password after `updatePassword` calls. */
   currentPassword: () => string;
+  /** Every `sendPasswordReset` call, oldest first. */
+  passwordResets: () => readonly { email: string; locale: string }[];
+  /** Accounts made by `createAccount`, oldest first. */
+  createdAccounts: () => readonly { email: string; displayName: string }[];
 };
 
 /** The one code every fake second factor accepts (TOTP apps and SMS alike). */
@@ -69,6 +75,26 @@ const createFakeSecurity = (initial: FakeAuthOptions, isSignedIn: () => boolean)
   };
 };
 
+/** Account creation and password reset emails, recorded for assertions. */
+const createFakeAccounts = (initial: FakeAuthOptions, signIn: (user: Pick<AuthUser, "email" | "displayName">) => void) => {
+  const taken = new Set(initial.takenEmails ?? []);
+  const resets: { email: string; locale: string }[] = [];
+  const created: { email: string; displayName: string }[] = [];
+  return {
+    passwordResets: () => [...resets],
+    createdAccounts: () => [...created],
+    sendPasswordReset: (email: string, locale: string) => Promise.resolve(void resets.push({ email, locale })),
+    createAccount: async ({ email, password, displayName }: { email: string; password: string; displayName: string }) => {
+      if (taken.has(email)) throw new AuthError("EMAIL_ALREADY_IN_USE");
+      if (password.length < 8) throw new AuthError("WEAK_PASSWORD");
+      taken.add(email);
+      created.push({ email, displayName });
+      signIn({ email, displayName });
+      return { kind: "signed-in" as const };
+    },
+  };
+};
+
 /**
  * In-memory `AuthPort` for tests: `signInWithEmail` signs `user` in, tokens are
  * `token-<uid>` (`-fresh` when forced), claims come from `setClaims`. Sign-in MFA rejects (tests
@@ -112,5 +138,6 @@ export const createFakeAuth = (user: AuthUser, initial: AuthState = { status: "s
       checkCode(answer.code);
     },
     ...createFakeSecurity(options, () => state.status === "signed-in"),
+    ...createFakeAccounts(options, (profile) => setState({ status: "signed-in", user: { ...user, ...profile } })),
   };
 };

@@ -17,6 +17,10 @@ const FIREBASE_CODES: Record<string, AuthErrorCode> = {
   "auth/password-does-not-meet-requirements": "WEAK_PASSWORD",
   "auth/invalid-phone-number": "INVALID_PHONE_NUMBER",
   "auth/missing-phone-number": "INVALID_PHONE_NUMBER",
+  "auth/email-already-in-use": "EMAIL_ALREADY_IN_USE",
+  // Email/password sign-up turned off for the project (Identity Platform "user actions").
+  "auth/operation-not-allowed": "ACCOUNT_CREATION_DISABLED",
+  "auth/admin-restricted-operation": "ACCOUNT_CREATION_DISABLED",
 };
 
 /** Firebase error `code` (`auth/...`), when the thrown value has one. */

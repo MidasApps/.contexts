@@ -12,6 +12,8 @@ export const createServerRenderAuth = (): AuthPort => ({
   getState: () => ({ status: "loading" }),
   subscribe: () => () => undefined,
   signInWithEmail: unavailable,
+  createAccount: unavailable,
+  sendPasswordReset: unavailable,
   sendMfaSmsCode: unavailable,
   resolveMfa: unavailable,
   startTotpEnrollment: unavailable,

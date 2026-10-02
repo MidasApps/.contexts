@@ -32,6 +32,8 @@ export const AUTH_ERROR_CODES = [
   "REQUIRES_RECENT_LOGIN",
   "WEAK_PASSWORD",
   "INVALID_PHONE_NUMBER",
+  "EMAIL_ALREADY_IN_USE",
+  "ACCOUNT_CREATION_DISABLED",
   "NOT_SIGNED_IN",
   "AUTH_FAILED",
 ] as const;
@@ -61,6 +63,13 @@ export type AuthPort = {
   getState: () => AuthState;
   subscribe: (listener: () => void) => () => void;
   signInWithEmail: (email: string, password: string) => Promise<SignInResult>;
+  /** Creates an email/password account and signs it in (decision 0049); `EMAIL_ALREADY_IN_USE` when taken. */
+  createAccount: (input: { email: string; password: string; displayName: string }) => Promise<SignInResult>;
+  /**
+   * Sends the password reset email in `locale`. Resolves as well when no account has this email
+   * (the page never tells which accounts exist); rejects only on failures the user can act on.
+   */
+  sendPasswordReset: (email: string, locale: string) => Promise<void>;
   /** SMS factor: sends the code; returns the verification id for `resolveMfa`. */
   sendMfaSmsCode: (challenge: MfaChallenge, hintUid: string, recaptchaContainer: HTMLElement) => Promise<string>;
   resolveMfa: (challenge: MfaChallenge, answer: { hintUid: string; code: string; verificationId?: string }) => Promise<void>;
