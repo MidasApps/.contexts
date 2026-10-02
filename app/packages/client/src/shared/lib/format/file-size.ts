@@ -1,4 +1,5 @@
-type NumberFormatter = (value: number, options: Intl.NumberFormatOptions) => string;
+type UnitOptions = { style: "unit"; unit: "byte" | "kilobyte" | "megabyte"; unitDisplay: "short"; maximumFractionDigits?: number };
+type NumberFormatter = (value: number, options: UnitOptions) => string;
 
 const KB = 1024;
 const MB = KB * 1024;
