@@ -87,7 +87,9 @@ describe("admin overview", () => {
     expect((await setup({ experiments: () => Promise.reject(new Error("mastra down")) }).getOverview()).evalStatus).toBe("unknown");
   });
 
-  it("keeps the tripwire rate at 0: guardrail stops are not recorded anywhere yet", async () => {
-    expect((await setup().getOverview()).tripwireRate).toBe(0);
+  it("keeps the tripwire rate at 0 and says it is not measured: guardrail stops are not recorded anywhere yet", async () => {
+    const overview = await setup().getOverview();
+    expect(overview.tripwireRate).toBe(0);
+    expect(overview.unmeasured).toEqual(["tripwireRate"]);
   });
 });

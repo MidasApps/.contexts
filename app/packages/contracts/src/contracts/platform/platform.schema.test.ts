@@ -17,6 +17,17 @@ describe("platform contracts", () => {
   });
 });
 
+describe("AdminOverviewSchema", () => {
+  const [overview] = AdminOverviewContract.meta.examples as [Record<string, unknown>];
+
+  it("names the numbers that are not measured, none when an older answer omits the list", () => {
+    expect(AdminOverviewContract.schema.parse({ ...overview, unmeasured: ["tripwireRate"] }).unmeasured).toEqual(["tripwireRate"]);
+    const { unmeasured: _omitted, ...older } = overview;
+    expect(AdminOverviewContract.schema.parse(older).unmeasured).toEqual([]);
+    expect(AdminOverviewContract.schema.safeParse({ ...overview, unmeasured: ["organizations"] }).success).toBe(false);
+  });
+});
+
 describe("PlanSchema", () => {
   const [plan] = PlanContract.meta.examples as [{ limits: Record<string, unknown> } & Record<string, unknown>];
 

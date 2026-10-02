@@ -54,8 +54,9 @@ const evalStatusOf = async (deps: OverviewDeps): Promise<AdminOverview["evalStat
  * - approval rate of the last 7 days: approved (executed and failed included) over approved plus
  *   rejected, 0 without decisions;
  * - eval status: verdict of the latest finished experiment (`unknown` when none or unreachable).
- * The tripwire rate stays 0: a guardrail stop aborts the run but is recorded neither in the audit
- * log nor in the ledger (follow-up: persist tripwires, then compute it here).
+ * The tripwire rate stays 0 and is listed in `unmeasured`, so the console never shows it as a
+ * measurement: a guardrail stop aborts the run but is recorded neither in the audit log nor in the
+ * ledger (follow-up 57: persist tripwires, compute it here and drop it from `unmeasured`).
  */
 export const makeGetAdminOverview =
   (deps: OverviewDeps): GetAdminOverview =>
@@ -77,5 +78,6 @@ export const makeGetAdminOverview =
       approvalRate,
       evalStatus,
       generatedAt: now.toISOString(),
+      unmeasured: ["tripwireRate"],
     });
   };

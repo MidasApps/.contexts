@@ -24636,7 +24636,7 @@ components:
       x-tenancyScope: platform
     platform.AdminOverview:
       additionalProperties: false
-      description: "Platform overview for staff: organizations, active users, cost, guardrail and approval rates, eval status."
+      description: "Platform overview for staff: organizations, active users, cost, guardrail and approval rates, eval status, and which numbers are not measured yet."
       examples:
         - activeUsers7d: 87
           approvalRate: 0.92
@@ -24645,6 +24645,8 @@ components:
           generatedAt: "2026-09-30T12:00:00.000Z"
           organizations: 12
           tripwireRate: 0.01
+          unmeasured:
+            - tripwireRate
       properties:
         activeUsers7d:
           description: Distinct users with activity in the last 7 days.
@@ -24690,6 +24692,15 @@ components:
           minimum: 0
           type: number
           x-pii: none
+        unmeasured:
+          default: []
+          description: Numbers the platform does not measure yet; their value is a placeholder the UI must not show as a measurement.
+          items:
+            enum:
+              - tripwireRate
+            type: string
+          type: array
+          x-pii: none
       required:
         - organizations
         - activeUsers7d
@@ -24698,6 +24709,7 @@ components:
         - approvalRate
         - evalStatus
         - generatedAt
+        - unmeasured
       type: object
       x-kind: view
       x-permission: platform.usage.read

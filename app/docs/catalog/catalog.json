@@ -19605,7 +19605,7 @@
     },
     {
       "context": "platform",
-      "description": "Platform overview for staff: organizations, active users, cost, guardrail and approval rates, eval status.",
+      "description": "Platform overview for staff: organizations, active users, cost, guardrail and approval rates, eval status, and which numbers are not measured yet.",
       "examples": [
         {
           "activeUsers7d": 87,
@@ -19614,7 +19614,10 @@
           "evalStatus": "passed",
           "generatedAt": "2026-09-30T12:00:00.000Z",
           "organizations": 12,
-          "tripwireRate": 0.01
+          "tripwireRate": 0.01,
+          "unmeasured": [
+            "tripwireRate"
+          ]
         }
       ],
       "fields": [
@@ -19659,12 +19662,18 @@
           "name": "tripwireRate",
           "pii": "none",
           "required": true
+        },
+        {
+          "description": "Numbers the platform does not measure yet; their value is a placeholder the UI must not show as a measurement.",
+          "name": "unmeasured",
+          "pii": "none",
+          "required": true
         }
       ],
       "id": "platform.AdminOverview",
       "jsonSchema": {
         "additionalProperties": false,
-        "description": "Platform overview for staff: organizations, active users, cost, guardrail and approval rates, eval status.",
+        "description": "Platform overview for staff: organizations, active users, cost, guardrail and approval rates, eval status, and which numbers are not measured yet.",
         "examples": [
           {
             "activeUsers7d": 87,
@@ -19673,7 +19682,10 @@
             "evalStatus": "passed",
             "generatedAt": "2026-09-30T12:00:00.000Z",
             "organizations": 12,
-            "tripwireRate": 0.01
+            "tripwireRate": 0.01,
+            "unmeasured": [
+              "tripwireRate"
+            ]
           }
         ],
         "properties": {
@@ -19728,6 +19740,18 @@
             "minimum": 0,
             "type": "number",
             "x-pii": "none"
+          },
+          "unmeasured": {
+            "default": [],
+            "description": "Numbers the platform does not measure yet; their value is a placeholder the UI must not show as a measurement.",
+            "items": {
+              "enum": [
+                "tripwireRate"
+              ],
+              "type": "string"
+            },
+            "type": "array",
+            "x-pii": "none"
           }
         },
         "required": [
@@ -19737,7 +19761,8 @@
           "tripwireRate",
           "approvalRate",
           "evalStatus",
-          "generatedAt"
+          "generatedAt",
+          "unmeasured"
         ],
         "type": "object",
         "x-kind": "view",
