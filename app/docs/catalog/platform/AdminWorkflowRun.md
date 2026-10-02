@@ -18,6 +18,7 @@ A workflow run of any organization, or of the platform, as staff see it.
 |---|---|---|---|---|
 | `approvalRequestId` | yes | `none` | Approval request a suspended run waits for, if any. |  |
 | `createdAt` | yes | `none` | When the run started (UTC). |  |
+| `failure` | no | `none` | Why a failed or stopped run ended; null otherwise. |  |
 | `runId` | yes | `none` | Run id. |  |
 | `scheduleId` | yes | `none` | Schedule that started the run, if any. |  |
 | `startedBy` | yes | `personal` | User who started the run; null for platform schedules. |  |

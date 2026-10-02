@@ -1,6 +1,6 @@
 import { describe, expect, expectTypeOf, it } from "vitest";
 import type { TenantId } from "../primitives/ids.schema.ts";
-import { ConnectorContract, ConnectorSchema, type Connector } from "./connector.schema.ts";
+import { ConnectorContract, ConnectorSchema, connectorNeedsSecret, type Connector } from "./connector.schema.ts";
 import { ConnectorToolPolicyContract, ConnectorToolPolicySchema } from "./connector-tool-policy.schema.ts";
 
 const contracts = [ConnectorContract, ConnectorToolPolicyContract];
@@ -38,6 +38,24 @@ describe("ConnectorSchema", () => {
   it("never carries a secret value", () => {
     expect(ConnectorSchema.safeParse({ ...mcp, secret: "s3cr3t" }).success).toBe(false);
     expect(ConnectorSchema.safeParse({ ...mcp, config: { ...mcp.config, token: "s3cr3t" } }).success).toBe(false);
+  });
+
+  it("carries the runtime's last load error as a code and a time only", () => {
+    const failing = { ...mcp, lastError: { code: "CONNECT_FAILED", at: "2026-10-01T10:00:00.000Z" } };
+    expect(ConnectorSchema.safeParse(failing).success).toBe(true);
+    expect(ConnectorSchema.safeParse({ ...mcp, lastError: null }).success).toBe(true);
+    expect(ConnectorSchema.safeParse({ ...mcp, lastError: { code: "CONNECT_FAILED", at: "2026-10-01T10:00:00.000Z", message: "ECONNREFUSED" } }).success).toBe(false);
+    expect(ConnectorSchema.safeParse({ ...mcp, lastError: { code: "ECONNREFUSED", at: "2026-10-01T10:00:00.000Z" } }).success).toBe(false);
+  });
+
+  it("knows which connectors need a stored secret", () => {
+    const need = examples.map((example) => [example.type, example.config["auth"] ?? null, connectorNeedsSecret(ConnectorSchema.parse(example))]);
+    expect(need).toEqual([
+      ["openapi", "bearer", true],
+      ["mcp", "none", false],
+      ["postgres", null, true],
+      ["browser", null, false],
+    ]);
   });
 
   it("requires https", () => {

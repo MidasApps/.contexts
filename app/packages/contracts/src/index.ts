@@ -142,11 +142,17 @@ export {
 } from "./contracts/knowledge/endpoints.ts";
 export {
   AllowedHostSchema,
+  CONNECTOR_LOAD_ERROR_CODES,
   ConnectorContract,
   ConnectorIdSchema,
+  ConnectorLoadErrorCodeSchema,
+  ConnectorLoadErrorSchema,
   ConnectorSchema,
+  connectorNeedsSecret,
   type Connector,
   type ConnectorId,
+  type ConnectorLoadError,
+  type ConnectorLoadErrorCode,
   type ConnectorType,
 } from "./contracts/connectors/connector.schema.ts";
 export {
@@ -498,8 +504,9 @@ export {
   type CreateScheduleInput, type Schedule, type ScheduleStatus, type UpdateScheduleInput,
 } from "./contracts/workflows/schedule.schema.ts";
 export {
-  StartWorkflowRunInputContract, StartWorkflowRunInputSchema, WORKFLOW_RUN_STATUSES, WorkflowRunContract, WorkflowRunSchema,
-  WorkflowRunStatusSchema, type StartWorkflowRunInput, type WorkflowRun, type WorkflowRunStatus,
+  StartWorkflowRunInputContract, StartWorkflowRunInputSchema, WORKFLOW_RUN_FAILURE_CODES, WORKFLOW_RUN_STATUSES, WorkflowRunContract,
+  WorkflowRunFailureCodeSchema, WorkflowRunFailureSchema, WorkflowRunSchema, WorkflowRunStatusSchema, type StartWorkflowRunInput,
+  type WorkflowRun, type WorkflowRunFailure, type WorkflowRunFailureCode, type WorkflowRunStatus,
 } from "./contracts/workflows/workflow-run.schema.ts";
 export {
   WORKFLOW_EVENT_TYPES, WorkflowEventContract, WorkflowEventSchema, WorkflowEventTypeSchema, type WorkflowEvent,

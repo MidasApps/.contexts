@@ -43,12 +43,29 @@ const BrowserConfigSchema = z.strictObject({
   allowedHosts,
 });
 
+/**
+ * Why the agent runtime could not load a connector the last time it tried (UX review U-59): a
+ * missing secret, the OpenAPI document (unreachable, invalid, too large, a server outside the
+ * allowed hosts), the MCP server refusing the connection, or anything else.
+ */
+export const CONNECTOR_LOAD_ERROR_CODES = ["SECRET_MISSING", "SPEC_UNAVAILABLE", "SPEC_INVALID", "SPEC_TOO_LARGE", "SERVER_NOT_ALLOWED", "CONNECT_FAILED", "LOAD_FAILED"] as const;
+export const ConnectorLoadErrorCodeSchema = z.enum(CONNECTOR_LOAD_ERROR_CODES);
+export type ConnectorLoadErrorCode = z.infer<typeof ConnectorLoadErrorCodeSchema>;
+
+export const ConnectorLoadErrorSchema = z.strictObject({
+  code: ConnectorLoadErrorCodeSchema.meta(none("What went wrong; never the raw error, which stays in the logs.")),
+  at: IsoDateTimeSchema.meta(none("When the runtime last failed to load the connector (UTC).")),
+});
+export type ConnectorLoadError = z.infer<typeof ConnectorLoadErrorSchema>;
+
 const baseShape = {
   id: ConnectorIdSchema.meta(none("Firestore automatic id of the connector.")),
   tenantId: TenantIdSchema.meta(none("Owning organization.")),
   name: z.string().min(1).max(100).meta(none("Display name; also the prefix of the generated tool names.")),
   status: z.enum(["active", "disabled", "error"]).meta(none("Whether agents can use the connector.")),
   secretRef: z.string().min(1).max(255).nullable().meta(none("Name of the secret in the secret store; never the secret.")),
+  // Optional: written by the agent runtime, absent on connectors it never failed to load (additive).
+  lastError: ConnectorLoadErrorSchema.nullable().optional().meta(none("Why the agent runtime could not load the connector the last time; null once it loads again.")),
   toolPolicy: buildConnectorToolPolicySchema().meta(none("Tools agents may call and which skip approval.")),
   createdBy: UserIdSchema.meta({ description: "Uid of the admin who created it.", pii: "personal" }),
   createdAt: IsoDateTimeSchema.meta(none("When the connector was created (UTC).")),
@@ -64,6 +81,13 @@ export const ConnectorSchema = z.discriminatedUnion("type", [
 ]);
 export type Connector = z.infer<typeof ConnectorSchema>;
 export type ConnectorType = Connector["type"];
+
+/** Whether the connector authenticates with a secret it must have stored (a Postgres DSN, a bearer token, an API key, OAuth tokens). */
+export const connectorNeedsSecret = (connector: Connector): boolean => {
+  if (connector.type === "postgres") return true;
+  if (connector.type === "openapi" || connector.type === "mcp") return connector.config.auth !== "none";
+  return false;
+};
 
 const common = {
   id: "Cn4sK2lPq0WnR5tYu3bV",

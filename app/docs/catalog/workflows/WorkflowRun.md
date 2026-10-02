@@ -18,6 +18,7 @@ A run of a workflow in an organization, with its status and what it waits for.
 |---|---|---|---|---|
 | `approvalRequestId` | yes | `none` | Approval request a suspended run waits for, if any. |  |
 | `createdAt` | yes | `none` | When the run started (UTC). |  |
+| `failure` | no | `none` | Why a failed or stopped run ended; null otherwise. |  |
 | `runId` | yes | `none` | Run id. |  |
 | `scheduleId` | yes | `none` | Schedule that started the run, if any. |  |
 | `startedBy` | yes | `personal` | User who started the run; null for platform schedules. |  |
@@ -42,6 +43,7 @@ A run of a workflow in an organization, with its status and what it waits for.
     "startedBy": "uA1b2C3d4E5f6G7h8I9j",
     "scheduleId": null,
     "approvalRequestId": "Ar9oP1lK3jH5gF7dS9aQ",
+    "failure": null,
     "createdAt": "2026-09-29T14:30:00.000Z",
     "updatedAt": "2026-09-29T15:00:00.000Z"
   }

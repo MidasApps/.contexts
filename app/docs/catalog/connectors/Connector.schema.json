@@ -181,6 +181,46 @@
           "type": "string",
           "x-pii": "none"
         },
+        "lastError": {
+          "anyOf": [
+            {
+              "additionalProperties": false,
+              "properties": {
+                "at": {
+                  "description": "When the runtime last failed to load the connector (UTC).",
+                  "format": "date-time",
+                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                  "type": "string",
+                  "x-pii": "none"
+                },
+                "code": {
+                  "description": "What went wrong; never the raw error, which stays in the logs.",
+                  "enum": [
+                    "SECRET_MISSING",
+                    "SPEC_UNAVAILABLE",
+                    "SPEC_INVALID",
+                    "SPEC_TOO_LARGE",
+                    "SERVER_NOT_ALLOWED",
+                    "CONNECT_FAILED",
+                    "LOAD_FAILED"
+                  ],
+                  "type": "string",
+                  "x-pii": "none"
+                }
+              },
+              "required": [
+                "code",
+                "at"
+              ],
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Why the agent runtime could not load the connector the last time; null once it loads again.",
+          "x-pii": "none"
+        },
         "name": {
           "description": "Display name; also the prefix of the generated tool names.",
           "maxLength": 100,
@@ -342,6 +382,46 @@
           "type": "string",
           "x-pii": "none"
         },
+        "lastError": {
+          "anyOf": [
+            {
+              "additionalProperties": false,
+              "properties": {
+                "at": {
+                  "description": "When the runtime last failed to load the connector (UTC).",
+                  "format": "date-time",
+                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                  "type": "string",
+                  "x-pii": "none"
+                },
+                "code": {
+                  "description": "What went wrong; never the raw error, which stays in the logs.",
+                  "enum": [
+                    "SECRET_MISSING",
+                    "SPEC_UNAVAILABLE",
+                    "SPEC_INVALID",
+                    "SPEC_TOO_LARGE",
+                    "SERVER_NOT_ALLOWED",
+                    "CONNECT_FAILED",
+                    "LOAD_FAILED"
+                  ],
+                  "type": "string",
+                  "x-pii": "none"
+                }
+              },
+              "required": [
+                "code",
+                "at"
+              ],
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Why the agent runtime could not load the connector the last time; null once it loads again.",
+          "x-pii": "none"
+        },
         "name": {
           "description": "Display name; also the prefix of the generated tool names.",
           "maxLength": 100,
@@ -482,6 +562,46 @@
           "description": "Firestore automatic id of the connector.",
           "minLength": 1,
           "type": "string",
+          "x-pii": "none"
+        },
+        "lastError": {
+          "anyOf": [
+            {
+              "additionalProperties": false,
+              "properties": {
+                "at": {
+                  "description": "When the runtime last failed to load the connector (UTC).",
+                  "format": "date-time",
+                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                  "type": "string",
+                  "x-pii": "none"
+                },
+                "code": {
+                  "description": "What went wrong; never the raw error, which stays in the logs.",
+                  "enum": [
+                    "SECRET_MISSING",
+                    "SPEC_UNAVAILABLE",
+                    "SPEC_INVALID",
+                    "SPEC_TOO_LARGE",
+                    "SERVER_NOT_ALLOWED",
+                    "CONNECT_FAILED",
+                    "LOAD_FAILED"
+                  ],
+                  "type": "string",
+                  "x-pii": "none"
+                }
+              },
+              "required": [
+                "code",
+                "at"
+              ],
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Why the agent runtime could not load the connector the last time; null once it loads again.",
           "x-pii": "none"
         },
         "name": {
@@ -632,6 +752,46 @@
           "description": "Firestore automatic id of the connector.",
           "minLength": 1,
           "type": "string",
+          "x-pii": "none"
+        },
+        "lastError": {
+          "anyOf": [
+            {
+              "additionalProperties": false,
+              "properties": {
+                "at": {
+                  "description": "When the runtime last failed to load the connector (UTC).",
+                  "format": "date-time",
+                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+                  "type": "string",
+                  "x-pii": "none"
+                },
+                "code": {
+                  "description": "What went wrong; never the raw error, which stays in the logs.",
+                  "enum": [
+                    "SECRET_MISSING",
+                    "SPEC_UNAVAILABLE",
+                    "SPEC_INVALID",
+                    "SPEC_TOO_LARGE",
+                    "SERVER_NOT_ALLOWED",
+                    "CONNECT_FAILED",
+                    "LOAD_FAILED"
+                  ],
+                  "type": "string",
+                  "x-pii": "none"
+                }
+              },
+              "required": [
+                "code",
+                "at"
+              ],
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Why the agent runtime could not load the connector the last time; null once it loads again.",
           "x-pii": "none"
         },
         "name": {

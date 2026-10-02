@@ -19745,6 +19745,35 @@ components:
               minLength: 1
               type: string
               x-pii: none
+            lastError:
+              anyOf:
+                - additionalProperties: false
+                  properties:
+                    at:
+                      description: When the runtime last failed to load the connector (UTC).
+                      format: date-time
+                      pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z))$
+                      type: string
+                      x-pii: none
+                    code:
+                      description: What went wrong; never the raw error, which stays in the logs.
+                      enum:
+                        - SECRET_MISSING
+                        - SPEC_UNAVAILABLE
+                        - SPEC_INVALID
+                        - SPEC_TOO_LARGE
+                        - SERVER_NOT_ALLOWED
+                        - CONNECT_FAILED
+                        - LOAD_FAILED
+                      type: string
+                      x-pii: none
+                  required:
+                    - code
+                    - at
+                  type: object
+                - type: "null"
+              description: Why the agent runtime could not load the connector the last time; null once it loads again.
+              x-pii: none
             name:
               description: Display name; also the prefix of the generated tool names.
               maxLength: 100
@@ -19872,6 +19901,35 @@ components:
               minLength: 1
               type: string
               x-pii: none
+            lastError:
+              anyOf:
+                - additionalProperties: false
+                  properties:
+                    at:
+                      description: When the runtime last failed to load the connector (UTC).
+                      format: date-time
+                      pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z))$
+                      type: string
+                      x-pii: none
+                    code:
+                      description: What went wrong; never the raw error, which stays in the logs.
+                      enum:
+                        - SECRET_MISSING
+                        - SPEC_UNAVAILABLE
+                        - SPEC_INVALID
+                        - SPEC_TOO_LARGE
+                        - SERVER_NOT_ALLOWED
+                        - CONNECT_FAILED
+                        - LOAD_FAILED
+                      type: string
+                      x-pii: none
+                  required:
+                    - code
+                    - at
+                  type: object
+                - type: "null"
+              description: Why the agent runtime could not load the connector the last time; null once it loads again.
+              x-pii: none
             name:
               description: Display name; also the prefix of the generated tool names.
               maxLength: 100
@@ -19982,6 +20040,35 @@ components:
               description: Firestore automatic id of the connector.
               minLength: 1
               type: string
+              x-pii: none
+            lastError:
+              anyOf:
+                - additionalProperties: false
+                  properties:
+                    at:
+                      description: When the runtime last failed to load the connector (UTC).
+                      format: date-time
+                      pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z))$
+                      type: string
+                      x-pii: none
+                    code:
+                      description: What went wrong; never the raw error, which stays in the logs.
+                      enum:
+                        - SECRET_MISSING
+                        - SPEC_UNAVAILABLE
+                        - SPEC_INVALID
+                        - SPEC_TOO_LARGE
+                        - SERVER_NOT_ALLOWED
+                        - CONNECT_FAILED
+                        - LOAD_FAILED
+                      type: string
+                      x-pii: none
+                  required:
+                    - code
+                    - at
+                  type: object
+                - type: "null"
+              description: Why the agent runtime could not load the connector the last time; null once it loads again.
               x-pii: none
             name:
               description: Display name; also the prefix of the generated tool names.
@@ -20100,6 +20187,35 @@ components:
               description: Firestore automatic id of the connector.
               minLength: 1
               type: string
+              x-pii: none
+            lastError:
+              anyOf:
+                - additionalProperties: false
+                  properties:
+                    at:
+                      description: When the runtime last failed to load the connector (UTC).
+                      format: date-time
+                      pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z))$
+                      type: string
+                      x-pii: none
+                    code:
+                      description: What went wrong; never the raw error, which stays in the logs.
+                      enum:
+                        - SECRET_MISSING
+                        - SPEC_UNAVAILABLE
+                        - SPEC_INVALID
+                        - SPEC_TOO_LARGE
+                        - SERVER_NOT_ALLOWED
+                        - CONNECT_FAILED
+                        - LOAD_FAILED
+                      type: string
+                      x-pii: none
+                  required:
+                    - code
+                    - at
+                  type: object
+                - type: "null"
+              description: Why the agent runtime could not load the connector the last time; null once it loads again.
               x-pii: none
             name:
               description: Display name; also the prefix of the generated tool names.
@@ -25190,6 +25306,33 @@ components:
           pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z))$
           type: string
           x-pii: none
+        failure:
+          anyOf:
+            - additionalProperties: false
+              properties:
+                code:
+                  description: "Why the run ended: a step failed, a guardrail stopped it, or it failed outside any step."
+                  enum:
+                    - STEP_FAILED
+                    - TRIPWIRE
+                    - RUN_FAILED
+                  type: string
+                  x-pii: none
+                stepId:
+                  anyOf:
+                    - maxLength: 128
+                      minLength: 1
+                      type: string
+                    - type: "null"
+                  description: Step that failed or was stopped, when known.
+                  x-pii: none
+              required:
+                - code
+                - stepId
+              type: object
+            - type: "null"
+          description: Why a failed or stopped run ended; null otherwise.
+          x-pii: none
         runId:
           description: Run id.
           maxLength: 128
@@ -27816,6 +27959,7 @@ components:
       examples:
         - approvalRequestId: Ar9oP1lK3jH5gF7dS9aQ
           createdAt: "2026-09-29T14:30:00.000Z"
+          failure: null
           runId: 01J8Z3K4M5N6P7Q8R9S0T1V2W3
           scheduleId: null
           startedBy: uA1b2C3d4E5f6G7h8I9j
@@ -27836,6 +27980,33 @@ components:
           format: date-time
           pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z))$
           type: string
+          x-pii: none
+        failure:
+          anyOf:
+            - additionalProperties: false
+              properties:
+                code:
+                  description: "Why the run ended: a step failed, a guardrail stopped it, or it failed outside any step."
+                  enum:
+                    - STEP_FAILED
+                    - TRIPWIRE
+                    - RUN_FAILED
+                  type: string
+                  x-pii: none
+                stepId:
+                  anyOf:
+                    - maxLength: 128
+                      minLength: 1
+                      type: string
+                    - type: "null"
+                  description: Step that failed or was stopped, when known.
+                  x-pii: none
+              required:
+                - code
+                - stepId
+              type: object
+            - type: "null"
+          description: Why a failed or stopped run ended; null otherwise.
           x-pii: none
         runId:
           description: Run id.

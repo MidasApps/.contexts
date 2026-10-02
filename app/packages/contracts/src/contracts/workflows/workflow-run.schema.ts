@@ -11,6 +11,21 @@ export const WORKFLOW_RUN_STATUSES = ["pending", "running", "waiting", "suspende
 export const WorkflowRunStatusSchema = z.enum(WORKFLOW_RUN_STATUSES);
 export type WorkflowRunStatus = z.infer<typeof WorkflowRunStatusSchema>;
 
+/** Why a run ended badly: a step failed, a guardrail stopped it, or it failed outside any step. */
+export const WORKFLOW_RUN_FAILURE_CODES = ["STEP_FAILED", "TRIPWIRE", "RUN_FAILED"] as const;
+export const WorkflowRunFailureCodeSchema = z.enum(WORKFLOW_RUN_FAILURE_CODES);
+export type WorkflowRunFailureCode = z.infer<typeof WorkflowRunFailureCodeSchema>;
+
+/**
+ * The safe part of a failed or stopped run (UX review U-57): a stable code and the step, never
+ * the error message, the guardrail's reason or a stack (they stay in logs and traces).
+ */
+export const WorkflowRunFailureSchema = z.strictObject({
+  code: WorkflowRunFailureCodeSchema.meta(none("Why the run ended: a step failed, a guardrail stopped it, or it failed outside any step.")),
+  stepId: z.string().min(1).max(128).nullable().meta(none("Step that failed or was stopped, when known.")),
+});
+export type WorkflowRunFailure = z.infer<typeof WorkflowRunFailureSchema>;
+
 /** A workflow run as `/v1/workflows/runs` lists it (tenant from `resourceId`, decision 0040). */
 export const WorkflowRunSchema = z.strictObject({
   runId: z.string().min(1).max(128).meta(none("Run id.")),
@@ -20,6 +35,8 @@ export const WorkflowRunSchema = z.strictObject({
   startedBy: UserIdSchema.nullable().meta(personal("User who started the run; null for platform schedules.")),
   scheduleId: z.string().min(1).nullable().meta(none("Schedule that started the run, if any.")),
   approvalRequestId: z.string().min(1).nullable().meta(none("Approval request a suspended run waits for, if any.")),
+  // Optional: added after the first release of the view (additive, schemas rule); null when the run did not fail.
+  failure: WorkflowRunFailureSchema.nullable().optional().meta(none("Why a failed or stopped run ended; null otherwise.")),
   createdAt: IsoDateTimeSchema.meta(none("When the run started (UTC).")),
   updatedAt: IsoDateTimeSchema.meta(none("When the run last changed (UTC).")),
 });
@@ -38,6 +55,7 @@ export const WorkflowRunContract = defineContract(WorkflowRunSchema, {
       startedBy: EXAMPLE_IDS.user,
       scheduleId: null,
       approvalRequestId: EXAMPLE_IDS.approvalRequest,
+      failure: null,
       createdAt: EXAMPLE_TIMES.created,
       updatedAt: EXAMPLE_TIMES.updated,
     },

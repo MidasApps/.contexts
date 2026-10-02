@@ -35,6 +35,49 @@
       "type": "string",
       "x-pii": "none"
     },
+    "failure": {
+      "anyOf": [
+        {
+          "additionalProperties": false,
+          "properties": {
+            "code": {
+              "description": "Why the run ended: a step failed, a guardrail stopped it, or it failed outside any step.",
+              "enum": [
+                "STEP_FAILED",
+                "TRIPWIRE",
+                "RUN_FAILED"
+              ],
+              "type": "string",
+              "x-pii": "none"
+            },
+            "stepId": {
+              "anyOf": [
+                {
+                  "maxLength": 128,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Step that failed or was stopped, when known.",
+              "x-pii": "none"
+            }
+          },
+          "required": [
+            "code",
+            "stepId"
+          ],
+          "type": "object"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Why a failed or stopped run ended; null otherwise.",
+      "x-pii": "none"
+    },
     "runId": {
       "description": "Run id.",
       "maxLength": 128,
