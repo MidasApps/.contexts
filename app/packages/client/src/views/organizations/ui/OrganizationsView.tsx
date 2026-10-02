@@ -5,6 +5,7 @@ import { useTranslations } from "use-intl";
 import { orderByLastUsed, OrganizationAvatar } from "#/entities/organization/index.ts";
 import { useMe, useMyOrganizations } from "#/entities/session/index.ts";
 import { CreateOrganizationForm } from "#/features/create-organization/index.ts";
+import { SignOutButton } from "#/features/sign-out/index.ts";
 import { RouteLink } from "#/shared/lib/router/router-context.tsx";
 import { Badge } from "#/shared/ui/atoms/Badge/Badge.tsx";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
@@ -14,6 +15,15 @@ import { EmptyState } from "#/shared/ui/molecules/EmptyState/EmptyState.tsx";
 import { ApiErrorState } from "#/shared/ui/molecules/ErrorState/ApiErrorState.tsx";
 import { LoadingState } from "#/shared/ui/molecules/LoadingState/LoadingState.tsx";
 import { PageHeader } from "#/widgets/page-header/index.ts";
+
+/** `pending` while `GET /v1/me` loads; a failed load counts as "no" (the server enforces anyway). */
+type CreateAccess = "pending" | "allowed" | "denied";
+
+const useCreateAccess = (): CreateAccess => {
+  const me = useMe();
+  if (me.isPending) return "pending";
+  return me.data?.capabilities.createOrganization === true ? "allowed" : "denied";
+};
 
 function OrganizationList({ organizations, lastUsedId }: { organizations: readonly Organization[]; lastUsedId: string | undefined }) {
   const t = useTranslations("shell.organizations");
@@ -39,13 +49,27 @@ function OrganizationList({ organizations, lastUsedId }: { organizations: readon
   );
 }
 
-function OrganizationsSection() {
+/** Nothing to list: create one next to it, or (no self-serve) ask for an invitation or switch account. */
+function NoOrganizations({ access }: { access: CreateAccess }) {
+  const t = useTranslations("shell.organizations");
+  if (access !== "denied") return <EmptyState icon="building" title={t("emptyTitle")} description={t("emptyDescription")} />;
+  return (
+    <EmptyState
+      icon="building"
+      title={t("emptyTitle")}
+      description={t("emptyDescriptionInviteOnly")}
+      action={<SignOutButton variant="secondary">{t("switchAccount")}</SignOutButton>}
+    />
+  );
+}
+
+function OrganizationsSection({ access }: { access: CreateAccess }) {
   const t = useTranslations("shell.organizations");
   const me = useMe();
   const organizations = useMyOrganizations();
   if (organizations.isPending) return <LoadingState label={t("loading")} rows={4} />;
   if (organizations.isError) return <ApiErrorState error={organizations.error} onRetry={() => void organizations.refetch()} retrying={organizations.isFetching} />;
-  if (organizations.data.length === 0) return <EmptyState icon="building" title={t("emptyTitle")} description={t("emptyDescription")} />;
+  if (organizations.data.length === 0) return <NoOrganizations access={access} />;
   return (
     <div className="flex flex-col gap-3">
       <OrganizationList organizations={organizations.data} lastUsedId={me.data?.lastContext.organizationId} />
@@ -58,31 +82,42 @@ function OrganizationsSection() {
   );
 }
 
+function CreateOrganizationCard({ access }: { access: Exclude<CreateAccess, "denied"> }) {
+  const t = useTranslations("shell.organizations");
+  if (access === "pending") return <LoadingState label={t("create.checking")} rows={3} className="self-start" />;
+  return (
+    <Card role="region" aria-labelledby="create-organization-heading" className="self-start">
+      <CardHeader>
+        <CardTitle as="h2" id="create-organization-heading">
+          {t("create.title")}
+        </CardTitle>
+        <CardDescription>{t("create.description")}</CardDescription>
+      </CardHeader>
+      <CreateOrganizationForm />
+    </Card>
+  );
+}
+
 /**
  * `/organizations` (SP2 spec §4): the user's organizations, the last used first, and a form to
- * create one (the creator becomes owner). Loading, empty and error states with retry.
+ * create one (the creator becomes owner) when `GET /v1/me` says the server would allow it
+ * (decision 0048); otherwise the empty state points to an invitation. Loading, empty and error
+ * states with retry.
  */
 export function OrganizationsView() {
   const t = useTranslations("shell.organizations");
+  const access = useCreateAccess();
   return (
     <>
-      <PageHeader title={t("title")} description={t("description")} />
-      <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_400px]">
+      <PageHeader title={t("title")} description={access === "denied" ? t("descriptionInviteOnly") : t("description")} />
+      <div className={access === "denied" ? "flex flex-col" : "grid gap-8 lg:grid-cols-[minmax(0,1fr)_400px]"}>
         <section aria-labelledby="organizations-list-heading" className="flex flex-col gap-3">
           <h2 id="organizations-list-heading" className="text-sm font-semibold">
             {t("listLabel")}
           </h2>
-          <OrganizationsSection />
+          <OrganizationsSection access={access} />
         </section>
-        <Card role="region" aria-labelledby="create-organization-heading" className="self-start">
-          <CardHeader>
-            <CardTitle as="h2" id="create-organization-heading">
-              {t("create.title")}
-            </CardTitle>
-            <CardDescription>{t("create.description")}</CardDescription>
-          </CardHeader>
-          <CreateOrganizationForm />
-        </Card>
+        {access === "denied" ? null : <CreateOrganizationCard access={access} />}
       </div>
     </>
   );

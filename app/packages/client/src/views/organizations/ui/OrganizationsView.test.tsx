@@ -44,6 +44,25 @@ describe("OrganizationsView", () => {
     expect(await screen.findByRole("list", { name: "Suas organizações" })).toBeDefined();
   }, 15_000);
 
+  it("hides the create form when the caller may not create organizations, and says how to get in", async () => {
+    const { container, user, auth } = renderApp(<OrganizationsView />, {
+      path: "/organizations",
+      routes: {
+        "GET /v1/me": ok(buildMe({ capabilities: { createOrganization: false } })),
+        "GET /v1/me/organizations": page([]),
+      },
+    });
+    const empty = await screen.findByRole("heading", { name: "Você ainda não participa de nenhuma organização" });
+    const panel = empty.closest("[data-state='empty']");
+    expect(panel?.textContent).toContain("Peça um convite a quem administra a sua organização");
+    expect(screen.queryByRole("form", { name: "Nova organização" })).toBeNull();
+    expect(screen.queryByRole("region", { name: "Nova organização" })).toBeNull();
+    expect(screen.getByText("Escolha onde trabalhar.")).toBeDefined();
+    await expectNoAxeViolations(container);
+    await user.click(screen.getByRole("button", { name: "Entrar com outra conta" }));
+    await waitFor(() => expect(auth.getState().status).toBe("signed-out"));
+  });
+
   it("creates an organization with an Idempotency-Key and prefilled defaults, then opens it", async () => {
     const created = buildOrganization({ id: "NewOrg0000000000000a", name: "Fabrikam" });
     const { user, api, router } = renderApp(<OrganizationsView />, {

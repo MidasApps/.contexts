@@ -68,6 +68,7 @@ export const buildMe = (overrides: Json = {}): Json => ({
   accessVersion: 3,
   isPlatformStaff: false,
   mfaEnrolled: false,
+  capabilities: { createOrganization: true },
   ...overrides,
 });
 
