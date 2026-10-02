@@ -6,11 +6,11 @@ still applied (none were already fixed). Paths are relative to `app/packages/cli
 
 | Finding | Status | Commit | Test |
 |---|---|---|---|
-| U-05 TOTP enrollment has no QR code (SH-03) | fixed | `feat(client): show a qr code to enroll an authenticator app` | `shared/ui/atoms/QrCode/QrCode.test.tsx`; `views/profile-security/ui/ProfileSecurityView.test.tsx` ("shows the setup as a QR code…") |
-| U-66 TOTP issuer is the Firebase project id (SH-20) | fixed | same commit | `ProfileSecurityView.test.tsx` (asserts `startTotpEnrollment("Core")`) |
-| U-20 impersonation awareness (SH-08, SH-14, ADM-06) | fixed | `fix(client): make support mode visible and read-only in the profile`; the stored labels in `fix(admin): hand focus through the support-access steps` | `features/update-preferences/model/use-save-theme-preference.test.tsx`; `views/profile-account/ui/ProfileAccountView.test.tsx`; `views/profile-notifications/ui/ProfileNotificationsView.test.tsx`; `app-shell/app-layout.test.tsx`; `views/admin-users/ui/AdminUsersView.test.tsx` |
-| U-46 no focus hand-off in the impersonation flow (ADM-07) | fixed | `fix(admin): hand focus through the support-access steps` | `AdminUsersView.test.tsx` ("moves focus to the chosen user after a pick…") |
-| U-47 org error not tied to its field, no duration range hint (ADM-09) | fixed | same commit | `AdminUsersView.test.tsx` ("ties each error to its field…") |
+| U-05 TOTP enrollment has no QR code (SH-03) | fixed | `68f3138a` | `shared/ui/atoms/QrCode/QrCode.test.tsx`; `views/profile-security/ui/ProfileSecurityView.test.tsx` ("shows the setup as a QR code…") |
+| U-66 TOTP issuer is the Firebase project id (SH-20) | fixed | `68f3138a` | `ProfileSecurityView.test.tsx` (asserts `startTotpEnrollment("Core")`) |
+| U-20 impersonation awareness (SH-08, SH-14, ADM-06) | fixed | `d4dd8f36`, `ab035ecd` (read-only scope); stored labels in `88d5e1b7` | `features/update-preferences/model/use-save-theme-preference.test.tsx`; `views/profile-account/ui/ProfileAccountView.test.tsx` (incl. retry stays usable); `views/profile-notifications/ui/ProfileNotificationsView.test.tsx`; `app-shell/app-layout.test.tsx`; `views/admin-users/ui/AdminUsersView.test.tsx` |
+| U-46 no focus hand-off in the impersonation flow (ADM-07) | fixed | `88d5e1b7` | `AdminUsersView.test.tsx` ("moves focus to the chosen user after a pick…") |
+| U-47 org error not tied to its field, no duration range hint (ADM-09) | fixed | `88d5e1b7` | `AdminUsersView.test.tsx` ("ties each error to its field…") |
 
 ## What changed
 
@@ -67,3 +67,11 @@ still applied (none were already fixed). Paths are relative to `app/packages/cli
   (`IMPERSONATION_READ_ONLY`).
 - `ProfileThemeSync` still applies the impersonated user's saved theme in the staff tab. This is
   harmless and was left as is.
+
+## Verification (worktree, on top of `ace7eb1b`)
+
+- `vitest run --maxWorkers=2` in `packages/client`: 241 files, 1220 tests passed.
+- `vitest run` in `packages/i18n`: 51 passed. `pnpm i18n:check`: ok (10 namespaces, 30 catalogs).
+- `tsc --noEmit` and `eslint .`: clean in `packages/client` and `packages/i18n`. `typecheck`: clean
+  in `apps/web` and `apps/desktop`.
+- No contract changed, so `contracts:check` does not apply.
