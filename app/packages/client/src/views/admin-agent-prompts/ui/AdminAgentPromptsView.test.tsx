@@ -260,7 +260,7 @@ describe("AdminAgentPromptsView", () => {
     const dialog = await screen.findByRole("dialog", { name: "Nova versão do prompt de Assistente" });
     // Follow-up 86: the editor starts from the instructions the agent ships with in code.
     expect(within(dialog).getByText(/O texto parte das instruções que o agente tem no código/u)).toBeDefined();
-    expect((within(dialog).getByRole("textbox", { name: /^Texto do prompt/u }) as HTMLTextAreaElement).value).toBe(seed.body);
+    expect(within(dialog).getByRole<HTMLTextAreaElement>("textbox", { name: /^Texto do prompt/u }).value).toBe(seed.body);
     // Saving the seed as it is creates version 1 (the code text is not a stored version).
     await user.click(within(dialog).getByRole("button", { name: "Criar versão" }));
     await waitFor(() => expect(api.calls.find((call) => call.method === "POST")?.body).toEqual({ body: seed.body }));
