@@ -1,5 +1,10 @@
 // AI Elements in the client (decision 0035): installed from the registry with the pinned shadcn
 // CLI in a scratch copy, then ported to the design tokens, the Atomic kit and i18n. Owned code.
+//
+// Reserved for modules: `ChainOfThought`, `Context`, `Plan` and `Queue` are used by no core screen
+// (the core chat streams no plan, queue or token-usage parts). They stay because this barrel is the
+// public `@core/client/shared/ui/ai` kit a module builds its own chat parts from; each one is
+// covered by `ai-elements.test.tsx` (states, axe). Remove one only with the module that last used it.
 export { Agent, AgentContent, AgentHeader, AgentSection, type AgentHeaderProps, type AgentSectionProps } from "./agent.tsx";
 export { Attachment, AttachmentRemove, Attachments, type AttachmentProps, type AttachmentRemoveProps, type AttachmentsProps } from "./attachments.tsx";
 export { AudioPlayer, type AudioPlayerProps } from "./audio-player.tsx";
