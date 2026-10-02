@@ -60,7 +60,7 @@ test.describe("workflow runs", () => {
 
     await run.getByRole("button", { name: `Cancelar a execução ${runId} de ${APPROVAL_DEMO}` }).click();
     const confirm = staffPage.getByRole("alertdialog", { name: `Cancelar a execução de ${APPROVAL_DEMO}?` });
-    await expect(confirm).toContainText("A solicitação de aprovação que ela aguardava continua aberta");
+    await expect(confirm).toContainText("A solicitação de aprovação que ela aguardava é cancelada junto");
     await confirm.getByRole("button", { name: "Cancelar execução" }).click();
     await expect(toast(staffPage, `Execução de ${APPROVAL_DEMO} cancelada.`)).toBeVisible();
     await filters.getByRole("button", { name: "Aguardando aprovação" }).click();

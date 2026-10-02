@@ -897,7 +897,7 @@
     "cancel": {
       "title": "Cancel the run of {workflow}?",
       "description": "The run stops now and cannot be resumed.",
-      "descriptionSuspended": "The run stops now and cannot be resumed. The approval request it was waiting for stays open and expires on its own; nobody is notified.",
+      "descriptionSuspended": "The run stops now and cannot be resumed. The approval request it was waiting for is cancelled with it.",
       "confirm": "Cancel run",
       "keep": "Keep run",
       "done": "Run of {workflow} cancelled."

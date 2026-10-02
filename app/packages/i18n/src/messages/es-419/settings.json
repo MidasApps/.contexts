@@ -1421,7 +1421,7 @@
     "cancelDialog": {
       "title": "¿Cancelar la ejecución de {workflow}?",
       "description": "La ejecución se detiene y no puede reanudarse. Lo que ya hizo no se deshace.",
-      "descriptionSuspended": "La ejecución se detiene y no puede reanudarse. La solicitud de aprobación que esperaba deja de tener efecto.",
+      "descriptionSuspended": "La ejecución se detiene y no puede reanudarse. La solicitud de aprobación que esperaba se cancela con ella.",
       "confirm": "Cancelar ejecución",
       "keep": "Mantener ejecución",
       "done": "Ejecución de {workflow} cancelada."

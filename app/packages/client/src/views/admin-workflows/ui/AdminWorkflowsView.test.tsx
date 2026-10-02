@@ -74,7 +74,7 @@ describe("AdminWorkflowsView: runs", () => {
     const table = await screen.findByRole("table", { name: "Execuções de workflows" });
     await user.click(within(table).getByRole("button", { name: /^Cancelar a execução/u }));
     const dialog = await screen.findByRole("alertdialog", { name: "Cancelar a execução de Demonstração de aprovação?" });
-    expect(within(dialog).getByText(/solicitação de aprovação que ela aguardava continua aberta/u)).toBeDefined();
+    expect(within(dialog).getByText(/solicitação de aprovação que ela aguardava é cancelada junto/u)).toBeDefined();
     await expectNoAxeViolations(container.ownerDocument.body);
     api.route("GET /v1/admin/workflow-runs", page([{ ...SUSPENDED, status: "canceled" }, PLATFORM_DONE]));
     await user.click(within(dialog).getByRole("button", { name: "Cancelar execução" }));

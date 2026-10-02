@@ -1421,7 +1421,7 @@
     "cancelDialog": {
       "title": "Cancel the run of {workflow}?",
       "description": "The run stops and cannot be resumed. What it already did is not undone.",
-      "descriptionSuspended": "The run stops and cannot be resumed. The approval request it was waiting for no longer has any effect.",
+      "descriptionSuspended": "The run stops and cannot be resumed. The approval request it was waiting for is cancelled with it.",
       "confirm": "Cancel run",
       "keep": "Keep run",
       "done": "Run of {workflow} canceled."

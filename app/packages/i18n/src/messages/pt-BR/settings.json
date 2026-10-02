@@ -1421,7 +1421,7 @@
     "cancelDialog": {
       "title": "Cancelar a execução de {workflow}?",
       "description": "A execução para e não pode ser retomada. O que ela já fez não é desfeito.",
-      "descriptionSuspended": "A execução para e não pode ser retomada. O pedido de aprovação que ela aguardava deixa de ter efeito.",
+      "descriptionSuspended": "A execução para e não pode ser retomada. O pedido de aprovação que ela aguardava é cancelado junto.",
       "confirm": "Cancelar execução",
       "keep": "Manter execução",
       "done": "Execução de {workflow} cancelada."

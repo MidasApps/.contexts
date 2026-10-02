@@ -897,7 +897,7 @@
     "cancel": {
       "title": "Cancelar a execução de {workflow}?",
       "description": "A execução para agora e não pode ser retomada.",
-      "descriptionSuspended": "A execução para agora e não pode ser retomada. A solicitação de aprovação que ela aguardava continua aberta e expira sozinha; ninguém é avisado.",
+      "descriptionSuspended": "A execução para agora e não pode ser retomada. A solicitação de aprovação que ela aguardava é cancelada junto.",
       "confirm": "Cancelar execução",
       "keep": "Manter execução",
       "done": "Execução de {workflow} cancelada."

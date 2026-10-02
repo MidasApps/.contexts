@@ -25,7 +25,7 @@ describe("CancelRunDialog", () => {
   it("cancels the run after the confirmation, closes and says so", async () => {
     const { user, api, container } = render({ [CANCEL]: noContent() });
     const dialog = await screen.findByRole("alertdialog", { name: "Cancelar a execução de Demonstração de aprovação?" });
-    expect(dialog.textContent).toContain("A solicitação de aprovação que ela aguardava continua aberta");
+    expect(dialog.textContent).toContain("A solicitação de aprovação que ela aguardava é cancelada junto");
     await expectNoAxeViolations(container.ownerDocument.body);
     await user.click(within(dialog).getByRole("button", { name: "Cancelar execução" }));
     await waitFor(() => expect(screen.queryByRole("alertdialog")).toBeNull());
