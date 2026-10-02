@@ -516,6 +516,11 @@
       "description": "The access of {staff} as {user} stops working immediately. The end is recorded in the platform and organization audit logs.",
       "confirm": "End session",
       "done": "Session of {staff} ended."
+    },
+    "adminBlocked": {
+      "pageTitle": "Platform administration",
+      "title": "Administration does not open in support mode",
+      "description": "This tab is signed in as another user, read-only. Leave support mode to return to your staff account and use the administration."
     }
   },
   "traces": {

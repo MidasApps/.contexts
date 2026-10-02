@@ -516,6 +516,11 @@
       "description": "El acceso de {staff} como {user} deja de funcionar de inmediato. El cierre queda registrado en la auditoría de la plataforma y de la organización.",
       "confirm": "Finalizar sesión",
       "done": "Sesión de {staff} finalizada."
+    },
+    "adminBlocked": {
+      "pageTitle": "Administración de la plataforma",
+      "title": "La administración no se abre en modo soporte",
+      "description": "Esta pestaña está conectada como otro usuario, en modo solo lectura. Sal del modo soporte para volver a tu cuenta del equipo y usar la administración."
     }
   },
   "traces": {
