@@ -1,4 +1,4 @@
-import { PROFILE_SECTIONS, SETTINGS_SECTIONS, type ProfileSection, type SettingsSection } from "@core/client/shared/lib/router";
+import { PROFILE_SECTIONS, SETTINGS_SECTIONS, useRouter, type ProfileSection, type SettingsSection } from "@core/client/shared/lib/router";
 import { NotFoundView } from "@core/client/views/not-found";
 import { ProfileAccountView } from "@core/client/views/profile-account";
 import { ProfileNotificationsView } from "@core/client/views/profile-notifications";
@@ -81,8 +81,11 @@ function KnownProfileSection({ section }: { section: ProfileSection }) {
 }
 
 /** `/o/:organizationId/settings/:section` (SP2 spec §8); a section outside the route map is not found. */
-export function SettingsSectionPage({ section }: { section: string }) {
-  return isOneOf(SETTINGS_SECTIONS, section) ? <KnownSettingsSection section={section} /> : <NotFoundView />;
+export function SettingsSectionPage() {
+  // The shared route map decides (as on web): an unknown section, or a tail under a section
+  // without detail pages (`members/whatever`), has no params and reads as not found.
+  const section = useRouter().useRouteParams()["section"];
+  return section !== undefined && isOneOf(SETTINGS_SECTIONS, section) ? <KnownSettingsSection section={section} /> : <NotFoundView />;
 }
 
 /** `/profile/:section` (SP2 spec §8); a section outside the route map is not found. */
