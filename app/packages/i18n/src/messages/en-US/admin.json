@@ -500,6 +500,9 @@
     "banner": {
       "message": "You are seeing the app as another user, read-only. Everything you open is recorded.",
       "messageUntil": "You are seeing the app as another user, read-only, until {when}. Everything you open is recorded.",
+      "messageNamed": "You are seeing the app as {user}, read-only. Everything you open is recorded.",
+      "messageNamedUntil": "You are seeing the app as {user}, read-only, until {when}. Everything you open is recorded.",
+      "messageNamedIn": "You are seeing the app as {user} in {organization}, read-only, until {when}. Everything you open is recorded.",
       "leave": "Leave support mode"
     },
     "endAny": {

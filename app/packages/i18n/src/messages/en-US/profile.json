@@ -1,5 +1,6 @@
 {
   "navLabel": "Profile sections",
+  "impersonationReadOnly": "Support mode: this profile is read-only. You see what the user sees, but you cannot change anything here.",
   "account": {
     "title": "Account",
     "description": "Your sign-in details and how other members see you.",

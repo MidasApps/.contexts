@@ -4,7 +4,10 @@ import type { ReactNode } from "react";
 import { useTranslations } from "use-intl";
 import { useRouter } from "#/shared/lib/router/router-context.tsx";
 import { PROFILE_SECTIONS, routeHref, type ProfileSection } from "#/shared/lib/router/route-paths.ts";
+import { useIsImpersonating } from "#/shared/lib/session/use-impersonation.ts";
+import { Icon } from "#/shared/ui/atoms/Icon/Icon.tsx";
 import type { IconName } from "#/shared/ui/atoms/Icon/icon-registry.ts";
+import { Alert, AlertDescription } from "#/shared/ui/molecules/Alert/Alert.tsx";
 import { SectionNav } from "#/shared/ui/molecules/SectionNav/SectionNav.tsx";
 import { SettingsTemplate } from "#/shared/ui/templates/SettingsTemplate/SettingsTemplate.tsx";
 
@@ -27,12 +30,32 @@ export function ProfileNav() {
   return <SectionNav items={items} />;
 }
 
+/**
+ * Support staff viewing the app as a user (read-only, SP1 spec §6.6): one notice, and every
+ * control of the page disabled at once by a disabled `fieldset`, instead of saves that always fail.
+ */
+function ReadOnlyWhileImpersonating({ children }: { children: ReactNode }) {
+  const t = useTranslations("profile");
+  if (!useIsImpersonating()) return children;
+  return (
+    <div className="flex flex-col gap-4">
+      <Alert variant="warning" role={undefined}>
+        <Icon name="eye" />
+        <AlertDescription className="text-inherit">{t("impersonationReadOnly")}</AlertDescription>
+      </Alert>
+      <fieldset disabled className="min-w-0">
+        {children}
+      </fieldset>
+    </div>
+  );
+}
+
 /** Frame of every profile page: header, the labelled section navigation, the content. */
 export function ProfilePageFrame({ header, children }: { header: ReactNode; children: ReactNode }) {
   const t = useTranslations("profile");
   return (
     <SettingsTemplate header={header} navigation={<ProfileNav />} navigationLabel={t("navLabel")}>
-      {children}
+      <ReadOnlyWhileImpersonating>{children}</ReadOnlyWhileImpersonating>
     </SettingsTemplate>
   );
 }

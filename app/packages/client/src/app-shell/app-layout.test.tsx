@@ -1,9 +1,11 @@
-import { screen, waitFor, within } from "@testing-library/react";
+import { act, screen, waitFor, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { apiError, ok } from "#/shared/testing/fake-api.ts";
 import { expectNoAxeViolations } from "#/shared/testing/axe.ts";
 import { buildProject, IDS } from "#/shared/testing/fixtures.ts";
+import { IMPERSONATION_STORAGE_KEY, useImpersonationStore } from "#/features/admin-impersonation/index.ts";
 import { createFakeAuth } from "#/shared/lib/auth/fake-auth.ts";
+import { storedImpersonation } from "#/shared/testing/admin-accounts-fixtures.ts";
 import { TEST_USER } from "#/shared/testing/render-client.tsx";
 import { AppLayout } from "./app-layout.tsx";
 import { renderApp } from "./testing/render-app.tsx";
@@ -41,9 +43,23 @@ describe("AppLayout", () => {
     const { container } = renderLayout({ auth });
     // `renderApp` sets the default claims; the impersonated token carries `imp` (SP1 spec §6.6).
     auth.setClaims({ accessVersion: 3, imp: "Im5sK2lPq0WnR5tYu3bV", impBy: "staff-1" });
-    expect(await screen.findByText(/Você está vendo o app como outro usuário, em modo somente leitura/u)).toBeDefined();
+    // The signed-in user is the impersonated one: the banner names them.
+    expect(await screen.findByText(/Você está vendo o app como Ana Souza, em modo somente leitura/u)).toBeDefined();
     expect(screen.getByRole("button", { name: "Sair do modo suporte" })).toBeDefined();
     await expectNoAxeViolations(container);
+  });
+
+  it("names the organization and the end time of a session this tab started, and stays pinned under the topbar", async () => {
+    globalThis.sessionStorage.setItem(IMPERSONATION_STORAGE_KEY, storedImpersonation({ sessionId: "Im5sK2lPq0WnR5tYu3bV", organizationName: "Northwind", targetLabel: "Ana Souza" }));
+    const auth = createFakeAuth(TEST_USER);
+    const { container } = renderLayout({ auth });
+    auth.setClaims({ accessVersion: 3, imp: "Im5sK2lPq0WnR5tYu3bV", impBy: "staff-1" });
+    expect(await screen.findByText(/Você está vendo o app como Ana Souza em Northwind, em modo somente leitura, até /u)).toBeDefined();
+    const banner = container.querySelector("[data-slot='impersonation-banner']");
+    expect(banner?.className.split(" ")).toContain("sticky");
+    expect(banner?.className).toContain("top-14");
+    act(() => useImpersonationStore.getState().reset());
+    globalThis.sessionStorage.clear();
   });
 
   it("leaving support mode ends the impersonation and returns to the staff account on /admin/users", async () => {

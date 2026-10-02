@@ -72,7 +72,7 @@ export function AppLayout({ children, sidebarDefaultOpen, persistSidebarState }:
         {...(persistSidebarState === undefined ? {} : { persistSidebarState })}
       >
         <OfflineBanner className="mb-4 empty:mb-0" />
-        <ImpersonationBanner className="mb-4 empty:mb-0" />
+        <ImpersonationBanner className="sticky top-14 z-10 mb-4 empty:mb-0" />
         {children}
       </AppShellTemplate>
       <CommandPalette open={paletteOpen} onOpenChange={setPaletteOpen} />

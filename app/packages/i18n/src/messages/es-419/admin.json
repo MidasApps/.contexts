@@ -500,6 +500,9 @@
     "banner": {
       "message": "Estás viendo la app como otro usuario, en modo solo lectura. Todo lo que abras queda registrado.",
       "messageUntil": "Estás viendo la app como otro usuario, en modo solo lectura, hasta {when}. Todo lo que abras queda registrado.",
+      "messageNamed": "Estás viendo la app como {user}, en modo de solo lectura. Todo lo que abras queda registrado.",
+      "messageNamedUntil": "Estás viendo la app como {user}, en modo de solo lectura, hasta {when}. Todo lo que abras queda registrado.",
+      "messageNamedIn": "Estás viendo la app como {user} en {organization}, en modo de solo lectura, hasta {when}. Todo lo que abras queda registrado.",
       "leave": "Salir del modo soporte"
     },
     "endAny": {

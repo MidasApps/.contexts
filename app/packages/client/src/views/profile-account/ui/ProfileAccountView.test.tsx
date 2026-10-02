@@ -50,4 +50,14 @@ describe("ProfileAccountView", () => {
     await waitFor(() => expect(name.getAttribute("aria-invalid")).toBe("true"));
     expect(document.activeElement).toBe(name);
   });
+
+  it("is read-only while support staff view the account as the user, and says so", async () => {
+    const { auth, api, container } = renderView();
+    auth.setClaims({ accessVersion: 3, imp: "Im5sK2lPq0WnR5tYu3bV", impBy: "staff-1" });
+    expect(await screen.findByText(/Modo suporte: este perfil é somente leitura/u)).toBeDefined();
+    await waitFor(() => expect(screen.getByRole("textbox", { name: /Nome de exibição/u }).matches(":disabled")).toBe(true));
+    expect(screen.getByRole("button", { name: "Salvar" }).matches(":disabled")).toBe(true);
+    expect(api.callLines()).not.toContain("PATCH /v1/me");
+    await expectNoAxeViolations(container);
+  });
 });

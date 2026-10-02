@@ -42,4 +42,11 @@ describe("ProfileNotificationsView", () => {
     expect(await screen.findByText("Não foi possível salvar a preferência.")).toBeDefined();
     await waitFor(() => expect(product.getAttribute("aria-checked")).toBe("false"));
   });
+
+  it("keeps the switches off-limits while support staff view the app as the user", async () => {
+    const { auth } = renderView();
+    auth.setClaims({ accessVersion: 3, imp: "Im5sK2lPq0WnR5tYu3bV", impBy: "staff-1" });
+    expect(await screen.findByText(/Modo suporte: este perfil é somente leitura/u)).toBeDefined();
+    await waitFor(() => expect(screen.getByRole("switch", { name: "Novidades do produto" }).matches(":disabled")).toBe(true));
+  });
 });

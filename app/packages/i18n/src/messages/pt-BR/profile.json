@@ -1,5 +1,6 @@
 {
   "navLabel": "Seções do perfil",
+  "impersonationReadOnly": "Modo suporte: este perfil é somente leitura. Você vê o que o usuário vê, mas não pode alterar nada aqui.",
   "account": {
     "title": "Conta",
     "description": "Seus dados de acesso e como os outros membros veem você.",
