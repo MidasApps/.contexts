@@ -37,11 +37,10 @@ describe("ProfileAccountView", () => {
     expect(patches).toEqual([{ displayName: "Ana S." }]);
   });
 
-  it("does not call the API when the name did not change, and maps a server field error", async () => {
+  it("keeps save off until the name changes, and maps a server field error", async () => {
     const { user, api } = renderView({ "PATCH /v1/me": apiError(400, "VALIDATION_FAILED", [{ field: "displayName", issue: "TOO_BIG" }]) });
     await screen.findByText("ana@example.com");
-    await user.click(screen.getByRole("button", { name: "Salvar" }));
-    await screen.findByText("Alterações salvas.");
+    expect(screen.getByRole("button", { name: "Salvar" }).matches(":disabled")).toBe(true);
     expect(api.callLines()).not.toContain("PATCH /v1/me");
 
     const name = screen.getByRole("textbox", { name: /Nome de exibição/u });

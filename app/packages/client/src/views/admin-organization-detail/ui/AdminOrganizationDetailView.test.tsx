@@ -98,9 +98,24 @@ describe("AdminOrganizationDetailView", () => {
     await user.clear(tokens);
     await user.type(tokens, "1.5");
     await user.click(within(budget).getByRole("button", { name: "Salvar ajuste" }));
-    expect(await within(budget).findByText("Informe um número inteiro de tokens, sem separadores.")).toBeDefined();
+    const message = await within(budget).findByText("Informe um número inteiro de tokens, por exemplo 20.000.000.");
     expect(tokens.getAttribute("aria-invalid")).toBe("true");
+    expect(tokens.getAttribute("aria-describedby")).toBe(message.id);
     expect(api.calls.some((call) => call.method === "PUT")).toBe(false);
+    // The error goes away as soon as the value is being fixed.
+    await user.type(tokens, "0");
+    expect(within(budget).queryByText("Informe um número inteiro de tokens, por exemplo 20.000.000.")).toBeNull();
+  });
+
+  it("keeps the budget save off until a value changes, and groups the token cap", async () => {
+    const { user } = render();
+    const budget = await screen.findByRole("region", { name: "Ajuste de orçamento" });
+    const save = within(budget).getByRole("button", { name: "Salvar ajuste" });
+    expect(save.hasAttribute("disabled")).toBe(true);
+    const tokens = within(budget).getByRole<HTMLInputElement>("textbox", { name: "Tokens por mês" });
+    expect(tokens.value).toMatch(/^\d{1,3}(\.\d{3})+$/u);
+    await user.type(tokens, "0");
+    expect(save.hasAttribute("disabled")).toBe(false);
   });
 
   it("clears the override after a confirmation", async () => {

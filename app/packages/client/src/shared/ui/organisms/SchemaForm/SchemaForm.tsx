@@ -37,6 +37,8 @@ export type SchemaFormProps<Schema extends z.ZodType> = Omit<ComponentProps<"for
   loading?: boolean | undefined;
   /** Called when the values start or stop differing from the defaults (a dialog guards dismissal with it). */
   onDirtyChange?: ((dirty: boolean) => void) | undefined;
+  /** Edit forms of saved values: submit stays off until a value differs from the defaults. */
+  requireChanges?: boolean | undefined;
 };
 
 const denyAll = (): boolean => false;
@@ -117,6 +119,7 @@ export function SchemaForm<Schema extends z.ZodType>({
   defaultCurrency,
   loading = false,
   onDirtyChange,
+  requireChanges = false,
   className,
   ...formProps
 }: SchemaFormProps<Schema>) {
@@ -135,6 +138,10 @@ export function SchemaForm<Schema extends z.ZodType>({
   // Read during render so react-hook-form subscribes to it.
   const dirty = form.formState.isDirty;
   useEffect(() => onDirtyChange?.(dirty), [dirty, onDirtyChange]);
+  // "Saved" describes the values on screen: once the user edits again it no longer does.
+  useEffect(() => {
+    if (dirty) setStatus((current) => (current.kind === "saved" ? { kind: "idle" } : current));
+  }, [dirty]);
 
   const submit = form.handleSubmit(
     async (values) => {
@@ -169,7 +176,7 @@ export function SchemaForm<Schema extends z.ZodType>({
         <SchemaFormStatus status={status} successMessage={t(successMessageKey)} />
         <Sections sections={plan.sections} defaultCurrency={defaultCurrency} onMoneyParse={money.report} />
         <div className="flex justify-end">
-          <Button type="submit" pending={form.formState.isSubmitting}>
+          <Button type="submit" pending={form.formState.isSubmitting} disabled={requireChanges && !dirty}>
             {t(submitLabelKey)}
           </Button>
         </div>

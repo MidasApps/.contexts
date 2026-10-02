@@ -347,7 +347,7 @@
       "money": "Gasto mensual en modelos",
       "tokens": "Tokens por mes",
       "moneyError": "Ingresa un monto en dólares, por ejemplo 100,00.",
-      "tokensError": "Ingresa un número entero de tokens, sin separadores.",
+      "tokensError": "Ingresa un número entero de tokens, por ejemplo 20,000,000.",
       "save": "Guardar ajuste",
       "saved": "Presupuesto de {name} ajustado.",
       "clear": "Volver al plan",

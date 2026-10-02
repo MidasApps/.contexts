@@ -347,7 +347,7 @@
       "money": "Monthly model spend",
       "tokens": "Tokens per month",
       "moneyError": "Enter an amount in dollars, for example 100.00.",
-      "tokensError": "Enter a whole number of tokens, without separators.",
+      "tokensError": "Enter a whole number of tokens, for example 20,000,000.",
       "save": "Save override",
       "saved": "Budget of {name} overridden.",
       "clear": "Back to the plan",

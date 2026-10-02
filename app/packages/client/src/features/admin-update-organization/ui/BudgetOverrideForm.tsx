@@ -9,14 +9,12 @@ import { useConfirmedAction } from "#/shared/lib/errors/use-confirmed-action.ts"
 import { microUsdToMoney, moneyToMicroUsd } from "#/shared/lib/format/use-format-micro-usd.ts";
 import { useOnlineStatus } from "#/shared/lib/network/use-online-status.ts";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
-import { Input } from "#/shared/ui/atoms/Input/Input.tsx";
 import { Label } from "#/shared/ui/atoms/Label/Label.tsx";
+import { IntegerInput } from "#/shared/ui/molecules/IntegerInput/IntegerInput.tsx";
 import { MoneyInput } from "#/shared/ui/molecules/MoneyInput/MoneyInput.tsx";
 import { notify } from "#/shared/ui/molecules/Toaster/notify.ts";
 import { ConfirmDialog } from "#/shared/ui/organisms/ConfirmDialog/ConfirmDialog.tsx";
 import { useOrganizationWrites } from "../model/use-organization-writes.ts";
-
-const TOKENS = /^\d{1,15}$/u;
 
 type FieldErrors = { money?: string; tokens?: string };
 
@@ -63,20 +61,30 @@ export function BudgetOverrideForm({ organization }: { organization: Organizatio
   const start = organization.budget.override ?? organization.budget.caps;
   const [money, setMoney] = useState<MoneyValue | null>(() => microUsdToMoney(start.monthlyMicroUsd));
   const [moneyInvalid, setMoneyInvalid] = useState(false);
-  const [tokens, setTokens] = useState(String(start.monthlyTokens));
+  const [tokens, setTokens] = useState<number | null>(start.monthlyTokens);
+  const [tokensInvalid, setTokensInvalid] = useState(false);
+  // Text typed but not committed yet (both inputs parse on blur) already counts as a change.
+  const [editing, setEditing] = useState(false);
   const [errors, setErrors] = useState<FieldErrors>({});
   const writes = useOrganizationWrites(organization.id);
   const save = useAsyncAction();
+
+  const changed = editing || moneyInvalid || tokensInvalid || money?.amountMinor !== microUsdToMoney(start.monthlyMicroUsd)?.amountMinor || tokens !== start.monthlyTokens;
+  // A field error goes away as soon as the user starts fixing it.
+  const edit = (field: keyof FieldErrors) => (): void => {
+    setEditing(true);
+    setErrors(({ [field]: _fixed, ...rest }) => rest);
+  };
 
   const submit = async (event: FormEvent<HTMLFormElement>): Promise<void> => {
     event.preventDefault();
     const next: FieldErrors = {
       ...(money === null || moneyInvalid ? { money: t("moneyError") } : {}),
-      ...(TOKENS.test(tokens.trim()) ? {} : { tokens: t("tokensError") }),
+      ...(tokens === null || tokensInvalid ? { tokens: t("tokensError") } : {}),
     };
     setErrors(next);
-    if (money === null || Object.keys(next).length > 0) return;
-    const override = { monthlyMicroUsd: moneyToMicroUsd(money), monthlyTokens: Number(tokens.trim()) };
+    if (money === null || tokens === null || Object.keys(next).length > 0) return;
+    const override = { monthlyMicroUsd: moneyToMicroUsd(money), monthlyTokens: tokens };
     const ok = await save.run(async () => void (await writes.setBudget(override)));
     if (ok) notify.success(t("saved", { name: organization.name }));
   };
@@ -90,8 +98,12 @@ export function BudgetOverrideForm({ organization }: { organization: Organizatio
             id={ids.money}
             value={money}
             currency="USD"
-            onValueChange={setMoney}
+            onValueChange={(next) => {
+              setMoney(next);
+              setEditing(false);
+            }}
             onParseError={(error) => setMoneyInvalid(error !== null)}
+            onInput={edit("money")}
             aria-invalid={errors.money !== undefined}
             aria-describedby={errors.money === undefined ? undefined : ids.moneyError}
           />
@@ -103,12 +115,15 @@ export function BudgetOverrideForm({ organization }: { organization: Organizatio
         </div>
         <div className="flex flex-col gap-1.5">
           <Label htmlFor={ids.tokens}>{t("tokens")}</Label>
-          <Input
+          <IntegerInput
             id={ids.tokens}
-            inputMode="numeric"
-            className="text-right font-mono tabular-nums"
             value={tokens}
-            onChange={(event) => setTokens(event.target.value)}
+            onValueChange={(next) => {
+              setTokens(next);
+              setEditing(false);
+            }}
+            onParseError={setTokensInvalid}
+            onChange={edit("tokens")}
             aria-invalid={errors.tokens !== undefined}
             aria-describedby={errors.tokens === undefined ? undefined : ids.tokensError}
           />
@@ -125,7 +140,7 @@ export function BudgetOverrideForm({ organization }: { organization: Organizatio
         </p>
       )}
       <div className="flex flex-wrap gap-2">
-        <Button type="submit" pending={save.pending} disabled={!online}>
+        <Button type="submit" pending={save.pending} disabled={!online || !changed}>
           {t("save")}
         </Button>
         {organization.budget.override === null ? null : <ClearOverride organization={organization} disabled={!online || save.pending} />}

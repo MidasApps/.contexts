@@ -23,5 +23,5 @@ export function UpdateProfileForm({ me }: { me: Me }) {
       throw error;
     }
   };
-  return <SchemaForm contract={ProfileFormContract} defaultValues={{ displayName: me.displayName }} onSubmit={submit} />;
+  return <SchemaForm contract={ProfileFormContract} defaultValues={{ displayName: me.displayName }} onSubmit={submit} requireChanges />;
 }

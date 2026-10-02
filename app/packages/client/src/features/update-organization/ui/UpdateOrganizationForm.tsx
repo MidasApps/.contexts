@@ -34,5 +34,5 @@ export function UpdateOrganizationForm({ organization }: { organization: Organiz
     ]);
     return { ok: true };
   };
-  return <SchemaForm contract={OrganizationFormContract} defaultValues={initial} onSubmit={submit} />;
+  return <SchemaForm contract={OrganizationFormContract} defaultValues={initial} onSubmit={submit} requireChanges />;
 }

@@ -69,6 +69,27 @@ describe("SchemaForm", () => {
     expect(screen.getByRole("textbox", { name: "Código interno" })).toBeDefined();
   });
 
+  it("drops the saved confirmation as soon as the user edits again", async () => {
+    const { user } = renderForm({ defaultValues: { id: "note-1", title: "Fornecedor", priority: "low", budget: { amountMinor: 500, currency: "BRL" } } });
+    const title = screen.getByRole("textbox", { name: /^Título/ });
+    await user.type(title, "s");
+    await user.click(submitButton());
+    expect(await screen.findByText("Alterações salvas.")).toBeDefined();
+    await user.type(title, "x");
+    expect(screen.queryByText("Alterações salvas.")).toBeNull();
+  });
+
+  it("keeps submit off until something changed when the form edits saved values", async () => {
+    const onSubmit = submitSpy();
+    const { user } = renderForm({ onSubmit, requireChanges: true, defaultValues: { id: "note-1", title: "Fornecedor", priority: "low", budget: { amountMinor: 500, currency: "BRL" } } });
+    expect(submitButton()).toHaveProperty("disabled", true);
+    await user.type(screen.getByRole("textbox", { name: /^Título/ }), "s");
+    expect(submitButton()).toHaveProperty("disabled", false);
+    await user.click(submitButton());
+    await vi.waitFor(() => expect(onSubmit).toHaveBeenCalledTimes(1));
+    await vi.waitFor(() => expect(submitButton()).toHaveProperty("disabled", true));
+  });
+
   it("shows translated client validation errors and focuses the first invalid field", async () => {
     const onSubmit = submitSpy();
     const { user, container } = renderForm({ onSubmit });

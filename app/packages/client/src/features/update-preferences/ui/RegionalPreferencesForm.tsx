@@ -48,5 +48,5 @@ export function RegionalPreferencesForm({ me }: { me: Me }) {
   };
 
   // No remount after a save: SchemaForm keeps the saved values and `initial` follows the new `me`.
-  return <SchemaForm contract={RegionalPreferencesFormContract} defaultValues={initial} onSubmit={submit} />;
+  return <SchemaForm contract={RegionalPreferencesFormContract} defaultValues={initial} onSubmit={submit} requireChanges />;
 }
