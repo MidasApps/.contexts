@@ -4,7 +4,7 @@ import { renderHook } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { IntlProvider } from "use-intl";
 import { describe, expect, it } from "vitest";
-import { useAgentLabel, useFlagLabel, usePermissionLabel, useToolLabel, useWorkflowLabel } from "./use-catalog-labels.ts";
+import { useAgentLabel, useCommandLabel, useFlagLabel, usePermissionLabel, useToolLabel, useWorkflowLabel } from "./use-catalog-labels.ts";
 
 const MODULE_MESSAGES: ExtraNamespaces = {
   example: {
@@ -89,5 +89,13 @@ describe("useAgentLabel", () => {
     expect(result.current("example-helper")).toBe("Ajudante");
     expect(result.current("org-agent-1", "Meu agente")).toBe("Meu agente");
     expect(result.current("org-agent-1")).toBe("org-agent-1");
+  });
+});
+
+describe("useCommandLabel", () => {
+  it("names a command by its permission label, else keeps the command id", () => {
+    const { result } = renderHook(() => useCommandLabel(), { wrapper: wrapperFor() });
+    expect(result.current("tenancy.CreateProjectInput")).toBe("Criar projetos");
+    expect(result.current("other.UnknownCommand")).toBe("other.UnknownCommand");
   });
 });

@@ -148,7 +148,7 @@
     "stepsTitle": "Etapas"
   },
   "tool": {
-    "title": "Ferramenta {name}"
+    "title": "Ferramenta: {name}"
   },
   "approval": {
     "label": "Aprovação: {summary}",
@@ -208,8 +208,7 @@
     },
     "approvalPending": {
       "title": "Aguardando aprovação de outra pessoa",
-      "open": "Abrir aprovações",
-      "reference": "Pedido {approvalId}"
+      "open": "Abrir aprovações"
     }
   },
   "upload": {

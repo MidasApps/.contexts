@@ -53,7 +53,7 @@ export function DataTablePart({ props }: GenerativeComponentProps<DataTableProps
   const columns = props.columns.map((definition) =>
     column.accessor((row) => row.values[definition.key], {
       id: definition.key,
-      header: () => (definition.labelKey !== undefined && tRoot.has(definition.labelKey as never) ? tRoot(definition.labelKey as never) : definition.key),
+      header: () => (definition.labelKey !== undefined && tRoot.has(definition.labelKey as never) ? tRoot(definition.labelKey as never) : (definition.label ?? definition.key)),
       cell: (cell) => formatCell(definition.type, cell.getValue()),
       meta: { numeric: definition.type === "number" || definition.type === "money" },
     }),

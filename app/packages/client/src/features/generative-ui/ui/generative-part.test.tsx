@@ -107,7 +107,7 @@ describe("GenerativePart", () => {
       component: "data-table",
       props: {
         columns: [
-          { key: "name", type: "text" },
+          { key: "name", label: "Região", type: "text" },
           { key: "units", type: "number" },
           { key: "active", type: "boolean" },
           { key: "total", type: "money" },
@@ -118,7 +118,7 @@ describe("GenerativePart", () => {
       },
     });
     const table = screen.getByRole("table", { name: "Resultado" });
-    expect(within(table).getAllByRole("columnheader").map((header) => header.textContent)).toEqual(["name", "units", "active", "total", "html"]);
+    expect(within(table).getAllByRole("columnheader").map((header) => header.textContent)).toEqual(["Região", "units", "active", "total", "html"]);
     expect(within(table).getByText("1.234,5")).toBeTruthy();
     expect(within(table).getByText("Sim")).toBeTruthy();
     expect(within(table).getByText(/R\$\s1\.234,56/)).toBeTruthy();
@@ -163,6 +163,8 @@ describe("GenerativePart", () => {
   it("links a pending four-eyes approval to the approvals inbox", async () => {
     const { container } = setup({ component: "approval-pending", props: { approvalId: "Ap3rQ9vLr3TnB7pWc1aZ", summary: "Arquivar nota Kickoff" } });
     expect(screen.getByText("Arquivar nota Kickoff")).toBeTruthy();
+    // The request id is a reference for support, not content: the link carries it.
+    expect(screen.queryByText(/Ap3rQ9vLr3TnB7pWc1aZ/u)).toBeNull();
     expect(screen.getByRole("link", { name: "Abrir aprovações" }).getAttribute("href")).toBe("/approvals/Ap3rQ9vLr3TnB7pWc1aZ");
     await expectNoAxeViolations(container);
   });
@@ -173,11 +175,12 @@ describe("GenerativePart", () => {
   });
 
   it.each(["bar", "line", "area", "pie"] as const)("draws a %s chart with its data in a table", { timeout: 40_000 }, async (kind) => {
-    const { container } = setup({ component: "chart", props: { kind, x: "month", series: [{ key: "total", label: "Total" }], rows: [{ month: "2026-08", total: 42 }, { month: "2026-09", total: "17.5" }, { month: "2026-10", total: "n/a" }] } });
+    const { container } = setup({ component: "chart", props: { kind, x: "month", xLabel: "Mês", series: [{ key: "total", label: "Total" }], rows: [{ month: "2026-08", total: 42 }, { month: "2026-09", total: "17.5" }, { month: "2026-10", total: "n/a" }] } });
     // The chart part loads on first use; the first import of recharts is slow under jsdom.
     const figure = await screen.findByRole("figure", undefined, { timeout: 30_000 });
     expect(within(figure).getByText(/^Gráfico de .+: Total$/)).toBeTruthy();
     const table = within(figure).getByRole("table", { name: "Dados do gráfico" });
+    expect(within(table).getByRole("columnheader", { name: "Mês" })).toBeTruthy();
     expect(within(table).getByRole("row", { name: /2026-08/ }).textContent).toContain("42");
     expect(within(table).getByRole("row", { name: /2026-09/ }).textContent).toContain("17,5");
     expect(within(table).getByRole("row", { name: /2026-10/ }).textContent).toContain("—");

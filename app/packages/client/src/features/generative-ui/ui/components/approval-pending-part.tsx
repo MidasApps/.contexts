@@ -21,7 +21,6 @@ export function ApprovalPendingPart({ props }: GenerativeComponentProps<Approval
         <div className="min-w-0 space-y-0.5">
           <h3 className="font-semibold text-foreground">{t("title")}</h3>
           <p className="text-[13px] text-muted-foreground">{props.summary}</p>
-          <p className="font-mono text-[11.5px] text-muted-foreground">{t("reference", { approvalId: props.approvalId })}</p>
         </div>
       </div>
       <div className="flex justify-end">

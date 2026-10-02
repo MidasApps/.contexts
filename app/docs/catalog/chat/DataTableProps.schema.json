@@ -6,6 +6,7 @@
       "columns": [
         {
           "key": "name",
+          "label": "Name",
           "type": "text"
         },
         {
@@ -36,8 +37,15 @@
             "type": "string",
             "x-pii": "none"
           },
+          "label": {
+            "description": "Header written in the conversation's language, for columns without a catalog key.",
+            "maxLength": 100,
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
           "labelKey": {
-            "description": "i18n key of the header; the key itself otherwise.",
+            "description": "i18n key of the header; `label`, then the key itself, otherwise.",
             "maxLength": 200,
             "minLength": 1,
             "type": "string",

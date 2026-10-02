@@ -3,6 +3,7 @@
 import type { SchemaFormProps } from "@core/contracts";
 import { useState } from "react";
 import { useTranslations } from "use-intl";
+import { useCommandLabel } from "#/shared/lib/labels/use-catalog-labels.ts";
 import { SchemaForm } from "#/shared/ui/organisms/SchemaForm/SchemaForm.tsx";
 import type { SchemaFormResult } from "#/shared/ui/organisms/SchemaForm/server-errors.ts";
 import { useGenerativeUi } from "../../model/generative-ui-context.tsx";
@@ -18,6 +19,7 @@ import type { GenerativeComponentProps } from "../../model/ui-registry.ts";
 export function SchemaFormPart({ props, toolCallId, toolName, interactive, fallback }: GenerativeComponentProps<SchemaFormProps>) {
   const t = useTranslations("chat.ui.form");
   const { findContract, submit, can, defaultCurrency } = useGenerativeUi();
+  const commandLabel = useCommandLabel();
   const [submitted, setSubmitted] = useState(false);
   // The command's input is what the form edits; the entity contract is the documented fallback.
   const contract = findContract(props.commandId) ?? findContract(props.contractId);
@@ -29,10 +31,10 @@ export function SchemaFormPart({ props, toolCallId, toolName, interactive, fallb
     return { ok: true };
   };
 
-  const label = t("label", { command: props.commandId });
+  const label = t("label", { command: commandLabel(props.commandId) });
   return (
     <section data-slot="schema-form-part" aria-label={label} className="flex flex-col gap-3 rounded-md border border-border bg-card p-4">
-      <h3 className="font-mono text-[12.5px] text-muted-foreground">{label}</h3>
+      <h3 className="text-[13px] font-medium text-muted-foreground">{label}</h3>
       <p role="status" className={submitted ? "text-[13px] text-emerald-foreground" : "sr-only"}>
         {submitted ? t("submitted") : ""}
       </p>

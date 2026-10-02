@@ -91,3 +91,16 @@ export const useToolLabel = (): ((toolNameOrId: string) => string) => {
     [t, modules, permissionLabel],
   );
 };
+
+/** Label of a command (`tenancy.CreateProjectInput` → "Criar projetos"), as its agent tool is named; else the command id. */
+export const useCommandLabel = (): ((commandId: string) => string) => {
+  const toolLabel = useToolLabel();
+  return useCallback(
+    (commandId) => {
+      const toolId = `${COMMAND_PREFIX}${commandId}`;
+      const label = toolLabel(toolId);
+      return label === toolId ? commandId : label;
+    },
+    [toolLabel],
+  );
+};

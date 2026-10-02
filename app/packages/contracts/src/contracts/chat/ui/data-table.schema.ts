@@ -6,7 +6,8 @@ export const MAX_TABLE_ROWS = 500;
 
 const ColumnSchema = z.strictObject({
   key: z.string().min(1).max(100).meta(none("Row key of the column.")),
-  labelKey: z.string().min(1).max(200).optional().meta(none("i18n key of the header; the key itself otherwise.")),
+  labelKey: z.string().min(1).max(200).optional().meta(none("i18n key of the header; `label`, then the key itself, otherwise.")),
+  label: z.string().min(1).max(100).optional().meta(none("Header written in the conversation's language, for columns without a catalog key.")),
   type: z.enum(["text", "number", "date", "datetime", "boolean", "money"]).meta(none("How cells are formatted.")),
 });
 
@@ -25,7 +26,7 @@ export const DataTablePropsContract = defineContract(DataTablePropsSchema, {
   examples: [
     {
       columns: [
-        { key: "name", type: "text" },
+        { key: "name", label: "Name", type: "text" },
         { key: "units", labelKey: "table.units", type: "number" },
       ],
       rows: [{ name: "North", units: 12 }],

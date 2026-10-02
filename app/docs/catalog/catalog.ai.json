@@ -8946,7 +8946,8 @@
               "label": "Total"
             }
           ],
-          "x": "month"
+          "x": "month",
+          "xLabel": "Month"
         }
       ],
       "fields": [
@@ -8973,6 +8974,12 @@
           "name": "x",
           "pii": "none",
           "required": true
+        },
+        {
+          "description": "Header of the category or time axis, in the conversation's language; the key itself otherwise.",
+          "name": "xLabel",
+          "pii": "none",
+          "required": false
         }
       ],
       "id": "chat.ChartProps",
@@ -8989,7 +8996,8 @@
                 "label": "Total"
               }
             ],
-            "x": "month"
+            "x": "month",
+            "xLabel": "Month"
           }
         ],
         "properties": {
@@ -9054,6 +9062,13 @@
             "minLength": 1,
             "type": "string",
             "x-pii": "none"
+          },
+          "xLabel": {
+            "description": "Header of the category or time axis, in the conversation's language; the key itself otherwise.",
+            "maxLength": 100,
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
           }
         },
         "required": [
@@ -9082,6 +9097,7 @@
           "columns": [
             {
               "key": "name",
+              "label": "Name",
               "type": "text"
             },
             {
@@ -9123,6 +9139,7 @@
             "columns": [
               {
                 "key": "name",
+                "label": "Name",
                 "type": "text"
               },
               {
@@ -9148,8 +9165,15 @@
                   "type": "string",
                   "x-pii": "none"
                 },
+                "label": {
+                  "description": "Header written in the conversation's language, for columns without a catalog key.",
+                  "maxLength": 100,
+                  "minLength": 1,
+                  "type": "string",
+                  "x-pii": "none"
+                },
                 "labelKey": {
-                  "description": "i18n key of the header; the key itself otherwise.",
+                  "description": "i18n key of the header; `label`, then the key itself, otherwise.",
                   "maxLength": 200,
                   "minLength": 1,
                   "type": "string",

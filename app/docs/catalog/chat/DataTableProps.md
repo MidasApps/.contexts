@@ -31,6 +31,7 @@ _None._
     "columns": [
       {
         "key": "name",
+        "label": "Name",
         "type": "text"
       },
       {

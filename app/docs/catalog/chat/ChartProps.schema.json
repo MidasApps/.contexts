@@ -16,7 +16,8 @@
           "label": "Total"
         }
       ],
-      "x": "month"
+      "x": "month",
+      "xLabel": "Month"
     }
   ],
   "properties": {
@@ -77,6 +78,13 @@
     },
     "x": {
       "description": "Row key of the category or time axis.",
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "xLabel": {
+      "description": "Header of the category or time axis, in the conversation's language; the key itself otherwise.",
       "maxLength": 100,
       "minLength": 1,
       "type": "string",

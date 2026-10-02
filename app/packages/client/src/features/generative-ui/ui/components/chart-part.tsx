@@ -110,7 +110,7 @@ export function ChartPart({ props }: GenerativeComponentProps<ChartProps>) {
         <caption>{t("data")}</caption>
         <thead>
           <tr>
-            <th scope="col">{props.x}</th>
+            <th scope="col">{props.xLabel ?? props.x}</th>
             {shownSeries.map((series) => (
               <th key={series.key} scope="col">
                 {series.label}

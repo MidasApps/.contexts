@@ -148,7 +148,7 @@
     "stepsTitle": "Steps"
   },
   "tool": {
-    "title": "Tool {name}"
+    "title": "Tool: {name}"
   },
   "approval": {
     "label": "Approval: {summary}",
@@ -208,8 +208,7 @@
     },
     "approvalPending": {
       "title": "Waiting for another person's approval",
-      "open": "Open approvals",
-      "reference": "Request {approvalId}"
+      "open": "Open approvals"
     }
   },
   "upload": {

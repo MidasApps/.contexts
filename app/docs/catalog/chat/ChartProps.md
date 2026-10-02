@@ -19,6 +19,7 @@ A bar, line, area or pie chart of rows an agent tool returned.
 | `rows` | yes | `personal` | Data rows. |  |
 | `series` | yes | `none` | Plotted series. |  |
 | `x` | yes | `none` | Row key of the category or time axis. |  |
+| `xLabel` | no | `none` | Header of the category or time axis, in the conversation's language; the key itself otherwise. |  |
 
 ## Relations
 
@@ -31,6 +32,7 @@ _None._
   {
     "kind": "bar",
     "x": "month",
+    "xLabel": "Month",
     "series": [
       {
         "key": "total",

@@ -43,7 +43,7 @@ describe("ChatMessage", () => {
     expect(screen.queryByText("Qual é o prazo de entrega?")).toBeNull();
     await user.click(card);
     expect(screen.getByText("Qual é o prazo de entrega?")).toBeTruthy();
-    expect(screen.getByText("knowledge_searchKnowledge")).toBeTruthy();
+    expect(screen.getByText("Buscar na base de conhecimento")).toBeTruthy();
     expect(screen.getByRole("button", { name: "1 etapa" })).toBeTruthy();
   });
 
@@ -64,7 +64,7 @@ describe("ChatMessage", () => {
 
   it("renders a plain tool call collapsed with its state", () => {
     renderWithProviders(<ChatMessage message={assistant([{ type: "tool-catalog_listEntities", toolCallId: "c-2", state: "input-available", input: {} }])} />);
-    const tool = screen.getByRole("button", { name: /Ferramenta catalog_listEntities/ });
+    const tool = screen.getByRole("button", { name: /Ferramenta: Listar os dados do catálogo/ });
     expect(tool.getAttribute("aria-expanded")).toBe("false");
     expect(within(tool).getByText("Executando")).toBeTruthy();
   });

@@ -64,7 +64,7 @@ describe("ChatPanel — approvals and generative UI", () => {
     const card = screen.getByRole("region", { name: "Aprovação: Criar projeto Launch" });
     const diff = within(card).getByRole("table", { name: "Alterações propostas" });
     expect(within(diff).getByRole("row", { name: /name/ }).textContent).toContain("Launch");
-    expect(within(card).getByText("core.project.create")).toBeTruthy();
+    expect(within(card).getByText("Criar projetos")).toBeTruthy();
     expect(screen.getByRole("button", { name: /Delegado para Agente de ações/ })).toBeTruthy();
     await waitFor(() => expect(screen.getAllByRole("status").some((node) => node.textContent === "Aguardando sua aprovação.")).toBe(true));
     expect(screen.queryByRole("button", { name: "Gerar novamente" })).toBeNull();
@@ -151,7 +151,7 @@ describe("ChatPanel — approvals and generative UI", () => {
       );
       stream.close();
     });
-    expect(await screen.findByRole("button", { name: /Ferramenta module_fancyWidget/ })).toBeTruthy();
+    expect(await screen.findByRole("button", { name: /Ferramenta: module_fancyWidget/ })).toBeTruthy();
     expect(context.container.querySelector("script")).toBeNull();
     const pending = await screen.findByRole("region", { name: "Aguardando aprovação de outra pessoa" });
     expect(within(pending).getByRole("link", { name: "Abrir aprovações" }).getAttribute("href")).toBe(`/o/${IDS.organization}/settings/approvals/Ap3rQ9vLr3TnB7pWc1aZ`);

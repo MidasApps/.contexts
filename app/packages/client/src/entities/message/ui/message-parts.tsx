@@ -4,6 +4,7 @@ import type { UIMessage } from "ai";
 import { ClipboardCheckIcon, ShieldAlertIcon } from "lucide-react";
 import type { ReactNode } from "react";
 import { useTranslations } from "use-intl";
+import { useAgentLabel, useCommandLabel, useToolLabel } from "#/shared/lib/labels/use-catalog-labels.ts";
 import { Agent, AgentContent, AgentHeader, AgentSection } from "#/shared/ui/ai/agent.tsx";
 import { Attachment, Attachments } from "#/shared/ui/ai/attachments.tsx";
 import { InlineCitation } from "#/shared/ui/ai/inline-citation.tsx";
@@ -64,7 +65,11 @@ const KNOWN_AGENTS = new Set(["knowledge", "data", "action", "web"]);
 
 function DelegationCard({ tool, delegation }: { tool: ToolPartView; delegation: DelegationView }) {
   const t = useTranslations("chat.delegation");
-  const agent = KNOWN_AGENTS.has(delegation.agentId) ? t(`agents.${delegation.agentId as "knowledge"}`) : t("agents.unknown", { id: delegation.agentId });
+  const agentLabel = useAgentLabel();
+  const toolLabel = useToolLabel();
+  // A module agent named by its module reads as its label; only an agent no catalog names shows its key.
+  const named = agentLabel(delegation.agentId);
+  const agent = KNOWN_AGENTS.has(delegation.agentId) ? t(`agents.${delegation.agentId as "knowledge"}`) : named === delegation.agentId ? t("agents.unknown", { id: delegation.agentId }) : named;
   return (
     <Agent data-agent={delegation.agentId}>
       <AgentHeader name={t("label", { agent })} status={<ToolStatus state={tool.state} />} />
@@ -81,7 +86,7 @@ function DelegationCard({ tool, delegation }: { tool: ToolPartView; delegation: 
               <TaskContent>
                 {delegation.steps.map((step) => (
                   <TaskItem key={step.toolCallId}>
-                    <TaskItemFile>{step.toolName}</TaskItemFile>
+                    <TaskItemFile>{toolLabel(step.toolName)}</TaskItemFile>
                     {step.isError ? <span className="ml-1.5 text-destructive-text">{t("stepFailed")}</span> : null}
                   </TaskItem>
                 ))}
@@ -102,9 +107,10 @@ function DelegationCard({ tool, delegation }: { tool: ToolPartView; delegation: 
 
 function ToolCard({ tool }: { tool: ToolPartView }) {
   const t = useTranslations("chat.tool");
+  const toolLabel = useToolLabel();
   return (
     <Tool data-tool={tool.toolName}>
-      <ToolHeader title={t("title", { name: tool.toolName })} state={tool.state} />
+      <ToolHeader title={t("title", { name: toolLabel(tool.toolName) })} state={tool.state} />
       <ToolContent>
         {tool.input === undefined ? null : <ToolInput value={tool.input} />}
         <ToolOutput value={tool.output} errorText={tool.errorText} />
@@ -128,12 +134,13 @@ function TripwireAlert({ tripwire }: { tripwire: TripwireView }) {
 /** A form or picker answer the member sent (`ui-submission.ts`), shown as a chip instead of its JSON. */
 function UserText({ text }: { text: string }) {
   const t = useTranslations("chat.message");
+  const commandLabel = useCommandLabel();
   const submission = parseUiSubmission(text);
   if (submission === null) return <p className="whitespace-pre-wrap">{text}</p>;
   return (
     <p data-slot="ui-submission" className="flex items-center gap-2">
       <ClipboardCheckIcon aria-hidden="true" className="size-4 shrink-0 text-muted-foreground" />
-      {submission.kind === "picker" ? t("choiceSubmitted", { choice: submission.labels.join(", ") }) : t("formSubmitted", { command: submission.commandId })}
+      {submission.kind === "picker" ? t("choiceSubmitted", { choice: submission.labels.join(", ") }) : t("formSubmitted", { command: commandLabel(submission.commandId) })}
     </p>
   );
 }
