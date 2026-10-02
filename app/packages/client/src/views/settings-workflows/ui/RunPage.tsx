@@ -9,6 +9,7 @@ import { useFormatDateTime } from "#/shared/lib/format/use-format-date-time.ts";
 import { useOnlineStatus } from "#/shared/lib/network/use-online-status.ts";
 import { RouteLink } from "#/shared/lib/router/router-context.tsx";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
+import { EmptyState } from "#/shared/ui/molecules/EmptyState/EmptyState.tsx";
 import { OfflineNotice } from "#/shared/ui/molecules/OfflineNotice/OfflineNotice.tsx";
 import { SectionCard } from "#/shared/ui/molecules/SectionCard/SectionCard.tsx";
 import { PageHeader } from "#/widgets/page-header/index.ts";
@@ -82,11 +83,29 @@ function RunDetails({ run, organizationId, canSeeApprovals, starterLabel }: { ru
   );
 }
 
+function RunNotFound({ organizationId }: { organizationId: string }) {
+  const t = useTranslations("settings.workflows");
+  return (
+    <EmptyState
+      headingLevel={2}
+      icon="search"
+      title={t("run.notFoundTitle")}
+      description={t("run.notFoundDescription")}
+      action={
+        <Button variant="secondary" asChild>
+          <RouteLink to={{ id: "settings", organizationId, section: "workflows" }}>{t("backToRuns")}</RouteLink>
+        </Button>
+      }
+    />
+  );
+}
+
 /**
  * `/o/:organizationId/settings/workflows/runs/:runId` (core.workflow-run.read): one run of the
  * organization: status, how it started, what it waits for, and its step events. Progress is
  * live two ways: the run is re-read every 2 s while it can still change, and the SSE progress
- * stream adds step events when the server offers it. A run of another organization answers 404.
+ * stream adds step events when the server offers it. A run of another organization (or a purged one) answers 404 and
+ * reads as not found, with a way back to the runs.
  */
 export function RunPage({ context, runId }: { context: AccessContext; runId: string }) {
   const t = useTranslations("settings.workflows");
@@ -95,7 +114,8 @@ export function RunPage({ context, runId }: { context: AccessContext; runId: str
   const run = useTenantWorkflowRun(organization.id, runId);
   const starterName = useStarterNames({ organizationId: organization.id, canReadMembers: context.permissions.includes("core.member.read") });
   const [canceling, setCanceling] = useState(false);
-  const canCancel = context.permissions.includes("core.workflow-run.cancel") && run.data !== undefined && isRunCancelable(run.data.status);
+  const current = run.data ?? null;
+  const canCancel = context.permissions.includes("core.workflow-run.cancel") && current !== null && isRunCancelable(current.status);
   return (
     <SettingsPageFrame
       organizationId={organization.id}
@@ -103,8 +123,8 @@ export function RunPage({ context, runId }: { context: AccessContext; runId: str
       header={
         <PageHeader
           eyebrow={t("eyebrow", { organization: organization.name })}
-          title={t("run.title", { workflow: run.data?.workflowId ?? runId })}
-          meta={run.data === undefined ? undefined : <RunStatusPill status={run.data.status} />}
+          title={t("run.title", { workflow: current?.workflowId ?? runId })}
+          meta={current === null ? undefined : <RunStatusPill status={current.status} />}
           actions={
             <>
               <Button variant="secondary" asChild>
@@ -121,10 +141,10 @@ export function RunPage({ context, runId }: { context: AccessContext; runId: str
       }
     >
       {online ? null : <OfflineNotice className="mb-4" />}
-      <QuerySection query={run} loadingLabel={t("run.loading")}>
+      <QuerySection query={run} loadingLabel={t("run.loading")} notFound={<RunNotFound organizationId={organization.id} />}>
         {(data) => <RunDetails run={data} organizationId={organization.id} canSeeApprovals={context.permissions.includes("core.approval.read")} starterLabel={starterName(data.startedBy)} />}
       </QuerySection>
-      <CancelWorkflowRunDialog organizationId={organization.id} run={canceling && run.data !== undefined ? run.data : null} onOpenChange={(open) => !open && setCanceling(false)} />
+      <CancelWorkflowRunDialog organizationId={organization.id} run={canceling ? current : null} onOpenChange={(open) => !open && setCanceling(false)} />
     </SettingsPageFrame>
   );
 }

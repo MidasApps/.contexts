@@ -26,4 +26,21 @@ describe("QuerySection", () => {
     rerender(view(query({})));
     expect(screen.getByText("ok")).toBeDefined();
   });
+
+  it("renders the given not-found state for a 404 or null data instead of a retryable error", () => {
+    const view = (props: Parameters<typeof QuerySection>[0]["query"]) => (
+      <QuerySection query={props} loadingLabel="Carregando dados" notFound={<p>Sumiu</p>}>
+        {(data) => <p>{data as string}</p>}
+      </QuerySection>
+    );
+    const { rerender } = renderWithProviders(view(query({ status: "error", data: undefined, error: new ApiError({ status: 404, code: "NOT_FOUND", message: "x" }) })));
+    expect(screen.getByText("Sumiu")).toBeDefined();
+    expect(screen.queryByRole("button", { name: "Tentar novamente" })).toBeNull();
+
+    rerender(view(query({ data: null })));
+    expect(screen.getByText("Sumiu")).toBeDefined();
+
+    rerender(view(query({ status: "error", data: undefined, error: new ApiError({ status: 500, code: "INTERNAL_ERROR", message: "x" }) })));
+    expect(screen.getByRole("button", { name: "Tentar novamente" })).toBeDefined();
+  });
 });

@@ -1395,6 +1395,8 @@
     "run": {
       "title": "Execução de {workflow}",
       "loading": "Carregando a execução…",
+      "notFoundTitle": "Execução não encontrada",
+      "notFoundDescription": "Esta execução não existe mais ou pertence a outra organização.",
       "id": "Identificador",
       "workflow": "Fluxo",
       "timelineTitle": "Linha do tempo",

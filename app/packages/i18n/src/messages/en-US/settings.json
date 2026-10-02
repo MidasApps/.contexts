@@ -1395,6 +1395,8 @@
     "run": {
       "title": "Run of {workflow}",
       "loading": "Loading the run…",
+      "notFoundTitle": "Run not found",
+      "notFoundDescription": "This run no longer exists or belongs to another organization.",
       "id": "Identifier",
       "workflow": "Workflow",
       "timelineTitle": "Timeline",

@@ -11,7 +11,7 @@ import {
 import { queryOptions, useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { useCallEndpoint } from "#/shared/api/api-context.tsx";
 import type { CallEndpoint } from "#/shared/api/call-endpoint.ts";
-import { cursorListQuery, pageQuery } from "#/shared/api/cursor-list.ts";
+import { cursorListQuery, nullOnNotFound, pageQuery } from "#/shared/api/cursor-list.ts";
 import { queryKeys, type QueryKey } from "#/shared/api/query-keys.ts";
 import { useIsSignedIn } from "#/shared/lib/session/use-signed-in.ts";
 import { isRunCancelable } from "./workflow-run-queries.ts";
@@ -54,11 +54,15 @@ export const useTenantWorkflowRuns = (organizationId: string, filters: TenantRun
   return useInfiniteQuery({ ...tenantWorkflowRunsQuery(callEndpoint, organizationId, filters), enabled: signedIn && organizationId !== "" && options.enabled !== false });
 };
 
-/** `GET /v1/workflows/runs/{runId}?organizationId=` (core.workflow-run.read). */
+/**
+ * `GET /v1/workflows/runs/{runId}?organizationId=` (core.workflow-run.read). `null` when the run
+ * does not exist or belongs to another organization (404): pages show not-found, not a retry.
+ */
 export const tenantWorkflowRunQuery = (callEndpoint: CallEndpoint, organizationId: string, runId: string) =>
   queryOptions({
     queryKey: tenantWorkflowRunKeys.one(organizationId, runId),
-    queryFn: async ({ signal }): Promise<WorkflowRun> => (await callEndpoint(getWorkflowRunEndpoint, { params: { runId }, query: { organizationId }, signal })).data,
+    queryFn: async ({ signal }): Promise<WorkflowRun | null> =>
+      nullOnNotFound(async () => (await callEndpoint(getWorkflowRunEndpoint, { params: { runId }, query: { organizationId }, signal })).data),
   });
 
 /** One run; re-read every 2 s while it can still change (progress without a reload). */
@@ -68,7 +72,7 @@ export const useTenantWorkflowRun = (organizationId: string, runId: string, opti
   return useQuery({
     ...tenantWorkflowRunQuery(callEndpoint, organizationId, runId),
     enabled: signedIn && organizationId !== "" && runId !== "" && options.enabled !== false,
-    refetchInterval: (query) => (query.state.data !== undefined && isRunCancelable(query.state.data.status) ? RUN_POLL_MS : false),
+    refetchInterval: (query) => (query.state.data != null && isRunCancelable(query.state.data.status) ? RUN_POLL_MS : false),
   });
 };
 

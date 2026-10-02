@@ -311,7 +311,12 @@ describe("SettingsWorkflowsView: run page", () => {
 
   it("answers not-found for a run of another organization and for an unknown address", async () => {
     const first = renderView({ "GET /v1/workflows/runs/:runId": apiError(404, "NOT_FOUND") }, ADMIN, runPath("other"));
-    expect((await screen.findByRole("alert")).textContent).toContain("Referência");
+    expect(await screen.findByRole("heading", { level: 2, name: "Execução não encontrada" })).toBeDefined();
+    expect(screen.queryByRole("alert")).toBeNull();
+    expect(screen.queryByRole("button", { name: "Tentar novamente" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Cancelar execução" })).toBeNull();
+    expect(screen.getAllByRole("link", { name: "Voltar às execuções" }).at(-1)?.getAttribute("href")).toBe(SETTINGS_PATH);
+    await expectNoAxeViolations(first.container);
     first.unmount();
     renderView({}, ADMIN, `${SETTINGS_PATH}/nope`);
     expect(await screen.findByRole("heading", { name: "Página não encontrada" })).toBeDefined();
