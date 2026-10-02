@@ -109,6 +109,20 @@
   "oneTimeSecret": {
     "confirmFirst": "Confirma que guardaste el secreto para terminar."
   },
+  "dialogGuard": {
+    "unsaved": {
+      "title": "¿Descartar los cambios?",
+      "description": "Lo que cambiaste en este diálogo se perderá.",
+      "confirm": "Descartar",
+      "cancel": "Seguir editando"
+    },
+    "oneTime": {
+      "title": "¿Cerrar sin guardarlo?",
+      "description": "Este valor no se volverá a mostrar. Para obtener otro, tendrás que generar uno nuevo.",
+      "confirm": "Cerrar de todos modos",
+      "cancel": "Volver"
+    }
+  },
   "pageTitles": {
     "signIn": "Iniciar sesión",
     "invite": "Invitación",

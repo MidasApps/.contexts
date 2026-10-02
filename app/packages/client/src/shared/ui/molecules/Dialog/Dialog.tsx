@@ -2,18 +2,40 @@
 
 import { XIcon } from "lucide-react";
 import { Dialog as DialogPrimitive } from "radix-ui";
-import type { ComponentProps } from "react";
+import { useState, type ComponentProps } from "react";
 import { useTranslations } from "use-intl";
 import { cn } from "#/shared/lib/cn.ts";
 import { centeredModalClasses, overlayClasses } from "#/shared/ui/styles/modal-classes.ts";
+import { DiscardQuestion, DismissGuardProvider, useCurrentDismissGuard, useDismissGuardState } from "./dialog-dismiss-guard.tsx";
 
 /**
  * shadcn `dialog` (Radix modal: focus trapped inside, Esc closes, focus returns to the trigger,
  * background inert). Every dialog needs a `DialogTitle` (use `className="sr-only"` to hide it) and
- * a `DialogDescription` or `aria-describedby={undefined}` on the content.
+ * a `DialogDescription` or `aria-describedby={undefined}` on the content. Content inside can guard
+ * dismissal with `useDialogDismissGuard` (block while in flight, ask before losing work or a
+ * one-time value); the root owns the open state when uncontrolled so the guard always applies.
  */
-export function Dialog(props: ComponentProps<typeof DialogPrimitive.Root>) {
-  return <DialogPrimitive.Root data-slot="dialog" {...props} />;
+export function Dialog({ open, defaultOpen = false, onOpenChange, children, ...props }: ComponentProps<typeof DialogPrimitive.Root>) {
+  const [innerOpen, setInnerOpen] = useState(defaultOpen);
+  const isOpen = open ?? innerOpen;
+  const setOpen = (next: boolean): void => {
+    if (open === undefined) setInnerOpen(next);
+    onOpenChange?.(next);
+  };
+  const dismissal = useDismissGuardState(() => setOpen(false));
+  return (
+    <DialogPrimitive.Root data-slot="dialog" open={isOpen} onOpenChange={(next) => (next ? setOpen(true) : dismissal.requestDismiss())} {...props}>
+      <DismissGuardProvider value={dismissal.context}>{children}</DismissGuardProvider>
+      <DiscardQuestion
+        asking={dismissal.asking}
+        onKeep={() => dismissal.setAsking(null)}
+        onDiscard={() => {
+          dismissal.setAsking(null);
+          setOpen(false);
+        }}
+      />
+    </DialogPrimitive.Root>
+  );
 }
 
 export function DialogTrigger(props: ComponentProps<typeof DialogPrimitive.Trigger>) {
@@ -31,12 +53,14 @@ export function DialogContent({
   ...props
 }: ComponentProps<typeof DialogPrimitive.Content> & { showCloseButton?: boolean }) {
   const t = useTranslations("common.actions");
+  // A blocked dialog cannot be closed, so it shows no close button that would do nothing.
+  const closable = useCurrentDismissGuard() !== "block";
   return (
     <DialogPrimitive.Portal data-slot="dialog-portal">
       <DialogPrimitive.Overlay data-slot="dialog-overlay" className={overlayClasses} />
       <DialogPrimitive.Content data-slot="dialog-content" className={cn(centeredModalClasses, className)} {...props}>
         {children}
-        {showCloseButton ? (
+        {showCloseButton && closable ? (
           <DialogPrimitive.Close
             data-slot="dialog-close"
             className="absolute top-4 right-4 inline-flex size-7 cursor-pointer items-center justify-center rounded-xs text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"

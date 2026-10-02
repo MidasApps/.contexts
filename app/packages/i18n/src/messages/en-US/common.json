@@ -109,6 +109,20 @@
   "oneTimeSecret": {
     "confirmFirst": "Confirm you stored the secret to finish."
   },
+  "dialogGuard": {
+    "unsaved": {
+      "title": "Discard changes?",
+      "description": "What you changed in this dialog will be lost.",
+      "confirm": "Discard",
+      "cancel": "Keep editing"
+    },
+    "oneTime": {
+      "title": "Close without storing it?",
+      "description": "This value will not be shown again. To get another one, you will have to create a new one.",
+      "confirm": "Close anyway",
+      "cancel": "Go back"
+    }
+  },
   "pageTitles": {
     "signIn": "Sign in",
     "invite": "Invitation",
