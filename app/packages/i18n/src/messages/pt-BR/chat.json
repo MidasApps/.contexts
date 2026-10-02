@@ -117,7 +117,9 @@
     "copied": "Resposta copiada.",
     "attachments": "Anexos",
     "formSubmitted": "Formulário enviado: {command}",
-    "choiceSubmitted": "Escolha enviada: {choice}"
+    "choiceSubmitted": "Escolha enviada: {choice}",
+    "incomplete": "Incompleta",
+    "incompleteHint": "A resposta parou por um erro; o texto acima pode estar incompleto."
   },
   "error": {
     "title": "Não foi possível responder",

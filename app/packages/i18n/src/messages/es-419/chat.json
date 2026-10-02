@@ -117,7 +117,9 @@
     "copied": "Respuesta copiada.",
     "attachments": "Adjuntos",
     "formSubmitted": "Formulario enviado: {command}",
-    "choiceSubmitted": "Elección enviada: {choice}"
+    "choiceSubmitted": "Elección enviada: {choice}",
+    "incomplete": "Incompleta",
+    "incompleteHint": "La respuesta se detuvo por un error; el texto de arriba puede estar incompleto."
   },
   "error": {
     "title": "No se pudo responder",

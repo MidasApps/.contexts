@@ -14,6 +14,8 @@ export type ChatMessageProps = {
   streaming?: boolean | undefined;
   /** The member stopped this answer, or the stream was lost: the partial answer stays. */
   interrupted?: boolean | undefined;
+  /** The turn failed after part of this answer arrived: the text is kept and marked. */
+  incomplete?: boolean | undefined;
   showReasoning?: boolean | undefined;
   renderTool?: RenderToolPart | undefined;
   /** Actions under an assistant message (copy, regenerate). */
@@ -27,7 +29,7 @@ export type ChatMessageProps = {
  * citation guard found no source (SP3), "interrompido" when it was cut short. Both are words
  * with an icon or dot, never colour alone.
  */
-export function ChatMessage({ message, streaming = false, interrupted = false, showReasoning, renderTool, actions, assistantName }: ChatMessageProps) {
+export function ChatMessage({ message, streaming = false, interrupted = false, incomplete = false, showReasoning, renderTool, actions, assistantName }: ChatMessageProps) {
   const t = useTranslations("chat.message");
   const from = message.role === "user" ? "user" : "assistant";
   // Shown as soon as the stream says so (the knowledge delegation ends before the answer text).
@@ -37,7 +39,7 @@ export function ChatMessage({ message, streaming = false, interrupted = false, s
       <MessageContent>
         <MessageParts message={message} streaming={streaming} showReasoning={showReasoning} renderTool={renderTool} />
       </MessageContent>
-      {lowConfidence || interrupted ? (
+      {lowConfidence || interrupted || incomplete ? (
         <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[12.5px] text-muted-foreground">
           {lowConfidence ? (
             <>
@@ -53,6 +55,14 @@ export function ChatMessage({ message, streaming = false, interrupted = false, s
                 {t("stopped")}
               </StatusPill>
               <span>{t("stoppedHint")}</span>
+            </>
+          ) : null}
+          {incomplete ? (
+            <>
+              <StatusPill tone="amber" icon="alert-triangle" data-slot="incomplete">
+                {t("incomplete")}
+              </StatusPill>
+              <span>{t("incompleteHint")}</span>
             </>
           ) : null}
         </div>

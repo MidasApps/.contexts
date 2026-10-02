@@ -225,6 +225,19 @@ describe("ChatPanel", () => {
     expect(alert.textContent).not.toContain("sk-secret");
   });
 
+  it("marks a partial answer as incomplete when the stream fails mid-way", async () => {
+    const { user, transport, field } = setup();
+    await user.type(field(), "oi{Enter}");
+    const stream = await firstStream(transport);
+    act(() => stream.emit(...textChunks(["Metade da"], { finish: false })));
+    await waitFor(() => expect(status()).toBe("Respondendo…"));
+    act(() => stream.emit({ type: "error", errorText: "provider exploded" }));
+    await screen.findByRole("alert");
+    expect(screen.getByText("Metade da")).toBeTruthy();
+    expect(screen.getByText("Incompleta")).toBeTruthy();
+    expect(screen.getByText(/A resposta parou por um erro/u)).toBeTruthy();
+  });
+
   it("marks a lost stream, keeps what arrived and retries", async () => {
     const { user, transport, field } = setup();
     await user.type(field(), "oi{Enter}");

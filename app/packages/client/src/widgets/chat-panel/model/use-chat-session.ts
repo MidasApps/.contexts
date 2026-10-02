@@ -8,7 +8,7 @@ import { ApiError } from "#/shared/api/api-error.ts";
 import { useApiConnection, useCallEndpoint } from "#/shared/api/api-context.tsx";
 import { createChatTransport, type ChatScope } from "#/shared/api/chat-transport.ts";
 import { useOnlineStatus } from "#/shared/lib/network/use-online-status.ts";
-import { partsOf, toolPartOf } from "#/entities/message/index.ts";
+import { partsOf, textOf, toolPartOf } from "#/entities/message/index.ts";
 
 /** What the status line says (SP4 spec §5.3); derived from `useChat` status, connectivity and how the last answer ended. */
 export type ChatPhase =
@@ -30,7 +30,8 @@ export type ChatPhase =
   | "error";
 
 /** How the last answer ended, and which message it left behind. */
-type Outcome = { readonly kind: "none" | "finished" | "stopped" | "lost"; readonly messageId?: string | undefined };
+/** `failed`: the stream ended in an error after part of the answer arrived. */
+type Outcome = { readonly kind: "none" | "finished" | "stopped" | "lost" | "failed"; readonly messageId?: string | undefined };
 
 export type ChatFailure = {
   /** API error code (`errors.<code>`), or `undefined` for a failure inside the stream. */
@@ -63,6 +64,8 @@ export type ChatSession = {
   readonly conversationId: string | undefined;
   /** The message a stop or a lost stream cut short. */
   readonly interruptedMessageId: string | undefined;
+  /** The partial answer of a turn that failed mid-way (kept on screen, marked incomplete). */
+  readonly incompleteMessageId: string | undefined;
   readonly busy: boolean;
   /** Sends a turn; `attachments` are ready files of the upload queue (sent by id, shown from metadata). */
   readonly send: (text: string, attachments?: readonly MessageAttachment[]) => void;
@@ -173,7 +176,8 @@ export const useChatSession = (args: UseChatSessionArgs): ChatSession => {
       // A stop is recorded when the member asks for it; an abort seen here is that same stop.
       if (isAbort) return;
       if (isDisconnect) setOutcome({ kind: "lost", messageId: message.id });
-      else if (!isError) setOutcome({ kind: "finished", messageId: message.id });
+      else if (isError) setOutcome({ kind: "failed", messageId: message.role === "assistant" && textOf(message).trim() !== "" ? message.id : undefined });
+      else setOutcome({ kind: "finished", messageId: message.id });
     },
     onError: () => setResuming(false),
   });
@@ -226,6 +230,7 @@ export const useChatSession = (args: UseChatSessionArgs): ChatSession => {
     failure,
     conversationId,
     interruptedMessageId: outcome.kind === "stopped" || outcome.kind === "lost" ? outcome.messageId : undefined,
+    incompleteMessageId: outcome.kind === "failed" ? outcome.messageId : undefined,
     busy,
     send,
     stop,

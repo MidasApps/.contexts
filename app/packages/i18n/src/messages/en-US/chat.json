@@ -117,7 +117,9 @@
     "copied": "Answer copied.",
     "attachments": "Attachments",
     "formSubmitted": "Form submitted: {command}",
-    "choiceSubmitted": "Choice sent: {choice}"
+    "choiceSubmitted": "Choice sent: {choice}",
+    "incomplete": "Incomplete",
+    "incompleteHint": "The answer stopped on an error; the text above may be incomplete."
   },
   "error": {
     "title": "Could not answer",

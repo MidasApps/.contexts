@@ -205,6 +205,7 @@ export function ChatThread(props: ChatThreadProps) {
                   message={message}
                   streaming={busy && last && message.role === "assistant"}
                   interrupted={message.id === session.interruptedMessageId}
+                  incomplete={message.id === session.incompleteMessageId}
                   showReasoning={props.showReasoning}
                   assistantName={props.assistantName}
                   renderTool={renderTool}
