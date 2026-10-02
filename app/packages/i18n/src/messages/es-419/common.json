@@ -249,5 +249,84 @@
       "lastFire": "Último disparo",
       "actions": "Acciones"
     }
+  },
+  "workflows": {
+    "knowledge-ingest": {
+      "name": "Ingesta de conocimiento",
+      "description": "Indexa un archivo subido o una página web pública en la base de conocimiento de la organización."
+    },
+    "catalog-reindex": {
+      "name": "Reindexación del catálogo",
+      "description": "Reconstruye los documentos del catálogo de la plataforma en la base de conocimiento."
+    },
+    "approval-demo": {
+      "name": "Demostración de aprobación",
+      "description": "Pide a otra persona que apruebe una nota antes de crearla."
+    },
+    "usage-report": {
+      "name": "Informe de uso",
+      "description": "Consolida el uso de modelos por organización y día, lo exporta y envía alertas de presupuesto."
+    },
+    "approval-expiry-sweep": {
+      "name": "Vencimiento de aprobaciones",
+      "description": "Vence las solicitudes de aprobación atrasadas y cierra las ejecuciones interrumpidas."
+    },
+    "conversation-purge": {
+      "name": "Depuración de conversaciones",
+      "description": "Elimina definitivamente las conversaciones borradas hace más de 30 días."
+    },
+    "eval-export": {
+      "name": "Exportación de evaluaciones",
+      "description": "Exporta los resúmenes de los experimentos de evaluación al data warehouse."
+    }
+  },
+  "agents": {
+    "assistant": "Asistente",
+    "knowledge": "Conocimiento",
+    "data": "Datos",
+    "action": "Acciones",
+    "web": "Web"
+  },
+  "flags": {
+    "ai": {
+      "kill-switch": {
+        "name": "Interruptor de emergencia de la IA",
+        "description": "Detiene todos los agentes, chats y voz durante un incidente."
+      },
+      "web-tools": {
+        "name": "Herramientas web",
+        "description": "Interruptor de la plataforma sobre la opción de la organización para herramientas que acceden a la web pública."
+      },
+      "memory": {
+        "observational": {
+          "name": "Memoria observacional",
+          "description": "Memoria observacional de los agentes; se aplica en el próximo inicio del runtime."
+        }
+      }
+    },
+    "chat": {
+      "voice": {
+        "name": "Voz en el chat",
+        "description": "Transcripción y voz por entorno y organización.",
+        "realtime": {
+          "name": "Voz en tiempo real",
+          "description": "Sesiones de voz en tiempo real; el audio va directo entre el navegador y el proveedor y aún no se mide."
+        }
+      }
+    },
+    "workflows": {
+      "schedules": {
+        "name": "Programaciones de workflows",
+        "description": "Disparos programados de workflows; apagado, retiene todos los disparos (uno perdido se ejecuta una vez al reactivarlo)."
+      }
+    }
+  },
+  "cron": {
+    "hourly": "Cada hora, en el minuto {minute}",
+    "daily": "Todos los días a las {time}",
+    "weekdays": "Días hábiles a las {time}",
+    "weekly": "Cada semana, el {weekday}, a las {time}",
+    "monthly": "El día {day} de cada mes a las {time}",
+    "withZone": "{description} ({zone})"
   }
 }

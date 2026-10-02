@@ -6,6 +6,7 @@
     "note": { "read": "Ver las notas del módulo de ejemplo", "create": "Crear notas en el módulo de ejemplo", "archive": "Archivar notas del módulo de ejemplo (requiere la aprobación de otra persona)" }
   },
   "unitTypes": { "area": "Área" },
+  "workflows": { "note-intake": { "name": "Ingreso de notas", "description": "Crea una nota en la organización de quien la pide." } },
   "note": { "title": "Título", "body": "Texto", "noteId": "Nota" },
   "settings": {
     "greeting": "Saludo",

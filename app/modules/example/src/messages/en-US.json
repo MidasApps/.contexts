@@ -6,6 +6,7 @@
     "note": { "read": "View the example module's notes", "create": "Create notes in the example module", "archive": "Archive the example module's notes (needs another person's approval)" }
   },
   "unitTypes": { "area": "Area" },
+  "workflows": { "note-intake": { "name": "Note intake", "description": "Creates a note in the caller's organization." } },
   "note": { "title": "Title", "body": "Text", "noteId": "Note" },
   "settings": {
     "greeting": "Greeting",

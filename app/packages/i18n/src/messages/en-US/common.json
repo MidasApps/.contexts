@@ -249,5 +249,84 @@
       "lastFire": "Last fire",
       "actions": "Actions"
     }
+  },
+  "workflows": {
+    "knowledge-ingest": {
+      "name": "Knowledge ingestion",
+      "description": "Indexes an uploaded file or a public web page into the organization's knowledge base."
+    },
+    "catalog-reindex": {
+      "name": "Catalog reindex",
+      "description": "Rebuilds the platform catalog documents of the knowledge base."
+    },
+    "approval-demo": {
+      "name": "Approval demo",
+      "description": "Asks a second person to approve a note before it is created."
+    },
+    "usage-report": {
+      "name": "Usage report",
+      "description": "Rolls up model usage per organization and day, exports it and sends budget alerts."
+    },
+    "approval-expiry-sweep": {
+      "name": "Approval expiry sweep",
+      "description": "Expires overdue approval requests and fails interrupted executions."
+    },
+    "conversation-purge": {
+      "name": "Conversation purge",
+      "description": "Purges conversations deleted more than 30 days ago."
+    },
+    "eval-export": {
+      "name": "Eval export",
+      "description": "Exports eval experiment summaries to the warehouse."
+    }
+  },
+  "agents": {
+    "assistant": "Assistant",
+    "knowledge": "Knowledge",
+    "data": "Data",
+    "action": "Actions",
+    "web": "Web"
+  },
+  "flags": {
+    "ai": {
+      "kill-switch": {
+        "name": "AI kill switch",
+        "description": "Stops every agent, chat and voice run during an incident."
+      },
+      "web-tools": {
+        "name": "Web tools",
+        "description": "Platform switch over the organization's opt-in for tools that reach the public web."
+      },
+      "memory": {
+        "observational": {
+          "name": "Observational memory",
+          "description": "Agents' observational memory; takes effect the next time the runtime starts."
+        }
+      }
+    },
+    "chat": {
+      "voice": {
+        "name": "Chat voice",
+        "description": "Voice transcription and speech per environment and organization.",
+        "realtime": {
+          "name": "Realtime voice",
+          "description": "Realtime voice sessions; audio flows between browser and provider and is not metered yet."
+        }
+      }
+    },
+    "workflows": {
+      "schedules": {
+        "name": "Workflow schedules",
+        "description": "Scheduled workflow fires; off holds every fire (a missed fire runs once when back on)."
+      }
+    }
+  },
+  "cron": {
+    "hourly": "Every hour at minute {minute}",
+    "daily": "Every day at {time}",
+    "weekdays": "Weekdays at {time}",
+    "weekly": "Every week on {weekday} at {time}",
+    "monthly": "Monthly on day {day} at {time}",
+    "withZone": "{description} ({zone})"
   }
 }

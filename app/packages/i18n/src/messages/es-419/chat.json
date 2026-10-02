@@ -353,5 +353,22 @@
     "player": "Respuesta en audio",
     "readFailed": "No se pudo leer la respuesta en voz alta.",
     "readUnavailable": "La lectura en voz alta está desactivada para esta organización."
+  },
+  "tools": {
+    "catalog": {
+      "describeEntity": "Describir un dato del catálogo",
+      "listEntities": "Listar los datos del catálogo",
+      "renderForm": "Abrir un formulario"
+    },
+    "knowledge": {
+      "searchKnowledge": "Buscar en la base de conocimiento"
+    },
+    "sql": {
+      "querySemanticSql": "Consultar datos"
+    },
+    "web": {
+      "search": "Buscar en la web",
+      "scrape": "Leer una página web"
+    }
   }
 }

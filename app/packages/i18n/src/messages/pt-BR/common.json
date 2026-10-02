@@ -249,5 +249,84 @@
       "lastFire": "Último disparo",
       "actions": "Ações"
     }
+  },
+  "workflows": {
+    "knowledge-ingest": {
+      "name": "Ingestão de conhecimento",
+      "description": "Indexa um arquivo enviado ou uma página pública na base de conhecimento da organização."
+    },
+    "catalog-reindex": {
+      "name": "Reindexação do catálogo",
+      "description": "Reconstrói os documentos do catálogo da plataforma na base de conhecimento."
+    },
+    "approval-demo": {
+      "name": "Demonstração de aprovação",
+      "description": "Pede a outra pessoa que aprove uma nota antes de criá-la."
+    },
+    "usage-report": {
+      "name": "Relatório de uso",
+      "description": "Consolida o uso de modelos por organização e dia, exporta e envia alertas de orçamento."
+    },
+    "approval-expiry-sweep": {
+      "name": "Expiração de aprovações",
+      "description": "Expira pedidos de aprovação vencidos e encerra execuções interrompidas."
+    },
+    "conversation-purge": {
+      "name": "Limpeza de conversas",
+      "description": "Apaga de vez as conversas excluídas há mais de 30 dias."
+    },
+    "eval-export": {
+      "name": "Exportação de avaliações",
+      "description": "Exporta os resumos dos experimentos de avaliação para o data warehouse."
+    }
+  },
+  "agents": {
+    "assistant": "Assistente",
+    "knowledge": "Conhecimento",
+    "data": "Dados",
+    "action": "Ações",
+    "web": "Web"
+  },
+  "flags": {
+    "ai": {
+      "kill-switch": {
+        "name": "Interruptor de emergência da IA",
+        "description": "Para todos os agentes, conversas e voz durante um incidente."
+      },
+      "web-tools": {
+        "name": "Ferramentas de web",
+        "description": "Chave da plataforma acima da opção da organização para ferramentas que acessam a web pública."
+      },
+      "memory": {
+        "observational": {
+          "name": "Memória observacional",
+          "description": "Memória observacional dos agentes; vale a partir do próximo início do runtime."
+        }
+      }
+    },
+    "chat": {
+      "voice": {
+        "name": "Voz no chat",
+        "description": "Transcrição e fala por ambiente e organização.",
+        "realtime": {
+          "name": "Voz em tempo real",
+          "description": "Sessões de voz em tempo real; o áudio vai direto entre o navegador e o provedor e ainda não é medido."
+        }
+      }
+    },
+    "workflows": {
+      "schedules": {
+        "name": "Agendamentos de workflows",
+        "description": "Disparos agendados de workflows; desligado, segura todos os disparos (um disparo perdido roda uma vez ao religar)."
+      }
+    }
+  },
+  "cron": {
+    "hourly": "De hora em hora, aos {minute} min",
+    "daily": "Todos os dias às {time}",
+    "weekdays": "Dias úteis às {time}",
+    "weekly": "Toda semana, {weekday}, às {time}",
+    "monthly": "Todo dia {day} do mês às {time}",
+    "withZone": "{description} ({zone})"
   }
 }

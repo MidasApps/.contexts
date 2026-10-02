@@ -24,6 +24,9 @@ const useRegistries = (): ShellRegistries => {
  */
 export const useModuleRegistry = (): ModuleRegistry => useRegistries().modules;
 
+/** The installed client modules, or `null` outside the app shell (labels then use the core catalogs only). */
+export const useOptionalModuleRegistry = (): ModuleRegistry | null => use(ShellRegistryContext)?.modules ?? null;
+
 /**
  * Core and module navigation items per slot, filtered with `visibleItems(slot, can)`.
  * @throws {Error} outside the app shell (a composition bug).

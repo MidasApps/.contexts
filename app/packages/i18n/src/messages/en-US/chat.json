@@ -353,5 +353,22 @@
     "player": "Answer as audio",
     "readFailed": "The answer could not be read aloud.",
     "readUnavailable": "Read aloud is turned off for this organization."
+  },
+  "tools": {
+    "catalog": {
+      "describeEntity": "Describe a catalog entity",
+      "listEntities": "List catalog entities",
+      "renderForm": "Open a form"
+    },
+    "knowledge": {
+      "searchKnowledge": "Search the knowledge base"
+    },
+    "sql": {
+      "querySemanticSql": "Query data"
+    },
+    "web": {
+      "search": "Search the web",
+      "scrape": "Read a web page"
+    }
   }
 }
