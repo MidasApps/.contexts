@@ -1,6 +1,6 @@
 import type { Permission } from "@core/contracts";
 import { configure, screen, waitFor, within } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { renderApp } from "#/app-shell/testing/render-app.tsx";
 import { shellRoutes } from "#/app-shell/testing/shell-routes.ts";
 import { buildKnowledgeDocument, KNOWLEDGE_IDS } from "#/entities/knowledge/knowledge.fixture.ts";
@@ -36,6 +36,9 @@ const renderView = (routes: FakeRoutes = {}, permissions: readonly Permission[] 
     </main>,
     { path: `/o/${IDS.organization}/settings/knowledge`, routes: shellRoutes(permissions, { [DOCUMENTS]: page(LIST), ...routes }) },
   );
+
+// Started ingestions survive reloads in sessionStorage; each test starts without any.
+afterEach(() => sessionStorage.clear());
 
 describe("SettingsKnowledgeView", () => {
   it("lists documents with their collection and indexing status, and says how collections work", async () => {
@@ -152,6 +155,34 @@ describe("SettingsKnowledgeView", () => {
       { kind: "url", url: PAGE_URL },
     ]);
     await waitFor(() => expect(runs).toContain("run-2"));
+  });
+
+  it("keeps an ingestion started here across a reload, and shows its failure on return", async () => {
+    let status: "running" | "failed" = "running";
+    const routes = { [DOCUMENTS]: page([]), [SOURCES]: ok({ runId: "run-1" }, 202), [RUN]: () => ok(buildWorkflowRun({ runId: "run-1", workflowId: "knowledge-ingest", status })) };
+    const first = renderView(routes, RUN_READER);
+    await first.user.click((await screen.findAllByRole("button", { name: "Adicionar documento" }))[0] as HTMLElement);
+    const dialog = await screen.findByRole("dialog", { name: "Adicionar documento" });
+    await first.user.click(within(dialog).getByRole("tab", { name: "Página da web" }));
+    await first.user.type(within(dialog).getByRole("textbox", { name: "Endereço da página" }), PAGE_URL);
+    await first.user.click(within(dialog).getByRole("button", { name: "Adicionar" }));
+    expect(await screen.findByText(/Indexando https:\/\/docs\.example\.com\/new/u)).toBeDefined();
+    first.unmount();
+
+    // The run failed while the page was closed.
+    status = "failed";
+    const { user } = renderView(routes, RUN_READER);
+    const failed = await screen.findByRole("alert", { name: `Não foi possível indexar ${PAGE_URL}` });
+    await user.click(within(failed).getByRole("button", { name: `Dispensar o aviso de ${PAGE_URL}` }));
+    expect(screen.queryByRole("alert", { name: `Não foi possível indexar ${PAGE_URL}` })).toBeNull();
+    expect(sessionStorage.getItem(`core.knowledge.ingestions.${IDS.organization}`)).toBe("[]");
+  });
+
+  it("ignores stored ingestions it cannot read", async () => {
+    sessionStorage.setItem(`core.knowledge.ingestions.${IDS.organization}`, "{not json");
+    renderView({}, RUN_READER);
+    await screen.findByText("Onboarding guide");
+    expect(screen.queryByRole("list", { name: "Indexações em andamento" })).toBeNull();
   });
 
   it("dismisses a failed ingestion", async () => {

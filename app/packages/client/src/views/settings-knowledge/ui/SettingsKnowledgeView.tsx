@@ -1,7 +1,7 @@
 "use client";
 
 import type { AccessContext, KnowledgeDocument } from "@core/contracts";
-import { useCallback, useId, useMemo, useState } from "react";
+import { useId, useMemo, useState } from "react";
 import { useTranslations } from "use-intl";
 import { collectionOfNamespace, namespaceOfTarget, ORGANIZATION_NAMESPACE, useKnowledgeDocuments } from "#/entities/knowledge/index.ts";
 import { useProjects } from "#/entities/project/index.ts";
@@ -19,6 +19,7 @@ import { OfflineNotice } from "#/shared/ui/molecules/OfflineNotice/OfflineNotice
 import { PageHeader } from "#/widgets/page-header/index.ts";
 import { QueryPage } from "#/widgets/page-state/index.ts";
 import { SettingsPageFrame } from "#/widgets/settings-nav/index.ts";
+import { useStartedIngestions } from "../model/use-started-ingestions.ts";
 import { IngestionNotices } from "./IngestionNotices.tsx";
 import { documentName, KnowledgeDocumentsTable, useCollectionName } from "./KnowledgeDocumentsTable.tsx";
 
@@ -60,18 +61,14 @@ function SettingsKnowledge({ context }: { context: AccessContext }) {
   const [selected, setSelected] = useState<string>(ALL);
   const [adding, setAdding] = useState(false);
   const [deleting, setDeleting] = useState<KnowledgeDocument | null>(null);
-  const [started, setStarted] = useState<readonly StartedKnowledgeIngestion[]>([]);
+  const ingestions = useStartedIngestions(organization.id);
+  const { started } = ingestions;
   const projects = useProjects(organization.id);
   const projectNames = useMemo(() => new Map((projects.data ?? []).map((project) => [String(project.id), project.name] as const)), [projects.data]);
   const collectionName = useCollectionName(projectNames, projects.isSuccess && !projects.hasNextPage);
   const allowed = permissions.includes("core.knowledge.read");
   const documents = useKnowledgeDocuments(organization.id, selected === ALL ? undefined : selected, { poll: started.length > 0, enabled: allowed });
   const indexing = stillIndexing(started, documents.data ?? []);
-  const dismissRun = useCallback((runId: string) => setStarted((runs) => runs.filter((run) => run.runId !== runId)), []);
-  const restartRun = useCallback(
-    (previousRunId: string, next: StartedKnowledgeIngestion) => setStarted((runs) => runs.map((run) => (run.runId === previousRunId ? next : run))),
-    [],
-  );
   // An upload goes to the collection being looked at; "all" has no single target, so it goes to the organization.
   const collection = collectionOfNamespace(selected === ALL ? ORGANIZATION_NAMESPACE : selected);
   const targetProjectId = collection.kind === "project" ? collection.projectId : undefined;
@@ -108,8 +105,8 @@ function SettingsKnowledge({ context }: { context: AccessContext }) {
         organizationId={organization.id}
         runs={indexing}
         followRuns={permissions.includes("core.workflow-run.read")}
-        onDismiss={dismissRun}
-        onRestarted={restartRun}
+        onDismiss={ingestions.dismiss}
+        onRestarted={ingestions.restart}
       />
       <KnowledgeDocumentsTable
         caption={t("caption", { organization: organization.name })}
@@ -134,7 +131,7 @@ function SettingsKnowledge({ context }: { context: AccessContext }) {
           fileAllowed={permissions.includes("core.file.upload")}
           open={adding}
           onOpenChange={setAdding}
-          onAdded={(run) => setStarted((runs) => [...runs, run])}
+          onAdded={ingestions.add}
         />
       ) : null}
       <DeleteKnowledgeDocumentDialog
