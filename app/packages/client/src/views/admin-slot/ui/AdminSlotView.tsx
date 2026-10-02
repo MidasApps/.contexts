@@ -5,8 +5,8 @@ import { useMe } from "#/entities/session/index.ts";
 import { RouteLink, useRouter } from "#/shared/lib/router/router-context.tsx";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
 import { EmptyState } from "#/shared/ui/molecules/EmptyState/EmptyState.tsx";
+import { AdminPageFrame } from "#/widgets/admin-nav/index.ts";
 import { useAdminItems } from "#/widgets/admin-sidebar/index.ts";
-import { PageHeader } from "#/widgets/page-header/index.ts";
 import { PageNotFound, QueryPage } from "#/widgets/page-state/index.ts";
 
 function AdminSlotPage({ rest }: { rest: string }) {
@@ -17,9 +17,9 @@ function AdminSlotPage({ rest }: { rest: string }) {
   if (area === undefined) return <PageNotFound />;
   const name = area.route.id === "admin" ? area.route.rest : "";
   const descriptionKey = `admin.descriptions.${name}`;
+  // The same frame as every built admin page: header, eyebrow and the area's permission states.
   return (
-    <>
-      <PageHeader eyebrow={t("admin.slot.eyebrow")} title={t(area.item.labelKey)} {...(t.has(descriptionKey) ? { description: t(descriptionKey) } : {})} />
+    <AdminPageFrame permission={area.item.permission} title={t(area.item.labelKey)} description={t.has(descriptionKey) ? t(descriptionKey) : undefined}>
       <EmptyState
         headingLevel={2}
         icon={area.item.icon}
@@ -31,7 +31,7 @@ function AdminSlotPage({ rest }: { rest: string }) {
           </Button>
         }
       />
-    </>
+    </AdminPageFrame>
   );
 }
 

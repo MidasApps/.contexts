@@ -11,8 +11,11 @@ import { LoadingState } from "#/shared/ui/molecules/LoadingState/LoadingState.ts
 import { NoAccessState } from "#/shared/ui/molecules/NoAccessState/NoAccessState.tsx";
 
 export type AdminPageFrameProps = {
-  /** Platform permission of the page; a staff role without it sees the no-access state. */
-  permission: Permission;
+  /**
+   * Platform permission of the page; a staff role without it sees the no-access state. `undefined`
+   * only for a contributed area registered without one: any staff role may open it.
+   */
+  permission: Permission | undefined;
   /** The page's only `h1`. */
   title: string;
   description?: string | undefined;
@@ -34,7 +37,7 @@ export type AdminPageFrameProps = {
 export function AdminPageFrame({ permission, title, description, back, meta, actions, children }: AdminPageFrameProps) {
   const t = useTranslations("admin.states");
   const permissions = usePlatformPermissions();
-  const allowed = permissions.status === "success" && permissions.can(permission);
+  const allowed = permissions.status === "success" && (permission === undefined || permissions.can(permission));
   return (
     <>
       <div data-slot="page-header" className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
@@ -51,7 +54,7 @@ export function AdminPageFrame({ permission, title, description, back, meta, act
             </RouteLink>
           )}
           <div className="flex flex-wrap items-center gap-2">
-            <h1 className="text-2xl leading-tight font-semibold tracking-tight">{title}</h1>
+            <h1 className="min-w-0 text-2xl leading-tight font-semibold tracking-tight break-words [overflow-wrap:anywhere]">{title}</h1>
             {meta}
           </div>
           {description === undefined ? null : <p className="max-w-prose text-sm text-muted-foreground">{description}</p>}

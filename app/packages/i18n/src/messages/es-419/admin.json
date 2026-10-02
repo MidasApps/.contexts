@@ -12,7 +12,6 @@
     "badge": "Equipo de la plataforma"
   },
   "slot": {
-    "eyebrow": "Administración",
     "emptyTitle": "Todavía no disponible",
     "emptyDescription": "Esta área de la administración llega en una próxima versión.",
     "backToHome": "Volver a la administración",
