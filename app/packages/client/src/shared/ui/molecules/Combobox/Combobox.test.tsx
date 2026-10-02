@@ -43,4 +43,14 @@ describe("Combobox", () => {
     expect(trigger.textContent).toContain("Maçã");
     expect(document.activeElement).toBe(trigger);
   });
+  // Follow-up 89: with many options and a short viewport, the list must stay on screen and scroll.
+  it("bounds the popover by the room the viewport has and scrolls the options inside it", async () => {
+    const { user } = renderWithProviders(<Fruit />);
+    await user.click(screen.getByRole("combobox", { name: "Fruta" }));
+    const popover = await screen.findByRole("dialog", { name: "Buscar fruta" });
+    expect(popover.className).toContain("max-h-(--radix-popover-content-available-height)");
+    const list = screen.getByRole("listbox");
+    expect(list.className).toContain("min-h-0");
+    expect(list.className).toContain("overflow-y-auto");
+  });
 });

@@ -86,10 +86,18 @@ export function Combobox({
           <ChevronsUpDownIcon className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
         </button>
       </PopoverTrigger>
-      <PopoverContent id={contentId} aria-label={searchLabel} className="w-(--radix-popover-trigger-width) min-w-64 p-0" align="start">
-        <Command label={searchLabel} filter={containsAllTerms}>
+      {/* The popover never outgrows the room Radix measured on its side; the list shrinks and
+          scrolls inside it, so options never sit off screen on short viewports (follow-up 89). */}
+      <PopoverContent
+        id={contentId}
+        aria-label={searchLabel}
+        className="flex max-h-(--radix-popover-content-available-height) w-(--radix-popover-trigger-width) min-w-64 flex-col p-0"
+        align="start"
+        collisionPadding={8}
+      >
+        <Command label={searchLabel} filter={containsAllTerms} className="min-h-0">
           <CommandInput placeholder={searchPlaceholder} />
-          <CommandList label={resultsLabel}>
+          <CommandList label={resultsLabel} className="min-h-0 flex-1">
             <CommandEmpty>{emptyText}</CommandEmpty>
             {groups.map((group, index) => (
               <CommandGroup key={group.heading ?? index} heading={group.heading}>
