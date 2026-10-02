@@ -20,4 +20,11 @@ describe("cn", () => {
     expect(cn("shadow-popover rounded-2xs", "shadow-modal rounded-sm")).toBe("shadow-modal rounded-sm");
     expect(cn("text-xs text-muted-foreground", "text-muted-foreground-strong")).toBe("text-xs text-muted-foreground-strong");
   });
+
+  it("reads the type scale steps as font sizes, never as colors", () => {
+    expect(cn("text-caption text-muted-foreground")).toBe("text-caption text-muted-foreground");
+    expect(cn("text-body text-destructive-text", "text-body-sm")).toBe("text-destructive-text text-body-sm");
+    expect(cn("text-micro text-tiny text-label text-title")).toBe("text-title");
+    expect(cn("text-sm", "text-caption")).toBe("text-caption");
+  });
 });

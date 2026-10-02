@@ -211,6 +211,22 @@
   --breakpoint-xl: 80rem;
 }
 
+/*
+ * Type scale of the dense UI (decision 0057): Tailwind's `text-xs`/`text-sm`/... plus the steps
+ * the design-system prototypes use between them, so components name a step instead of a pixel
+ * value. No `--text-*--line-height`: like the arbitrary sizes they replace, they keep the line
+ * height around them (set `leading-*` where a step needs its own).
+ */
+@theme {
+  --text-micro: 0.59375rem; /* 9.5px: mono uppercase tags, xs avatar initials */
+  --text-tiny: 0.65625rem; /* 10.5px: counters, uppercase group headings */
+  --text-label: 0.6875rem; /* 11px: overline labels, keyboard keys, chart ticks */
+  --text-caption: 0.71875rem; /* 11.5px: ids, hints, secondary metadata */
+  --text-body-sm: 0.78125rem; /* 12.5px: secondary body text, dense lists, code */
+  --text-body: 0.8125rem; /* 13px: dense UI body: tables, menus, panels */
+  --text-title: 0.9375rem; /* 15px: card and section titles */
+}
+
 @keyframes shimmer {
   0%,
   100% {
