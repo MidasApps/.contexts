@@ -5,6 +5,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { adminOrganizationKeys } from "#/entities/admin-organization/index.ts";
 import { adminOverviewKeys } from "#/entities/admin-overview/index.ts";
 import { useCallEndpoint } from "#/shared/api/api-context.tsx";
+import type { CollectedPages } from "#/shared/api/cursor-list.ts";
 
 export type OrganizationWrites = {
   /** `PATCH /v1/admin/organizations/{id}`: the plan (`null` = platform default), the status or both. */
@@ -23,7 +24,9 @@ export const useOrganizationWrites = (organizationId: string): OrganizationWrite
   const callEndpoint = useCallEndpoint();
   const queryClient = useQueryClient();
   const store = (saved: OrganizationAdminSummary): OrganizationAdminSummary => {
-    queryClient.setQueryData<OrganizationAdminSummary[]>(adminOrganizationKeys.whole(), (list) => list?.map((item) => (item.id === saved.id ? saved : item)));
+    queryClient.setQueryData<CollectedPages<OrganizationAdminSummary>>(adminOrganizationKeys.whole(), (whole) =>
+      whole === undefined ? whole : { ...whole, items: whole.items.map((item) => (item.id === saved.id ? saved : item)) },
+    );
     queryClient.setQueryData<OrganizationAdminDetail | null>(adminOrganizationKeys.detail(saved.id), (detail) => (detail === undefined || detail === null ? detail : { ...detail, ...saved }));
     void queryClient.invalidateQueries({ queryKey: adminOrganizationKeys.searches() });
     void queryClient.invalidateQueries({ queryKey: adminOverviewKeys.all() });

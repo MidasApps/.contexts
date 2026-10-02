@@ -8,6 +8,7 @@ export {
   useAdminOrganization,
   useAdminOrganizationSearch,
   useAllAdminOrganizations,
+  useCollectedAdminOrganizations,
   type AdminOrganizationFilter as AdminOrganizationSearchFilter,
 } from "./api/admin-organization-queries.ts";
 export { BUDGET_ALERT_RATIO, budgetUsage, type BudgetLevel, type BudgetUsage } from "./lib/budget-usage.ts";

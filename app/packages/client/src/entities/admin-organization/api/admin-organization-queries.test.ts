@@ -17,7 +17,8 @@ describe("admin organization queries", () => {
     const asked: Query[] = [];
     const query = allAdminOrganizationsQuery(fakeCall(asked));
     const all = await query.queryFn?.({ signal, queryKey: query.queryKey, meta: undefined, client: undefined as never });
-    expect(all?.map((organization) => organization.id)).toEqual(["OrgA", "OrgB"]);
+    expect(all?.items.map((organization) => organization.id)).toEqual(["OrgA", "OrgB"]);
+    expect(all?.truncated).toBe(false);
     expect(asked).toEqual([{ limit: 100 }, { limit: 100, cursor: "next" }]);
   });
 

@@ -18,6 +18,7 @@ export { accessContextQuery, meQuery, type NodeParams } from "./core-queries.ts"
 export {
   COLLECT_PAGE_LIMIT,
   collectAllPages,
+  collectPages,
   cursorListQuery,
   isApiErrorStatus,
   MAX_COLLECTED_PAGES,
@@ -25,6 +26,7 @@ export {
   nextCursor,
   nullOnNotFound,
   pageQuery,
+  type CollectedPages,
   type FetchPage,
   type ListPage,
 } from "./cursor-list.ts";

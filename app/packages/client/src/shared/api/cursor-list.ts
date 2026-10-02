@@ -19,21 +19,32 @@ export const COLLECT_PAGE_LIMIT = 100;
 export const nextCursor = (page: ListPage<unknown>): string | undefined =>
   page.meta.page.hasMore && page.meta.page.cursor !== null ? page.meta.page.cursor : undefined;
 
+/** The items of a list read whole, and whether the page cap left some out. */
+export type CollectedPages<T> = { readonly items: T[]; readonly truncated: boolean };
+
 /**
- * Reads every page of a short list in order (unit types, permissions, the units under one parent),
- * stopping at `maxPages` so a runaway cursor cannot loop forever.
+ * Reads every page of a list in order, stopping at `maxPages` so a runaway cursor cannot loop
+ * forever; `truncated` is `true` when it stopped with a next page still announced, so a view that
+ * counts or totals the items can say they are partial.
  */
-export const collectAllPages = async <T>(fetchPage: FetchPage<T>, signal: AbortSignal, maxPages = MAX_COLLECTED_PAGES): Promise<T[]> => {
+export const collectPages = async <T>(fetchPage: FetchPage<T>, signal: AbortSignal, maxPages = MAX_COLLECTED_PAGES): Promise<CollectedPages<T>> => {
   const items: T[] = [];
   let cursor: string | undefined;
   for (let index = 0; index < maxPages; index += 1) {
     const page = await fetchPage(cursor, signal);
     items.push(...page.data);
     cursor = nextCursor(page);
-    if (cursor === undefined) break;
+    if (cursor === undefined) return { items, truncated: false };
   }
-  return items;
+  return { items, truncated: true };
 };
+
+/**
+ * Reads every page of a short list in order (unit types, permissions, the units under one parent),
+ * stopping at `maxPages`; use `collectPages` where a silently partial list would mislead.
+ */
+export const collectAllPages = async <T>(fetchPage: FetchPage<T>, signal: AbortSignal, maxPages = MAX_COLLECTED_PAGES): Promise<T[]> =>
+  (await collectPages(fetchPage, signal, maxPages)).items;
 
 /** Merges the loaded pages of an infinite list into one array, oldest page first. */
 export const mergePages = <T>(data: InfiniteData<ListPage<T>, string | undefined>): readonly T[] => data.pages.flatMap((page) => page.data);
