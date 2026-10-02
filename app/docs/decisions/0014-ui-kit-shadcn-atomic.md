@@ -36,7 +36,7 @@ The framework standardizes shadcn/ui with Radix primitives and the `new-york` st
 | — | `--sidebar-accent`, `--sidebar-accent-foreground` | `--color-sidebar-accent(-foreground)` | = `--accent`, `--foreground` |
 | — | `--sidebar-border`, `--sidebar-ring` | `--color-sidebar-border`, `--color-sidebar-ring` | = `--border`, `--ring` |
 | `--radius` 0.875rem, `--radius-xl` | `--radius` | `--radius-sm/md/lg/xl` | sm = radius − 4px, md = radius − 2px, lg = radius, xl = radius × 1.4 |
-| typography | — | `--font-sans`, `--font-mono` | system stacks of DESIGN.md (no web fonts) |
+| typography | — | `--font-sans`, `--font-mono`; `--text-micro/tiny/label/caption/body-sm/body/title` | system stacks of DESIGN.md (no web fonts); the type scale steps between Tailwind's sizes are decision 0057 |
 | spacing, motion | `--component-xs..lg`, `--layout-sm..lg`, `--duration-instant/fast/moderate/deliberate` | `--spacing`, `--ease-in-out`, `--ease-out` | as given; durations collapse to 0s under `prefers-reduced-motion: reduce` |
 | breakpoints (breakpoints.html) | — | `--breakpoint-sm/md/lg/xl` | 40rem / 48rem / 64rem / 80rem (640/768/1024/1280 px) |
 
