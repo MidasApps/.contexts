@@ -52,6 +52,8 @@ export type Route =
   /** The chat of a project (SP4): a new conversation, or the stored one named in the path. */
   | { id: "chat"; organizationId: string; projectId: string; conversationId?: string | undefined; unit?: string | undefined }
   | { id: "settings"; organizationId: string; section: SettingsSection; rest?: string | undefined }
+  /** `/o/:organizationId/settings` without a section: opens the first section the viewer can read. */
+  | { id: "settings-index"; organizationId: string }
   | { id: "settings-module"; organizationId: string; moduleId: string }
   | { id: "profile"; section: ProfileSection }
   | { id: "admin"; rest: string; search?: Readonly<Record<string, string>> | undefined };
@@ -70,6 +72,7 @@ export const ROUTE_IDS = [
   "module",
   "chat",
   "settings",
+  "settings-index",
   "settings-module",
   "profile",
   "admin",
@@ -124,6 +127,8 @@ export const routeHref = (route: Route): string => {
     }
     case "settings":
       return `${organizationPath(route.organizationId)}/settings/${route.section}${tail(route.rest ?? "")}`;
+    case "settings-index":
+      return `${organizationPath(route.organizationId)}/settings`;
     case "settings-module":
       return `${organizationPath(route.organizationId)}/settings/m/${seg(route.moduleId)}`;
     case "profile":

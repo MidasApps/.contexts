@@ -17,6 +17,7 @@ const parseOrganizationRoute = ([organizationId, ...rest]: string[], search: URL
   if (organizationId === undefined) return null;
   const [kind, second, third, fourth, ...more] = rest;
   if (kind === undefined) return { id: "organization", organizationId };
+  if (kind === "settings" && second === undefined) return { id: "settings-index", organizationId };
   if (kind === "settings" && second === "m" && third !== undefined && fourth === undefined) {
     return { id: "settings-module", organizationId, moduleId: third };
   }

@@ -17,6 +17,7 @@ import { Route as SignInRouteImport } from './routes/sign-in'
 import { Route as SignUpRouteImport } from './routes/sign-up'
 import { Route as ProfileSectionRouteImport } from './routes/profile/$section'
 import { Route as OOrganizationIdIndexRouteImport } from './routes/o/$organizationId/index'
+import { Route as OOrganizationIdSettingsIndexRouteImport } from './routes/o/$organizationId/settings/index'
 import { Route as OOrganizationIdPProjectIdIndexRouteImport } from './routes/o/$organizationId/p/$projectId/index'
 import { Route as OOrganizationIdSettingsSectionSplatRouteImport } from './routes/o/$organizationId/settings/$section/$'
 import { Route as OOrganizationIdSettingsMModuleIdRouteImport } from './routes/o/$organizationId/settings/m/$moduleId'
@@ -63,6 +64,12 @@ const OOrganizationIdIndexRoute = OOrganizationIdIndexRouteImport.update({
   path: '/o/$organizationId/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const OOrganizationIdSettingsIndexRoute =
+  OOrganizationIdSettingsIndexRouteImport.update({
+    id: '/o/$organizationId/settings/',
+    path: '/o/$organizationId/settings/',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const OOrganizationIdPProjectIdIndexRoute =
   OOrganizationIdPProjectIdIndexRouteImport.update({
     id: '/o/$organizationId/p/$projectId/',
@@ -103,6 +110,7 @@ export interface FileRoutesByFullPath {
   '/sign-up': typeof SignUpRoute
   '/profile/$section': typeof ProfileSectionRoute
   '/o/$organizationId/': typeof OOrganizationIdIndexRoute
+  '/o/$organizationId/settings/': typeof OOrganizationIdSettingsIndexRoute
   '/o/$organizationId/settings/$section/$': typeof OOrganizationIdSettingsSectionSplatRoute
   '/o/$organizationId/settings/m/$moduleId': typeof OOrganizationIdSettingsMModuleIdRoute
   '/o/$organizationId/p/$projectId/': typeof OOrganizationIdPProjectIdIndexRoute
@@ -118,6 +126,7 @@ export interface FileRoutesByTo {
   '/sign-up': typeof SignUpRoute
   '/profile/$section': typeof ProfileSectionRoute
   '/o/$organizationId': typeof OOrganizationIdIndexRoute
+  '/o/$organizationId/settings': typeof OOrganizationIdSettingsIndexRoute
   '/o/$organizationId/settings/$section/$': typeof OOrganizationIdSettingsSectionSplatRoute
   '/o/$organizationId/settings/m/$moduleId': typeof OOrganizationIdSettingsMModuleIdRoute
   '/o/$organizationId/p/$projectId': typeof OOrganizationIdPProjectIdIndexRoute
@@ -134,6 +143,7 @@ export interface FileRoutesById {
   '/sign-up': typeof SignUpRoute
   '/profile/$section': typeof ProfileSectionRoute
   '/o/$organizationId/': typeof OOrganizationIdIndexRoute
+  '/o/$organizationId/settings/': typeof OOrganizationIdSettingsIndexRoute
   '/o/$organizationId/settings/$section/$': typeof OOrganizationIdSettingsSectionSplatRoute
   '/o/$organizationId/settings/m/$moduleId': typeof OOrganizationIdSettingsMModuleIdRoute
   '/o/$organizationId/p/$projectId/': typeof OOrganizationIdPProjectIdIndexRoute
@@ -151,6 +161,7 @@ export interface FileRouteTypes {
     | '/sign-up'
     | '/profile/$section'
     | '/o/$organizationId/'
+    | '/o/$organizationId/settings/'
     | '/o/$organizationId/settings/$section/$'
     | '/o/$organizationId/settings/m/$moduleId'
     | '/o/$organizationId/p/$projectId/'
@@ -166,6 +177,7 @@ export interface FileRouteTypes {
     | '/sign-up'
     | '/profile/$section'
     | '/o/$organizationId'
+    | '/o/$organizationId/settings'
     | '/o/$organizationId/settings/$section/$'
     | '/o/$organizationId/settings/m/$moduleId'
     | '/o/$organizationId/p/$projectId'
@@ -181,6 +193,7 @@ export interface FileRouteTypes {
     | '/sign-up'
     | '/profile/$section'
     | '/o/$organizationId/'
+    | '/o/$organizationId/settings/'
     | '/o/$organizationId/settings/$section/$'
     | '/o/$organizationId/settings/m/$moduleId'
     | '/o/$organizationId/p/$projectId/'
@@ -197,6 +210,7 @@ export interface RootRouteChildren {
   SignUpRoute: typeof SignUpRoute
   ProfileSectionRoute: typeof ProfileSectionRoute
   OOrganizationIdIndexRoute: typeof OOrganizationIdIndexRoute
+  OOrganizationIdSettingsIndexRoute: typeof OOrganizationIdSettingsIndexRoute
   OOrganizationIdSettingsSectionSplatRoute: typeof OOrganizationIdSettingsSectionSplatRoute
   OOrganizationIdSettingsMModuleIdRoute: typeof OOrganizationIdSettingsMModuleIdRoute
   OOrganizationIdPProjectIdIndexRoute: typeof OOrganizationIdPProjectIdIndexRoute
@@ -262,6 +276,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OOrganizationIdIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/o/$organizationId/settings/': {
+      id: '/o/$organizationId/settings/'
+      path: '/o/$organizationId/settings'
+      fullPath: '/o/$organizationId/settings/'
+      preLoaderRoute: typeof OOrganizationIdSettingsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/o/$organizationId/p/$projectId/': {
       id: '/o/$organizationId/p/$projectId/'
       path: '/o/$organizationId/p/$projectId'
@@ -309,6 +330,7 @@ const rootRouteChildren: RootRouteChildren = {
   SignUpRoute: SignUpRoute,
   ProfileSectionRoute: ProfileSectionRoute,
   OOrganizationIdIndexRoute: OOrganizationIdIndexRoute,
+  OOrganizationIdSettingsIndexRoute: OOrganizationIdSettingsIndexRoute,
   OOrganizationIdSettingsSectionSplatRoute:
     OOrganizationIdSettingsSectionSplatRoute,
   OOrganizationIdSettingsMModuleIdRoute: OOrganizationIdSettingsMModuleIdRoute,

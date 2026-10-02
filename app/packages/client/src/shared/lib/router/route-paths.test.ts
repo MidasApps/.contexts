@@ -29,6 +29,7 @@ const SAMPLES: Record<RouteId, Route[]> = {
     { id: "settings", organizationId: "org", section: "approvals", rest: "Ap3rQ9vLr3TnB7pWc1aZ" },
     { id: "settings", organizationId: "org", section: "workflows", rest: "runs/run 1" },
   ],
+  "settings-index": [{ id: "settings-index", organizationId: "org" }],
   "settings-module": [{ id: "settings-module", organizationId: "org", moduleId: "example" }],
   profile: [{ id: "profile", section: "preferences" }],
   admin: [
@@ -47,6 +48,7 @@ describe("route paths", () => {
     expect(routeHref({ id: "project", organizationId: "a", projectId: "b", unit: "c" })).toBe("/o/a/p/b?unit=c");
     expect(routeHref({ id: "module", organizationId: "a", projectId: "b", moduleId: "example", rest: "items/1" })).toBe("/o/a/p/b/m/example/items/1");
     expect(routeHref({ id: "settings-module", organizationId: "a", moduleId: "example" })).toBe("/o/a/settings/m/example");
+    expect(routeHref({ id: "settings-index", organizationId: "a" })).toBe("/o/a/settings");
     expect(routeHref({ id: "settings", organizationId: "a", section: "approvals", rest: "ap1" })).toBe("/o/a/settings/approvals/ap1");
     expect(routeHref({ id: "settings", organizationId: "a", section: "workflows", rest: "runs/r1" })).toBe("/o/a/settings/workflows/runs/r1");
     expect(routeHref({ id: "chat", organizationId: "a", projectId: "b" })).toBe("/o/a/p/b/chat");

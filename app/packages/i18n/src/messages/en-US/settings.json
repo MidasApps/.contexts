@@ -1,6 +1,7 @@
 {
   "navLabel": "Settings sections",
   "navLoading": "Loading sections…",
+  "indexLoading": "Opening settings…",
   "noAccessDescription": "Ask an organization administrator to give you access to this section.",
   "nodes": {
     "organizationGroup": "Organization",

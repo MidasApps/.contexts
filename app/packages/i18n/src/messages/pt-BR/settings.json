@@ -1,6 +1,7 @@
 {
   "navLabel": "Seções das configurações",
   "navLoading": "Carregando as seções…",
+  "indexLoading": "Abrindo as configurações…",
   "noAccessDescription": "Peça a um administrador da organização para liberar esta seção.",
   "nodes": {
     "organizationGroup": "Organização",

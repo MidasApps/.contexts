@@ -23,6 +23,8 @@ export const usePageLabel = (): string | undefined => {
       return t("shell.nav.chat");
     case "settings":
       return t(`shell.nav.settings.${route.section}`);
+    case "settings-index":
+      return t("shell.nav.organizationSettings");
     case "profile":
       return t(`shell.nav.profile.${route.section}`);
     case "module":
