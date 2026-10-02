@@ -125,10 +125,14 @@ test.describe("schedules", () => {
     await row.getByRole("button", { name: /^Executar agora o agendamento/ }).click();
     await page.getByRole("alertdialog", { name: `Executar ${USAGE_REPORT} agora?` }).getByRole("button", { name: "Executar agora" }).click();
     await expect(toast(page, `Execução de ${USAGE_REPORT} iniciada.`)).toBeVisible();
+    // Scoped to each panel: the schedule's row also names the workflow, so an unscoped row matched
+    // it before the tab had changed.
     await page.getByRole("tab", { name: "Execuções" }).click();
-    await expect(page.getByRole("row").filter({ hasText: USAGE_REPORT }).first()).toBeVisible({ timeout: 60_000 });
+    const runsPanel = page.getByRole("tabpanel", { name: "Execuções" });
+    await expect(runsPanel.getByRole("row").filter({ hasText: USAGE_REPORT }).first()).toBeVisible({ timeout: 60_000 });
 
     await page.getByRole("tab", { name: "Agendamentos" }).click();
+    await expect(page.getByRole("tab", { name: "Agendamentos" })).toHaveAttribute("aria-selected", "true");
     await row.getByRole("button", { name: /^Mais ações do agendamento/ }).click();
     await page.getByRole("menuitem", { name: /^Excluir o agendamento/ }).click();
     await page.getByRole("alertdialog", { name: /Excluir o agendamento de/ }).getByRole("button", { name: "Excluir agendamento" }).click();
