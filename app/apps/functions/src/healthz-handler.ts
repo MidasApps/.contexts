@@ -15,7 +15,7 @@ const ALLOW_HEADER = [...ALLOWED_METHODS].join(", ");
 export const makeHealthzHandler = (deps: { logger: Logger }): WebHandler => {
   const checkHealth = makeHealthRouteHandler(deps);
   const rejectMethod = withRouteBoundary(
-    { operation: "health_method_rejected", logger: deps.logger },
+    { operation: "health_method", logger: deps.logger },
     (_request, { requestId }) => {
       const response = errorResponse({ status: 405, code: "METHOD_NOT_ALLOWED", message: "Method not allowed.", requestId });
       response.headers.set("allow", ALLOW_HEADER);

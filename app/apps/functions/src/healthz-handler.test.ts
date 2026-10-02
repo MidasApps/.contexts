@@ -57,7 +57,7 @@ describe("healthz", () => {
 
     expect(records).toEqual([
       expect.objectContaining({ message: "health_checked_ok", status: 200, requestId: VALID_ULID }),
-      expect.objectContaining({ message: "health_method_rejected_ok", status: 405, requestId: VALID_ULID }),
+      expect.objectContaining({ message: "health_method_rejected", status: 405, requestId: VALID_ULID }),
     ]);
   });
 });

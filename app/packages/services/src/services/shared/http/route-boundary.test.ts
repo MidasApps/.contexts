@@ -64,6 +64,24 @@ describe("withRouteBoundary", () => {
     ]);
   });
 
+  it("logs a 4xx answer as rejected, not ok", async () => {
+    const { logger, records } = makeLogger();
+    const handler = withRouteBoundary({ operation: "thing_read", logger }, () => Promise.resolve(Response.json({ error: { code: "NOT_FOUND" } }, { status: 404 })));
+
+    await handler(requestWith(VALID_ULID));
+
+    expect(records).toEqual([expect.objectContaining({ level: "info", message: "thing_read_rejected", requestId: VALID_ULID, status: 404 })]);
+  });
+
+  it("logs a 5xx answer of the handler as failed at warn level", async () => {
+    const { logger, records } = makeLogger();
+    const handler = withRouteBoundary({ operation: "thing_read", logger }, () => Promise.resolve(Response.json({ error: { code: "UPSTREAM_UNAVAILABLE" } }, { status: 502 })));
+
+    await handler(requestWith(VALID_ULID));
+
+    expect(records).toEqual([expect.objectContaining({ level: "warn", message: "thing_read_failed", requestId: VALID_ULID, status: 502 })]);
+  });
+
   it("echoes the request id on a response whose headers are immutable", async () => {
     const { logger } = makeLogger();
     // Response.redirect (like a proxied fetch response) has an immutable header guard.

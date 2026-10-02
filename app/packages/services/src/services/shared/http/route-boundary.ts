@@ -23,12 +23,22 @@ const withRequestIdHeader = (response: Response, requestId: RequestId): Response
   }
 };
 
+type Outcome = { readonly requestId: RequestId; readonly status: number; readonly durationMs: number };
+
+// The message follows the answer: a refusal (4xx) is not an `_ok`, a 5xx the handler mapped is a degradation.
+const logOutcome = (logger: Logger, operation: string, outcome: Outcome): void => {
+  if (outcome.status >= 500) logger.warn(`${operation}_failed`, outcome);
+  else if (outcome.status >= 400) logger.info(`${operation}_rejected`, outcome);
+  else logger.info(`${operation}_ok`, outcome);
+};
+
 /**
  * Top-level boundary of every HTTP driving adapter (rules/error-handling.md):
  * resolves the request id, times the call, logs exactly once and turns any
  * unexpected throw into a generic 500 `INTERNAL_ERROR`. Expected domain
  * errors are mapped by the handler itself and never reach the catch.
- * @param options.operation snake_case name; logs `<operation>_ok|_failed`.
+ * @param options.operation snake_case name; logs `<operation>_ok` (< 400),
+ * `_rejected` (4xx) or `_failed` (a 5xx answer at warn, a throw at error).
  */
 export const withRouteBoundary =
   (
@@ -42,7 +52,7 @@ export const withRouteBoundary =
     const elapsedMs = () => Math.round(performance.now() - startedAt);
     try {
       const response = withRequestIdHeader(await handler(request, { requestId }), requestId);
-      logger.info(`${operation}_ok`, { requestId, status: response.status, durationMs: elapsedMs() });
+      logOutcome(logger, operation, { requestId, status: response.status, durationMs: elapsedMs() });
       return response;
     } catch (err: unknown) {
       logger.error(`${operation}_failed`, { requestId, durationMs: elapsedMs(), err });
