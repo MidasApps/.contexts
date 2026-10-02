@@ -223,8 +223,20 @@ describe("upload queue", () => {
     expect(api.calls.find((call) => call.method === "POST" && call.path.endsWith("/files"))?.body).toMatchObject({
       purpose: "knowledge",
     });
+    expect(queue.getSnapshot()).toHaveLength(1);
+    // Sending the message clears a knowledge file that is done: it never travels with the message.
     expect(queue.take()).toEqual([]);
-    expect(item().purpose).toBe("knowledge");
+    expect(queue.getSnapshot()).toEqual([]);
+  });
+
+  it("never holds the message for a knowledge file still on its way, and keeps that file after sending", async () => {
+    const { queue, transfer, item } = setup({ files: { [FILE_A]: [ok(storedFile(FILE_A))] } });
+    queue.add([source("guide.md", "text/markdown")], "knowledge");
+    await transfer();
+    expect(item().status).toBe("uploading");
+    expect(hasUploadsInFlight(queue.getSnapshot())).toBe(false);
+    expect(queue.take()).toEqual([]);
+    expect(item()).toMatchObject({ purpose: "knowledge", status: "uploading" });
   });
 
   it("empties the queue and cancels everything on clear", async () => {

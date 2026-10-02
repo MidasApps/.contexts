@@ -190,17 +190,29 @@ describe("ChatPanel uploads", () => {
       status: 202,
       body: { data: { runId: "run-1" } },
     });
-    const { user, transfer } = setup({}, api, new Set(["core.file.upload", "core.knowledge.write"]));
+    const { user, transfer, transport, field } = setup({}, api, new Set(["core.file.upload", "core.knowledge.write"]));
     await user.upload(
       screen.getByLabelText("Arquivos para a base de conhecimento"),
       new File(["# Guia"], "guia.md", { type: "text/markdown" }),
     );
-    act(() => void transfer().then((sent) => sent.finish()));
-    expect(await within(chips()).findByText("Na base de conhecimento. Indexando…")).toBeTruthy();
+    const sent = await transfer();
+    // The document does not travel with the message, so it never holds the message back.
+    await user.type(field(), "Resuma o guia");
+    expect(screen.queryByText("Aguarde o envio dos anexos terminar.")).toBeNull();
+    expect(screen.getByRole("button", { name: "Enviar mensagem" }).hasAttribute("disabled")).toBe(false);
+    act(() => sent.finish());
+    expect(
+      await within(chips()).findByText("Enviado à base de conhecimento. A indexação continua em segundo plano."),
+    ).toBeTruthy();
     expect(api.calls.find((call) => call.path.endsWith("/knowledge/sources"))?.body).toEqual({
       kind: "file",
       fileId: FILE_A,
     });
+    // Once the message goes, the finished document leaves the composer.
+    await user.keyboard("{Enter}");
+    const stream = await firstStream(transport);
+    expect(stream.messages.at(-1)?.metadata).toBeUndefined();
+    expect(screen.queryByRole("list", { name: "Anexos da mensagem" })).toBeNull();
   });
 });
 

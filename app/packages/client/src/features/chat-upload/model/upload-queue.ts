@@ -62,7 +62,10 @@ export type UploadQueue = {
   readonly remove: (id: string) => void;
   /** Starts a `failed` item again from the beginning. */
   readonly retry: (id: string) => void;
-  /** The ready chat attachments, taken out of the queue: what the next message carries. */
+  /**
+   * The ready chat attachments, taken out of the queue: what the next message carries. Knowledge
+   * files that are done leave the composer too (they went to the knowledge base, not the message).
+   */
   readonly take: () => readonly MessageAttachment[];
   /** Cancels everything and empties the queue (the composer unmounted). */
   readonly clear: () => void;
@@ -71,9 +74,12 @@ export type UploadQueue = {
 const SERVER_REASONS: ReadonlySet<string> = new Set(["TYPE_NOT_ALLOWED", "TOO_LARGE", "CONTENT_MISMATCH"]);
 const IN_FLIGHT: ReadonlySet<UploadStatus> = new Set(["pending", "uploading", "validating"]);
 
-/** Uploads still on their way: sending waits for them. */
+/**
+ * Chat attachments still on their way: sending waits for them. A knowledge file never travels
+ * with the message, so it never holds the message back.
+ */
 export const hasUploadsInFlight = (items: readonly UploadItem[]): boolean =>
-  items.some((item) => IN_FLIGHT.has(item.status));
+  items.some((item) => item.purpose === "chat-attachment" && IN_FLIGHT.has(item.status));
 
 /** A chat attachment that will not go: the member removes or retries it before sending. */
 export const hasUploadProblems = (items: readonly UploadItem[]): boolean =>
@@ -254,8 +260,11 @@ export const createUploadQueue = (deps: UploadQueueDeps): UploadQueue => {
         ({ item }) => item.purpose === "chat-attachment" && item.status === "ready" && item.fileId !== undefined,
       );
       const attachments = ready.map(({ item }) => toAttachment(item));
-      ready.forEach(({ item }) => drop(item.id));
-      if (ready.length > 0) publish();
+      const settledKnowledge = [...entries.values()].filter(
+        ({ item }) => item.purpose === "knowledge" && item.status === "ready",
+      );
+      [...ready, ...settledKnowledge].forEach(({ item }) => drop(item.id));
+      if (ready.length + settledKnowledge.length > 0) publish();
       return attachments;
     },
     clear: () => {

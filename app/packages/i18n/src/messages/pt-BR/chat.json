@@ -233,7 +233,7 @@
       "uploading": "Enviando {percent}",
       "validating": "Verificando…",
       "ready": "Pronto",
-      "indexing": "Na base de conhecimento. Indexando…",
+      "indexing": "Enviado à base de conhecimento. A indexação continua em segundo plano.",
       "failed": "Falha no envio",
       "timeout": "A verificação demorou demais",
       "rejected": {
@@ -246,7 +246,7 @@
     },
     "announce": {
       "ready": "{name}: pronto.",
-      "indexing": "{name}: adicionado à base de conhecimento.",
+      "indexing": "{name}: enviado à base de conhecimento; a indexação continua em segundo plano.",
       "problem": "{name}: {reason}."
     }
   },

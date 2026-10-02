@@ -233,7 +233,7 @@
       "uploading": "Uploading {percent}",
       "validating": "Checking…",
       "ready": "Ready",
-      "indexing": "In the knowledge base. Indexing…",
+      "indexing": "Sent to the knowledge base. Indexing continues in the background.",
       "failed": "Upload failed",
       "timeout": "The check took too long",
       "rejected": {
@@ -246,7 +246,7 @@
     },
     "announce": {
       "ready": "{name}: ready.",
-      "indexing": "{name}: added to the knowledge base.",
+      "indexing": "{name}: sent to the knowledge base; indexing continues in the background.",
       "problem": "{name}: {reason}."
     }
   },
