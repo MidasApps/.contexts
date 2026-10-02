@@ -91,6 +91,10 @@
   "routeAnnouncer": {
     "fallback": "New page loaded"
   },
+  "serverError": {
+    "title": "This page could not be opened",
+    "description": "The server hit an error while building the page. Try again; if it keeps happening, give the reference to support."
+  },
   "errorBoundary": {
     "title": "This screen stopped working",
     "description": "An unexpected error interrupted the screen. Try reloading it; if it keeps happening, give the reference to support."

@@ -86,6 +86,32 @@ export function PageForbidden() {
 }
 
 /**
+ * A page whose render failed on the server (UX review U-07; the web's `error.tsx`): translated
+ * copy, the server's error identifier (Next `digest`) as the reference, a retry and a way home.
+ */
+export function PageRenderError({ reference, onRetry }: { reference: string | undefined; onRetry: () => void }) {
+  const t = useTranslations();
+  return (
+    <PageStateLayout
+      role="alert"
+      icon="alert-triangle"
+      tone="destructive"
+      title={t("shell.serverError.title")}
+      description={t("shell.serverError.description")}
+      reference={reference === undefined ? undefined : t("common.errorState.reference", { requestId: reference })}
+      actions={
+        <>
+          <Button variant="secondary" onClick={onRetry}>
+            {t("common.actions.retry")}
+          </Button>
+          <HomeAction variant="secondary" />
+        </>
+      }
+    />
+  );
+}
+
+/**
  * A page whose main data failed to load (not 403/404): the copy of the error code, its request
  * reference and a retry, plus a way home. A lost session (401) offers signing in again instead.
  */

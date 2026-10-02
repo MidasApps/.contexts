@@ -91,6 +91,10 @@
   "routeAnnouncer": {
     "fallback": "Nova página carregada"
   },
+  "serverError": {
+    "title": "Não foi possível abrir esta página",
+    "description": "O servidor encontrou um erro ao montar a página. Tente novamente; se continuar, informe a referência ao suporte."
+  },
   "errorBoundary": {
     "title": "Esta tela parou de funcionar",
     "description": "Um erro inesperado interrompeu a tela. Tente recarregá-la; se continuar, informe a referência ao suporte."
