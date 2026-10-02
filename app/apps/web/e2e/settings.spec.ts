@@ -167,7 +167,7 @@ test.describe("a viewer", () => {
     await expect(page.getByRole("heading", { level: 1, name: "Geral" })).toBeVisible();
     await expect(page.getByText("Somente administradores podem alterar estes dados.")).toBeVisible();
     const nav = page.getByRole("navigation", { name: "Seções das configurações" });
-    // Grouped links on wide screens; on phones the same sections are a picker (decision 0054).
+    // Grouped links on wide screens; on phones the same sections are a picker (decision 0055).
     if (isMobile) {
       await nav.getByRole("combobox", { name: "Seção" }).click();
       await expect(page.getByRole("option", { name: "Unidades" })).toBeVisible();

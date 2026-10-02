@@ -97,7 +97,7 @@ type RunLabels = {
 /**
  * The run of `?run=`: found among the loaded rows, its timeline; while the list
  * loads or fails, nothing yet; not among them (another page, other filters, or gone), a dialog that says so
- * instead of an empty one. There is no endpoint for one run by id (follow-up 95).
+ * instead of an empty one. There is no endpoint for one run by id (follow-up 96).
  */
 function RunDetailsDialog({ runId, run, ready, labels, onClose }: { runId: string | undefined; run: AdminWorkflowRun | undefined; ready: boolean; labels: RunLabels; onClose: () => void }) {
   const t = useTranslations("admin.workflows.runs");

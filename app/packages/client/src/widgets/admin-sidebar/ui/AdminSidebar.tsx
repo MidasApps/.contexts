@@ -39,7 +39,7 @@ function AdminNavGroup() {
   );
 }
 
-/** One heading of the admin areas (decision 0054) with the areas under it. */
+/** One heading of the admin areas (decision 0055) with the areas under it. */
 function AdminAreaGroup({ group, items }: { group: NavGroup; items: readonly AdminItem[] }) {
   const t = useTranslations();
   const labelId = useId();

@@ -71,7 +71,7 @@ describe("core navigation", () => {
       ["core.admin.flags", "platform.flag.manage"],
       ["core.admin.connectors", "platform.connector.read"],
     ]);
-    // Grouped by what staff come to do (decision 0054).
+    // Grouped by what staff come to do (decision 0055).
     expect(registry.visibleItems("admin", all).map((entry) => entry.group)).toEqual(["customers", "customers", "customers", "ai", "ai", "ai", "ai", "ai", "operations", "operations", "operations"]);
     expect(registry.visibleItems("organization", all).map((entry) => entry.id)).toEqual(["core.organization.home", "core.organization.settings"]);
     expect(registry.visibleItems("project", all).map((entry) => entry.id)).toEqual(["core.project.home", "core.project.chat"]);

@@ -135,7 +135,7 @@ function PillList({ items, className }: { items: readonly SectionNavItem[]; clas
 
 /**
  * Section links of settings/profile pages (navegacao.html secondary nav). The current section
- * carries `aria-current="page"`. Grouped items (decision 0054) show a labelled list per heading
+ * carries `aria-current="page"`. Grouped items (decision 0055) show a labelled list per heading
  * from `lg` and a grouped section picker below it; ungrouped items keep the vertical list and the
  * row of pills. Goes inside the `nav` of `SettingsTemplate`.
  */

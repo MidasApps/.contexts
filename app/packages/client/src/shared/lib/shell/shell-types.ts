@@ -34,13 +34,13 @@ export type ShellNavItem = {
   readonly target: NavTarget;
   /**
    * Heading the item sits under in the settings nav and the admin sidebar: a key of
-   * `shell.nav.groups` (decision 0054). Items without one (module contributions) go under
+   * `shell.nav.groups` (decision 0055). Items without one (module contributions) go under
    * "other", after the grouped ones.
    */
   readonly group?: NavGroup | undefined;
 };
 
-/** Headings of the settings and admin navigation, in the order they appear (decision 0054). */
+/** Headings of the settings and admin navigation, in the order they appear (decision 0055). */
 export const NAV_GROUPS = ["organization", "access", "customers", "ai", "operations", "other"] as const;
 export type NavGroup = (typeof NAV_GROUPS)[number];
 

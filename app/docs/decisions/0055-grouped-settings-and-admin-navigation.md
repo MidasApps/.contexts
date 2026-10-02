@@ -1,4 +1,4 @@
-# 0054. Grouped settings and admin navigation
+# 0055. Grouped settings and admin navigation
 
 - **Status:** accepted
 - **Date:** 2026-10-02

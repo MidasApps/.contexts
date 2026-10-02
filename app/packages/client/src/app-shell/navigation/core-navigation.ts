@@ -5,7 +5,7 @@ import type { NavGroup } from "#/shared/lib/shell/shell-types.ts";
 import type { ShellNavItem } from "./navigation-registry.ts";
 
 // Read permission of each settings section (SP1 spec §7.3; SP3 spec §2.2 and SP5 spec §2.1 for the
-// runtime ones) and the heading it sits under (decision 0054).
+// runtime ones) and the heading it sits under (decision 0055).
 const SETTINGS: Record<SettingsSection, { icon: IconName; permission: Permission; group: NavGroup }> = {
   general: { icon: "settings", permission: "core.organization.read", group: "organization" },
   members: { icon: "users", permission: "core.member.read", group: "organization" },
@@ -37,7 +37,7 @@ const PROFILE_ICONS: Record<ProfileSection, IconName> = {
 // `/admin` areas (SP5 spec §6), each gated by the platform permission its API authorizes. The
 // server guards `/admin` (staff + MFA); `platform-support` holds the read permissions only, so it
 // sees organizations, users, connectors, traces, logs and costs.
-// Grouped by what staff come to do (decision 0054): customers, AI, operations.
+// Grouped by what staff come to do (decision 0055): customers, AI, operations.
 const ADMIN: { name: string; icon: IconName; permission: Permission; group: NavGroup }[] = [
   { name: "organizations", icon: "building", permission: "platform.organization.read", group: "customers" },
   { name: "plans", icon: "credit-card", permission: "platform.plan.manage", group: "customers" },
