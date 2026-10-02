@@ -59,16 +59,13 @@ export function SchedulesSection({ context, workflows, online }: SchedulesSectio
             onPause={(schedule) => setTarget({ action: "pause", schedule })}
             onResume={resume.resume}
             onRunNow={(schedule) => setTarget({ action: "run", schedule })}
-            renderRowActions={(schedule) => (
-              <>
-                <Button variant="outline" size="sm" disabled={!online} onClick={() => setEditing({ schedule })} aria-label={t("editNamed", { name: workflowLabel.name(schedule.workflowId), id: scheduleSlugOf(schedule.id) ?? schedule.id })}>
-                  {t("edit")}
-                </Button>
-                <Button variant="outline" size="sm" disabled={!online} onClick={() => setTarget({ action: "delete", schedule })} aria-label={t("deleteNamed", { name: workflowLabel.name(schedule.workflowId), id: scheduleSlugOf(schedule.id) ?? schedule.id })}>
-                  {t("delete")}
-                </Button>
-              </>
-            )}
+            rowMenuItems={(schedule) => {
+              const named = { name: workflowLabel.name(schedule.workflowId), id: scheduleSlugOf(schedule.id) ?? schedule.id };
+              return [
+                { id: "edit", label: t("edit"), accessibleLabel: t("editNamed", named), disabled: !online, onSelect: () => setEditing({ schedule }) },
+                { id: "delete", label: t("delete"), accessibleLabel: t("deleteNamed", named), disabled: !online, destructive: true, onSelect: () => setTarget({ action: "delete", schedule }) },
+              ];
+            }}
             empty={
               <EmptyState
                 frame="plain"

@@ -235,7 +235,8 @@ describe("SettingsWorkflowsView: schedules", () => {
         return ok(buildSchedule({ cron: "30 * * * *" }));
       },
     });
-    await user.click(screen.getByRole("button", { name: "Editar o agendamento daily-usage de Relatório de uso" }));
+    await user.click(screen.getByRole("button", { name: "Mais ações do agendamento daily-usage de Relatório de uso" }));
+    await user.click(await screen.findByRole("menuitem", { name: "Editar o agendamento daily-usage de Relatório de uso" }));
     const dialog = await screen.findByRole("dialog", { name: "Editar agendamento de Relatório de uso" });
     expect(within(dialog).queryByRole("textbox", { name: /Nome curto/u })).toBeNull();
     expect(within(dialog).getByText("Expressão: 0 9 * * *")).toBeDefined();
@@ -274,7 +275,8 @@ describe("SettingsWorkflowsView: schedules", () => {
     await user.click(within(run).getByRole("button", { name: "Executar agora" }));
     expect(await screen.findByText("Execução de Relatório de uso iniciada.")).toBeDefined();
 
-    await user.click(screen.getByRole("button", { name: `Excluir o agendamento daily-usage de Relatório de uso` }));
+    await user.click(screen.getByRole("button", { name: "Mais ações do agendamento daily-usage de Relatório de uso" }));
+    await user.click(await screen.findByRole("menuitem", { name: `Excluir o agendamento daily-usage de Relatório de uso` }));
     const remove = await screen.findByRole("alertdialog", { name: "Excluir o agendamento de Relatório de uso?" });
     await user.click(within(remove).getByRole("button", { name: "Excluir agendamento" }));
     expect(await screen.findByText("Agendamento de Relatório de uso excluído.")).toBeDefined();
@@ -285,7 +287,7 @@ describe("SettingsWorkflowsView: schedules", () => {
     await openSchedules({}, [...MEMBER, "core.schedule.read"]);
     expect(screen.queryByRole("button", { name: "Novo agendamento" })).toBeNull();
     expect(screen.queryByRole("button", { name: /Pausar o agendamento/u })).toBeNull();
-    expect(screen.queryByRole("button", { name: /Excluir o agendamento/u })).toBeNull();
+    expect(screen.queryByRole("button", { name: /Mais ações do agendamento/u })).toBeNull();
   });
 });
 

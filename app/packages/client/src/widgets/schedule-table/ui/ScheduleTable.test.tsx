@@ -39,6 +39,42 @@ describe("ScheduleTable", () => {
     expect(within(row).getByRole("button", { name: "Pausar o agendamento daily-usage de Relatório de uso" })).toBeDefined();
   });
 
+  it("keeps pause and run-now on the row and groups the caller's actions in a menu", async () => {
+    const onEdit = vi.fn();
+    const { user } = renderWithProviders(
+      <ScheduleTable
+        caption="Agendamentos"
+        schedules={[ROW]}
+        canManage
+        pendingId={null}
+        onPause={vi.fn()}
+        onResume={vi.fn()}
+        onRunNow={vi.fn()}
+        rowMenuItems={() => [
+          { id: "edit", label: "Editar", accessibleLabel: "Editar o agendamento daily-usage", onSelect: onEdit },
+          { id: "delete", label: "Excluir", onSelect: vi.fn(), destructive: true, disabled: true },
+        ]}
+        empty={<p>vazio</p>}
+      />,
+    );
+    const row = screen.getAllByRole("row")[1]!;
+    expect(within(row).getAllByRole("button").map((button) => button.getAttribute("aria-label"))).toEqual([
+      "Pausar o agendamento daily-usage de Relatório de uso",
+      "Executar agora o agendamento daily-usage de Relatório de uso",
+      "Mais ações do agendamento daily-usage de Relatório de uso",
+    ]);
+    await user.click(within(row).getByRole("button", { name: /^Mais ações/u }));
+    const menu = await screen.findByRole("menu");
+    expect(within(menu).getByRole("menuitem", { name: "Excluir" }).getAttribute("aria-disabled")).toBe("true");
+    await user.click(within(menu).getByRole("menuitem", { name: "Editar o agendamento daily-usage" }));
+    expect(onEdit).toHaveBeenCalledTimes(1);
+  });
+
+  it("shows no menu when the caller has no more actions", () => {
+    renderTable();
+    expect(screen.queryByRole("button", { name: /^Mais ações/u })).toBeNull();
+  });
+
   it("describes a preset cron in words and keeps the expression as secondary text", () => {
     renderTable();
     expect(screen.getByText("Dias úteis às 09:00")).toBeDefined();

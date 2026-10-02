@@ -242,6 +242,7 @@
     "resumeNamed": "Retomar o agendamento {id} de {name}",
     "runNow": "Executar agora",
     "runNowNamed": "Executar agora o agendamento {id} de {name}",
+    "moreActionsNamed": "Mais ações do agendamento {id} de {name}",
     "columns": {
       "workflow": "Workflow",
       "cron": "Cron e fuso",

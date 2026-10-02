@@ -90,7 +90,8 @@ test.describe("schedules", () => {
     // The next fire is shown in the schedule's zone (the viewer's zone is the same here).
     await expect(row).toContainText(/\(America\/Sao_Paulo\)/);
 
-    await row.getByRole("button", { name: /^Editar o agendamento/ }).click();
+    await row.getByRole("button", { name: /^Mais ações do agendamento/ }).click();
+    await page.getByRole("menuitem", { name: /^Editar o agendamento/ }).click();
     const edit = page.getByRole("dialog", { name: /Editar agendamento de .*usage-report/ });
     await edit.getByRole("textbox", { name: /^Expressão cron/ }).fill("*/30 * * * *");
     await edit.getByRole("button", { name: "Salvar agendamento" }).click();
@@ -114,7 +115,8 @@ test.describe("schedules", () => {
     await expect(page.getByRole("row").filter({ hasText: "usage-report" }).first()).toBeVisible({ timeout: 60_000 });
 
     await page.getByRole("tab", { name: "Agendamentos" }).click();
-    await row.getByRole("button", { name: /^Excluir o agendamento/ }).click();
+    await row.getByRole("button", { name: /^Mais ações do agendamento/ }).click();
+    await page.getByRole("menuitem", { name: /^Excluir o agendamento/ }).click();
     await page.getByRole("alertdialog", { name: /Excluir o agendamento de/ }).getByRole("button", { name: "Excluir agendamento" }).click();
     await expect(toast(page, /Agendamento de .*usage-report.* excluído\./)).toBeVisible();
     await expect(panel.getByRole("heading", { name: "Nenhum agendamento" })).toBeVisible();

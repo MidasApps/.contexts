@@ -1,12 +1,14 @@
 "use client";
 
 import { formatDateTime } from "@core/i18n";
+import { EllipsisIcon } from "lucide-react";
 import { createContext, use, useMemo, type ReactNode } from "react";
 import { useLocale, useTimeZone, useTranslations } from "use-intl";
 import { scheduleSlugOf } from "#/entities/schedule/index.ts";
 import { useDescribeCron } from "#/features/schedule-editor/index.ts";
 import { useWorkflowLabel } from "#/shared/lib/labels/use-catalog-labels.ts";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "#/shared/ui/molecules/DropdownMenu/DropdownMenu.tsx";
 import { StatusPill } from "#/shared/ui/molecules/StatusPill/StatusPill.tsx";
 import { DataTable } from "#/shared/ui/organisms/DataTable/DataTable.tsx";
 import { dataTableColumnHelper } from "#/shared/ui/organisms/DataTable/data-table-columns.ts";
@@ -25,6 +27,18 @@ export type ScheduleRow = {
   readonly lastFireAt: string | null;
 };
 
+/** One of the caller's actions on a row (edit, delete), listed in the row's "more actions" menu. */
+export type ScheduleRowMenuItem = {
+  readonly id: string;
+  /** Visible text of the item ("Editar"). */
+  readonly label: string;
+  /** Names the schedule for assistive tech; must start with `label` (WCAG 2.5.3). */
+  readonly accessibleLabel?: string | undefined;
+  readonly onSelect: () => void;
+  readonly disabled?: boolean | undefined;
+  readonly destructive?: boolean | undefined;
+};
+
 export type ScheduleTableProps<Row extends ScheduleRow> = {
   /** Table name (visually hidden). */
   caption: string;
@@ -41,12 +55,15 @@ export type ScheduleTableProps<Row extends ScheduleRow> = {
   onResume: (schedule: Row) => void;
   /** Opens the caller's confirmation; the run starts there. */
   onRunNow: (schedule: Row) => void;
-  /** More actions of a row (edit, delete), after run-now; shown only when `canManage`. */
-  renderRowActions?: ((schedule: Row) => ReactNode) | undefined;
+  /**
+   * The caller's further actions on a row (edit, delete): grouped in a "more actions" menu after
+   * pause and run-now, so a row keeps at most three controls; shown only when `canManage`.
+   */
+  rowMenuItems?: ((schedule: Row) => readonly ScheduleRowMenuItem[]) | undefined;
   empty: ReactNode;
 };
 
-type TableState = Pick<ScheduleTableProps<ScheduleRow>, "ownerLabel" | "canManage" | "disabled" | "pendingId" | "onPause" | "onResume" | "onRunNow" | "renderRowActions">;
+type TableState = Pick<ScheduleTableProps<ScheduleRow>, "ownerLabel" | "canManage" | "disabled" | "pendingId" | "onPause" | "onResume" | "onRunNow" | "rowMenuItems">;
 
 // Cells read the changing state from context so the column definitions never change identity
 // (TanStack remounts cells when they do, which drops clicks made while data loads).
@@ -114,16 +131,36 @@ function Status({ status }: { status: ScheduleRow["status"] }) {
   return <StatusPill tone={status === "active" ? "emerald" : "amber"}>{t(status)}</StatusPill>;
 }
 
+function MoreActions({ items, label }: { items: readonly ScheduleRowMenuItem[]; label: string }) {
+  if (items.length === 0) return null;
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="outline" size="icon-sm" aria-label={label}>
+          <EllipsisIcon aria-hidden="true" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        {items.map((item) => (
+          <DropdownMenuItem key={item.id} variant={item.destructive === true ? "destructive" : "default"} disabled={item.disabled === true} {...(item.accessibleLabel === undefined ? {} : { "aria-label": item.accessibleLabel })} onSelect={item.onSelect}>
+            {item.label}
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
 function Actions({ schedule }: { schedule: ScheduleRow }) {
   const t = useTranslations("common.scheduleTable");
-  const { canManage, disabled = false, pendingId, onPause, onResume, onRunNow, renderRowActions } = useTableState();
+  const { canManage, disabled = false, pendingId, onPause, onResume, onRunNow, rowMenuItems } = useTableState();
   const { workflow: name, slug } = useScheduleName(schedule);
   if (!canManage) return null;
   const pending = pendingId === schedule.id;
   const blocked = disabled || pendingId !== null;
   const id = slug ?? name;
   return (
-    <span className="flex flex-wrap justify-end gap-2">
+    <span className="flex flex-wrap items-center justify-end gap-2">
       {schedule.status === "active" ? (
         <Button variant="outline" size="sm" pending={pending} disabled={blocked} onClick={() => onPause(schedule)} aria-label={t("pauseNamed", { name, id })}>
           {t("pause")}
@@ -136,7 +173,7 @@ function Actions({ schedule }: { schedule: ScheduleRow }) {
       <Button variant="outline" size="sm" disabled={blocked} onClick={() => onRunNow(schedule)} aria-label={t("runNowNamed", { name, id })}>
         {t("runNow")}
       </Button>
-      {renderRowActions?.(schedule)}
+      <MoreActions items={rowMenuItems?.(schedule) ?? []} label={t("moreActionsNamed", { name, id })} />
     </span>
   );
 }

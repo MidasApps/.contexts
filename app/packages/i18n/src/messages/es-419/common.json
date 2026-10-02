@@ -242,6 +242,7 @@
     "resumeNamed": "Reanudar la programación {id} de {name}",
     "runNow": "Ejecutar ahora",
     "runNowNamed": "Ejecutar ahora la programación {id} de {name}",
+    "moreActionsNamed": "Más acciones de la programación {id} de {name}",
     "columns": {
       "workflow": "Workflow",
       "cron": "Cron y zona horaria",

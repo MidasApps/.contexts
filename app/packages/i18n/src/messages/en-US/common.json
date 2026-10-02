@@ -242,6 +242,7 @@
     "resumeNamed": "Resume the schedule {id} of {name}",
     "runNow": "Run now",
     "runNowNamed": "Run the schedule {id} of {name} now",
+    "moreActionsNamed": "More actions for the schedule {id} of {name}",
     "columns": {
       "workflow": "Workflow",
       "cron": "Cron and time zone",
