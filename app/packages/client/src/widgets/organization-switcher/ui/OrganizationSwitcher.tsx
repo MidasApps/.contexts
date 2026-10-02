@@ -4,7 +4,7 @@ import type { Organization } from "@core/contracts";
 import { useTranslations } from "use-intl";
 import { orderByLastUsed, OrganizationAvatar } from "#/entities/organization/index.ts";
 import { useAccessContext, useCurrentNode, useMe, useMyOrganizations } from "#/entities/session/index.ts";
-import { useSwitchOrganization } from "#/features/switch-organization/index.ts";
+import { useIsSwitchingOrganization, useSwitchOrganization } from "#/features/switch-organization/index.ts";
 import { RouteLink } from "#/shared/lib/router/router-context.tsx";
 import { Icon } from "#/shared/ui/atoms/Icon/Icon.tsx";
 import { Skeleton } from "#/shared/ui/atoms/Skeleton/Skeleton.tsx";
@@ -27,6 +27,7 @@ function OrganizationItems({ currentId }: { currentId: string | undefined }) {
   const me = useMe();
   const organizations = useMyOrganizations();
   const switchOrganization = useSwitchOrganization();
+  const switching = useIsSwitchingOrganization();
   if (organizations.isPending) {
     return (
       <DropdownMenuItem disabled>
@@ -45,9 +46,13 @@ function OrganizationItems({ currentId }: { currentId: string | undefined }) {
   }
   const ordered = orderByLastUsed(organizations.data, me.data?.lastContext.organizationId);
   return (
-    <DropdownMenuRadioGroup value={currentId ?? ""} onValueChange={(organizationId) => organizationId !== currentId && switchOrganization.mutate(organizationId)}>
+    <DropdownMenuRadioGroup value={currentId ?? ""} onValueChange={(organizationId) => {
+        // One switch at a time: a second one would refetch every query twice.
+        if (organizationId !== currentId && !switching) switchOrganization.mutate(organizationId);
+      }}
+    >
       {ordered.map((organization: Organization) => (
-        <DropdownMenuRadioItem key={organization.id} value={organization.id} className="gap-2">
+        <DropdownMenuRadioItem key={organization.id} value={organization.id} disabled={switching} className="gap-2">
           <OrganizationAvatar name={organization.name} size="xs" decorative />
           <span className="truncate">{organization.name}</span>
         </DropdownMenuRadioItem>
@@ -69,12 +74,16 @@ export function OrganizationSwitcher() {
   const current = context.data?.organization;
   const loadingName = node !== null && context.isPending;
   const name = current?.name ?? t("chooseOrganization");
+  const switching = useIsSwitchingOrganization();
   return (
     <SidebarMenu>
+      <span role="status" className="sr-only">
+        {switching ? t("switching") : null}
+      </span>
       <SidebarMenuItem>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <SidebarMenuButton size="lg" tooltip={name} aria-label={t("organizationTrigger", { name })} className="data-[state=open]:bg-sidebar-accent">
+            <SidebarMenuButton size="lg" tooltip={name} aria-label={t("organizationTrigger", { name })} aria-busy={switching || undefined} className="data-[state=open]:bg-sidebar-accent">
               {current === undefined ? (
                 <span className="grid size-8 shrink-0 place-items-center rounded-xs bg-muted text-muted-foreground">
                   <Icon name="building" />
@@ -86,7 +95,7 @@ export function OrganizationSwitcher() {
                 {loadingName ? <Skeleton className="h-4 w-24" /> : <span className="truncate text-[13px] font-medium">{name}</span>}
                 <span className="truncate text-[11.5px] text-muted-foreground">{t("organizationLabel")}</span>
               </span>
-              <Icon name="chevron-down" className="ml-auto size-4" />
+              {switching ? <Spinner decorative className="ml-auto" /> : <Icon name="chevron-down" className="ml-auto size-4" />}
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent side={isMobile ? "bottom" : "right"} align="start" sideOffset={4} className="w-(--radix-dropdown-menu-trigger-width) min-w-60">

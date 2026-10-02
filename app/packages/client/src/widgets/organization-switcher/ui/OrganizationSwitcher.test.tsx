@@ -18,6 +18,32 @@ describe("OrganizationSwitcher", () => {
     await expectNoAxeViolations(document.body);
   });
 
+  it("shows the switch as pending and refuses a second pick until it settles", async () => {
+    let finish: () => void = () => undefined;
+    const calls: string[] = [];
+    const { user } = renderWidget(<OrganizationSwitcher />, {
+      path: `/o/${IDS.organization}`,
+      routes: {
+        "PUT /v1/me/active-organization": (request) => {
+          calls.push(String((request.body as { organizationId: string }).organizationId));
+          return new Promise((resolve) => (finish = () => resolve({ status: 204 })));
+        },
+      },
+    });
+    await user.click(await screen.findByRole("button", { name: "Northwind, trocar de organização" }));
+    await user.click(await screen.findByRole("menuitemradio", { name: "Contoso" }));
+    const trigger = await screen.findByRole("button", { name: /trocar de organização/u });
+    await waitFor(() => expect(trigger.getAttribute("aria-busy")).toBe("true"));
+    expect(screen.getByRole("status").textContent).toBe("Trocando de organização…");
+    await user.click(trigger);
+    const items = await screen.findAllByRole("menuitemradio");
+    items.forEach((item) => expect(item.getAttribute("aria-disabled")).toBe("true"));
+    await user.keyboard("{Escape}");
+    finish();
+    await waitFor(() => expect(screen.getByRole("button", { name: /trocar de organização/u }).getAttribute("aria-busy")).toBeNull());
+    expect(calls).toHaveLength(1);
+  });
+
   it("asks to choose outside an organization and offers a retry when the list fails", async () => {
     let fail = true;
     const { user } = renderWidget(<OrganizationSwitcher />, {

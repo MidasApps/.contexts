@@ -165,7 +165,8 @@
     "noProjects": "Nenhum projeto ainda",
     "createProject": "Novo projeto",
     "allProjects": "Todos os projetos",
-    "switchFailed": "Não foi possível trocar de organização"
+    "switchFailed": "Não foi possível trocar de organização",
+    "switching": "Trocando de organização…"
   },
   "userMenu": {
     "trigger": "{name}, menu da conta",

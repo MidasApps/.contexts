@@ -6,7 +6,7 @@ import { usePermissions } from "#/entities/permission/index.ts";
 import { useProjects } from "#/entities/project/index.ts";
 import { useCurrentNode, useMyOrganizations } from "#/entities/session/index.ts";
 import { useSignOut } from "#/features/sign-out/index.ts";
-import { useSwitchOrganization } from "#/features/switch-organization/index.ts";
+import { useIsSwitchingOrganization, useSwitchOrganization } from "#/features/switch-organization/index.ts";
 import type { NodeParams } from "#/shared/api/core-queries.ts";
 import { useRouter } from "#/shared/lib/router/router-context.tsx";
 import { navItemRoute } from "#/shared/lib/shell/nav-item-route.ts";
@@ -53,11 +53,16 @@ const useTenantCommands = (node: NodeParams | null) => {
   const organizations = useMyOrganizations();
   const projects = useProjects(node?.organizationId);
   const switchOrganization = useSwitchOrganization();
+  const switching = useIsSwitchingOrganization();
   const organizationCommands = (organizations.data ?? [])
     .filter((organization) => organization.id !== node?.organizationId)
     .map((organization): PaletteCommand => {
       const label = t("switchOrganization", { name: organization.name });
-      return { id: `organization:${organization.id}`, group: "organizations", label, icon: "building", keywords: [organization.name], run: () => switchOrganization.mutate(organization.id) };
+      return { id: `organization:${organization.id}`, group: "organizations", label, icon: "building", keywords: [organization.name], run: () => {
+          // A second switch while one runs would refetch every query twice.
+          if (!switching) switchOrganization.mutate(organization.id);
+        },
+      };
     });
   const projectCommands =
     node === null
