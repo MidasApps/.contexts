@@ -1,4 +1,4 @@
-# 0049. Account creation, password reset and the self-serve capability
+# 0050. Account creation, password reset and the self-serve capability
 
 - **Status:** accepted
 - **Date:** 2026-10-01

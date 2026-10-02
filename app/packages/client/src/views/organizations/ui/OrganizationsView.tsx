@@ -101,7 +101,7 @@ function CreateOrganizationCard({ access }: { access: Exclude<CreateAccess, "den
 /**
  * `/organizations` (SP2 spec §4): the user's organizations, the last used first, and a form to
  * create one (the creator becomes owner) when `GET /v1/me` says the server would allow it
- * (decision 0049); otherwise the empty state points to an invitation. Loading, empty and error
+ * (decision 0050); otherwise the empty state points to an invitation. Loading, empty and error
  * states with retry.
  */
 export function OrganizationsView() {

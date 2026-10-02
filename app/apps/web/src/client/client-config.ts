@@ -8,7 +8,7 @@ export type WebPublicEnv = {
   readonly NEXT_PUBLIC_FIREBASE_PROJECT_ID?: string | undefined;
   readonly NEXT_PUBLIC_FIREBASE_AUTH_EMULATOR_URL?: string | undefined;
   readonly NEXT_PUBLIC_MFA_FACTORS?: string | undefined;
-  /** `true` offers open sign-up (`/sign-up`, decision 0049); unset or `false`: invitations only. */
+  /** `true` offers open sign-up (`/sign-up`, decision 0050); unset or `false`: invitations only. */
   readonly NEXT_PUBLIC_SELF_SERVE_SIGN_UP?: string | undefined;
 };
 

@@ -63,7 +63,7 @@ export type AuthPort = {
   getState: () => AuthState;
   subscribe: (listener: () => void) => () => void;
   signInWithEmail: (email: string, password: string) => Promise<SignInResult>;
-  /** Creates an email/password account and signs it in (decision 0049); `EMAIL_ALREADY_IN_USE` when taken. */
+  /** Creates an email/password account and signs it in (decision 0050); `EMAIL_ALREADY_IN_USE` when taken. */
   createAccount: (input: { email: string; password: string; displayName: string }) => Promise<SignInResult>;
   /**
    * Sends the password reset email in `locale`. Resolves as well when no account has this email

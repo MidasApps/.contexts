@@ -23,7 +23,7 @@ export const WebOnlyEnvSchema = z.object({
   // wrong deployment fails at boot instead of in the browser.
   NEXT_PUBLIC_APP_ENV: z.enum(["local", "dev", "staging", "prod"]).optional(),
   NEXT_PUBLIC_MFA_FACTORS: MfaFactorListSchema.optional(),
-  // Open sign-up page (decision 0049); unset = invitations only.
+  // Open sign-up page (decision 0050); unset = invitations only.
   NEXT_PUBLIC_SELF_SERVE_SIGN_UP: z.enum(["true", "false"]).optional(),
   // Auth Emulator origin of the browser SDK (local only); the CSP allows it (decision 0016).
   NEXT_PUBLIC_FIREBASE_AUTH_EMULATOR_URL: z.url({ protocol: /^http$/ }).optional(),

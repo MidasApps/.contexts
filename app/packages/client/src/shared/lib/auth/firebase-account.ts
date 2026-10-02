@@ -11,7 +11,7 @@ const SILENT_RESET_CODES = new Set(["auth/user-not-found", "auth/invalid-email",
 
 /**
  * Account creation (an invitee without an account, or open sign-up when the app offers it,
- * decision 0049) and the password reset email. Creating an account signs it in, so the caller
+ * decision 0050) and the password reset email. Creating an account signs it in, so the caller
  * continues with the session's `completeSignIn`, like an email sign-in.
  */
 export const createFirebaseAccountActions = (sdk: FirebaseAccountSdk, auth: Auth): Pick<AuthPort, "createAccount" | "sendPasswordReset"> => ({

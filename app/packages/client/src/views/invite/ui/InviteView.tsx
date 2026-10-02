@@ -97,7 +97,7 @@ function InviteBody({ token }: { token: string }) {
  * (redirecting to `/sign-in?next=` would either lose the token or put it in a query string that
  * reaches server logs); then the preview and "Accept" follow. Signing out after an email mismatch
  * keeps the token in memory, so the right account can sign in and accept. A language switch
- * carries the token in the fragment (decision 0049).
+ * carries the token in the fragment (decision 0050).
  */
 export function InviteView({ brand, footer }: { brand?: ReactNode; footer?: ReactNode }) {
   const t = useTranslations("auth.invite");

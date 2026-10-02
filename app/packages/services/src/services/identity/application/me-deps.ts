@@ -25,7 +25,7 @@ export type MeDeps = {
   readonly syncClaims: SyncClaims;
   readonly organizations: Pick<OrganizationRepository, "get">;
   readonly loadNode: LoadNode;
-  /** The tenancy creation rule, answered as `capabilities.createOrganization` (decision 0049). */
+  /** The tenancy creation rule, answered as `capabilities.createOrganization` (decision 0050). */
   readonly mayCreateOrganization: MayCreateOrganization;
   readonly audit: AuditWriter;
   readonly unitOfWork: UnitOfWork;

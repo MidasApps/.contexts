@@ -79,7 +79,7 @@ function SignUpBody({ next }: { next: string | null }) {
 }
 
 /**
- * `/sign-up?next=` (decision 0049): a new email/password account when the app offers open
+ * `/sign-up?next=` (decision 0050): a new email/password account when the app offers open
  * sign-up (`selfServeSignUp`), then on to `next` or home (which leads a user without
  * organizations to create one or ask for an invitation). Closed apps explain that accounts come
  * from invitations.

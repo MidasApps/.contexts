@@ -35,7 +35,7 @@ function SignedOutNotice({ reason }: { reason: SignedOutReason }) {
   );
 }
 
-/** "No account yet? Create account", only when the app offers open sign-up (decision 0049). */
+/** "No account yet? Create account", only when the app offers open sign-up (decision 0050). */
 function SignUpPrompt({ next }: { next: string | null }) {
   const t = useTranslations("auth.signIn");
   const config = useClientConfig();

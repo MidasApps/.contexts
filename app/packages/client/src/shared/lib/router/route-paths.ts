@@ -40,7 +40,7 @@ export type ProfileSection = (typeof PROFILE_SECTIONS)[number];
 export type Route =
   | { id: "sign-in"; next?: string | undefined }
   | { id: "invite"; token?: string | undefined }
-  /** Open sign-up (decision 0049); `next` as on sign-in. */
+  /** Open sign-up (decision 0050); `next` as on sign-in. */
   | { id: "sign-up"; next?: string | undefined }
   /** Password reset request (the email is typed there; never carried in the URL). */
   | { id: "reset-password" }

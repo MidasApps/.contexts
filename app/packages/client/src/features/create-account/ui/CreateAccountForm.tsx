@@ -90,7 +90,7 @@ const useCreateAccount = () => {
 };
 
 /**
- * New email/password account (decision 0049): on the invitation page for an invitee without an
+ * New email/password account (decision 0050): on the invitation page for an invitee without an
  * account, and on `/sign-up` when the app offers open sign-up. Field problems are shown per field
  * and the first one takes focus; a Firebase refusal shows one focused message and clears the
  * password.

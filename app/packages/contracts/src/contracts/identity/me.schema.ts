@@ -6,7 +6,7 @@ import { UserIdSchema } from "../primitives/ids.schema.ts";
 import { PlatformRoleSchema } from "./platform-staff.schema.ts";
 import { USER_FIELDS } from "./user.schema.ts";
 
-/** What the signed-in user may start from the UI; the server still enforces each rule (decision 0049). */
+/** What the signed-in user may start from the UI; the server still enforces each rule (decision 0050). */
 export const MeCapabilitiesSchema = z.object({
   createOrganization: z.boolean().meta(none("Whether POST /v1/organizations would let the caller in (self-serve on, or MFA platform staff; never under impersonation).")),
 });
