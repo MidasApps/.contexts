@@ -1,11 +1,12 @@
 "use client";
 
 import type { ApprovalRequest, ApprovalStatus } from "@core/contracts";
-import { useQuery, useQueryClient, type UseQueryResult } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery, useQueryClient, type UseQueryResult } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useCallEndpoint } from "#/shared/api/api-context.tsx";
+import type { CollectedPages } from "#/shared/api/cursor-list.ts";
 import { useIsSignedIn } from "#/shared/lib/session/use-signed-in.ts";
-import { approvalRequestKeys, approvalRequestQuery, approvalRequestsQuery } from "../api/approval-request-queries.ts";
+import { approvalHistoryQuery, approvalRequestKeys, approvalRequestQuery, approvalRequestsQuery } from "../api/approval-request-queries.ts";
 
 /** Refetch period when no live listener is allowed (SP5 spec §3.4). */
 export const APPROVALS_POLL_MS = 15_000;
@@ -26,8 +27,10 @@ export type UseApprovalRequestsArgs = {
 };
 
 export type UseApprovalRequestsResult = {
-  readonly query: UseQueryResult<ApprovalRequest[]>;
+  readonly query: UseQueryResult<CollectedPages<ApprovalRequest>>;
   readonly requests: readonly ApprovalRequest[];
+  /** The read stopped at `APPROVALS_MAX_PAGES` with more requests left: the view must say so. */
+  readonly truncated: boolean;
   readonly mode: "listener" | "polling";
 };
 
@@ -60,7 +63,17 @@ export const useApprovalRequests = ({ organizationId, status, live, enabled = tr
     refetchInterval: listening ? false : APPROVALS_POLL_MS,
     refetchOnWindowFocus: !listening,
   });
-  return { query, requests: query.data ?? [], mode: listening ? "listener" : "polling" };
+  return { query, requests: query.data?.items ?? [], truncated: query.data?.truncated ?? false, mode: listening ? "listener" : "polling" };
+};
+
+/**
+ * The settled requests (the history tab), one cursor page at a time and only once asked for. A
+ * decision invalidates every list of the organization, so a new settled request shows up then.
+ */
+export const useApprovalHistory = (organizationId: string, options: { enabled?: boolean } = {}) => {
+  const callEndpoint = useCallEndpoint();
+  const signedIn = useIsSignedIn();
+  return useInfiniteQuery({ ...approvalHistoryQuery(callEndpoint, organizationId), enabled: signedIn && organizationId !== "" && options.enabled !== false });
 };
 
 /** One request by id (the detail page); polls like the inbox while it is pending. */

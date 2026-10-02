@@ -1,8 +1,16 @@
 // Public API of the approval-request entity (SP5 Tasks 3 and 14): data access, inbox state and preview.
-export { approvalRequestKeys, approvalRequestQuery, approvalRequestsQuery, APPROVALS_MAX_PAGES } from "./api/approval-request-queries.ts";
+export {
+  APPROVAL_HISTORY_PAGE_SIZE,
+  approvalHistoryQuery,
+  approvalRequestKeys,
+  approvalRequestQuery,
+  approvalRequestsQuery,
+  APPROVALS_MAX_PAGES,
+} from "./api/approval-request-queries.ts";
 export {
   type ApprovalChangeSource,
   APPROVALS_POLL_MS,
+  useApprovalHistory,
   useApprovalRequest,
   useApprovalRequests,
   type UseApprovalRequestsArgs,

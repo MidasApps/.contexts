@@ -893,6 +893,9 @@
     "title": "Approvals",
     "description": "Actions that need the decision of a second person before they run. The person who asks never approves their own request.",
     "loading": "Loading approvals",
+    "historyPagination": "History pages",
+    "truncatedTitle": "Not every pending request was loaded",
+    "truncatedDescription": "Showing the first {count}, the limit of this list. Decide these to see the rest.",
     "tabs": {
       "label": "Approval lists",
       "waiting": "Waiting for my decision",
@@ -906,7 +909,7 @@
       "waitingTitle": "Nothing is waiting for your decision",
       "waitingDescription": "When someone asks for an action that needs approval, it shows up here.",
       "mineTitle": "You have not requested any approval",
-      "mineDescription": "Requests you make, in the chat or in a workflow, show up here with their progress.",
+      "mineDescription": "Your requests, from the chat or a workflow, show up here while they wait for a decision; decided ones move to History.",
       "historyTitle": "No settled approvals",
       "historyDescription": "Executed, rejected, cancelled and expired approvals are kept here."
     },

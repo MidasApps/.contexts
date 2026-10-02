@@ -893,6 +893,9 @@
     "title": "Aprovações",
     "description": "Ações que precisam da decisão de uma segunda pessoa antes de serem executadas. Quem pede nunca aprova o próprio pedido.",
     "loading": "Carregando aprovações",
+    "historyPagination": "Páginas do histórico",
+    "truncatedTitle": "Nem todas as solicitações pendentes foram carregadas",
+    "truncatedDescription": "Mostrando as {count} primeiras, o limite desta lista. Decida estas para ver as demais.",
     "tabs": {
       "label": "Listas de aprovações",
       "waiting": "Aguardando minha decisão",
@@ -906,7 +909,7 @@
       "waitingTitle": "Nada aguardando sua decisão",
       "waitingDescription": "Quando alguém pedir uma ação que exige aprovação, ela aparece aqui.",
       "mineTitle": "Você não pediu nenhuma aprovação",
-      "mineDescription": "Pedidos feitos por você, no chat ou em um fluxo, aparecem aqui com o andamento.",
+      "mineDescription": "Pedidos seus, no chat ou em um fluxo, aparecem aqui enquanto aguardam decisão; os decididos ficam no Histórico.",
       "historyTitle": "Nenhuma aprovação concluída",
       "historyDescription": "Aprovações executadas, recusadas, canceladas ou expiradas ficam registradas aqui."
     },

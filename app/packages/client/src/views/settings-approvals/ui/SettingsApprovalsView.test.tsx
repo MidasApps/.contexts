@@ -60,21 +60,56 @@ describe("SettingsApprovalsView inbox", () => {
     expect(within(list).queryByText(/Create the note/u)).toBeNull();
     expect(screen.getByRole("tab", { name: "Aguardando minha decisão (1)" }).getAttribute("aria-selected")).toBe("true");
     expect(await within(list).findByRole("button", { name: "Aprovar" })).toBeDefined();
-    expect(api.calls.find((call) => call.path.endsWith("/approval-requests"))?.path).toBe(`/v1/organizations/${IDS.organization}/approval-requests`);
+    // The waiting and mine tabs read the pending requests only, filtered on the server.
+    const listed = api.calls.find((call) => call.path.endsWith("/approval-requests"));
+    expect(listed?.path).toBe(`/v1/organizations/${IDS.organization}/approval-requests`);
+    expect(new URLSearchParams(listed?.query).get("status")).toBe("pending");
+    // The history is read only when its tab opens.
+    expect(api.calls.filter((call) => call.path.endsWith("/approval-requests") && !new URLSearchParams(call.query).has("status"))).toHaveLength(0);
     await expectNoAxeViolations(container);
   });
 
-  it("shows my own requests without decision controls and the settled ones in the history", async () => {
+  it("shows my own pending requests without decision controls and the settled ones in the history", async () => {
     const { user } = renderView();
     await user.click(await screen.findByRole("tab", { name: "Pedidas por mim (1)" }));
     const own = await screen.findByRole("list", { name: "Pedidas por mim" });
     expect(within(own).getByText(/Pedida por você/u)).toBeDefined();
     expect(within(own).queryByRole("button", { name: "Aprovar" })).toBeNull();
     expect(within(own).getByRole("link", { name: "Ver o progresso do fluxo" }).getAttribute("href")).toBe(`/o/${IDS.organization}/settings/workflows/runs/run-1`);
-    await user.click(screen.getByRole("tab", { name: "Histórico (1)" }));
+    await user.click(screen.getByRole("tab", { name: "Histórico" }));
     const history = await screen.findByRole("list", { name: "Histórico" });
+    expect(within(history).getAllByRole("listitem")).toHaveLength(1);
     expect(within(history).getByText("Recusada")).toBeDefined();
     expect(within(history).getByText("Motivo informado: Not this month")).toBeDefined();
+  });
+
+  it("pages the history by cursor instead of reading it whole", async () => {
+    const older = Array.from({ length: 25 }, (_, index) => ({ ...settled, id: `ApOld${String(index).padStart(15, "0")}`, reason: `Old ${index}` }));
+    const history = (request: FakeRequest) => {
+      if (request.query.get("status") === "pending") return page([waiting]);
+      return request.query.get("cursor") === "next" ? page(older.slice(19)) : page([settled, ...older.slice(0, 19)], { cursor: "next" });
+    };
+    const { user, api } = renderView({ routes: { [LIST]: history } });
+    await user.click(await screen.findByRole("tab", { name: "Histórico" }));
+    const list = await screen.findByRole("list", { name: "Histórico" });
+    expect(within(list).getAllByRole("listitem")).toHaveLength(20);
+    const pages = screen.getByRole("navigation", { name: "Páginas do histórico" });
+    await user.click(within(pages).getByRole("button", { name: "Próxima" }));
+    await waitFor(() => expect(within(screen.getByRole("list", { name: "Histórico" })).getAllByRole("listitem")).toHaveLength(6));
+    const reads = api.calls.filter((call) => call.path.endsWith("/approval-requests") && !new URLSearchParams(call.query).has("status"));
+    expect(reads.map((call) => [new URLSearchParams(call.query).get("cursor"), new URLSearchParams(call.query).get("limit")])).toEqual([[null, "20"], ["next", "20"]]);
+  });
+
+  it("says when the pending requests were cut at the read limit", async () => {
+    let index = 0;
+    const endless = (request: FakeRequest) => {
+      index += 1;
+      const one = { ...waiting, id: `ApMany${String(index).padStart(14, "0")}` };
+      return request.query.get("status") === "pending" ? page([one], { cursor: `c${index}` }) : page([]);
+    };
+    const { container } = renderView({ routes: { [LIST]: endless } });
+    expect(await screen.findByText("Nem todas as solicitações pendentes foram carregadas")).toBeDefined();
+    await expectNoAxeViolations(container);
   });
 
   it("approves with a reason and shows the result", async () => {
@@ -94,8 +129,8 @@ describe("SettingsApprovalsView inbox", () => {
     await waitFor(() => expect(bodies).toHaveLength(1));
     expect(bodies[0]?.params["approvalRequestId"]).toBe("ApWaiting00000000000");
     expect(bodies[0]?.body).toEqual({ reason: "Checked" });
-    expect(await screen.findByRole("tab", { name: "Histórico (1)" })).toBeDefined();
-    expect(screen.getByRole("heading", { name: "Nada aguardando sua decisão" })).toBeDefined();
+    expect(await screen.findByRole("heading", { name: "Nada aguardando sua decisão" })).toBeDefined();
+    expect(screen.getByRole("tab", { name: "Aguardando minha decisão (0)" })).toBeDefined();
   });
 
   it("rejects only after a confirmation", async () => {
