@@ -143,7 +143,7 @@ function SettingsDevices({ context }: { context: AccessContext }) {
         />
       }
     >
-  // The empty-state copy follows the permission; offline only holds the action (the shell says why).
+      {/* The empty-state copy follows the permission; offline only holds the action (the shell says why). */}
       <DevicesTable context={context} onCreate={canCreate ? () => setCreating(true) : null} />
       {canCreate ? <CreateDeviceActivationDialog organization={organization} customRoles={roles.data} open={creating} onOpenChange={setCreating} /> : null}
     </SettingsPageFrame>

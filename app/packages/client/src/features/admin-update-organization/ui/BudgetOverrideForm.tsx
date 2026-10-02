@@ -73,7 +73,11 @@ export function BudgetOverrideForm({ organization }: { organization: Organizatio
   // A field error goes away as soon as the user starts fixing it.
   const edit = (field: keyof FieldErrors) => (): void => {
     setEditing(true);
-    setErrors(({ [field]: _fixed, ...rest }) => rest);
+    setErrors((current) => {
+      const kept = field === "money" ? current.tokens : current.money;
+      const other: keyof FieldErrors = field === "money" ? "tokens" : "money";
+      return kept === undefined ? {} : { [other]: kept };
+    });
   };
 
   const submit = async (event: FormEvent<HTMLFormElement>): Promise<void> => {

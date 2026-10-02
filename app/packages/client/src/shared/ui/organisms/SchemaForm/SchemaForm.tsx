@@ -138,10 +138,8 @@ export function SchemaForm<Schema extends z.ZodType>({
   // Read during render so react-hook-form subscribes to it.
   const dirty = form.formState.isDirty;
   useEffect(() => onDirtyChange?.(dirty), [dirty, onDirtyChange]);
-  // "Saved" describes the values on screen: once the user edits again it no longer does.
-  useEffect(() => {
-    if (dirty) setStatus((current) => (current.kind === "saved" ? { kind: "idle" } : current));
-  }, [dirty]);
+  // "Saved" describes the values on screen: while they differ from the saved ones it is not shown.
+  const shownStatus: SubmitStatus = status.kind === "saved" && dirty ? { kind: "idle" } : status;
 
   const submit = form.handleSubmit(
     async (values) => {
@@ -173,7 +171,7 @@ export function SchemaForm<Schema extends z.ZodType>({
   return (
     <FormProvider {...form}>
       <form noValidate className={cn("flex flex-col gap-6", className)} onSubmit={(event) => void handleSubmit(event)} {...formProps}>
-        <SchemaFormStatus status={status} successMessage={t(successMessageKey)} />
+        <SchemaFormStatus status={shownStatus} successMessage={t(successMessageKey)} />
         <Sections sections={plan.sections} defaultCurrency={defaultCurrency} onMoneyParse={money.report} />
         <div className="flex justify-end">
           <Button type="submit" pending={form.formState.isSubmitting} disabled={requireChanges && !dirty}>

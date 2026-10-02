@@ -14,8 +14,8 @@ const escape = (text: string): string => text.replace(/[.*+?^${}()|[\]\\]/gu, "\
  */
 export const parseIntegerInput = (text: string, locale: string): number | null => {
   // Intl groups with a narrow no-break space in some locales; typed text uses a plain space.
-  const separator = groupSeparatorOf(locale).replace(/[  ]/gu, " ");
-  const normalized = text.trim().replace(/[  ]/gu, " ");
+  const separator = groupSeparatorOf(locale).replace(/[\u00a0\u202f]/gu, " ");
+  const normalized = text.trim().replace(/[\u00a0\u202f]/gu, " ");
   const grouped = new RegExp(`^\\d{1,3}(?:${escape(separator)}\\d{3})+$`, "u");
   if (!/^\d+$/u.test(normalized) && !grouped.test(normalized)) return null;
   const digits = normalized.split(separator).join("");
