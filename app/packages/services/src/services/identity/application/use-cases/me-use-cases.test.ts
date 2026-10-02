@@ -45,6 +45,25 @@ describe("getMe", () => {
     const updated = await open.identity.updateMe({ actor: userOf("ana"), input: { displayName: "Ana" } });
     expect(updated).toMatchObject({ ok: true, data: { capabilities: { createOrganization: true } } });
   });
+
+  it("answers the last context while the caller is still a member, and an empty one once it is gone", async () => {
+    const world = makeMeWorld();
+    const organization = await world.organizationOf("owner");
+    world.account("owner");
+    await world.identity.getMe({ actor: userOf("owner") });
+    await world.identity.setActiveOrganization({ actor: userOf("owner"), access: world.access(), organizationId: organization.id, requestId: REQUEST_ID });
+
+    expect(await world.identity.getMe({ actor: userOf("owner") })).toMatchObject({ ok: true, data: { lastContext: { organizationId: organization.id } } });
+
+    const deleted = await world.tenancy.deleteOrganization({ ...world.command("owner"), organizationId: organization.id });
+    expect(deleted.ok).toBe(true);
+    const me = await world.identity.getMe({ actor: userOf("owner") });
+    expect(me.ok ? me.data.lastContext : "error").toEqual({});
+    const updated = await world.identity.updateMe({ actor: userOf("owner"), input: { displayName: "Owner" } });
+    expect(updated.ok ? updated.data.lastContext : "error").toEqual({});
+    // Answer-only: the stored context is left as it was (GET stays safe).
+    expect(world.users.userOf("owner")?.lastContext).toEqual({ organizationId: organization.id });
+  });
 });
 
 describe("updateMe", () => {
