@@ -100,7 +100,9 @@ export function CreateAccountForm() {
   const [values, setValues] = useState<NewAccountInput>({ name: "", email: "", password: "" });
   const [problems, setProblems] = useState<NewAccountProblems>({});
   const { create, failure, pending } = useCreateAccount();
-  const refs = { name: useRef<HTMLInputElement>(null), email: useRef<HTMLInputElement>(null), password: useRef<HTMLInputElement>(null) };
+  const nameRef = useRef<HTMLInputElement>(null);
+  const emailRef = useRef<HTMLInputElement>(null);
+  const passwordRef = useRef<HTMLInputElement>(null);
   const set = (name: FieldName) => (value: string) => setValues((current) => ({ ...current, [name]: value }));
   const problem = (name: FieldName): string | undefined => (problems[name] === undefined ? undefined : t(`validation.${problems[name]}`));
 
@@ -110,7 +112,7 @@ export function CreateAccountForm() {
     const found = validateNewAccount(values);
     setProblems(found);
     const firstInvalid = FIELD_ORDER.find((name) => found[name] !== undefined);
-    if (firstInvalid !== undefined) return refs[firstInvalid].current?.focus();
+    if (firstInvalid !== undefined) return { name: nameRef, email: emailRef, password: passwordRef }[firstInvalid].current?.focus();
     if (!(await create(values))) setValues((current) => ({ ...current, password: "" }));
   };
 
@@ -118,11 +120,11 @@ export function CreateAccountForm() {
     <form noValidate onSubmit={(event) => void submit(event)} className="flex flex-col gap-5">
       {failure === null ? null : <FailureAlert code={failure} />}
       <FieldGroup>
-        <TextField label={t("createAccount.name")} hint={t("createAccount.nameHint")} error={problem("name")} inputRef={refs.name} name="name" autoComplete="name" value={values.name} onChange={(event) => set("name")(event.target.value)} />
+        <TextField label={t("createAccount.name")} hint={t("createAccount.nameHint")} error={problem("name")} inputRef={nameRef} name="name" autoComplete="name" value={values.name} onChange={(event) => set("name")(event.target.value)} />
         <TextField
           label={t("createAccount.email")}
           error={problem("email")}
-          inputRef={refs.email}
+          inputRef={emailRef}
           name="email"
           type="email"
           inputMode="email"
@@ -132,7 +134,7 @@ export function CreateAccountForm() {
           value={values.email}
           onChange={(event) => set("email")(event.target.value)}
         />
-        <NewPasswordField value={values.password} onChange={set("password")} error={problem("password")} inputRef={refs.password} />
+        <NewPasswordField value={values.password} onChange={set("password")} error={problem("password")} inputRef={passwordRef} />
       </FieldGroup>
       <Button type="submit" pending={pending} className="w-full">
         {pending ? t("createAccount.submitting") : t("createAccount.submit")}

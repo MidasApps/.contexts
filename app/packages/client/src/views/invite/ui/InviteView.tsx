@@ -49,17 +49,13 @@ function ModeSwitch({ prompt, action, onClick }: { prompt: string; action: strin
  */
 function SignedOutInvite() {
   const t = useTranslations("auth.invite");
-  const [mode, setMode] = useState<SignedOutMode>("sign-in");
-  // Focus moves to the new heading only after a switch, never on the first render.
-  const switched = useRef(false);
-  const switchTo = (next: SignedOutMode) => {
-    switched.current = true;
-    setMode(next);
-  };
+  // `switched`: focus moves to the new heading only after a switch, never on the first render.
+  const [{ mode, switched }, setView] = useState<{ mode: SignedOutMode; switched: boolean }>({ mode: "sign-in", switched: false });
+  const switchTo = (next: SignedOutMode) => setView({ mode: next, switched: true });
   if (mode === "create-account") {
     return (
       <>
-        <Heading key="create" title={t("createTitle")} description={t("createDescription")} focusOnMount={switched.current} />
+        <Heading key="create" title={t("createTitle")} description={t("createDescription")} focusOnMount={switched} />
         <CreateAccountForm />
         <ModeSwitch prompt={t("haveAccount")} action={t("signIn")} onClick={() => switchTo("sign-in")} />
       </>
@@ -67,7 +63,7 @@ function SignedOutInvite() {
   }
   return (
     <>
-      <Heading key="sign-in" title={t("signInTitle")} description={t("signInDescription")} focusOnMount={switched.current} />
+      <Heading key="sign-in" title={t("signInTitle")} description={t("signInDescription")} focusOnMount={switched} />
       <SignInForm />
       <ModeSwitch prompt={t("noAccount")} action={t("createAccount")} onClick={() => switchTo("create-account")} />
     </>
