@@ -23,7 +23,7 @@ export type CatalogLabel = {
   readonly description: (id: string, fallback: string) => string;
 };
 
-/** Names of workflows (decision 0051): `common.workflows.<id>` or the module's `<moduleId>.workflows.<rest>`. */
+/** Names of workflows (decision 0052): `common.workflows.<id>` or the module's `<moduleId>.workflows.<rest>`. */
 export const useWorkflowLabel = (): CatalogLabel => {
   const t = useRootTranslator();
   return useMemo(
@@ -35,7 +35,7 @@ export const useWorkflowLabel = (): CatalogLabel => {
   );
 };
 
-/** Names of feature flags (decision 0051): `common.flags.<key>`; the registry's reason is the description fallback. */
+/** Names of feature flags (decision 0052): `common.flags.<key>`; the registry's reason is the description fallback. */
 export const useFlagLabel = (): CatalogLabel => {
   const t = useRootTranslator();
   return useMemo(

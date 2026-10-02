@@ -104,7 +104,7 @@ describe("AdminAgentPromptsView", () => {
     expect(within(scorer).getByText("Atingiu o mínimo")).toBeDefined();
     // The experiment is a link to its page in the evals console, not a bare id.
     const experimentLink = screen.getByRole("link", { name: "Ver o experimento nas avaliações" });
-    expect(experimentLink.getAttribute("href")).toBe(`/admin/evals?a=${buildPromptEvalResult().experimentId}`);
+    expect(experimentLink.getAttribute("href")).toBe(`/admin/evals?a=${String(buildPromptEvalResult().experimentId)}`);
     expect(api.calls.find((call) => call.method === "POST")?.path).toBe(`/v1/admin/agents/assistant/prompt-versions/${PROMPT_IDS.v3}/eval`);
     await waitFor(() => expect(within(row(table, "v3")).getByRole("button", { name: "Ativar a versão 3" }).hasAttribute("disabled")).toBe(false));
     await expectNoAxeViolations(container);

@@ -1,5 +1,5 @@
 /**
- * Message keys that may hold the human label of a code-defined id (decision 0051): workflows,
+ * Message keys that may hold the human label of a code-defined id (decision 0052): workflows,
  * agents, tools, flags and permissions are named by convention, never by a key sent with the data,
  * so a row that carries only the id (a run, a schedule, an approval) still finds its label. Core
  * labels live in the core catalogs; a module ships its own under its namespace, keyed by the id

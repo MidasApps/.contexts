@@ -117,10 +117,10 @@ function Status({ status }: { status: ScheduleRow["status"] }) {
 function Actions({ schedule }: { schedule: ScheduleRow }) {
   const t = useTranslations("common.scheduleTable");
   const { canManage, disabled = false, pendingId, onPause, onResume, onRunNow, renderRowActions } = useTableState();
+  const { workflow: name, slug } = useScheduleName(schedule);
   if (!canManage) return null;
   const pending = pendingId === schedule.id;
   const blocked = disabled || pendingId !== null;
-  const { workflow: name, slug } = useScheduleName(schedule);
   const id = slug ?? name;
   return (
     <span className="flex flex-wrap justify-end gap-2">
