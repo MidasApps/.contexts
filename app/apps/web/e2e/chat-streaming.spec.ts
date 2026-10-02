@@ -161,7 +161,7 @@ test.describe("without permission", () => {
     await expect(
       page.getByRole("navigation", { name: "Navegação" }).getByRole("link", { name: "Visão geral" }),
     ).toBeVisible();
-    await expect(page.getByRole("link", { name: "Chat", exact: true })).toHaveCount(0);
+    await expect(page.getByRole("link", { name: "Assistente", exact: true })).toHaveCount(0);
 
     await page.goto(chatPath(world));
     await expect(page.getByRole("heading", { level: 1, name: "Você não tem acesso a esta página" })).toBeVisible();

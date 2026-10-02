@@ -15,7 +15,10 @@ test("opens the chat of a project, streams an answer and keeps the conversation 
   const user = await createUser({ label: "DeskChat", organizations: [{ id: world.alpha.id }] });
   await signInThroughUi(page, user, "/sign-in");
   await page.getByRole("main").getByRole("link", { name: world.alpha.projects.launch.name }).click();
-  await page.getByRole("navigation", { name: "Navegação" }).getByRole("link", { name: "Chat", exact: true }).click();
+  await page
+    .getByRole("navigation", { name: "Navegação" })
+    .getByRole("link", { name: "Assistente", exact: true })
+    .click();
   await expect(page).toHaveURL(new RegExp(`/p/${world.alpha.projects.launch.id}/chat$`));
   const panel = page.locator('[data-slot="chat-view"] [data-slot="chat-panel"]');
   await expect(panel.getByRole("heading", { name: "Como posso ajudar?" })).toBeVisible();

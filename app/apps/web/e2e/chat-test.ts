@@ -77,12 +77,12 @@ export const openChat = async (page: Page, world: World): Promise<void> => {
   await expect(chatPanel(page).getByRole("heading", { name: "Como posso ajudar?" })).toBeVisible();
 };
 
-/** Opens the project page and follows "Chat" in the project navigation. */
+/** Opens the project page and follows "Assistente" (the chat) in the project navigation. */
 export const openChatFromNavigation = async (page: Page, world: World): Promise<void> => {
   await page.goto(`o/${world.alpha.id}/p/${world.alpha.projects.launch.id}`);
   await expect(page.getByRole("heading", { level: 1, name: world.alpha.projects.launch.name })).toBeVisible();
   await showSidebar(page);
-  await page.getByRole("link", { name: "Chat", exact: true }).click();
+  await page.getByRole("link", { name: "Assistente", exact: true }).click();
   await expect(page).toHaveURL(new RegExp(`/p/${world.alpha.projects.launch.id}/chat$`));
 };
 
