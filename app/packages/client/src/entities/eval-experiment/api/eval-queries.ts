@@ -32,7 +32,7 @@ export const useAdminExperiments = (page: number, options: { enabled?: boolean }
   return useQuery({ ...adminExperimentsQuery(callEndpoint, page), placeholderData: keepPreviousData, enabled: signedIn && options.enabled !== false });
 };
 
-/** `GET /v1/admin/experiments/{id}` (staff): any experiment, `null` when it does not exist (decision 0048). */
+/** `GET /v1/admin/experiments/{id}` (staff): any experiment, `null` when it does not exist (decision 0049). */
 export const adminExperimentQuery = (callEndpoint: CallEndpoint, experimentId: string) =>
   queryOptions({
     queryKey: evalKeys.experiment(experimentId),

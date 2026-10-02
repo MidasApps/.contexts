@@ -1,4 +1,4 @@
-# 0048. Console data honesty: unmeasured numbers, cut lists and experiments read by id
+# 0049. Console data honesty: unmeasured numbers, cut lists and experiments read by id
 
 - **Status:** accepted
 - **Date:** 2026-10-01

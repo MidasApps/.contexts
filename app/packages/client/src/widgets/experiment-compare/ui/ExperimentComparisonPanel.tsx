@@ -52,7 +52,7 @@ function PanelBody({ pair, copy }: Pick<ExperimentComparisonPanelProps, "pair" |
 
 /**
  * The comparison of two experiments, shown above the list they are chosen from so the result sits
- * next to the "Comparar" toggles (decision 0048). It names the chosen pair, offers to clear it and
+ * next to the "Comparar" toggles (decision 0049). It names the chosen pair, offers to clear it and
  * keeps loading, gone and failed reads of an experiment from another page apart.
  */
 export function ExperimentComparisonPanel({ ids, pair, onClear, copy }: ExperimentComparisonPanelProps) {

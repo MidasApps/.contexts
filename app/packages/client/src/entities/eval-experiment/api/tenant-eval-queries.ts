@@ -37,7 +37,7 @@ export const useTenantExperiments = (organizationId: string, page: number, optio
 
 /**
  * `GET /v1/evals/experiments/{id}?organizationId=` (core.eval.read): one of the organization's
- * experiments, `null` when it does not exist or belongs to another organization (decision 0048).
+ * experiments, `null` when it does not exist or belongs to another organization (decision 0049).
  */
 export const tenantExperimentQuery = (callEndpoint: CallEndpoint, organizationId: string, experimentId: string) =>
   queryOptions({

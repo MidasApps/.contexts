@@ -12,7 +12,7 @@ export type EvalsUrl = {
   /** Experiments chosen for the comparison (A, then B), from `?a=&b=`. */
   readonly compare: readonly string[];
   readonly setTab: (tab: EvalTab) => void;
-  /** The comparison stays: a chosen experiment of another page is read by id (decision 0048). */
+  /** The comparison stays: a chosen experiment of another page is read by id (decision 0049). */
   readonly setPage: (page: number) => void;
   /** Adds the experiment to the comparison or removes it; a third choice replaces B. */
   readonly toggleCompare: (experimentId: string) => void;

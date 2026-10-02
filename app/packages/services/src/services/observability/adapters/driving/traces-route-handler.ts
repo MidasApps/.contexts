@@ -92,7 +92,7 @@ const buildTraceRoutes = (deps: { readonly pipeline: ApiRouteDeps; readonly obse
 
 /**
  * `/v1/evals/*` (the organization's datasets and experiments) and `/v1/admin/datasets|experiments`
- * (staff). One experiment by id lets a comparison span list pages (decision 0048).
+ * (staff). One experiment by id lets a comparison span list pages (decision 0049).
  */
 const buildEvalRoutes = (deps: { readonly pipeline: ApiRouteDeps; readonly observability: ObservabilityServices }): Record<string, RouteHandler> => ({
   [listEvalDatasetsEndpoint.id]: withApiRoute(listEvalDatasetsEndpoint, deps.pipeline, async (ctx) => {

@@ -19,7 +19,7 @@ export {
   useTenantDatasets,
   useTenantExperiments,
 } from "./api/tenant-eval-queries.ts";
-// Decision 0048: the chosen experiments of a comparison, from the page or read by id.
+// Decision 0049: the chosen experiments of a comparison, from the page or read by id.
 export {
   type ChosenExperiment,
   type ExperimentPair,

@@ -49,7 +49,7 @@ type ReadOne = (callEndpoint: CallEndpoint, experimentId: string) => UseQueryOpt
 
 /**
  * Resolves the chosen ids: an experiment of the shown page is used as is; any other is read by id,
- * so a comparison can span list pages (decision 0048).
+ * so a comparison can span list pages (decision 0049).
  */
 const useExperimentPair = (ids: readonly string[], onPage: readonly EvalExperimentSummary[], readOne: ReadOne, enabled: boolean): ExperimentPairState => {
   const callEndpoint = useCallEndpoint();
