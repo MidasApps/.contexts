@@ -1,7 +1,7 @@
 import { AppLayout } from "@core/client/app-shell";
 import { ENTRY_ROUTE_IDS, parseRoute, useRouter } from "@core/client/shared/lib/router";
 import { useSession, type SessionState } from "@core/client/shared/lib/session";
-import { LoadingState } from "@core/client/shared/ui/molecules/LoadingState/LoadingState";
+import { AppShellSkeleton } from "@core/client/shared/ui/templates/AppShellSkeleton/AppShellSkeleton";
 import { useRouterState } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
 import { useTranslations } from "use-intl";
@@ -23,7 +23,7 @@ export const userAreaAccess = (status: SessionState["status"]): UserAreaAccess =
   }
 };
 
-function UserAreaGate({ href, children }: { href: string; children: ReactNode }) {
+function UserAreaGate({ href, sidebarOpen, children }: { href: string; sidebarOpen: boolean; children: ReactNode }) {
   const t = useTranslations("auth.signIn");
   const { state } = useSession();
   const router = useRouter();
@@ -33,11 +33,8 @@ function UserAreaGate({ href, children }: { href: string; children: ReactNode })
     if (access === "sign-in") router.navigate({ id: "sign-in", next: href }, { replace: true });
   }, [access, href, router]);
   if (access === "allow") return children;
-  return (
-    <main className="grid min-h-svh place-items-center p-6">
-      <LoadingState variant="spinner" label={t("loading")} />
-    </main>
-  );
+  // The shell's frame (with the stored sidebar width) instead of a lone spinner, so nothing jumps.
+  return <AppShellSkeleton label={t("loading")} sidebarOpen={sidebarOpen} />;
 }
 
 /**
@@ -50,7 +47,7 @@ export function DesktopShell({ sidebar, children }: { sidebar: DesktopApp["sideb
   const route = parseRoute(href);
   if (route !== null && ENTRY_ROUTE_IDS.has(route.id)) return children;
   return (
-    <UserAreaGate href={href}>
+    <UserAreaGate href={href} sidebarOpen={sidebar.defaultOpen}>
       <AppLayout sidebarDefaultOpen={sidebar.defaultOpen} persistSidebarState={sidebar.persist}>
         {children}
       </AppLayout>

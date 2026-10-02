@@ -26,6 +26,8 @@ type RenderArgs = {
   profileLocale?: string;
   /** Runs the real desktop session bridge over a fake Tauri keychain instead of a stub bridge. */
   keychain?: Map<string, string>;
+  /** The session restore never settles: the user area stays in its loading state. */
+  restoring?: boolean;
 };
 
 const EXPIRES_AT = "2026-10-30T00:00:00.000Z";
@@ -53,7 +55,7 @@ const renderDesktop = (args: RenderArgs) => {
   });
   const stubBridge: SessionBridgePort = {
     establish: () => Promise.resolve(),
-    restore: () => Promise.resolve(args.signedIn ? { customToken: "custom-token" } : null),
+    restore: () => (args.restoring === true ? new Promise(() => undefined) : Promise.resolve(args.signedIn ? { customToken: "custom-token" } : null)),
     end: () => Promise.resolve(),
   };
   const reportError = vi.fn();
@@ -76,6 +78,17 @@ describe("desktop app", () => {
 
     expect(await screen.findByRole("heading", { level: 1, name: "Entrar" })).toBeDefined();
     expect(router.state.location.href).toBe(`/sign-in?next=${encodeURIComponent(`/o/${IDS.organization}`)}`);
+    await expectNoAxeViolations(container);
+  });
+
+  it("draws the shell's frame, not a lone spinner, while the session is restored", async () => {
+    const { container } = renderDesktop({ path: `/o/${IDS.organization}`, signedIn: true, restoring: true });
+
+    const status = (await screen.findByText("Verificando sua sessão…")).closest('[role="status"]');
+    expect(status?.getAttribute("aria-busy")).toBe("true");
+    expect(screen.getByRole("main").id).toBe("main");
+    expect(container.querySelector('[data-slot="app-shell-skeleton-sidebar"]')).not.toBeNull();
+    expect(container.querySelector('[data-slot="app-topbar-skeleton"]')).not.toBeNull();
     await expectNoAxeViolations(container);
   });
 
