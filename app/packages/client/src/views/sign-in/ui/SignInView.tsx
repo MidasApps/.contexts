@@ -4,27 +4,17 @@ import { useEffect, useMemo, useRef, type ReactNode } from "react";
 import { useTranslations } from "use-intl";
 import { SignInForm } from "#/features/auth-by-email/index.ts";
 import { MfaChallengeForm } from "#/features/mfa-challenge/index.ts";
-import { parseRoute } from "#/shared/lib/router/parse-route.ts";
-import type { Route } from "#/shared/lib/router/route-paths.ts";
-import { useRouter } from "#/shared/lib/router/router-context.tsx";
+import { useClientConfig } from "#/shared/config/config-context.tsx";
+import { nextRoute } from "#/shared/lib/router/entry-routes.ts";
+import { RouteLink, useRouter } from "#/shared/lib/router/router-context.tsx";
 import { useSession } from "#/shared/lib/session/session-context.tsx";
 import type { SignedOutReason } from "#/shared/lib/session/session-state.ts";
 import { Alert, AlertDescription } from "#/shared/ui/molecules/Alert/Alert.tsx";
 import { LoadingState } from "#/shared/ui/molecules/LoadingState/LoadingState.tsx";
 import { AuthTemplate } from "#/shared/ui/templates/AuthTemplate/AuthTemplate.tsx";
+import { AuthBrand, EntryLocaleSwitcher } from "#/widgets/auth-entry/index.ts";
 
-const HOME: Route = { id: "home" };
-const ENTRY_ROUTES = new Set<Route["id"]>(["sign-in", "invite"]);
-
-/**
- * Where to go after signing in: `?next=` when it is a route of the app (never another origin:
- * `parseRoute` only yields internal routes) and not an entry page, else home.
- */
-export const nextRoute = (next: string | null): Route => {
-  if (next === null || !next.startsWith("/") || next.startsWith("//")) return HOME;
-  const route = parseRoute(next);
-  return route === null || ENTRY_ROUTES.has(route.id) ? HOME : route;
-};
+export { nextRoute };
 
 function Heading({ title, description }: { title: string; description: string }) {
   return (
@@ -45,9 +35,25 @@ function SignedOutNotice({ reason }: { reason: SignedOutReason }) {
   );
 }
 
+/** "No account yet? Create account", only when the app offers open sign-up (decision 0049). */
+function SignUpPrompt({ next }: { next: string | null }) {
+  const t = useTranslations("auth.signIn");
+  const config = useClientConfig();
+  if (config.selfServeSignUp !== true) return null;
+  return (
+    <p className="text-center text-sm text-muted-foreground">
+      {t("noAccount")}{" "}
+      <RouteLink to={{ id: "sign-up", next: next ?? undefined }} className="font-medium text-foreground underline underline-offset-4">
+        {t("createAccount")}
+      </RouteLink>
+    </p>
+  );
+}
+
 /**
  * `/sign-in?next=` (SP2 spec §4): email + password, then the second factor when the account has
- * one. A signed-in session is sent to `next` (internal routes only) or home.
+ * one. A signed-in session is sent to `next` (internal routes only) or home. Brand and language
+ * picker by default (SH-12); hosts may pass their own.
  */
 export function SignInView({ brand, footer }: { brand?: ReactNode; footer?: ReactNode }) {
   const t = useTranslations("auth");
@@ -67,7 +73,7 @@ export function SignInView({ brand, footer }: { brand?: ReactNode; footer?: Reac
 
   const { state } = session;
   return (
-    <AuthTemplate brand={brand} footer={footer}>
+    <AuthTemplate brand={brand ?? <AuthBrand />} footer={footer ?? <EntryLocaleSwitcher />}>
       {state.status === "mfa-required" ? (
         <>
           <Heading title={t("mfa.title")} description={t("mfa.description")} />
@@ -78,6 +84,7 @@ export function SignInView({ brand, footer }: { brand?: ReactNode; footer?: Reac
           <Heading title={t("signIn.title")} description={t("signIn.description")} />
           <SignedOutNotice reason={state.reason} />
           <SignInForm />
+          <SignUpPrompt next={next} />
         </>
       ) : (
         <>

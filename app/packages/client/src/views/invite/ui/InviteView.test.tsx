@@ -56,6 +56,43 @@ describe("InviteView", () => {
     expect(router.current()).toBe("/invite");
   });
 
+  it("lets an invitee without an account create one on the page, then previews and accepts", async () => {
+    openLink(`#token=${TOKEN}`);
+    const { user, router, auth, container } = renderApp(<InviteView />, { signedIn: false, path: "/invite", routes: routes(ok({ organizationId: IDS.organization })) });
+    await user.click(await screen.findByRole("button", { name: "Criar conta" }));
+    const heading = await screen.findByRole("heading", { level: 1, name: "Crie sua conta para aceitar o convite" });
+    await waitFor(() => expect(document.activeElement).toBe(heading));
+    await expectNoAxeViolations(container);
+    await user.type(screen.getByLabelText(/Seu nome/u), "Caio Reis");
+    await user.type(screen.getByLabelText("E-mail"), "caio@example.com");
+    await user.type(screen.getByLabelText(/^Senha/u), "long-password");
+    await user.click(screen.getByRole("button", { name: "Criar conta" }));
+    expect(await screen.findByText("Bia Lima convidou você para participar de Northwind.")).toBeDefined();
+    expect(auth.createdAccounts()).toEqual([{ email: "caio@example.com", displayName: "Caio Reis" }]);
+    expect(router.current()).toBe("/invite");
+    await user.click(screen.getByRole("button", { name: "Aceitar convite" }));
+    await waitFor(() => expect(router.current()).toBe(`/o/${IDS.organization}`));
+  });
+
+  it("goes back to signing in from account creation", async () => {
+    openLink(`#token=${TOKEN}`);
+    const { user } = renderApp(<InviteView />, { signedIn: false, path: "/invite", routes: routes(ok({ organizationId: IDS.organization })) });
+    await user.click(await screen.findByRole("button", { name: "Criar conta" }));
+    await user.click(await screen.findByRole("button", { name: "Entrar" }));
+    expect(await screen.findByRole("heading", { level: 1, name: "Entre para ver o convite" })).toBeDefined();
+  });
+
+  it("keeps the token across a language switch", async () => {
+    openLink(`#token=${TOKEN}`);
+    const { user, router } = renderApp(<InviteView />, { signedIn: false, path: "/invite", routes: routes(ok({ organizationId: IDS.organization })) });
+    const picker = await screen.findByRole("combobox", { name: "Idioma" });
+    picker.focus();
+    await user.keyboard("{Enter}");
+    await user.click(await screen.findByRole("option", { name: "English (United States)" }));
+    expect(router.localeSwitches()).toEqual(["en-US"]);
+    expect(router.localeSwitchHashes()).toEqual([`token=${TOKEN}`]);
+  });
+
   it("explains an incomplete link and a used invitation", async () => {
     openLink("#token=short");
     const missing = renderApp(<InviteView />, { path: "/invite" });

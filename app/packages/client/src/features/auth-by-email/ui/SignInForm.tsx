@@ -6,6 +6,7 @@ import { useTranslations } from "use-intl";
 import { useAuth } from "#/shared/lib/auth/auth-context.tsx";
 import { authErrorCode } from "#/shared/lib/auth/auth-error-code.ts";
 import type { AuthErrorCode } from "#/shared/lib/auth/auth-port.ts";
+import { RouteLink } from "#/shared/lib/router/router-context.tsx";
 import { useSession } from "#/shared/lib/session/session-context.tsx";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
 import { Icon } from "#/shared/ui/atoms/Icon/Icon.tsx";
@@ -44,6 +45,9 @@ function PasswordField({ value, onChange, error, inputRef }: { value: string; on
         </Button>
       </div>
       <FieldError errors={[error]} />
+      <RouteLink to={{ id: "reset-password" }} className="self-end text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline">
+        {t("forgotPassword")}
+      </RouteLink>
     </Field>
   );
 }

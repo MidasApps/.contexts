@@ -22,6 +22,12 @@ export const ClientConfigSchema = z
     /** Auth Emulator origin; required in `local` and only there (follow-up #12c). */
     authEmulatorUrl: z.url({ protocol: /^http$/ }).optional(),
     mfaFactors: z.array(MfaFactorSchema),
+    /**
+     * Open sign-up (`/sign-up`, decision 0049); absent or false: accounts are created only from an
+     * invitation. A UI switch, not a security control: the server rules (invitations, self-serve)
+     * decide what a new account may do.
+     */
+    selfServeSignUp: z.boolean().optional(),
   })
   .refine((config) => (config.appEnv === "local") === (config.authEmulatorUrl !== undefined), {
     error: "authEmulatorUrl is required in local and forbidden elsewhere.",

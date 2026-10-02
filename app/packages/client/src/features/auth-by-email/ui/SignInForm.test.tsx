@@ -35,6 +35,11 @@ describe("SignInForm", () => {
     expect(validateCredentials({ email: "ana@", password: "x" })).toEqual({ email: "emailInvalid" });
   });
 
+  it("links to the password reset page", () => {
+    renderWithClient(<SignInForm />, { session: signedOut() });
+    expect(screen.getByRole("link", { name: "Esqueci minha senha" }).getAttribute("href")).toBe("/reset-password");
+  });
+
   it("signs in and completes the session through the bridge", async () => {
     const session = signedOut();
     const { user } = renderWithClient(<SignInForm />, { session, auth: createFakeAuth(TEST_USER) });

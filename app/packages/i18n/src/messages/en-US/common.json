@@ -126,6 +126,8 @@
   "pageTitles": {
     "signIn": "Sign in",
     "invite": "Invitation",
+    "signUp": "Create account",
+    "resetPassword": "Reset password",
     "home": "Home",
     "organizations": "Organizations",
     "organization": "Organization",

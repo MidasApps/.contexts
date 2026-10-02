@@ -126,6 +126,8 @@
   "pageTitles": {
     "signIn": "Entrar",
     "invite": "Convite",
+    "signUp": "Criar conta",
+    "resetPassword": "Redefinir senha",
     "home": "Início",
     "organizations": "Organizações",
     "organization": "Organização",
