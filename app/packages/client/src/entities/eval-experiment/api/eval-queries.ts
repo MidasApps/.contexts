@@ -5,6 +5,7 @@ import { keepPreviousData, queryOptions, useQuery } from "@tanstack/react-query"
 import { useCallEndpoint } from "#/shared/api/api-context.tsx";
 import type { CallEndpoint } from "#/shared/api/call-endpoint.ts";
 import { nullOnNotFound } from "#/shared/api/cursor-list.ts";
+import { pollWhilePageLive } from "#/shared/api/live-list-polling.ts";
 import type { QueryKey } from "#/shared/api/query-keys.ts";
 import { useIsSignedIn } from "#/shared/lib/session/use-signed-in.ts";
 
@@ -26,10 +27,18 @@ export const adminExperimentsQuery = (callEndpoint: CallEndpoint, page: number) 
     queryFn: ({ signal }): Promise<ExperimentPage> => callEndpoint(adminListExperimentsEndpoint, { query: { page: page - 1, perPage: EXPERIMENTS_PAGE_SIZE }, signal }),
   });
 
+/** Polls a page of experiments while one of them is still pending or running. */
+export const pollLiveExperiments = pollWhilePageLive<EvalExperimentSummary>((experiment) => experiment.status === "pending" || experiment.status === "running");
+
 export const useAdminExperiments = (page: number, options: { enabled?: boolean } = {}) => {
   const callEndpoint = useCallEndpoint();
   const signedIn = useIsSignedIn();
-  return useQuery({ ...adminExperimentsQuery(callEndpoint, page), placeholderData: keepPreviousData, enabled: signedIn && options.enabled !== false });
+  return useQuery({
+    ...adminExperimentsQuery(callEndpoint, page),
+    placeholderData: keepPreviousData,
+    enabled: signedIn && options.enabled !== false,
+    refetchInterval: (query) => pollLiveExperiments(query.state.data),
+  });
 };
 
 /** `GET /v1/admin/experiments/{id}` (staff): any experiment, `null` when it does not exist (decision 0049). */

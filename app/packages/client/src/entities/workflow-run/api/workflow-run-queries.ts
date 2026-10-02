@@ -5,6 +5,7 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { useCallEndpoint } from "#/shared/api/api-context.tsx";
 import type { CallEndpoint } from "#/shared/api/call-endpoint.ts";
 import { cursorListQuery, pageQuery } from "#/shared/api/cursor-list.ts";
+import { pollWhileAnyLive } from "#/shared/api/live-list-polling.ts";
 import type { QueryKey } from "#/shared/api/query-keys.ts";
 import { useIsSignedIn } from "#/shared/lib/session/use-signed-in.ts";
 
@@ -42,8 +43,15 @@ export const adminWorkflowRunsQuery = (callEndpoint: CallEndpoint, filters: Admi
       }),
   });
 
+const pollAdminRuns = pollWhileAnyLive<AdminWorkflowRun>((run) => isRunCancelable(run.status));
+
+/** Re-read while a listed run can still change, so "running" does not outlive the run. */
 export const useAdminWorkflowRuns = (filters: AdminRunFilters, options: { enabled?: boolean } = {}) => {
   const callEndpoint = useCallEndpoint();
   const signedIn = useIsSignedIn();
-  return useInfiniteQuery({ ...adminWorkflowRunsQuery(callEndpoint, filters), enabled: signedIn && options.enabled !== false });
+  return useInfiniteQuery({
+    ...adminWorkflowRunsQuery(callEndpoint, filters),
+    enabled: signedIn && options.enabled !== false,
+    refetchInterval: (query) => pollAdminRuns(query.state.data),
+  });
 };

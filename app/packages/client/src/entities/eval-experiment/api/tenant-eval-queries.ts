@@ -7,7 +7,7 @@ import type { CallEndpoint } from "#/shared/api/call-endpoint.ts";
 import { nullOnNotFound } from "#/shared/api/cursor-list.ts";
 import { queryKeys, type QueryKey } from "#/shared/api/query-keys.ts";
 import { useIsSignedIn } from "#/shared/lib/session/use-signed-in.ts";
-import { EXPERIMENTS_PAGE_SIZE, type ExperimentPage } from "./eval-queries.ts";
+import { EXPERIMENTS_PAGE_SIZE, pollLiveExperiments, type ExperimentPage } from "./eval-queries.ts";
 
 /** Under `["organizations", id, "evals"]`: one organization's datasets and experiments. */
 export const tenantEvalKeys = {
@@ -32,6 +32,7 @@ export const useTenantExperiments = (organizationId: string, page: number, optio
     ...tenantExperimentsQuery(callEndpoint, organizationId, page),
     placeholderData: keepPreviousData,
     enabled: signedIn && organizationId !== "" && options.enabled !== false,
+    refetchInterval: (query) => pollLiveExperiments(query.state.data),
   });
 };
 

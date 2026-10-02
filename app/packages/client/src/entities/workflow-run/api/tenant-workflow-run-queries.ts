@@ -12,6 +12,7 @@ import { queryOptions, useInfiniteQuery, useQuery } from "@tanstack/react-query"
 import { useCallEndpoint } from "#/shared/api/api-context.tsx";
 import type { CallEndpoint } from "#/shared/api/call-endpoint.ts";
 import { cursorListQuery, nullOnNotFound, pageQuery } from "#/shared/api/cursor-list.ts";
+import { pollWhileAnyLive } from "#/shared/api/live-list-polling.ts";
 import { queryKeys, type QueryKey } from "#/shared/api/query-keys.ts";
 import { useIsSignedIn } from "#/shared/lib/session/use-signed-in.ts";
 import { isRunCancelable } from "./workflow-run-queries.ts";
@@ -48,10 +49,17 @@ export const tenantWorkflowRunsQuery = (callEndpoint: CallEndpoint, organization
       }),
   });
 
+const pollTenantRuns = pollWhileAnyLive<WorkflowRun>((run) => isRunCancelable(run.status));
+
+/** Re-read while a listed run can still change (after "Run now" or a start, the list follows it). */
 export const useTenantWorkflowRuns = (organizationId: string, filters: TenantRunFilters, options: { enabled?: boolean } = {}) => {
   const callEndpoint = useCallEndpoint();
   const signedIn = useIsSignedIn();
-  return useInfiniteQuery({ ...tenantWorkflowRunsQuery(callEndpoint, organizationId, filters), enabled: signedIn && organizationId !== "" && options.enabled !== false });
+  return useInfiniteQuery({
+    ...tenantWorkflowRunsQuery(callEndpoint, organizationId, filters),
+    enabled: signedIn && organizationId !== "" && options.enabled !== false,
+    refetchInterval: (query) => pollTenantRuns(query.state.data),
+  });
 };
 
 /**
