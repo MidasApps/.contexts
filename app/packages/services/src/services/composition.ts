@@ -232,6 +232,7 @@ export const createCoreServer = (args: CoreServerArgs): CoreServer => {
     syncClaims: access.services.syncClaims,
     organizations: tenancyAdapters.organizations,
     loadNode: tenancy.loadNode,
+    mayCreateOrganization: tenancy.mayCreateOrganization,
     audit,
     unitOfWork: createFirestoreUnitOfWork({ firestore }),
     clock,

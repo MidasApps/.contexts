@@ -18,12 +18,25 @@ export class UserAccountMissingError extends Error {
   }
 }
 
-// Self-serve off: only staff with platform.organization.read (SP1 spec §6.1).
-const mayCreate = async (deps: TenancyDeps, command: CreateOrganizationCommand): Promise<Result<void, AccessDeniedError>> => {
+/** Who may create organizations: the caller and its request scope. */
+export type OrganizationCreationCheck = Pick<TenancyCommand, "access"> & { readonly actor: UserPrincipal };
+
+/** `true` when `createOrganization` would let the caller in (`GET /v1/me` capability, decision 0048). */
+export type MayCreateOrganization = (command: OrganizationCreationCheck) => Promise<boolean>;
+
+// Impersonation is read-only; self-serve off: only staff with platform.organization.read (SP1 spec §6.1).
+const mayCreate = async (deps: TenancyDeps, command: OrganizationCreationCheck): Promise<Result<void, AccessDeniedError>> => {
+  if (command.actor.impersonation !== undefined) return err(new AccessDeniedError("IMPERSONATION_READ_ONLY"));
   if (deps.selfServe) return ok(undefined);
   const decision = await command.access.authorize({ principal: command.actor, permission: "platform.organization.read", node: { level: "platform" } });
   return decision.allowed ? ok(undefined) : err(new AccessDeniedError(decision.reason === "NOT_A_MEMBER" ? "PERMISSION_NOT_GRANTED" : decision.reason));
 };
+
+/** The creation rule as a yes/no, so the client hides a form that would always be refused. */
+export const makeMayCreateOrganization =
+  (deps: TenancyDeps): MayCreateOrganization =>
+  async (command) =>
+    (await mayCreate(deps, command)).ok;
 
 /**
  * Creates an organization with the caller as owner (SP1 spec §6.1). One transaction

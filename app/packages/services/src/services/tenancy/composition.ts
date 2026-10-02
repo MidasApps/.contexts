@@ -2,7 +2,7 @@
 // regional settings. The unit type registry is built once: the core's types, then the modules'.
 import type { UnitTypeDefinition } from "@core/contracts";
 import type { TenancyDeps } from "./application/tenancy-deps.ts";
-import { makeCreateOrganization, type CreateOrganization } from "./application/use-cases/create-organization.ts";
+import { makeCreateOrganization, makeMayCreateOrganization, type CreateOrganization, type MayCreateOrganization } from "./application/use-cases/create-organization.ts";
 import { makeCreateUnit, type CreateUnit } from "./application/use-cases/create-unit.ts";
 import { makeDeleteOrganization, type DeleteOrganization } from "./application/use-cases/delete-organization.ts";
 import { makeGetOrganization, type GetOrganization } from "./application/use-cases/get-organization.ts";
@@ -24,6 +24,8 @@ import { createUnitTypeRegistry, type UnitTypeRegistry } from "./domain/unit-typ
 export type TenancyServices = {
   readonly unitTypes: UnitTypeRegistry;
   readonly createOrganization: CreateOrganization;
+  /** Whether `createOrganization` would let the caller in (the `GET /v1/me` capability). */
+  readonly mayCreateOrganization: MayCreateOrganization;
   readonly getOrganization: GetOrganization;
   readonly updateOrganization: UpdateOrganization;
   readonly deleteOrganization: DeleteOrganization;
@@ -53,6 +55,7 @@ export const createTenancyServices = (args: { unitTypes: readonly UnitTypeDefini
   return {
     unitTypes: deps.unitTypes,
     createOrganization: makeCreateOrganization(deps),
+    mayCreateOrganization: makeMayCreateOrganization(deps),
     getOrganization: makeGetOrganization(deps),
     updateOrganization: makeUpdateOrganization(deps),
     deleteOrganization: makeDeleteOrganization(deps),

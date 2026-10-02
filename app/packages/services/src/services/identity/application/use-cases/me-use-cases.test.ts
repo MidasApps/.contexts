@@ -29,6 +29,22 @@ describe("getMe", () => {
     world.store.putPlatformStaff("staff-1", { role: "platform-support", isActive: true });
     expect(await world.identity.getMe({ actor: userOf("staff-1") })).toMatchObject({ ok: true, data: { isPlatformStaff: true, platformRole: "platform-support" } });
   });
+
+  it("tells whether the caller may create organizations (self-serve, else MFA staff)", async () => {
+    const open = makeMeWorld();
+    open.account("ana");
+    const closed = makeMeWorld({ selfServe: false });
+    closed.account("ana");
+    closed.account("staff-1");
+    closed.store.putUser("staff-1"); // the access store reads users separately in this world
+    closed.store.putPlatformStaff("staff-1", { role: "platform-support", isActive: true });
+
+    expect(await open.identity.getMe({ actor: userOf("ana") })).toMatchObject({ ok: true, data: { capabilities: { createOrganization: true } } });
+    expect(await closed.identity.getMe({ actor: userOf("ana") })).toMatchObject({ ok: true, data: { capabilities: { createOrganization: false } } });
+    expect(await closed.identity.getMe({ actor: { ...userOf("staff-1"), mfa: true } })).toMatchObject({ ok: true, data: { capabilities: { createOrganization: true } } });
+    const updated = await open.identity.updateMe({ actor: userOf("ana"), input: { displayName: "Ana" } });
+    expect(updated).toMatchObject({ ok: true, data: { capabilities: { createOrganization: true } } });
+  });
 });
 
 describe("updateMe", () => {

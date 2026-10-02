@@ -22756,9 +22756,11 @@ components:
       x-tenancyScope: platform
     identity.Me:
       additionalProperties: false
-      description: Profile, preferences, staff flags and access version of the signed-in user.
+      description: Profile, preferences, staff flags, capabilities and access version of the signed-in user.
       examples:
         - accessVersion: 3
+          capabilities:
+            createOrganization: true
           displayName: Ana Souza
           email: ana@example.com
           isPlatformStaff: false
@@ -22779,6 +22781,18 @@ components:
           maximum: 9007199254740991
           minimum: 0
           type: integer
+          x-pii: none
+        capabilities:
+          additionalProperties: false
+          description: Actions the UI may offer the caller; it hides the ones the server would refuse.
+          properties:
+            createOrganization:
+              description: Whether POST /v1/organizations would let the caller in (self-serve on, or MFA platform staff; never under impersonation).
+              type: boolean
+              x-pii: none
+          required:
+            - createOrganization
+          type: object
           x-pii: none
         displayName:
           description: Name shown to other members; may be empty.
@@ -22895,6 +22909,7 @@ components:
         - accessVersion
         - isPlatformStaff
         - mfaEnrolled
+        - capabilities
       type: object
       x-kind: view
       x-pii: personal

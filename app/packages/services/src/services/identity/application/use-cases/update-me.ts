@@ -44,7 +44,7 @@ const applied = (user: User, patch: UserProfilePatch, updatedAt: string): User =
  * IANA name, validated at the boundary). Refused under impersonation (read-only).
  */
 export const makeUpdateMe =
-  (deps: Pick<MeDeps, "users" | "accounts" | "staff" | "clock" | "unitOfWork">): UpdateMe =>
+  (deps: Pick<MeDeps, "users" | "accounts" | "staff" | "clock" | "unitOfWork" | "access" | "mayCreateOrganization">): UpdateMe =>
   async ({ actor, input }) => {
     if (actor.impersonation !== undefined) return err(new AccessDeniedError("IMPERSONATION_READ_ONLY"));
     const loaded = await loadMe(deps, actor);
@@ -56,5 +56,5 @@ export const makeUpdateMe =
       deps.users.updateProfile(tx, { uid: actor.uid, patch, updatedAt, actorId: actor.uid });
       return applied(current, patch, updatedAt);
     });
-    return ok(await describeMe(deps, user, loaded.data.account));
+    return ok(await describeMe(deps, actor, user, loaded.data.account));
   };

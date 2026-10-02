@@ -37,6 +37,32 @@ describe("createOrganization", () => {
     const result = await world.tenancy.createOrganization({ ...world.command("staff-1"), actor: { ...world.command("staff-1").actor, mfa: true }, input: { name: "X", defaults: DEFAULTS } });
     expect(result.ok).toBe(true);
   });
+
+  it("refuses an impersonated caller (read-only) even when self-serve is on", async () => {
+    const world = makeTenancyWorld();
+    world.store.putUser("u1");
+    const command = world.command("u1");
+    const actor = { ...command.actor, impersonation: { sessionId: "imp-1", staffUid: "staff-1" } } as unknown as typeof command.actor;
+    const result = await world.tenancy.createOrganization({ ...command, actor, input: { name: "X", defaults: DEFAULTS } });
+    expect(result).toMatchObject({ ok: false, error: { code: "ACCESS_DENIED", reason: "IMPERSONATION_READ_ONLY" } });
+  });
+});
+
+describe("mayCreateOrganization", () => {
+  it("answers the rule createOrganization enforces: self-serve, else MFA staff; never under impersonation", async () => {
+    const open = makeTenancyWorld();
+    const closed = makeTenancyWorld({ selfServe: false });
+    closed.store.putUser("u1");
+    closed.store.putUser("staff-1");
+    closed.store.putPlatformStaff("staff-1", { role: "platform-support", isActive: true });
+    const staff = { ...closed.command("staff-1"), actor: { ...closed.command("staff-1").actor, mfa: true } };
+    const impersonated = { ...open.command("u1").actor, impersonation: { sessionId: "imp-1", staffUid: "staff-1" } } as unknown as ReturnType<typeof open.command>["actor"];
+
+    expect(await open.tenancy.mayCreateOrganization(open.command("u1"))).toBe(true);
+    expect(await open.tenancy.mayCreateOrganization({ ...open.command("u1"), actor: impersonated })).toBe(false);
+    expect(await closed.tenancy.mayCreateOrganization(closed.command("u1"))).toBe(false);
+    expect(await closed.tenancy.mayCreateOrganization(staff)).toBe(true);
+  });
 });
 
 describe("get, update and delete an organization", () => {

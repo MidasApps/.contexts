@@ -1,4 +1,4 @@
-import type { Me, PlatformRole, User } from "@core/contracts";
+import type { Me, MeCapabilities, PlatformRole, User } from "@core/contracts";
 import type { AccessProjectionStore } from "../../access/application/ports/driven/access-projection-writer.ts";
 import type { PrincipalStatusReader } from "../../access/application/ports/driven/principal-status-reader.ts";
 import type { SyncClaims } from "../../access/application/use-cases/sync-claims.ts";
@@ -7,6 +7,7 @@ import type { AuditWriter } from "../../audit/application/use-cases/record-audit
 import type { Clock } from "../../shared/clock/clock.ts";
 import type { UnitOfWork } from "../../shared/firestore/unit-of-work.ts";
 import type { OrganizationRepository } from "../../tenancy/application/ports/driven/organization-repository.ts";
+import type { MayCreateOrganization } from "../../tenancy/application/use-cases/create-organization.ts";
 import type { LoadNode } from "../../tenancy/application/use-cases/resolve-regional-settings.ts";
 import type { AuthAccountReader } from "./ports/driven/auth-account-reader.ts";
 import type { UserRepository } from "./ports/driven/user-repository.ts";
@@ -24,13 +25,15 @@ export type MeDeps = {
   readonly syncClaims: SyncClaims;
   readonly organizations: Pick<OrganizationRepository, "get">;
   readonly loadNode: LoadNode;
+  /** The tenancy creation rule, answered as `capabilities.createOrganization` (decision 0048). */
+  readonly mayCreateOrganization: MayCreateOrganization;
   readonly audit: AuditWriter;
   readonly unitOfWork: UnitOfWork;
   readonly clock: Clock;
 };
 
-/** Staff flags and MFA enrollment `Me` adds to the users doc. */
-export type MeFlags = { readonly platformRole: PlatformRole | null; readonly mfaEnrolled: boolean };
+/** Staff flags, MFA enrollment and capabilities `Me` adds to the users doc. */
+export type MeFlags = { readonly platformRole: PlatformRole | null; readonly mfaEnrolled: boolean; readonly capabilities: MeCapabilities };
 
 /** The `Me` view of a users doc (SP1 spec §7.3). */
 export const toMe = (user: User, flags: MeFlags): Me => {
@@ -45,5 +48,6 @@ export const toMe = (user: User, flags: MeFlags): Me => {
     isPlatformStaff: flags.platformRole !== null,
     ...(flags.platformRole === null ? {} : { platformRole: flags.platformRole }),
     mfaEnrolled: flags.mfaEnrolled,
+    capabilities: flags.capabilities,
   };
 };

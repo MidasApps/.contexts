@@ -344,7 +344,7 @@ export {
   DisplayNameSchema, LastContextSchema, UserContract, UserSchema, UserStatusSchema, type LastContext, type User,
   type UserStatus,
 } from "./contracts/identity/user.schema.ts";
-export { MeContract, MeSchema, type Me } from "./contracts/identity/me.schema.ts";
+export { MeCapabilitiesSchema, MeContract, MeSchema, type Me, type MeCapabilities } from "./contracts/identity/me.schema.ts";
 export { UpdateMeInputContract, UpdateMeInputSchema, type UpdateMeInput } from "./contracts/identity/update-me-input.schema.ts";
 export {
   SetActiveOrganizationInputContract, SetActiveOrganizationInputSchema, type SetActiveOrganizationInput,
