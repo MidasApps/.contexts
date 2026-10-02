@@ -7,12 +7,14 @@ import { useTranslations } from "use-intl";
 import { promptVersionKeys } from "#/entities/prompt-version/index.ts";
 import { useCallEndpoint } from "#/shared/api/api-context.tsx";
 import { useDescribeError } from "#/shared/lib/errors/describe-error.ts";
+import { useOnlineStatus } from "#/shared/lib/network/use-online-status.ts";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
 import { Input } from "#/shared/ui/atoms/Input/Input.tsx";
 import { Textarea } from "#/shared/ui/atoms/Textarea/Textarea.tsx";
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "#/shared/ui/molecules/Dialog/Dialog.tsx";
 import { useDialogDismissGuard } from "#/shared/ui/molecules/Dialog/dialog-dismiss-guard.tsx";
 import { Field, FieldControl, FieldDescription, FieldError, FieldLabel } from "#/shared/ui/molecules/Field/Field.tsx";
+import { OfflineNotice } from "#/shared/ui/molecules/OfflineNotice/OfflineNotice.tsx";
 import { notify } from "#/shared/ui/molecules/Toaster/notify.ts";
 
 const MAX_BODY = 50_000;
@@ -44,6 +46,7 @@ function PromptVersionForm({ agentId, initialBody, onOpenChange, onCreated }: Fo
   const [bodyError, setBodyError] = useState<string | undefined>();
   const [failure, setFailure] = useState<string | undefined>();
   const [pending, setPending] = useState(false);
+  const online = useOnlineStatus();
   // Up to 50 000 characters with no draft: Esc, outside click, X or Cancel ask before dropping edits.
   const dirty = body !== initialBody || note !== "";
   useDialogDismissGuard(pending ? "block" : dirty ? "confirmUnsaved" : "allow");
@@ -57,7 +60,8 @@ function PromptVersionForm({ agentId, initialBody, onOpenChange, onCreated }: Fo
 
   const submit = async (event: FormEvent<HTMLFormElement>): Promise<void> => {
     event.preventDefault();
-    if (pending) return;
+    // Offline the save waits with the reason shown, instead of failing with a network error.
+    if (pending || !online) return;
     const invalid = validate();
     setBodyError(invalid);
     setFailure(undefined);
@@ -100,13 +104,14 @@ function PromptVersionForm({ agentId, initialBody, onOpenChange, onCreated }: Fo
         </FieldControl>
         <FieldDescription>{t("noteHint")}</FieldDescription>
       </Field>
+      {online ? null : <OfflineNotice />}
       <DialogFooter>
         <DialogClose asChild>
           <Button variant="secondary" disabled={pending}>
             {tCommon("actions.cancel")}
           </Button>
         </DialogClose>
-        <Button type="submit" pending={pending}>
+        <Button type="submit" pending={pending} disabled={!online}>
           {t("submit")}
         </Button>
       </DialogFooter>
