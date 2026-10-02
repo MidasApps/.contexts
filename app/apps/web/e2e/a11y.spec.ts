@@ -198,6 +198,9 @@ test.describe("axe on the second-factor step and the support access banner", () 
     const page = staff.page;
     // The Auth Emulator answers the SDK's reCAPTCHA Enterprise config with 501 (see admin-users.spec).
     staff.guard.allow(/status of 501 \(Not Implemented\)/);
+    // A Firefox performance advisory (a scroll listener moves an element), logged as a warning;
+    // it is not an error of the page and the other browsers do not emit it.
+    staff.guard.allow(/scroll-linked positioning effect/);
     await submitSignIn(page, SEED_USERS.staff, "sign-in?next=%2Fadmin%2Fusers");
     await expect(page.getByRole("heading", { name: "Verificação em duas etapas" })).toBeVisible({ timeout: SETTLE_TIMEOUT_MS });
     await expectNoAxeViolations(page);
