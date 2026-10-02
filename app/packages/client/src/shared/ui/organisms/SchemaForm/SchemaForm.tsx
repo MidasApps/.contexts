@@ -7,7 +7,9 @@ import { FormProvider, useForm, type FieldErrors, type FieldValues, type UseForm
 import { useLocale, useTranslations } from "use-intl";
 import type { z } from "zod";
 import { cn } from "#/shared/lib/cn.ts";
+import { useOnlineStatus } from "#/shared/lib/network/use-online-status.ts";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
+import { OfflineNotice } from "#/shared/ui/molecules/OfflineNotice/OfflineNotice.tsx";
 import { FieldGroup, FieldLegend, FieldSet } from "#/shared/ui/molecules/Field/Field.tsx";
 import { LoadingState } from "#/shared/ui/molecules/LoadingState/LoadingState.tsx";
 import { formatMoneyInputText } from "#/shared/ui/molecules/MoneyInput/money-input-text.ts";
@@ -107,7 +109,8 @@ function Sections({ sections, defaultCurrency, onMoneyParse }: { sections: reado
  * widget, label, order, fieldset and visibility; validation runs the contract schema with
  * translated messages; server `VALIDATION_FAILED` details map back to fields. States: loading
  * skeleton, submitting (button busy, no double submit), success status, error alert with the
- * request reference. The first invalid field (or the alert) receives focus after a failed submit.
+ * request reference, offline (submit held with the reason, as in `ConfirmDialog`). The first
+ * invalid field (or the alert) receives focus after a failed submit.
  */
 export function SchemaForm<Schema extends z.ZodType>({
   contract,
@@ -130,6 +133,7 @@ export function SchemaForm<Schema extends z.ZodType>({
   const money = useMoneyParseErrors();
   const [status, setStatus] = useState<SubmitStatus>({ kind: "idle" });
   const submitting = useRef(false);
+  const online = useOnlineStatus();
   const form = useForm<FieldValues>({
     defaultValues: withSwitchDefaults(plan, defaultValues ?? {}),
     resolver: createContractResolver(contract.schema, (issue, value) => translate(describeZodIssue(issue, value)), money.read),
@@ -157,8 +161,8 @@ export function SchemaForm<Schema extends z.ZodType>({
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>): Promise<void> => {
     event.preventDefault();
-    // Enter in a field while a submit is pending must not send the form twice.
-    if (submitting.current) return;
+    // Enter in a field while a submit is pending must not send the form twice; offline it waits.
+    if (submitting.current || !online) return;
     submitting.current = true;
     try {
       await submit(event);
@@ -173,8 +177,9 @@ export function SchemaForm<Schema extends z.ZodType>({
       <form noValidate className={cn("flex flex-col gap-6", className)} onSubmit={(event) => void handleSubmit(event)} {...formProps}>
         <SchemaFormStatus status={shownStatus} successMessage={t(successMessageKey)} />
         <Sections sections={plan.sections} defaultCurrency={defaultCurrency} onMoneyParse={money.report} />
+        {online ? null : <OfflineNotice />}
         <div className="flex justify-end">
-          <Button type="submit" pending={form.formState.isSubmitting} disabled={requireChanges && !dirty}>
+          <Button type="submit" pending={form.formState.isSubmitting} disabled={!online || (requireChanges && !dirty)}>
             {t(submitLabelKey)}
           </Button>
         </div>

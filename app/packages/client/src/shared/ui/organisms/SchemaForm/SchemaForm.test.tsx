@@ -1,6 +1,7 @@
 import { fireEvent, screen, within } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { expectNoAxeViolations } from "#/shared/testing/axe.ts";
+import { setOnline } from "#/shared/testing/network.ts";
 import { renderWithProviders } from "#/shared/testing/render.tsx";
 import { SchemaForm, type SchemaFormProps } from "./SchemaForm.tsx";
 import { FIXTURE_MESSAGES, FixtureNoteContract, type FixtureNoteSchema } from "./schema-form.fixture.ts";
@@ -183,6 +184,25 @@ describe("SchemaForm", () => {
     finish({ ok: true });
     await vi.waitFor(() => expect(submitButton()).toHaveProperty("disabled", false));
     expect(onSubmit).toHaveBeenCalledTimes(1);
+  });
+
+  it("holds the submit while offline and says why, then sends once the connection is back", async () => {
+    const onSubmit = submitSpy();
+    const { user, container } = renderForm({ onSubmit });
+    await fillValidNote(user);
+    try {
+      setOnline(false);
+      expect(submitButton()).toHaveProperty("disabled", true);
+      expect(screen.getByText(/Você está sem conexão/u)).toBeDefined();
+      await user.type(screen.getByRole("textbox", { name: /^Título/ }), "{Enter}");
+      expect(onSubmit).not.toHaveBeenCalled();
+      await expectNoAxeViolations(container);
+    } finally {
+      setOnline(true);
+    }
+    expect(screen.queryByText(/Você está sem conexão/u)).toBeNull();
+    await user.click(submitButton());
+    await vi.waitFor(() => expect(onSubmit).toHaveBeenCalledTimes(1));
   });
 
   it("shows a loading state instead of the form while values load", () => {
