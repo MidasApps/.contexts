@@ -21,7 +21,7 @@ export class UserAccountMissingError extends Error {
 /** Who may create organizations: the caller and its request scope. */
 export type OrganizationCreationCheck = Pick<TenancyCommand, "access"> & { readonly actor: UserPrincipal };
 
-/** `true` when `createOrganization` would let the caller in (`GET /v1/me` capability, decision 0048). */
+/** `true` when `createOrganization` would let the caller in (`GET /v1/me` capability, decision 0049). */
 export type MayCreateOrganization = (command: OrganizationCreationCheck) => Promise<boolean>;
 
 // Impersonation is read-only; self-serve off: only staff with platform.organization.read (SP1 spec §6.1).

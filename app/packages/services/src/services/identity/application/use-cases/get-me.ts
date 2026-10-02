@@ -36,7 +36,7 @@ export const describeMe = async (
 /**
  * `GET /v1/me` (SP1 spec §7.3): creates `users/{uid}` from the Auth account on the first
  * call (idempotent), then answers profile, preferences, staff flags, MFA enrollment,
- * capabilities (decision 0048) and `accessVersion` (the client re-syncs claims when it is newer
+ * capabilities (decision 0049) and `accessVersion` (the client re-syncs claims when it is newer
  * than its token's).
  */
 export const makeGetMe =
