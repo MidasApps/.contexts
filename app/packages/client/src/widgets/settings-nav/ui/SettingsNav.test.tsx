@@ -74,4 +74,30 @@ describe("settings and profile navigation", () => {
     expect(within(nav).getByRole("link", { name: "Sessões" }).getAttribute("aria-current")).toBe("page");
     await expectNoAxeViolations(container);
   });
+
+  it("builds the profile sections from the user-menu navigation, like the user menu", async () => {
+    renderApp(
+      <main>
+        <ProfilePageFrame header={<h1>Conta</h1>}>
+          <p>Conteúdo</p>
+        </ProfilePageFrame>
+      </main>,
+      {
+        path: "/profile/account",
+        navigation: [
+          { id: "sample.security-shortcut", slot: "user-menu", labelKey: "shell.nav.profile.security", icon: "shield-check", order: 5, target: { kind: "profile", section: "security" } },
+          { id: "sample.admin-shortcut", slot: "user-menu", labelKey: "shell.nav.admin.organizations", icon: "building", order: 6, target: { kind: "admin", rest: "organizations" } },
+        ],
+      },
+    );
+    const nav = screen.getByRole("navigation", { name: "Seções do perfil" });
+    expect(within(nav).getAllByRole("link").map((link) => link.getAttribute("href"))).toEqual([
+      "/profile/account",
+      "/profile/security",
+      "/profile/preferences",
+      "/profile/security",
+      "/profile/sessions",
+      "/profile/notifications",
+    ]);
+  });
 });

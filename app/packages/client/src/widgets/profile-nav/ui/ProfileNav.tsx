@@ -2,31 +2,31 @@
 
 import type { ReactNode } from "react";
 import { useTranslations } from "use-intl";
+import { usePermissions } from "#/entities/permission/index.ts";
 import { useRouter } from "#/shared/lib/router/router-context.tsx";
-import { PROFILE_SECTIONS, routeHref, type ProfileSection } from "#/shared/lib/router/route-paths.ts";
+import { routeHref } from "#/shared/lib/router/route-paths.ts";
 import { useIsImpersonating } from "#/shared/lib/session/use-impersonation.ts";
+import { useNavigationRegistry } from "#/shared/lib/shell/shell-registry-context.tsx";
 import { Icon } from "#/shared/ui/atoms/Icon/Icon.tsx";
-import type { IconName } from "#/shared/ui/atoms/Icon/icon-registry.ts";
 import { Alert, AlertDescription } from "#/shared/ui/molecules/Alert/Alert.tsx";
-import { SectionNav } from "#/shared/ui/molecules/SectionNav/SectionNav.tsx";
+import { SectionNav, type SectionNavItem } from "#/shared/ui/molecules/SectionNav/SectionNav.tsx";
 import { SettingsTemplate, type SettingsTemplateProps } from "#/shared/ui/templates/SettingsTemplate/SettingsTemplate.tsx";
 
-const ICONS: Record<ProfileSection, IconName> = {
-  account: "user",
-  preferences: "languages",
-  security: "shield-check",
-  sessions: "monitor",
-  notifications: "bell",
-};
-
-/** Sections of the user's profile (SP2 spec §8); no permission gates them (user-level data). */
+/**
+ * Sections of the user's profile (SP2 spec §8): the profile items of the `user-menu` navigation
+ * slot, the same source the user menu reads, so a contributed item appears in both with one icon.
+ */
 export function ProfileNav() {
-  const t = useTranslations("shell.nav.profile");
+  const t = useTranslations();
   const locationPath = useRouter().useLocationPath();
-  const items = PROFILE_SECTIONS.map((section) => {
-    const to = { id: "profile", section } as const;
-    return { id: section, label: t(section), icon: ICONS[section], to, current: routeHref(to) === locationPath };
-  });
+  const { can } = usePermissions();
+  const items = useNavigationRegistry()
+    .visibleItems("user-menu", can)
+    .flatMap((item): SectionNavItem[] => {
+      if (item.target.kind !== "profile") return [];
+      const to = { id: "profile", section: item.target.section } as const;
+      return [{ id: item.id, label: t(item.labelKey), icon: item.icon, to, current: routeHref(to) === locationPath }];
+    });
   return <SectionNav items={items} />;
 }
 
