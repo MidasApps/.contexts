@@ -16,13 +16,15 @@ export type ErrorStateProps = Omit<ComponentProps<typeof StatePanel>, "icon" | "
   onRetry?: (() => void) | undefined;
   /** Retry in flight: the button shows a spinner and is disabled. */
   retrying?: boolean;
+  /** Replaces the retry when another action fits (sign in again after a lost session). */
+  action?: ReactNode;
 };
 
 /**
  * Failed to load or act (SP2 spec §9 "error states with requestId"). Announced once as an alert,
  * with the request reference in mono and an optional retry. Never shows raw API messages.
  */
-export function ErrorState({ title, description, requestId, onRetry, retrying = false, children, ...props }: ErrorStateProps) {
+export function ErrorState({ title, description, requestId, onRetry, retrying = false, action, children, ...props }: ErrorStateProps) {
   const t = useTranslations("common");
   return (
     <StatePanel
@@ -33,11 +35,12 @@ export function ErrorState({ title, description, requestId, onRetry, retrying = 
       title={title ?? t("errorState.title")}
       description={description ?? t("errorState.description")}
       action={
-        onRetry === undefined ? undefined : (
+        action ??
+        (onRetry === undefined ? undefined : (
           <Button variant="secondary" onClick={onRetry} pending={retrying}>
             {t("actions.retry")}
           </Button>
-        )
+        ))
       }
       {...props}
     >

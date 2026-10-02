@@ -4,6 +4,7 @@
   },
   "actions": {
     "save": "Guardar",
+    "signInAgain": "Iniciar sesión de nuevo",
     "cancel": "Cancelar",
     "close": "Cerrar",
     "confirm": "Confirmar",

@@ -4,6 +4,7 @@
   },
   "actions": {
     "save": "Salvar",
+    "signInAgain": "Entrar novamente",
     "cancel": "Cancelar",
     "close": "Fechar",
     "confirm": "Confirmar",

@@ -2,7 +2,7 @@ import { screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { ApiError } from "#/shared/api/api-error.ts";
 import { expectNoAxeViolations } from "#/shared/testing/axe.ts";
-import { renderWithClient } from "#/shared/testing/render-client.tsx";
+import { createRecordingSession, renderWithClient } from "#/shared/testing/render-client.tsx";
 import { PageError, PageForbidden, PageNotFound } from "./PageState.tsx";
 import { QueryPage, type PageQuery } from "./QueryPage.tsx";
 
@@ -29,6 +29,14 @@ describe("page states", () => {
     await user.click(screen.getByRole("button", { name: "Tentar novamente" }));
     expect(onRetry).toHaveBeenCalledOnce();
     await expectNoAxeViolations(container);
+  });
+
+  it("offers signing in again on a page whose session is gone (401)", async () => {
+    const { user, router, session } = renderWithClient(<PageError error={new ApiError({ status: 401, code: "UNAUTHORIZED", message: "x" })} onRetry={vi.fn()} />, { path: "/o/org-1" });
+    expect(screen.queryByRole("button", { name: "Tentar novamente" })).toBeNull();
+    await user.click(screen.getByRole("button", { name: "Entrar novamente" }));
+    expect((session as ReturnType<typeof createRecordingSession>).actions).toEqual(["signOut"]);
+    expect(router.current()).toBe(`/sign-in?next=${encodeURIComponent("/o/org-1")}`);
   });
 
   it("QueryPage picks loading, not-found (404 or null), forbidden (403), error or the page", () => {

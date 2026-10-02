@@ -8,6 +8,7 @@ import { RouteLink } from "#/shared/lib/router/router-context.tsx";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
 import { Icon } from "#/shared/ui/atoms/Icon/Icon.tsx";
 import type { IconName } from "#/shared/ui/atoms/Icon/icon-registry.ts";
+import { isSessionLost, SignInAgainButton } from "#/shared/ui/molecules/ErrorState/SignInAgainButton.tsx";
 
 type PageStateLayoutProps = {
   icon: IconName;
@@ -86,7 +87,7 @@ export function PageForbidden() {
 
 /**
  * A page whose main data failed to load (not 403/404): the copy of the error code, its request
- * reference and a retry, plus a way home.
+ * reference and a retry, plus a way home. A lost session (401) offers signing in again instead.
  */
 export function PageError({ error, onRetry, retrying = false }: { error: unknown; onRetry: () => void; retrying?: boolean }) {
   const t = useTranslations();
@@ -100,12 +101,16 @@ export function PageError({ error, onRetry, retrying = false }: { error: unknown
       description={described.message}
       reference={described.requestId === undefined ? undefined : t("common.errorState.reference", { requestId: described.requestId })}
       actions={
-        <>
-          <Button variant="secondary" onClick={onRetry} pending={retrying}>
-            {t("common.actions.retry")}
-          </Button>
-          <HomeAction variant="secondary" />
-        </>
+        isSessionLost(error) ? (
+          <SignInAgainButton />
+        ) : (
+          <>
+            <Button variant="secondary" onClick={onRetry} pending={retrying}>
+              {t("common.actions.retry")}
+            </Button>
+            <HomeAction variant="secondary" />
+          </>
+        )
       }
     />
   );
