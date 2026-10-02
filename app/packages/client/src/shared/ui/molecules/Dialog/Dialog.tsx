@@ -2,11 +2,31 @@
 
 import { XIcon } from "lucide-react";
 import { Dialog as DialogPrimitive } from "radix-ui";
-import { useState, type ComponentProps } from "react";
+import { createContext, use, useState, type ComponentProps } from "react";
 import { useTranslations } from "use-intl";
 import { cn } from "#/shared/lib/cn.ts";
 import { centeredModalClasses, overlayClasses } from "#/shared/ui/styles/modal-classes.ts";
 import { DiscardQuestion, DismissGuardProvider, useCurrentDismissGuard, useDismissGuardState } from "./dialog-dismiss-guard.tsx";
+
+/** How many times the dialog has opened: each opening mounts its own overlay and content. */
+const DialogOpeningContext = createContext(0);
+
+/**
+ * Counts the openings. Radix keeps a closed dialog's content mounted while it animates out, and
+ * opening the same dialog again in that time (another row's "Edit" pressed as the last dialog
+ * fades) reused it: the press, which Radix defers to its click, landed outside the closing
+ * content and dismissed the dialog the click had just opened, and the overlay, already gone and
+ * mounted again, stacked above the content. A new opening drops the closing one instead.
+ */
+const useOpeningCount = (open: boolean): number => {
+  const [openings, setOpenings] = useState(open ? 1 : 0);
+  const [wasOpen, setWasOpen] = useState(open);
+  if (open !== wasOpen) {
+    setWasOpen(open);
+    if (open) setOpenings(openings + 1);
+  }
+  return openings;
+};
 
 /**
  * shadcn `dialog` (Radix modal: focus trapped inside, Esc closes, focus returns to the trigger,
@@ -23,9 +43,12 @@ export function Dialog({ open, defaultOpen = false, children, ...props }: Compon
     props.onOpenChange?.(next);
   };
   const dismissal = useDismissGuardState(() => setOpen(false));
+  const openings = useOpeningCount(isOpen);
   return (
     <DialogPrimitive.Root data-slot="dialog" {...props} open={isOpen} onOpenChange={(next) => (next ? setOpen(true) : dismissal.requestDismiss())}>
-      <DismissGuardProvider value={dismissal.context}>{children}</DismissGuardProvider>
+      <DialogOpeningContext value={openings}>
+        <DismissGuardProvider value={dismissal.context}>{children}</DismissGuardProvider>
+      </DialogOpeningContext>
       <DiscardQuestion
         asking={dismissal.asking}
         onKeep={() => dismissal.setAsking(null)}
@@ -56,7 +79,7 @@ export function DialogContent({
   // A blocked dialog cannot be closed, so it shows no close button that would do nothing.
   const closable = useCurrentDismissGuard() !== "block";
   return (
-    <DialogPrimitive.Portal data-slot="dialog-portal">
+    <DialogPrimitive.Portal key={use(DialogOpeningContext)} data-slot="dialog-portal">
       <DialogPrimitive.Overlay data-slot="dialog-overlay" className={overlayClasses} />
       <DialogPrimitive.Content data-slot="dialog-content" className={cn(centeredModalClasses, className)} {...props}>
         {children}
