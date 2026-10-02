@@ -4,7 +4,7 @@ import type { GatewayResult } from "../../application/ports/agent-runtime-gatewa
 import type { ChatMessagesPage, ChatRuntimeGateway, ChatStreamAnswer } from "../../application/ports/chat-runtime-gateway.ts";
 import { UPSTREAM_UNAVAILABLE } from "./mastra-error-mapper.ts";
 import { clientFor, connectionOf, type MastraGatewayOptions } from "./mastra-gateway.ts";
-import { callRawRoute, type MastraConnection, withDeadline } from "./mastra-request.ts";
+import { callRawRoute, holdUpstreamBody, type MastraConnection, withDeadline } from "./mastra-request.ts";
 
 /** Paths of the Mastra chat routes (`@core/agents` `chat-routes.ts`, decision 0031). */
 export const CHAT_ROUTES = {
@@ -26,7 +26,7 @@ const SSE = "text/event-stream";
 const streamOf = (response: Response): ChatStreamAnswer | null => {
   if (response.status === 204 || response.body === null) return null;
   return {
-    body: response.body,
+    body: holdUpstreamBody(response.body),
     contentType: response.headers.get("content-type") ?? SSE,
     runId: response.headers.get("x-run-id"),
     streamProtocol: response.headers.get("x-vercel-ai-ui-message-stream"),

@@ -1,7 +1,7 @@
 import type { GatewayError } from "../../application/ports/agent-runtime-gateway.ts";
 import type { VoiceRuntimeGateway } from "../../application/ports/chat-runtime-gateway.ts";
 import { connectionOf, type MastraGatewayOptions } from "./mastra-gateway.ts";
-import { callRawRoute } from "./mastra-request.ts";
+import { callRawRoute, holdUpstreamBody } from "./mastra-request.ts";
 
 /** Paths of the Mastra voice routes (`@core/agents` `voice-routes.ts`). */
 export const VOICE_ROUTES = { transcriptions: "/voice/transcriptions", speech: "/voice/speech", realtimeSessions: "/voice/realtime-sessions" } as const;
@@ -32,7 +32,7 @@ export const createMastraVoiceGateway = (options: MastraGatewayOptions): VoiceRu
       if (!result.ok) return result;
       const stream = result.data.body;
       if (stream === null) return { ok: false, error: { code: "UPSTREAM_UNAVAILABLE", status: 502 } };
-      return { ok: true, data: { body: stream, contentType: result.data.headers.get("content-type") ?? "application/octet-stream" } };
+      return { ok: true, data: { body: holdUpstreamBody(stream), contentType: result.data.headers.get("content-type") ?? "application/octet-stream" } };
     },
     createRealtimeSession: async ({ scope }) => {
       const call = { method: "POST", path: VOICE_ROUTES.realtimeSessions, accept: "application/json", mapStatus: mapVoiceStatus } as const;

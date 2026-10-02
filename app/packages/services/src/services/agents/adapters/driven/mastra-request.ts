@@ -49,6 +49,14 @@ export const buildForwardedHeaders = async (connection: MastraConnection, scope:
   ...(connection.serverlessToken === null ? {} : { [FORWARDED_HEADERS.serverlessAuthorization]: await connection.serverlessToken.headerValue() }),
 });
 
+/**
+ * The body of a streamed Mastra answer, locked to a reader right away. Node's fetch cancels the
+ * body of a `Response` that is garbage collected while the body is still unlocked and unread; the
+ * gateway keeps only the body and `/v1` awaits other work before reading it, so a collection in
+ * between ended the stream with no bytes. A pipe holds the body from here until it is read.
+ */
+export const holdUpstreamBody = (body: ReadableStream<Uint8Array>): ReadableStream<Uint8Array> => body.pipeThrough(new TransformStream<Uint8Array, Uint8Array>());
+
 /** A non-2xx Mastra answer of a raw call, already mapped to its `/v1` error (`mapMastraError`). */
 class UpstreamStatusError extends Error {
   readonly mapped: GatewayError;
@@ -120,7 +128,7 @@ export const postForStream = (args: {
     if (response.body === null) throw new UpstreamStatusError(502, UPSTREAM_UNAVAILABLE);
     const conversationId = response.headers.get(FORWARDED_HEADERS.conversationId);
     return {
-      body: response.body,
+      body: holdUpstreamBody(response.body),
       contentType: response.headers.get("content-type") ?? "application/octet-stream",
       ...(conversationId === null ? {} : { conversationId }),
     };
@@ -162,7 +170,7 @@ export const postMcp = (args: {
       const value = response.headers.get(name);
       return value === null ? [] : [[name, value] as const];
     });
-    return { status: response.status, body: response.body, contentType: response.headers.get("content-type"), headers: Object.fromEntries(passed) };
+    return { status: response.status, body: response.body === null ? null : holdUpstreamBody(response.body), contentType: response.headers.get("content-type"), headers: Object.fromEntries(passed) };
   });
 };
 

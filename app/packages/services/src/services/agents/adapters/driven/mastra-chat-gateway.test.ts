@@ -1,3 +1,7 @@
+import { createServer } from "node:http";
+import type { AddressInfo } from "node:net";
+import { setFlagsFromString } from "node:v8";
+import { runInNewContext } from "node:vm";
 import { describe, expect, it } from "vitest";
 import type { AgentCallScope } from "../../application/ports/agent-runtime-gateway.ts";
 import { createMastraChatGateway, memoryAgentIdOf } from "./mastra-chat-gateway.ts";
@@ -74,6 +78,49 @@ describe("Mastra chat gateway", () => {
     const { gateway } = gatewayWith(() => answers.shift() ?? new Response(null, { status: 500 }));
     for (let index = 0; index < 3; index += 1) {
       expect(await gateway.abort({ scope: SCOPE, runId: "run-1" })).toEqual({ ok: false, error: { code: "UPSTREAM_UNAVAILABLE", status: 502 } });
+    }
+  });
+});
+
+// Node's fetch cancels the body of a Response that is garbage collected while its body is still
+// unread and unlocked. `gc` is exposed here to reproduce that collection on demand.
+setFlagsFromString("--expose-gc");
+const collectGarbage = runInNewContext("gc") as () => void;
+
+/** A local server that streams `chunks` SSE events, one every 30 ms. */
+const startSseServer = async (chunks: number) => {
+  const server = createServer((_request, response) => {
+    response.writeHead(200, { "content-type": "text/event-stream", "x-run-id": "run-gc" });
+    let sent = 0;
+    const timer = setInterval(() => {
+      response.write(`data: ${String(sent)}\n\n`);
+      sent += 1;
+      if (sent === chunks) {
+        clearInterval(timer);
+        response.end();
+      }
+    }, 30);
+  });
+  await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
+  const { port } = server.address() as AddressInfo;
+  return { baseUrl: `http://127.0.0.1:${String(port)}`, close: () => new Promise<void>((resolve) => server.close(() => resolve())) };
+};
+
+describe("Mastra chat gateway over a real fetch", () => {
+  it("keeps the turn's stream readable when the upstream Response is garbage collected before it is read", async () => {
+    const server = await startSseServer(5);
+    try {
+      const gateway = createMastraChatGateway({ baseUrl: server.baseUrl, serverlessToken: null });
+      const sent = await gateway.send({ scope: SCOPE, agentId: "assistant", body: { messages: [{ id: "m1", role: "user", parts: [] }] } });
+      if (!sent.ok) throw new Error("the send failed");
+      // `/v1` awaits other work (approval audit, active run) before it reads the stream.
+      for (let round = 0; round < 3; round += 1) {
+        collectGarbage();
+        await new Promise((resolve) => setTimeout(resolve, 10));
+      }
+      expect(await new Response(sent.data.body).text()).toBe("data: 0\n\ndata: 1\n\ndata: 2\n\ndata: 3\n\ndata: 4\n\n");
+    } finally {
+      await server.close();
     }
   });
 });
