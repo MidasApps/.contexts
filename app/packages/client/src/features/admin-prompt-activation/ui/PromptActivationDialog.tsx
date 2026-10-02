@@ -8,10 +8,12 @@ import { promptVersionKeys } from "#/entities/prompt-version/index.ts";
 import { useCallEndpoint } from "#/shared/api/api-context.tsx";
 import { useDescribeError } from "#/shared/lib/errors/describe-error.ts";
 import { useConfirmedAction } from "#/shared/lib/errors/use-confirmed-action.ts";
+import { useOnlineStatus } from "#/shared/lib/network/use-online-status.ts";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
 import { Textarea } from "#/shared/ui/atoms/Textarea/Textarea.tsx";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "#/shared/ui/molecules/Dialog/Dialog.tsx";
 import { Field, FieldControl, FieldDescription, FieldError, FieldLabel } from "#/shared/ui/molecules/Field/Field.tsx";
+import { OfflineNotice } from "#/shared/ui/molecules/OfflineNotice/OfflineNotice.tsx";
 import { notify } from "#/shared/ui/molecules/Toaster/notify.ts";
 import { ConfirmDialog } from "#/shared/ui/organisms/ConfirmDialog/ConfirmDialog.tsx";
 
@@ -62,9 +64,11 @@ function ForceForm({ agentId, agentName, version, onOpenChange }: ForceProps & {
   const [reasonError, setReasonError] = useState<string | undefined>();
   const [failure, setFailure] = useState<string | undefined>();
   const [pending, setPending] = useState(false);
+  const online = useOnlineStatus();
   const submit = async (event: FormEvent<HTMLFormElement>): Promise<void> => {
     event.preventDefault();
-    if (pending) return;
+    // Offline it waits with the reason shown, like the plain confirmation.
+    if (pending || !online) return;
     const trimmed = reason.trim();
     setFailure(undefined);
     setReasonError(trimmed.length < MIN_REASON ? t("reasonRequired") : undefined);
@@ -96,11 +100,12 @@ function ForceForm({ agentId, agentName, version, onOpenChange }: ForceProps & {
         <FieldDescription>{t("reasonHint")}</FieldDescription>
         <FieldError>{reasonError}</FieldError>
       </Field>
+      {online ? null : <OfflineNotice />}
       <DialogFooter>
         <Button variant="secondary" onClick={() => onOpenChange(false)} disabled={pending}>
           {tCommon("actions.cancel")}
         </Button>
-        <Button type="submit" variant="destructive" pending={pending}>
+        <Button type="submit" variant="destructive" pending={pending} disabled={!online}>
           {t("forceConfirm")}
         </Button>
       </DialogFooter>
