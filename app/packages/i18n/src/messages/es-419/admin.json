@@ -557,7 +557,7 @@
       "apply": "Filtrar",
       "from": "Desde",
       "to": "Hasta",
-      "dateHint": "Días completos, en la zona horaria de este navegador."
+      "dateHint": "Días completos, en la zona horaria de este navegador ({zone})."
     },
     "detail": {
       "title": "Trace",

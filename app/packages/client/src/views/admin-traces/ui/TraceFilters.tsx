@@ -39,6 +39,9 @@ export function TraceFilters({ values, onChange }: TraceFiltersProps) {
   const statusId = useId();
   const fromId = useId();
   const toId = useId();
+  const dateHintId = useId();
+  // Decision 0042: every date of `/admin` is in the browser's zone; the rule is said next to the days.
+  const zone = Intl.DateTimeFormat().resolvedOptions().timeZone;
   const [draft, setDraft] = useState(values.agentId ?? "");
   const [invalid, setInvalid] = useState(false);
   const submit = (event: FormEvent<HTMLFormElement>): void => {
@@ -66,11 +69,11 @@ export function TraceFilters({ values, onChange }: TraceFiltersProps) {
       </div>
       <div className="flex flex-col gap-1.5">
         <Label htmlFor={fromId}>{t("from")}</Label>
-        <Input id={fromId} type="date" className="lg:w-40" value={values.from ?? ""} max={values.to} title={t("dateHint")} onChange={(event) => onChange({ from: event.target.value })} />
+        <Input id={fromId} type="date" className="lg:w-40" value={values.from ?? ""} max={values.to} aria-describedby={dateHintId} onChange={(event) => onChange({ from: event.target.value })} />
       </div>
       <div className="flex flex-col gap-1.5">
         <Label htmlFor={toId}>{t("to")}</Label>
-        <Input id={toId} type="date" className="lg:w-40" value={values.to ?? ""} min={values.from} title={t("dateHint")} onChange={(event) => onChange({ to: event.target.value })} />
+        <Input id={toId} type="date" className="lg:w-40" value={values.to ?? ""} min={values.from} aria-describedby={dateHintId} onChange={(event) => onChange({ to: event.target.value })} />
       </div>
       <div className="flex flex-col gap-1.5">
         <Label htmlFor={agentId}>{t("agent")}</Label>
@@ -96,6 +99,9 @@ export function TraceFilters({ values, onChange }: TraceFiltersProps) {
           </p>
         ) : null}
       </div>
+      <p id={dateHintId} className="text-xs text-muted-foreground lg:basis-full">
+        {t("dateHint", { zone })}
+      </p>
     </form>
   );
 }

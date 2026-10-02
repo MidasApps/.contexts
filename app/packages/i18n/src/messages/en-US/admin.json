@@ -557,7 +557,7 @@
       "apply": "Filter",
       "from": "From",
       "to": "To",
-      "dateHint": "Whole days, in this browser's time zone."
+      "dateHint": "Whole days, in this browser's time zone ({zone})."
     },
     "detail": {
       "title": "Trace",

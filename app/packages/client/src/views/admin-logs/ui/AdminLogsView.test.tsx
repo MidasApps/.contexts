@@ -17,6 +17,8 @@ describe("AdminLogsView", () => {
     expect(lines).toHaveLength(2);
     expect(within(lines[0] as HTMLElement).getByText("Erro")).toBeDefined();
     expect(within(lines[0] as HTMLElement).getByText("get_order_failed")).toBeDefined();
+    // To the millisecond (lines of one minute must be told apart), with the zone they are shown in.
+    expect((lines[0] as HTMLElement).querySelector("time")?.textContent).toMatch(/:00:05,000 \S+$/u);
     expect(within(lines[0] as HTMLElement).queryByRole("button")).toBeNull();
     const info = lines[1] as HTMLElement;
     expect(within(info).getByText("order_placed").className).toContain("font-mono");

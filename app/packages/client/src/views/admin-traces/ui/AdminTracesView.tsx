@@ -58,7 +58,7 @@ const useColumns = ({ target, organization }: Labels) => {
       column.accessor("tenantId", { header: () => t("columns.organization"), cell: ({ getValue }) => organization(getValue()) }),
       column.display({ id: "target", header: () => t("columns.target"), cell: ({ row }) => target(row.original) }),
       column.accessor("status", { header: () => t("columns.status"), cell: ({ getValue }) => <TraceStatusPill status={getValue()} /> }),
-      column.accessor("startedAt", { header: () => t("columns.startedAt"), cell: ({ getValue }) => formatDateTime(getValue()) }),
+      column.accessor("startedAt", { header: () => t("columns.startedAt"), cell: ({ getValue }) => formatDateTime(getValue(), "precise") }),
       column.accessor("durationMs", { header: () => t("columns.duration"), meta: { numeric: true }, cell: ({ getValue }) => <TraceDuration durationMs={getValue()} /> }),
       column.display({
         id: "tokens",
@@ -131,7 +131,7 @@ function TraceTable({ page, labels, fetching, filtering, search, onClear }: Trac
             {labels.organization(trace.tenantId)} · {labels.target(trace)}
           </span>
           <span className="text-xs text-muted-foreground">
-            {formatDateTime(trace.startedAt)} · <TraceDuration durationMs={trace.durationMs} /> · <TraceCost costMicroUsd={trace.costMicroUsd} />
+            {formatDateTime(trace.startedAt, "precise")} · <TraceDuration durationMs={trace.durationMs} /> · <TraceCost costMicroUsd={trace.costMicroUsd} />
           </span>
         </div>
       )}

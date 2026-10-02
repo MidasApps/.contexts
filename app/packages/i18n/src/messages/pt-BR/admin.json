@@ -557,7 +557,7 @@
       "apply": "Filtrar",
       "from": "De",
       "to": "Até",
-      "dateHint": "Dias inteiros, no fuso horário deste navegador."
+      "dateHint": "Dias inteiros, no fuso horário deste navegador ({zone})."
     },
     "detail": {
       "title": "Trace",

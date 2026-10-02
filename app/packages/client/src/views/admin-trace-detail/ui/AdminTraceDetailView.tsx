@@ -29,7 +29,7 @@ function TraceSummaryCards({ detail, organizationName }: { detail: TraceDetail; 
       </h2>
       <dl className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <KpiCard label={t("detail.organization")} value={<span className="font-sans text-base break-words">{organizationName}</span>} hint={target} />
-        <KpiCard label={t("detail.startedAt")} value={<span className="text-base">{formatDateTime(summary.startedAt)}</span>} />
+        <KpiCard label={t("detail.startedAt")} value={<span className="text-base">{formatDateTime(summary.startedAt, "precise")}</span>} />
         <KpiCard label={t("detail.duration")} value={<TraceDuration durationMs={summary.durationMs} />} />
         <KpiCard label={t("detail.tokens")} value={t("tokensValue", { input: format.number(summary.inputTokens), output: format.number(summary.outputTokens) })} />
         <KpiCard label={t("detail.cost")} value={<TraceCost costMicroUsd={summary.costMicroUsd} />} />

@@ -64,7 +64,7 @@ export function LogLines({ lines }: { lines: readonly LogLine[] }) {
           <span className="flex flex-wrap items-center gap-2">
             <StatusPill tone={LEVEL_TONES[line.level]}>{t(`levels.${line.level}`)}</StatusPill>
             <time dateTime={line.timestamp} className="font-mono text-[11.5px] text-muted-foreground tabular-nums">
-              {formatDateTime(line.timestamp)}
+              {formatDateTime(line.timestamp, "precise")}
             </time>
             <span className="text-[11.5px] text-muted-foreground">{t("service", { service: line.service, env: line.env })}</span>
           </span>

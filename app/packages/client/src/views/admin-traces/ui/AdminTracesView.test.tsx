@@ -59,6 +59,18 @@ describe("AdminTracesView", () => {
     expect(sent.get("startedBefore")).toBe(new Date(2026, 9, 1).toISOString());
     expect(screen.getByLabelText<HTMLInputElement>("De").value).toBe("2026-09-29");
     expect(screen.getByLabelText<HTMLInputElement>("Até").value).toBe("2026-09-30");
+    // The zone rule is visible text tied to both days, not a tooltip.
+    const hint = screen.getByText(/^Dias inteiros, no fuso horário deste navegador \(.+\)\.$/u);
+    for (const label of ["De", "Até"]) {
+      expect(screen.getByLabelText(label).getAttribute("aria-describedby")).toBe(hint.id);
+      expect(screen.getByLabelText(label).hasAttribute("title")).toBe(false);
+    }
+  });
+
+  it("shows when each trace started to the millisecond, with the zone", async () => {
+    render();
+    const table = await screen.findByRole("table", { name: "Traces de execução" });
+    expect(within(table).getAllByRole("row")[1]?.textContent).toMatch(/\d{2}:\d{2}:\d{2},\d{3} \S+/u);
   });
 
   it("writes a picked day to the URL, back on the first page, and ignores a day that does not exist", async () => {
