@@ -15,16 +15,16 @@ import { DiscardQuestion, DismissGuardProvider, useCurrentDismissGuard, useDismi
  * dismissal with `useDialogDismissGuard` (block while in flight, ask before losing work or a
  * one-time value); the root owns the open state when uncontrolled so the guard always applies.
  */
-export function Dialog({ open, defaultOpen = false, onOpenChange, children, ...props }: ComponentProps<typeof DialogPrimitive.Root>) {
+export function Dialog({ open, defaultOpen = false, children, ...props }: ComponentProps<typeof DialogPrimitive.Root>) {
   const [innerOpen, setInnerOpen] = useState(defaultOpen);
   const isOpen = open ?? innerOpen;
   const setOpen = (next: boolean): void => {
     if (open === undefined) setInnerOpen(next);
-    onOpenChange?.(next);
+    props.onOpenChange?.(next);
   };
   const dismissal = useDismissGuardState(() => setOpen(false));
   return (
-    <DialogPrimitive.Root data-slot="dialog" open={isOpen} onOpenChange={(next) => (next ? setOpen(true) : dismissal.requestDismiss())} {...props}>
+    <DialogPrimitive.Root data-slot="dialog" {...props} open={isOpen} onOpenChange={(next) => (next ? setOpen(true) : dismissal.requestDismiss())}>
       <DismissGuardProvider value={dismissal.context}>{children}</DismissGuardProvider>
       <DiscardQuestion
         asking={dismissal.asking}

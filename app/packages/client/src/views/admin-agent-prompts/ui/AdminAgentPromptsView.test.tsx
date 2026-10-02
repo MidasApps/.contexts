@@ -196,7 +196,7 @@ describe("AdminAgentPromptsView", () => {
     await user.keyboard("{Escape}");
     const question = await screen.findByRole("alertdialog", { name: "Descartar alterações?" });
     await user.click(within(question).getByRole("button", { name: "Continuar editando" }));
-    expect((within(dialog).getByRole("textbox", { name: /^Texto do prompt/u }) as HTMLTextAreaElement).value).toContain("Be kind.");
+    expect(within(dialog).getByRole<HTMLTextAreaElement>("textbox", { name: /^Texto do prompt/u }).value).toContain("Be kind.");
     await user.click(within(dialog).getByRole("button", { name: "Cancelar" }));
     await user.click(within(await screen.findByRole("alertdialog")).getByRole("button", { name: "Descartar" }));
     await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
