@@ -1,0 +1,27 @@
+{
+  "additionalProperties": false,
+  "description": "Creates an empty eval dataset of the organization, evaluated against the assistant by default.",
+  "examples": [
+    {
+      "name": "refund questions"
+    }
+  ],
+  "properties": {
+    "name": {
+      "description": "Dataset name, unique in the organization.",
+      "maxLength": 200,
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "none"
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "type": "object",
+  "x-kind": "command",
+  "x-permission": "core.eval.write",
+  "x-pii": "none",
+  "x-relations": [],
+  "x-tenancyScope": "organization"
+}

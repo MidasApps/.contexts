@@ -594,9 +594,13 @@ export {
   type StartEvalExperimentInput,
 } from "./contracts/observability/eval-dataset.schema.ts";
 export {
+  AddEvalDatasetItemInputContract, AddEvalDatasetItemInputSchema, CreateEvalDatasetInputContract, CreateEvalDatasetInputSchema, EvalDatasetItemContract,
+  EvalDatasetItemSchema, type AddEvalDatasetItemInput, type CreateEvalDatasetInput, type EvalDatasetItem,
+} from "./contracts/observability/eval-dataset-item.schema.ts";
+export {
   adminGetExperimentEndpoint, adminGetTraceEndpoint, adminListDatasetsEndpoint, adminListExperimentsEndpoint, adminListTracesEndpoint,
-  getEvalExperimentEndpoint, getTraceEndpoint, listEvalDatasetsEndpoint, listEvalExperimentsEndpoint, listTracesEndpoint,
-  OBSERVABILITY_ENDPOINTS, recordMessageFeedbackEndpoint, startEvalExperimentEndpoint,
+  addEvalDatasetItemEndpoint, createEvalDatasetEndpoint, deleteEvalDatasetItemEndpoint, getEvalExperimentEndpoint, getTraceEndpoint,
+  listEvalDatasetItemsEndpoint, listEvalDatasetsEndpoint, listEvalExperimentsEndpoint, listTracesEndpoint, OBSERVABILITY_ENDPOINTS, recordMessageFeedbackEndpoint, startEvalExperimentEndpoint,
 } from "./contracts/observability/endpoints.ts";
 // SP5 staff console operations (decision 0043): runs, schedules, connectors and local logs for `/admin`.
 export {

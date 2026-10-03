@@ -7,6 +7,7 @@ import { dataEnvelope } from "../http/envelopes.schema.ts";
 import { IsoDateTimeSchema } from "../primitives/iso-datetime.schema.ts";
 import { OrganizationIdSchema } from "../tenancy/ids.schema.ts";
 import { OrganizationQuerySchema } from "../workflows/endpoints.ts";
+import { AddEvalDatasetItemInputSchema, CreateEvalDatasetInputSchema, EvalDatasetItemSchema } from "./eval-dataset-item.schema.ts";
 import { EvalDatasetSchema, StartEvalExperimentInputSchema } from "./eval-dataset.schema.ts";
 import { EvalExperimentSummarySchema } from "./eval-experiment-summary.schema.ts";
 import { TraceDetailSchema } from "./trace-detail.schema.ts";
@@ -31,6 +32,8 @@ const traceFilters = PageNumberQuerySchema.extend({
   startedBefore: IsoDateTimeSchema.optional().meta(none("Only traces that started before this instant (UTC); must be after `startedAfter`.")),
 });
 const traceParams = z.object({ traceId: TraceIdSchema.meta(none("Trace id.")) });
+const datasetParams = z.object({ datasetId: z.string().regex(/^[A-Za-z0-9_-]{1,128}$/).meta(none("Dataset id.")) });
+const itemParams = datasetParams.extend({ itemId: z.string().regex(/^[A-Za-z0-9_-]{1,128}$/).meta(none("Dataset item id.")) });
 const experimentParams = z.object({ experimentId: z.string().regex(/^[A-Za-z0-9_-]{1,128}$/).meta(none("Experiment id.")) });
 
 export const listTracesEndpoint = defineEndpoint({
@@ -87,6 +90,55 @@ export const listEvalDatasetsEndpoint = defineEndpoint({
   responses: { 200: dataEnvelope(z.array(EvalDatasetSchema)) },
   errors: { 403: ["FORBIDDEN"] },
   summary: "Lists the organization's own datasets (core.eval.read).",
+});
+
+export const createEvalDatasetEndpoint = defineEndpoint({
+  id: "evals.createDataset",
+  method: "POST",
+  path: "/v1/evals/datasets",
+  auth: "user",
+  query: OrganizationQuerySchema,
+  body: CreateEvalDatasetInputSchema,
+  responses: { 201: dataEnvelope(EvalDatasetSchema) },
+  errors: { 400: ["VALIDATION_FAILED"], 403: ["FORBIDDEN"], 409: ["CONFLICT"], 503: ["UPSTREAM_UNAVAILABLE"] },
+  summary: "Creates an empty dataset of the organization; a name the organization already uses answers 409 (core.eval.write).",
+});
+
+export const listEvalDatasetItemsEndpoint = defineEndpoint({
+  id: "evals.listDatasetItems",
+  method: "GET",
+  path: "/v1/evals/datasets/{datasetId}/items",
+  auth: "principal",
+  params: datasetParams,
+  query: OrganizationQuerySchema.extend(PageNumberQuerySchema.shape),
+  responses: { 200: pagedEnvelope(EvalDatasetItemSchema) },
+  errors: { 403: ["FORBIDDEN"], 404: ["NOT_FOUND"] },
+  summary: "Lists the items of one of the organization's datasets, newest first; another tenant's dataset answers 404 (core.eval.read).",
+});
+
+export const addEvalDatasetItemEndpoint = defineEndpoint({
+  id: "evals.addDatasetItem",
+  method: "POST",
+  path: "/v1/evals/datasets/{datasetId}/items",
+  auth: "user",
+  params: datasetParams,
+  query: OrganizationQuerySchema,
+  body: AddEvalDatasetItemInputSchema,
+  responses: { 201: dataEnvelope(EvalDatasetItemSchema) },
+  errors: { 400: ["VALIDATION_FAILED"], 403: ["FORBIDDEN"], 404: ["NOT_FOUND"], 503: ["UPSTREAM_UNAVAILABLE"] },
+  summary: "Adds a manual item (input and expected answer) to one of the organization's datasets (core.eval.write).",
+});
+
+export const deleteEvalDatasetItemEndpoint = defineEndpoint({
+  id: "evals.deleteDatasetItem",
+  method: "DELETE",
+  path: "/v1/evals/datasets/{datasetId}/items/{itemId}",
+  auth: "user",
+  params: itemParams,
+  query: OrganizationQuerySchema,
+  responses: { 204: null },
+  errors: { 403: ["FORBIDDEN"], 404: ["NOT_FOUND"], 503: ["UPSTREAM_UNAVAILABLE"] },
+  summary: "Deletes an item of one of the organization's datasets; past experiments keep their results (core.eval.write).",
 });
 
 export const listEvalExperimentsEndpoint = defineEndpoint({
@@ -174,6 +226,10 @@ export const OBSERVABILITY_ENDPOINTS: readonly EndpointDefinition[] = [
   adminListTracesEndpoint,
   adminGetTraceEndpoint,
   listEvalDatasetsEndpoint,
+  createEvalDatasetEndpoint,
+  listEvalDatasetItemsEndpoint,
+  addEvalDatasetItemEndpoint,
+  deleteEvalDatasetItemEndpoint,
   listEvalExperimentsEndpoint,
   getEvalExperimentEndpoint,
   startEvalExperimentEndpoint,

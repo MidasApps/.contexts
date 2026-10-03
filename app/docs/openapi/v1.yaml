@@ -5731,6 +5731,391 @@ paths:
       tags:
         - evals
       x-auth: principal
+    post:
+      operationId: evals.createDataset
+      parameters:
+        - description: Organization to act in; required for users, and when given it must be an API key's own organization.
+          in: query
+          name: organizationId
+          required: false
+          schema:
+            minLength: 1
+            type: string
+            x-pii: none
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/observability.CreateEvalDatasetInput"
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: "#/components/schemas/observability.EvalDataset"
+                required:
+                  - data
+                type: object
+          description: Created
+          headers:
+            Location:
+              description: URL of the created resource.
+              schema:
+                type: string
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: VALIDATION_FAILED
+          x-error-codes:
+            - VALIDATION_FAILED
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UNAUTHORIZED
+          x-error-codes:
+            - UNAUTHORIZED
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: FORBIDDEN
+          x-error-codes:
+            - FORBIDDEN
+        "409":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: CONFLICT
+          x-error-codes:
+            - CONFLICT
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: INTERNAL_ERROR
+          x-error-codes:
+            - INTERNAL_ERROR
+        "503":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UPSTREAM_UNAVAILABLE
+          x-error-codes:
+            - UPSTREAM_UNAVAILABLE
+      security:
+        - bearerAuth: []
+      summary: Creates an empty dataset of the organization; a name the organization already uses answers 409 (core.eval.write).
+      tags:
+        - evals
+      x-auth: user
+  /v1/evals/datasets/{datasetId}/items:
+    get:
+      operationId: evals.listDatasetItems
+      parameters:
+        - description: Dataset id.
+          in: path
+          name: datasetId
+          required: true
+          schema:
+            pattern: ^[A-Za-z0-9_-]{1,128}$
+            type: string
+            x-pii: none
+        - description: Organization to act in; required for users, and when given it must be an API key's own organization.
+          in: query
+          name: organizationId
+          required: false
+          schema:
+            minLength: 1
+            type: string
+            x-pii: none
+        - description: Page number, from 0.
+          in: query
+          name: page
+          required: false
+          schema:
+            default: 0
+            maximum: 1000
+            minimum: 0
+            type: integer
+            x-pii: none
+        - description: Page size, 1-100 (default 20).
+          in: query
+          name: perPage
+          required: false
+          schema:
+            default: 20
+            maximum: 100
+            minimum: 1
+            type: integer
+            x-pii: none
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    items:
+                      $ref: "#/components/schemas/observability.EvalDatasetItem"
+                    type: array
+                  meta:
+                    additionalProperties: false
+                    description: Paging state.
+                    properties:
+                      hasMore:
+                        description: Whether a next page exists.
+                        type: boolean
+                        x-pii: none
+                    required:
+                      - hasMore
+                    type: object
+                    x-pii: none
+                required:
+                  - data
+                  - meta
+                type: object
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: VALIDATION_FAILED
+          x-error-codes:
+            - VALIDATION_FAILED
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UNAUTHORIZED
+          x-error-codes:
+            - UNAUTHORIZED
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: FORBIDDEN
+          x-error-codes:
+            - FORBIDDEN
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: NOT_FOUND
+          x-error-codes:
+            - NOT_FOUND
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: INTERNAL_ERROR
+          x-error-codes:
+            - INTERNAL_ERROR
+      security:
+        - bearerAuth: []
+      summary: Lists the items of one of the organization's datasets, newest first; another tenant's dataset answers 404 (core.eval.read).
+      tags:
+        - evals
+      x-auth: principal
+    post:
+      operationId: evals.addDatasetItem
+      parameters:
+        - description: Dataset id.
+          in: path
+          name: datasetId
+          required: true
+          schema:
+            pattern: ^[A-Za-z0-9_-]{1,128}$
+            type: string
+            x-pii: none
+        - description: Organization to act in; required for users, and when given it must be an API key's own organization.
+          in: query
+          name: organizationId
+          required: false
+          schema:
+            minLength: 1
+            type: string
+            x-pii: none
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/observability.AddEvalDatasetItemInput"
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: "#/components/schemas/observability.EvalDatasetItem"
+                required:
+                  - data
+                type: object
+          description: Created
+          headers:
+            Location:
+              description: URL of the created resource.
+              schema:
+                type: string
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: VALIDATION_FAILED
+          x-error-codes:
+            - VALIDATION_FAILED
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UNAUTHORIZED
+          x-error-codes:
+            - UNAUTHORIZED
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: FORBIDDEN
+          x-error-codes:
+            - FORBIDDEN
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: NOT_FOUND
+          x-error-codes:
+            - NOT_FOUND
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: INTERNAL_ERROR
+          x-error-codes:
+            - INTERNAL_ERROR
+        "503":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UPSTREAM_UNAVAILABLE
+          x-error-codes:
+            - UPSTREAM_UNAVAILABLE
+      security:
+        - bearerAuth: []
+      summary: Adds a manual item (input and expected answer) to one of the organization's datasets (core.eval.write).
+      tags:
+        - evals
+      x-auth: user
+  /v1/evals/datasets/{datasetId}/items/{itemId}:
+    delete:
+      operationId: evals.deleteDatasetItem
+      parameters:
+        - description: Dataset id.
+          in: path
+          name: datasetId
+          required: true
+          schema:
+            pattern: ^[A-Za-z0-9_-]{1,128}$
+            type: string
+            x-pii: none
+        - description: Dataset item id.
+          in: path
+          name: itemId
+          required: true
+          schema:
+            pattern: ^[A-Za-z0-9_-]{1,128}$
+            type: string
+            x-pii: none
+        - description: Organization to act in; required for users, and when given it must be an API key's own organization.
+          in: query
+          name: organizationId
+          required: false
+          schema:
+            minLength: 1
+            type: string
+            x-pii: none
+      responses:
+        "204":
+          description: No Content
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: VALIDATION_FAILED
+          x-error-codes:
+            - VALIDATION_FAILED
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UNAUTHORIZED
+          x-error-codes:
+            - UNAUTHORIZED
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: FORBIDDEN
+          x-error-codes:
+            - FORBIDDEN
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: NOT_FOUND
+          x-error-codes:
+            - NOT_FOUND
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: INTERNAL_ERROR
+          x-error-codes:
+            - INTERNAL_ERROR
+        "503":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UPSTREAM_UNAVAILABLE
+          x-error-codes:
+            - UPSTREAM_UNAVAILABLE
+      security:
+        - bearerAuth: []
+      summary: Deletes an item of one of the organization's datasets; past experiments keep their results (core.eval.write).
+      tags:
+        - evals
+      x-auth: user
   /v1/evals/experiments:
     get:
       operationId: evals.listExperiments
@@ -24247,6 +24632,53 @@ components:
           target: tenancy.Organization
           type: belongs-to
       x-tenancyScope: organization
+    observability.AddEvalDatasetItemInput:
+      additionalProperties: false
+      description: Adds a manual item (input and expected answer) to one of the organization's datasets.
+      examples:
+        - expectedOutput: The refund policy and the terms of sale.
+          input: Which documents mention the refund policy?
+      properties:
+        expectedOutput:
+          description: Expected answer (ground truth); omit when there is none.
+          maxLength: 4000
+          minLength: 1
+          type: string
+          x-pii: personal
+        input:
+          description: Message the agent receives.
+          maxLength: 4000
+          minLength: 1
+          type: string
+          x-pii: personal
+      required:
+        - input
+      type: object
+      x-kind: command
+      x-permission: core.eval.write
+      x-pii: personal
+      x-relations: []
+      x-tenancyScope: organization
+    observability.CreateEvalDatasetInput:
+      additionalProperties: false
+      description: Creates an empty eval dataset of the organization, evaluated against the assistant by default.
+      examples:
+        - name: refund questions
+      properties:
+        name:
+          description: Dataset name, unique in the organization.
+          maxLength: 200
+          minLength: 1
+          type: string
+          x-pii: none
+      required:
+        - name
+      type: object
+      x-kind: command
+      x-permission: core.eval.write
+      x-pii: none
+      x-relations: []
+      x-tenancyScope: organization
     observability.EvalDataset:
       additionalProperties: false
       description: "An eval dataset: platform eval sets per agent, or an organization's own (feedback, manual items)."
@@ -24309,6 +24741,58 @@ components:
       x-kind: view
       x-permission: core.eval.read
       x-pii: none
+      x-relations: []
+      x-tenancyScope: organization
+    observability.EvalDatasetItem:
+      additionalProperties: false
+      description: "One item of an organization's eval dataset: the input an agent receives and the expected answer."
+      examples:
+        - createdAt: "2026-09-29T14:30:00.000Z"
+          datasetId: ds_01J8Z3K4M5
+          expectedOutput: The refund policy and the terms of sale.
+          id: item_01J8Z3K4M5
+          input: Which documents mention the refund policy?
+      properties:
+        createdAt:
+          description: When the item was added (UTC).
+          format: date-time
+          pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z))$
+          type: string
+          x-pii: none
+        datasetId:
+          description: Dataset of the item.
+          maxLength: 128
+          minLength: 1
+          type: string
+          x-pii: none
+        expectedOutput:
+          anyOf:
+            - maxLength: 8000
+              type: string
+            - type: "null"
+          description: Expected answer (ground truth) as text; null when the item has none.
+          x-pii: personal
+        id:
+          description: Item id.
+          maxLength: 128
+          minLength: 1
+          type: string
+          x-pii: none
+        input:
+          description: What the agent receives, as text (JSON for a structured input).
+          maxLength: 8000
+          type: string
+          x-pii: personal
+      required:
+        - id
+        - datasetId
+        - input
+        - expectedOutput
+        - createdAt
+      type: object
+      x-kind: view
+      x-permission: core.eval.read
+      x-pii: personal
       x-relations: []
       x-tenancyScope: organization
     observability.EvalExperimentSummary:

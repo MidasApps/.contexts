@@ -1,0 +1,35 @@
+{
+  "additionalProperties": false,
+  "description": "Adds a manual item (input and expected answer) to one of the organization's datasets.",
+  "examples": [
+    {
+      "expectedOutput": "The refund policy and the terms of sale.",
+      "input": "Which documents mention the refund policy?"
+    }
+  ],
+  "properties": {
+    "expectedOutput": {
+      "description": "Expected answer (ground truth); omit when there is none.",
+      "maxLength": 4000,
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "personal"
+    },
+    "input": {
+      "description": "Message the agent receives.",
+      "maxLength": 4000,
+      "minLength": 1,
+      "type": "string",
+      "x-pii": "personal"
+    }
+  },
+  "required": [
+    "input"
+  ],
+  "type": "object",
+  "x-kind": "command",
+  "x-permission": "core.eval.write",
+  "x-pii": "personal",
+  "x-relations": [],
+  "x-tenancyScope": "organization"
+}
