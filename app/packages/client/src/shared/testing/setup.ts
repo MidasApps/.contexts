@@ -1,7 +1,12 @@
 // Vitest setup for @core/client (vitest.config.ts `setupFiles`): Testing Library cleanup (globals are
 // off, so it does not register itself) and the browser APIs Radix primitives call that jsdom lacks.
-import { cleanup } from "@testing-library/react";
+import { cleanup, configure } from "@testing-library/react";
 import { afterEach } from "vitest";
+
+// `findBy*`/`waitFor` give up after 1 s by default. Under a full `turbo run test`, a render that
+// takes 300 ms idle passes that limit and the test fails. A hung assertion still fails within
+// `testTimeout`.
+configure({ asyncUtilTimeout: 5_000 });
 
 afterEach(() => {
   cleanup();
