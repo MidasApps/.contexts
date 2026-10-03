@@ -42,6 +42,7 @@ export const buildAgentSettings = (overrides: Json = {}): Json => ({
   webTools: { firecrawl: false, browser: false },
   guardrails: { pii: "redact" },
   budget: { monthlyMicroUsd: 50_000_000, monthlyTokens: 20_000_000 },
+  ownBudget: null,
   updatedBy: IDS.user,
   createdAt: "2026-09-29T14:30:00.000Z",
   updatedAt: "2026-09-29T14:30:00.000Z",

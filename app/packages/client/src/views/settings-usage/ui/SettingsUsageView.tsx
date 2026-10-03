@@ -54,8 +54,16 @@ function OwnCap({ organizationId, disabled }: { organizationId: string; disabled
   return (
     <SectionCard title={t("title")} description={t("description")}>
       <QuerySection query={settings} loadingLabel={t("loading")}>
-        {/* Keyed by the caps in force: after a save the form starts again from what the server enforces. */}
-        {(data) => <UsageCapForm key={`${String(data.budget.monthlyMicroUsd)}:${String(data.budget.monthlyTokens)}`} organizationId={organizationId} caps={data.budget} disabled={disabled} />}
+        {/* Keyed by the caps in force and the own cap: after a save the form starts again from what the server enforces. */}
+        {(data) => (
+          <UsageCapForm
+            key={JSON.stringify([data.budget, data.ownBudget])}
+            organizationId={organizationId}
+            caps={data.budget}
+            ownBudget={data.ownBudget}
+            disabled={disabled}
+          />
+        )}
       </QuerySection>
     </SectionCard>
   );

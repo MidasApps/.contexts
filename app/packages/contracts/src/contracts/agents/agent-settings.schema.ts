@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { defineContract } from "../contract.ts";
+import { BudgetCapsSchema } from "../platform/organization-admin.schema.ts";
 import { TenantIdSchema, UserIdSchema } from "../primitives/ids.schema.ts";
 import { IsoDateTimeSchema } from "../primitives/iso-datetime.schema.ts";
 
@@ -9,7 +10,7 @@ const none = (description: string) => ({ description, pii: "none" as const });
 export const AgentKeySchema = z.string().regex(/^[a-z][a-z0-9-]*$/, { error: "Expected a kebab-case agent key." });
 export type AgentKey = z.infer<typeof AgentKeySchema>;
 
-/** Tenant agent settings (SP3 spec §6, §12): enabled agents, web opt-ins, guardrail level and budget. */
+/** Tenant agent settings (SP3 spec §6, §12): enabled agents, web opt-ins, guardrail level, budget and own cap (decision 0060). */
 export const AgentSettingsSchema = z.strictObject({
   tenantId: TenantIdSchema.meta(none("Organization the settings belong to (document id).")),
   enabledAgents: z.array(AgentKeySchema).meta(none("Subagents the supervisor may delegate to in this tenant.")),
@@ -30,6 +31,9 @@ export const AgentSettingsSchema = z.strictObject({
       monthlyTokens: z.int().nonnegative().meta(none("Hard monthly token cap (used when a price is unknown).")),
     })
     .meta(none("Monthly caps enforced by the tenant budget guard; alerts fire at 80 %.")),
+  ownBudget: BudgetCapsSchema.nullable().meta(
+    none("The organization's own lower cap as it set it; null when it set none and the plan's (or staff override's) caps apply."),
+  ),
   updatedBy: UserIdSchema.nullable().meta({ description: "Uid of the last editor; null for defaults.", pii: "personal" }),
   createdAt: IsoDateTimeSchema.meta(none("When the settings were created (UTC).")),
   updatedAt: IsoDateTimeSchema.meta(none("When the settings last changed (UTC).")),
@@ -46,7 +50,8 @@ export const AgentSettingsContract = defineContract(AgentSettingsSchema, {
       enabledAgents: ["knowledge", "data", "action"],
       webTools: { firecrawl: false, browser: false },
       guardrails: { pii: "warn" },
-      budget: { monthlyMicroUsd: 50_000_000, monthlyTokens: 20_000_000 },
+      budget: { monthlyMicroUsd: 30_000_000, monthlyTokens: 20_000_000 },
+      ownBudget: { monthlyMicroUsd: 30_000_000, monthlyTokens: 25_000_000 },
       updatedBy: "uA1b2C3d4E5f6G7h8I9j",
       createdAt: "2026-09-29T14:30:00.000Z",
       updatedAt: "2026-09-29T14:30:00.000Z",

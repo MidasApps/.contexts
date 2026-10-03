@@ -190,6 +190,7 @@ export const defaultAgentSettings = (tenantId: string): AgentSettings =>
     webTools: { firecrawl: false, browser: false },
     guardrails: { pii: "warn" },
     budget: { monthlyMicroUsd: 50_000_000, monthlyTokens: 20_000_000 },
+    ownBudget: null,
     updatedBy: null,
     createdAt: "2026-09-29T00:00:00.000Z",
     updatedAt: "2026-09-29T00:00:00.000Z",

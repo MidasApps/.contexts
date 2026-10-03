@@ -55,6 +55,12 @@ describe("AgentSettingsSchema", () => {
   it("accepts only warn or redact for pii", () => {
     expect(AgentSettingsSchema.safeParse({ ...example, guardrails: { pii: "off" } }).success).toBe(false);
   });
+
+  it("carries the organization's own cap, null when it set none", () => {
+    expect(AgentSettingsSchema.safeParse({ ...example, ownBudget: null }).success).toBe(true);
+    expect(AgentSettingsSchema.safeParse({ ...example, ownBudget: { monthlyMicroUsd: 1, monthlyTokens: 2 } }).success).toBe(true);
+    expect(AgentSettingsSchema.safeParse({ ...example, ownBudget: undefined }).success).toBe(false);
+  });
 });
 
 describe("ToolUiSchema", () => {

@@ -1,8 +1,9 @@
-import { type AgentSettings, TenantIdSchema } from "@core/contracts";
+import { TenantIdSchema } from "@core/contracts";
 import { describe, expect, it } from "vitest";
 import { CORE_COLLECTIONS } from "../../../shared/firestore/collections.ts";
 import { emulatorFirebase } from "../../../shared/testing/core-server-emulator.fixture.ts";
 import { createFirestoreAgentSettingsRepository, createFirestoreOrganizationAdminStore, createFirestorePlanRepository } from "./firestore-console-stores.ts";
+import type { AgentSettingsFields } from "../../application/ports/console-ports.ts";
 
 const firebase = emulatorFirebase();
 const RUN = Date.now().toString(36).padStart(10, "0");
@@ -65,7 +66,7 @@ describe("Firestore console stores (emulator)", () => {
   it("stores agent settings under the tenant id with the storage-only self cap", async () => {
     const repository = createFirestoreAgentSettingsRepository({ firestore: firebase.firestore });
     const tenantId = TenantIdSchema.parse(`settings${RUN}`);
-    const settings: AgentSettings = {
+    const settings: AgentSettingsFields = {
       tenantId,
       enabledAgents: ["knowledge"],
       webTools: { firecrawl: false, browser: false },

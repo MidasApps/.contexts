@@ -1409,6 +1409,11 @@
       "platformJobs": "Processos da plataforma"
     },
     "ownCap": {
+      "source": {
+        "plan": "Sem limite próprio: valem os limites do plano.",
+        "own": "Limite próprio em vigor: {spend} e {tokens} tokens por mês.",
+        "mixed": "Limite próprio definido: {spend} e {tokens} tokens por mês; onde o limite do plano é menor, vale o do plano."
+      },
       "title": "Limite próprio da organização",
       "description": "A organização pode definir um limite mensal menor que o do plano. Não é possível ultrapassar o limite do plano.",
       "loading": "Carregando os limites…",

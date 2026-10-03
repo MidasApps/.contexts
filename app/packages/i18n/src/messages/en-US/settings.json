@@ -1409,6 +1409,11 @@
       "platformJobs": "Platform jobs"
     },
     "ownCap": {
+      "source": {
+        "plan": "No own cap: the plan's caps apply.",
+        "own": "Own cap in force: {spend} and {tokens} tokens per month.",
+        "mixed": "Own cap set: {spend} and {tokens} tokens per month; where the plan's cap is lower, the plan's applies."
+      },
       "title": "The organization's own cap",
       "description": "The organization can set a monthly cap lower than its plan's. It cannot go above the plan's cap.",
       "loading": "Loading the caps…",

@@ -195,6 +195,20 @@ describe("agent settings", () => {
     expect(auditLog.entries("tenant")).toEqual([expect.objectContaining({ action: "AGENT_SETTINGS_UPDATED", tenantId: ORG_A, changes: ["guardrails", "budget"] })]);
   });
 
+  it("reads back the organization's own cap apart from the caps in force, and null once removed", async () => {
+    const { routes } = setup();
+    const url = `/v1/agent-settings?organizationId=${ORG_A}`;
+    const read = async () => json(await callRoute(routes, "agent-settings.get", url, { as: "alice" }));
+    expect(await read()).toMatchObject({ data: { ownBudget: null, budget: { monthlyMicroUsd: 50_000_000, monthlyTokens: 20_000_000 } } });
+    const saved = await callRoute(routes, "agent-settings.update", url, { method: "PATCH", as: "alice", body: { budget: { monthlyMicroUsd: 10_000_000, monthlyTokens: 20_000_000 } } });
+    expect(await json(saved)).toMatchObject({ data: { ownBudget: { monthlyMicroUsd: 10_000_000, monthlyTokens: 20_000_000 } } });
+    await callRoute(routes, "agent-settings.update", url, { method: "PATCH", as: "alice", body: { guardrails: { pii: "warn" } } });
+    expect(await read()).toMatchObject({ data: { ownBudget: { monthlyMicroUsd: 10_000_000, monthlyTokens: 20_000_000 }, budget: { monthlyMicroUsd: 10_000_000, monthlyTokens: 20_000_000 } } });
+    const removed = await callRoute(routes, "agent-settings.update", url, { method: "PATCH", as: "alice", body: { budget: null } });
+    expect(await json(removed)).toMatchObject({ data: { ownBudget: null, budget: { monthlyMicroUsd: 50_000_000 } } });
+    expect(await read()).toMatchObject({ data: { ownBudget: null } });
+  });
+
   it("keeps the tenant's lower cap when staff later raise the override, and audits staff edits on the platform log", async () => {
     const { routes, memory, auditLog } = setup();
     await callRoute(routes, "agent-settings.update", `/v1/agent-settings?organizationId=${ORG_A}`, { method: "PATCH", as: "alice", body: { budget: { monthlyMicroUsd: 10, monthlyTokens: 10 } } });

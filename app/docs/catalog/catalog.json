@@ -4997,7 +4997,7 @@
       "examples": [
         {
           "budget": {
-            "monthlyMicroUsd": 50000000,
+            "monthlyMicroUsd": 30000000,
             "monthlyTokens": 20000000
           },
           "createdAt": "2026-09-29T14:30:00.000Z",
@@ -5008,6 +5008,10 @@
           ],
           "guardrails": {
             "pii": "warn"
+          },
+          "ownBudget": {
+            "monthlyMicroUsd": 30000000,
+            "monthlyTokens": 25000000
           },
           "tenantId": "Jd8sK2lPq0WnR5tYu3bV",
           "updatedAt": "2026-09-29T14:30:00.000Z",
@@ -5044,6 +5048,12 @@
           "required": true
         },
         {
+          "description": "The organization's own lower cap as it set it; null when it set none and the plan's (or staff override's) caps apply.",
+          "name": "ownBudget",
+          "pii": "none",
+          "required": true
+        },
+        {
           "description": "Organization the settings belong to (document id).",
           "name": "tenantId",
           "pii": "none",
@@ -5075,7 +5085,7 @@
         "examples": [
           {
             "budget": {
-              "monthlyMicroUsd": 50000000,
+              "monthlyMicroUsd": 30000000,
               "monthlyTokens": 20000000
             },
             "createdAt": "2026-09-29T14:30:00.000Z",
@@ -5086,6 +5096,10 @@
             ],
             "guardrails": {
               "pii": "warn"
+            },
+            "ownBudget": {
+              "monthlyMicroUsd": 30000000,
+              "monthlyTokens": 25000000
             },
             "tenantId": "Jd8sK2lPq0WnR5tYu3bV",
             "updatedAt": "2026-09-29T14:30:00.000Z",
@@ -5159,6 +5173,39 @@
             "type": "object",
             "x-pii": "none"
           },
+          "ownBudget": {
+            "anyOf": [
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "monthlyMicroUsd": {
+                    "description": "Monthly model spend cap in micro-USD.",
+                    "maximum": 9007199254740991,
+                    "minimum": 0,
+                    "type": "integer",
+                    "x-pii": "none"
+                  },
+                  "monthlyTokens": {
+                    "description": "Monthly model token cap.",
+                    "maximum": 9007199254740991,
+                    "minimum": 0,
+                    "type": "integer",
+                    "x-pii": "none"
+                  }
+                },
+                "required": [
+                  "monthlyMicroUsd",
+                  "monthlyTokens"
+                ],
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The organization's own lower cap as it set it; null when it set none and the plan's (or staff override's) caps apply.",
+            "x-pii": "none"
+          },
           "tenantId": {
             "description": "Organization the settings belong to (document id).",
             "minLength": 1,
@@ -5214,6 +5261,7 @@
           "webTools",
           "guardrails",
           "budget",
+          "ownBudget",
           "updatedBy",
           "createdAt",
           "updatedAt"

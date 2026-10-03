@@ -33,8 +33,14 @@ export type OrganizationAdminStore = {
   readonly tenantsOnPlan: (planId: string) => Promise<readonly string[]>;
 };
 
-/** Stored agent settings plus the tenant's own lower cap (storage-only, decision 0039 amendment). */
-export type StoredAgentSettings = { readonly settings: AgentSettings; readonly selfCap: BudgetCaps | null };
+/** The stored fields of agent settings; the read model adds `ownBudget` from `selfCap` (decision 0060). */
+export type AgentSettingsFields = Omit<AgentSettings, "ownBudget">;
+
+/** Stored agent settings plus the tenant's own lower cap (decision 0039 amendment). */
+export type StoredAgentSettings = { readonly settings: AgentSettingsFields; readonly selfCap: BudgetCaps | null };
+
+/** The read model of stored settings: the own cap is read back as `ownBudget` (decision 0060). */
+export const agentSettingsOf = (stored: StoredAgentSettings): AgentSettings => ({ ...stored.settings, ownBudget: stored.selfCap === null ? null : { ...stored.selfCap } });
 
 /** Firestore `agent-settings/{tenantId}` (the contract names the tenant id as the document id). */
 export type AgentSettingsRepository = {

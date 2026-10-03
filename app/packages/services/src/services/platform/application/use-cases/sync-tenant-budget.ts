@@ -1,7 +1,7 @@
-import { type AgentSettings, type BudgetCaps, TenantIdSchema } from "@core/contracts";
+import { type BudgetCaps, TenantIdSchema } from "@core/contracts";
 import { resolveTenantCaps, type TenantCaps } from "../../../usage/domain/budget-policy.ts";
 import type { ConsoleDeps } from "../console-deps.ts";
-import type { StoredAgentSettings } from "../ports/console-ports.ts";
+import type { AgentSettingsFields, StoredAgentSettings } from "../ports/console-ports.ts";
 
 /** Subagents of an organization without stored settings: core ones, never `web` (an opt-in). */
 export const DEFAULT_SETTINGS_AGENTS: readonly string[] = ["knowledge", "data", "action"];
@@ -10,7 +10,7 @@ export const DEFAULT_SETTINGS_AGENTS: readonly string[] = ["knowledge", "data", 
  * Settings of an organization that never saved any: core subagents, web off, PII `redact` (the
  * conservative mode while `compliance.md` is a template) and the given caps.
  */
-export const defaultAgentSettingsOf = (tenantId: string, caps: BudgetCaps, at: string): AgentSettings => ({
+export const defaultAgentSettingsOf = (tenantId: string, caps: BudgetCaps, at: string): AgentSettingsFields => ({
   tenantId: TenantIdSchema.parse(tenantId),
   enabledAgents: [...DEFAULT_SETTINGS_AGENTS],
   webTools: { firecrawl: false, browser: false },

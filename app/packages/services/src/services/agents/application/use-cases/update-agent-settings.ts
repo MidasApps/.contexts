@@ -1,6 +1,7 @@
 import type { AgentSettings, TenantId, UpdateAgentSettingsInput, UserPrincipal } from "@core/contracts";
 import { auditActorOf } from "../../../audit/domain/audit-actor.ts";
 import type { ConsoleDeps } from "../../../platform/application/console-deps.ts";
+import { agentSettingsOf, type AgentSettingsFields } from "../../../platform/application/ports/console-ports.ts";
 import { baseCapsOf, changeTenantBudget, storedSettingsOf } from "../../../platform/application/use-cases/sync-tenant-budget.ts";
 import { err, ok, type Result } from "../../../shared/result/result.ts";
 import { resolveTenantCaps, selfCapWithin } from "../../../usage/domain/budget-policy.ts";
@@ -48,7 +49,7 @@ export const makeUpdateAgentSettings =
     if (input.budget !== undefined && input.budget !== null && !selfCapWithin(input.budget, baseCaps)) return err({ code: "ABOVE_PLAN" });
     const stored = await storedSettingsOf(deps, tenantId, baseCaps);
     const selfCap = input.budget === undefined ? stored.selfCap : input.budget;
-    const settings: AgentSettings = {
+    const settings: AgentSettingsFields = {
       ...stored.settings,
       ...(input.enabledAgents === undefined ? {} : { enabledAgents: [...input.enabledAgents] }),
       ...(input.webTools === undefined ? {} : { webTools: { ...input.webTools } }),
@@ -58,5 +59,5 @@ export const makeUpdateAgentSettings =
     };
     const resolved = await changeTenantBudget(deps, { tenantId, next: (inputs) => ({ ...inputs, selfCap }), write: () => deps.agentSettings.save({ settings, selfCap }) });
     await audit(deps, command, Object.keys(input).filter((key) => input[key as keyof UpdateAgentSettingsInput] !== undefined));
-    return ok({ ...settings, budget: { ...resolved.caps } });
+    return ok(agentSettingsOf({ settings: { ...settings, budget: { ...resolved.caps } }, selfCap }));
   };

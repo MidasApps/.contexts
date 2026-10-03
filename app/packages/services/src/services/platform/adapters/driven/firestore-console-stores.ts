@@ -1,9 +1,9 @@
-import { type AgentSettings, AgentSettingsSchema, BudgetCapsSchema, type OrganizationStatus, type Plan, PlanSchema } from "@core/contracts";
+import { AgentSettingsSchema, BudgetCapsSchema, type OrganizationStatus, type Plan, PlanSchema } from "@core/contracts";
 import { FieldPath, type Firestore, Timestamp } from "firebase-admin/firestore";
 import { CORE_COLLECTIONS, CORE_SCHEMA_VERSION } from "../../../shared/firestore/collections.ts";
 import { CorruptDocumentError } from "../../../shared/firestore/corrupt-document-error.ts";
 import { pageFromOverfetch } from "../../../shared/pagination/page.ts";
-import type { AgentSettingsRepository, OrganizationAdminStore, OrganizationPlan, PlanRepository, StoredAgentSettings } from "../../application/ports/console-ports.ts";
+import type { AgentSettingsFields, AgentSettingsRepository, OrganizationAdminStore, OrganizationPlan, PlanRepository, StoredAgentSettings } from "../../application/ports/console-ports.ts";
 
 /** Platform plans, automatic ids (decision 0039). */
 export const PLANS_COLLECTION = "plans";
@@ -108,8 +108,11 @@ export const createFirestoreOrganizationAdminStore = (deps: { readonly firestore
   };
 };
 
-const toSettings = (tenantId: string, data: StoredFields, path: string): AgentSettings => {
-  const parsed = AgentSettingsSchema.safeParse({
+// `ownBudget` is not a stored field: the read model takes it from `selfCap` (decision 0060).
+const StoredSettingsSchema = AgentSettingsSchema.omit({ ownBudget: true });
+
+const toSettings = (tenantId: string, data: StoredFields, path: string): AgentSettingsFields => {
+  const parsed = StoredSettingsSchema.safeParse({
     tenantId,
     enabledAgents: data["enabledAgents"],
     webTools: data["webTools"],

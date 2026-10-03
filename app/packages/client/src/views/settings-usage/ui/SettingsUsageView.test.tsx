@@ -17,6 +17,7 @@ vi.setConfig({ testTimeout: 60_000 });
 const READER: Permission[] = ["core.organization.read", "core.usage.read"];
 const ADMIN: Permission[] = [...READER, "core.agent-settings.read", "core.agent-settings.update"];
 const NOW = () => new Date("2026-10-01T12:00:00.000Z");
+const OWN_CAP = { monthlyMicroUsd: 20_000_000, monthlyTokens: 10_000_000 };
 
 const renderView = (routes: FakeRoutes = {}, permissions: readonly Permission[] = ADMIN) =>
   renderApp(
@@ -97,12 +98,31 @@ describe("SettingsUsageView", () => {
     expect(await screen.findByRole("heading", { name: "Nenhum uso neste mês" })).toBeDefined();
   });
 
+  it("says the plan's caps apply and offers no removal while the organization has no own cap", async () => {
+    renderView();
+    const card = await screen.findByRole("region", { name: "Limite próprio da organização" });
+    expect(await within(card).findByText("Sem limite próprio: valem os limites do plano.")).toBeDefined();
+    expect(within(card).getByRole("button", { name: "Salvar limite" })).toBeDefined();
+    expect(within(card).queryByRole("button", { name: "Remover limite próprio" })).toBeNull();
+  });
+
+  it("says when the plan is below part of the organization's own cap", async () => {
+    renderView({ "GET /v1/agent-settings": ok(buildTenantAgentSettings({ ownBudget: { ...OWN_CAP, monthlyTokens: 30_000_000 } })) });
+    const card = await screen.findByRole("region", { name: "Limite próprio da organização" });
+    expect(await within(card).findByText(/onde o limite do plano é menor, vale o do plano/u)).toBeDefined();
+  });
+
   it("saves a lower own cap for the organization and removes it", async () => {
     const patches: FakeRequest[] = [];
+    // The server's state: the own cap last saved, which lowers the plan's caps in force.
+    let own: Record<string, number> | null = null;
+    const settings = () => buildTenantAgentSettings(own === null ? {} : { ownBudget: own, budget: own });
     const { user } = renderView({
+      "GET /v1/agent-settings": () => ok(settings()),
       "PATCH /v1/agent-settings": (request: FakeRequest) => {
         patches.push(request);
-        return ok(buildTenantAgentSettings());
+        own = (request.body as { budget: Record<string, number> | null }).budget;
+        return ok(settings());
       },
     });
     const card = await screen.findByRole("region", { name: "Limite próprio da organização" });
@@ -119,6 +139,7 @@ describe("SettingsUsageView", () => {
     await waitFor(() => expect(patches).toHaveLength(1));
     expect(patches[0]?.query.get("organizationId")).toBe(IDS.organization);
     expect(patches[0]?.body).toEqual({ budget: { monthlyMicroUsd: 20_000_000, monthlyTokens: 10_000_000 } });
+    expect(await within(card).findByText(/^Limite próprio em vigor: US\$\s20,00 e 10\.000\.000 tokens por mês\.$/u)).toBeDefined();
 
     // Removing lifts a cost guard: it asks first, and Cancel sends nothing.
     await user.click(await within(card).findByRole("button", { name: "Remover limite próprio" }));
@@ -129,6 +150,7 @@ describe("SettingsUsageView", () => {
     await user.click(within(await screen.findByRole("alertdialog")).getByRole("button", { name: "Remover limite" }));
     await waitFor(() => expect(patches).toHaveLength(2));
     expect(patches[1]?.body).toEqual({ budget: null });
+    await waitFor(() => expect(within(card).queryByRole("button", { name: "Remover limite próprio" })).toBeNull());
   });
 
   it("explains a cap above the plan instead of a generic validation error", async () => {
@@ -141,7 +163,7 @@ describe("SettingsUsageView", () => {
   });
 
   it("closes the remove confirmation on a failure and shows why next to the form", async () => {
-    const { user } = renderView({ "PATCH /v1/agent-settings": apiError(403, "FORBIDDEN") });
+    const { user } = renderView({ "GET /v1/agent-settings": ok(buildTenantAgentSettings({ ownBudget: OWN_CAP, budget: OWN_CAP })), "PATCH /v1/agent-settings": apiError(403, "FORBIDDEN") });
     const card = await screen.findByRole("region", { name: "Limite próprio da organização" });
     await user.click(await within(card).findByRole("button", { name: "Remover limite próprio" }));
     await user.click(within(await screen.findByRole("alertdialog")).getByRole("button", { name: "Remover limite" }));

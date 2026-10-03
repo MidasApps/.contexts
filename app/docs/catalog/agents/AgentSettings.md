@@ -20,6 +20,7 @@ Per-organization configuration of the agent runtime: enabled subagents, web tool
 | `createdAt` | yes | `none` | When the settings were created (UTC). |  |
 | `enabledAgents` | yes | `none` | Subagents the supervisor may delegate to in this tenant. |  |
 | `guardrails` | yes | `none` | Tenant-tunable guardrail levels. |  |
+| `ownBudget` | yes | `none` | The organization's own lower cap as it set it; null when it set none and the plan's (or staff override's) caps apply. |  |
 | `tenantId` | yes | `none` | Organization the settings belong to (document id). |  |
 | `updatedAt` | yes | `none` | When the settings last changed (UTC). |  |
 | `updatedBy` | yes | `personal` | Uid of the last editor; null for defaults. |  |
@@ -48,8 +49,12 @@ _None._
       "pii": "warn"
     },
     "budget": {
-      "monthlyMicroUsd": 50000000,
+      "monthlyMicroUsd": 30000000,
       "monthlyTokens": 20000000
+    },
+    "ownBudget": {
+      "monthlyMicroUsd": 30000000,
+      "monthlyTokens": 25000000
     },
     "updatedBy": "uA1b2C3d4E5f6G7h8I9j",
     "createdAt": "2026-09-29T14:30:00.000Z",
