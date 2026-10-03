@@ -13,6 +13,7 @@ export {
   type ArchiveNoteCommand,
   type CreateNoteCommand,
 } from "./note-commands.schema.ts";
+export { EXAMPLE_ENDPOINTS, listNotesEndpoint } from "./note-endpoints.ts";
 
 /**
  * Every contract of the module, for the workspace catalog (ids `example.<Name>`). The note

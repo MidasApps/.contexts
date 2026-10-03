@@ -36,8 +36,12 @@
     "emptyDescription": "Set the greeting and the default budget in the module settings.",
     "emptyDescriptionReadOnly": "Ask an organization admin to set up this module.",
     "configure": "Set up",
-    "recordItem": "Record item",
-    "recorded": "Item recorded.",
-    "recordedDescription": "Demonstrates the write permission: nothing was saved."
+    "notesTitle": "Notes",
+    "notesDescription": "Created by agents, workflows or the chat. This list only shows them.",
+    "notesLoading": "Loading the notes…",
+    "notesEmptyTitle": "No notes yet",
+    "notesEmptyDescription": "Ask an agent in the chat to create a note; it shows up here.",
+    "notesArchived": "Archived",
+    "notesLoadMore": "Load more"
   }
 }

@@ -137,7 +137,8 @@ service cloud.firestore {
     }
 
     // Notes of the example module (SP3 Task 19): written only by its commands (Admin SDK),
-    // through the agent runtime and `/v1` approvals. A derived app removes this with the module.
+    // through the agent runtime and `/v1` approvals, and listed by `GET /v1/organizations/{id}/notes`.
+    // A derived app removes this with the module.
     match /notes/{noteId} {
       allow read, write: if false;
     }

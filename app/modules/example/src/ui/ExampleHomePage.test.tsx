@@ -1,5 +1,5 @@
 import { defineClientModule, type ModulePageProps } from "@core/client/app-shell";
-import { apiError, expectNoAxeViolations, IDS, MEMBER_PERMISSIONS, ok, renderApp, shellRoutes, type FakeRoutes } from "@core/client/testing";
+import { apiError, expectNoAxeViolations, IDS, MEMBER_PERMISSIONS, ok, page, renderApp, shellRoutes, type FakeRequest, type FakeRoutes } from "@core/client/testing";
 import { ModulePageView } from "@core/client/views/module-page";
 import { screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
@@ -18,6 +18,18 @@ const testModule = defineClientModule({ manifest: exampleManifest, pages: { "": 
 const VIEWER = [...MEMBER_PERMISSIONS, "example.item.read"];
 const EDITOR = [...VIEWER, "example.item.write"];
 const SETTINGS_ROUTE = "GET /v1/organizations/:organizationId/module-settings/:moduleId";
+const NOTES_ROUTE = "GET /v1/organizations/:organizationId/notes";
+
+const note = (id: string, title: string, extra: Record<string, unknown> = {}) => ({
+  id,
+  tenantId: IDS.organization,
+  authorId: IDS.user,
+  title,
+  body: "",
+  createdAt: "2026-09-30T12:00:00.000Z",
+  updatedAt: "2026-09-30T12:00:00.000Z",
+  ...extra,
+});
 
 const storedSettings = (values: Record<string, unknown> | null) =>
   ok({ tenantId: IDS.organization, moduleId: "example", values, updatedAt: values === null ? null : "2026-09-29T15:00:00.000Z", updatedBy: values === null ? null : IDS.user });
@@ -33,7 +45,7 @@ const renderPage = (args: { permissions?: readonly string[]; routes?: FakeRoutes
       path: `/o/${IDS.organization}/p/${IDS.project}/m/example`,
       modules: [testModule],
       locale: args.locale ?? "pt-BR",
-      routes: shellRoutes((args.permissions ?? EDITOR), { [SETTINGS_ROUTE]: CONFIGURED, ...args.routes }),
+      routes: shellRoutes((args.permissions ?? EDITOR), { [SETTINGS_ROUTE]: CONFIGURED, [NOTES_ROUTE]: page([]), ...args.routes }),
     },
   );
 
@@ -65,19 +77,47 @@ describe("ExampleHomePage", () => {
     expect(await screen.findByText("R$1,234.56")).toBeDefined();
   });
 
-  it("offers the write action to editors and confirms it with a toast", async () => {
-    const { user } = renderPage();
+  it("lists the organization's notes newest first, with the archived ones marked, and loads the next page", async () => {
+    const requests: FakeRequest[] = [];
+    const notesRoute = (request: FakeRequest) => {
+      requests.push(request);
+      return request.query.get("cursor") === "next"
+        ? page([note("NoteOld0000000000001", "Older note")], { limit: 20 })
+        : page([note("NoteNew0000000000001", "Supplier follow-up", { body: "Call Ana on Monday." }), note("NoteArc0000000000001", "Archived note", { archivedAt: "2026-09-30T13:00:00.000Z" })], { cursor: "next", limit: 20 });
+    };
+    const { user, container } = renderPage({ permissions: VIEWER, routes: { [NOTES_ROUTE]: notesRoute } });
 
-    await user.click(await screen.findByRole("button", { name: "Registrar item" }));
+    expect(await screen.findByText("Supplier follow-up")).toBeDefined();
+    expect(screen.getByText("Call Ana on Monday.")).toBeDefined();
+    expect(screen.getByText("Arquivada")).toBeDefined();
+    await expectNoAxeViolations(container);
+    await user.click(screen.getByRole("button", { name: "Carregar mais" }));
 
-    expect(await screen.findByText("Item registrado.")).toBeDefined();
+    expect(await screen.findByText("Older note")).toBeDefined();
+    expect(screen.queryByRole("button", { name: "Carregar mais" })).toBeNull();
+    expect(requests.map((request) => [request.params["organizationId"], request.query.get("limit")])).toEqual([[IDS.organization, "20"], [IDS.organization, "20"]]);
   });
 
-  it("hides the write action from viewers", async () => {
-    renderPage({ permissions: VIEWER });
+  it("says where notes come from while the organization has none, and offers no write action", async () => {
+    renderPage();
 
-    expect(await screen.findByText("R$ 1.234,56")).toBeDefined();
+    expect(await screen.findByRole("heading", { name: "Nenhuma nota ainda" })).toBeDefined();
     expect(screen.queryByRole("button", { name: "Registrar item" })).toBeNull();
+  });
+
+  it("shows an error with retry in the notes card when the server does not serve the notes", async () => {
+    renderPage({ routes: { [NOTES_ROUTE]: apiError(404, "NOT_FOUND") } });
+
+    const notes = (await screen.findByRole("heading", { name: "Notas" })).closest("[data-slot=section-card]");
+    if (!(notes instanceof HTMLElement)) throw new Error("notes card not found");
+    expect(await within(notes).findByRole("button", { name: "Tentar novamente" })).toBeDefined();
+  });
+
+  it("shows no-access in the notes card when example.note.read is refused", async () => {
+    renderPage({ routes: { [NOTES_ROUTE]: apiError(403, "FORBIDDEN") } });
+
+    expect(await screen.findByRole("heading", { name: "Você não tem acesso a esta página" })).toBeDefined();
+    expect(screen.getByText("R$ 1.234,56")).toBeDefined();
   });
 
   it("shows an empty state with a link to the module settings until the module is set up", async () => {

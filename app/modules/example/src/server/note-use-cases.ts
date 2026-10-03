@@ -1,5 +1,5 @@
 import { type Note, type NoteId, type Principal, type TenantId, type TenantNodeRef, UserIdSchema } from "@core/contracts";
-import { type AccessCore, AccessDeniedError, auditActorOf, type AuditWriter, type Clock, err, ok, type Result, type UnitOfWork } from "@core/services";
+import { type AccessCore, AccessDeniedError, auditActorOf, type AuditWriter, type Clock, err, ok, type Page, type PageRequest, type Result, type UnitOfWork } from "@core/services";
 import { type CreateNoteCommand, NOTE_PERMISSIONS } from "../contracts/note-commands.schema.ts";
 import type { NoteRepository } from "./note-repository.ts";
 
@@ -100,5 +100,19 @@ export const makeArchiveNote =
     return archived === null ? err(new NoteNotFoundError(command.noteId)) : ok(archived);
   };
 
+/**
+ * Lists the organization's notes, newest first, archived ones included (`example.note.read` at
+ * the organization: notes belong to the tenant, not to a project). Reads are not audited.
+ */
+export const makeListNotes =
+  (deps: Pick<NotesDeps, "notes" | "access">) =>
+  async (query: { readonly actor: Principal; readonly tenantId: TenantId; readonly page: PageRequest }): Promise<Result<Page<Note>, AccessDeniedError>> => {
+    const node = { level: "organization", tenantId: query.tenantId } as const;
+    const decision = await deps.access.forRequest().authorize({ principal: query.actor, permission: NOTE_PERMISSIONS.read, node });
+    if (!decision.allowed) return err(new AccessDeniedError(decision.reason));
+    return ok(await deps.notes.list({ tenantId: query.tenantId, page: query.page }));
+  };
+
 export type CreateNote = ReturnType<typeof makeCreateNote>;
+export type ListNotes = ReturnType<typeof makeListNotes>;
 export type ArchiveNote = ReturnType<typeof makeArchiveNote>;

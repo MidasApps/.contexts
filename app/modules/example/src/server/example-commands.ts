@@ -13,7 +13,7 @@ import type { Firestore } from "firebase-admin/firestore";
 import { z } from "zod";
 import { ArchiveNoteCommandContract, CreateNoteCommandContract } from "../contracts/note-commands.schema.ts";
 import { createFirestoreNoteRepository, type NoteRepository } from "./note-repository.ts";
-import { type ArchiveNote, type CreateNote, makeArchiveNote, makeCreateNote, type NotesDeps } from "./note-use-cases.ts";
+import { type ArchiveNote, type CreateNote, type ListNotes, makeArchiveNote, makeCreateNote, makeListNotes, type NotesDeps } from "./note-use-cases.ts";
 
 /** What the apps hand to the module's server side: the core server's access, audit and Firestore. */
 export type ExampleServerDeps = {
@@ -26,7 +26,7 @@ export type ExampleServerDeps = {
   readonly unitOfWork?: UnitOfWork;
 };
 
-export type ExampleNotes = { readonly createNote: CreateNote; readonly archiveNote: ArchiveNote };
+export type ExampleNotes = { readonly createNote: CreateNote; readonly archiveNote: ArchiveNote; readonly listNotes: ListNotes };
 
 /** The module's note use cases over Firestore `notes`. */
 export const createExampleNotes = (deps: ExampleServerDeps): ExampleNotes => {
@@ -37,7 +37,7 @@ export const createExampleNotes = (deps: ExampleServerDeps): ExampleNotes => {
     unitOfWork: deps.unitOfWork ?? createFirestoreUnitOfWork({ firestore: deps.firestore }),
     clock: deps.clock ?? systemClock,
   };
-  return { createNote: makeCreateNote(bound), archiveNote: makeArchiveNote(bound) };
+  return { createNote: makeCreateNote(bound), archiveNote: makeArchiveNote(bound), listNotes: makeListNotes(bound) };
 };
 
 const TARGET_CONTRACT = "example.Note";

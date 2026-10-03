@@ -36,8 +36,12 @@
     "emptyDescription": "Defina a saudação e o orçamento padrão nas configurações do módulo.",
     "emptyDescriptionReadOnly": "Peça a um administrador da organização para configurar este módulo.",
     "configure": "Configurar",
-    "recordItem": "Registrar item",
-    "recorded": "Item registrado.",
-    "recordedDescription": "Demonstração da permissão de escrita: nada foi salvo."
+    "notesTitle": "Notas",
+    "notesDescription": "Criadas por agentes, fluxos de trabalho ou pelo chat. Esta lista só mostra as notas.",
+    "notesLoading": "Carregando as notas…",
+    "notesEmptyTitle": "Nenhuma nota ainda",
+    "notesEmptyDescription": "Peça a um agente no chat para criar uma nota; ela aparece aqui.",
+    "notesArchived": "Arquivada",
+    "notesLoadMore": "Carregar mais"
   }
 }

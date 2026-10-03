@@ -267,28 +267,39 @@ three files, use it through `useTranslations("<namespace>")`, then run
 
 1. **Package:** copy `modules/example` to `modules/<id>` and rename the package
    (`@core/module-<id>`); keep the `exports` (`./manifest`, `./contracts`,
-   `./client`). Modules may import `@core/contracts` and `@core/client`, never
-   another module or an app.
+   `./client`, `./server`, `./agents`). Modules may import `@core/contracts`,
+   `@core/client` and the public API of `@core/services`, never another module or
+   an app.
 2. **Manifest** (`src/manifest.ts`, data only, decision 0015): `defineModule()` with
    the `id`, permissions (`<id>.<resource>.<action>` plus default roles), unit types,
    navigation items (slot `project` or `organization`, permission, order), the
    settings contract and the messages of the three locales. SP3 capabilities
    (agents, tools, workflows, skills) hang off the same manifest (`capabilities.ts`).
 3. **Contracts** (`src/contracts/`): Zod schemas with `defineContract` catalog meta;
-   the module settings page renders the settings contract with `SchemaForm`.
-4. **Client** (`src/client.ts`): `defineClientModule({ manifest, pages })`; `pages`
+   the module settings page renders the settings contract with `SchemaForm`. `/v1`
+   endpoints of the module are `defineEndpoint` descriptors with ids
+   `<id>.<operation>`, listed in one array (`EXAMPLE_ENDPOINTS`, decision 0063).
+4. **Server** (`src/server/`, optional): the use cases, their repositories, the
+   agent commands (`createExampleCommands`) and the `/v1` handlers
+   (`createExampleRoutes`, each wrapped in `withApiRoute` from `@core/services`).
+5. **Client** (`src/client.ts`): `defineClientModule({ manifest, pages })`; `pages`
    maps the path after `/m/<id>/` to a lazily loaded page component (module pages
-   need no route files in the apps).
-5. **Messages:** `src/messages/{pt-BR,en-US,es-419}.json`; `pnpm i18n:check`.
-6. **Install it** in the composition files (the only places that name modules):
+   need no route files in the apps). Pages read the module's endpoints through
+   `useCallEndpoint` and `cursorListQuery` (`@core/client/shared/api`).
+6. **Messages:** `src/messages/{pt-BR,en-US,es-419}.json`; `pnpm i18n:check`.
+7. **Install it** in the composition files (the only places that name modules):
    `apps/web/src/modules.ts` (server manifests), `apps/web/src/client/modules.ts`
    and `apps/desktop/src/modules.ts` (client modules), `catalog.modules.ts`
-   (contracts in the generated catalog), `transpilePackages` in
-   `apps/web/next.config.ts`, and the workspace dependency in each app's
-   `package.json`. Tailwind already scans `modules/*/src`.
-7. **Verify:** `pnpm -F @core/module-<id> test`, `pnpm contracts:catalog` (commit the
-   regenerated `docs/catalog`), `pnpm lint && pnpm typecheck && pnpm i18n:check`,
-   and an e2e journey through its page when it has one.
+   (contracts in the generated catalog, `endpoints` in the OpenAPI),
+   `transpilePackages` in `apps/web/next.config.ts`, and the workspace dependency
+   in each app's `package.json`. Tailwind already scans `modules/*/src`. A module
+   with `/v1` endpoints also goes in `apps/web/src/server/modules.ts`
+   (`createModuleRoutes`, `MODULE_ENDPOINT_IDS`) and gets one route file per path
+   under `apps/web/src/app/v1/` (`export const GET = route("<id>.<operation>")`);
+   its Firestore queries add their composite indexes to `firestore.indexes.json`.
+8. **Verify:** `pnpm -F @core/module-<id> test`, `pnpm contracts:catalog` (commit the
+   regenerated `docs/catalog` and `docs/openapi`), `pnpm lint && pnpm typecheck &&
+   pnpm i18n:check`, and an e2e journey through its page when it has one.
 
 ## Starting a new app from this core
 

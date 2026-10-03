@@ -1,6 +1,7 @@
-import { createExampleCommands, type ExampleServerDeps } from "@core/module-example/server";
-import type { ContractCommand } from "@core/services";
-import type { CoreServerModule } from "@core/services/composition";
+import { EXAMPLE_ENDPOINTS } from "@core/module-example/contracts";
+import { createExampleCommands, createExampleRoutes, type ExampleServerDeps } from "@core/module-example/server";
+import type { ApiRouteDeps, ContractCommand } from "@core/services";
+import type { CoreRoutes, CoreServerModule } from "@core/services/composition";
 import { INSTALLED_MODULES } from "@/modules";
 
 /**
@@ -15,3 +16,9 @@ export const serverModules: readonly CoreServerModule[] = INSTALLED_MODULES;
  * agent runtime derives its tool from (`apps/mastra/src/modules.ts`).
  */
 export const createModuleCommands = (deps: ExampleServerDeps): ContractCommand[] => [...createExampleCommands(deps)];
+
+/** Ids of the installed modules' `/v1` endpoints, so `route(endpointId)` accepts them (`src/server/core.ts`). */
+export const MODULE_ENDPOINT_IDS: readonly string[] = EXAMPLE_ENDPOINTS.map((endpoint) => endpoint.id);
+
+/** The installed modules' `/v1` handlers, served next to the core routes (`src/server/runtime-routes.ts`). */
+export const createModuleRoutes = (deps: ExampleServerDeps & { readonly pipeline: ApiRouteDeps }): CoreRoutes => ({ ...createExampleRoutes(deps) });

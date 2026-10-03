@@ -13,6 +13,8 @@ import { RATE_LIMIT_BUCKETS_COLLECTION } from "./rate-limit/firestore-rate-limit
 
 // `firestore.indexes.json` review (contracts/firebase-firestore.md §7, §20; decision 0006 §1).
 const WORKSPACE_ROOT = path.resolve(import.meta.dirname, "../../../../..");
+/** `NOTES_COLLECTION` of `modules/example`: the core never imports a module, so the name is repeated here. */
+const EXAMPLE_NOTES_COLLECTION = "notes";
 
 const IndexFieldSchema = z.looseObject({
   fieldPath: z.string(),
@@ -67,6 +69,8 @@ const REQUIRED = [
   signature("conversations", ["tenantId:ASCENDING", "ownerId:ASCENDING", "deletedAt:ASCENDING", "archived:ASCENDING", "pinned:DESCENDING", "lastMessageAt:DESCENDING"]),
   signature("conversations", ["tenantId:ASCENDING", "ownerId:ASCENDING", "deletedAt:ASCENDING", "archived:ASCENDING", "searchTokens:CONTAINS", "pinned:DESCENDING", "lastMessageAt:DESCENDING"]),
   signature("conversations", ["tenantId:ASCENDING", "activeStreamStartedAt:ASCENDING"]),
+  // Example module notes (`GET /v1/organizations/{id}/notes`, decision 0063).
+  signature(EXAMPLE_NOTES_COLLECTION, ["tenantId:ASCENDING", "createdAt:DESCENDING"]),
 ];
 
 /**
@@ -90,6 +94,7 @@ const KNOWN_COLLECTIONS = new Set<string>([
   CONVERSATIONS_COLLECTION,
   CUSTOM_AGENTS_COLLECTION,
   CUSTOM_SKILLS_COLLECTION,
+  EXAMPLE_NOTES_COLLECTION,
 ]);
 
 describe("firestore.indexes.json", () => {

@@ -1,6 +1,6 @@
 import { randomBytes } from "node:crypto";
 import { NoteIdSchema, PrincipalSchema, TenantIdSchema } from "@core/contracts";
-import { createAccessCore, createFirebaseAdmin, createFirestoreAuditLogWriter, createInMemoryAccessStore, makeRecordAudit, systemClock } from "@core/services";
+import { createAccessCore, createFirebaseAdmin, createFirestoreAuditLogWriter, createInMemoryAccessStore, decodeCursor, makeRecordAudit, systemClock } from "@core/services";
 import { Timestamp } from "firebase-admin/firestore";
 import { describe, expect, it } from "vitest";
 import { exampleManifest } from "../manifest.ts";
@@ -62,5 +62,26 @@ describe("example notes (Firestore emulator)", () => {
     expect(archived.ok && again.ok && archived.data.archivedAt === again.data.archivedAt).toBe(true);
     expect((await auditOf("MODULE_RECORD_UPDATED")).filter((entry) => (entry["target"] as { id?: string }).id === created.data.id)).toHaveLength(1);
     expect(await notes.archiveNote({ ...command(), noteId: NoteIdSchema.parse("Missing0000000000001") })).toMatchObject({ ok: false, error: { code: "NOTE_NOT_FOUND" } });
+  });
+
+  it("lists the organization's notes newest first in cursor pages and none of another organization", async () => {
+    // One second apart and after every other note of this run, so the order does not depend on timing.
+    let seconds = 0;
+    const listing = createExampleNotes({ firestore: firebase.firestore, access, audit, clock: { now: () => new Date(Date.UTC(2030, 0, 1, 0, 0, (seconds += 1))) } });
+    for (const title of ["List one", "List two", "List three"]) {
+      const created = await listing.createNote({ ...command(), input: { title } });
+      if (!created.ok) throw new Error("the member may create notes");
+    }
+    const firstPage = await notes.listNotes({ actor: VIEWER, tenantId: TENANT, page: { after: undefined, limit: 2 } });
+    const after = firstPage.ok && firstPage.data.nextCursor !== null ? decodeCursor(firstPage.data.nextCursor) : null;
+    if (!firstPage.ok || after === null) throw new Error("expected a second page");
+    const rest = await notes.listNotes({ actor: VIEWER, tenantId: TENANT, page: { after, limit: 100 } });
+    if (!rest.ok) throw new Error("the viewer may read notes");
+    const listed = [...firstPage.data.items, ...rest.data.items];
+    expect(listed.slice(0, 3).map((note) => note.title)).toEqual(["List three", "List two", "List one"]);
+    expect(new Set(listed.map((note) => note.id)).size).toBe(listed.length);
+    expect(listed.every((note) => note.tenantId === TENANT)).toBe(true);
+    const other = await notes.listNotes({ actor: MEMBER, tenantId: OTHER, page: { after: undefined, limit: 20 } });
+    expect(other).toMatchObject({ ok: false, error: { code: "ACCESS_DENIED" } });
   });
 });
