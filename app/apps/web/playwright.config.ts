@@ -43,8 +43,10 @@ export default defineConfig({
     { name: "mobile-chrome", testIgnore: SINGLE_BROWSER_SPECS, use: { ...devices["Pixel 7"], storageState: owner }, dependencies: ["setup"] },
     { name: "console", testMatch: CONSOLE_SPECS, use: { ...devices["Desktop Chrome"], storageState: owner }, dependencies: ["setup"] },
     // The chat journeys (SP4) run once, on chromium: each one streams through the agent runtime,
-    // and the browser matrix above already covers the shell they are mounted in.
-    { name: "chat", testMatch: CHAT_SPECS, use: { ...devices["Desktop Chrome"], storageState: owner }, dependencies: ["setup"] },
+    // and the browser matrix above already covers the shell they are mounted in. One at a time:
+    // with two or four streams on one local runtime next to the browsers and emulators, some
+    // turns never started streaming before their timeouts; serially all of them pass (follow-up #80).
+    { name: "chat", workers: 1, testMatch: CHAT_SPECS, use: { ...devices["Desktop Chrome"], storageState: owner }, dependencies: ["setup"] },
   ],
   webServer: [
     e2eWebServer(env, { webAppDir: import.meta.dirname }),
