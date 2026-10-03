@@ -165,7 +165,8 @@ export function RunsSection({ context, workflows, onStart, online }: RunsSection
   const setFilters = (next: TenantRunFilters): void => search.set({ workflowId: next.workflowId, status: next.status });
   const [canceling, setCanceling] = useState<WorkflowRun | null>(null);
   const runs = useTenantWorkflowRuns(organization.id, filters);
-  const paged = useCursorPages(runs, TENANT_RUNS_PAGE_LIMIT, t("pagination"));
+  // The page joins the filters in the URL; a filter change returns to the first page.
+  const paged = useCursorPages(runs, TENANT_RUNS_PAGE_LIMIT, t("pagination"), search);
   const canCancel = context.permissions.includes("core.workflow-run.cancel") && online;
   const actions: RowActions = { organizationId: organization.id, onCancel: canCancel ? setCanceling : null };
   const starterName = useMemberNames({ organizationId: organization.id, canReadMembers: context.permissions.includes("core.member.read") });

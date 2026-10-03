@@ -25,6 +25,20 @@ describe("useCursorPages", () => {
     expect(fetchNextPage).toHaveBeenCalledOnce();
   });
 
+  it("keeps the page where the caller says (the URL) and loads the pages before a linked one", async () => {
+    const fetchNextPage = vi.fn(() => Promise.resolve());
+    const setPage = vi.fn();
+    const { result, rerender } = renderHook(({ state }) => useCursorPages(state, 2, undefined, { page: 3, setPage }), { initialProps: { state: list([1, 2], true, fetchNextPage) } });
+    // Page 3 of a shared link: the cursors before it are fetched one at a time.
+    expect(fetchNextPage).toHaveBeenCalledOnce();
+    rerender({ state: list([1, 2, 3, 4], true, fetchNextPage) });
+    expect(fetchNextPage).toHaveBeenCalledTimes(2);
+    rerender({ state: list([1, 2, 3, 4, 5], false, fetchNextPage) });
+    expect(result.current.rows).toEqual([5]);
+    act(() => result.current.pagination?.onPrevious());
+    expect(setPage).toHaveBeenCalledWith(2);
+  });
+
   it("clamps the page when rows disappear", async () => {
     const { result, rerender } = renderHook(({ state }) => useCursorPages(state, 2), { initialProps: { state: list([1, 2, 3], false) } });
     await act(async () => result.current.pagination?.onNext());

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 /** The parts of an infinite cursor query (`cursorListQuery` + `useInfiniteQuery`) paging needs. */
 export type CursorListState<T> = {
@@ -20,6 +20,9 @@ export type CursorPagination = {
   readonly label?: string;
 };
 
+/** A page kept outside the hook (`useRouteSearch`'s `page`/`setPage`), 1-based. */
+export type PageState = { readonly page: number; readonly setPage: (page: number) => void };
+
 export type CursorPages<T> = {
   /** Rows of the page on screen. */
   readonly rows: readonly T[];
@@ -31,12 +34,22 @@ export type CursorPages<T> = {
  * Previous/next paging over an infinite cursor list (contracts/api.md §9: opaque cursors, no page
  * numbers). Loaded pages stay cached, so "previous" never refetches; "next" fetches the next cursor
  * only when it is not loaded yet. The index is clamped when rows disappear (a revoke on the last page).
+ * With `pageState` the page lives with the caller (the URL): a link to page N loads the cursors
+ * before it, one at a time, and shows the last loaded page meanwhile.
  */
-export const useCursorPages = <T>(query: CursorListState<T>, pageSize: number, label?: string): CursorPages<T> => {
-  const [requested, setRequested] = useState(0);
+export const useCursorPages = <T>(query: CursorListState<T>, pageSize: number, label?: string, pageState?: PageState): CursorPages<T> => {
+  const [localIndex, setLocalIndex] = useState(0);
+  const requested = pageState === undefined ? localIndex : pageState.page - 1;
+  const setRequested = (next: number): void => (pageState === undefined ? setLocalIndex(next) : pageState.setPage(next + 1));
   const all = query.data ?? [];
   const lastLoaded = Math.max(0, Math.ceil(all.length / pageSize) - 1);
   const index = Math.min(requested, lastLoaded);
+  // Only a page from outside can be ahead of the loaded ones: "next" fetches before it moves.
+  const behind = pageState !== undefined && requested > lastLoaded && query.hasNextPage && !query.isFetchingNextPage;
+  const { fetchNextPage } = query;
+  useEffect(() => {
+    if (behind) void fetchNextPage();
+  }, [behind, all.length, fetchNextPage]);
   const loadedAhead = all.length > (index + 1) * pageSize;
   const hasNext = loadedAhead || query.hasNextPage;
   const next = async (): Promise<void> => {

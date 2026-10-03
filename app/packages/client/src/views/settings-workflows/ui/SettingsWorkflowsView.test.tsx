@@ -81,6 +81,24 @@ describe("SettingsWorkflowsView: runs", () => {
     });
   });
 
+  it("keeps the runs page in the URL, so a shared link opens the same page", async () => {
+    const firstPage = Array.from({ length: 20 }, (_, index) => buildWorkflowRun({ runId: `run-a${String(index)}` }));
+    const { user, router } = renderView(
+      {
+        "GET /v1/workflows/runs": (request) =>
+          request.query.get("cursor") === "c2" ? page([buildWorkflowRun({ runId: "run-b0" })], { limit: 20 }) : page(firstPage, { cursor: "c2", limit: 20 }),
+      },
+      ADMIN,
+      `${SETTINGS_PATH}?status=running&page=2`,
+    );
+    const table = await screen.findByRole("table", { name: "Execuções de fluxos de Northwind" });
+    expect(await within(table).findByText("run-b0")).toBeDefined();
+    expect(within(table).queryByText("run-a0")).toBeNull();
+    await user.click(within(screen.getByRole("navigation", { name: "Páginas de execuções" })).getByRole("button", { name: /Anterior/u }));
+    await waitFor(() => expect(router.current()).toBe(`${SETTINGS_PATH}?status=running`));
+    expect(await within(table).findByText("run-a0")).toBeDefined();
+  });
+
   it("starts a startable workflow from fields of its input schema and opens the run page", async () => {
     const requests: FakeRequest[] = [];
     const { user, router } = renderView({
