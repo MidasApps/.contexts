@@ -112,6 +112,24 @@ describe("SettingsWorkflowsView: runs", () => {
     expect(requests[0]?.body).toEqual({ inputData: { title: "Follow-up" } });
   });
 
+  it("closes an untouched start dialog on Escape and asks before discarding typed input", async () => {
+    const { user } = renderView();
+    await user.click(await screen.findByRole("button", { name: "Iniciar fluxo" }));
+    await screen.findByRole("dialog", { name: "Iniciar fluxo" });
+    await user.keyboard("{Escape}");
+    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+    expect(screen.queryByRole("alertdialog")).toBeNull();
+    await user.click(screen.getByRole("button", { name: "Iniciar fluxo" }));
+    const dialog = await screen.findByRole("dialog", { name: "Iniciar fluxo" });
+    await user.click(within(dialog).getByRole("combobox", { name: /Fluxo/u }));
+    await user.click(await screen.findByRole("option", { name: /Demonstração de aprovação/u }));
+    await user.type(within(dialog).getByRole("textbox", { name: /Título/u }), "Follow-up");
+    await user.keyboard("{Escape}");
+    const question = await screen.findByRole("alertdialog", { name: "Descartar alterações?" });
+    await user.click(within(question).getByRole("button", { name: "Descartar" }));
+    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+  });
+
   it("edits the input as JSON when asked, and back as fields", async () => {
     const requests: FakeRequest[] = [];
     const { user } = renderView({
@@ -247,6 +265,22 @@ describe("SettingsWorkflowsView: schedules", () => {
     expect(requests[0]?.body).toEqual({ workflowId: "usage-report", slug: "weekdays", cron: "0 9 * * 1-5", timezone: "America/Sao_Paulo", inputData: {} });
     // A workflow that declares no input asks for none.
     expect(within(dialog).queryByRole("group", { name: /Dados de entrada/u })).toBeNull();
+  });
+
+  it("closes an untouched schedule editor on Escape and asks before discarding a typed one", async () => {
+    const { user } = await openSchedules();
+    await user.click(screen.getByRole("button", { name: "Novo agendamento" }));
+    await screen.findByRole("dialog", { name: "Novo agendamento" });
+    await user.keyboard("{Escape}");
+    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+    expect(screen.queryByRole("alertdialog")).toBeNull();
+    await user.click(screen.getByRole("button", { name: "Novo agendamento" }));
+    const dialog = await screen.findByRole("dialog", { name: "Novo agendamento" });
+    await user.type(within(dialog).getByRole("textbox", { name: /Nome curto/u }), "weekdays");
+    await user.keyboard("{Escape}");
+    const question = await screen.findByRole("alertdialog", { name: "Descartar alterações?" });
+    await user.click(within(question).getByRole("button", { name: "Descartar" }));
+    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
   });
 
   it("edits a schedule's input in the fields of its workflow, prefilled with what it sends", async () => {

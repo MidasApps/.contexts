@@ -117,4 +117,20 @@ describe("SettingsRolesView", () => {
     expect(screen.queryByRole("button", { name: /Editar papel/u })).toBeNull();
     expect(screen.queryByRole("button", { name: /Excluir papel/u })).toBeNull();
   });
+
+  it("closes an untouched role editor on Escape and asks before discarding a typed one", async () => {
+    const { user } = renderView();
+    await user.click(await screen.findByRole("button", { name: "Novo papel" }));
+    await screen.findByRole("dialog", { name: "Novo papel" });
+    await user.keyboard("{Escape}");
+    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+    expect(screen.queryByRole("alertdialog")).toBeNull();
+    await user.click(screen.getByRole("button", { name: "Novo papel" }));
+    const dialog = await screen.findByRole("dialog", { name: "Novo papel" });
+    await user.type(within(dialog).getByRole("textbox", { name: "Nome" }), "Auditor");
+    await user.keyboard("{Escape}");
+    const question = await screen.findByRole("alertdialog", { name: "Descartar alterações?" });
+    await user.click(within(question).getByRole("button", { name: "Descartar" }));
+    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+  });
 });

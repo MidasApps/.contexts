@@ -141,4 +141,20 @@ describe("SettingsSkillsView", { timeout: 30_000 }, () => {
     renderView(["core.organization.read"]);
     expect(await screen.findByRole("heading", { name: "Você não tem acesso a esta página" })).toBeDefined();
   });
+
+  it("closes an untouched skill editor on Escape and asks before discarding a typed one", async () => {
+    const { user } = renderView(ADMIN);
+    await user.click(await screen.findByRole("button", { name: "Nova habilidade" }));
+    await screen.findByRole("dialog", { name: "Nova habilidade" });
+    await user.keyboard("{Escape}");
+    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+    expect(screen.queryByRole("alertdialog")).toBeNull();
+    await user.click(screen.getByRole("button", { name: "Nova habilidade" }));
+    const dialog = await screen.findByRole("dialog", { name: "Nova habilidade" });
+    await user.type(within(dialog).getByRole("textbox", { name: "Nome" }), "release-notes");
+    await user.keyboard("{Escape}");
+    const question = await screen.findByRole("alertdialog", { name: "Descartar alterações?" });
+    await user.click(within(question).getByRole("button", { name: "Descartar" }));
+    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+  });
 });

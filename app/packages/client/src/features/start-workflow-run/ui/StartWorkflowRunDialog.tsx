@@ -11,6 +11,7 @@ import { useWorkflowInputLabel, useWorkflowLabel } from "#/shared/lib/labels/use
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "#/shared/ui/atoms/Select/Select.tsx";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "#/shared/ui/molecules/Dialog/Dialog.tsx";
+import { useDialogDismissGuard } from "#/shared/ui/molecules/Dialog/dialog-dismiss-guard.tsx";
 import { ApiErrorAlert } from "#/shared/ui/molecules/ErrorState/ApiErrorAlert.tsx";
 import { Field, FieldControl, FieldDescription, FieldError, FieldGroup, FieldLabel } from "#/shared/ui/molecules/Field/Field.tsx";
 import { notify } from "#/shared/ui/molecules/Toaster/notify.ts";
@@ -68,6 +69,9 @@ function StartWorkflowRunForm({ organizationId, workflows, onOpenChange, onStart
   const idempotency = useIdempotencyKey();
   const startable = workflows.filter((workflow) => workflow.startable);
   const [workflowId, setWorkflowId] = useState<string | undefined>(() => (startable.some((workflow) => workflow.id === initialWorkflowId) ? initialWorkflowId : undefined));
+  // Typed work has no draft elsewhere: Esc, an outside click or the X ask before dropping it (decision 0048).
+  const [dirty, setDirty] = useState(false);
+  useDialogDismissGuard(dirty ? "confirmUnsaved" : "allow");
   const [workflowMissing, setWorkflowMissing] = useState(false);
   const [failure, setFailure] = useState<unknown>(null);
   const [pending, setPending] = useState(false);
@@ -107,22 +111,33 @@ function StartWorkflowRunForm({ organizationId, workflows, onOpenChange, onStart
 
   if (startable.length === 0) return <p className="text-sm text-muted-foreground">{t("noneStartable")}</p>;
   return (
-    <form noValidate onSubmit={(event) => void submit(event)} className="flex max-h-[70vh] flex-col gap-5 overflow-y-auto pr-1">
+    <form noValidate onSubmit={(event) => void submit(event)} className="flex flex-col gap-5">
       {failure === null ? null : <ApiErrorAlert error={failure} />}
       <FieldGroup>
-        <WorkflowSelectField startable={startable} workflowId={workflowId} onChange={setWorkflowId} invalid={workflowMissing && selected === undefined} />
+        <WorkflowSelectField
+          startable={startable}
+          workflowId={workflowId}
+          onChange={(next) => {
+            setWorkflowId(next);
+            setDirty(true);
+          }}
+          invalid={workflowMissing && selected === undefined}
+        />
         {selected === undefined ? null : (
           <JsonSchemaFields
             plan={input.plan}
             draft={input.draft}
-            onDraftChange={input.setDraft}
+            onDraftChange={(next) => {
+              input.setDraft(next);
+              setDirty(true);
+            }}
             problems={input.problems}
             labelOf={(field) => inputLabel(selected.id, field)}
             jsonHint={t("inputHint")}
           />
         )}
       </FieldGroup>
-      <DialogFooter className="sticky bottom-0 bg-background pt-2">
+      <DialogFooter>
         <Button type="button" variant="secondary" disabled={pending} onClick={() => onOpenChange(false)}>
           {t("cancel")}
         </Button>

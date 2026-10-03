@@ -400,4 +400,20 @@ describe("SettingsAgentsView", { timeout: 30_000 }, () => {
     renderView(["core.organization.read"]);
     expect(await screen.findByRole("heading", { name: "Você não tem acesso a esta página" })).toBeDefined();
   });
+
+  it("closes an untouched agent editor on Escape and asks before discarding a typed one", async () => {
+    const { user } = renderView(ADMIN);
+    await user.click(await screen.findByRole("button", { name: "Novo agente" }));
+    await screen.findByRole("dialog", { name: "Novo agente" });
+    await user.keyboard("{Escape}");
+    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+    expect(screen.queryByRole("alertdialog")).toBeNull();
+    await user.click(screen.getByRole("button", { name: "Novo agente" }));
+    const dialog = await screen.findByRole("dialog", { name: "Novo agente" });
+    await user.type(await within(dialog).findByRole("textbox", { name: "Nome" }), "Guide");
+    await user.keyboard("{Escape}");
+    const question = await screen.findByRole("alertdialog", { name: "Descartar alterações?" });
+    await user.click(within(question).getByRole("button", { name: "Descartar" }));
+    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+  });
 });

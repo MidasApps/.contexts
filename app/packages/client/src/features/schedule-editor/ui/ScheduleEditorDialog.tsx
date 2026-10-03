@@ -14,6 +14,7 @@ import { Input } from "#/shared/ui/atoms/Input/Input.tsx";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "#/shared/ui/atoms/Select/Select.tsx";
 import { Alert, AlertDescription } from "#/shared/ui/molecules/Alert/Alert.tsx";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "#/shared/ui/molecules/Dialog/Dialog.tsx";
+import { useDialogDismissGuard } from "#/shared/ui/molecules/Dialog/dialog-dismiss-guard.tsx";
 import { ApiErrorAlert } from "#/shared/ui/molecules/ErrorState/ApiErrorAlert.tsx";
 import { Field, FieldControl, FieldDescription, FieldError, FieldGroup, FieldLabel } from "#/shared/ui/molecules/Field/Field.tsx";
 import { TimeZoneSelect } from "#/shared/ui/molecules/TimeZoneSelect/TimeZoneSelect.tsx";
@@ -129,7 +130,14 @@ function ScheduleEditorForm({ organizationId, schedule, workflows, defaultTimeZo
   const callEndpoint = useCallEndpoint();
   const queryClient = useQueryClient();
   const creating = schedule === null;
-  const [draft, setDraft] = useState<Draft>(() => draftOf(schedule, defaultTimeZone));
+  const [draft, keepDraft] = useState<Draft>(() => draftOf(schedule, defaultTimeZone));
+  // Typed work has no draft elsewhere: Esc, an outside click or the X ask before dropping it (decision 0048).
+  const [dirty, setDirty] = useState(false);
+  useDialogDismissGuard(dirty ? "confirmUnsaved" : "allow");
+  const setDraft = (next: Draft): void => {
+    keepDraft(next);
+    setDirty(true);
+  };
   const [problems, setProblems] = useState<Set<Problem>>(new Set());
   const [failure, setFailure] = useState<unknown>(null);
   const [pending, setPending] = useState(false);
@@ -168,7 +176,7 @@ function ScheduleEditorForm({ organizationId, schedule, workflows, defaultTimeZo
   };
 
   return (
-    <form noValidate onSubmit={(event) => void submit(event)} className="flex max-h-[70vh] flex-col gap-5 overflow-y-auto pr-1">
+    <form noValidate onSubmit={(event) => void submit(event)} className="flex flex-col gap-5">
       {failure === null ? null : <Refusal error={failure} />}
       <FieldGroup>
         {creating ? <IdentityFields draft={draft} setDraft={setDraft} problems={problems} schedulable={workflows.filter((workflow) => workflow.schedulable)} /> : null}
@@ -185,7 +193,10 @@ function ScheduleEditorForm({ organizationId, schedule, workflows, defaultTimeZo
           <JsonSchemaFields
             plan={input.plan}
             draft={input.draft}
-            onDraftChange={input.setDraft}
+            onDraftChange={(next) => {
+              input.setDraft(next);
+              setDirty(true);
+            }}
             problems={input.problems}
             labelOf={(field) => inputLabel(draft.workflowId ?? "", field)}
             jsonHint={t("inputHint")}
@@ -193,7 +204,7 @@ function ScheduleEditorForm({ organizationId, schedule, workflows, defaultTimeZo
         )}
       </FieldGroup>
       <p className="text-xs text-muted-foreground">{t("nextFireAfterSave")}</p>
-      <DialogFooter className="sticky bottom-0 bg-background pt-2">
+      <DialogFooter>
         <Button type="button" variant="secondary" disabled={pending} onClick={() => onOpenChange(false)}>
           {t("cancel")}
         </Button>

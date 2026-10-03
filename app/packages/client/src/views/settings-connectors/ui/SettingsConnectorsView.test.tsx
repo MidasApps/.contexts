@@ -260,4 +260,20 @@ describe("SettingsConnectorsView", { timeout: 30_000 }, () => {
       setOnline(true);
     }
   });
+
+  it("closes an untouched connector editor on Escape and asks before discarding a typed one", async () => {
+    const { user } = renderView();
+    await user.click(await screen.findByRole("button", { name: "Novo conector" }));
+    await screen.findByRole("dialog", { name: "Novo conector" });
+    await user.keyboard("{Escape}");
+    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+    expect(screen.queryByRole("alertdialog")).toBeNull();
+    await user.click(screen.getByRole("button", { name: "Novo conector" }));
+    const dialog = await screen.findByRole("dialog", { name: "Novo conector" });
+    await paste(user, within(dialog).getByRole("textbox", { name: "Nome" }), "docs-mcp");
+    await user.keyboard("{Escape}");
+    const question = await screen.findByRole("alertdialog", { name: "Descartar alterações?" });
+    await user.click(within(question).getByRole("button", { name: "Descartar" }));
+    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+  });
 });

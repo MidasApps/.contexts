@@ -10,6 +10,7 @@ import { ApiError } from "#/shared/api/api-error.ts";
 import { useIdempotencyKey } from "#/shared/api/use-idempotency-key.ts";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "#/shared/ui/molecules/Dialog/Dialog.tsx";
+import { useDialogDismissGuard } from "#/shared/ui/molecules/Dialog/dialog-dismiss-guard.tsx";
 import { ApiErrorAlert } from "#/shared/ui/molecules/ErrorState/ApiErrorAlert.tsx";
 import { notify } from "#/shared/ui/molecules/Toaster/notify.ts";
 import { connectorInputOf, draftFromConnector, emptyConnectorDraft, problemsFromDetails, type ConnectorDraft, type DraftProblems } from "../model/connector-draft.ts";
@@ -30,7 +31,14 @@ function ConnectorEditorBody({ organizationId, onOpenChange, connector = null, o
   const callEndpoint = useCallEndpoint();
   const queryClient = useQueryClient();
   const idempotency = useIdempotencyKey();
-  const [draft, setDraft] = useState<ConnectorDraft>(() => (connector === null ? emptyConnectorDraft() : draftFromConnector(connector)));
+  const [draft, keepDraft] = useState<ConnectorDraft>(() => (connector === null ? emptyConnectorDraft() : draftFromConnector(connector)));
+  // Typed work has no draft elsewhere: Esc, an outside click or the X ask before dropping it (decision 0048).
+  const [dirty, setDirty] = useState(false);
+  useDialogDismissGuard(dirty ? "confirmUnsaved" : "allow");
+  const setDraft = (next: ConnectorDraft): void => {
+    keepDraft(next);
+    setDirty(true);
+  };
   const [problems, setProblems] = useState<DraftProblems>({});
   const [failure, setFailure] = useState<unknown>(null);
   const [pending, setPending] = useState(false);
@@ -72,10 +80,10 @@ function ConnectorEditorBody({ organizationId, onOpenChange, connector = null, o
         <DialogTitle>{t(mode === "create" ? "createTitle" : "editTitle", { name: connector?.name ?? "" })}</DialogTitle>
         <DialogDescription>{t(mode === "create" ? "createDescription" : "editDescription")}</DialogDescription>
       </DialogHeader>
-      <form noValidate onSubmit={(event) => void submit(event)} className="flex max-h-[70vh] flex-col gap-5 overflow-y-auto pr-1">
+      <form noValidate onSubmit={(event) => void submit(event)} className="flex flex-col gap-5">
         {failure === null ? null : <ApiErrorAlert error={failure} />}
         <ConnectorFields draft={draft} setDraft={setDraft} problems={problems} typeLocked={connector !== null} />
-        <DialogFooter className="sticky bottom-0 bg-background pt-2">
+        <DialogFooter>
           <Button type="button" variant="secondary" disabled={pending} onClick={() => onOpenChange(false)}>
             {t("cancel")}
           </Button>

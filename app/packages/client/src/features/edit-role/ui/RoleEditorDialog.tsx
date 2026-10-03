@@ -11,6 +11,7 @@ import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
 import { Input } from "#/shared/ui/atoms/Input/Input.tsx";
 import { Textarea } from "#/shared/ui/atoms/Textarea/Textarea.tsx";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "#/shared/ui/molecules/Dialog/Dialog.tsx";
+import { useDialogDismissGuard } from "#/shared/ui/molecules/Dialog/dialog-dismiss-guard.tsx";
 import { ApiErrorAlert } from "#/shared/ui/molecules/ErrorState/ApiErrorAlert.tsx";
 import { Field, FieldControl, FieldError, FieldGroup, FieldLabel } from "#/shared/ui/molecules/Field/Field.tsx";
 import { notify } from "#/shared/ui/molecules/Toaster/notify.ts";
@@ -57,7 +58,14 @@ function RoleEditorDialogBody({ organizationId, customRole: role, onOpenChange, 
   // Without the registry the picker has nothing to offer; saving would only fail "choose a permission".
   const catalogReady = usePermissionCatalogReady();
   const save = useSaveRole(organizationId, role);
-  const [draft, setDraft] = useState<RoleDraft>(() => draftOf(role));
+  const [draft, keepDraft] = useState<RoleDraft>(() => draftOf(role));
+  // Typed work has no draft elsewhere: Esc, an outside click or the X ask before dropping it (decision 0048).
+  const [dirty, setDirty] = useState(false);
+  useDialogDismissGuard(dirty ? "confirmUnsaved" : "allow");
+  const setDraft = (next: RoleDraft): void => {
+    keepDraft(next);
+    setDirty(true);
+  };
   const [problems, setProblems] = useState<RoleDraftProblems>({});
   const [failure, setFailure] = useState<unknown>(null);
   const [pending, setPending] = useState(false);
@@ -89,7 +97,7 @@ function RoleEditorDialogBody({ organizationId, customRole: role, onOpenChange, 
           <DialogTitle>{role === null ? t("createTitle") : t("editTitle", { name: role.name })}</DialogTitle>
           <DialogDescription>{t("description")}</DialogDescription>
         </DialogHeader>
-        <form noValidate onSubmit={(event) => void submit(event)} className="flex max-h-[70vh] flex-col gap-5 overflow-y-auto pr-1">
+        <form noValidate onSubmit={(event) => void submit(event)} className="flex flex-col gap-5">
           {failure === null ? null : <ApiErrorAlert error={failure} />}
           <FieldGroup>
             <Field>
@@ -113,7 +121,7 @@ function RoleEditorDialogBody({ organizationId, customRole: role, onOpenChange, 
               error={problems.permissions === true ? t("errors.permissions") : undefined}
             />
           </FieldGroup>
-          <DialogFooter className="sticky bottom-0 bg-background pt-2">
+          <DialogFooter>
             <Button type="button" variant="secondary" disabled={pending} onClick={() => onOpenChange(false)}>
               {t("cancel")}
             </Button>

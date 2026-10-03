@@ -12,6 +12,7 @@ import { useIdempotencyKey } from "#/shared/api/use-idempotency-key.ts";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
 import { Spinner } from "#/shared/ui/atoms/Spinner/Spinner.tsx";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "#/shared/ui/molecules/Dialog/Dialog.tsx";
+import { useDialogDismissGuard } from "#/shared/ui/molecules/Dialog/dialog-dismiss-guard.tsx";
 import { ApiErrorAlert } from "#/shared/ui/molecules/ErrorState/ApiErrorAlert.tsx";
 import { notify } from "#/shared/ui/molecules/Toaster/notify.ts";
 import { agentInputOf, agentProblemsFromDetails, draftFromAgent, emptyAgentDraft, type AgentDraft, type AgentDraftProblems } from "../model/custom-agent-draft.ts";
@@ -35,7 +36,14 @@ function AgentForm({ organizationId, agent, options, skills, onClose }: FormProp
   const callEndpoint = useCallEndpoint();
   const queryClient = useQueryClient();
   const idempotency = useIdempotencyKey();
-  const [draft, setDraft] = useState<AgentDraft>(() => (agent === null ? emptyAgentDraft() : draftFromAgent(agent)));
+  const [draft, keepDraft] = useState<AgentDraft>(() => (agent === null ? emptyAgentDraft() : draftFromAgent(agent)));
+  // Typed work has no draft elsewhere: Esc, an outside click or the X ask before dropping it (decision 0048).
+  const [dirty, setDirty] = useState(false);
+  useDialogDismissGuard(dirty ? "confirmUnsaved" : "allow");
+  const setDraft = (next: AgentDraft): void => {
+    keepDraft(next);
+    setDirty(true);
+  };
   const [problems, setProblems] = useState<AgentDraftProblems>({});
   const [failure, setFailure] = useState<unknown>(null);
   const [pending, setPending] = useState(false);
@@ -68,10 +76,10 @@ function AgentForm({ organizationId, agent, options, skills, onClose }: FormProp
   };
 
   return (
-    <form noValidate onSubmit={(event) => void submit(event)} className="flex max-h-[70vh] flex-col gap-5 overflow-y-auto pr-1">
+    <form noValidate onSubmit={(event) => void submit(event)} className="flex flex-col gap-5">
       {failure === null ? null : <ApiErrorAlert error={failure} />}
       <CustomAgentFields draft={draft} setDraft={setDraft} problems={problems} options={options} skills={skills} />
-      <DialogFooter className="sticky bottom-0 bg-background pt-2">
+      <DialogFooter>
         <Button type="button" variant="secondary" disabled={pending} onClick={onClose}>
           {t("cancel")}
         </Button>
