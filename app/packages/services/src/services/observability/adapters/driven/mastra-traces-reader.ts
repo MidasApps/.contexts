@@ -1,4 +1,4 @@
-import { EvalDatasetSchema, EvalExperimentSummarySchema, FORWARDED_HEADERS, TraceDetailSchema, TraceSummarySchema } from "@core/contracts";
+import { EvalDatasetItemSchema, EvalDatasetSchema, EvalExperimentSummarySchema, FORWARDED_HEADERS, TraceDetailSchema, TraceSummarySchema } from "@core/contracts";
 import { z } from "zod";
 import type { ServerlessIdTokenSource } from "../../../agents/adapters/driven/serverless-id-token.ts";
 import type { ConsoleError, ConsoleGateway, ConsoleResult } from "../../application/ports/console-gateway.ts";
@@ -7,7 +7,7 @@ const UNAVAILABLE: ConsoleError = { code: "UPSTREAM_UNAVAILABLE", status: 502 };
 
 // Status-only mapping: an upstream error body is never read (like the Mastra gateway).
 const errorOf = (status: number): ConsoleError =>
-  status === 404 ? { code: "NOT_FOUND", status: 404 } : status === 403 ? { code: "FORBIDDEN", status: 403 } : status === 422 || status === 400 ? { code: "VALIDATION_FAILED", status: 400 } : UNAVAILABLE;
+  status === 404 ? { code: "NOT_FOUND", status: 404 } : status === 409 ? { code: "CONFLICT", status: 409 } : status === 403 ? { code: "FORBIDDEN", status: 403 } : status === 422 || status === 400 ? { code: "VALIDATION_FAILED", status: 400 } : UNAVAILABLE;
 
 const paged = <S extends z.ZodType>(schema: S) => z.object({ data: z.array(schema), meta: z.object({ hasMore: z.boolean() }) });
 
@@ -25,7 +25,7 @@ export const createMastraConsoleGateway = (options: {
 }): ConsoleGateway => {
   const baseUrl = options.baseUrl.replace(/\/+$/, "");
   const fetchFn = options.fetch ?? fetch;
-  const call = async <S extends z.ZodType>(request: { method: "GET" | "POST"; path: string; query?: Record<string, string | number | undefined>; body?: unknown; requestId?: string }, schema: S): Promise<ConsoleResult<z.infer<S>>> => {
+  const call = async <S extends z.ZodType>(request: { method: "GET" | "POST" | "DELETE"; path: string; query?: Record<string, string | number | undefined>; body?: unknown; requestId?: string }, schema: S): Promise<ConsoleResult<z.infer<S>>> => {
     const params = new URLSearchParams(Object.entries(request.query ?? {}).flatMap(([key, value]) => (value === undefined ? [] : [[key, String(value)] as [string, string]])));
     const url = `${baseUrl}/console${request.path}${params.size === 0 ? "" : `?${params.toString()}`}`;
     try {
@@ -67,6 +67,23 @@ export const createMastraConsoleGateway = (options: {
     },
     listDatasets: async (query) => {
       const result = await call({ method: "GET", path: "/datasets", query: tenant(query.tenantId) }, z.object({ data: z.array(EvalDatasetSchema) }));
+      return result.ok ? { ok: true, data: result.data.data } : result;
+    },
+    listDatasetItems: async (query) => {
+      const result = unwrapPage(await call({ method: "GET", path: `/datasets/${encodeURIComponent(query.datasetId)}/items`, query: { tenantId: query.tenantId, page: query.page, perPage: query.perPage } }, paged(EvalDatasetItemSchema)));
+      return result.ok ? { ok: true, data: { items: result.data.items, hasMore: result.data.hasMore } } : result;
+    },
+    addDatasetItem: async ({ datasetId, ...body }) => {
+      const result = await call({ method: "POST", path: `/datasets/${encodeURIComponent(datasetId)}/items`, body }, z.object({ data: EvalDatasetItemSchema }));
+      return result.ok ? { ok: true, data: result.data.data } : result;
+    },
+    deleteDatasetItem: async (input) => {
+      const path = `/datasets/${encodeURIComponent(input.datasetId)}/items/${encodeURIComponent(input.itemId)}`;
+      const result = await call({ method: "DELETE", path, query: { tenantId: input.tenantId } }, z.object({ data: z.object({ itemId: z.string().min(1) }) }));
+      return result.ok ? { ok: true, data: result.data.data } : result;
+    },
+    createDataset: async (body) => {
+      const result = await call({ method: "POST", path: "/datasets", body }, z.object({ data: EvalDatasetSchema }));
       return result.ok ? { ok: true, data: result.data.data } : result;
     },
     startExperiment: async ({ requestId, ...body }) => {

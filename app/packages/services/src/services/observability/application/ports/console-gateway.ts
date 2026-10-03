@@ -1,4 +1,4 @@
-import type { EvalDataset, EvalExperimentSummary, TraceDetail, TraceSummary } from "@core/contracts";
+import type { EvalDataset, EvalDatasetItem, EvalExperimentSummary, TraceDetail, TraceSummary } from "@core/contracts";
 import type { Result } from "../../../shared/result/result.ts";
 
 /** A console call refused or failed upstream: the status and code `/v1` answers with. */
@@ -9,6 +9,8 @@ export type ConsoleResult<T> = Result<T, ConsoleError>;
 /** `null` tenant = staff: every tenant. A tenant endpoint always passes its organization. */
 export type TenantFilter = { readonly tenantId: string | null };
 export type PageNumber = { readonly page: number; readonly perPage: number };
+/** One dataset of a tenant: dataset item calls always name the tenant. */
+export type TenantDataset = { readonly tenantId: string; readonly datasetId: string };
 /** ISO instants: traces that started in `[startedAfter, startedBefore)`. */
 export type TraceTimeRange = { readonly startedAfter?: string; readonly startedBefore?: string };
 
@@ -24,6 +26,12 @@ export type ConsoleGateway = {
   /** One experiment; another tenant's is `NOT_FOUND` like a missing one. */
   readonly getExperiment: (query: TenantFilter & { readonly experimentId: string }) => Promise<ConsoleResult<EvalExperimentSummary>>;
   readonly listDatasets: (query: TenantFilter) => Promise<ConsoleResult<EvalDataset[]>>;
+  /** Tenant-only (follow-up 66): another tenant's or a platform dataset is `NOT_FOUND`. */
+  readonly listDatasetItems: (query: TenantDataset & PageNumber) => Promise<ConsoleResult<{ readonly items: EvalDatasetItem[]; readonly hasMore: boolean }>>;
+  readonly addDatasetItem: (input: TenantDataset & { readonly input: string; readonly expectedOutput?: string }) => Promise<ConsoleResult<EvalDatasetItem>>;
+  readonly deleteDatasetItem: (input: TenantDataset & { readonly itemId: string }) => Promise<ConsoleResult<{ readonly itemId: string }>>;
+  /** A name the tenant already uses is `CONFLICT`. */
+  readonly createDataset: (input: { readonly tenantId: string; readonly name: string }) => Promise<ConsoleResult<EvalDataset>>;
   readonly startExperiment: (input: {
     readonly tenantId: string;
     readonly userId: string;

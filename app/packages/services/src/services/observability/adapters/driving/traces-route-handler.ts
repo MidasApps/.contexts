@@ -1,18 +1,22 @@
 import {
+  addEvalDatasetItemEndpoint,
   adminGetExperimentEndpoint,
   adminGetTraceEndpoint,
   adminListDatasetsEndpoint,
   adminListExperimentsEndpoint,
   adminListTracesEndpoint,
+  createEvalDatasetEndpoint,
+  deleteEvalDatasetItemEndpoint,
   getEvalExperimentEndpoint,
   getTraceEndpoint,
+  listEvalDatasetItemsEndpoint,
   listEvalDatasetsEndpoint,
   listEvalExperimentsEndpoint,
   listTracesEndpoint,
   startEvalExperimentEndpoint,
 } from "@core/contracts";
 import { requireStaff, requireTenant } from "../../../platform/adapters/driving/console-guards.ts";
-import { apiError, dataResponse } from "../../../shared/http/api-errors.ts";
+import { apiError, dataResponse, noContentResponse } from "../../../shared/http/api-errors.ts";
 import { withApiRoute, type ApiRouteDeps } from "../../../shared/http/api-route.ts";
 import type { RouteHandler } from "../../../shared/http/route-boundary.ts";
 import type { ConsoleError, ConsoleResult } from "../../application/ports/console-gateway.ts";
@@ -29,7 +33,7 @@ export const OBSERVABILITY_PERMISSIONS = {
 const errorResponse = (error: ConsoleError, requestId: string): Response =>
   error.code === "AGENT_NOT_ENABLED" ? apiError(400, "VALIDATION_FAILED", requestId, [{ field: "agentId", issue: "AGENT_NOT_ENABLED" }]) : apiError(error.status, error.code, requestId);
 
-const answer = <T>(result: ConsoleResult<T>, requestId: string, body: (data: T) => { data: unknown; meta?: unknown }, status: 200 | 202 = 200): Response =>
+const answer = <T>(result: ConsoleResult<T>, requestId: string, body: (data: T) => { data: unknown; meta?: unknown }, status: 200 | 201 | 202 = 200): Response =>
   result.ok ? dataResponse(body(result.data), { status }) : errorResponse(result.error, requestId);
 
 type TraceListQuery = {
@@ -132,7 +136,40 @@ const buildEvalRoutes = (deps: { readonly pipeline: ApiRouteDeps; readonly obser
   }),
 });
 
+/**
+ * `/v1/evals/datasets[/{datasetId}/items[/{itemId}]]`: an organization creates datasets and manages
+ * their items (follow-up 66, decision 0062). The tenant is always the authorized organization;
+ * reading needs `core.eval.read`, every change `core.eval.write`.
+ */
+const buildDatasetItemRoutes = (deps: { readonly pipeline: ApiRouteDeps; readonly observability: ObservabilityServices }): Record<string, RouteHandler> => ({
+  [createEvalDatasetEndpoint.id]: withApiRoute(createEvalDatasetEndpoint, deps.pipeline, async (ctx) => {
+    const tenantId = await requireTenant(ctx, { organizationId: ctx.input.query.organizationId, permission: OBSERVABILITY_PERMISSIONS.evalWrite });
+    if (tenantId instanceof Response) return tenantId;
+    return answer(await deps.observability.createDataset({ tenantId, name: ctx.input.body.name }), ctx.requestId, (data) => ({ data }), 201);
+  }),
+  [listEvalDatasetItemsEndpoint.id]: withApiRoute(listEvalDatasetItemsEndpoint, deps.pipeline, async (ctx) => {
+    const tenantId = await requireTenant(ctx, { organizationId: ctx.input.query.organizationId, permission: OBSERVABILITY_PERMISSIONS.evalRead });
+    if (tenantId instanceof Response) return tenantId;
+    const result = await deps.observability.listDatasetItems({ tenantId, datasetId: ctx.input.params.datasetId, page: ctx.input.query.page, perPage: ctx.input.query.perPage });
+    return answer(result, ctx.requestId, (data) => ({ data: data.items, meta: { hasMore: data.hasMore } }));
+  }),
+  [addEvalDatasetItemEndpoint.id]: withApiRoute(addEvalDatasetItemEndpoint, deps.pipeline, async (ctx) => {
+    const tenantId = await requireTenant(ctx, { organizationId: ctx.input.query.organizationId, permission: OBSERVABILITY_PERMISSIONS.evalWrite });
+    if (tenantId instanceof Response) return tenantId;
+    const { input, expectedOutput } = ctx.input.body;
+    const result = await deps.observability.addDatasetItem({ tenantId, datasetId: ctx.input.params.datasetId, input, ...(expectedOutput === undefined ? {} : { expectedOutput }) });
+    return answer(result, ctx.requestId, (data) => ({ data }), 201);
+  }),
+  [deleteEvalDatasetItemEndpoint.id]: withApiRoute(deleteEvalDatasetItemEndpoint, deps.pipeline, async (ctx) => {
+    const tenantId = await requireTenant(ctx, { organizationId: ctx.input.query.organizationId, permission: OBSERVABILITY_PERMISSIONS.evalWrite });
+    if (tenantId instanceof Response) return tenantId;
+    const result = await deps.observability.deleteDatasetItem({ tenantId, datasetId: ctx.input.params.datasetId, itemId: ctx.input.params.itemId });
+    return result.ok ? noContentResponse() : errorResponse(result.error, ctx.requestId);
+  }),
+});
+
 export const buildObservabilityRoutes = (deps: { readonly pipeline: ApiRouteDeps; readonly observability: ObservabilityServices }): Record<string, RouteHandler> => ({
   ...buildTraceRoutes(deps),
   ...buildEvalRoutes(deps),
+  ...buildDatasetItemRoutes(deps),
 });

@@ -5,6 +5,7 @@ import type { MessageFeedbackStore } from "../conversations/application/ports/me
 import { makeRecordMessageFeedback, type RecordMessageFeedback } from "../conversations/application/use-cases/record-message-feedback.ts";
 import { type GetExperiment, makeGetExperiment } from "../evals/application/use-cases/get-experiment.ts";
 import { type ListDatasets, makeListDatasets } from "../evals/application/use-cases/list-datasets.ts";
+import { type AddDatasetItem, type CreateDataset, type DeleteDatasetItem, type ListDatasetItems, makeDatasetItemUseCases } from "../evals/application/use-cases/manage-dataset-items.ts";
 import { type ListExperiments, makeListExperiments } from "../evals/application/use-cases/list-experiments.ts";
 import { makeStartExperiment, type StartExperiment } from "../evals/application/use-cases/start-experiment.ts";
 import type { Clock } from "../shared/clock/clock.ts";
@@ -18,6 +19,10 @@ export type ObservabilityServices = {
   readonly listTraces: ListTraces;
   readonly getTrace: GetTrace;
   readonly listDatasets: ListDatasets;
+  readonly listDatasetItems: ListDatasetItems;
+  readonly addDatasetItem: AddDatasetItem;
+  readonly deleteDatasetItem: DeleteDatasetItem;
+  readonly createDataset: CreateDataset;
   readonly listExperiments: ListExperiments;
   readonly getExperiment: GetExperiment;
   readonly startExperiment: StartExperiment;
@@ -38,6 +43,7 @@ export const createObservabilityServices = (deps: {
   listTraces: makeListTraces(deps),
   getTrace: makeGetTrace(deps),
   listDatasets: makeListDatasets(deps),
+  ...makeDatasetItemUseCases(deps),
   listExperiments: makeListExperiments(deps),
   getExperiment: makeGetExperiment(deps),
   startExperiment: makeStartExperiment(deps),

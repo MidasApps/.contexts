@@ -32,6 +32,20 @@ const fakeConsole = () => {
     },
     listDatasets: (query) => (calls.push({ op: "listDatasets", tenantId: query.tenantId }), Promise.resolve({ ok: true, data: [] })),
     startExperiment: (input) => (calls.push({ op: "startExperiment", tenantId: input.tenantId, extra: input }), Promise.resolve({ ok: true, data: { experimentId: "exp-1" } })),
+    listDatasetItems: (query) => (calls.push({ op: "listDatasetItems", tenantId: query.tenantId, extra: query.datasetId }), Promise.resolve({ ok: true, data: { items: [], hasMore: false } })),
+    addDatasetItem: (input) => {
+      calls.push({ op: "addDatasetItem", tenantId: input.tenantId, extra: input });
+      return Promise.resolve({ ok: true, data: { id: "item-1", datasetId: input.datasetId, input: input.input, expectedOutput: input.expectedOutput ?? null, createdAt: "2026-10-01T12:00:00.000Z" } });
+    },
+    deleteDatasetItem: (input) => {
+      calls.push({ op: "deleteDatasetItem", tenantId: input.tenantId, extra: input.itemId });
+      return Promise.resolve(input.itemId === "missing" ? { ok: false, error: { code: "NOT_FOUND", status: 404 } } : { ok: true, data: { itemId: input.itemId } });
+    },
+    createDataset: (input) => {
+      calls.push({ op: "createDataset", tenantId: input.tenantId, extra: input.name });
+      if (input.name === "taken") return Promise.resolve({ ok: false, error: { code: "CONFLICT", status: 409 } });
+      return Promise.resolve({ ok: true, data: { id: "ds-new", name: input.name, tenantId: TenantIdSchema.parse(input.tenantId), version: 0, targetIds: ["assistant"], createdAt: "2026-10-01T12:00:00.000Z" } });
+    },
     addFeedbackItem: (input) => (calls.push({ op: "addFeedbackItem", tenantId: input.tenantId, extra: input }), Promise.resolve({ ok: true, data: { datasetId: "ds", itemId: "it" } })),
   };
   return { gateway, calls };
@@ -143,6 +157,57 @@ describe("/v1/evals", () => {
     const started = await callRoute(routes, "evals.startExperiment", `/v1/evals/experiments?organizationId=${ORG_A}`, { method: "POST", as: "alice", body: { datasetId: "ds", agentId: "knowledge" } });
     expect(started.status).toBe(202);
     expect(calls.at(-1)).toMatchObject({ op: "startExperiment", tenantId: ORG_A, extra: { userId: "alice", agentId: "knowledge" } });
+  });
+});
+
+describe("/v1/evals dataset items (follow-up 66)", () => {
+  it("lists a dataset's items under the caller's organization only, and refuses a member without core.eval.read", async () => {
+    const { routes, calls } = await setup();
+    const own = await callRoute(routes, "evals.listDatasetItems", `/v1/evals/datasets/ds-1/items?organizationId=${ORG_A}&page=1&perPage=10`, { as: "alice" });
+    expect(own.status).toBe(200);
+    expect(await own.json()).toEqual({ data: [], meta: { hasMore: false } });
+    expect((await callRoute(routes, "evals.listDatasetItems", `/v1/evals/datasets/ds-1/items?organizationId=${ORG_B}`, { as: "alice" })).status).toBe(404);
+    expect((await callRoute(routes, "evals.listDatasetItems", `/v1/evals/datasets/ds-1/items?organizationId=${ORG_A}`, { as: "mia" })).status).toBe(403);
+    expect(calls.map((call) => [call.op, call.tenantId, call.extra])).toEqual([["listDatasetItems", ORG_A, "ds-1"]]);
+  });
+
+  it("adds a manual item with the organization of the call, never one the body names", async () => {
+    const { routes, calls } = await setup();
+    const added = await callRoute(routes, "evals.addDatasetItem", `/v1/evals/datasets/ds-1/items?organizationId=${ORG_A}`, { method: "POST", as: "alice", body: { input: " Refund policy? ", expectedOutput: "30 days." } });
+    expect(added.status).toBe(201);
+    expect(await added.json()).toMatchObject({ data: { id: "item-1", input: "Refund policy?", expectedOutput: "30 days." } });
+    const smuggled = await callRoute(routes, "evals.addDatasetItem", `/v1/evals/datasets/ds-1/items?organizationId=${ORG_A}`, { method: "POST", as: "alice", body: { input: "x", tenantId: ORG_B } });
+    expect(smuggled.status).toBe(400);
+    expect((await callRoute(routes, "evals.addDatasetItem", `/v1/evals/datasets/ds-1/items?organizationId=${ORG_A}`, { method: "POST", as: "alice", body: { input: "  " } })).status).toBe(400);
+    expect((await callRoute(routes, "evals.addDatasetItem", `/v1/evals/datasets/ds-1/items?organizationId=${ORG_A}`, { method: "POST", as: "mia", body: { input: "x" } })).status).toBe(403);
+    expect(calls).toEqual([{ op: "addDatasetItem", tenantId: ORG_A, extra: { tenantId: ORG_A, datasetId: "ds-1", input: "Refund policy?", expectedOutput: "30 days." } }]);
+  });
+
+  it("deletes an item with 204 and answers 404 for one the runtime does not find", async () => {
+    const { routes, calls } = await setup();
+    const deleted = await callRoute(routes, "evals.deleteDatasetItem", `/v1/evals/datasets/ds-1/items/item-1?organizationId=${ORG_A}`, { method: "DELETE", as: "alice" });
+    expect(deleted.status).toBe(204);
+    expect((await callRoute(routes, "evals.deleteDatasetItem", `/v1/evals/datasets/ds-1/items/missing?organizationId=${ORG_A}`, { method: "DELETE", as: "alice" })).status).toBe(404);
+    expect((await callRoute(routes, "evals.deleteDatasetItem", `/v1/evals/datasets/ds-1/items/item-1?organizationId=${ORG_B}`, { method: "DELETE", as: "alice" })).status).toBe(404);
+    expect(calls.map((call) => [call.op, call.tenantId, call.extra])).toEqual([
+      ["deleteDatasetItem", ORG_A, "item-1"],
+      ["deleteDatasetItem", ORG_A, "missing"],
+    ]);
+  });
+
+  it("creates a dataset of the organization and answers 409 for a name it already uses", async () => {
+    const { routes, calls } = await setup();
+    const created = await callRoute(routes, "evals.createDataset", `/v1/evals/datasets?organizationId=${ORG_A}`, { method: "POST", as: "alice", body: { name: "refunds" } });
+    expect(created.status).toBe(201);
+    expect(await created.json()).toMatchObject({ data: { id: "ds-new", tenantId: ORG_A } });
+    const taken = await callRoute(routes, "evals.createDataset", `/v1/evals/datasets?organizationId=${ORG_A}`, { method: "POST", as: "alice", body: { name: "taken" } });
+    expect(taken.status).toBe(409);
+    expect(await taken.json()).toMatchObject({ error: { code: "CONFLICT" } });
+    expect((await callRoute(routes, "evals.createDataset", `/v1/evals/datasets?organizationId=${ORG_A}`, { method: "POST", as: "mia", body: { name: "x" } })).status).toBe(403);
+    expect(calls.map((call) => [call.op, call.tenantId, call.extra])).toEqual([
+      ["createDataset", ORG_A, "refunds"],
+      ["createDataset", ORG_A, "taken"],
+    ]);
   });
 });
 

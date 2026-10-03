@@ -6,7 +6,7 @@ import { z } from "zod";
 import { buildAgentPrincipal } from "../auth/agent-principal.ts";
 import { buildAgentRequestContext, writeAgentContext } from "../context/write-agent-context.ts";
 import type { AccessPort, WorkflowApprovalPort } from "../runtime/runtime-ports.ts";
-import { addFeedbackItem, listDatasets } from "./dataset-console.ts";
+import { addDatasetItem, addFeedbackItem, createTenantDataset, deleteDatasetItem, listDatasetItems, listDatasets } from "./dataset-console.ts";
 import { EvalRunRecordSchema, type ExperimentStore, getExperimentSummary, listExperimentSummaries, recordEvalRun } from "./eval-console.ts";
 import { actOnAdminSchedule, AdminRunsQuerySchema, cancelAdminRun, listAdminRuns, listAdminSchedules, SCHEDULE_ACTIONS } from "./operations-console.ts";
 import { createTraceReader, type TraceStore } from "./trace-reader.ts";
@@ -187,6 +187,55 @@ const FeedbackItemSchema = z.strictObject({
   comment: z.string().max(1000).nullable(),
 });
 
+const TenantIdSchema = z.string().min(1).max(128);
+const CreateDatasetSchema = z.strictObject({ tenantId: TenantIdSchema, name: z.string().trim().min(1).max(200) });
+const AddItemSchema = z.strictObject({ tenantId: TenantIdSchema, input: z.string().trim().min(1).max(4000), expectedOutput: z.string().trim().min(1).max(4000).optional() });
+
+// Item routes are tenant-only (follow-up 66): no `tenantId` is a client mistake, never "every tenant".
+const datasetItemRoutes = (deps: ConsoleRouteDeps): ApiRoute[] => [
+  registerApiRoute(`${CONSOLE_ROUTES_PREFIX}/datasets`, {
+    method: "POST",
+    requiresAuth: false,
+    handler: guarded(deps, "console_dataset_create_failed", async (ctx) => {
+      const input = CreateDatasetSchema.safeParse(await ctx.json().catch(() => null));
+      if (!input.success) return fail(400, "VALIDATION_FAILED");
+      const created = await createTenantDataset(ctx.mastra.datasets, input.data);
+      return created.ok ? json(201, { data: created.data }) : fail(409, created.code);
+    }),
+  }),
+  registerApiRoute(`${CONSOLE_ROUTES_PREFIX}/datasets/:datasetId/items`, {
+    method: "GET",
+    requiresAuth: false,
+    handler: guarded(deps, "console_dataset_items_failed", async (ctx) => {
+      const tenantId = TenantIdSchema.safeParse(ctx.query("tenantId"));
+      if (!tenantId.success) return fail(400, "VALIDATION_FAILED");
+      const listed = await listDatasetItems(ctx.mastra.datasets, { tenantId: tenantId.data, datasetId: ctx.param("datasetId"), ...pageOf(ctx) });
+      return listed === null ? fail(404, "NOT_FOUND") : json(200, { data: listed.items, meta: { hasMore: listed.hasMore } });
+    }),
+  }),
+  registerApiRoute(`${CONSOLE_ROUTES_PREFIX}/datasets/:datasetId/items`, {
+    method: "POST",
+    requiresAuth: false,
+    handler: guarded(deps, "console_dataset_item_add_failed", async (ctx) => {
+      const input = AddItemSchema.safeParse(await ctx.json().catch(() => null));
+      if (!input.success) return fail(400, "VALIDATION_FAILED");
+      const item = await addDatasetItem(ctx.mastra.datasets, { ...input.data, datasetId: ctx.param("datasetId") });
+      return item === null ? fail(404, "NOT_FOUND") : json(201, { data: item });
+    }),
+  }),
+  registerApiRoute(`${CONSOLE_ROUTES_PREFIX}/datasets/:datasetId/items/:itemId`, {
+    method: "DELETE",
+    requiresAuth: false,
+    handler: guarded(deps, "console_dataset_item_delete_failed", async (ctx) => {
+      const tenantId = TenantIdSchema.safeParse(ctx.query("tenantId"));
+      if (!tenantId.success) return fail(400, "VALIDATION_FAILED");
+      const itemId = ctx.param("itemId");
+      const deleted = await deleteDatasetItem(ctx.mastra.datasets, { tenantId: tenantId.data, datasetId: ctx.param("datasetId"), itemId });
+      return deleted ? json(200, { data: { itemId } }) : fail(404, "NOT_FOUND");
+    }),
+  }),
+];
+
 const datasetRoutes = (deps: ConsoleRouteDeps): ApiRoute[] => [
   registerApiRoute(`${CONSOLE_ROUTES_PREFIX}/datasets`, {
     method: "GET",
@@ -272,6 +321,7 @@ export const createConsoleRoutes = (deps: ConsoleRouteDeps): ApiRoute[] => [
   ...traceRoutes(deps),
   ...evalRoutes(deps),
   ...datasetRoutes(deps),
+  ...datasetItemRoutes(deps),
   ...operationRoutes(deps),
   ...agentRoutes(deps),
 ];
