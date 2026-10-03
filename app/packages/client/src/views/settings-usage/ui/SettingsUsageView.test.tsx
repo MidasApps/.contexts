@@ -5,8 +5,9 @@ import { renderApp } from "#/app-shell/testing/render-app.tsx";
 import { shellRoutes } from "#/app-shell/testing/shell-routes.ts";
 import { buildTenantAgentSettings, buildUsageSummary, buildUsageTotals } from "#/entities/usage/usage.fixture.ts";
 import { expectNoAxeViolations } from "#/shared/testing/axe.ts";
-import { apiError, ok, type FakeRequest, type FakeRoutes } from "#/shared/testing/fake-api.ts";
+import { apiError, ok, page, type FakeRequest, type FakeRoutes } from "#/shared/testing/fake-api.ts";
 import { IDS } from "#/shared/testing/fixtures.ts";
+import { buildMember } from "#/shared/testing/settings-fixtures.ts";
 import { SettingsUsageView } from "./SettingsUsageView.tsx";
 
 // Sibling test runs load the machine: the shell boot alone can take seconds, so waits and tests get room.
@@ -51,6 +52,26 @@ describe("SettingsUsageView", () => {
     await expectNoAxeViolations(container);
   });
 
+  it("breaks the month down by day, agent and user, naming agents and members", async () => {
+    const { container } = renderView({ [`GET /v1/organizations/${IDS.organization}/members`]: page([buildMember({ uid: IDS.user, displayName: "Ana Souza" })]) }, [...ADMIN, "core.member.read"]);
+    const days = await screen.findByRole("table", { name: "Custo por dia" });
+    expect(within(days).getAllByRole("row")).toHaveLength(3);
+    expect(within(days).getByRole("row", { name: /01\/10/u }).textContent).toMatch(/US\$\s12,00/u);
+    const agents = screen.getByRole("table", { name: "Uso por agente no mês" });
+    expect(within(agents).getByText("Assistente")).toBeDefined();
+    expect(within(agents).getByText("Conhecimento")).toBeDefined();
+    const users = screen.getByRole("table", { name: "Uso por usuário no mês" });
+    expect(await within(users).findByText("Ana Souza")).toBeDefined();
+    expect(within(users).getByText("Processos da plataforma")).toBeDefined();
+    await expectNoAxeViolations(container);
+  });
+
+  it("shows the user id when members cannot be listed", async () => {
+    renderView();
+    const users = await screen.findByRole("table", { name: "Uso por usuário no mês" });
+    expect(within(users).getByText(IDS.user)).toBeDefined();
+  });
+
   it("says in words when usage is near the cap and when the cap is reached", async () => {
     renderView({
       "GET /v1/usage": ok(buildUsageSummary({ totals: buildUsageTotals({ costMicroUsd: 45_000_000, inputTokens: 15_000_000, outputTokens: 5_000_000 }) })),
@@ -66,7 +87,7 @@ describe("SettingsUsageView", () => {
     const { user } = renderView({
       "GET /v1/usage": (request: FakeRequest) => {
         months.push(request.query.get("month"));
-        return ok(buildUsageSummary({ month: request.query.get("month"), totals: buildUsageTotals({ calls: 0, inputTokens: 0, outputTokens: 0, costMicroUsd: 0 }), byModel: [] }));
+        return ok(buildUsageSummary({ month: request.query.get("month"), totals: buildUsageTotals({ calls: 0, inputTokens: 0, outputTokens: 0, costMicroUsd: 0 }), byModel: [], byDay: [], byAgent: [], byUser: [] }));
       },
     });
     await screen.findByRole("region", { name: "Totais do mês" });

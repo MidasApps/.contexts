@@ -168,4 +168,32 @@ describe("postgres usage repository", () => {
       },
     });
   });
+
+  it("breaks a tenant's month down by UTC day, agent and user, largest cost first", async () => {
+    await repository.insertCalls([
+      call({ occurredAt: "2026-09-02T23:59:59.000Z", agentId: "assistant", costMicroUsd: 100 }),
+      call({ occurredAt: "2026-09-03T00:00:00.000Z", userId: "uid-2", costMicroUsd: 1000 }),
+      call({ occurredAt: "2026-09-03T08:00:00.000Z", userId: null, agentId: "usage-report", costMicroUsd: null }),
+      call({ occurredAt: "2026-08-31T23:59:59.000Z", costMicroUsd: 50_000 }),
+      call({ tenantId: TENANT_B, costMicroUsd: 777 }),
+    ]);
+    const breakdowns = await repository.getMonthBreakdowns({ tenantId: TENANT_A, monthStart: SEPTEMBER });
+    const totals = (calls: number, costMicroUsd: number, unpricedCalls = 0) => ({ calls, inputTokens: 100 * calls, outputTokens: 50 * calls, costMicroUsd, unpricedCalls });
+    expect(breakdowns).toEqual({
+      byDay: [
+        { day: "2026-09-02", totals: totals(1, 100) },
+        { day: "2026-09-03", totals: totals(2, 1000, 1) },
+      ],
+      byAgent: [
+        { agentId: "knowledge", totals: totals(1, 1000) },
+        { agentId: "assistant", totals: totals(1, 100) },
+        { agentId: "usage-report", totals: totals(1, 0, 1) },
+      ],
+      byUser: [
+        { userId: "uid-2", totals: totals(1, 1000) },
+        { userId: "uid-1", totals: totals(1, 100) },
+        { userId: null, totals: totals(1, 0, 1) },
+      ],
+    });
+  });
 });

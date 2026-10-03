@@ -21,8 +21,8 @@ export type GetUsageSummary = (
 ) => Promise<{ readonly ok: true; readonly data: UsageSummary } | { readonly ok: false; readonly error: UsageValidationError }>;
 
 /**
- * Month-to-date usage of a tenant against its caps (contract `usage.UsageSummary`,
- * SP3 spec §12); `/v1` and `/admin` (SP5) authorize `core.usage.read` before calling it.
+ * Month-to-date usage of a tenant against its caps, per model, day, agent and user (contract
+ * `usage.UsageSummary`, SP3 spec §12, decision 0060); `/v1` and `/admin` (SP5) authorize `core.usage.read` before calling it.
  */
 export const makeGetUsageSummary =
   (deps: { readonly repository: UsageRepository; readonly clock: Clock }): GetUsageSummary =>
@@ -31,10 +31,11 @@ export const makeGetUsageSummary =
     if (!parsed.success) return { ok: false, error: { code: "VALIDATION_FAILED", details: validationDetailsOf(parsed.error.issues) } };
     const { tenantId } = parsed.data;
     const monthStart = parsed.data.month === undefined ? utcMonthStart(deps.clock.now()) : monthStartOfKey(parsed.data.month);
-    const [totals, byModel, stored] = await Promise.all([
+    const [totals, byModel, breakdowns, stored] = await Promise.all([
       deps.repository.getMonthSpend({ tenantId, monthStart }),
       deps.repository.getMonthByModel({ tenantId, monthStart }),
+      deps.repository.getMonthBreakdowns({ tenantId, monthStart }),
       deps.repository.getTenantBudget({ tenantId }),
     ]);
-    return { ok: true, data: UsageSummarySchema.parse({ tenantId, month: monthKeyOf(monthStart), totals, budget: resolveBudget(stored), byModel }) };
+    return { ok: true, data: UsageSummarySchema.parse({ tenantId, month: monthKeyOf(monthStart), totals, budget: resolveBudget(stored), byModel, ...breakdowns }) };
   };

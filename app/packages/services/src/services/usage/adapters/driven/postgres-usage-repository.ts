@@ -1,7 +1,7 @@
 import type { LlmCall } from "@core/contracts";
 import type { Sql, TransactionSql } from "postgres";
 import { withTenantTransaction } from "../../../shared/postgres/with-tenant-transaction.ts";
-import type { ModelTotals, StoredBudget, UsageRepository, UsageTotals } from "../../application/ports/usage-repository.ts";
+import type { ModelTotals, StoredBudget, UsageBreakdowns, UsageRepository, UsageTotals } from "../../application/ports/usage-repository.ts";
 
 /** NOLOGIN role every usage query runs as (migration 0007): no BYPASSRLS, append-only on the ledger. */
 export const USAGE_RUNTIME_ROLE = "usage_runtime";
@@ -92,6 +92,36 @@ const getMonthByModel = (sql: Sql) => (input: { tenantId: string; monthStart: Da
     return rows.map((row) => ({ provider: row.provider, model: row.model, totals: toTotals(row) }));
   });
 
+const TOTALS_COLUMNS = `count(*) AS calls, coalesce(sum(input_tokens), 0) AS input_tokens, coalesce(sum(output_tokens), 0) AS output_tokens,
+  coalesce(sum(cost_micro_usd), 0) AS cost_micro_usd, count(*) FILTER (WHERE cost_micro_usd IS NULL) AS unpriced_calls`;
+
+// One read-only transaction, three grouped reads of the same month on llm_calls_tenant_occurred_idx.
+const getMonthBreakdowns = (sql: Sql) => (input: { tenantId: string; monthStart: Date }): Promise<UsageBreakdowns> =>
+  withTenantTransaction(sql, { tenantId: input.tenantId, readOnly: true }, async (tx) => {
+    await asRuntime(tx);
+    const { start, end } = monthRange(input.monthStart);
+    const days = await tx<(TotalsRow & { day: string })[]>`
+      SELECT to_char(occurred_at AT TIME ZONE 'UTC', 'YYYY-MM-DD') AS day, ${tx.unsafe(TOTALS_COLUMNS)}
+      FROM usage.llm_calls
+      WHERE tenant_id = ${input.tenantId} AND occurred_at >= ${start} AND occurred_at < ${end}
+      GROUP BY 1 ORDER BY 1`;
+    const agents = await tx<(TotalsRow & { agent_id: string })[]>`
+      SELECT agent_id, ${tx.unsafe(TOTALS_COLUMNS)}
+      FROM usage.llm_calls
+      WHERE tenant_id = ${input.tenantId} AND occurred_at >= ${start} AND occurred_at < ${end}
+      GROUP BY agent_id ORDER BY coalesce(sum(cost_micro_usd), 0) DESC, agent_id`;
+    const users = await tx<(TotalsRow & { user_id: string | null })[]>`
+      SELECT user_id, ${tx.unsafe(TOTALS_COLUMNS)}
+      FROM usage.llm_calls
+      WHERE tenant_id = ${input.tenantId} AND occurred_at >= ${start} AND occurred_at < ${end}
+      GROUP BY user_id ORDER BY coalesce(sum(cost_micro_usd), 0) DESC, user_id NULLS LAST`;
+    return {
+      byDay: days.map((row) => ({ day: row.day, totals: toTotals(row) })),
+      byAgent: agents.map((row) => ({ agentId: row.agent_id, totals: toTotals(row) })),
+      byUser: users.map((row) => ({ userId: row.user_id, totals: toTotals(row) })),
+    };
+  });
+
 const getTenantBudget = (sql: Sql) => (input: { tenantId: string }): Promise<StoredBudget | null> =>
   withTenantTransaction(sql, { tenantId: input.tenantId, readOnly: true }, async (tx) => {
     await asRuntime(tx);
@@ -157,6 +187,7 @@ export const createPostgresUsageRepository = (sql: Sql): UsageRepository => ({
   insertCalls: insertCalls(sql),
   getMonthSpend: getMonthSpend(sql),
   getMonthByModel: getMonthByModel(sql),
+  getMonthBreakdowns: getMonthBreakdowns(sql),
   getTenantBudget: getTenantBudget(sql),
   setTenantBudget: setTenantBudget(sql),
 });

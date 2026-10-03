@@ -10,6 +10,7 @@ import { EmptyState } from "#/shared/ui/molecules/EmptyState/EmptyState.tsx";
 import { StatusPill, type StatusTone } from "#/shared/ui/molecules/StatusPill/StatusPill.tsx";
 import { DataTable } from "#/shared/ui/organisms/DataTable/DataTable.tsx";
 import { dataTableColumnHelper } from "#/shared/ui/organisms/DataTable/data-table-columns.ts";
+import { UsageBreakdowns } from "./UsageBreakdowns.tsx";
 
 type ModelRow = UsageSummary["byModel"][number];
 const column = dataTableColumnHelper<ModelRow>();
@@ -149,13 +150,18 @@ function Models({ summary }: { summary: UsageSummary }) {
   );
 }
 
-/** A month of model usage: totals, the state of both caps (in words, not only color) and the per-model breakdown. */
-export function UsageSummaryPanel({ summary }: { summary: UsageSummary }) {
+/**
+ * A month of model usage: totals, the state of both caps (in words, not only color), and the
+ * breakdowns per model, day, agent and user.
+ * @param memberName a member's display name by uid, `undefined` when unknown (the uid is shown).
+ */
+export function UsageSummaryPanel({ summary, memberName }: { summary: UsageSummary; memberName: (uid: string | null) => string | undefined }) {
   return (
     <div className="flex flex-col gap-6">
       <Totals summary={summary} />
       <Budget summary={summary} />
       <Models summary={summary} />
+      <UsageBreakdowns summary={summary} memberName={memberName} />
     </div>
   );
 }

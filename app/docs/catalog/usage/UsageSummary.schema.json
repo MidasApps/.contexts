@@ -1,6 +1,6 @@
 {
   "additionalProperties": false,
-  "description": "Month-to-date model usage and cost of an organization compared with its budget caps.",
+  "description": "Month-to-date model usage and cost of an organization compared with its budget caps, per model, day, agent and user.",
   "examples": [
     {
       "budget": {
@@ -8,6 +8,30 @@
         "monthlyMicroUsd": 50000000,
         "monthlyTokens": 20000000
       },
+      "byAgent": [
+        {
+          "agentId": "assistant",
+          "totals": {
+            "calls": 42,
+            "costMicroUsd": 61000,
+            "inputTokens": 50000,
+            "outputTokens": 12000,
+            "unpricedCalls": 0
+          }
+        }
+      ],
+      "byDay": [
+        {
+          "day": "2026-09-30",
+          "totals": {
+            "calls": 42,
+            "costMicroUsd": 61000,
+            "inputTokens": 50000,
+            "outputTokens": 12000,
+            "unpricedCalls": 0
+          }
+        }
+      ],
       "byModel": [
         {
           "model": "gemini-3.5-flash",
@@ -19,6 +43,18 @@
             "outputTokens": 12000,
             "unpricedCalls": 0
           }
+        }
+      ],
+      "byUser": [
+        {
+          "totals": {
+            "calls": 42,
+            "costMicroUsd": 61000,
+            "inputTokens": 50000,
+            "outputTokens": 12000,
+            "unpricedCalls": 0
+          },
+          "userId": "uA1b2C3d4E5f6G7h8I9j"
         }
       ],
       "month": "2026-09",
@@ -65,6 +101,149 @@
         "alertThresholdPercent"
       ],
       "type": "object",
+      "x-pii": "none"
+    },
+    "byAgent": {
+      "description": "Breakdown per agent, largest cost first.",
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "agentId": {
+            "description": "Agent, workflow or processor that called the model.",
+            "minLength": 1,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "totals": {
+            "additionalProperties": false,
+            "description": "Totals for this agent.",
+            "properties": {
+              "calls": {
+                "description": "Model calls.",
+                "maximum": 9007199254740991,
+                "minimum": 0,
+                "type": "integer",
+                "x-pii": "none"
+              },
+              "costMicroUsd": {
+                "description": "Known cost in micro-USD (calls without a price are excluded).",
+                "maximum": 9007199254740991,
+                "minimum": 0,
+                "type": "integer",
+                "x-pii": "none"
+              },
+              "inputTokens": {
+                "description": "Prompt tokens.",
+                "maximum": 9007199254740991,
+                "minimum": 0,
+                "type": "integer",
+                "x-pii": "none"
+              },
+              "outputTokens": {
+                "description": "Completion tokens.",
+                "maximum": 9007199254740991,
+                "minimum": 0,
+                "type": "integer",
+                "x-pii": "none"
+              },
+              "unpricedCalls": {
+                "description": "Calls whose model had no price; their tokens still count against the token cap.",
+                "maximum": 9007199254740991,
+                "minimum": 0,
+                "type": "integer",
+                "x-pii": "none"
+              }
+            },
+            "required": [
+              "calls",
+              "inputTokens",
+              "outputTokens",
+              "costMicroUsd",
+              "unpricedCalls"
+            ],
+            "type": "object",
+            "x-pii": "none"
+          }
+        },
+        "required": [
+          "agentId",
+          "totals"
+        ],
+        "type": "object"
+      },
+      "type": "array",
+      "x-pii": "none"
+    },
+    "byDay": {
+      "description": "Breakdown per UTC day with calls, oldest first; days without calls are absent.",
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "day": {
+            "description": "Calendar day in UTC, YYYY-MM-DD.",
+            "format": "date",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$",
+            "type": "string",
+            "x-pii": "none"
+          },
+          "totals": {
+            "additionalProperties": false,
+            "description": "Totals for this day.",
+            "properties": {
+              "calls": {
+                "description": "Model calls.",
+                "maximum": 9007199254740991,
+                "minimum": 0,
+                "type": "integer",
+                "x-pii": "none"
+              },
+              "costMicroUsd": {
+                "description": "Known cost in micro-USD (calls without a price are excluded).",
+                "maximum": 9007199254740991,
+                "minimum": 0,
+                "type": "integer",
+                "x-pii": "none"
+              },
+              "inputTokens": {
+                "description": "Prompt tokens.",
+                "maximum": 9007199254740991,
+                "minimum": 0,
+                "type": "integer",
+                "x-pii": "none"
+              },
+              "outputTokens": {
+                "description": "Completion tokens.",
+                "maximum": 9007199254740991,
+                "minimum": 0,
+                "type": "integer",
+                "x-pii": "none"
+              },
+              "unpricedCalls": {
+                "description": "Calls whose model had no price; their tokens still count against the token cap.",
+                "maximum": 9007199254740991,
+                "minimum": 0,
+                "type": "integer",
+                "x-pii": "none"
+              }
+            },
+            "required": [
+              "calls",
+              "inputTokens",
+              "outputTokens",
+              "costMicroUsd",
+              "unpricedCalls"
+            ],
+            "type": "object",
+            "x-pii": "none"
+          }
+        },
+        "required": [
+          "day",
+          "totals"
+        ],
+        "type": "object"
+      },
+      "type": "array",
       "x-pii": "none"
     },
     "byModel": {
@@ -145,6 +324,84 @@
       "type": "array",
       "x-pii": "none"
     },
+    "byUser": {
+      "description": "Breakdown per user, largest cost first.",
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "totals": {
+            "additionalProperties": false,
+            "description": "Totals for this user.",
+            "properties": {
+              "calls": {
+                "description": "Model calls.",
+                "maximum": 9007199254740991,
+                "minimum": 0,
+                "type": "integer",
+                "x-pii": "none"
+              },
+              "costMicroUsd": {
+                "description": "Known cost in micro-USD (calls without a price are excluded).",
+                "maximum": 9007199254740991,
+                "minimum": 0,
+                "type": "integer",
+                "x-pii": "none"
+              },
+              "inputTokens": {
+                "description": "Prompt tokens.",
+                "maximum": 9007199254740991,
+                "minimum": 0,
+                "type": "integer",
+                "x-pii": "none"
+              },
+              "outputTokens": {
+                "description": "Completion tokens.",
+                "maximum": 9007199254740991,
+                "minimum": 0,
+                "type": "integer",
+                "x-pii": "none"
+              },
+              "unpricedCalls": {
+                "description": "Calls whose model had no price; their tokens still count against the token cap.",
+                "maximum": 9007199254740991,
+                "minimum": 0,
+                "type": "integer",
+                "x-pii": "none"
+              }
+            },
+            "required": [
+              "calls",
+              "inputTokens",
+              "outputTokens",
+              "costMicroUsd",
+              "unpricedCalls"
+            ],
+            "type": "object",
+            "x-pii": "none"
+          },
+          "userId": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Uid of the caller; null groups the calls of platform jobs.",
+            "x-pii": "personal"
+          }
+        },
+        "required": [
+          "userId",
+          "totals"
+        ],
+        "type": "object"
+      },
+      "type": "array",
+      "x-pii": "personal"
+    },
     "month": {
       "description": "Calendar month in UTC, YYYY-MM.",
       "pattern": "^\\d{4}-(?:0[1-9]|1[0-2])$",
@@ -213,12 +470,15 @@
     "month",
     "totals",
     "budget",
-    "byModel"
+    "byModel",
+    "byDay",
+    "byAgent",
+    "byUser"
   ],
   "type": "object",
   "x-kind": "view",
   "x-permission": "core.usage.read",
-  "x-pii": "none",
+  "x-pii": "personal",
   "x-relations": [],
   "x-tenancyScope": "organization"
 }

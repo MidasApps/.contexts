@@ -16,7 +16,7 @@ import { EmptyState } from "#/shared/ui/molecules/EmptyState/EmptyState.tsx";
 import { DataTable } from "#/shared/ui/organisms/DataTable/DataTable.tsx";
 import { dataTableColumnHelper } from "#/shared/ui/organisms/DataTable/data-table-columns.ts";
 import { QuerySection } from "#/widgets/page-state/index.ts";
-import { useStarterNames } from "../model/use-starter-names.ts";
+import { useMemberNames } from "#/entities/member/index.ts";
 import { SettingsSectionLink } from "#/widgets/settings-nav/index.ts";
 import { useTenantScheduleLabels } from "../model/use-tenant-schedule-labels.ts";
 
@@ -168,7 +168,7 @@ export function RunsSection({ context, workflows, onStart, online }: RunsSection
   const paged = useCursorPages(runs, TENANT_RUNS_PAGE_LIMIT, t("pagination"));
   const canCancel = context.permissions.includes("core.workflow-run.cancel") && online;
   const actions: RowActions = { organizationId: organization.id, onCancel: canCancel ? setCanceling : null };
-  const starterName = useStarterNames({ organizationId: organization.id, canReadMembers: context.permissions.includes("core.member.read") });
+  const starterName = useMemberNames({ organizationId: organization.id, canReadMembers: context.permissions.includes("core.member.read") });
   const scheduleLabel = useTenantScheduleLabels(context);
   const labels = useMemo((): Labels => ({ starterName, scheduleLabel }), [starterName, scheduleLabel]);
   const columns = useColumns(actions, labels);

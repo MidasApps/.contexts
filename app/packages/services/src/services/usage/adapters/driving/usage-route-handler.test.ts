@@ -27,6 +27,12 @@ const setup = () => {
       return Promise.resolve(tenantId === ORG_A ? TOTALS : EMPTY);
     },
     getMonthByModel: ({ tenantId }) => Promise.resolve(tenantId === ORG_A ? [{ provider: "google", model: "gemini-3.5-flash", totals: TOTALS }] : []),
+    getMonthBreakdowns: ({ tenantId }) =>
+      Promise.resolve(
+        tenantId === ORG_A
+          ? { byDay: [{ day: "2026-10-01", totals: TOTALS }], byAgent: [{ agentId: "assistant", totals: TOTALS }], byUser: [{ userId: "alice", totals: TOTALS }] }
+          : { byDay: [], byAgent: [], byUser: [] },
+      ),
     getTenantBudget: ({ tenantId }) => Promise.resolve(tenantId === ORG_A ? { monthlyMicroUsd: 5000, monthlyTokens: 9000 } : null),
     setTenantBudget: () => Promise.resolve(),
   };
@@ -37,7 +43,7 @@ const setup = () => {
 const json = async <T>(response: Response) => (await response.json()) as T;
 
 describe("GET /v1/usage", () => {
-  it("answers the organization's month totals, per-model breakdown and caps in force", async () => {
+  it("answers the organization's month totals, breakdowns per model, day, agent and user, and caps in force", async () => {
     const { routes, reads } = setup();
     const response = await callRoute(routes, "usage.getSummary", `/v1/usage?organizationId=${ORG_A}`, { as: "alice" });
     expect(response.status).toBe(200);
@@ -48,6 +54,9 @@ describe("GET /v1/usage", () => {
         totals: TOTALS,
         budget: { monthlyMicroUsd: 5000, monthlyTokens: 9000, alertThresholdPercent: 80 },
         byModel: [{ provider: "google", model: "gemini-3.5-flash", totals: TOTALS }],
+        byDay: [{ day: "2026-10-01", totals: TOTALS }],
+        byAgent: [{ agentId: "assistant", totals: TOTALS }],
+        byUser: [{ userId: "alice", totals: TOTALS }],
       },
     });
     expect(reads).toEqual([{ tenantId: ORG_A, monthStart: "2026-10-01T00:00:00.000Z" }]);

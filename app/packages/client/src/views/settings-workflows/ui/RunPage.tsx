@@ -21,7 +21,7 @@ import { RunTimeline } from "#/widgets/run-timeline/index.ts";
 import { SettingsPageFrame, SettingsSectionLink } from "#/widgets/settings-nav/index.ts";
 import { useRunEvents } from "../model/use-run-events.ts";
 import { useTenantScheduleLabels } from "../model/use-tenant-schedule-labels.ts";
-import { useStarterNames } from "../model/use-starter-names.ts";
+import { useMemberNames } from "#/entities/member/index.ts";
 
 function RunEvents({ events }: { events: readonly WorkflowEvent[] }) {
   const t = useTranslations("settings.workflows.run");
@@ -128,7 +128,7 @@ export function RunPage({ context, runId }: { context: AccessContext; runId: str
   const run = useTenantWorkflowRun(organization.id, runId);
   const workflowLabel = useWorkflowLabel();
   const scheduleLabel = useTenantScheduleLabels(context);
-  const starterName = useStarterNames({ organizationId: organization.id, canReadMembers: context.permissions.includes("core.member.read") });
+  const starterName = useMemberNames({ organizationId: organization.id, canReadMembers: context.permissions.includes("core.member.read") });
   const [canceling, setCanceling] = useState(false);
   const [rerunning, setRerunning] = useState(false);
   const router = useRouter();

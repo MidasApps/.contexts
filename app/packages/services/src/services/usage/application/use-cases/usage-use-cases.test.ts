@@ -1,7 +1,7 @@
 import { type LlmCall, LlmCallContract } from "@core/contracts";
 import { describe, expect, it } from "vitest";
 import { fixedClock } from "../../../shared/clock/clock.ts";
-import type { StoredBudget, UsageRepository, UsageTotals } from "../ports/usage-repository.ts";
+import type { StoredBudget, UsageBreakdowns, UsageRepository, UsageTotals } from "../ports/usage-repository.ts";
 import { BudgetTenantMissingError, makeCheckTenantBudget } from "./check-tenant-budget.ts";
 import { makeGetUsageSummary } from "./get-usage-summary.ts";
 import { makeRecordLlmCalls } from "./record-llm-calls.ts";
@@ -10,9 +10,10 @@ const [example] = LlmCallContract.meta.examples as [LlmCall];
 const clock = fixedClock("2026-09-30T12:00:00.000Z");
 const ZERO: UsageTotals = { calls: 0, inputTokens: 0, outputTokens: 0, costMicroUsd: 0, unpricedCalls: 0 };
 
-const fakeRepository = (state: { spend?: UsageTotals; budget?: StoredBudget | null } = {}) => {
+const fakeRepository = (state: { spend?: UsageTotals; budget?: StoredBudget | null; breakdowns?: UsageBreakdowns } = {}) => {
   const inserted: LlmCall[] = [];
   const monthStarts: Date[] = [];
+  const breakdownMonths: Date[] = [];
   const repository: UsageRepository = {
     insertCalls: (calls) => {
       inserted.push(...calls);
@@ -23,10 +24,14 @@ const fakeRepository = (state: { spend?: UsageTotals; budget?: StoredBudget | nu
       return Promise.resolve(state.spend ?? ZERO);
     },
     getMonthByModel: () => Promise.resolve([]),
+    getMonthBreakdowns: ({ monthStart }) => {
+      breakdownMonths.push(monthStart);
+      return Promise.resolve(state.breakdowns ?? { byDay: [], byAgent: [], byUser: [] });
+    },
     getTenantBudget: () => Promise.resolve(state.budget ?? null),
     setTenantBudget: () => Promise.resolve(),
   };
-  return { repository, inserted, monthStarts };
+  return { repository, inserted, monthStarts, breakdownMonths };
 };
 
 describe("recordLlmCalls", () => {
@@ -80,5 +85,14 @@ describe("getUsageSummary", () => {
     const result = await makeGetUsageSummary({ repository, clock })({ tenantId: "t1", month: "2026-08" });
     expect(result).toMatchObject({ ok: true, data: { month: "2026-08", budget: { monthlyMicroUsd: 50_000_000, monthlyTokens: 5, alertThresholdPercent: 80 } } });
     expect(monthStarts).toEqual([new Date("2026-08-01T00:00:00.000Z")]);
+  });
+
+  it("adds the month's breakdowns per day, agent and user from the same ledger month", async () => {
+    const totals: UsageTotals = { ...ZERO, calls: 2, costMicroUsd: 500 };
+    const breakdowns: UsageBreakdowns = { byDay: [{ day: "2026-08-03", totals }], byAgent: [{ agentId: "knowledge", totals }], byUser: [{ userId: null, totals }] };
+    const { repository, breakdownMonths } = fakeRepository({ breakdowns });
+    const result = await makeGetUsageSummary({ repository, clock })({ tenantId: "t1", month: "2026-08" });
+    expect(result).toMatchObject({ ok: true, data: breakdowns });
+    expect(breakdownMonths).toEqual([new Date("2026-08-01T00:00:00.000Z")]);
   });
 });

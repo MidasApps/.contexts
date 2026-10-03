@@ -45,4 +45,16 @@ describe("UsageSummarySchema", () => {
   it("uses a YYYY-MM month", () => {
     expect(UsageSummarySchema.safeParse({ ...example, month: "2026-9" }).success).toBe(false);
   });
+
+  it("breaks the month down by UTC day, agent and user; service calls have no user", () => {
+    const totals = { calls: 1, inputTokens: 10, outputTokens: 5, costMicroUsd: 100, unpricedCalls: 0 };
+    const summary = { ...example, byDay: [{ day: "2026-09-30", totals }], byAgent: [{ agentId: "assistant", totals }], byUser: [{ userId: null, totals }] };
+    expect(UsageSummarySchema.safeParse(summary).success).toBe(true);
+    expect(UsageSummarySchema.safeParse({ ...summary, byDay: [{ day: "2026-09", totals }] }).success).toBe(false);
+    expect(UsageSummarySchema.safeParse({ ...summary, byAgent: [{ agentId: "", totals }] }).success).toBe(false);
+  });
+
+  it("marks the per-user breakdown as personal data", () => {
+    expect(UsageSummaryContract.meta.pii).toBe("personal");
+  });
 });

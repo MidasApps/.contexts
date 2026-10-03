@@ -4,6 +4,7 @@ import type { AccessContext } from "@core/contracts";
 import { useId, useState } from "react";
 import { useFormatter, useTranslations } from "use-intl";
 import { useTenantAgentSettings } from "#/entities/agent-settings/index.ts";
+import { useMemberNames } from "#/entities/member/index.ts";
 import { useAccessContext, useCurrentNode } from "#/entities/session/index.ts";
 import { recentMonths, useUsageSummary } from "#/entities/usage/index.ts";
 import { UsageCapForm } from "#/features/set-usage-cap/index.ts";
@@ -69,6 +70,7 @@ function SettingsUsage({ context, now }: { context: AccessContext; now: () => Da
   const allowed = permissions.includes("core.usage.read");
   const summary = useUsageSummary(organization.id, month, { enabled: allowed });
   const canSetCap = permissions.includes("core.agent-settings.read") && permissions.includes("core.agent-settings.update");
+  const memberName = useMemberNames({ organizationId: organization.id, canReadMembers: allowed && permissions.includes("core.member.read") });
   return (
     <SettingsPageFrame
       organizationId={organization.id}
@@ -78,7 +80,7 @@ function SettingsUsage({ context, now }: { context: AccessContext; now: () => Da
       {online ? null : <OfflineNotice />}
       <MonthPicker months={months} value={month} onChange={setMonth} />
       <QuerySection query={summary} loadingLabel={t("loading")}>
-        {(data) => <UsageSummaryPanel summary={data} />}
+        {(data) => <UsageSummaryPanel summary={data} memberName={memberName} />}
       </QuerySection>
       {canSetCap ? <OwnCap organizationId={organization.id} disabled={!online} /> : null}
     </SettingsPageFrame>
@@ -87,7 +89,7 @@ function SettingsUsage({ context, now }: { context: AccessContext; now: () => Da
 
 /**
  * `/o/:organizationId/settings/usage` (SP5 spec §7, core.usage.read): a month of model cost and
- * tokens, the state of the budget caps and the per-model breakdown; holders of
+ * tokens, the state of the budget caps and the breakdowns per model, day, agent and user; holders of
  * core.agent-settings.update may lower the organization's own cap (never above its plan).
  * @param now clock for the month list (tests inject a fixed one).
  */

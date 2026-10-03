@@ -1384,6 +1384,30 @@
       "emptyTitle": "Sin uso en este mes",
       "emptyDescription": "Cuando los agentes respondan, el uso por modelo aparece aquí."
     },
+    "breakdowns": {
+      "columns": {
+        "calls": "Llamadas",
+        "tokens": "Tokens",
+        "cost": "Costo"
+      },
+      "cardMeta": "{calls, plural, one {# llamada} other {# llamadas}} · {cost}",
+      "byDay": {
+        "title": "Costo por día",
+        "description": "Costo conocido de cada día del mes con llamadas (días en UTC).",
+        "day": "Día"
+      },
+      "byAgent": {
+        "title": "Uso por agente",
+        "caption": "Uso por agente en el mes",
+        "name": "Agente"
+      },
+      "byUser": {
+        "title": "Uso por usuario",
+        "caption": "Uso por usuario en el mes",
+        "name": "Usuario"
+      },
+      "platformJobs": "Procesos de la plataforma"
+    },
     "ownCap": {
       "title": "Límite propio de la organización",
       "description": "La organización puede definir un límite mensual menor que el del plan. No es posible superar el límite del plan.",

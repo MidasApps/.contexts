@@ -1384,6 +1384,30 @@
       "emptyTitle": "No usage this month",
       "emptyDescription": "Once the agents answer, usage by model appears here."
     },
+    "breakdowns": {
+      "columns": {
+        "calls": "Calls",
+        "tokens": "Tokens",
+        "cost": "Cost"
+      },
+      "cardMeta": "{calls, plural, one {# call} other {# calls}} · {cost}",
+      "byDay": {
+        "title": "Cost per day",
+        "description": "Known cost of each day of the month with calls (UTC days).",
+        "day": "Day"
+      },
+      "byAgent": {
+        "title": "Usage by agent",
+        "caption": "Usage by agent for the month",
+        "name": "Agent"
+      },
+      "byUser": {
+        "title": "Usage by user",
+        "caption": "Usage by user for the month",
+        "name": "User"
+      },
+      "platformJobs": "Platform jobs"
+    },
     "ownCap": {
       "title": "The organization's own cap",
       "description": "The organization can set a monthly cap lower than its plan's. It cannot go above the plan's cap.",
