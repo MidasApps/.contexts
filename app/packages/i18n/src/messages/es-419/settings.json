@@ -1591,7 +1591,12 @@
       "timezone": "Zona horaria",
       "timezoneHint": "Los horarios de arriba valen en esta zona horaria.",
       "inputHint": "Un objeto JSON enviado al flujo en cada disparo. Déjalo vacío si el flujo no necesita datos.",
-      "nextFireAfterSave": "El servidor calcula el próximo disparo al guardar.",
+      "nextFires": {
+        "title": "Próximos {count} disparos",
+        "loading": "Calculando los próximos disparos…",
+        "invalidCron": "Completa la frecuencia para ver los próximos disparos.",
+        "unavailable": "No se pudieron calcular los próximos disparos ahora. El servidor revisa la frecuencia al guardar."
+      },
       "errors": {
         "workflow": "Elige un flujo.",
         "slug": "Usa letras minúsculas, números y guiones (hasta 60 caracteres).",

@@ -1591,7 +1591,12 @@
       "timezone": "Time zone",
       "timezoneHint": "The times above are in this time zone.",
       "inputHint": "A JSON object sent to the workflow on every fire. Leave it empty if the workflow needs no data.",
-      "nextFireAfterSave": "The server calculates the next fire when you save.",
+      "nextFires": {
+        "title": "Next {count} fires",
+        "loading": "Calculating the next fires…",
+        "invalidCron": "Complete the frequency to see the next fires.",
+        "unavailable": "The next fires could not be calculated right now. The server checks the frequency when you save."
+      },
       "errors": {
         "workflow": "Choose a workflow.",
         "slug": "Use lowercase letters, numbers and hyphens (up to 60 characters).",

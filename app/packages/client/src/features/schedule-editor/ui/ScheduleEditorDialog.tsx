@@ -23,6 +23,7 @@ import { JsonSchemaFields } from "#/shared/ui/organisms/JsonSchemaFields/JsonSch
 import { useJsonSchemaInput } from "#/shared/ui/organisms/JsonSchemaFields/use-json-schema-input.ts";
 import { cronOfDraft, DEFAULT_CRON_DRAFT, draftOfCron, type CronDraft } from "../model/cron-presets.ts";
 import { CronFields } from "./CronFields.tsx";
+import { NextFires } from "./NextFires.tsx";
 
 export type ScheduleEditorDialogProps = {
   organizationId: string;
@@ -203,7 +204,7 @@ function ScheduleEditorForm({ organizationId, schedule, workflows, defaultTimeZo
           />
         )}
       </FieldGroup>
-      <p className="text-xs text-muted-foreground">{t("nextFireAfterSave")}</p>
+      <NextFires organizationId={organizationId} cron={cronOfDraft(draft.cron)} timezone={draft.timezone} />
       <DialogFooter>
         <Button type="button" variant="secondary" disabled={pending} onClick={() => onOpenChange(false)}>
           {t("cancel")}
@@ -222,7 +223,7 @@ function ScheduleEditorForm({ organizationId, schedule, workflows, defaultTimeZo
  * schedule's id), the cron from a preset or a 5-field expression, the IANA zone the cron is read
  * in, and the input of every fire (fields from the workflow's JSON Schema, or JSON text). The server owns the semantics: it refuses an interval
  * under its minimum, a workflow that is not schedulable and a slug in use, each with its own copy
- * here. The next fire is the server's; this dialog computes none.
+ * here. The next five fires are the server's preview of the draft; this dialog computes none.
  */
 export function ScheduleEditorDialog(props: ScheduleEditorDialogProps) {
   const t = useTranslations("settings.workflows.editor");

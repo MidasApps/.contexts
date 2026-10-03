@@ -37,6 +37,7 @@ const renderView = (routes: FakeRoutes = {}, permissions: readonly Permission[] 
         "GET /v1/workflows/runs": page([buildWorkflowRun(), buildWorkflowRun({ runId: "run-2", workflowId: "usage-report", status: "success", startedBy: null, scheduleId: "schedule_3fa9c0e1b2d4a6f8-daily-usage" })]),
         "GET /v1/workflows": ok(CATALOG),
         "GET /v1/schedules": ok([buildSchedule()]),
+        "POST /v1/schedules/preview": ok({ nextFireTimes: ["2026-10-02T12:00:00.000Z"] }),
         ...routes,
       }),
     },
@@ -328,6 +329,30 @@ describe("SettingsWorkflowsView: schedules", () => {
     api.route("POST /v1/schedules", apiError(409, "CONFLICT"));
     await user.click(within(dialog).getByRole("button", { name: "Criar agendamento" }));
     await waitFor(() => expect(within(dialog).getByRole("alert").textContent).toContain("Já existe um agendamento com este nome curto. Escolha outro."));
+  });
+
+  it("previews the next five fires of the cron being edited, in the schedule's zone and the viewer's", async () => {
+    const previews: FakeRequest[] = [];
+    const { user } = await openSchedules({
+      "GET /v1/schedules": ok([buildSchedule({ timezone: "Asia/Tokyo" })]),
+      "POST /v1/schedules/preview": (request) => {
+        previews.push(request);
+        return ok({ nextFireTimes: ["2026-10-01T00:00:00.000Z", "2026-10-02T00:00:00.000Z", "2026-10-03T00:00:00.000Z", "2026-10-04T00:00:00.000Z", "2026-10-05T00:00:00.000Z"] });
+      },
+    });
+    await user.click(screen.getByRole("button", { name: "Mais ações do agendamento daily-usage de Relatório de uso" }));
+    await user.click(await screen.findByRole("menuitem", { name: "Editar o agendamento daily-usage de Relatório de uso" }));
+    const dialog = await screen.findByRole("dialog", { name: "Editar agendamento de Relatório de uso" });
+    const fires = await within(dialog).findByRole("list", { name: "Próximos 5 disparos" });
+    expect(within(fires).getAllByRole("listitem")).toHaveLength(5);
+    expect(within(fires).getByText("1 de out. de 2026, 09:00 (Asia/Tokyo)")).toBeDefined();
+    expect(within(fires).getByText("30 de set. de 2026, 21:00 no seu fuso (America/Sao_Paulo)")).toBeDefined();
+    expect(previews[0]?.body).toEqual({ cron: "0 9 * * *", timezone: "Asia/Tokyo" });
+    expect(previews[0]?.query.get("organizationId")).toBe(IDS.organization);
+    // A new cron is previewed before it is saved.
+    await user.click(within(dialog).getByRole("combobox", { name: /Frequência/u }));
+    await user.click(await screen.findByRole("option", { name: "A cada hora" }));
+    await waitFor(() => expect(previews.at(-1)?.body).toEqual({ cron: "0 * * * *", timezone: "Asia/Tokyo" }));
   });
 
   it("edits the cron and zone of a schedule; workflow and slug stay fixed", async () => {

@@ -1,11 +1,10 @@
 "use client";
 
-import { formatDateTime } from "@core/i18n";
 import { EllipsisIcon } from "lucide-react";
 import { createContext, use, useMemo, type ReactNode } from "react";
-import { useLocale, useTimeZone, useTranslations } from "use-intl";
+import { useTranslations } from "use-intl";
 import { scheduleSlugOf } from "#/entities/schedule/index.ts";
-import { useDescribeCron } from "#/features/schedule-editor/index.ts";
+import { FireTime as Fire, useDescribeCron } from "#/features/schedule-editor/index.ts";
 import { useWorkflowLabel } from "#/shared/lib/labels/use-catalog-labels.ts";
 import { Button } from "#/shared/ui/atoms/Button/Button.tsx";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "#/shared/ui/molecules/DropdownMenu/DropdownMenu.tsx";
@@ -75,22 +74,6 @@ const useTableState = (): TableState => {
 };
 
 const column = dataTableColumnHelper<ScheduleRow>();
-
-function Fire({ iso, timezone }: { iso: string | null; timezone: string }) {
-  const t = useTranslations("common.scheduleTable");
-  const locale = useLocale();
-  const viewerZone = useTimeZone() ?? Intl.DateTimeFormat().resolvedOptions().timeZone;
-  if (iso === null) return <span className="text-muted-foreground">{t("noFire")}</span>;
-  const inSchedule = formatDateTime(iso, { locale, timeZone: timezone, style: "datetime" });
-  return (
-    <span className="flex flex-col">
-      <span>{t("inZone", { when: inSchedule, zone: timezone })}</span>
-      {viewerZone === timezone ? null : (
-        <span className="text-caption text-muted-foreground">{t("inYourZone", { when: formatDateTime(iso, { locale, timeZone: viewerZone, style: "datetime" }), zone: viewerZone })}</span>
-      )}
-    </span>
-  );
-}
 
 /** The workflow label and the slug a person chose; the full ids stay in the API. */
 const useScheduleName = (schedule: ScheduleRow): { workflow: string; slug: string | null } => ({
