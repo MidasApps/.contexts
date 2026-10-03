@@ -43,6 +43,10 @@ const fakeGateway = () => {
       return own(scope, action === "run" ? { scheduleId: id } : schedule);
     },
     deleteSchedule: (scope) => own(scope, null),
+    previewSchedule: (scope, input) => {
+      calls.push({ op: "preview", scope, arg: input });
+      return Promise.resolve({ ok: true, data: { nextFireTimes: ["2026-10-01T12:00:00.000Z"] } });
+    },
   };
   return { gateway: gateway as WorkflowRuntimeGateway, calls };
 };
@@ -86,6 +90,24 @@ describe("/v1/schedules", () => {
     const { routes, calls } = setup();
     expect((await callRoute(routes, "schedules.create", `/v1/schedules?organizationId=${ORG_A}`, { method: "POST", as: "alice", body: { ...create, cron: "0 0 9 * * *" } })).status).toBe(400);
     expect((await callRoute(routes, "schedules.create", `/v1/schedules?organizationId=${ORG_A}`, { method: "POST", as: "alice", body: { ...create, timezone: undefined } })).status).toBe(400);
+    expect(calls).toHaveLength(0);
+  });
+
+  it("previews the next fires of an unsaved cron with core.schedule.read", async () => {
+    const { routes, calls } = setup();
+    const body = { cron: "0 9 * * 1-5", timezone: "America/Sao_Paulo" };
+    expect((await callRoute(routes, "schedules.preview", `/v1/schedules/preview?organizationId=${ORG_A}`, { method: "POST", as: "mia", body })).status).toBe(403);
+    const response = await callRoute(routes, "schedules.preview", `/v1/schedules/preview?organizationId=${ORG_A}`, { method: "POST", as: "alice", body });
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({ data: { nextFireTimes: ["2026-10-01T12:00:00.000Z"] } });
+    expect(calls[0]).toMatchObject({ op: "preview", scope: { bearer: "alice-token", tenantId: ORG_A }, arg: body });
+    expect(calls).toHaveLength(1);
+  });
+
+  it("refuses a malformed preview before the runtime (400)", async () => {
+    const { routes, calls } = setup();
+    const response = await callRoute(routes, "schedules.preview", `/v1/schedules/preview?organizationId=${ORG_A}`, { method: "POST", as: "alice", body: { cron: "0 0 9 * * *", timezone: "America/Sao_Paulo" } });
+    expect(response.status).toBe(400);
     expect(calls).toHaveLength(0);
   });
 

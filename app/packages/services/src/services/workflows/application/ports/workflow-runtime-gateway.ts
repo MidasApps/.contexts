@@ -1,4 +1,4 @@
-import type { AgentCatalogEntry, CustomAgentRuntimeOptions, Schedule, WorkflowCatalogEntry, WorkflowEvent, WorkflowRun, WorkflowRunStatus } from "@core/contracts";
+import type { AgentCatalogEntry, CustomAgentRuntimeOptions, Schedule, SchedulePreview, SchedulePreviewInput, WorkflowCatalogEntry, WorkflowEvent, WorkflowRun, WorkflowRunStatus } from "@core/contracts";
 import type { AgentCallScope } from "../../../agents/application/ports/agent-runtime-gateway.ts";
 
 /**
@@ -50,6 +50,8 @@ export type WorkflowRuntimeGateway = {
   readonly updateSchedule: (scope: AgentCallScope, scheduleId: string, input: ScheduleWriteInput) => Promise<WorkflowGatewayResult<Schedule>>;
   readonly actOnSchedule: (scope: AgentCallScope, scheduleId: string, action: ScheduleAction) => Promise<WorkflowGatewayResult<Schedule | { readonly scheduleId: string }>>;
   readonly deleteSchedule: (scope: AgentCallScope, scheduleId: string) => Promise<WorkflowGatewayResult<null>>;
+  /** The next fires of an unsaved cron, from the scheduler's own engine (`/tenant-schedules/preview`, decision 0061). */
+  readonly previewSchedule: (scope: AgentCallScope, input: SchedulePreviewInput) => Promise<WorkflowGatewayResult<SchedulePreview>>;
   /** The subagents of the caller's tenant with their tools and skills (`/tenant-catalog/agents`, SP5 Task 14). */
   readonly listAgentCatalog: (scope: AgentCallScope) => Promise<WorkflowGatewayResult<AgentCatalogEntry[]>>;
   /** The workflows the tenant may start or schedule (`/tenant-catalog/workflows`, SP5 Task 14). */

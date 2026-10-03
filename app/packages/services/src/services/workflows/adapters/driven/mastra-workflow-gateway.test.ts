@@ -54,6 +54,13 @@ describe("createMastraWorkflowGateway", () => {
     expect(await leaky.gateway.listAgentCatalog(scope)).toEqual({ ok: false, error: { code: "UPSTREAM_UNAVAILABLE", status: 502 } });
   });
 
+  it("posts a schedule preview and reads its fires", async () => {
+    const { gateway, seen } = gatewayAnswering(200, { data: { nextFireTimes: ["2026-10-01T12:00:00.000Z"] } });
+    expect(await gateway.previewSchedule(scope, { cron: "0 9 * * *", timezone: "America/Sao_Paulo" })).toEqual({ ok: true, data: { nextFireTimes: ["2026-10-01T12:00:00.000Z"] } });
+    expect(seen[0]?.url).toBe("http://mastra:4111/tenant-schedules/preview");
+    expect(seen[0]?.init).toMatchObject({ method: "POST", body: JSON.stringify({ cron: "0 9 * * *", timezone: "America/Sao_Paulo" }) });
+  });
+
   it("refuses a success body that breaks the contract", async () => {
     expect(await gatewayAnswering(200, { data: { runId: 1 } }).gateway.getRun(scope, "run-1")).toEqual({ ok: false, error: { code: "UPSTREAM_UNAVAILABLE", status: 502 } });
   });

@@ -6,7 +6,7 @@ import { buildAgentContextEntries, TEST_TENANT, TEST_UID } from "../../testing/a
 import { createFakeAccessPort } from "../../testing/fake-ports.ts";
 import { SCHEDULE_ID_CONTEXT_KEY } from "../runs/workflow-run-view.ts";
 import { createWorkflowCatalog, policyOf } from "../workflow-catalog.ts";
-import { handleCreateSchedule, handleGetSchedule, handleListSchedules, handleScheduleAction, type TenantScheduleRouteDeps } from "./tenant-schedule-routes.ts";
+import { handleCreateSchedule, handleGetSchedule, handleListSchedules, handlePreviewSchedule, handleScheduleAction, type TenantScheduleRouteDeps } from "./tenant-schedule-routes.ts";
 import { scheduleIdOf, type StoredSchedule } from "./tenant-schedule-view.ts";
 
 const OTHER = "Zz8sK2lPq0WnR5tYu3bV";
@@ -84,6 +84,29 @@ describe("tenant schedule routes", () => {
     expect(((await list.json()) as { data: { tenantId: string }[] }).data.map((row) => row.tenantId)).toEqual([TEST_TENANT]);
     expect((await handleGetSchedule(deps(WRITER), foreign.id)({ mastra, requestContext: context() })).status).toBe(404);
     expect((await handleScheduleAction(deps(WRITER), foreign.id, "pause")({ mastra, requestContext: context() })).status).toBe(404);
+  });
+
+  it("previews the next five fires of an unsaved cron from now, in its zone, with core.schedule.read", async () => {
+    const { mastra } = fakeMastra([]);
+    const preview = (payload: unknown, permissions: readonly string[] = ["core.schedule.read"]) =>
+      handlePreviewSchedule(deps(permissions), () => Promise.resolve(payload))({ mastra, requestContext: context() });
+    const response = await preview({ cron: "0 9 * * 1-5", timezone: "America/Sao_Paulo" });
+    expect(response.status).toBe(200);
+    // NOW is Wednesday 2026-09-30 12:00Z (09:00 in São Paulo): the 09:00 of that day has passed.
+    expect(await response.json()).toEqual({
+      data: { nextFireTimes: ["2026-10-01T12:00:00.000Z", "2026-10-02T12:00:00.000Z", "2026-10-05T12:00:00.000Z", "2026-10-06T12:00:00.000Z", "2026-10-07T12:00:00.000Z"] },
+    });
+    expect((await preview({ cron: "0 9 * * *", timezone: "America/Sao_Paulo" }, [])).status).toBe(403);
+  });
+
+  it("refuses a preview whose cron the scheduler cannot read (400) and does not apply the minimum interval", async () => {
+    const { mastra } = fakeMastra([]);
+    const preview = (payload: unknown) => handlePreviewSchedule(deps(["core.schedule.read"]), () => Promise.resolve(payload))({ mastra, requestContext: context() });
+    const impossible = await preview({ cron: "99 9 * * *", timezone: "America/Sao_Paulo" });
+    expect(impossible.status).toBe(400);
+    expect(await impossible.json()).toMatchObject({ error: { code: "VALIDATION_FAILED" } });
+    expect((await preview({ cron: "0 9 * * *", timezone: "Mars/Base" })).status).toBe(400);
+    expect((await preview({ cron: "* * * * *", timezone: "UTC" })).status).toBe(200);
   });
 
   it("needs core.schedule.write to change a schedule", async () => {

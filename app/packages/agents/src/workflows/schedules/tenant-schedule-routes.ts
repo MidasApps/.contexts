@@ -1,4 +1,4 @@
-import { CreateScheduleInputSchema, UpdateScheduleInputSchema } from "@core/contracts";
+import { CreateScheduleInputSchema, SCHEDULE_PREVIEW_FIRES, SchedulePreviewInputSchema, UpdateScheduleInputSchema } from "@core/contracts";
 import type { Logger } from "@core/services";
 import type { Mastra } from "@mastra/core/mastra";
 import { type ApiRoute, registerApiRoute } from "@mastra/core/server";
@@ -6,7 +6,7 @@ import type { z } from "zod";
 import type { AccessPort } from "../../runtime/runtime-ports.ts";
 import { authorizeCaller, dataJson, type FieldIssue, inputsOf, type RouteInputs, routeError, validateWorkflowInput } from "../runs/workflow-route-http.ts";
 import type { WorkflowCatalog } from "../workflow-catalog.ts";
-import { checkSchedule } from "./schedule-policy.ts";
+import { checkSchedule, previewFires } from "./schedule-policy.ts";
 import { isTenantSchedule, scheduledRunContextOf, scheduleIdOf, type StoredSchedule, toScheduleView } from "./tenant-schedule-view.ts";
 
 /** Custom routes of tenant schedules (SP5 spec §3.5, decision 0037); `/v1/schedules` calls them. */
@@ -103,6 +103,18 @@ export const handleCreateSchedule = (deps: TenantScheduleRouteDeps, readBody: ()
     return viewResponse(created, inputs, 201);
   });
 
+/** The next fires of an unsaved cron from now, in its zone (the editor's preview; core.schedule.read). */
+export const handlePreviewSchedule = (deps: TenantScheduleRouteDeps, readBody: () => Promise<unknown>) =>
+  guarded(deps, "schedule_preview_failed", async (inputs) => {
+    const caller = await authorizeCaller({ access: deps.access, requestContext: inputs.requestContext, permission: SCHEDULE_PERMISSIONS.read });
+    if (!caller.ok) return caller.response;
+    const body = SchedulePreviewInputSchema.safeParse(await readBody().catch(() => undefined));
+    if (!body.success) return routeError("VALIDATION_FAILED", inputs.requestContext, issuesOf(body.error));
+    const fires = previewFires({ ...body.data, now: (deps.now ?? Date.now)(), count: SCHEDULE_PREVIEW_FIRES });
+    if (fires === null) return routeError("VALIDATION_FAILED", inputs.requestContext, [{ field: "cron", issue: "INVALID_CRON" }]);
+    return dataJson({ nextFireTimes: fires.map((fire) => new Date(fire).toISOString()) });
+  });
+
 export const handleUpdateSchedule = (deps: TenantScheduleRouteDeps, id: string, readBody: () => Promise<unknown>) =>
   guarded(deps, "schedule_update_failed", async (inputs) => {
     const caller = await authorizeCaller({ access: deps.access, requestContext: inputs.requestContext, permission: SCHEDULE_PERMISSIONS.write });
@@ -137,6 +149,8 @@ export const handleScheduleAction = (deps: TenantScheduleRouteDeps, id: string, 
 export const createTenantScheduleRoutes = (deps: TenantScheduleRouteDeps): ApiRoute[] => [
   registerApiRoute("/tenant-schedules", { method: "GET", requiresAuth: true, handler: (c) => handleListSchedules(deps)(inputsOf(c)) }),
   registerApiRoute("/tenant-schedules", { method: "POST", requiresAuth: true, handler: (c) => handleCreateSchedule(deps, () => c.req.json())(inputsOf(c)) }),
+  // A static segment: no `POST /tenant-schedules/:scheduleId` exists for it to collide with.
+  registerApiRoute("/tenant-schedules/preview", { method: "POST", requiresAuth: true, handler: (c) => handlePreviewSchedule(deps, () => c.req.json())(inputsOf(c)) }),
   registerApiRoute("/tenant-schedules/:scheduleId", { method: "GET", requiresAuth: true, handler: (c) => handleGetSchedule(deps, c.req.param("scheduleId"))(inputsOf(c)) }),
   registerApiRoute("/tenant-schedules/:scheduleId", {
     method: "PATCH",

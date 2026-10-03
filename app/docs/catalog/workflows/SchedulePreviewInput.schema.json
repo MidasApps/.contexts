@@ -1,0 +1,33 @@
+{
+  "additionalProperties": false,
+  "description": "A cron expression and time zone whose next fires the editor shows before saving.",
+  "examples": [
+    {
+      "cron": "0 9 * * 1-5",
+      "timezone": "America/Sao_Paulo"
+    }
+  ],
+  "properties": {
+    "cron": {
+      "description": "5-field cron expression to preview; it need not be saved.",
+      "maxLength": 120,
+      "type": "string",
+      "x-pii": "none"
+    },
+    "timezone": {
+      "description": "IANA time zone the cron is read in.",
+      "type": "string",
+      "x-pii": "none"
+    }
+  },
+  "required": [
+    "cron",
+    "timezone"
+  ],
+  "type": "object",
+  "x-kind": "command",
+  "x-permission": "core.schedule.read",
+  "x-pii": "none",
+  "x-relations": [],
+  "x-tenancyScope": "organization"
+}

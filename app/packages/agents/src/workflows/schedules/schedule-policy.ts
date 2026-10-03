@@ -40,7 +40,21 @@ export const nextFires = (cron: string, timezone: string, after: number, count: 
   return fires;
 };
 
-const shortestGapMinutes = (fires: readonly number[]): number => {
+/**
+ * The next `count` fires (epoch ms) of an unsaved cron from `now`, for the editor's preview. No
+ * minimum interval here: the write refuses that with its own code.
+ * @returns `null` when the scheduler cannot read the cron in that zone.
+ */
+export const previewFires = (input: { readonly cron: string; readonly timezone: string; readonly now: number; readonly count: number }): number[] | null => {
+  try {
+    validateCron(input.cron, input.timezone);
+    return nextFires(input.cron, input.timezone, input.now, input.count);
+  } catch {
+    return null;
+  }
+};
+
+const shortestGapMinutes =(fires: readonly number[]): number => {
   let shortest = Number.POSITIVE_INFINITY;
   for (let index = 1; index < fires.length; index += 1) shortest = Math.min(shortest, ((fires[index] ?? 0) - (fires[index - 1] ?? 0)) / 60_000);
   return shortest;

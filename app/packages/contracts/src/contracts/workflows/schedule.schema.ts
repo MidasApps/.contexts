@@ -96,6 +96,42 @@ export const CreateScheduleInputContract = defineContract(CreateScheduleInputSch
   permission: "core.schedule.write",
 });
 
+/** How many fires `POST /v1/schedules/preview` returns. */
+export const SCHEDULE_PREVIEW_FIRES = 5;
+
+export const SchedulePreviewInputSchema = z.strictObject({
+  cron: CronExpressionSchema.meta(none("5-field cron expression to preview; it need not be saved.")),
+  timezone: TimeZoneSchema.meta(none("IANA time zone the cron is read in.")),
+});
+export type SchedulePreviewInput = z.infer<typeof SchedulePreviewInputSchema>;
+
+export const SchedulePreviewInputContract = defineContract(SchedulePreviewInputSchema, {
+  id: "workflows.SchedulePreviewInput",
+  kind: "command",
+  description: "A cron expression and time zone whose next fires the editor shows before saving.",
+  examples: [{ cron: "0 9 * * 1-5", timezone: "America/Sao_Paulo" }],
+  pii: "none",
+  tenancyScope: "organization",
+  relations: [],
+  permission: "core.schedule.read",
+});
+
+export const SchedulePreviewSchema = z.strictObject({
+  nextFireTimes: z.array(IsoDateTimeSchema).max(SCHEDULE_PREVIEW_FIRES).meta(none("The next five fires from now (UTC), computed by the scheduler's own cron engine.")),
+});
+export type SchedulePreview = z.infer<typeof SchedulePreviewSchema>;
+
+export const SchedulePreviewContract = defineContract(SchedulePreviewSchema, {
+  id: "workflows.SchedulePreview",
+  kind: "view",
+  description: "The next fires of a cron expression in its time zone, as the scheduler would fire them.",
+  examples: [{ nextFireTimes: ["2026-10-01T12:00:00.000Z", "2026-10-02T12:00:00.000Z", "2026-10-05T12:00:00.000Z", "2026-10-06T12:00:00.000Z", "2026-10-07T12:00:00.000Z"] }],
+  pii: "none",
+  tenancyScope: "organization",
+  relations: [],
+  permission: "core.schedule.read",
+});
+
 export const UpdateScheduleInputSchema = z.strictObject({
   cron: CronExpressionSchema.optional().meta(none("New cron expression.")),
   timezone: TimeZoneSchema.optional().meta(none("New IANA time zone.")),

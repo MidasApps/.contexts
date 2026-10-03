@@ -6,7 +6,15 @@ import {
   WorkflowResumeActionInputContract,
   WorkflowResumeActionInputSchema,
 } from "./human-approval-resume.schema.ts";
-import { CreateScheduleInputContract, CreateScheduleInputSchema, CronExpressionSchema, ScheduleContract, UpdateScheduleInputContract } from "./schedule.schema.ts";
+import {
+  CreateScheduleInputContract,
+  CreateScheduleInputSchema,
+  CronExpressionSchema,
+  ScheduleContract,
+  SchedulePreviewContract,
+  SchedulePreviewInputContract,
+  UpdateScheduleInputContract,
+} from "./schedule.schema.ts";
 import { StartWorkflowRunInputContract, WorkflowRunContract, WorkflowRunSchema } from "./workflow-run.schema.ts";
 import { WorkflowEventContract, WorkflowEventSchema } from "./workflow-event.schema.ts";
 
@@ -16,6 +24,8 @@ const contracts = [
   ScheduleContract,
   CreateScheduleInputContract,
   UpdateScheduleInputContract,
+  SchedulePreviewInputContract,
+  SchedulePreviewContract,
   WorkflowRunContract,
   StartWorkflowRunInputContract,
   WorkflowEventContract,

@@ -25,7 +25,7 @@ import { AddEvalDatasetItemInputContract, CreateEvalDatasetInputContract, EvalDa
 import { EvalDatasetContract, StartEvalExperimentInputContract } from "./observability/eval-dataset.schema.ts";
 import { UsageDailyRollupContract } from "./usage/usage-daily-rollup.schema.ts";
 import { HumanApprovalResumeContract, WorkflowResumeActionInputContract } from "./workflows/human-approval-resume.schema.ts";
-import { CreateScheduleInputContract, ScheduleContract, UpdateScheduleInputContract } from "./workflows/schedule.schema.ts";
+import { CreateScheduleInputContract, ScheduleContract, SchedulePreviewContract, SchedulePreviewInputContract, UpdateScheduleInputContract } from "./workflows/schedule.schema.ts";
 import { WorkflowEventContract } from "./workflows/workflow-event.schema.ts";
 import { StartWorkflowRunInputContract, WorkflowRunContract } from "./workflows/workflow-run.schema.ts";
 
@@ -36,6 +36,8 @@ export const SP5_CONTRACTS: readonly ContractDefinition[] = [
   ScheduleContract,
   CreateScheduleInputContract,
   UpdateScheduleInputContract,
+  SchedulePreviewInputContract,
+  SchedulePreviewContract,
   WorkflowRunContract,
   StartWorkflowRunInputContract,
   WorkflowEventContract,

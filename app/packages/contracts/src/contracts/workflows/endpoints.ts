@@ -5,7 +5,7 @@ import { defineEndpoint, type EndpointDefinition } from "../http/endpoint.ts";
 import { dataEnvelope, listEnvelope, PageQuerySchema } from "../http/envelopes.schema.ts";
 import { OrganizationIdSchema } from "../tenancy/ids.schema.ts";
 import { WorkflowIdSchema } from "./human-approval-resume.schema.ts";
-import { CreateScheduleInputSchema, ScheduleSchema, UpdateScheduleInputSchema } from "./schedule.schema.ts";
+import { CreateScheduleInputSchema, SchedulePreviewInputSchema, SchedulePreviewSchema, ScheduleSchema, UpdateScheduleInputSchema } from "./schedule.schema.ts";
 import { StartWorkflowRunInputSchema, WorkflowRunSchema, WorkflowRunStatusSchema } from "./workflow-run.schema.ts";
 
 const RunIdSchema = z.string().regex(/^[A-Za-z0-9_-]{1,128}$/);
@@ -195,9 +195,22 @@ export const runScheduleNowEndpoint = defineEndpoint({
   summary: "Starts a run of the schedule now, with the creator re-authorized (core.schedule.write).",
 });
 
+export const previewScheduleEndpoint = defineEndpoint({
+  id: "schedules.preview",
+  method: "POST",
+  path: "/v1/schedules/preview",
+  auth: "principal",
+  query: OrganizationQuerySchema,
+  body: SchedulePreviewInputSchema,
+  responses: { 200: dataEnvelope(SchedulePreviewSchema) },
+  errors: { 403: ["FORBIDDEN"] },
+  summary: "The next five fires of an unsaved cron expression in its time zone, from the scheduler's own engine (core.schedule.read).",
+});
+
 export const SCHEDULE_ENDPOINTS: readonly EndpointDefinition[] = [
   listSchedulesEndpoint,
   createScheduleEndpoint,
+  previewScheduleEndpoint,
   getScheduleEndpoint,
   updateScheduleEndpoint,
   deleteScheduleEndpoint,

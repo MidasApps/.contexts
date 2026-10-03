@@ -123,6 +123,7 @@ describe("composeAgentRuntime", () => {
       "POST /chat/workflows/:workflowId",
       "GET /tenant-schedules",
       "POST /tenant-schedules",
+      "POST /tenant-schedules/preview",
       "GET /tenant-schedules/:scheduleId",
       "PATCH /tenant-schedules/:scheduleId",
       "DELETE /tenant-schedules/:scheduleId",

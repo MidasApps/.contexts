@@ -500,8 +500,9 @@ export {
 } from "./contracts/workflows/human-approval-resume.schema.ts";
 export {
   CreateScheduleInputContract, CreateScheduleInputSchema, CronExpressionSchema, ScheduleContract, ScheduleSchema,
+  SCHEDULE_PREVIEW_FIRES, SchedulePreviewContract, SchedulePreviewInputContract, SchedulePreviewInputSchema, SchedulePreviewSchema,
   ScheduleSlugSchema, ScheduleStatusSchema, UpdateScheduleInputContract, UpdateScheduleInputSchema,
-  type CreateScheduleInput, type Schedule, type ScheduleStatus, type UpdateScheduleInput,
+  type CreateScheduleInput, type Schedule, type SchedulePreview, type SchedulePreviewInput, type ScheduleStatus, type UpdateScheduleInput,
 } from "./contracts/workflows/schedule.schema.ts";
 export {
   StartWorkflowRunInputContract, StartWorkflowRunInputSchema, WORKFLOW_RUN_FAILURE_CODES, WORKFLOW_RUN_STATUSES, WorkflowRunContract,
@@ -550,7 +551,7 @@ export {
 } from "./contracts/workflows/endpoints.ts";
 export {
   createScheduleEndpoint, deleteScheduleEndpoint, getScheduleEndpoint, listSchedulesEndpoint, pauseScheduleEndpoint, resumeScheduleEndpoint,
-  runScheduleNowEndpoint, SCHEDULE_ENDPOINTS, ScheduleRunQueuedSchema, updateScheduleEndpoint,
+  previewScheduleEndpoint, runScheduleNowEndpoint, SCHEDULE_ENDPOINTS, ScheduleRunQueuedSchema, updateScheduleEndpoint,
 } from "./contracts/workflows/endpoints.ts";
 export {
   adminClearFlagOverrideEndpoint, adminListFlagsEndpoint, adminSetFlagEndpoint, FLAG_ENDPOINTS, listFlagsEndpoint, setTenantFlagEndpoint,

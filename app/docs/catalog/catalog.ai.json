@@ -25436,6 +25436,137 @@
     },
     {
       "context": "workflows",
+      "description": "The next fires of a cron expression in its time zone, as the scheduler would fire them.",
+      "examples": [
+        {
+          "nextFireTimes": [
+            "2026-10-01T12:00:00.000Z",
+            "2026-10-02T12:00:00.000Z",
+            "2026-10-05T12:00:00.000Z",
+            "2026-10-06T12:00:00.000Z",
+            "2026-10-07T12:00:00.000Z"
+          ]
+        }
+      ],
+      "fields": [
+        {
+          "description": "The next five fires from now (UTC), computed by the scheduler's own cron engine.",
+          "name": "nextFireTimes",
+          "pii": "none",
+          "required": true
+        }
+      ],
+      "id": "workflows.SchedulePreview",
+      "jsonSchema": {
+        "additionalProperties": false,
+        "description": "The next fires of a cron expression in its time zone, as the scheduler would fire them.",
+        "examples": [
+          {
+            "nextFireTimes": [
+              "2026-10-01T12:00:00.000Z",
+              "2026-10-02T12:00:00.000Z",
+              "2026-10-05T12:00:00.000Z",
+              "2026-10-06T12:00:00.000Z",
+              "2026-10-07T12:00:00.000Z"
+            ]
+          }
+        ],
+        "properties": {
+          "nextFireTimes": {
+            "description": "The next five fires from now (UTC), computed by the scheduler's own cron engine.",
+            "items": {
+              "format": "date-time",
+              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$",
+              "type": "string"
+            },
+            "maxItems": 5,
+            "type": "array",
+            "x-pii": "none"
+          }
+        },
+        "required": [
+          "nextFireTimes"
+        ],
+        "type": "object",
+        "x-kind": "view",
+        "x-permission": "core.schedule.read",
+        "x-pii": "none",
+        "x-relations": [],
+        "x-tenancyScope": "organization"
+      },
+      "kind": "view",
+      "name": "SchedulePreview",
+      "permission": "core.schedule.read",
+      "pii": "none",
+      "relations": [],
+      "tenancyScope": "organization"
+    },
+    {
+      "context": "workflows",
+      "description": "A cron expression and time zone whose next fires the editor shows before saving.",
+      "examples": [
+        {
+          "cron": "0 9 * * 1-5",
+          "timezone": "America/Sao_Paulo"
+        }
+      ],
+      "fields": [
+        {
+          "description": "5-field cron expression to preview; it need not be saved.",
+          "name": "cron",
+          "pii": "none",
+          "required": true
+        },
+        {
+          "description": "IANA time zone the cron is read in.",
+          "name": "timezone",
+          "pii": "none",
+          "required": true
+        }
+      ],
+      "id": "workflows.SchedulePreviewInput",
+      "jsonSchema": {
+        "additionalProperties": false,
+        "description": "A cron expression and time zone whose next fires the editor shows before saving.",
+        "examples": [
+          {
+            "cron": "0 9 * * 1-5",
+            "timezone": "America/Sao_Paulo"
+          }
+        ],
+        "properties": {
+          "cron": {
+            "description": "5-field cron expression to preview; it need not be saved.",
+            "maxLength": 120,
+            "type": "string",
+            "x-pii": "none"
+          },
+          "timezone": {
+            "description": "IANA time zone the cron is read in.",
+            "type": "string",
+            "x-pii": "none"
+          }
+        },
+        "required": [
+          "cron",
+          "timezone"
+        ],
+        "type": "object",
+        "x-kind": "command",
+        "x-permission": "core.schedule.read",
+        "x-pii": "none",
+        "x-relations": [],
+        "x-tenancyScope": "organization"
+      },
+      "kind": "command",
+      "name": "SchedulePreviewInput",
+      "permission": "core.schedule.read",
+      "pii": "none",
+      "relations": [],
+      "tenancyScope": "organization"
+    },
+    {
+      "context": "workflows",
       "description": "Starts a run of a startable workflow in the active organization.",
       "examples": [
         {

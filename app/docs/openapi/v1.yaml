@@ -12528,6 +12528,75 @@ paths:
       tags:
         - schedules
       x-auth: principal
+  /v1/schedules/preview:
+    post:
+      operationId: schedules.preview
+      parameters:
+        - description: Organization to act in; required for users, and when given it must be an API key's own organization.
+          in: query
+          name: organizationId
+          required: false
+          schema:
+            minLength: 1
+            type: string
+            x-pii: none
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/workflows.SchedulePreviewInput"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                properties:
+                  data:
+                    $ref: "#/components/schemas/workflows.SchedulePreview"
+                required:
+                  - data
+                type: object
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: VALIDATION_FAILED
+          x-error-codes:
+            - VALIDATION_FAILED
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: UNAUTHORIZED
+          x-error-codes:
+            - UNAUTHORIZED
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: FORBIDDEN
+          x-error-codes:
+            - FORBIDDEN
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/http.ErrorEnvelope"
+          description: INTERNAL_ERROR
+          x-error-codes:
+            - INTERNAL_ERROR
+      security:
+        - bearerAuth: []
+      summary: The next five fires of an unsaved cron expression in its time zone, from the scheduler's own engine (core.schedule.read).
+      tags:
+        - schedules
+      x-auth: principal
   /v1/schedules/{scheduleId}:
     delete:
       operationId: schedules.delete
@@ -28691,6 +28760,59 @@ components:
         - field: tenantId
           target: tenancy.Organization
           type: belongs-to
+      x-tenancyScope: organization
+    workflows.SchedulePreview:
+      additionalProperties: false
+      description: The next fires of a cron expression in its time zone, as the scheduler would fire them.
+      examples:
+        - nextFireTimes:
+            - "2026-10-01T12:00:00.000Z"
+            - "2026-10-02T12:00:00.000Z"
+            - "2026-10-05T12:00:00.000Z"
+            - "2026-10-06T12:00:00.000Z"
+            - "2026-10-07T12:00:00.000Z"
+      properties:
+        nextFireTimes:
+          description: The next five fires from now (UTC), computed by the scheduler's own cron engine.
+          items:
+            format: date-time
+            pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z))$
+            type: string
+          maxItems: 5
+          type: array
+          x-pii: none
+      required:
+        - nextFireTimes
+      type: object
+      x-kind: view
+      x-permission: core.schedule.read
+      x-pii: none
+      x-relations: []
+      x-tenancyScope: organization
+    workflows.SchedulePreviewInput:
+      additionalProperties: false
+      description: A cron expression and time zone whose next fires the editor shows before saving.
+      examples:
+        - cron: 0 9 * * 1-5
+          timezone: America/Sao_Paulo
+      properties:
+        cron:
+          description: 5-field cron expression to preview; it need not be saved.
+          maxLength: 120
+          type: string
+          x-pii: none
+        timezone:
+          description: IANA time zone the cron is read in.
+          type: string
+          x-pii: none
+      required:
+        - cron
+        - timezone
+      type: object
+      x-kind: command
+      x-permission: core.schedule.read
+      x-pii: none
+      x-relations: []
       x-tenancyScope: organization
     workflows.StartWorkflowRunInput:
       additionalProperties: false

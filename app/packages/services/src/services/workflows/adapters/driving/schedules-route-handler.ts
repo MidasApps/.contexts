@@ -4,6 +4,7 @@ import {
   getScheduleEndpoint,
   listSchedulesEndpoint,
   pauseScheduleEndpoint,
+  previewScheduleEndpoint,
   resumeScheduleEndpoint,
   runScheduleNowEndpoint,
   updateScheduleEndpoint,
@@ -59,6 +60,10 @@ export const buildSchedulesRoutes = (deps: SchedulesRouteDeps): Record<string, R
     [getScheduleEndpoint.id]: withApiRoute(getScheduleEndpoint, deps.pipeline, async (ctx) => {
       const scope = await scopeOf(ctx, SCHEDULE_PERMISSIONS.read);
       return scope instanceof Response ? scope : answer(await deps.gateway.getSchedule(scope, ctx.input.params.scheduleId), ctx.requestId);
+    }),
+    [previewScheduleEndpoint.id]: withApiRoute(previewScheduleEndpoint, deps.pipeline, async (ctx) => {
+      const scope = await scopeOf(ctx, SCHEDULE_PERMISSIONS.read);
+      return scope instanceof Response ? scope : answer(await deps.gateway.previewSchedule(scope, ctx.input.body), ctx.requestId);
     }),
     [createScheduleEndpoint.id]: withApiRoute(createScheduleEndpoint, deps.pipeline, async (ctx) => {
       const scope = await scopeOf(ctx, SCHEDULE_PERMISSIONS.write);
