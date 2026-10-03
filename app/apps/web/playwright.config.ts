@@ -41,7 +41,9 @@ export default defineConfig({
     { name: "firefox", testIgnore: SINGLE_BROWSER_SPECS, use: { ...devices["Desktop Firefox"], storageState: owner }, dependencies: ["setup"] },
     { name: "webkit", testIgnore: SINGLE_BROWSER_SPECS, use: { ...devices["Desktop Safari"], storageState: owner }, dependencies: ["setup"] },
     { name: "mobile-chrome", testIgnore: SINGLE_BROWSER_SPECS, use: { ...devices["Pixel 7"], storageState: owner }, dependencies: ["setup"] },
-    { name: "console", testMatch: CONSOLE_SPECS, use: { ...devices["Desktop Chrome"], storageState: owner }, dependencies: ["setup"] },
+    // One at a time too: an eval or a chat turn of one journey held the single local agent runtime
+    // and the next journey's Mastra-backed pages loaded past their timeouts; serially 53 of 53 pass.
+    { name: "console", workers: 1, testMatch: CONSOLE_SPECS, use: { ...devices["Desktop Chrome"], storageState: owner }, dependencies: ["setup"] },
     // The chat journeys (SP4) run once, on chromium: each one streams through the agent runtime,
     // and the browser matrix above already covers the shell they are mounted in. One at a time:
     // with two or four streams on one local runtime next to the browsers and emulators, some
