@@ -21,9 +21,10 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: isCi,
   retries: isCi ? 2 : 0,
-  // Four workers everywhere: each cold page restores a session through `next start` and the
-  // emulators, and more parallel browsers than that made those restores slower than the timeouts.
-  workers: 4,
+  // Four workers in CI, two locally: each cold page restores a session through `next start` and the
+  // emulators, and more parallel browsers than that made those restores slower than the timeouts. A
+  // developer machine also runs the agent runtime, the emulators and its own apps (follow-up #102).
+  workers: isCi ? 4 : 2,
   timeout: 60_000,
   expect: { timeout: 10_000 },
   reporter: isCi ? [["html", { open: "never" }], ["github"]] : [["list"], ["html", { open: "never" }]],
