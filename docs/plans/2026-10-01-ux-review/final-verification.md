@@ -1,6 +1,6 @@
 # Final verification (2026-10-03)
 
-Branch `feat/agentic-app-core-sp0`. The full checks ran at `e519a391`; the e2e runs listed below ran on that commit and on the e2e configuration changes after it (`4a12a748`, `81e65b37`).
+Branch `feat/agentic-app-core-sp0`. The full checks ran on `e519a391` to `4a12a748`: the unit-test step ran again at `4a12a748` after a script error. The final e2e ran at `81e65b37`.
 
 Machine: Windows 11, Node 26.10.0, pnpm 12.6.0, Docker Desktop (Postgres 18). The user's own apps were open throughout: Chrome, the ChatGPT desktop app, Warp, Paseo. Logs of every step are in `%TEMP%\fv\*.log` on that machine.
 
