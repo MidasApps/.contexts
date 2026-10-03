@@ -1,8 +1,9 @@
 import { expect, test as setup } from "@playwright/test";
 import { readE2eEnv } from "@core/e2e/e2e-env";
 import { createEmulatorAuth } from "@core/e2e/emulator";
-import { SEED_USERS, seedWorld, writeWorld } from "@core/e2e/seed-users";
+import { readWorld, SEED_USERS, seedWorld, writeWorld } from "@core/e2e/seed-users";
 import { completeSmsChallenge, signInThroughUi, submitSignIn } from "@core/e2e/sign-in";
+import { warmAgentRuntime } from "@core/e2e/warm-agents";
 import { authFile, WEB_AUTH_DIR } from "./web-test.ts";
 
 // Seeds the e2e world once, then signs each seeded user in through the UI and keeps the storage
@@ -29,4 +30,9 @@ setup("sign in staff with the SMS second factor", async ({ page }) => {
   await completeSmsChallenge(page, createEmulatorAuth(env));
   await expect(page.getByRole("button", { name: `${SEED_USERS.staff.displayName}, menu da conta` })).toBeVisible();
   await page.context().storageState({ path: authFile("staff") });
+});
+
+setup("warm the agent runtime", async () => {
+  setup.setTimeout(120_000);
+  await warmAgentRuntime(env, readWorld(WEB_AUTH_DIR));
 });
