@@ -22,7 +22,8 @@ export function NextFires({ organizationId, cron, timezone }: NextFiresProps) {
   const t = useTranslations("settings.workflows.editor.nextFires");
   const headingId = useId();
   const preview = useSchedulePreview(organizationId, cron === null || timezone === "" ? null : { cron, timezone });
-  const fires = preview.data;
+  // An incomplete cron hides the previous cron's fires (kept as placeholder while a new one loads).
+  const fires = cron === null ? undefined : preview.data;
   return (
     <section aria-labelledby={headingId} className="flex flex-col gap-1.5 text-xs">
       <h3 id={headingId} className="font-medium">

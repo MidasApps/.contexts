@@ -371,6 +371,15 @@ describe("SettingsWorkflowsView: schedules", () => {
     await user.click(within(dialog).getByRole("combobox", { name: /Frequência/u }));
     await user.click(await screen.findByRole("option", { name: "A cada hora" }));
     await waitFor(() => expect(previews.at(-1)?.body).toEqual({ cron: "0 * * * *", timezone: "Asia/Tokyo" }));
+    // An incomplete cron shows no stale fires.
+    await user.click(within(dialog).getByRole("combobox", { name: /Frequência/u }));
+    await user.click(await screen.findByRole("option", { name: "Expressão cron" }));
+    const cron = within(dialog).getByRole("textbox", { name: /Expressão cron/u });
+    await user.clear(cron);
+    await user.click(cron);
+    await user.paste("bad");
+    expect(await within(dialog).findByText("Complete a frequência para ver os próximos disparos.")).toBeDefined();
+    expect(within(dialog).queryByRole("list", { name: "Próximos 5 disparos" })).toBeNull();
   });
 
   it("edits the cron and zone of a schedule; workflow and slug stay fixed", async () => {
