@@ -232,7 +232,7 @@ export { OrganizationIdSchema, ProjectIdSchema, UnitIdSchema } from "@core/contr
 export { createFirestoreUnitOfWork, inMemoryUnitOfWork, type UnitOfWork } from "./services/shared/firestore/unit-of-work.ts";
 export { CORE_COLLECTIONS, CORE_SCHEMA_VERSION } from "./services/shared/firestore/collections.ts";
 export { decodeCursor, encodeCursor, type CursorPosition } from "./services/shared/pagination/cursor.ts";
-export { pageMeta, paginateInMemory, type Page, type PageRequest } from "./services/shared/pagination/page.ts";
+export { pageFromOverfetch, pageMeta, paginateInMemory, type Page, type PageRequest } from "./services/shared/pagination/page.ts";
 export { err, ok, type Result } from "./services/shared/result/result.ts";
 // SP1 tenancy (Task 10): organizations, projects, the unit tree, regional settings.
 export {
@@ -330,6 +330,8 @@ export {
 export { operationName, withApiRoute, type ApiRouteDeps } from "./services/shared/http/api-route.ts";
 export type { ApiHandler, ApiHandlerContext, EndpointPrincipal } from "./services/shared/http/api-handler-context.ts";
 export { apiError, dataResponse, type DomainErrorMapping, mapDomainError, noContentResponse } from "./services/shared/http/api-errors.ts";
+// List helpers for module `/v1` handlers (`?cursor&limit`, `meta.page`, hidden-node 404).
+export { deniedResponse, invalidCursorResponse, listResponse, pageRequestOf } from "./services/shared/http/api-list.ts";
 export { matchPathParams } from "./services/shared/http/path-params.ts";
 export { clientIpOf } from "./services/shared/http/client-ip.ts";
 // SP3 catalog context: semantic view registry and read-only SQL runner (Task 11).

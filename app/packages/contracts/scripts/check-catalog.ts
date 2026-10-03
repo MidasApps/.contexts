@@ -5,14 +5,14 @@ import { stdout } from "node:process";
 import { composeCoreContracts, composeCoreEndpoints } from "../src/composition.ts";
 import { readGeneratedFiles } from "./catalog/artifact-files.ts";
 import { buildCatalogArtifacts } from "./catalog/artifacts.ts";
-import { loadModuleContracts } from "./catalog/module-contracts.ts";
+import { loadModuleContracts, loadModuleEndpoints } from "./catalog/module-contracts.ts";
 import { findContractProblems, findDanglingRefsInArtifacts, findRawMetaInArtifacts } from "./catalog/contract-problems.ts";
 import { findCatalogDrift } from "./catalog/drift.ts";
 
 const main = async (): Promise<number> => {
-  // Core contracts plus those of the modules listed in app/catalog.modules.ts (decision 0015).
+  // Core contracts and endpoints plus those of the modules listed in app/catalog.modules.ts (decision 0015).
   const contracts = composeCoreContracts(await loadModuleContracts()).listContracts();
-  const endpoints = composeCoreEndpoints().list();
+  const endpoints = composeCoreEndpoints(await loadModuleEndpoints()).list();
   const expected = buildCatalogArtifacts(contracts, endpoints);
   const onDisk = await readGeneratedFiles();
   const problems = [
