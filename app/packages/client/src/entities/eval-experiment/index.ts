@@ -12,10 +12,14 @@ export {
 export { compareExperiments, type ScoreComparison, type ScoreOutcome } from "./lib/compare-experiments.ts";
 // SP5 Task 14: an organization's own datasets and experiments (`/v1/evals/*`).
 export {
+  DATASET_ITEMS_PAGE_SIZE,
+  type DatasetItemPage,
+  tenantDatasetItemsQuery,
   tenantDatasetsQuery,
   tenantEvalKeys,
   tenantExperimentQuery,
   tenantExperimentsQuery,
+  useTenantDatasetItems,
   useTenantDatasets,
   useTenantExperiments,
 } from "./api/tenant-eval-queries.ts";

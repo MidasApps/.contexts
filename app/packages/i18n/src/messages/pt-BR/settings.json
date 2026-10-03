@@ -765,10 +765,6 @@
     "title": "Avaliações",
     "description": "Meça a qualidade dos agentes desta organização: rode um agente em um conjunto de dados e compare as notas.",
     "loading": "Carregando avaliações…",
-    "limits": {
-      "title": "O que esta página ainda não faz",
-      "description": "Os conjuntos de dados desta organização são criados a partir das avaliações negativas no chat. Ainda não é possível adicionar ou editar itens por aqui, nem ver os itens de um conjunto."
-    },
     "tabs": {
       "label": "Seções de avaliações",
       "experiments": "Experimentos",
@@ -821,13 +817,28 @@
       "targetsOf": "Agentes avaliados por {name}",
       "cardMeta": "Versão {version} · {when}",
       "emptyTitle": "Nenhum conjunto de dados ainda",
-      "emptyDescription": "Um conjunto é criado quando alguém avalia negativamente uma resposta no chat.",
+      "emptyDescription": "Crie um conjunto e adicione itens, ou avalie negativamente uma resposta no chat para criar o conjunto feedback.",
       "emptyAction": "Ver experimentos",
       "columns": {
         "name": "Conjunto de dados",
         "version": "Versão",
         "targets": "Agentes",
-        "createdAt": "Criado em"
+        "createdAt": "Criado em",
+        "items": "Itens"
+      },
+      "emptyDescriptionReadOnly": "Os conjuntos aparecem aqui quando alguém com permissão cria um ou avalia negativamente uma resposta no chat.",
+      "openItems": "Ver itens",
+      "openItemsNamed": "Ver os itens de {name}",
+      "create": {
+        "action": "Novo conjunto de dados",
+        "title": "Novo conjunto de dados",
+        "description": "Um conjunto vazio desta organização, avaliado com o assistente. Depois, adicione os itens.",
+        "name": "Nome",
+        "nameRequired": "Informe um nome.",
+        "nameTaken": "Esta organização já tem um conjunto com esse nome.",
+        "submit": "Criar",
+        "cancel": "Cancelar",
+        "done": "Conjunto {name} criado."
       }
     },
     "compare": {
@@ -854,6 +865,44 @@
       "submit": "Iniciar",
       "cancel": "Cancelar",
       "done": "Experimento {id} iniciado."
+    },
+    "items": {
+      "back": "Conjuntos de dados",
+      "title": "Itens de {name}",
+      "caption": "Itens de {name}",
+      "loading": "Carregando itens…",
+      "pagination": "Páginas de itens",
+      "noExpectedOutput": "Sem resposta esperada",
+      "deleteAction": "Excluir",
+      "deleteNamed": "Excluir o item {input}",
+      "emptyTitle": "Nenhum item ainda",
+      "emptyDescription": "Adicione um item com a mensagem que o agente recebe e a resposta esperada.",
+      "emptyDescriptionReadOnly": "Os itens aparecem aqui quando alguém com permissão os adiciona.",
+      "columns": {
+        "input": "Entrada",
+        "expectedOutput": "Resposta esperada",
+        "createdAt": "Adicionado em",
+        "actions": "Ações"
+      },
+      "add": {
+        "action": "Adicionar item",
+        "title": "Adicionar item",
+        "description": "Um item manual de {name}. Experimentos novos usam a versão atual do conjunto.",
+        "input": "Entrada",
+        "inputHint": "A mensagem que o agente recebe.",
+        "inputRequired": "Informe a entrada.",
+        "expectedOutput": "Resposta esperada (opcional)",
+        "expectedOutputHint": "A resposta que os avaliadores comparam com a do agente.",
+        "submit": "Adicionar",
+        "cancel": "Cancelar",
+        "done": "Item adicionado."
+      },
+      "delete": {
+        "title": "Excluir este item?",
+        "description": "O item sai do conjunto. Experimentos já feitos mantêm os resultados.",
+        "confirm": "Excluir item",
+        "done": "Item excluído."
+      }
     }
   },
   "traces": {

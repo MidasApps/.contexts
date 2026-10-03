@@ -67,7 +67,7 @@ describe("SettingsEvalsView", () => {
     expect(within(row).getByText(/tool-routing: 94% \(mínimo 90%\)/u)).toBeDefined();
     expect(within(within(table).getByRole("row", { name: /exp_candidate/u })).getByText("Reprovado")).toBeDefined();
     expect(organizationOf(api.calls.find((call) => call.path === "/v1/evals/experiments"))).toBe(IDS.organization);
-    expect(screen.getByText(/Ainda não é possível adicionar ou editar itens/u)).toBeDefined();
+    expect(screen.queryByText(/Ainda não é possível adicionar ou editar itens/u)).toBeNull();
     await expectNoAxeViolations(container);
   });
 

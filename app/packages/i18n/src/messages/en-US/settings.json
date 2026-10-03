@@ -765,10 +765,6 @@
     "title": "Evaluations",
     "description": "Measure the quality of this organization's agents: run an agent on a dataset and compare the scores.",
     "loading": "Loading evaluations…",
-    "limits": {
-      "title": "What this page does not do yet",
-      "description": "This organization's datasets are built from negative ratings in the chat. Adding or editing items here, or viewing the items of a dataset, is not available yet."
-    },
     "tabs": {
       "label": "Evaluation sections",
       "experiments": "Experiments",
@@ -821,13 +817,28 @@
       "targetsOf": "Agents evaluated by {name}",
       "cardMeta": "Version {version} · {when}",
       "emptyTitle": "No datasets yet",
-      "emptyDescription": "A dataset is created when someone rates a chat answer negatively.",
+      "emptyDescription": "Create a dataset and add items, or rate an answer down in the chat to create the feedback dataset.",
       "emptyAction": "See experiments",
       "columns": {
         "name": "Dataset",
         "version": "Version",
         "targets": "Agents",
-        "createdAt": "Created"
+        "createdAt": "Created",
+        "items": "Items"
+      },
+      "emptyDescriptionReadOnly": "Datasets show up here when someone with permission creates one or rates an answer down in the chat.",
+      "openItems": "View items",
+      "openItemsNamed": "View the items of {name}",
+      "create": {
+        "action": "New dataset",
+        "title": "New dataset",
+        "description": "An empty dataset of this organization, evaluated with the assistant. Add its items next.",
+        "name": "Name",
+        "nameRequired": "Enter a name.",
+        "nameTaken": "This organization already has a dataset with this name.",
+        "submit": "Create",
+        "cancel": "Cancel",
+        "done": "Dataset {name} created."
       }
     },
     "compare": {
@@ -854,6 +865,44 @@
       "submit": "Start",
       "cancel": "Cancel",
       "done": "Experiment {id} started."
+    },
+    "items": {
+      "back": "Datasets",
+      "title": "Items of {name}",
+      "caption": "Items of {name}",
+      "loading": "Loading items…",
+      "pagination": "Item pages",
+      "noExpectedOutput": "No expected answer",
+      "deleteAction": "Delete",
+      "deleteNamed": "Delete the item {input}",
+      "emptyTitle": "No items yet",
+      "emptyDescription": "Add an item with the message the agent receives and the expected answer.",
+      "emptyDescriptionReadOnly": "Items show up here when someone with permission adds them.",
+      "columns": {
+        "input": "Input",
+        "expectedOutput": "Expected answer",
+        "createdAt": "Added",
+        "actions": "Actions"
+      },
+      "add": {
+        "action": "Add item",
+        "title": "Add item",
+        "description": "A manual item of {name}. New experiments use the dataset's current version.",
+        "input": "Input",
+        "inputHint": "The message the agent receives.",
+        "inputRequired": "Enter the input.",
+        "expectedOutput": "Expected answer (optional)",
+        "expectedOutputHint": "The answer the scorers compare the agent's with.",
+        "submit": "Add",
+        "cancel": "Cancel",
+        "done": "Item added."
+      },
+      "delete": {
+        "title": "Delete this item?",
+        "description": "The item leaves the dataset. Experiments already run keep their results.",
+        "confirm": "Delete item",
+        "done": "Item deleted."
+      }
     }
   },
   "traces": {

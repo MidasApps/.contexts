@@ -1,6 +1,14 @@
 "use client";
 
-import { getEvalExperimentEndpoint, listEvalDatasetsEndpoint, listEvalExperimentsEndpoint, type EvalDataset, type EvalExperimentSummary } from "@core/contracts";
+import {
+  getEvalExperimentEndpoint,
+  listEvalDatasetItemsEndpoint,
+  listEvalDatasetsEndpoint,
+  listEvalExperimentsEndpoint,
+  type EvalDataset,
+  type EvalDatasetItem,
+  type EvalExperimentSummary,
+} from "@core/contracts";
 import { keepPreviousData, queryOptions, useQuery } from "@tanstack/react-query";
 import { useCallEndpoint } from "#/shared/api/api-context.tsx";
 import type { CallEndpoint } from "#/shared/api/call-endpoint.ts";
@@ -15,7 +23,12 @@ export const tenantEvalKeys = {
   experiments: (organizationId: string, page: number): QueryKey => queryKeys.organizationScoped(organizationId, "evals", "experiments", { page }),
   experiment: (organizationId: string, experimentId: string): QueryKey => queryKeys.organizationScoped(organizationId, "evals", "experiment", experimentId),
   datasets: (organizationId: string): QueryKey => queryKeys.organizationScoped(organizationId, "evals", "datasets"),
+  datasetItems: (organizationId: string, datasetId: string, page: number): QueryKey => queryKeys.organizationScoped(organizationId, "evals", "dataset-items", datasetId, { page }),
 };
+
+export const DATASET_ITEMS_PAGE_SIZE = 20;
+
+export type DatasetItemPage = { readonly data: readonly EvalDatasetItem[]; readonly meta: { readonly hasMore: boolean } };
 
 /** `GET /v1/evals/experiments?organizationId=` (core.eval.read); `page` is 1-based, the API pages from 0. */
 export const tenantExperimentsQuery = (callEndpoint: CallEndpoint, organizationId: string, page: number) =>
@@ -58,4 +71,21 @@ export const useTenantDatasets = (organizationId: string, options: { enabled?: b
   const callEndpoint = useCallEndpoint();
   const signedIn = useIsSignedIn();
   return useQuery({ ...tenantDatasetsQuery(callEndpoint, organizationId), enabled: signedIn && organizationId !== "" && options.enabled !== false });
+};
+
+/**
+ * `GET /v1/evals/datasets/{datasetId}/items?organizationId=` (core.eval.read, decision 0062): a page
+ * of one of the organization's datasets; `page` is 1-based, the API pages from 0.
+ */
+export const tenantDatasetItemsQuery = (callEndpoint: CallEndpoint, organizationId: string, datasetId: string, page: number) =>
+  queryOptions({
+    queryKey: tenantEvalKeys.datasetItems(organizationId, datasetId, page),
+    queryFn: ({ signal }): Promise<DatasetItemPage> =>
+      callEndpoint(listEvalDatasetItemsEndpoint, { params: { datasetId }, query: { organizationId, page: page - 1, perPage: DATASET_ITEMS_PAGE_SIZE }, signal }),
+  });
+
+export const useTenantDatasetItems = (organizationId: string, datasetId: string, page: number) => {
+  const callEndpoint = useCallEndpoint();
+  const signedIn = useIsSignedIn();
+  return useQuery({ ...tenantDatasetItemsQuery(callEndpoint, organizationId, datasetId, page), placeholderData: keepPreviousData, enabled: signedIn && organizationId !== "" && datasetId !== "" });
 };
