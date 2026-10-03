@@ -35,19 +35,22 @@ export const resolveE2eDatabaseTarget = (databaseUrl: string): E2eDatabaseTarget
 };
 
 /**
- * Creates the e2e database when it is missing and applies the local bootstrap SQL of `initDir`
- * (extensions, schemas and roles; idempotent, the same files compose runs on an empty volume).
- * Migrations are a separate step (`scripts/db-migrate.ts`).
+ * Prepares the e2e database and applies the local bootstrap SQL of `initDir` (extensions, schemas
+ * and roles; idempotent, the same files compose runs on an empty volume). With `fresh`, an existing
+ * database is dropped first: every run seeds its own world, and what earlier runs left (Mastra
+ * spans above all, about 1 GB after a few dozen runs) made every agent call slow enough to fail the
+ * journeys. Migrations are a separate step (`scripts/db-migrate.ts`).
  * @returns `true` when the database was created by this call.
  */
-export const ensureE2eDatabase = async (args: { databaseUrl: string; initDir: string }): Promise<boolean> => {
+export const ensureE2eDatabase = async (args: { databaseUrl: string; initDir: string; fresh: boolean }): Promise<boolean> => {
   const target = resolveE2eDatabaseTarget(args.databaseUrl);
   const maintenance = createPostgresClient({ DATABASE_URL: target.maintenanceUrl }, { max: 1 });
   let created = false;
   try {
+    // The name matched DATABASE_NAME above; DROP/CREATE DATABASE take no bind parameter.
+    if (args.fresh) await maintenance.unsafe(`DROP DATABASE IF EXISTS ${target.name} WITH (FORCE)`);
     const existing = await maintenance`SELECT 1 FROM pg_database WHERE datname = ${target.name}`;
     if (existing.length === 0) {
-      // The name matched DATABASE_NAME above; CREATE DATABASE takes no bind parameter.
       await maintenance.unsafe(`CREATE DATABASE ${target.name}`);
       created = true;
     }

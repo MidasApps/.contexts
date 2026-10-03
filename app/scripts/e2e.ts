@@ -39,8 +39,10 @@ const main = async (): Promise<number> => {
   const command = extra.length > 0 ? joinCommandArgs(extra) : DEFAULT_E2E_COMMAND;
   const firebaseBin = resolvePackageBin({ fromDir: APP_ROOT, packageName: "firebase-tools", binName: "firebase" });
   print(`project ${e2eEnv["E2E_PROJECT_ID"] ?? ""}, web ${e2eEnv["E2E_WEB_ORIGIN"] ?? ""}, desktop ${e2eEnv["E2E_DESKTOP_ORIGIN"] ?? ""}, agents ${e2eEnv["E2E_MASTRA_ORIGIN"] ?? ""}`);
-  const created = await ensureE2eDatabase({ databaseUrl: e2eEnv["DATABASE_URL"] ?? "", initDir: POSTGRES_INIT_DIR });
-  print(created ? "created the e2e database" : "the e2e database exists");
+  // A fresh database each run, except when Playwright reuses servers that already hold it open.
+  const fresh = env["E2E_REUSE_SERVERS"] !== "1";
+  const created = await ensureE2eDatabase({ databaseUrl: e2eEnv["DATABASE_URL"] ?? "", initDir: POSTGRES_INIT_DIR, fresh });
+  print(created ? "created a fresh e2e database" : "reusing the e2e database (E2E_REUSE_SERVERS=1)");
   runNodeStep("applying migrations to the e2e database", path.join("scripts", "db-migrate.ts"), env);
   // The Functions emulator loads apps/functions/lib (the upload validation trigger).
   runNodeStep("building the functions source", path.join("apps", "functions", "build.ts"), env);
