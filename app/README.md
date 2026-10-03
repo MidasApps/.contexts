@@ -160,6 +160,10 @@ The file suffix says what a test needs (`.test.ts`, `.emulator.test.ts`,
 (`.github/workflows/app-ci.yml`), plus `desktop-check` (desktop `vite build` and
 `cargo check --locked` on Linux).
 
+`pnpm test` runs two packages at a time (`--concurrency=2`). Each Vitest run
+already uses half the cores; with every package at once, jsdom renders starve
+and tests pass their timeouts.
+
 ### End-to-end (Playwright)
 
 `pnpm test:e2e` (`scripts/e2e.ts`) starts the Auth and Firestore emulators of
